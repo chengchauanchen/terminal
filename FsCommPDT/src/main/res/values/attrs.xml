@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 声明一个属性的集合，，名字一般与相应的类名相同 -->
+    <declare-styleable name="MToggleBtn">
+
+        <!-- 声明属性 -->
+        <attr name="mtogglebutton_background_on" format="reference"></attr>
+        <attr name="mtogglebutton_background_off" format="reference"></attr>
+        <attr name="mtogglebutton_button_on" format="reference"></attr>
+        <attr name="mtogglebutton_button_off" format="reference"></attr>
+
+    </declare-styleable>
+    
+    <declare-styleable name="BottomView">
+        <attr name="selected" format="boolean"/>
+        <attr name="text" format="string"/>
+        <attr name="textSize" format="dimension"/>
+        <attr name="src" format="reference"/>
+    </declare-styleable>
+    
+    <declare-styleable name="SwipeFlingAdapterView">
+        <attr name="y_offset_step" format="dimension" />
+        <attr name="rotation_degrees" format="float" />
+        <attr name="min_adapter_stack" format="integer" />
+        <attr name="max_visible" format="integer" />
+    </declare-styleable>
+    
+    <declare-styleable name="JCameraView">
+        <attr name="iconSize"/>
+        <attr name="iconMargin"/>
+        <attr name="iconSrc"/>
+        <attr name="iconLeft"/>
+        <attr name="iconRight"/>
+        <attr name="duration_max"/>
+    </declare-styleable>
+
+
+    <!--完成进度条-->
+    <declare-styleable name="RoundProgressBar">
+        <attr name="roundColor" format="color"/>
+        <attr name="roundProgressColor" format="color"/>
+        <attr name="roundWidth" format="dimension"></attr>
+        <attr name="max" format="integer"></attr>
+        <attr name="textIsDisplayable" format="boolean"></attr>
+        <attr name="style">
+            <enum name="STROKE" value="0"></enum>
+            <enum name="FILL" value="1"></enum>
+        </attr>
+    </declare-styleable>
+
+</resources>

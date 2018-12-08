@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/catagory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background_gray">
+
+        <TextView
+            android:id="@+id/tv_catagory"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/y13"
+            android:layout_marginLeft="@dimen/x20"
+            android:gravity="center_vertical"
+            android:text="A"
+            android:textColor="@color/group_text_gray"
+            android:textSize="12sp" />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/item_background"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y35"
+        android:background="@color/group_person_item_background_white">
+
+        <ImageView
+            android:id="@+id/user_logo"
+            android:layout_width="@dimen/x39"
+            android:layout_height="@dimen/y27"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x20"
+            android:background="@drawable/logo_xc" />
+
+        <TextView
+            android:id="@+id/user_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x25"
+            android:layout_toRightOf="@id/user_logo"
+            android:text="小蔡"
+            android:textColor="@color/serch_text_black"
+            android:textSize="15sp" />
+
+        <ImageView
+            android:id="@+id/message_to"
+            android:layout_width="@dimen/x21"
+            android:layout_height="@dimen/y15"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/x120"
+            android:background="@drawable/new_message_icon" />
+
+        <ImageView
+            android:id="@+id/call_to"
+            android:layout_width="@dimen/x21"
+            android:layout_height="@dimen/y15"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/x70"
+            android:background="@drawable/new_call_icon" />
+
+        <ImageView
+            android:id="@+id/add_friend"
+            android:layout_width="@dimen/x21"
+            android:layout_height="@dimen/y15"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/x20"
+            android:background="@drawable/popupwindow_add_contacts_gray" />
+
+
+    </RelativeLayout>
+
+
+</LinearLayout>

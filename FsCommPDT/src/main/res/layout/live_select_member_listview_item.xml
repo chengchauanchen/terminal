@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:orientation="vertical"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center_vertical">
+    <LinearLayout
+        android:id="@+id/catagory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/catagory_color"
+        >
+        
+        <TextView
+            android:id="@+id/tv_catagory"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/x20"
+            android:gravity="center_vertical"
+            android:text="A"
+            android:textColor="@color/group_text_gray"
+            android:textSize="12sp" />
+    </LinearLayout>
+    <LinearLayout
+        android:paddingTop="@dimen/x10"
+        android:paddingBottom="@dimen/x10"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/itemblue"
+        android:orientation="horizontal">
+        <ImageView
+            android:layout_marginLeft="@dimen/x20"
+            android:layout_gravity="center"
+            android:id="@+id/iv_selectmember_headsculpture"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:src="@drawable/new_men_icon"
+            />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            >
+            <TextView
+                android:id="@+id/tv_selectmember_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:text="刘成"
+                android:textColor="@color/group_text_gray"
+                android:textSize="16sp" />
+            <TextView
+                android:id="@+id/tv_selectmember_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="15dp"
+                android:text="00123654"
+                android:textColor="@color/group_text_gray_two"
+                android:textSize="12sp" />
+        </LinearLayout>
+        <ImageView
+            android:layout_marginLeft="@dimen/x25"
+            android:layout_gravity="center"
+            android:layout_marginRight="@dimen/x15"
+            android:id="@+id/img_terminalMemberType"
+            android:layout_width="25dp"
+            android:layout_height="25dp" />
+        <View
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"/>
+        <CheckBox
+            android:layout_gravity="center_vertical"
+            android:id="@+id/cb_selectmember"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_marginRight="@dimen/x20"
+            android:focusable="false"
+            android:clickable="false"
+            android:button="@drawable/checkbox"
+            
+            />
+        <RadioButton
+            android:visibility="visible"
+            android:button="@drawable/radiobutton"
+            android:layout_gravity="center"
+            android:id="@+id/rb_selectmember"
+            android:layout_width="26dp"
+            android:layout_height="25dp"
+            android:layout_marginRight="30dp"
+            android:focusable="false"
+            android:clickable="false"
+            />
+    </LinearLayout>
+</LinearLayout>

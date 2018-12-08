@@ -1,0 +1,76 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+    
+    <style name="pttSilenceText">
+        <item name="android:textColor">@color/ptt_silence_text</item>
+    </style>
+    <style name="pttPreSpeakText">
+        <item name="android:textColor">@color/ptt_pre_speak_text</item>
+    </style>
+    <style name="pttSpeakingText">
+        <item name="android:textColor">@color/ptt_speaking_text</item>
+    </style>
+    <style name="pttWaitingText">
+        <item name="android:textColor">@color/ptt_waiting_text</item>
+    </style>
+    
+    <style name="contacts_title_checked_text">
+        <item name="android:textColor">@color/contacts_title_checked_text</item>
+    </style>
+    <style name="contacts_title_unchecked_text">
+        <item name="android:textColor">@color/contacts_title_unchecked_text</item>
+    </style>
+    
+    <style name="funcation_top_btn_text">
+        <item name="android:textColor">@color/funcation_top_btn_text</item>
+    </style>
+    
+    <style name="function_wait_text">
+        <item name="android:textColor">@color/function_wait_text</item>
+    </style>
+    
+    <style name="ptt_gray">
+        <item name="android:textColor">@color/ptt_gray</item>
+    </style>
+    
+    <style name="white">
+        <item name="android:textColor">@color/white</item>
+    </style>
+    
+    <style name="bottom_unselect_text_color">
+        <item name="android:textColor">@color/bottom_textcolor1</item>
+    </style>
+    
+    <style name="bottom_select_text_color">
+        <item name="android:textColor">@color/bottom_textcolor2</item>
+    </style>
+    
+    <style name="group_name_color">
+        <item name="android:textColor">@color/group_name_color</item>
+    </style>
+    
+    <style name="normal_group_color">
+        <item name="android:textColor">@color/group_text_gray</item>
+    </style>
+    
+    <style name="ble_connect_tv">
+        <item name="android:textColor">@color/device_name_connect</item>
+    </style>
+    
+    <style name="ble_unconnect_tv">
+        <item name="android:textColor">@color/device_name</item>
+    </style>
+    
+    <style name="temp_group_checked">
+        <item name="android:textColor">@color/textview_checked</item>
+    </style>
+    <style name="temp_group_unchecked">
+        <item name="android:textColor">@color/textview_unchecked</item>
+    </style>
+</resources>

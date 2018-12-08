@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/about_background"
+    android:orientation="vertical">
+
+    <include layout="@layout/in_title_bar" />
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="150dp">
+
+        <ImageView
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="30dp"
+            android:background="@drawable/new_logo_icon" />
+
+        <TextView
+            android:id="@+id/tv_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="20dp"
+            android:textColor="@color/about_text_gray"
+            android:textSize="20sp" />
+    </FrameLayout>
+
+   <!-- <TextView
+        android:id="@+id/notice"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y30"
+        android:layout_marginTop="@dimen/y1"
+        android:background="@color/about_item_background"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/x30"
+        android:text="系统通知"
+        android:textColor="@color/about_text_black"
+        android:textSize="17sp" /> -->
+
+    <TextView
+        android:id="@+id/help"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y30"
+        android:layout_marginTop="@dimen/y1"
+        android:background="@color/about_item_background"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/x30"
+        android:text="功能介绍"
+        android:textColor="@color/about_text_black"
+        android:textSize="17sp" />
+
+    <TextView
+        android:id="@+id/tv_update"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y30"
+        android:layout_marginTop="@dimen/y1"
+        android:background="@color/about_item_background"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/x30"
+        android:text="检查新版本"
+        android:textColor="@color/about_text_black"
+        android:textSize="17sp" />
+
+</LinearLayout>

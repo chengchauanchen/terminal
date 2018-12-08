@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@color/regist_item_bg"
+    android:id="@+id/layout_container">
+    <TextView
+        android:layout_marginLeft="@dimen/x17"
+        android:id="@+id/tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="7dp"
+        android:text="北京市西城分局"
+        android:textColor="@color/regist_host_name"
+        android:textSize="18sp"
+        />
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/x7"/>
+
+</LinearLayout>

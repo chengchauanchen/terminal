@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/serch_background"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y45"
+        android:background="@color/serch_bar_background"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/x20">
+
+        <ImageView
+            android:id="@+id/bar_back"
+            android:layout_width="@dimen/x20"
+            android:layout_height="@dimen/x20"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x15"
+            android:src="@drawable/news_bar_return" />
+
+        <View
+            android:id="@+id/bar_line"
+            android:layout_width="1dp"
+            android:layout_height="@dimen/y10"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x11"
+            android:layout_marginRight="@dimen/x11"
+            android:layout_toRightOf="@+id/bar_back"
+            android:background="@color/news_bar_line" />
+
+        <ImageView
+            android:id="@+id/right_btn"
+            android:layout_width="@dimen/x20"
+            android:layout_height="@dimen/x20"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@id/bar_line"
+            android:src="@drawable/search_white" />
+
+        <EditText
+            android:id="@+id/bar_serch"
+            android:layout_width="@dimen/x170"
+            android:layout_height="@dimen/y20"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x10"
+            android:layout_toRightOf="@+id/right_btn"
+            android:background="@null"
+            android:hint="搜索"
+            android:textColor="@color/serch_text_white"
+            android:textColorHint="@color/serch_text_hite_gray"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/search_enter"
+            android:layout_width="@dimen/x50"
+            android:layout_height="@dimen/y19"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/x10"
+            android:background="@color/serch_btn_background"
+            android:gravity="center"
+            android:text="确定"
+            android:textColor="@color/serch_text_white"
+            android:textSize="18sp"
+            android:visibility="gone" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/bar_serch"
+            android:layout_marginRight="@dimen/x10"
+            android:layout_toLeftOf="@id/search_enter"
+            android:layout_toRightOf="@id/bar_line"
+            android:background="@color/serch_bar_line_blue" />
+
+    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/is_hint_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/y25"
+        android:text="输入姓名/编号  在服务器上搜索"
+        android:textColor="@color/serch_text_hite_gray"
+        android:textSize="17sp"
+        android:visibility="gone" />
+
+    <ListView
+        android:id="@+id/serch_list"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="visible" />
+</LinearLayout>

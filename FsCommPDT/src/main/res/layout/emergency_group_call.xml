@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/new_call_background"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+    <ImageView
+        android:id="@+id/ll_individual_call_retract_emergency"
+        android:layout_width="@dimen/x40"
+        android:layout_height="@dimen/y18"
+        android:layout_marginRight="@dimen/x20"
+        android:layout_marginTop="@dimen/y15"
+        android:background="@drawable/new_call_reset_icon" />
+</LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/y20"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                style="@style/image_wrap_content_style"
+                android:background="@drawable/shandian" />
+
+            <TextView
+                style="@style/current_group"
+                android:layout_marginRight="@dimen/x15"
+                android:text="紧急呼叫"
+                android:textColor="@color/new_call_text_gray"
+                android:textSize="20dp" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/group_logo"
+            android:layout_width="@dimen/x119"
+            android:layout_height="@dimen/x119"
+            android:layout_marginTop="@dimen/y15"
+            android:background="@drawable/new_call_group_icon"
+            android:gravity="center_horizontal" />
+
+        <TextView
+            android:id="@+id/tv_current_group"
+            style="@style/current_folder"
+            android:layout_marginTop="@dimen/y8"
+            android:text="7B-10T"
+            android:textColor="@color/new_call_text_black" />
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="4">
+
+        <cn.vsx.vc.view.IndividualCallTimerView
+            android:id="@+id/ICTV_speaking_time_emergency"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/y20" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/y90"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/set_group_call_novoice"
+                android:layout_width="@dimen/x60"
+                android:layout_height="@dimen/x60"
+                android:background="@drawable/call_novoice_select"
+                android:button="@null" />
+
+            <ImageView
+                android:id="@+id/ll_individual_call_hangup_emergency"
+                android:layout_width="@dimen/x60"
+                android:layout_height="@dimen/x60"
+                android:layout_marginLeft="@dimen/x30"
+                android:layout_marginRight="@dimen/x30"
+                android:background="@drawable/new_call_red_icon" />
+
+            <CheckBox
+                android:id="@+id/set_group_call_maxvoice"
+                android:layout_width="@dimen/x60"
+                android:layout_height="@dimen/x60"
+                android:background="@drawable/call_maxvoice_select"
+                android:button="@null" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+
+</LinearLayout>
+

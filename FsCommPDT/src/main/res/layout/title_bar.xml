@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/y45"
+    android:background="@drawable/titel_bar_bg"
+    android:id="@+id/other_title"
+    android:paddingTop="@dimen/x30">
+
+
+
+    <TextView
+        android:id="@+id/setting_group_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x10"
+        android:layout_alignParentLeft="true"
+        android:layout_marginRight="5dp"
+        android:ellipsize="middle"
+        android:maxEms="10"
+        android:singleLine="true"
+        android:textColor="@color/bar_text_white"
+        android:textSize="18sp" />
+
+
+    <LinearLayout
+        android:layout_marginLeft="15dp"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="14dp"
+        android:layout_toRightOf="@id/setting_group_name"
+        android:layout_centerVertical="true"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:visibility="gone"
+            android:id="@+id/speaking_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/bar_text_white"
+            android:textSize="@dimen/x13" />
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/icon_laba"
+            android:layout_marginLeft="@dimen/x3"
+            android:layout_width="@dimen/x13"
+            android:layout_height="@dimen/x13"
+            android:src="@drawable/horn" />
+
+    </LinearLayout>
+
+
+    <ImageView
+        android:id="@+id/find_iocn"
+        android:layout_width="@dimen/x20"
+        android:layout_height="@dimen/x20"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/x56"
+        android:visibility="gone"
+        android:src="@drawable/search_white" />
+
+    <ImageView
+        android:visibility="gone"
+        android:id="@+id/iv_titlebar_help"
+        android:layout_toLeftOf="@+id/add_icon"
+        android:layout_width="@dimen/x25"
+        android:layout_height="@dimen/x25"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="20dp"
+        android:src="@drawable/help"
+        android:padding="@dimen/x3"/>
+    <!--图像上报-->
+    <ImageView
+        android:id="@+id/add_icon"
+        android:layout_width="@dimen/x22"
+        android:layout_height="@dimen/x22"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="15dp"
+        android:src="@drawable/new_menu" />
+
+    <!--音量-->
+    <ImageView
+        android:id="@+id/voice_image"
+        android:layout_toLeftOf="@id/add_icon"
+        android:layout_width="@dimen/x22"
+        android:layout_height="@dimen/x22"
+        android:src="@drawable/horn"
+        android:layout_marginRight="35dp"
+        />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_alignParentBottom="true"
+        android:background="#0D1C2F">
+
+    </View>
+</RelativeLayout>

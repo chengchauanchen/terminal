@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center">
+
+    <LinearLayout
+        android:id="@+id/tv_linkman_delete"
+        android:layout_width="@dimen/x280"
+        android:layout_height="@dimen/tv_linkman_delete_height"
+        android:orientation="vertical"
+        android:background="@color/tv_linkman_delete_bg"
+        >
+        <TextView
+
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="转发"
+            android:textSize="@dimen/tv_linkman_delete_textsize"
+            android:gravity="center_vertical"
+            android:layout_marginLeft="15dip"
+            />
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/tv_copy"
+        android:layout_width="@dimen/x280"
+        android:layout_height="@dimen/tv_linkman_delete_height"
+        android:orientation="vertical"
+        android:background="@color/tv_linkman_delete_bg"
+        >
+        <TextView
+
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="复制"
+            android:textSize="@dimen/tv_linkman_delete_textsize"
+            android:gravity="center_vertical"
+            android:layout_marginLeft="15dip"
+            />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:focusable="true"
+    android:clickable="true"
+    >
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/srl"
+        android:background="@color/itemblue"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/common_bg">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/common_bg"
+            android:orientation="vertical">
+
+            <!--<LinearLayout-->
+                <!--android:id="@+id/ll_group_search"-->
+                <!--style="@style/linearlayout_group_style">-->
+
+                <!--<ImageView-->
+                    <!--style="@style/group_icon_style"-->
+                    <!--android:background="@drawable/search"-->
+                    <!--/>-->
+
+                <!--<TextView-->
+                    <!--style="@style/group_name"-->
+                    <!--android:text="搜索"-->
+                    <!--/>-->
+            <!--</LinearLayout>-->
+
+            <!--<include layout="@layout/universal_line"-->
+                <!--android:visibility="gone"/>-->
+
+            <!--<LinearLayout-->
+                <!--android:id="@+id/provisional_group"-->
+                <!--style="@style/linearlayout_group_style"-->
+                <!--android:visibility="gone">-->
+
+                <!--<ImageView-->
+                    <!--android:id="@+id/fir_iv"-->
+                    <!--style="@style/group_icon_style"-->
+                    <!--android:src="@drawable/new_provisionl_icon" />-->
+
+                <!--<TextView-->
+                    <!--style="@style/group_name"-->
+                    <!--android:text="7B-11T" />-->
+
+                <!--<View-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_weight="1"/>-->
+
+                <!--<TextView-->
+                    <!--style="@style/group_style"-->
+                    <!--android:text="临时组" />-->
+            <!--</LinearLayout>-->
+
+            <!--<include layout="@layout/universal_line" />-->
+
+            <!--<LinearLayout-->
+                <!--android:id="@+id/main_group"-->
+                <!--android:visibility="gone"-->
+                <!--style="@style/linearlayout_group_style">-->
+
+                <!--<ImageView-->
+                    <!--android:id="@+id/sen_iv"-->
+                    <!--style="@style/group_icon_style"-->
+                    <!--android:src="@drawable/new_home_icon" />-->
+
+                <!--<TextView-->
+                    <!--android:id="@+id/tv_main_group"-->
+                    <!--style="@style/group_name"-->
+                    <!--android:text="7B-11T" />-->
+
+                <!--<View-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_weight="1"/>-->
+
+                <!--<TextView-->
+                    <!--style="@style/group_style"-->
+                    <!--android:text="主通话组" />-->
+            <!--</LinearLayout>-->
+
+            <!--<include layout="@layout/universal_line" />-->
+
+            <!--<LinearLayout-->
+                <!--android:id="@+id/current_group"-->
+                <!--android:visibility="gone"-->
+                <!--style="@style/linearlayout_group_style">-->
+
+                <!--<ImageView-->
+                    <!--android:id="@+id/thi_iv"-->
+                    <!--style="@style/group_icon_style"-->
+                    <!--android:src="@drawable/new_current_icon" />-->
+
+                <!--<TextView-->
+                    <!--android:id="@+id/tv_current_group"-->
+                    <!--style="@style/group_name"-->
+                    <!--android:text="7B-11T" />-->
+
+                <!--<View-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:layout_weight="1"/>-->
+
+                <!--<TextView-->
+                    <!--style="@style/group_style"-->
+                    <!--android:text="当前组" />-->
+            <!--</LinearLayout>-->
+
+            <!--<View-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="1dp"-->
+                <!--android:background="#0D1C2F" />-->
+
+            <cn.vsx.vc.view.CustomerExl
+                android:id="@+id/group_folder_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/expandlistview_backgroud"
+                android:childDivider="@null"
+                android:divider="@null"
+                android:listSelector="@color/itemblue" />
+        </LinearLayout>
+    </ScrollView>
+            </android.support.v4.widget.SwipeRefreshLayout>
+
+</LinearLayout>

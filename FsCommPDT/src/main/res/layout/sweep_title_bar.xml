@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    >
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x20"
+        android:background="@drawable/titel_bar_bg"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y25"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:background="@drawable/titel_bar_bg"
+        >
+
+        <ImageView
+            android:id="@+id/news_bar_back"
+            android:layout_width="@dimen/x23"
+            android:layout_height="@dimen/y17"
+            android:layout_marginLeft="@dimen/x15"
+            android:src="@drawable/news_bar_return" />
+
+        <View
+            android:id="@+id/news_bar_line"
+            android:layout_width="0.5dp"
+            android:layout_height="@dimen/y10"
+            android:layout_marginLeft="@dimen/x11"
+            android:layout_marginRight="@dimen/x11"
+            android:background="@color/group_call_news_bar_line" />
+
+
+        <TextView
+            android:id="@+id/bar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="设置扫描组"
+            android:textColor="@color/bar_text_white"
+            android:textSize="@dimen/x15"
+            android:gravity="center_vertical"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+
+        <TextView
+            android:id="@+id/right_btn_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/x20"
+            android:text="添加"
+            android:textColor="@color/setting_text_gray"
+             />
+    </LinearLayout>
+
+</LinearLayout>

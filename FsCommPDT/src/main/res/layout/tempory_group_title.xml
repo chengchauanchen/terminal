@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="46dp"
+        android:text="临时组"
+        android:gravity="center_vertical"
+        android:textColor="@color/group_text_gray"
+        android:textSize="14sp"
+        android:layout_marginLeft="18dp" />
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="@color/diver_bg"
+        android:layout_alignParentBottom="true"/>
+</LinearLayout>

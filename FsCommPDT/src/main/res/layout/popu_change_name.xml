@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/common_bg"
+    android:orientation="vertical">
+    
+    <RelativeLayout
+        android:id="@+id/rl_top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y30"
+        android:background="@drawable/titel_bar_bg"
+        >
+        
+        <ImageView
+            android:id="@+id/ib_back_change_name"
+            android:layout_width="@dimen/x23"
+            android:layout_height="@dimen/y17"
+            android:src="@drawable/news_bar_return"
+            android:layout_marginLeft="@dimen/x10"
+            android:layout_centerVertical="true"/>
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_toRightOf="@+id/ib_back_change_name"
+            android:text="更改名字"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:layout_centerVertical="true"/>
+        
+        <TextView
+            android:id="@+id/tv_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/shape_bt_send_blue"
+            android:gravity="center"
+            android:minWidth="50dp"
+            android:padding="5dp"
+            android:text="保存"
+            android:layout_centerVertical="true"
+            android:textColor="@android:color/white"
+            android:textSize="14sp" />
+    </RelativeLayout>
+    
+    <EditText
+        android:id="@+id/et_change_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="20dp"
+        android:maxLines="1"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:textColor="@color/search_text"
+        android:textColorHint="@color/hint_color"
+        android:textCursorDrawable="@drawable/color_cursor"
+        android:textSize="18dp"/>
+</LinearLayout>

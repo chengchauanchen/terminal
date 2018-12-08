@@ -1,0 +1,394 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:zhy="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <View
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true">
+
+        </View>
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/talk_back_top">
+
+                <include
+                    android:id="@+id/title_bar"
+                    layout="@layout/talk_title_bar"
+                    android:visibility="visible" />
+
+                <LinearLayout
+                    android:id="@+id/ll_show_area"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_marginTop="@dimen/x68"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+
+                    <LinearLayout
+                        android:id="@+id/ll_scanGroup_speak"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:id="@+id/tv_scanGroup_speak"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:gravity="center"
+                            android:text="测试组一"
+                            android:textColor="#fff"
+                            android:textSize="20dp"
+                            android:textStyle="normal" />
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:layout_marginLeft="5dp"
+                            android:src="@drawable/horn" />
+                    </LinearLayout>
+
+
+                    <!--<ImageView
+                        android:id="@+id/iv_goback_miangroup"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginRight="15dp"
+                        android:src="@drawable/gobackmiangroup2"
+                        android:visibility="gone" />-->
+
+                    <LinearLayout
+                        android:id="@+id/ll_folder"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:visibility="visible">
+
+                        <TextView
+                            android:id="@+id/tv_current_online"
+                            style="@style/current_online"
+                            android:layout_gravity="center_horizontal"
+                            android:text="在线人数" />
+
+                        <TextView
+                            android:id="@+id/tv_current_folder"
+                            style="@style/current_folder"
+                            android:layout_gravity="center_horizontal"
+                            android:text="武汉市公安局"
+                            android:focusableInTouchMode="true"
+                            android:marqueeRepeatLimit="marquee_forever"
+                            android:scrollHorizontally="true"
+                            android:ellipsize="marquee"
+                            android:focusable="true"
+                            android:singleLine="true"/>
+
+                        <TextView
+                            android:id="@+id/tv_current_group"
+                            style="@style/current_group"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal"
+                            android:ellipsize="end"
+                            android:singleLine="true"/>
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:id="@+id/ll_speak_state"
+                        android:layout_width="fill_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="top|center_horizontal"
+                        android:orientation="vertical">
+
+                        <!-- 我正在说话 -->
+                        <LinearLayout
+                            android:id="@+id/ll_speaking"
+                            style="@style/wrap_content_style"
+                            android:orientation="horizontal"
+                            android:gravity="center"
+                            android:visibility="gone"
+                            >
+
+                            <TextView
+                                android:id="@+id/tv_speak_text_me"
+                                style="@style/speaking_text" />
+
+                            <ImageView
+                                style="@style/image_wrap_content_style"
+                                android:layout_marginRight="@dimen/x5"
+                                android:src="@drawable/self_speaking" />
+                        </LinearLayout>
+
+                        <!-- 听别人说话 -->
+                        <LinearLayout
+                            android:id="@+id/ll_listening"
+                            style="@style/wrap_content_style"
+                            android:layout_marginTop="@dimen/x11"
+                            android:gravity="center_horizontal"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <LinearLayout
+                                style="@style/wrap_content_style"
+                                android:orientation="horizontal">
+
+
+                                <TextView
+                                    android:id="@+id/incomming_call_current_speaker"
+                                    style="@style/current_speaker" />
+
+                                <ImageView
+                                    android:layout_width="@dimen/x20"
+                                    android:layout_height="@dimen/x20"
+                                    android:layout_marginLeft="@dimen/x10"
+                                    android:src="@drawable/self_speaking" />
+                            </LinearLayout>
+
+                            <TextView
+                                style="@style/speaking_text"
+                                android:text="" />
+                        </LinearLayout>
+
+                        <!-- 准备说话 -->
+                        <LinearLayout
+                            android:id="@+id/ll_pre_speaking"
+                            style="@style/wrap_content_style"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <TextView style="@style/pre_speaking_text" />
+                        </LinearLayout>
+
+                        <!-- 静默状态 -->
+                        <LinearLayout
+                            android:id="@+id/ll_silence"
+                            style="@style/wrap_content_style"
+                            android:orientation="vertical">
+                            <!-- 空闲 -->
+                             <TextView
+                            style="@style/silence_text" />
+                        </LinearLayout>
+
+                        <!-- 禁言禁听状态 -->
+                        <LinearLayout
+                            android:id="@+id/ll_forbid"
+                            style="@style/wrap_content_style"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                        </LinearLayout>
+
+                        <!-- 排队中状态 -->
+                        <LinearLayout
+                            android:id="@+id/ll_waiting"
+                            style="@style/wrap_content_style"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/talkback_time_progress"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/x50"
+                        android:visibility="gone"/>
+
+
+
+                    <!--<LinearLayout-->
+                        <!--android:id="@+id/open_lock_change_group"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="0dp"-->
+                        <!--android:layout_marginBottom="@dimen/y5"-->
+                        <!--android:layout_weight="2"-->
+                        <!--android:gravity="center"-->
+                        <!--android:orientation="vertical"-->
+                        <!--android:visibility="gone">-->
+
+                        <!--<TextView-->
+                            <!--android:layout_width="wrap_content"-->
+                            <!--android:layout_height="wrap_content"-->
+                            <!--android:text="点击解锁后切组"-->
+                            <!--android:textColor="#88FFFFFF"-->
+                            <!--android:textSize="16dp"-->
+                            <!--android:textStyle="normal" />-->
+
+                        <!--<ImageView-->
+                            <!--android:layout_width="@dimen/x28"-->
+                            <!--android:layout_height="@dimen/x28"-->
+                            <!--android:layout_marginTop="2dp"-->
+                            <!--android:alpha="0.5"-->
+                            <!--android:background="@drawable/lock1" />-->
+
+                    <!--</LinearLayout>-->
+
+                </LinearLayout>
+                <!--显示进度条，正在说话-->
+                <!--<RelativeLayout-->
+                <!--android:layout_centerInParent="true"-->
+                <!--android:id="@+id/talkback_time_progress"-->
+                <!--android:layout_width="fill_parent"-->
+                <!--android:layout_height="fill_parent"-->
+                <!--android:gravity="center"-->
+                <!--&gt;-->
+                <!--<cn.vsx.vc.view.RoundProgressBarWidthNumber-->
+                <!--android:id="@+id/group_call_time_progress"-->
+                <!--android:padding="@dimen/x5"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_centerHorizontal="true"-->
+                <!--zhy:progress_unreached_color="@color/new_call_progress_unreached"-->
+                <!--zhy:progress_reached_color="@color/new_call_progress_reached"-->
+                <!--android:layout_marginTop="@dimen/y12"-->
+                <!--android:max="600"/>-->
+
+                <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="总时长60S"-->
+                <!--android:layout_centerHorizontal="true"-->
+                <!--android:layout_marginTop="@dimen/y90"-->
+                <!--android:textColor="@color/gruop_call_news_progress_total_time"/>-->
+                <!--<TextView-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:text="我正在说话"-->
+                <!--android:textColor="@color/gruop_call_news_progress_total_time"-->
+                <!--android:textSize="@dimen/x20"-->
+                <!--android:layout_centerHorizontal="true"-->
+                <!--android:layout_below="@+id/group_call_time_progress"-->
+                <!--/>-->
+                <!--</RelativeLayout>-->
+
+                <LinearLayout
+                    android:id="@+id/ll_sliding_chenge_volume"
+                    android:layout_width="80dp"
+                    android:layout_height="40dp"
+                    android:layout_centerInParent="true"
+                    android:background="#66000000"
+                    android:gravity="center"
+                    android:visibility="gone">
+                    <!--<TextView-->
+                    <!--android:id="@+id/tv_volume_hint"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:text="通话音量"-->
+                    <!--android:textColor="#fff"-->
+                    <!--android:textStyle="normal"-->
+                    <!--android:textSize="14dp"-->
+                    <!--/>-->
+                    <ImageView
+                        android:id="@+id/iv_volume_fw"
+                        android:layout_width="14dp"
+                        android:layout_height="24dp"
+                        android:background="@drawable/volume_adjust" />
+
+                    <TextView
+                        android:id="@+id/tv_volume_fw"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:text="100%"
+                        android:textColor="#fff"
+                        android:textSize="14dp"
+                        android:textStyle="normal" />
+                </LinearLayout>
+                <!-- 滑动换组 -->
+                <LinearLayout
+                    android:id="@+id/change_group_show_area"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="60dp"
+                    android:layout_marginLeft="60dp"
+                    android:layout_marginRight="60dp"
+                    android:gravity="bottom"
+                    android:orientation="vertical"
+                    >
+
+                    <!--<TextView-->
+                    <!--style="@style/change_group_promp"-->
+                    <!--android:textSize="16dp" />-->
+
+                    <cn.vsx.vc.view.ChangeGroupView
+                        android:layout_marginBottom="30dp"
+                        android:id="@+id/change_group_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        />
+
+
+                </LinearLayout>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:id="@+id/rl_talk_back_bottom"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/talk_back_bottom"
+                android:clickable="true">
+
+                <ImageView
+                    android:id="@+id/talkback_change_session"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="18dp"
+                    android:layout_marginTop="10dp"
+                    android:src="@drawable/toggle" />
+
+                <ImageView
+                    android:id="@+id/to_current_group"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_marginLeft="18dp"
+                    android:layout_marginTop="10dp"
+                    android:src="@drawable/toggle1" />
+            </RelativeLayout>
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/ptt"
+            android:layout_width="@dimen/y168"
+            android:layout_height="@dimen/y168"
+            android:layout_marginBottom="15dp"
+            android:background="@drawable/ptt_silence"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="-10dp"
+            android:layout_below="@id/view"
+            android:text="按住说话"
+            android:textSize="20sp"
+            android:textColor="@color/ptt_silence_text"/>
+    </RelativeLayout>
+
+
+</LinearLayout>
+    
+

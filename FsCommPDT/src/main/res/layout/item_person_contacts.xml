@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/ll_item_person_contacts"
+    android:gravity="center_vertical"
+    android:orientation="vertical" 
+    android:background="#ffffffff" >
+
+    <TextView
+        android:id="@+id/tv_person_contacts_pinyin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#ddd"
+        android:gravity="center_vertical"
+        android:minHeight="20dp"
+        android:paddingLeft="10dp"
+        android:text="A"
+        android:textColor="#000" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp">
+
+        <ImageView
+            android:id="@+id/iv_member_portrait"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="20dp"
+            android:background="@drawable/member_info" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/tv_member_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="张星星"
+                android:textColor="#313131"
+                android:textSize="18dp"
+                android:textStyle="normal" />
+
+            <TextView
+                android:id="@+id/tv_member_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ID:123456"
+                android:textColor="#a0a0a0"
+                android:textSize="16dp"
+                android:textStyle="normal" />
+        </LinearLayout>
+
+       <View 
+           android:layout_width="0dp"
+           android:layout_weight="1"
+           android:layout_height="1dp"/>
+        
+        
+        <!-- <LinearLayout 
+            android:id="@+id/ll_contacts_delete"
+            android:layout_width="40dp"
+            android:layout_height="36dp"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="visible">
+            <ImageView
+            android:layout_width="26dp"
+            android:layout_height="26dp"
+            android:background="@drawable/delete_contacts" />
+        </LinearLayout>  -->
+        
+        <ImageView
+            android:id="@+id/iv_individual_msg"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginRight="30dip"
+            android:src="@drawable/new_message_icon"/>
+
+        <ImageView
+            android:id="@+id/iv_individual_call"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:layout_marginRight="30dip"
+            android:src="@drawable/phone_gray_news"/>
+
+    </LinearLayout>
+
+</LinearLayout>

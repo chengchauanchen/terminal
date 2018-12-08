@@ -1,0 +1,559 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--<color name="dodgerblue2">#1E9EFF</color>&lt;!&ndash;闪兰色2 &ndash;&gt;-->
+    <!--<color name="transparent">#00000000</color>&lt;!&ndash;透明 &ndash;&gt;-->
+    
+    <!--<color name="backgroudblue">#f5f5f5</color>&lt;!&ndash;背景蓝 &ndash;&gt;-->
+    
+    <!--<color name="ivory">#FFFFF0</color>&lt;!&ndash;象牙色 &ndash;&gt;-->
+    <!--<color name="lightyellow">#FFFFE0</color>&lt;!&ndash;亮黄色&ndash;&gt;-->
+    <!--<color name="yellow">#FFFF00</color>&lt;!&ndash;黄色 &ndash;&gt;-->
+    <!--<color name="snow">#FFFAFA</color>&lt;!&ndash;雪白色 &ndash;&gt;-->
+    <!--<color name="floralwhite">#FFFAF0</color>&lt;!&ndash;花白色 &ndash;&gt;-->
+    <!--<color name="lemonchiffon">#FFFACD</color>&lt;!&ndash;柠檬绸色 &ndash;&gt;-->
+    <!--<color name="cornsilk">#FFF8DC</color>&lt;!&ndash;米绸色 &ndash;&gt;-->
+    <!--<color name="seashell">#FFF5EE</color>&lt;!&ndash;海贝色 &ndash;&gt;-->
+    <!--<color name="lavenderblush">#FFF0F5</color>&lt;!&ndash;淡紫红 &ndash;&gt;-->
+    <!--<color name="papayawhip">#FFEFD5</color>&lt;!&ndash;番木色 &ndash;&gt;-->
+    <!--<color name="blanchedalmond">#FFEBCD</color>&lt;!&ndash;白杏色 &ndash;&gt;-->
+    <!--<color name="mistyrose">#FFE4E1</color>&lt;!&ndash;浅玫瑰色 &ndash;&gt;-->
+    <!--<color name="bisque">#FFE4C4</color>&lt;!&ndash;桔黄色 &ndash;&gt;-->
+    <!--<color name="moccasin">#FFE4B5</color>&lt;!&ndash;鹿皮色 &ndash;&gt;-->
+    <!--<color name="pttyellow">#fdb852</color>&lt;!&ndash;ptt长形按钮颜色 &ndash;&gt;-->
+    <!--<color name="navajowhite">#FFDEAD</color>&lt;!&ndash;纳瓦白 &ndash;&gt;-->
+    <!--<color name="peachpuff">#FFDAB9</color>&lt;!&ndash;桃色 &ndash;&gt;-->
+    <!--<color name="gold">#FFD700</color>&lt;!&ndash;金色 &ndash;&gt;-->
+    <!--<color name="pink">#FFC0CB</color>&lt;!&ndash;粉红色 &ndash;&gt;-->
+    <!--<color name="lightpink">#FFB6C1</color>&lt;!&ndash;亮粉红色&ndash;&gt;-->
+    <color name="orange">#f9b552</color><!--橙色 -->
+    <!--<color name="lightsalmon">#FFA07A</color>&lt;!&ndash;亮肉色 &ndash;&gt;-->
+    <!--<color name="darkorange">#FF8C00</color>&lt;!&ndash;暗桔黄色 &ndash;&gt;-->
+    <!--<color name="coral">#FF7F50</color>&lt;!&ndash;珊瑚色 &ndash;&gt;-->
+    <!--<color name="hotpink">#FF69B4</color>&lt;!&ndash;热粉红色 &ndash;&gt;-->
+    <!--<color name="tomato">#FF6347</color>&lt;!&ndash;西红柿色 &ndash;&gt;-->
+    <!--<color name="orangered">#FF4500</color>&lt;!&ndash;红橙色 &ndash;&gt;-->
+    <!--<color name="deeppink">#FF1493</color>&lt;!&ndash;深粉红色 &ndash;&gt;-->
+    <!--<color name="fuchsia">#FF00FF</color>&lt;!&ndash;紫红色 &ndash;&gt;-->
+    <!--<color name="magenta">#FF00FF</color>&lt;!&ndash;红紫色 &ndash;&gt;-->
+    <!--<color name="red">#FF0000</color>&lt;!&ndash;红色 &ndash;&gt;-->
+    <!--<color name="oldlace">#FDF5E6</color>&lt;!&ndash;老花色 &ndash;&gt;-->
+    <!--<color name="lightgoldenrodyellow">#FAFAD2</color>&lt;!&ndash;亮金黄色 &ndash;&gt;-->
+    <!--<color name="linen">#FAF0E6</color>&lt;!&ndash;亚麻色 &ndash;&gt;-->
+    <!--<color name="antiquewhite">#FAEBD7</color>&lt;!&ndash;古董白 &ndash;&gt;-->
+    <!--<color name="salmon">#FA8072</color>&lt;!&ndash;鲜肉色 &ndash;&gt;-->
+    <!--<color name="ghostwhite">#F8F8FF</color>&lt;!&ndash;幽灵白 &ndash;&gt;-->
+    <!--<color name="mintcream">#F5FFFA</color>&lt;!&ndash;薄荷色 &ndash;&gt;-->
+    <!--<color name="whitesmoke">#F5F5F5</color>&lt;!&ndash;烟白色 &ndash;&gt;-->
+    <!--<color name="beige">#F5F5DC</color>&lt;!&ndash;米色 &ndash;&gt;-->
+    <!--<color name="wheat">#F5DEB3</color>&lt;!&ndash;浅黄色 &ndash;&gt;-->
+    <!--<color name="sandybrown">#F4A460</color>&lt;!&ndash;沙褐色&ndash;&gt;-->
+    <!--<color name="azure">#F0FFFF</color>&lt;!&ndash;天蓝色 &ndash;&gt;-->
+    <!--<color name="honeydew">#F0FFF0</color>&lt;!&ndash;蜜色 &ndash;&gt;-->
+    <!--<color name="aliceblue">#F0F8FF</color>&lt;!&ndash;艾利斯兰 &ndash;&gt;-->
+    <!--<color name="khaki">#F0E68C</color>&lt;!&ndash;黄褐色 &ndash;&gt;-->
+    <!--<color name="lightcoral">#F08080</color>&lt;!&ndash;亮珊瑚色 &ndash;&gt;-->
+    <!--<color name="palegoldenrod">#EEE8AA</color>&lt;!&ndash;苍麒麟色 &ndash;&gt;-->
+    <!--<color name="violet">#EE82EE</color>&lt;!&ndash;紫罗兰色 &ndash;&gt;-->
+    <!--<color name="darksalmon">#E9967A</color>&lt;!&ndash;暗肉色 &ndash;&gt;-->
+    <!--<color name="lavender">#E6E6FA</color>&lt;!&ndash;淡紫色 &ndash;&gt;-->
+    <!--<color name="lightcyan">#E0FFFF</color>&lt;!&ndash;亮青色 &ndash;&gt;-->
+    <!--<color name="burlywood">#DEB887</color>&lt;!&ndash;实木色 &ndash;&gt;-->
+    <!--<color name="plum">#DDA0DD</color>&lt;!&ndash;洋李色 &ndash;&gt;-->
+    <!--<color name="gainsboro">#DCDCDC</color>&lt;!&ndash;淡灰色 &ndash;&gt;-->
+    <!--<color name="crimson">#DC143C</color>&lt;!&ndash;暗深红色 &ndash;&gt;-->
+    <!--<color name="palevioletred">#DB7093</color>&lt;!&ndash;苍紫罗兰色 &ndash;&gt;-->
+    <!--<color name="goldenrod">#DAA520</color>&lt;!&ndash;金麒麟色 &ndash;&gt;-->
+    <!--<color name="orchid">#DA70D6</color>&lt;!&ndash;淡紫色 &ndash;&gt;-->
+    <!--<color name="thistle">#D8BFD8</color>&lt;!&ndash;蓟色 &ndash;&gt;-->
+    <!--<color name="lightgray">#D3D3D3</color>&lt;!&ndash;亮灰色 &ndash;&gt;-->
+    <!--<color name="tan">#D2B48C</color>&lt;!&ndash;茶色 &ndash;&gt;-->
+    <!--<color name="chocolate">#D2691E</color>&lt;!&ndash;巧可力色 &ndash;&gt;-->
+    <!--<color name="peru">#CD853F</color>&lt;!&ndash;秘鲁色 &ndash;&gt;-->
+    <!--<color name="indianred">#CD5C5C</color>&lt;!&ndash;印第安红 &ndash;&gt;-->
+    <!--<color name="mediumvioletred">#C71585</color>&lt;!&ndash;中紫罗兰色 &ndash;&gt;-->
+    <!--<color name="silver">#C0C0C0</color>&lt;!&ndash;银色 &ndash;&gt;-->
+    <!--<color name="darkkhaki">#BDB76B</color>&lt;!&ndash;暗黄褐色 &ndash;&gt;-->
+    <!--<color name="rosybrown">#BC8F8F</color> &lt;!&ndash;褐玫瑰红 &ndash;&gt;-->
+    <!--<color name="mediumorchid">#BA55D3</color>&lt;!&ndash;中粉紫色 &ndash;&gt;-->
+    <!--<color name="darkgoldenrod">#B8860B</color>&lt;!&ndash;暗金黄色 &ndash;&gt;-->
+    <!--<color name="firebrick">#B22222</color>&lt;!&ndash;火砖色 &ndash;&gt;-->
+    <!--<color name="powderblue">#B0E0E6</color>&lt;!&ndash;粉蓝色 &ndash;&gt;-->
+    <!--<color name="lightsteelblue">#B0C4DE</color>&lt;!&ndash;亮钢兰色 &ndash;&gt;-->
+    <!--<color name="paleturquoise">#AFEEEE</color>&lt;!&ndash;苍宝石绿 &ndash;&gt;-->
+    <!--<color name="greenyellow">#ADFF2F</color>&lt;!&ndash;黄绿色 &ndash;&gt;-->
+    <!--<color name="lightblue">#ADD8E6</color>&lt;!&ndash;亮蓝色 &ndash;&gt;-->
+    <!--<color name="darkgray">#A9A9A9</color>&lt;!&ndash;暗灰色 &ndash;&gt;-->
+    <!--<color name="darkgrey">#A9A9A9</color>&lt;!&ndash;暗灰色 &ndash;&gt;-->
+    <!--<color name="brown">#A52A2A</color>&lt;!&ndash;褐色 &ndash;&gt;-->
+    <!--<color name="sienna">#A0522D</color>&lt;!&ndash;赭色 &ndash;&gt;-->
+    <!--<color name="darkorchid">#9932CC</color>&lt;!&ndash;暗紫色&ndash;&gt;-->
+    <!--<color name="palegreen">#98FB98</color>&lt;!&ndash;苍绿色 &ndash;&gt;-->
+    <!--<color name="darkviolet">#9400D3</color>&lt;!&ndash;暗紫罗兰色 &ndash;&gt;-->
+    <!--<color name="mediumpurple">#9370DB</color>&lt;!&ndash;中紫色 &ndash;&gt;-->
+    <!--<color name="lightgreen">#90EE90</color>&lt;!&ndash;亮绿色 &ndash;&gt;-->
+    <!--<color name="darkseagreen">#8FBC8F</color>&lt;!&ndash;暗海兰色 &ndash;&gt;-->
+    <!--<color name="saddlebrown">#8B4513</color>&lt;!&ndash;重褐色 &ndash;&gt;-->
+    <!--<color name="darkmagenta">#8B008B</color>&lt;!&ndash;暗洋红 &ndash;&gt;-->
+    <!--<color name="darkred">#8B0000</color>&lt;!&ndash;暗红色 &ndash;&gt;-->
+    <!--<color name="blueviolet">#8A2BE2</color>&lt;!&ndash;紫罗兰蓝色 &ndash;&gt;-->
+    <!--<color name="lightskyblue">#87CEFA</color>&lt;!&ndash;亮天蓝色 &ndash;&gt;-->
+    <!--<color name="skyblue">#87CEEB</color>&lt;!&ndash;天蓝色 &ndash;&gt;-->
+    <!--<color name="gray">#808080</color>&lt;!&ndash;灰色 &ndash;&gt;-->
+    <!--<color name="grey">#808080</color>&lt;!&ndash;灰色 &ndash;&gt;-->
+    <!--<color name="olive">#808000</color>&lt;!&ndash;橄榄色 &ndash;&gt;-->
+    <!--<color name="purple">#800080</color>&lt;!&ndash;紫色 &ndash;&gt;-->
+    <!--<color name="maroon">#800000</color>&lt;!&ndash;粟色 &ndash;&gt;-->
+    <!--<color name="aquamarine">#7FFFD4</color>&lt;!&ndash;碧绿色&ndash;&gt;-->
+    <!--<color name="chartreuse">#7FFF00</color>&lt;!&ndash;黄绿色 &ndash;&gt;-->
+    <!--<color name="lawngreen">#7CFC00</color>&lt;!&ndash;草绿色 &ndash;&gt;-->
+    <!--<color name="mediumslateblue">#7B68EE</color>&lt;!&ndash;中暗蓝色 &ndash;&gt;-->
+    <!--<color name="lightslategray">#778899</color>&lt;!&ndash;亮蓝灰 &ndash;&gt;-->
+    <!--<color name="lightslategrey">#778899</color>&lt;!&ndash;亮蓝灰 &ndash;&gt;-->
+    <!--<color name="slategray">#708090</color>&lt;!&ndash;灰石色 &ndash;&gt;-->
+    <!--<color name="slategrey">#708090</color>&lt;!&ndash;灰石色 &ndash;&gt;-->
+    <!--<color name="olivedrab">#6B8E23</color>&lt;!&ndash;深绿褐色 &ndash;&gt;-->
+    <!--<color name="slateblue">#6A5ACD</color>&lt;!&ndash;石蓝色 &ndash;&gt;-->
+    <!--<color name="dimgray">#696969</color>&lt;!&ndash;暗灰色 &ndash;&gt;-->
+    <!--<color name="dimgrey">#696969</color>&lt;!&ndash;暗灰色 &ndash;&gt;-->
+    <!--<color name="mediumaquamarine">#66CDAA</color>&lt;!&ndash;中绿色 &ndash;&gt;-->
+    <!--<color name="cornflowerblue">#6495ED</color>&lt;!&ndash;菊兰色 &ndash;&gt;-->
+    <!--<color name="cadetblue">#5F9EA0</color>&lt;!&ndash;军兰色 &ndash;&gt;-->
+    <!--<color name="darkolivegreen">#556B2F</color>&lt;!&ndash;暗橄榄绿  &ndash;&gt;-->
+    <!--<color name="indigo">#4B0082</color>&lt;!&ndash;靛青色 &ndash;&gt;-->
+    <!--<color name="mediumturquoise">#48D1CC</color>&lt;!&ndash;中绿宝石 &ndash;&gt;-->
+    <!--<color name="darkslateblue">#483D8B</color>&lt;!&ndash;暗灰蓝色 &ndash;&gt;-->
+    <!--<color name="steelblue">#4682B4</color>&lt;!&ndash;钢兰色 &ndash;&gt;-->
+    <!--<color name="royalblue">#4169E1</color>&lt;!&ndash;皇家蓝 &ndash;&gt;-->
+    <!--<color name="turquoise">#40E0D0</color>&lt;!&ndash;青绿色 &ndash;&gt;-->
+    <!--<color name="mediumseagreen">#3CB371</color>&lt;!&ndash;中海蓝 &ndash;&gt;-->
+    <!--<color name="limegreen">#32CD32</color>&lt;!&ndash;橙绿色 &ndash;&gt;-->
+    <!--<color name="darkslategray">#2F4F4F</color>&lt;!&ndash;暗瓦灰色 &ndash;&gt;-->
+    <!--<color name="darkslategrey">#2F4F4F</color>&lt;!&ndash;暗瓦灰色 &ndash;&gt;-->
+    <!--<color name="seagreen">#2E8B57</color>&lt;!&ndash;海绿色 &ndash;&gt;-->
+    <!--<color name="forestgreen">#228B22</color>&lt;!&ndash;森林绿 &ndash;&gt;-->
+    <!--<color name="lightseagreen">#20B2AA</color>&lt;!&ndash;亮海蓝色 &ndash;&gt;-->
+    <!--<color name="dodgerblue">#1E90FF</color>&lt;!&ndash;闪兰色 &ndash;&gt;-->
+    <!--<color name="midnightblue">#191970</color>&lt;!&ndash;中灰兰色 &ndash;&gt;-->
+    <!--<color name="aqua">#00FFFF</color>&lt;!&ndash;浅绿色 &ndash;&gt;-->
+    <!--<color name="cyan">#00FFFF</color>&lt;!&ndash;青色 &ndash;&gt;-->
+    <!--<color name="springgreen">#00FF7F</color>&lt;!&ndash;春绿色&ndash;&gt;-->
+    <!--<color name="lime">#00FF00</color>&lt;!&ndash;酸橙色 &ndash;&gt;-->
+    <!--<color name="mediumspringgreen">#00FA9A</color>&lt;!&ndash;中春绿色 &ndash;&gt;-->
+    <!--<color name="darkturquoise">#00CED1</color>&lt;!&ndash;暗宝石绿 &ndash;&gt;-->
+    <!--<color name="deepskyblue">#00BFFF</color>&lt;!&ndash;深天蓝色 &ndash;&gt;-->
+    <!--<color name="darkcyan">#008B8B</color>&lt;!&ndash;暗青色 &ndash;&gt;-->
+    <!--<color name="teal">#008080</color>&lt;!&ndash;水鸭色 &ndash;&gt;-->
+    <!--<color name="green">#008000</color>&lt;!&ndash;绿色 &ndash;&gt;-->
+    <!--<color name="darkgreen">#006400</color>&lt;!&ndash;暗绿色 &ndash;&gt;-->
+    <!--<color name="blue">#0000FF</color>&lt;!&ndash;蓝色 &ndash;&gt;-->
+    <!--<color name="mediumblue">#0000CD</color>&lt;!&ndash;中兰色 &ndash;&gt;-->
+    <!--<color name="darkblue">#00008B</color>&lt;!&ndash;暗蓝色 &ndash;&gt;-->
+    <!--<color name="navy">#000080</color>&lt;!&ndash;海军色 &ndash;&gt;-->
+    <!--<color name="black">#000000</color>&lt;!&ndash;黑色 &ndash;&gt;-->
+    <!--<color name="liantong">#13223f</color>-->
+    <!--<color name="folder_name">#535353</color>-->
+    <!--<color name="folder_number">#BFBFBF</color>-->
+    <!--<color name="group_name">#7d7d7d</color>-->
+    <!--<color name="group_name_selected">#FF5555</color>-->
+    <!--<color name="expandlistview_backgroup_selected">#e9fef7</color>-->
+    <!--<color name="exit_btn">#ff4a4a</color>-->
+    <!--<color name="divider">#bfbfbf</color>-->
+    <!--<color name="TRANSPARENT">#00000000</color>-->
+    <!--<color name="light_blue">#EE000000</color>&lt;!&ndash;刷新背景色 &ndash;&gt;-->
+
+
+    <!--<color name="greeny">#ff11aca6</color>-->
+
+    <!--<color name="main_white">#FFFFFF</color>&lt;!&ndash;白色 &ndash;&gt;-->
+    <!--<color name="main_text_white">#FFFFFF</color>-->
+
+
+    <!--&lt;!&ndash;新组呼界面&ndash;&gt;-->
+    <!--<color name="new_call_star_blue">#0090FF</color>-->
+    <!--<color name="new_call_gruop_name">#FFFFFF</color>-->
+    <!--<color name="new_call_progress_tempo">#00ffff</color>-->
+    <!--<color name="new_call_progress_reached">#33A6FF</color>-->
+    <!--<color name="new_call_progress_unreached">#FFFFFF</color>-->
+    <!--<color name="new_call_text_talking">#B8B8B8</color>-->
+    <!--<color name="new_call_include_ptt_bg">#EEEEEE</color>-->
+    <!--<color name="new_call_current_folder">#01E4E6</color>-->
+    <!--<color name="new_call_slide_change_group">#FFFFFF</color>-->
+
+    <!--&lt;!&ndash;组呼消息界面&ndash;&gt;-->
+    <!--<color name="group_call_news_bar_bg">#29363F</color>-->
+    <!--<color name="group_call_news_bar_line">#000000</color>-->
+    <!--<color name="group_call_news_group_name">#FFFFFF</color>-->
+    <!--<color name="group_call_news_listview_bg">#EEEEEE</color>-->
+    <!--<color name="group_call_news_progress_bg">#66898989</color>          &lt;!&ndash;组呼消息界面，进度条&ndash;&gt;-->
+    <!--<color name="gruop_call_news_progress_total_time">#FFFFFF</color>-->
+    <!--<color name="group_call_news_progress_unreached">#FFFFFF</color>-->
+    <!--<color name="group_call_news_progress_reached">#A5A5A5</color>-->
+    <!--<color name="group_call_news_prepare_speak_bg">#66898989</color>-->
+    <!--<color name="group_call_news_prepare_speak_text">#FFFFFF</color>-->
+    
+    
+    <!--<color name="group_call_news_speaking_bg">#FFFFFF</color>        &lt;!&ndash;组呼界面，正在说话条目&ndash;&gt;-->
+    <!--<color name="group_call_news_speaking_name">#000000</color>-->
+
+    <!--&lt;!&ndash;组呼消息界面item&ndash;&gt;-->
+    <!--<color name="group_news_item_bg">#F5F5F5</color>-->
+    <!--<color name="group_news_item_time_bg">#DCDCDC</color>             &lt;!&ndash;文本语音界面&ndash;&gt;-->
+    <!--<color name="group_news_item_time">#FFFFFF</color>-->
+    <!--<color name="group_news_item_name">#A7A7A7</color>-->
+    <!--<color name="group_news_item_conunt_text">#000000</color>-->
+
+    <!--&lt;!&ndash;消息界面fragment&ndash;&gt;-->
+    <!--<color name="news_list_bg">#eeeeee</color>-->
+    <!--<color name="news_item_bg">#FFFFFF</color>-->
+
+    <!--&lt;!&ndash;个呼消息界面&ndash;&gt;-->
+    <!--<color name="individual_news_bar_bg">#29363F</color>-->
+    <!--<color name="individual_news_bar_name">#FFFFFF</color>-->
+    <!--<color name="individual_news_listview_bg">#EEEEEE</color>-->
+
+    <!--&lt;!&ndash;个呼消息界面item&ndash;&gt;-->
+    <!--<color name="individual_news_item_bg">#F5F5F5</color>-->
+    <!--<color name="individual_news_item_time_bg">#DCDCDC</color>-->
+    <!--<color name="individual_news_item_time">#FFFFFF</color>-->
+    <!--<color name="individual_news_item_name">#A7A7A7</color>-->
+
+    <!--&lt;!&ndash;自定义控件funcation&ndash;&gt;-->
+    <!--&lt;!&ndash;top&ndash;&gt;-->
+    <!--<color name="funcation_top_bg">#F8F8F8</color>-->
+    <!--<color name="funcation_top_et_text">#000000</color>-->
+    <!--<color name="funcation_top_et_underline">#0091ff</color>-->
+    
+    <!--<color name="funcation_bottom_line">#E6E6E6</color>-->
+    <!--<color name="funcation_bottom_bg">#F8F8F8</color>-->
+    
+    <!--<color name="send_text_color">#FFFFFF</color>-->
+    <!--<color name="send_bt_bg">#3DDB57</color>-->
+
+
+    <!--&lt;!&ndash;titleBar&ndash;&gt;-->
+    <!--<color name="bar_background_blue">#0090FF</color>&lt;!&ndash;title背景蓝色 &ndash;&gt;-->
+    <!--<color name="bar_background_black">#29363F</color>&lt;!&ndash;title背景黑色 &ndash;&gt;-->
+    <!--<color name="bar_text_white">#FFFFFF</color>&lt;!&ndash;title字体白色 &ndash;&gt;-->
+
+    <!--&lt;!&ndash;通讯录界面&ndash;&gt;-->
+    <!--<color name="contacts_background_gray">#EEEEEE</color>&lt;!&ndash;通讯录背景灰色 &ndash;&gt;-->
+    <!--<color name="contacts_background_white">#FFFFFF</color>&lt;!&ndash;通讯录背景灰色 &ndash;&gt;-->
+    <!--<color name="contacts_text_gray">#EEEEEE</color>&lt;!&ndash;通讯下划线蓝色 &ndash;&gt;-->
+
+    <!--&lt;!&ndash;通讯录-群组&ndash;&gt;-->
+    <!--<color name="group_background_white">#FFFFFF</color>&lt;!&ndash;白色 &ndash;&gt;-->
+    <!--<color name="group_line_gray">#EEEEEE</color>&lt;!&ndash;白色 &ndash;&gt;-->
+    <!--<color name="group_item_background_white">#FFFFFF</color>&lt;!&ndash;白色 &ndash;&gt;-->
+    <!--<color name="group_text_gray">#95CAFF</color>&lt;!&ndash;通讯录字体灰色1 &ndash;&gt;-->
+    <!--<color name="group_text_gray_two">#637e9e</color>&lt;!&ndash;通讯录字体灰色2 &ndash;&gt;-->
+    <!--<color name="group_text_gray_three">#4F77A7</color>&lt;!&ndash;通讯录字体灰色3 &ndash;&gt;-->
+    <!--<color name="group_text_black">#4F77A7</color>&lt;!&ndash;通讯录字体黑色 &ndash;&gt;-->
+
+    <!--&lt;!&ndash;通讯录-个人&ndash;&gt;-->
+    <!--<color name="group_person_text_gray">#808080</color>&lt;!&ndash;灰色 &ndash;&gt;-->
+    <!--<color name="group_person_text_black">#303030</color>&lt;!&ndash;灰色 &ndash;&gt;-->
+    <!--<color name="group_person_text_gray_two">#656565</color>-->
+    <!--<color name="group_person_catagory_gray">#EEEEEE</color>&lt;!&ndash;灰色 &ndash;&gt;-->
+    <!--<color name="group_person_item_background_white">#FFFFFF</color>&lt;!&ndash;白色 &ndash;&gt;-->
+
+    <!--&lt;!&ndash;设置页面&ndash;&gt;-->
+    <!--<color name="setting_background_gray">#EEEEEE</color>-->
+    <!--<color name="setting_background_white">#FFFFFF</color>-->
+    <!--<color name="setting_text_black">#95CAFF</color>-->
+    <!--<color name="setting_text_gray">#95CAFF</color>-->
+    <!--<color name="setting_text_gray_two">#637e9e</color>-->
+
+    <!--&lt;!&ndash;查看组成员页面&ndash;&gt;-->
+    <!--<color name="group_member_background_white">#FFFFFF</color>-->
+    <!--<color name="group_member_background_gray">#EEEEEE</color>-->
+    <!--<color name="group_member_text_gray">#656565</color>-->
+    <!--<color name="group_member_text_gray_two">#BDBDBD</color>-->
+    <!--<color name="group_member_text_black">#95CAFF</color>-->
+
+    <!--&lt;!&ndash;搜索界面&ndash;&gt;-->
+    <!--<color name="serch_background">#EEEEEE</color>-->
+    <!--<color name="serch_bar_background">#29363F</color>-->
+    <!--<color name="serch_bar_line_blue">#0090FF</color>-->
+    <!--<color name="serch_text_white">#FFFFFF</color>-->
+    <!--<color name="serch_text_hite_gray">#6C6C6C</color>-->
+    <!--<color name="serch_text_black">#303030</color>-->
+    <!--<color name="serch_btn_background">#0090FF</color>-->
+    <!--<color name="serch_item_background_white">#FFFFFF</color>-->
+    <!--<color name="serch_item_background_gray">#EEEEEE</color>-->
+
+    <!--&lt;!&ndash;关于4GPTT页面&ndash;&gt;-->
+    <!--<color name="about_background">#0d182b</color>-->
+    <!--<color name="about_item_background">#13223f</color>-->
+    <!--<color name="about_text_black">#71a3e0</color>-->
+    <!--<color name="about_text_gray">#637e9e</color>-->
+
+    <!--&lt;!&ndash;扫描组页面&ndash;&gt;-->
+    <!--<color name="sweep_background">#FFFFFF</color>-->
+    <!--<color name="sweep_background_white">#FFFFFF</color>-->
+    <!--<color name="sweep_text_gray">#6C6C6C</color>-->
+    <!--<color name="sweep_text_black">#303030</color>-->
+
+    <!--&lt;!&ndash;设置-切换主组/页面&ndash;&gt;-->
+    <!--<color name="change_group_background">#EEEEEE</color>-->
+    <!--<color name="change_group_background_white">#FFFFFF</color>-->
+    <!--<color name="change_group_text_gray">#95CAFF</color>-->
+
+    <!--&lt;!&ndash;个人信息页面&ndash;&gt;-->
+    <!--<color name="user_info_background_gray">#EEEEEE</color>-->
+    <!--<color name="user_info_background_white">#FFFFFF</color>-->
+    <!--<color name="user_info_text_black">#71a3e0</color>-->
+    <!--<color name="user_info_text_gray">#637e9e</color>-->
+    <!--<color name="user_info_text_white">#FFFFFF</color>-->
+
+    <!--&lt;!&ndash;通用下划线&ndash;&gt;-->
+    <!--<color name="universal_line_gray">#EEEEEE</color>-->
+    <!--<color name="universal_background_white">#FFFFFF</color>-->
+    <!--<color name="et_bottom_line">#EEEEEE</color>-->
+
+    <!--&lt;!&ndash;toggolebutton&ndash;&gt;-->
+    <!--<color name="button_background_off">#C9C9C9</color>-->
+    <!--<color name="button_background_on">#0090FD</color>-->
+    <!--<color name="button_background_line">#FFFFFF</color>-->
+    <!--<color name="togglebutton_button_background_off">#FFFFFF</color>-->
+    <!--<color name="togglebutton_button_background_on">#FFFFFF</color>-->
+    <!--<color name="togglebutton_button_background_line">#FFFFFF</color>-->
+
+    <!--&lt;!&ndash;电话盘&ndash;&gt;-->
+    <!--<color name="keyboard_text_blue">#95CAFF</color>-->
+
+
+
+    <!--&lt;!&ndash;全局搜索页面&ndash;&gt;-->
+    <!--<color name="search_all_contacts_background">#F3F4F8</color>-->
+    <!--<color name="search_all_line">#000000</color>-->
+    <!--<color name="search_all_text_color">#33A7FC</color>-->
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#71a3df</color>
+
+
+    <!--&lt;!&ndash;消息界面&ndash;&gt;-->
+    <!--<color name="news_bar">#29363F</color>&lt;!&ndash;消息title背景 &ndash;&gt;-->
+    <!--<color name="news_bar_line">#000000</color>&lt;!&ndash;消息title线 &ndash;&gt;-->
+    <!--<color name="news_bar_text">#FFFFFF</color>&lt;!&ndash;消息title组名字字体颜色 &ndash;&gt;-->
+    <!--<color name="news_btn_ptt">#FFFFFF</color>&lt;!&ndash;消息下方button字体颜色 &ndash;&gt;-->
+    <!--<color name="news_bottom_backgroud">#F8F8F8</color>-->
+    <!--<color name="news_list_item_name_color">#000000</color>-->
+    <!--<color name="news_list_item_type_color">#939393</color>-->
+    <!--<color name="color_ffabab">#90ffabab</color>-->
+
+    <!--&lt;!&ndash;注册页面&ndash;&gt;-->
+    <!--<color name="regist_toolbar">#2ED0EA</color>-->
+    <!--<color name="regist_background">#f3f4f8</color>-->
+    <!--<color name="regist_button">#809eb6</color>-->
+    <!--<color name="regist_color">#fafafa</color>-->
+    <!--&lt;!&ndash;登录页面&ndash;&gt;-->
+    <!--<color name="login_toolbar">#fafafa</color>-->
+    <!--<color name="background_gray">#EEEEEE</color>-->
+    <!--<color name="background_blue">#0090FF</color>&lt;!&ndash;背景蓝色 &ndash;&gt;-->
+
+
+    <!--&lt;!&ndash;组呼/个呼 界面&ndash;&gt;-->
+    <!--<color name="new_call_background">#EEEEEE</color>&lt;!&ndash;灰色背景 &ndash;&gt;-->
+    <!--<color name="new_call_text_black">#303030</color>&lt;!&ndash;组呼字体黑色 &ndash;&gt;-->
+    <!--<color name="new_call_text_gray">#6C6C6C</color>&lt;!&ndash;组呼字体灰色 &ndash;&gt;-->
+    <!--<color name="new_call_text_red">#FF5959</color>&lt;!&ndash;组呼字体红色色 &ndash;&gt;-->
+
+    <!--&lt;!&ndash;灰色气泡选择栏&ndash;&gt;-->
+    <!--<color name="popupwindow_background">#29363F</color>-->
+    <!--<color name="popupwindow_text_color">#FFFFFF</color>-->
+    <!--<color name="ok_blue">#0090FF</color>-->
+    <!--<color name="dropdownlist_press">#FFFFFF</color>-->
+    <!--<color name="dropdownlist_bg">#FFFFFF</color>-->
+    <!--<color name="no_network_background">#FCB8B9</color>&lt;!&ndash;组呼字体红色色 &ndash;&gt;-->
+
+    <!--<color name="tv_linkman_delete_bg">#fafafa</color>-->
+    <!--<color name="call_id_color">#707070</color>-->
+    <!--<color name="color_efefef">#efefef</color>-->
+    <!--<color name="color_48baf3">#48BAF3</color>-->
+    <!--<color name="transparent_70_black">#4C000000</color>-->
+    <!--<color name="color_e5e5e5">#E5E5E5</color>-->
+    <!--<color name="transparent_70_white">#4CFFFFFF</color>-->
+    <!--<color name="md_blue_grey_50">#ECEFF1</color>-->
+    <!--<color name="md_blue_grey_100">#CFD8DC</color>-->
+    <!--<color name="md_blue_grey_200">#B0BBC5</color>-->
+    <!--<color name="md_blue_grey_300">#90A4AE</color>-->
+    <!--<color name="md_blue_grey_400">#78909C</color>-->
+    <!--<color name="md_blue_grey_500">#607D8B</color>-->
+    <!--<color name="md_blue_grey_600">#546E7A</color>-->
+    <!--<color name="md_blue_grey_700">#455A64</color>-->
+    <!--<color name="md_blue_grey_800">#37474F</color>-->
+    <!--<color name="md_blue_grey_900">#263238</color>-->
+    <!--&lt;!&ndash;grey&ndash;&gt;-->
+    <!--<color name="md_grey_50">#FAFAFA</color>-->
+    <!--<color name="md_grey_100">#F5F5F5</color>-->
+    <!--<color name="md_grey_200">#EEEEEE</color>-->
+    <!--<color name="md_grey_300">#E0E0E0</color>-->
+    <!--<color name="md_grey_400">#BDBDBD</color>-->
+    <!--<color name="md_grey_500">#9E9E9E</color>-->
+    <!--<color name="md_grey_600">#757575</color>-->
+    <!--<color name="md_grey_700">#616161</color>-->
+    <!--<color name="md_grey_800">#424242</color>-->
+    <!--<color name="md_grey_900">#212121</color>-->
+    <!--<color name="md_black_1000">#000000</color>-->
+    <!--<color name="md_white_1000">#ffffff</color>-->
+
+    <!--<color name="dark_blue">#213967</color>-->
+    <!--<color name="divider_black_line">#182c4f</color>-->
+    <color name="group_call_news_individual_bg">#FFFFFF</color>            <!--正在组呼，个呼来了-->
+    <color name="group_call_news_individual_name">#313131</color>
+    <color name="white">#FFFFFF</color>
+    <color name="dialog_text">#bcd3ef</color>
+    <color name="chat_title">#ffffff</color>
+    <color name="ptt_wait_bg">#dcdcdc</color>
+    <color name="ptt_gray">#b5b5b5</color>
+    <color name="chat_name">#aaaaaa</color>
+    <color name="voice_length">#a0a0a0</color>
+    <color name="function_bg">#f5f5f5</color>
+    <color name="funcation_top_btn_text">#ffffff</color>
+    <color name="function_line">#d8d8d8</color>
+    <color name="function_wait_text">#ffffff</color>
+    <color name="pre_speak_bg">#99000000</color>
+    <color name="edittext_text">#0091ff</color>
+    <color name="edittext_cursor">#0091ff</color>
+    <color name="funcation_bottom_text">#808080</color>
+    <color name="bottom_bg">#ffffff</color>
+    <color name="bottom_line">#d8d8d8</color>
+    
+    <color name="bottom_textcolor1">#999999</color>
+    <color name="bottom_textcolor2">#00a4ff</color>
+    <color name="common_bg">#eeeeee</color>
+    <color name="diver_bg">#eeeeee</color>
+    
+    <color name="news_item_text_time">#b5b5b5</color>
+    <color name="news_item_text_name">#313131</color>
+    <color name="news_item_text_type">#b5b5b5</color>
+    <color name="itemblue">#ffffff</color>
+    <color name="contacts_title_checked_text">#0091ff</color>
+    <color name="contacts_title_unchecked_text">#b5b5b5</color>
+    <color name="contacts_line_blue">#0091ff</color>
+    <color name="member_num_text">#b5b5b5</color>
+    <color name="group_diver">#eeeeee</color>
+    <color name="setting_text_gray">#313131</color>
+    <color name="setting_text_gray_two">#b5b5b5</color>
+    <color name="group_text_gray">#313131</color><!--通讯录字体灰色1 -->
+    <color name="speaking_bg">#f72933</color>
+    <color name="user_info_text_black">#313131</color>
+    <color name="user_info_text_gray">#b5b5b5</color>
+    <color name="kill_member">#313131</color>
+    <color name="user_info_text_company">#b5b5b5</color>
+    <color name="user_info_phone_number">#0091ff</color>
+    <color name="user_info_text_card_no">#b5b5b5</color>
+    <color name="fun_bg">#fafafa</color>
+    <color name="line">#d8d8d8</color>
+    <color name="group_text_gray_two">#313131</color>
+    <color name="contract_line_bg">#eeeeee</color>
+    <color name="change_group_bg">#ffffff</color>
+    <color name="change_group_line_bg">#cc6f7378</color>
+    <color name="change_group_text">#b5b5b5</color>
+    <color name="input_phone">#b5b5b5</color>
+    <color name="keyboard_text_blue">#0091ff</color>
+    <color name="keyboard_bg">#ffffff</color>
+    <color name="phone_edit_bg">#ffffff</color>
+    <color name="about_background">#eeeeee</color>
+    <color name="setting_text">#313131</color>
+    <color name="about_text_gray">#898989</color>
+    <color name="about_text_black">#313131</color>
+    <color name="about_item_background">#ffffff</color>
+    <color name="mtoggle_off_bg">#eeeeee</color>
+    <color name="mtoggle_off_button">#ffffff</color>
+    <color name="mtoggle_on_bg">#00a4ff</color>
+    <color name="mtoggle_on_button">#FFFFFF</color>
+    <color name="icon_text">#b5b5b5</color>
+    <color name="forbid_text">#313131</color>
+    <color name="message">#b5b5b5</color>
+    <color name="company_text">#b5b5b5</color>
+    <color name="hint_color">#637e9e</color>
+    <color name="search_text">#0091ff</color>
+    <color name="catagory_color">#eeeeee</color>
+    <color name="talk_back_top">#0092e3</color>
+    <color name="talk_back_bottom">#eeeeee</color>
+    <color name="wait_bg">#0ea5f9</color>
+    <color name="new_call_gruop_number">#b7e6ff</color>
+    <color name="new_call_current_folder">#ffffff</color>
+    <color name="new_call_gruop_name">#b7e6ff</color>
+    
+    <color name="ptt_silence_text">#0ea5f9</color>
+    <color name="ptt_pre_speak_text">#f59d57</color>
+    <color name="ptt_speaking_text">#ee4040</color>
+    <color name="ptt_waiting_text">#42b3f1</color>
+    <color name="group_call_news_bar_line">#313131</color>
+    <color name="group_call_news_group_name">#b5b5b5</color>
+    <color name="light_blue">#eeeeee</color><!--刷新背景色 -->
+    <color name="pl_video">#eeeeee</color>
+    <color name="ptt_silence_text_idle">#fcc236</color>
+    <color name="video_pop_bg">#071a28</color>
+    <color name="divider_video_line">#7f000000</color>
+    <color name="video_text_color">#ffffff</color>
+    <color name="regist_bg">#eeeeee</color>
+    <color name="regist_title">#0091ff</color>
+    <color name="regist_item_bg">#ffffff</color>
+    <color name="regist_pop_bg">#ffffff</color>
+    <color name="regist_host_name">#313131</color>
+    <color name="regist_add_host_name">#0091ff</color>
+    <color name="regist_btn_bg">#4d0091ff</color>
+    <color name="regist_btn_pre_bg">#FFC125</color>
+    <color name="regist_item_text">#b5b5b5</color>
+    <color name="regist_host_text">#b5b5b5</color>
+    <color name="regist_edit_hint">#b5b5b5</color>
+    <color name="regist_edit">#313131</color>
+    <color name="loading_tv">#b5b5b5</color>
+    <color name="regist_button">#7fffffff</color>
+    <color name="change_group_gray">#50ffffff</color>
+    
+    <!--锁屏界面-->
+    <color name="lock_screen_bg">#eeeeee</color>
+    <color name="lock_online_num">#1fb8ea</color>
+    <color name="lock_current_folder">#0091ff</color>
+    <color name="lock_current_group">#1fb8ea</color>
+    <color name="lock_slid_tv">#b5b5b5</color>
+    <color name="lock_silence_tv">#47b0fa</color>
+    <color name="lock_ptt_silence_text_idle">#fe9c3d</color>
+    <color name="lock_time">#313131</color>
+    
+    <color name="scan_diver">#eeeeee</color>
+    <color name="video_item_bg">#ffffff</color>
+    <color name="video_text_title">#313131</color>
+    <color name="video_line">#d8d8d8</color>
+    <color name="regist_org_bg">#ffffff</color>
+    <color name="liantong">#eeeeee</color>
+    
+    <color name="bar_background_black">#06141F</color>
+    <color name="change_group_text_bg">#cc6f7378</color>
+    <color name="ptt_pre_speaking">#ffffff</color>
+    
+    <color name="group_scan_text">#ffffff</color>
+    <!--<color name="bottom_textcolor1">#999999</color>-->
+    <!--<color name="bottom_textcolor2">#00a4ff</color>-->
+    
+    <color name="group_name_color">#ffbf61</color>
+    
+    <!--ble-->
+    <color name="ble_bg">#ffffff</color>
+    <color name="ble_usable_bg">#ffffff</color>
+    <color name="device_name">#313131</color>
+    <color name="device_name_connect">#b5b5b5</color>
+    <color name="device_connecting">#5cd55c</color>
+    <color name="useb_device_tv">#313131</color>
+    <color name="useb_device">#ffffff</color>
+    <color name="useb_background">#313131</color>
+    <color name="open_ble">#f7f7f7</color>
+    <color name="open_ble_tv">#313131</color>
+    <color name="ble_line">#e5e5e5</color>
+    <color name="close_ble">#b5b5b5</color>
+    
+    <!--临时组-->
+    <color name="edittext_bg">#eeeeee</color>
+    <color name="textview_color">#707070</color>
+    <color name="edittext_textcolor">#313131</color>
+    <color name="textview_describe">#b2eb6100</color>
+    <color name="temp_group_bg">#ffffff</color>
+    <color name="confirm_create">#0091ff</color>
+    <color name="textview_checked">#313131</color>
+    <color name="textview_unchecked">#707070</color>
+</resources>

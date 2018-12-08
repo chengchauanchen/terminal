@@ -1,0 +1,40 @@
+<resources>
+
+    <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    
+    <dimen name="bottom_tab_font_size">14dp</dimen>
+    <dimen name="bottom_tab_padding_up">2dp</dimen>
+    <dimen name="bottom_tab_padding_drawable">2dp</dimen>
+    <dimen name="common_text_size">18dp</dimen>
+    <dimen name="current_folder_text_size">28dp</dimen>
+    <dimen name="current_group_text_size">32dp</dimen>
+    <dimen name="current_speaker_text_size">20dp</dimen>
+    <dimen name="current_group_member_sum">22dp</dimen>
+    <dimen name="change_group_promp_text_size">30dp</dimen>
+    <dimen name="operate_menu_text_size">30dp</dimen>
+    <dimen name="i_am_speaking_text_size">30dp</dimen>
+    <dimen name="pre_speaking_text_size">30dp</dimen>
+    <dimen name="silence_view_margin_top">-50dp</dimen>
+    <dimen name="member_name_text_size">20dp</dimen>
+    <dimen name="member_id_text_size">16dp</dimen>
+    <dimen name="setting_item_text_size">18dp</dimen>
+
+    <dimen name="toolbar_padding_top">22dp</dimen>
+   
+
+    <dimen name="live_request_hangup_bottom">50dp</dimen>
+    <dimen name="live_request_answer_bottom">50dp</dimen>
+
+    <dimen name="individual_call_request_hangup_top">65dp</dimen>
+
+    <dimen name="tv_live_request_name_textsize">20sp</dimen>
+    <dimen name="tv_live_request_id_textsize">16sp</dimen>
+    <dimen name="tv_live_request_id_marginleft">20dp</dimen>
+
+    <dimen name="ptt_height_width">145dp</dimen>
+
+    <dimen name="tv_live_name_textsize">14sp</dimen>
+    <dimen name="click_pack_up_bottom">10dp</dimen>
+</resources>

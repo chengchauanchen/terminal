@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/y30"
+    android:background="@color/itemblue"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y20"
+        android:layout_marginLeft="@dimen/x10"
+        android:layout_marginRight="@dimen/x10">
+
+        <AutoCompleteTextView
+            android:id="@+id/actv_search"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerVertical="true"
+            android:background="@color/itemblue"
+            android:maxLength="10"
+            android:paddingLeft="@dimen/x5"
+            android:textColor="@color/change_group_text_gray"
+            android:textStyle="normal" />
+
+        <LinearLayout
+            android:id="@+id/ll_search_hint"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/x10"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="@dimen/x18"
+                android:layout_height="@dimen/y13"
+                android:background="@drawable/search" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/x8"
+                android:text="搜索组"
+                android:textColor="@color/change_group_text_gray"
+                android:textSize="18sp"
+                android:textStyle="normal" />
+        </LinearLayout>
+
+    </RelativeLayout>
+
+    <include layout="@layout/universal_line" />
+
+</LinearLayout>

@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+
+    <View
+        android:id="@+id/my_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        />
+
+    <RelativeLayout
+        android:id="@+id/rl_live_look_general_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true">
+        <TextureView
+            android:id="@+id/sv_live"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible"
+            />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="20dp">
+            <TextView
+                android:id="@+id/live_vedio_look_Theme"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="18sp"
+                android:text="上地树村建党学校发生火灾"
+                />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/live_vedio_look_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:textSize="14sp"
+
+                    android:textColor="@color/white"
+                    android:text="曲星星"/>
+            <TextView
+                android:layout_marginLeft="@dimen/x10"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:textSize="14sp"
+
+                android:textColor="@color/white"
+                android:text="正在上报图像"/>
+            </LinearLayout>
+        </LinearLayout>
+        <TextView
+            android:id="@+id/tv_live_look_realtime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="20:00"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="25dp"/>
+
+        <TextView
+            android:id="@+id/tv_spn_resolution_look"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="分辨率："
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:layout_marginTop="40dp"
+            android:layout_marginLeft="25dp"/>
+        <Spinner
+            android:id="@+id/spn_resolution_look"
+            android:layout_toRightOf="@+id/tv_spn_resolution_look"
+            android:layout_alignTop="@+id/tv_spn_resolution_look"
+            android:background="#00ffffff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <ListView
+            android:layout_marginLeft="@dimen/x20"
+            android:id="@+id/lv_live_look_member_info"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:scrollbars="none"
+            android:cacheColorHint="@color/TRANSPARENT"
+            android:divider="@color/TRANSPARENT"
+            android:visibility="visible"
+            android:layout_centerVertical="true">
+        </ListView>
+        <LinearLayout
+            android:id="@+id/ll_live_look_chage_camera"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="50dp"
+            android:orientation="vertical"
+            android:visibility="gone"
+            android:layout_marginLeft="@dimen/x40"
+            android:gravity="center"
+            >
+            <ImageView
+                android:id="@+id/iv_live_look_chage_camera"
+                android:layout_width="20dp"
+                android:layout_height="15dp"
+                android:background="@drawable/around_camera"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="转换摄像头"
+                android:textSize="16dp"
+                android:textColor="@color/white"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center"
+                android:visibility="visible"
+                />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_marginTop="@dimen/y120"
+            android:id="@+id/ll_live_look_hangup_total"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible"
+            android:layout_marginRight="@dimen/y40"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="50dp"
+            android:gravity="center_horizontal"
+            android:alpha="0.5"
+            >
+
+
+            <LinearLayout
+                android:id="@+id/ll_live_look_hangup"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:background="@drawable/individual_call_refuse_button_shape"
+                >
+                <ImageView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/phone_withe"
+                    />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="挂断"
+                android:textSize="16dp"
+                android:textColor="@color/white"
+                android:layout_marginTop="20dp"
+                android:layout_gravity="center"
+                android:visibility="visible"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_live_look_invite_member"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible"
+            android:layout_alignBottom="@+id/lv_live_look_member_info"
+            android:layout_alignLeft="@+id/ll_live_look_hangup_total"
+            android:layout_alignStart="@+id/ll_live_look_hangup_total"
+            android:layout_marginBottom="47dp">
+
+            <ImageView
+                android:id="@+id/iv_live_look_addmember"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:background="@drawable/invite_member_live"/>
+
+            <TextView
+                android:id="@+id/textView4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:text="推送图像"
+                android:textColor="@color/white"
+                android:textSize="16dp"
+                android:visibility="visible" />
+        </LinearLayout>
+
+
+
+        <Button
+            android:id="@+id/btn_live_look_ptt"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/y80"
+            android:background="@drawable/rectangle_with_corners_shape_silence"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/x100"
+            android:alpha="0.4"
+            android:text="PTT"
+            android:textSize="30dp"
+            android:textColor="@color/white"
+
+            android:layout_marginRight="@dimen/x100"
+            android:layout_alignParentBottom="true"/>
+
+        <LinearLayout
+            android:id="@+id/ptt_down_anim_look"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+
+            android:layout_marginBottom="20dp"
+            android:background="@drawable/record_bg"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:alpha="0.5"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/record_dialog_img_look"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/speaking" />
+
+            <TextView
+                android:id="@+id/record_dialog_txt_look"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:visibility="gone"
+                android:textColor="@android:color/white" />
+        </LinearLayout>
+    </RelativeLayout>
+
+</RelativeLayout>

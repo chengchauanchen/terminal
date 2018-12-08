@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:focusable="true"
+    android:clickable="true"
+    android:id="@+id/content_view"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/ll_top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/y25"
+            android:orientation="horizontal"
+            android:background="@color/bar_background_black"
+            android:gravity="center_vertical"
+            android:visibility="gone"
+            >
+
+            <ImageView
+                android:id="@+id/iv_back_face"
+                android:layout_width="@dimen/x16"
+                android:layout_height="@dimen/x16"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/x19"
+                android:src="@drawable/forx" />
+
+            <View
+                android:id="@+id/news_bar_line"
+                android:layout_width="0.5dp"
+                android:layout_height="@dimen/y15"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/x13"
+                android:layout_marginRight="@dimen/x13"
+                android:background="@color/news_bar_line" />
+
+            <TextView
+                android:id="@+id/tv_name_face"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="组内成员"
+                android:textColor="@color/bar_text_white"
+                android:textSize="@dimen/x14"
+                />
+        </LinearLayout>
+
+        <WebView
+            android:id = "@+id/wv_help"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            />
+
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/ll_pb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:visibility="gone">
+        <ProgressBar
+            android:id="@+id/pb_refresh"
+            android:layout_centerInParent="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="加载中"/>
+    </LinearLayout>
+</RelativeLayout>

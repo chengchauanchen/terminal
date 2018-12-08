@@ -1,0 +1,130 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '26.0.2'
+
+    defaultConfig {
+        applicationId "cn.vsx.vc"
+        minSdkVersion 19
+        targetSdkVersion 19
+
+        multiDexEnabled true
+
+        flavorDimensions "versionCode"
+        javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath = true
+            }
+        }
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a"
+        }
+    }
+
+    productFlavors {
+        instant {
+            minSdkVersion 21
+        }
+        app {
+            minSdkVersion 19
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true//去掉不用资源
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/plexus/components.xml'
+        exclude 'licenses/javolution.license.TXT'
+        exclude 'licenses/thoughtworks.TXT'
+        exclude 'org/apache/maven/project/pom-4.0.0.xml'
+        exclude 'licenses/extreme.indiana.edu.license.TXT'
+        exclude 'org/cyberneko/html/res/HTMLlat1.properties'
+        exclude 'org/cyberneko/html/res/ErrorMessages_ja.properties'
+        exclude 'org/cyberneko/html/res/ErrorMessages_ja.txt'
+        exclude 'org/cyberneko/html/res/ErrorMessages.properties'
+        exclude 'org/codehaus/plexus/plexus-bootstrap.xml'
+        exclude 'org/cyberneko/html/res/HTMLspecial.properties'
+        exclude 'org/cyberneko/html/res/XMLbuiltin.properties'
+        exclude 'org/cyberneko/html/res/HTMLsymbol.properties'
+    }
+
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+
+    dexOptions {
+//        incremental true
+        javaMaxHeapSize "4g"
+    }
+}
+
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:multidex:1.0.3'
+    //noinspection GradleCompatible
+    compile 'com.android.support:support-v4:25.3.0'
+//    //noinspection GradleCompatible
+    compile 'com.android.support:appcompat-v7:25.3.0'
+    compile 'com.github.liuguangqiang.swipeback:library:1.0.2@aar'
+    //noinspection GradleCompatible
+    compile 'com.android.support:design:25.3.0'
+    compile 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+    compile project(':imageandfileselector')
+    //    compile project(':skin-support-design')
+    compile project(':SpecificSDK4GPTT')
+//    compile 'cjt.library.wheel:camera:1.1.9'
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    compile 'skin.support:skin-support:2.2.3'
+    // skin-support 基础控件支持
+    compile 'skin.support:skin-support-design:2.2.3'
+    //时间选择器
+    compile 'com.contrarywind:Android-PickerView:3.2.7'
+
+    implementation 'android.arch.lifecycle:runtime:1.0.3'
+    implementation 'android.arch.lifecycle:extensions:1.0.0'
+    implementation 'android.arch.lifecycle:reactivestreams:1.0.0'
+    annotationProcessor "android.arch.lifecycle:compiler:1.0.0"
+    compile 'io.reactivex.rxjava2:rxjava:2.1.6'
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compile(name: 'libuvccamera-release', ext: 'aar') {
+        exclude module: 'support-v4'
+        exclude module: 'appcompat-v7'
+    }
+}
+
+
+
+
+
+
+
+
+
+
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}

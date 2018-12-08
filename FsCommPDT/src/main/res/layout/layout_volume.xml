@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="80dp"
+    android:layout_height="40dp">
+    <LinearLayout
+        android:id="@+id/ll_sliding_chenge_volume"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:layout_centerInParent="true"
+        android:background="#66000000"
+        android:visibility="gone"
+        android:gravity="center">
+        <!--<TextView-->
+        <!--android:id="@+id/tv_volume_hint"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="通话音量"-->
+        <!--android:textColor="#fff"-->
+        <!--android:textStyle="normal"-->
+        <!--android:textSize="14dp"-->
+        <!--/>-->
+        <ImageView
+            android:id="@+id/iv_volume_fw"
+            android:layout_width="14dp"
+            android:layout_height="24dp"
+            android:background="@drawable/volume_adjust" />
+
+        <TextView
+            android:id="@+id/tv_volume_fw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="100%"
+            android:textColor="#fff"
+            android:textSize="14dp"
+            android:textStyle="normal" />
+    </LinearLayout>
+</RelativeLayout>

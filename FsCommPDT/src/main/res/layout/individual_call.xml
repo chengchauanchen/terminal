@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" >
+    <include layout="@layout/emergency_group_call"
+        android:id="@+id/emergency_group_call"/>
+    <!-- 个呼请求-->
+    <include layout="@layout/individual_call_request"
+        android:id="@+id/individual_call_request"/>
+    <!-- 个呼对讲-->
+    <include layout="@layout/individual_call_speaking"
+        android:id="@+id/individual_call_speaking"/>
+    <!-- 缩小化-->
+    <include layout="@layout/popupwindow_minimize"
+        android:id="@+id/pop_minimize"/>
+
+    <include layout="@layout/layout_call_prompt"
+        android:id="@+id/layout_call_prompt"/>
+    
+    <!--上报选择 -->
+    <include layout="@layout/live_select_member"
+        android:id="@+id/live_select_member"/>
+    <!-- 主题编辑 -->
+    <include layout="@layout/live_edit_theme"
+        android:id="@+id/ll_live_edit_theme"/>
+    <!-- 请求视频 -->
+    <include layout="@layout/live_request"
+        android:id="@+id/live_request"/>
+    <!-- 直播选择-->
+    <include layout="@layout/live_report"
+        android:id="@+id/live_report"/>
+    <!--视频直播 -->
+    <include layout="@layout/live"
+        android:id="@+id/live"/>
+    <!--缩小化 -->
+    <include layout="@layout/popup_mini_live"
+        android:id="@+id/popup_mini_live"/>
+    <!-- 个呼选择-->
+    <include
+        android:id="@+id/individual_call_chooice"
+        layout="@layout/individual_call_chooice" />
+    <!--收到上报图像弹窗-->
+    <include
+        android:id="@+id/video_dialog"
+        layout="@layout/dialog_parent"/>
+    <!-- 个呼半双工-->
+    <include
+        android:id="@+id/individual_call_half_duplex"
+        layout="@layout/individual_call_half_duplex"/>
+    <!--外置摄像头上报视频-->
+    <include
+        android:id="@+id/usb_live"
+        layout="@layout/usbvideo_live"/>
+</FrameLayout>

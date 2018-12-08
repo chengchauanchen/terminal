@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/ble_bg"
+    tools:context="cn.vsx.vc.activity.BleActivity">
+    
+    <View
+        android:id="@+id/view"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x20"
+        android:background="@drawable/titel_bar_bg" />
+    
+    <LinearLayout
+        android:id="@+id/ll_title"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y25"
+        android:layout_below="@id/view"
+        android:background="@drawable/titel_bar_bg"
+        android:orientation="horizontal">
+        
+        <ImageView
+            android:id="@+id/news_bar_back"
+            android:layout_width="@dimen/x23"
+            android:layout_height="@dimen/y17"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/x15"
+            android:src="@drawable/news_bar_return" />
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/x20"
+            android:text="蓝牙PTT"
+            android:textColor="@color/white"
+            android:textSize="@dimen/x15"/>
+    </LinearLayout>
+    
+    <RelativeLayout
+        android:id="@+id/rl_ble"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y30"
+        android:layout_marginTop="10dp"
+        android:background="@color/open_ble"
+        android:layout_below="@id/ll_title"
+        android:gravity="center_vertical">
+        
+        <TextView
+            style="@style/setting_text_style_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:textColor="@color/open_ble_tv"
+            android:text="开启"
+            android:id="@+id/textView" />
+    
+        <cn.vsx.vc.view.MToggleButton
+            android:id="@+id/switch_ble"
+            style="@style/setting_MToggleButton" />
+    </RelativeLayout>
+    
+    <RelativeLayout
+        android:id="@+id/rl_usable_device"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y30"
+        android:background="@color/ble_usable_bg"
+        android:layout_below="@id/rl_ble">
+    
+        <TextView
+            style="@style/setting_text_style_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="可用设备"
+            android:textColor="@color/useb_device_tv"
+            android:textSize="14sp" />
+        <LinearLayout
+            android:id="@+id/ll_connecting"
+            android:layout_width="48dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/x21"
+            android:gravity="center"
+            android:layout_centerVertical="true">
+            <ImageView
+                android:id="@+id/iv_connecting"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/device_connecting"/>
+        </LinearLayout>
+        
+    </RelativeLayout>
+    <ListView
+        android:id="@+id/ble_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:divider="@null"
+        android:layout_below="@id/rl_usable_device"/>
+    
+    <TextView
+        android:id="@+id/tv_close_ble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/rl_usable_device"
+        android:layout_marginTop="@dimen/x20"
+        android:layout_marginRight="10dp"
+        style="@style/setting_text_style_left"
+        android:textColor="@color/close_ble"
+        android:text="开启蓝牙后,您的设备可以与附近的其他蓝牙PTT设备通信"
+        android:visibility="gone"/>
+</RelativeLayout>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <cn.vsx.vc.view.TouchImageView
+        android:id="@+id/iv_help"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/help_tv_out"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="再次单击或按返回键退出!"
+        android:textSize="16sp"
+        android:textColor="@color/red"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/y20"
+        android:visibility="gone"/>
+
+    <include layout="@layout/layout_base_activity"/>
+
+</RelativeLayout>

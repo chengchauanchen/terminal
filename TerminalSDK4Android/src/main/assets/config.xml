@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>  
+<CONFIGS>    
+    
+    	<!-- 2016/7/22 下午部署用的 -->
+        <server_ip>http://192.168.253.110</server_ip>    
+        <app_update_url>http://192.168.253.110:9990/updateApk/version.xml</app_update_url>    
+    
+</CONFIGS>

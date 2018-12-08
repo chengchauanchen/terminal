@@ -1,0 +1,77 @@
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '26.0.2'
+
+    //android 6.0(api 23) SDK，Android的网络请求强制使用HttpUrlConnection,并且SDK中也已经移除了HttpClient。
+    useLibrary 'org.apache.http.legacy'
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 26
+        compileOptions {
+            sourceCompatibility JavaVersion.VERSION_1_7
+            targetCompatibility JavaVersion.VERSION_1_7
+        }
+        multiDexEnabled true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+            aidl.srcDirs = ['src/main/aidl']
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+
+}
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    //    compile project(':Hamster-TetraServer')
+    compile project(':rtspclient')
+    compile 'com.android.support:appcompat-v7:26.1.0'
+    compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile 'com.squareup:otto:1.3.8'
+    compile 'com.google.code.gson:gson:2.8.1'
+    compile 'com.google.dagger:dagger:2.11-rc2'
+    annotationProcessor 'com.google.dagger:dagger-compiler:2.11-rc2'
+    compile project(':TerminalSDK')
+    compile project(':easylinphone')
+
+    implementation 'android.arch.lifecycle:extensions:1.0.0'
+    implementation 'android.arch.lifecycle:reactivestreams:1.0.0'
+    annotationProcessor "android.arch.lifecycle:compiler:1.0.0"
+    compile(name: 'libuvccamera-release', ext: 'aar') {
+        exclude module: 'support-v4'
+        exclude module: 'appcompat-v7'
+    }
+}
+
+//task makeJar(type: Copy){
+//    delete 'build/libs/TerminalSDK4Android.jar'
+//    from('build/intermediates/bundles/release/')
+//    into('build/outputs')
+//    include('classes.jar')
+//    rename('classes.jar','TerminalSDK4Android.jar')
+//}
+//makeJar.dependsOn(build)

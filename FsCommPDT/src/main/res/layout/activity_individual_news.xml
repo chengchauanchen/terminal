@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:zhy="http://schemas.android.com/apk/res-auto"
+    android:fitsSystemWindows="true"
+    >
+    <!--<View-->
+        <!--android:id="@+id/my_view"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="0dp" />-->
+    <!--<View-->
+        <!--android:id="@+id/top"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="@dimen/y10"-->
+        <!--android:background="@color/group_call_news_bar_bg"/>-->
+
+    <LinearLayout
+        android:id="@+id/rl_topbar"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y30"
+        android:gravity="center_vertical"
+        android:background="@drawable/titel_bar_bg"
+        >
+        <ImageView
+            android:id="@+id/news_bar_return"
+            android:layout_width="@dimen/x23"
+            android:layout_height="@dimen/y17"
+            android:src="@drawable/news_bar_return"
+            android:layout_marginLeft="@dimen/x10"
+            />
+        <View
+            android:id="@+id/news_bar_line"
+            android:layout_toRightOf="@+id/news_bar_return"
+            android:layout_width="1dp"
+            android:layout_height="@dimen/y10"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x11"
+            android:layout_marginRight="@dimen/x11"
+            android:background="@color/news_bar_line"
+            />
+
+
+        <TextView
+            android:id="@+id/tv_chat_name"
+            android:layout_toRightOf="@+id/news_bar_line"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="张小妍"
+            android:layout_centerVertical="true"
+            android:textColor="@color/individual_news_bar_name"
+            android:textSize="21sp"
+            />
+
+        <ImageView
+            android:visibility="gone"
+            android:id="@+id/individual_news_help"
+            android:layout_width="@dimen/x20"
+            android:layout_height="@dimen/x20"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/help"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/x95"/>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:id="@+id/iv_call"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:padding="5dp"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/individual_ic_mobile"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"/>
+
+        <ImageView
+            android:id="@+id/individual_news_phone"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:padding="5dp"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/phone"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"/>
+
+        <ImageView
+            android:id="@+id/individual_news_info"
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:padding="5dp"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/individual_info"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_below="@+id/rl_topbar"
+        >
+
+        <RelativeLayout
+            android:id="@+id/rl_include_listview"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="@drawable/group_call_news_listview_bg">
+
+                <cn.vsx.vc.view.MyListView
+                    android:id="@+id/group_call_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:divider="@null"
+                    
+                    android:transcriptMode="normal"
+                    
+                    android:listSelector="@android:color/transparent"/>
+
+        </RelativeLayout>
+
+        <cn.vsx.vc.view.FunctionHidePlus
+            android:id="@+id/funcation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </cn.vsx.vc.view.FunctionHidePlus>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/noNetWork"
+        android:background="@color/color_ffabab"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x50"
+        android:orientation="horizontal"
+        android:layout_below="@id/rl_topbar">
+        <ImageView
+            android:src="@drawable/duanwang"
+            android:layout_marginLeft="@dimen/x30"
+            android:layout_gravity="center"
+            android:layout_width="@dimen/x30"
+            android:layout_height="@dimen/x30" />
+        <TextView
+            android:layout_marginLeft="@dimen/x30"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13sp"
+            android:text="网络连接断开"/>
+    </LinearLayout>
+    <FrameLayout
+        android:id="@+id/fl_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/transparent"
+        android:visibility="gone"
+        android:focusable="true"
+        android:clickable="true"
+        ></FrameLayout>
+    <cn.vsx.vc.view.VolumeViewLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:layout_centerInParent="true"
+    android:id="@+id/volume_layout"
+    ></cn.vsx.vc.view.VolumeViewLayout>
+    <!--<include layout="@layout/layout_base_activity"-->
+         <!--/>-->
+
+
+</RelativeLayout>

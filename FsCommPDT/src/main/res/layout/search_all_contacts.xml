@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/ll_search_pop"
+    android:orientation="vertical"
+    android:focusable="true"
+    android:clickable="true"
+    android:background="@color/backgroudblue">
+
+    <View
+    android:id="@+id/top"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/y15"
+        android:background="@color/bar_background_black"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:background="@color/bar_background_black"
+        android:gravity="center_vertical"
+        >
+
+        <LinearLayout
+            android:id="@+id/iv_goback_contacts"
+            android:layout_width="40dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="10dp"
+            android:gravity="center">
+            <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:background="@drawable/goback_contacts"
+            />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/edittext_bottom_line_shap"
+            >
+            <ImageView
+            android:layout_width="@dimen/x15"
+            android:layout_height="@dimen/x15"
+            android:background="@drawable/search_white"
+            />
+        <EditText
+            android:id="@+id/et_search_allcontacts"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:visibility="visible"
+            android:background="@null"
+            android:textColor="@color/white"
+            android:textSize="@dimen/x12"
+            android:hint="搜索"
+            android:textColorHint="#88FFFFFF"
+            android:maxLength="10"
+            android:imeOptions="actionSearch"
+            android:singleLine="true"
+            />
+
+
+        <LinearLayout
+            android:id="@+id/iv_delete_edittext"
+            android:layout_width="40dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="10dp"
+            android:gravity="center">
+            
+            <ImageView
+            android:id="@+id/iv_delete"
+            android:src="@drawable/live_cencle"
+            android:layout_width="15dp"
+            android:layout_height="15dp" />
+        </LinearLayout>
+        </LinearLayout>
+
+        <!--<Button-->
+            <!--android:id="@+id/btn_search_allcontacts"-->
+            <!--android:layout_width="@dimen/x50"-->
+            <!--android:layout_height="@dimen/y20"-->
+            <!--android:layout_marginRight="@dimen/x8"-->
+            <!--android:background="@drawable/rectangle_with_corners_shape2"-->
+            <!--android:gravity="center"-->
+            <!--android:text="确定"-->
+            <!--android:textColor="#FFFFFF"-->
+            <!--android:textSize="@dimen/x12" />-->
+
+    </LinearLayout>
+
+
+    
+    <TextView
+        android:id="@+id/tv_search_nothing" 
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="@dimen/y29"
+        android:gravity="center_horizontal"
+        android:textColor="#b5b5b5"
+        android:textSize="@dimen/x12"
+        android:textStyle="normal"
+        />
+    
+   
+    
+     <RelativeLayout 
+         android:id="@+id/rl_search_result"
+        android:layout_width="match_parent"
+         android:layout_height="0dp"
+         android:layout_weight="1"
+    	android:visibility="gone">
+        
+       <TextView 
+            android:id="@+id/tv_search_contactscount"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:paddingLeft="@dimen/x14"
+            android:text="联系人"
+           android:background="@color/backgroudblue"            android:gravity="center_vertical"
+           android:textColor="@color/gray"
+            android:textSize="14dp"
+            android:textStyle="normal"
+            />
+
+        <ListView
+            android:id="@+id/lv_search_allcontacts"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/itemblue"
+            android:layout_below="@id/tv_search_contactscount" />
+
+        <TextView
+            android:id="@+id/tv_search_notdata"
+            android:layout_width="match_parent"
+            android:layout_height="30dp"
+            android:layout_alignParentBottom="true"
+            android:background="#8ddd"
+            android:text="没有更多数据了！"
+            android:gravity="center"
+            android:textColor="@color/setting_text_gray"
+            android:textSize="14dp"
+            android:visibility="gone"
+            android:textStyle="normal"
+            />
+    
+    </RelativeLayout>
+
+</LinearLayout>

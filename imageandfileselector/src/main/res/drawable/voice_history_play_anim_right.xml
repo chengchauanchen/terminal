@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:oneshot="false">
+    <item
+        android:drawable="@drawable/sound_blank"
+        android:duration="300" />
+    <item
+        android:drawable="@drawable/sound_chat_send_one_right"
+        android:duration="300" />
+    <item
+        android:drawable="@drawable/sound_chat_send_two_right"
+        android:duration="300" />
+    <item
+        android:drawable="@drawable/sound_item_right"
+        android:duration="300" />
+</animation-list>

@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:id="@+id/change_main_group"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y30"
+        android:layout_marginTop="0.5dp"
+        android:background="@color/itemblue"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/x30"
+            android:text="更改主通话组"
+            android:textColor="@color/setting_text_black"
+            android:textSize="17sp" />
+
+        <ImageView
+            android:layout_width="@dimen/x15"
+            android:layout_height="@dimen/y13"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/x20"
+            android:background="@drawable/new_next_icon" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/rl_start_group_sweep"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y29"
+        android:layout_marginTop="0.5dp"
+        android:background="@color/itemblue">
+
+        <TextView
+            android:id="@+id/tv_start_group_sweep"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="组扫描"
+            android:layout_centerVertical="true"
+            style="@style/setting_text_style_left"/>
+
+        <cn.vsx.vc.view.MToggleButton
+            android:id="@+id/open_sweep"
+            style="@style/setting_MToggleButton"
+             />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/rl_group_sweep_setting"
+        android:clickable="true"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y29"
+        android:layout_marginTop="0.5dp"
+        android:background="@color/itemblue">
+
+        <TextView
+            android:id="@+id/tv_group_sweep_setting"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="设置扫描组"
+            android:layout_centerVertical="true"
+            style="@style/setting_text_style_left"/>
+        <ImageView
+            android:id="@+id/iv_group_sweep_setting"
+            android:layout_width="8dp"
+            android:layout_height="16dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="30dp"
+            android:background="@drawable/new_next_icon" />
+    </RelativeLayout>
+
+    <!--<RelativeLayout-->
+        <!--android:id="@+id/rl_work_group"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="@dimen/y29"-->
+        <!--android:layout_marginTop="@dimen/y1"-->
+        <!--android:background="@color/setting_background_white"-->
+        <!--android:visibility="gone"-->
+        <!--android:layout_gravity="center_vertical">-->
+
+        <!--<TextView-->
+            <!--android:id="@+id/tv_work_group"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:text="值守主组"-->
+            <!--style="@style/setting_text_style_left"/>-->
+
+        <!--<TextView-->
+            <!--android:id="@+id/work_group_name"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginLeft="@dimen/x10"-->
+            <!--android:layout_toRightOf="@id/tv_work_group"-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:text="7B-10T"-->
+            <!--style="@style/setting_text_style_left"/>-->
+
+        <!--<cn.vsx.vc.view.MToggleButton-->
+            <!--android:id="@+id/btn_isOpen_workGroup"-->
+            <!--style="@style/setting_MToggleButton"/>-->
+    <!--</RelativeLayout>-->
+
+    <!--<TextView-->
+        <!--android:id="@+id/sweep_group"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="@dimen/y30"-->
+        <!--android:layout_marginTop="@dimen/y5"-->
+        <!--android:background="@color/setting_background_white"-->
+        <!--android:gravity="center_vertical"-->
+        <!--android:paddingLeft="@dimen/x30"-->
+        <!--android:text="组扫描"-->
+        <!--android:textColor="@color/setting_text_black"-->
+        <!--android:textSize="17sp"-->
+        <!--android:visibility="gone"/>-->
+
+    <!--<RelativeLayout-->
+        <!--android:id="@+id/set_sweep"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="@dimen/y30"-->
+        <!--android:layout_marginTop="@dimen/y1"-->
+        <!--android:background="@color/itemblue"-->
+        <!--android:visibility="gone"-->
+        <!--&gt;-->
+
+        <!--<TextView-->
+            <!--android:id="@+id/tv_set_group_sweep"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:layout_gravity="center_vertical"-->
+            <!--android:layout_marginLeft="@dimen/x30"-->
+            <!--android:text="设置组扫描"-->
+            <!--android:textColor="@color/setting_text_black"-->
+            <!--android:textSize="10sp" />-->
+
+        <!--<ImageView-->
+            <!--android:layout_width="@dimen/x6"-->
+            <!--android:layout_height="@dimen/y13"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:layout_marginRight="@dimen/x20"-->
+            <!--android:background="@drawable/new_next_icon" />-->
+    <!--</RelativeLayout>-->
+</LinearLayout>

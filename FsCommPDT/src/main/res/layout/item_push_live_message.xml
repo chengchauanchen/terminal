@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_marginTop="5dp"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/pl_video">
+
+    <TextView
+        android:id="@+id/tv_message_time"
+        style="@style/chat_text_date_style"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/x8"
+        />
+
+    <FrameLayout
+        android:background="@color/video_item_bg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="@dimen/x20"
+        android:layout_marginRight="@dimen/x20"
+        android:layout_marginTop="@dimen/x8"
+        >
+
+        <LinearLayout
+            android:id="@+id/ll_watch_success"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            >
+
+            <TextView
+                android:id="@+id/tv_push_type"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/x16"
+                android:textColor="@color/group_text_black"
+                android:text="个人上报图像"
+                android:gravity="center_vertical"
+                android:textSize="16sp"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="@color/video_line"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/x16"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                >
+
+                    <TextView
+                        android:id="@+id/tv_title"
+                        android:singleLine="true"
+                        android:maxLength="20"
+                        tools:text="text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/group_text_gray"
+                        android:textSize="18sp"
+                        />
+
+
+
+                <TextView
+                    android:id="@+id/tv_watch_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/group_text_black"
+                    android:text="12分36秒"
+                    android:layout_marginLeft="@dimen/x25"
+                    android:textSize="16sp"
+                    android:layout_centerVertical="true"
+                    />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_push_fail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tv_push_type_fail"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/chat_text_date_style"
+                android:text="刘光荣请求上报图像"
+                android:textColor="#ffffff"/>
+
+            <TextView
+                android:id="@+id/tv_push_state"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/chat_text_date_style"
+                android:text="未接受"
+                android:textColor="#ffffff"
+                android:layout_marginTop="@dimen/x8"/>
+        </LinearLayout>
+
+
+    </FrameLayout>
+
+</LinearLayout>

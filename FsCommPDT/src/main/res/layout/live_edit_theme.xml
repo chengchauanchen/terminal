@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0090FF"
+    >
+
+    <LinearLayout
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="#0090FF"
+        >
+
+        <ImageView
+            android:id="@+id/iv_live_edit_return"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:background="@drawable/delete_edittext"
+            android:layout_marginRight="10dp"/>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="30dp"
+            android:background="#1A79C3"
+            android:layout_marginRight="10dp"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="编辑主题"
+            android:textSize="16sp"
+            android:textColor="@color/white"
+            />
+
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="本次上报图像的主题"
+        android:background="#EEEEEE"
+        android:paddingLeft="20dp"
+        android:textSize="14sp"
+        android:padding="10dp"
+        android:textColor="@color/black"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/white"
+        android:orientation="vertical"
+        >
+        <EditText
+            android:id="@+id/et_live_edit_import_theme"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="@color/white"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:gravity="top"
+            android:hint="主题将显示在推送的图像消息上，被接收人看到"
+            android:maxLength="17"
+            android:maxLines="3"
+            android:padding="10dp"
+            android:textColor="@color/gray"
+            android:textSize="18sp"
+            />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#EEEEEE"
+        android:gravity="center"
+        android:padding="15dp"
+        >
+
+        <Button
+            android:id="@+id/btn_live_edit_confirm"
+            android:layout_width="350dp"
+            android:layout_height="50dp"
+            android:text="确定"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:background="@drawable/live_theme_confirm_bg"
+            />
+
+    </RelativeLayout>
+
+
+
+</LinearLayout>

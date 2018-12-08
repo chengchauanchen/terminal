@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_face_pair"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="45dp"
+    android:background="#ffffff"
+    android:gravity="center_vertical">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="45dp"
+        android:layout_weight="1"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginLeft="6dp">
+
+        <TextView
+            android:id="@+id/tv_title_face_pair"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="刘五"
+            android:textColor="#000000"
+            android:textSize="15sp"
+            />
+
+        <TextView
+            android:id="@+id/tv_matched_degree"
+            android:layout_width="30dp"
+            android:layout_height="15dp"
+            android:text="99%"
+            android:textSize="11sp"
+            android:textColor="#ffffff"
+            android:layout_marginLeft="6dp"
+            android:gravity="center"
+            android:background="@drawable/matched1"/>
+
+        <TextView
+            android:id="@+id/tv_content_face_pair"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="男,1992年05月11日"
+            android:textSize="11sp"
+            android:layout_marginLeft="6dp"
+            android:gravity="center_vertical"
+            android:maxLines="1"
+            android:ellipsize="end"
+        />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_photo_face_pair"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_marginRight="6dp"
+        android:src="@drawable/user_photo"/>
+
+</LinearLayout>
