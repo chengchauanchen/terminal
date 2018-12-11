@@ -169,6 +169,7 @@ public class AudioManager {
                 //记录录音结束时间和结束时文件长度
                 record.setEndTime(System.currentTimeMillis());
                 record.setSize(file.length());
+                Constant.records.clear();
                 Constant.records.put(record.getPath(),record);
                 mRecorder.reset();
                 mRecorder.release();

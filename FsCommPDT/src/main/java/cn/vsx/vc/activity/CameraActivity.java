@@ -172,11 +172,9 @@ public class CameraActivity extends BaseActivity {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);//请求开视频
     }
 
-    //收到请求开视频，关闭界面，不然会出现很多奇怪的问题
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler(){
         @Override
         public void handler(String mainMemberName, int mainMemberId){
-            //如果正在录制视频，停止并发送，如果已经拍好照片，发送，如果在预览，关闭界面
             runOnUiThread(new Runnable(){
                 @Override
                 public void run(){

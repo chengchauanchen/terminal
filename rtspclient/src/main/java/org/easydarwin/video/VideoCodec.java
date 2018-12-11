@@ -148,7 +148,7 @@ public class VideoCodec {
         }
 
         @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH)
-        protected void decodeAndSnapAndDisplay(RTSPClient.FrameInfo frame) {
+        public void decodeAndSnapAndDisplay(RTSPClient.FrameInfo frame) {
             try {
                 int result = decodeFrame(frame, mImageBufferReuse, mSize);
             } catch (Exception e) {

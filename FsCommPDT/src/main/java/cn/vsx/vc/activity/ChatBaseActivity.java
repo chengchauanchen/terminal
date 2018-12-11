@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -30,7 +31,6 @@ import com.zectec.imageandfileselector.bean.Image;
 import com.zectec.imageandfileselector.bean.Record;
 import com.zectec.imageandfileselector.fragment.FileMainFragment;
 import com.zectec.imageandfileselector.fragment.ImagePreviewFragment;
-import com.zectec.imageandfileselector.fragment.ImagePreviewItemFragment;
 import com.zectec.imageandfileselector.fragment.ImageSelectorFragment;
 import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileCheckMessageHandler;
 import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileHandler;
@@ -109,7 +109,7 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.I
  * Created by gt358 on 2017/8/16.
  */
 
-public abstract class ChatBaseActivity extends BaseActivity implements ImagePreviewItemFragment.BackHandlerInterface{
+public abstract class ChatBaseActivity extends BaseActivity{
     private static final int CODE_CAMERA_REQUEST = 0x11;/** 打开相机 */
     private static final int CODE_IMAGE_RESULT=0;
     private static final int CODE_VIDEO_RESULT=1;
@@ -141,8 +141,8 @@ public abstract class ChatBaseActivity extends BaseActivity implements ImagePrev
     protected boolean isGroup;//组会话还是个人会话
     private OnBackListener backListener;
     private long lastVersion;//最后一条发送成功的消息的version
-    private ImagePreviewItemFragment imagePreviewItemFragment;
     private String live_theme;
+    private boolean refreshing;
     private static final int WATCH_LIVE = 0;
     protected Handler handler = new Handler(){
         @Override
@@ -188,6 +188,7 @@ public abstract class ChatBaseActivity extends BaseActivity implements ImagePrev
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverToFaceRecognitionHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSelectChatListHandler);
         groupCallList.setOnRefreshListener(new OnRefreshListenerImplementationImpl());
+        groupCallList.setOnScrollListener(new OnScrollListenerImpl());
         groupCallList.setOnTouchListener(mMessageTouchListener);
         setOnPTTVolumeBtnStatusChangedListener(new OnPTTVolumeBtnStatusChangedListenerImp());
         rl_include_listview.setOnTouchListener(new OnInclude_listviewTouchListener());
@@ -397,9 +398,16 @@ public abstract class ChatBaseActivity extends BaseActivity implements ImagePrev
         if(null != backListener){
             backListener.onBack();
         }else{
-            //如果消息不为空则保存信息
-            saveUnsendMessage();
-            super.onBackPressed();
+            if(getSupportFragmentManager().getBackStackEntryCount() ==0){
+                //如果消息不为空则保存信息
+                saveUnsendMessage();
+                super.onBackPressed();
+            }else if(getSupportFragmentManager().getBackStackEntryCount() ==1){
+                setViewVisibility(fl_fragment_container, View.GONE);
+                getSupportFragmentManager().popBackStack();
+            }else {
+                super.onBackPressed();
+            }
         }
     }
 
@@ -1114,12 +1122,30 @@ public abstract class ChatBaseActivity extends BaseActivity implements ImagePrev
                                 return;
                         }
                         /**  图像推送消息，去图像推送助手 **/
-                        if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()
-                                && terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)
-                                && terminalMessage.messageBody.containsKey(JsonParam.REMARK)
-                                && (terminalMessage.messageBody.getIntValue(JsonParam.REMARK) == Remark.ACTIVE_VIDEO_LIVE)
-                                && terminalMessage.resultCode==0)
-                            return;
+                        if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()){
+                            if(terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)
+                                    && terminalMessage.messageBody.containsKey(JsonParam.REMARK)
+                                    && (terminalMessage.messageBody.getIntValue(JsonParam.REMARK) == Remark.ACTIVE_VIDEO_LIVE)
+                                    && terminalMessage.resultCode==0){
+                                //自己上报的消息，不显示在聊天界面
+                                return;
+                            }else {
+                                Iterator<TerminalMessage> iterator = chatMessageList.iterator();
+                                while(iterator.hasNext()){
+                                    TerminalMessage next = iterator.next();
+                                    //删除之前的上报消息
+                                    if(null == next.messageBody ||
+                                            TextUtils.isEmpty(next.messageBody.getString(JsonParam.CALLID)) ||
+                                            null == terminalMessage.messageBody ||
+                                            TextUtils.isEmpty(terminalMessage.messageBody.getString(JsonParam.CALLID))){
+                                        continue;
+                                    }
+                                    if(next.messageBody.getString(JsonParam.CALLID).equals(terminalMessage.messageBody.getString(JsonParam.CALLID))){
+                                        iterator.remove();
+                                    }
+                                }
+                            }
+                        }
                     }
 
                     //发送失败的消息重新发送，成功后改变状态
@@ -1514,6 +1540,39 @@ public abstract class ChatBaseActivity extends BaseActivity implements ImagePrev
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSendFileHandler);
     }
 
+    private void refreshData(){
+        refreshing = true;
+        // 下拉刷新操作
+        if (chatMessageList.size() <= 0) {
+            refreshing = false;
+            ToastUtil.showToast(ChatBaseActivity.this, "没有更多消息了！");
+            return;
+        }
+        List<TerminalMessage> groupMessageRecord1 = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupMessageRecord(
+                isGroup ? MessageCategory.MESSAGE_TO_GROUP.getCode() : MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), userId,
+                chatMessageList.get(0).sendTime - 1, TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
+        if (groupMessageRecord1 != null && groupMessageRecord1.size() > 0 ) {
+            logger.info("会话列表刷新成功");
+            Collections.sort(groupMessageRecord1);
+            intersetMessageToList(groupMessageRecord1, historyFailMessageList);
+            List<TerminalMessage> groupMessageRecord2 = new ArrayList<>();
+            groupMessageRecord2.addAll(chatMessageList);
+            chatMessageList.clear();
+            chatMessageList.addAll(groupMessageRecord1);
+            chatMessageList.addAll(groupMessageRecord2);
+            //            if(temporaryAdapter!=null){
+            //                temporaryAdapter.notifyDataSetChanged();
+            //            }
+            //滚动到之前的位置
+            if(groupMessageRecord1.size()+1 < chatMessageList.size()){
+                setListSelection(groupMessageRecord1.size()+1);
+            }
+        }else {
+            ToastUtil.showToast(ChatBaseActivity.this, "没有更多消息了！");
+        }
+        refreshing = false;
+    }
+
     /**  转发 **/
     private ReceiverTransponHandler mReceiverTransponHandler = new ReceiverTransponHandler() {
         @Override
@@ -1641,6 +1700,21 @@ public abstract class ChatBaseActivity extends BaseActivity implements ImagePrev
         }
     };
 
+    private final class OnScrollListenerImpl implements AbsListView.OnScrollListener{
+
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState){
+        }
+
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount){
+            if(!refreshing && firstVisibleItem == 0 && visibleItemCount >0 && totalItemCount > visibleItemCount){
+                refreshData();
+            }
+        }
+
+    }
+
     /**  下拉刷新   */
     private final class OnRefreshListenerImplementationImpl implements MyListView.OnRefreshListener {
         @Override
@@ -1650,7 +1724,7 @@ public abstract class ChatBaseActivity extends BaseActivity implements ImagePrev
                 public void run() {
                     /***先睡2s在进行加载更多数据**/
                     try {
-                        Thread.sleep(2000l);
+                        Thread.sleep(2000L);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -1675,9 +1749,12 @@ public abstract class ChatBaseActivity extends BaseActivity implements ImagePrev
                                 chatMessageList.clear();
                                 chatMessageList.addAll(groupMessageRecord1);
                                 chatMessageList.addAll(groupMessageRecord2);
-                                setListSelection(groupMessageRecord1.size());
+
                                 if(temporaryAdapter!=null){
                                     temporaryAdapter.notifyDataSetChanged();
+                                }
+                                if(groupMessageRecord1.size()+1 < chatMessageList.size()){
+                                    setListSelection(groupMessageRecord1.size()+1);
                                 }
                             }else {
                                 ToastUtil.showToast(ChatBaseActivity.this, "没有更多消息了！");
@@ -1785,7 +1862,7 @@ public abstract class ChatBaseActivity extends BaseActivity implements ImagePrev
 
                 }
             });
-
+            temporaryAdapter.setUploadFinished();
             funcation.showBottom(false);
             scrollMyListViewToBottom();
         }

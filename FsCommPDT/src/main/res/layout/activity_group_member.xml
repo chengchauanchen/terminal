@@ -15,6 +15,7 @@
 
         <include layout="@layout/in_title_bar"
             android:id="@+id/in_title_bar"/>
+        
         <include layout="@layout/temp_title_bar"
             android:id="@+id/temp_title_bar"
             android:visibility="gone"/>

@@ -404,7 +404,6 @@ public class LockScreenActivity extends BaseActivity {
     @Override
     public void initView() {
 
-        ActivityCollector.addActivity(this, getClass());
         online_number = MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size();
         setDateTime();
         setCurrentGroupView();
@@ -478,7 +477,6 @@ public class LockScreenActivity extends BaseActivity {
     @Override
     public void doOtherDestroy() {
         Log.e("LockScreenActivity", "doOtherDestroy");
-        ActivityCollector.removeActivity(this);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);

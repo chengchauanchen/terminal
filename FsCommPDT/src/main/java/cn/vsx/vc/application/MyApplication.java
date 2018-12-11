@@ -162,6 +162,7 @@ public class MyApplication extends Application {
 		MultiDex.install(this);
 	}
 	public enum TYPE{
+		RECODERPUSH,
 		UVCPUSH,
 		PUSH ,
 		PULL,

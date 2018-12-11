@@ -11,10 +11,8 @@ import java.util.HashMap;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
-public class ParseXmlService
-{
-	public static HashMap<String, String> parseXml(InputStream inStream) throws Exception
-	{
+public class ParseXmlService{
+	public static HashMap<String, String> parseXml(InputStream inStream) throws Exception{
 		HashMap<String, String> hashMap = new HashMap<String, String>();
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

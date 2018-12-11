@@ -73,8 +73,8 @@ public class ItemAdapter extends BaseAdapter {
         }
     }
 
-    public static List<DataHolder> iniDatas() {
-        List<DataHolder> list = new ArrayList<DataHolder>();
+    public static List<ItemAdapter.DataHolder> iniDatas() {
+        List<ItemAdapter.DataHolder> list = new ArrayList<ItemAdapter.DataHolder>();
         ItemAdapter.DataHolder dataHolder1 = new ItemAdapter.DataHolder("录音电话", R.drawable.tel);
         ItemAdapter.DataHolder dataHolder2 = new ItemAdapter.DataHolder("普通电话", R.drawable.tel);
         list.add(dataHolder1);

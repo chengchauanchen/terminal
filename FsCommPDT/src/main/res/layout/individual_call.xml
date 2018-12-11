@@ -47,8 +47,14 @@
     <include
         android:id="@+id/individual_call_half_duplex"
         layout="@layout/individual_call_half_duplex"/>
+    <!--VM680正在连接-->
+    <include
+        android:id="@+id/live_connecting"
+        android:visibility="gone"
+        layout="@layout/live_connecting"/>
     <!--外置摄像头上报视频-->
     <include
         android:id="@+id/usb_live"
         layout="@layout/usbvideo_live"/>
+    
 </FrameLayout>

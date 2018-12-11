@@ -111,12 +111,8 @@ public class NewsFragment extends BaseFragment {
 
     private void saveMessagesToSql(){
         logger.info("---------保存消息列表---------");
-        MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable(){
-            @Override
-            public void run(){
-                MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(messageList);
-            }
-        });
+        MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(messageList);
+
     }
     private void loadMessages(){
         terminalMessageData.clear();
@@ -668,8 +664,6 @@ public class NewsFragment extends BaseFragment {
         int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
         List<Integer> scanGroups = MyTerminalFactory.getSDK().getConfigManager().loadScanGroup();//组扫描列表
         boolean groupScanTog = MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false);//组扫描开关
-        int mainGroupId = MyTerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0);//主组id
-        boolean guardMainGroupTog = MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false);//主组开关
         if (terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){//组呼消息
             if (terminalMessage.isOffLineMessage) {//离线的组呼也是未读
                 terminalMessage.unReadCount = unReadCount + 1;
@@ -695,18 +689,8 @@ public class NewsFragment extends BaseFragment {
                             terminalMessage.messageBody.put(JsonParam.UNREAD, true);
                         }
                     }else {//组扫描关着，判断主组状态
-                        if (guardMainGroupTog){//主组开着
-                            if (mainGroupId == terminalMessage.messageToId){//是主组消息
-                                terminalMessage.unReadCount = unReadCount;
-                                terminalMessage.messageBody.put(JsonParam.UNREAD, false);
-                            }else {//不是主组消息
-                                terminalMessage.unReadCount = unReadCount + 1;
-                                terminalMessage.messageBody.put(JsonParam.UNREAD, true);
-                            }
-                        }else {//主组关着
-                            terminalMessage.unReadCount = unReadCount + 1;
-                            terminalMessage.messageBody.put(JsonParam.UNREAD, true);
-                        }
+                        terminalMessage.unReadCount = unReadCount + 1;
+                        terminalMessage.messageBody.put(JsonParam.UNREAD, true);
                     }
                 }
             }
@@ -1100,6 +1084,9 @@ public class NewsFragment extends BaseFragment {
     private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
         @Override
         public void handler(int memberId, int toGroupId,boolean forceSwitchGroup) {
+            if(!forceSwitchGroup){
+                return;
+            }
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {

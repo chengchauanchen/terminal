@@ -144,6 +144,7 @@ public class TemporaryAdapter extends BaseAdapter {
     List<ImageBean> mImgList = new ArrayList<>();
     List<String> mImgUrlList = new ArrayList<>();
     List<TerminalMessage> unReadVoiceList = new ArrayList<>();
+    private boolean upload;//是否正在上传
 
     public TemporaryAdapter(List<TerminalMessage> chatMessageList, FragmentActivity activity, HashMap<Integer, String> idNameMap) {
         this.chatMessageList = chatMessageList;
@@ -640,8 +641,8 @@ public class TemporaryAdapter extends BaseAdapter {
         terminalMessage1.messageToId = setToIds(terminalMessage1).get(0);
         terminalMessage1.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
         File file = new File(terminalMessage1.messagePath);
-
-//        File file1 = new File(terminalMessage1.messageBody.getString("pictureUrl"));
+        upload = true;
+        //        File file1 = new File(terminalMessage1.messageBody.getString("pictureUrl"));
         if (terminalMessage1.messageType == MessageType.PICTURE.getCode()) {
             if(file.length()<=0){
                 ToastUtil.showToast(activity,"图片为空，不能发送");
@@ -694,6 +695,10 @@ public class TemporaryAdapter extends BaseAdapter {
             public boolean onLongClick(View v) {
                 if (!isEnable)
                     return false;
+                if(upload){
+                    ToastUtil.showToast(activity,"正在上传中不能转发");
+                    return false;
+                }
                 if (terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
                         terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
                         terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
@@ -816,6 +821,10 @@ public class TemporaryAdapter extends BaseAdapter {
             holder.tvContent.setOnLongClickListener(new View.OnLongClickListener() {
                 @Override
                 public boolean onLongClick(View view) {
+                    if(upload){
+                        ToastUtil.showToast(activity,"正在上传中不能转发");
+                        return false;
+                    }
                     mIsLongClick = true;
                     //处理长按事件
                     transponMessage = (TerminalMessage) terminalMessage.clone();
@@ -1111,7 +1120,7 @@ public class TemporaryAdapter extends BaseAdapter {
                     faceRecognitionBean.setTitle(data.getString(JsonParam.TITLE));
                     faceRecognitionBean.setMatcheDegree(data.getString(JsonParam.DESCRIBE));
                     faceRecognitionBean.setPictureUrl(data.getString(JsonParam.PICTURE_URL));
-//                    faceRecognitionBean.setDetailedHtml(data.getString(JsonParam.DETAILED_HTML));
+                    faceRecognitionBean.setDetailedHtml(data.getString(JsonParam.PARTICULAR_HTML));
                     faceRecognitionBean.setContent(data.getString(JsonParam.CONTENT));
                     list.add(faceRecognitionBean);
                 }
@@ -1514,6 +1523,7 @@ public class TemporaryAdapter extends BaseAdapter {
     private void uploadLongText(ChatViewHolder chatViewHolder, TerminalMessage terminalMessage) {
         File file = new File(terminalMessage.messagePath);
         terminalMessage.messageToId = setToIds(terminalMessage).get(0);
+        upload = true;
         MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL), file, terminalMessage, false);
     }
 
@@ -1578,6 +1588,7 @@ public class TemporaryAdapter extends BaseAdapter {
             terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
             terminalMessage.messageBody.put(JsonParam.ISMICROPICTURE, true);
             File file = new File(terminalMessage.messagePath);
+            upload = true;
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, ""), file, terminalMessage, false);
         } else {
             sendPhotoMessage2(terminalMessage, toIds);
@@ -1605,6 +1616,7 @@ public class TemporaryAdapter extends BaseAdapter {
             terminalMessage.messageToId = toIds.get(0);
             terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
             File file = new File(terminalMessage.messagePath);
+            upload = true;
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, ""), file, terminalMessage, false);
         } else {
             sendFileMessage2(terminalMessage, toIds);
@@ -1664,8 +1676,9 @@ public class TemporaryAdapter extends BaseAdapter {
      * 文件条目点击
      */
     private void fileItemClick(ChatViewHolder chatViewHolder, TerminalMessage terminalMessage, int type) {
-        if (terminalMessage.messageType == MessageType.FILE.getCode())
+        if (terminalMessage.messageType == MessageType.FILE.getCode()){
             openFile(terminalMessage, chatViewHolder);
+        }
     }
 
     /**
@@ -2028,5 +2041,9 @@ public class TemporaryAdapter extends BaseAdapter {
         }
         notifyDataSetChanged();
         return mImgList;
+    }
+
+    public void setUploadFinished(){
+        upload = false;
     }
 }

@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android">
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
@@ -11,7 +11,8 @@
             backward-compatibility can go here.
         -->
     </style>
-    
+
+
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
@@ -345,14 +346,7 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowAnimationStyle">@android:style/Animation</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="windowActionBar">false</item>
-        <item name="android:windowBackground" tools:ignore="DuplicateDefinition">@android:color/transparent</item>
-        
-        <!--<item name="android:colorBackgroundCacheHint">@null</item>-->
-        <!---->
-        <!--<item name="android:windowAnimationStyle">@android:style/Animation</item>-->
-        
-        <!--<item name="android:windowContentOverlay">@null</item>-->
+        <item name="android:windowContentOverlay">@null</item>
     </style>
     <!-- 设置弹出窗口的属性，frame叠加，isfloat是否浮动，tarnslucent是否半透明，dim是背景是否变暗 -->
     <style name="Theme_audioDialog" parent="@android:style/Theme.Dialog">
@@ -362,10 +356,7 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:backgroundDimEnabled">false</item>
     </style>
-    
-    <style name="dialog_activity_theme" parent="AppBaseTheme">
-    
-    </style>
+
     <style name="pttSilenceText">
         <item name="android:textColor">@color/ptt_silence_text</item>
     </style>
@@ -431,6 +422,7 @@
         <item name="android:thumbOffset">0dip</item>
     </style>
     
+    
     <style name="ble_connect_tv">
         <item name="android:textColor">@color/device_name_connect</item>
     </style>
@@ -439,4 +431,10 @@
         <item name="android:textColor">@color/device_name</item>
     </style>
     
+    <style name="temp_group_checked">
+        <item name="android:textColor">@color/textview_checked</item>
+    </style>
+    <style name="temp_group_unchecked">
+        <item name="android:textColor">@color/textview_unchecked</item>
+    </style>
 </resources>

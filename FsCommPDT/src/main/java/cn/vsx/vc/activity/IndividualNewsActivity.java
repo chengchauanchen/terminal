@@ -1,11 +1,11 @@
 package cn.vsx.vc.activity;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Handler;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -16,7 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.zectec.imageandfileselector.fragment.ImagePreviewItemFragment;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.io.File;
@@ -63,7 +62,6 @@ import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.record.AudioRecordButton;
 import cn.vsx.vc.record.MediaManager;
-import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
@@ -152,7 +150,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         super.ptt = ptt;
         setStatusBarColor();
         groupCallList.setVerticalScrollBarEnabled(false);
-        ActivityCollector.addActivity(this, getClass());
         record.setAudioPauseListener(new AudioRecordButton.AudioPauseListener(){
             @Override
             public void onPause(){
@@ -224,7 +221,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     @Override
     public void doOtherDestroy() {
-        ActivityCollector.removeActivity(this);
         handler.removeCallbacksAndMessages(null);
         record.cancel();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
@@ -241,6 +237,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         if (volumeViewLayout != null) {
             volumeViewLayout.unRegistLintener();
         }
+        MediaManager.release();
         super.doOtherDestroy();
     }
 
@@ -461,7 +458,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         @Override
         public void handler(final TerminalMessage terminalMessage, int postion) {
             mposition = postion;
-
+            isReject=false;
             myHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -534,18 +531,17 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
             autoPlay(mposition+1);
         }
     };
-
+    private boolean isReject=false;
     //自动播放下一条语音
     private void autoPlay(int index){
         if(index<chatMessageList.size()){//不是最后一条消息，自动播放
             //不是语音消息跳过执行下一条
-            if (chatMessageList.get(index).messageType != MessageType.AUDIO.getCode()) {
+            if (chatMessageList.get(index).messageType != MessageType.AUDIO.getCode()&&!isReject) {
                 index = index + 1;
                 autoPlay(index);
             }else {
                 if (chatMessageList.get(index).messageBody.containsKey(JsonParam.UNREAD) &&
-                        chatMessageList.get(index).messageBody.getBooleanValue(JsonParam.UNREAD) && MediaManager.isPlaying() == false
-                        ) {
+                        chatMessageList.get(index).messageBody.getBooleanValue(JsonParam.UNREAD) && !MediaManager.isPlaying() && !isReject) {
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayIndividualChatVoiceHandler.class, chatMessageList.get(index), index);
                 } else {
                     logger.error("点击消息以下的未读消息已播放完成");
@@ -563,6 +559,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = new ReceiveMultimediaMessageCompleteHandler() {
         @Override
         public void handler(final int resultCode, final String resultDes) {
+            logger.info("ReceiveMultimediaMessageCompleteHandler   "+resultCode+"/"+resultDes);
             myHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -572,12 +569,12 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                             MyApplication.instance.isPlayVoice = !MyApplication.instance.isPlayVoice;
                         } else {//点击不同条目
                             isSameItem = false;
-                            MyApplication.instance.isPlayVoice = true;
+                            MyApplication.instance.isPlayVoice = false;
                         }
                         Collections.sort(chatMessageList);
                         if (temporaryAdapter != null) {
                             temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-                            temporaryAdapter.notifyDataSetChanged();
+//                            temporaryAdapter.notifyDataSetChanged();
                         }
                         lastPosition = mposition;
                     } else {
@@ -650,7 +647,10 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    record.onPause();
+                    isReject=true;
+                    MediaManager.release();
+                    MyApplication.instance.isPlayVoice=true;
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, 0, "");
                 }
             });
 
@@ -671,10 +671,14 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler() {
         @Override
         public void handler(final String mainMemberName, final int mainMemberId) {
+            logger.info("ReceiveNotifyLivingIncommingHandler:"+mainMemberName+"/"+mainMemberId);
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    record.onPause();
+                    isReject=true;
+                    MediaManager.release();
+                    MyApplication.instance.isPlayVoice=true;
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, 0, "");
                 }
             });
         }
@@ -709,8 +713,4 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     };
 
 
-    @Override
-    public void setSelectedFragment(ImagePreviewItemFragment backHandledFragment) {
-
-    }
 }

@@ -92,7 +92,7 @@
                 android:layout_marginRight="20dp"/>
             
         </LinearLayout>
-
+    
         <LinearLayout
             android:id="@+id/ll_volume"
             android:layout_width="80dp"
@@ -106,7 +106,7 @@
                 android:layout_width="14dp"
                 android:layout_height="24dp"
                 android:background="@drawable/volume_adjust" />
-
+        
             <TextView
                 android:id="@+id/tv_volume"
                 android:layout_width="wrap_content"

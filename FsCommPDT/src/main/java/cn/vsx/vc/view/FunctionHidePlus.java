@@ -319,7 +319,7 @@ public class FunctionHidePlus extends LinearLayout {
             ll_function_hide_plus_bottom.setVisibility(View.GONE);
             showInputView();
             groupCallNewsEt.requestFocus();
-            hideKeyboard(false);
+            hideKeyboard(true);
         }
     }
 
@@ -409,14 +409,7 @@ public class FunctionHidePlus extends LinearLayout {
                     canPush=true;
                 }
             }
-
-
-
-            logger.info("canPull = "+canPull+"     canPush = "+canPush);
-            if (canPull && canPush){
-                setHasVideo();
-            }
-            if (!canPull && !canPush){
+            if(!canPull&&!canPush){
                 setNoVideo();
             }else {
                 setHasVideo();

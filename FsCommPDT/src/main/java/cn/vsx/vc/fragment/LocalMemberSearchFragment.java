@@ -220,7 +220,7 @@ public class LocalMemberSearchFragment extends BaseFragment{
         searchList.clear();
         for(Member member : memberList) {
             String name = member.getName();
-            String id = String.valueOf(member.id);
+            String id = String.valueOf(member.getNo());
             if(!Util.isEmpty(name) && !Util.isEmpty(keyWord) && name.toLowerCase().contains(keyWord.toLowerCase())) {
                 searchList.add(member);
             }

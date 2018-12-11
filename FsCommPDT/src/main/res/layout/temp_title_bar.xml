@@ -63,6 +63,7 @@
             android:layout_width="@dimen/x20"
             android:layout_height="@dimen/x20"
             android:layout_marginRight="@dimen/x20"
+            android:visibility="gone"
             android:src="@drawable/temp_group_delete" />
 
         <TextView

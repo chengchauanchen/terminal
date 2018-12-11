@@ -7,22 +7,18 @@
     
     <TextView
         android:id="@+id/left1"
-        android:alpha="0.7"
         style="@style/change_group_circle" />
     <TextView
         android:id="@+id/left2"
-        android:alpha="0.7"
         style="@style/change_group_circle" />
     <TextView
         android:id="@+id/middle"
         style="@style/change_group_circle" />
     <TextView
         android:id="@+id/right2"
-        android:alpha="0.7"
         style="@style/change_group_circle" />
     <TextView
         android:id="@+id/right1"
-        android:alpha="0.7"
         style="@style/change_group_circle" />
     
 </FrameLayout>

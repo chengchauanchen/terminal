@@ -22,7 +22,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.zectec.imageandfileselector.fragment.ImagePreviewItemFragment;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.http.util.TextUtils;
@@ -68,16 +67,15 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
-import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import cn.vsx.vc.view.FunctionHidePlus;
 import cn.vsx.vc.view.MyListView;
 import cn.vsx.vc.view.RoundProgressBarWidthNumber;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.tools.ToastUtil;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 
@@ -192,7 +190,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 mHandler.sendEmptyMessage(1);
             }
         });
-        ActivityCollector.addActivity(this, getClass());
 
         //GH880手机按键服务
         keyMointor =(IGotaKeyMonitor)getSystemService("gotakeymonitor");
@@ -276,7 +273,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     @Override
     public void doOtherDestroy() {
-        ActivityCollector.removeActivity(this);
         mHandler.removeCallbacksAndMessages(null);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverCloseKeyBoardHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
@@ -367,15 +363,14 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             CheckMyPermission.permissionPrompt(GroupCallNewsActivity.this, Manifest.permission.RECORD_AUDIO);
             return;
         }
-
-
-        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
-
         //没有组呼权限
-        if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())&&resultCode!=BaseCommonCode.SUCCESS_CODE) {
+        if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
             Toast.makeText(this, "没有组呼权限", Toast.LENGTH_SHORT).show();
             return;
         }
+
+        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {//允许组呼了
             if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {//打开扬声器
                 MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(true);
@@ -470,10 +465,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 ptt.setBackgroundResource(R.drawable.shape_news_ptt_listen);
                 ptt.setText("PTT");
                 TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
-            }else{
-                ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-                ptt.setText("切到此组说话");
-                TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
             }
             ptt.setEnabled(true);
         }
@@ -494,7 +485,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         if (isCurrentGroup) {
             ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
             ptt.setText("按住 排队");
-            TextViewCompat.setTextAppearance(ptt, R.style.function_wait_text);
+            TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
         }
         logger.info("主界面，ptt被禁了  isPttPress：" + MyApplication.instance.isPttPress);
         if (MyApplication.instance.isPttPress) {
@@ -511,8 +502,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 img_scan.setVisibility(View.VISIBLE);
                 tv_speaker.setText(speakingName + "");
                 ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-                ptt.setText("切到此组说话");
-                TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
+                ptt.setText("切到此组 说话");
+                TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
 
             } else {
                 logger.info("sjl_当前组");
@@ -522,7 +513,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 tv_speaker.setText(speakingName + "");
                 ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
                 ptt.setText("按住 排队");
-                TextViewCompat.setTextAppearance(ptt, R.style.function_wait_text);
+                TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
             }
         }
 
@@ -1019,12 +1010,12 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
      **/
     private ReceiveGetGroupCurrentOnlineMemberListHandler mmReceiveGetGroupCurrentOnlineMemberListHandler = new ReceiveGetGroupCurrentOnlineMemberListHandler() {
         @Override
-        public void handler(final List<Member> memberList,String groupType) {
+        public void handler(final List<Member> memberList, final boolean isAllMember,int groupId) {
             Log.e("GroupCallNewsActivity", "memberList:" + memberList);
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (isFinishing()) {
+                    if (isFinishing() ||isAllMember) {
                         return;
                     }
                     String name = idNameMap.get(userId);
@@ -1144,11 +1135,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             }
         }
     };
-
-    @Override
-    public void setSelectedFragment(ImagePreviewItemFragment backHandledFragment) {
-
-    }
 
     //GH880手机PTT按钮事件
     public class GotaKeHandler extends IGotaKeyHandler.Stub{

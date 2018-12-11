@@ -235,11 +235,17 @@ public class PlayLiveHistoryActivity extends BaseActivity{
             //拖动条停止拖动的时候调用
             @Override
             public void onStopTrackingTouch(SeekBar seekBar){
-                float sMax = seek_bar.getMax();
-                float progress = seekBar.getProgress();
-                //seekBar进度比例
-                float percent = (progress / sMax);
-                mediaPlayer.seekTo((int) (maxTime * percent));
+                try {
+                    float sMax = seek_bar.getMax();
+                    float progress = seekBar.getProgress();
+                    //seekBar进度比例
+                    float percent = (progress / sMax);
+                    mediaPlayer.seekTo((int) (maxTime * percent));
+                    iv_pause.setVisibility(View.GONE);
+                }catch (Exception e){
+                    logger.error(e.toString());
+                }
+
             }
         });
     }
@@ -257,23 +263,6 @@ public class PlayLiveHistoryActivity extends BaseActivity{
             }
         }catch(IllegalStateException e){
             e.printStackTrace();
-        }
-    }
-
-    @Override
-    protected void onResume(){
-        super.onResume();
-        if(currentPosition != 0){
-            mHandler.postDelayed(new Runnable(){
-                @Override
-                public void run(){
-                    iv_pause_continue.setImageResource(R.drawable.continue_play);
-                    iv_pause.setVisibility(View.GONE);
-                    mediaPlayer.start();
-                    mHandler.sendEmptyMessage(UPDATE_PROGRESS);
-                    mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
-                }
-            }, 200);
         }
     }
 

@@ -35,22 +35,16 @@ public class DataUtil {
 	public static Group getGroupByGroupNo(int groupNo) {
 		List<Group> groupList=MyTerminalFactory.getSDK().getConfigManager().getAllGroups();
 		Group group = null;
-
-		try {
-			if (groupList!=null){
-				for (Group g:groupList){
-					if (groupNo==g.getNo()){
-						group=g;
-						break;
-					}
+		if (null != groupList){
+			for (Group g:groupList){
+				if (groupNo==g.getNo()){
+					group=g;
+					break;
 				}
 			}
-		}catch (Exception e){
-			logger.error(e);
 		}
-
-
 		if (group == null) {
+			logger.info("通讯录没有这个组："+groupNo);
 			group = new Group();
 			group.id = groupNo;
 			group.no = groupNo;
@@ -296,7 +290,7 @@ public class DataUtil {
 		List<Group> groupList=MyTerminalFactory.getSDK().getConfigManager().getAllGroups();
 		if (groupList!=null){
 			for (Group group:groupList){
-				if (group.getId()==groupId){
+				if (group.getNo()==groupId){
 					isExistGroup = true;
 					break;
 				}

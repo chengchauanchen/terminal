@@ -61,16 +61,17 @@ public class RTSPClient implements Closeable {
 //        Easy_U8	 u8H264Sps[128];			/*  ”∆µsps÷°ƒ⁄»› */
 //        Easy_U8	 u8H264Pps[36];				/*  ”∆µsps÷°ƒ⁄»› */
 
-        int videoCodec;
-        int fps;
-        int audioCodec;
-        int sample;
-        int channel;
-        int bitPerSample;
-        int spsLen;
-        int ppsLen;
-        byte[] sps;
-        byte[] pps;
+        public int videoCodec;
+        public int fps;
+        public int audioCodec;
+        public int sample;
+        public int channel;
+        public int bitPerSample;
+        public int spsLen;
+        public int ppsLen;
+        public byte[] sps;
+        public byte[] pps;
+
 
 
         @Override
@@ -119,7 +120,7 @@ public class RTSPClient implements Closeable {
     private long mCtx;
     private static final SparseArray<RTSPSourceCallBack> sCallbacks = new SparseArray<>();
 
-    RTSPClient(Context context, String key) {
+    public RTSPClient(Context context, String key) {
         if (key == null) {
             throw new NullPointerException();
         }
@@ -132,16 +133,14 @@ public class RTSPClient implements Closeable {
         }
     }
 
-    int registerCallback(RTSPSourceCallBack cb) {
-
+    public int registerCallback(RTSPSourceCallBack cb) {
         synchronized (sCallbacks) {
             sCallbacks.put(++sKey, cb);
             return sKey;
         }
     }
 
-    void unrigisterCallback(RTSPSourceCallBack cb) {
-
+    public void unrigisterCallback(RTSPSourceCallBack cb) {
         synchronized (sCallbacks) {
             sCallbacks.clear();
 //            int idx = sCallbacks.indexOfValue(cb);

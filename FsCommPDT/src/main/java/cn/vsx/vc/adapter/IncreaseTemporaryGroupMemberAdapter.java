@@ -25,6 +25,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -166,6 +167,8 @@ public class IncreaseTemporaryGroupMemberAdapter extends RecyclerView.Adapter<Re
                 }
             }
         }
+        Member member = (Member) DataUtil.getMemberByMemberNo(memberNo).clone();
+        addMembers.add(member);
         listener.onItemClick(null,-1,TYPE_USER);
         notifyDataSetChanged();
     }

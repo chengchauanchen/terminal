@@ -30,7 +30,6 @@ public class TransparentActivity extends BaseActivity{
 
     @Override
     public void initView(){
-        ActivityCollector.addActivity(this, getClass());
         Window window = getWindow();
         //放在左上角
         window.setGravity(Gravity.START | Gravity.TOP);
@@ -66,7 +65,6 @@ public class TransparentActivity extends BaseActivity{
     
     @Override
     public void doOtherDestroy(){
-        ActivityCollector.removeActivity(this);
         if(openLockReceiver != null){
             unregisterReceiver(openLockReceiver);
         }

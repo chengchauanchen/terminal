@@ -143,6 +143,7 @@ public class UVCCameraService extends Service{
                     //					camera.setPreviewTexture(camera.getSurfaceTexture());
                     mUVCCamera = camera;
                     liveData.postValue(camera);
+                    logger.info("DevicesOnConnect:");
                     logger.info("支持的分辨率:" + mUVCCamera.getSupportedSize());
                     ToastUtil.showToast(UVCCameraService.this,"外置摄像头已连接");
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUVCCameraConnectChangeHandler.class,true);

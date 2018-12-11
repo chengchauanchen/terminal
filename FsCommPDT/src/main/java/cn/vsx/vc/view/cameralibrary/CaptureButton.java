@@ -307,7 +307,7 @@ public class CaptureButton extends View{
             if (recorded_time < min_duration){
                 captureLisenter.recordShort(recorded_time);//回调录制时间过短
             }else{
-                captureLisenter.recordEnd(recorded_time,true);  //回调录制结束
+                captureLisenter.recordEnd(recorded_time,false);  //回调录制结束
             }
         }
     }

@@ -192,11 +192,11 @@ public class ChangeGroupView extends FrameLayout{
 				TextView tv = getTextView(currentDataIndex-dataIndexSubtractionViewIndex-textViewList.size()/2+i);
 //				tv.setText(getSeqData(currentDataIndex-textViewList.size()/2+i).toString());
 				if(i == 2){
-					tv.setTextColor(Color.parseColor("#0090ff"));
-					tv.setBackground(getResources().getDrawable(R.drawable.change_group_circle_shape_middle));
+//					tv.setTextColor(Color.parseColor("#0090ff"));
+					tv.setBackgroundResource(R.drawable.change_group_circle_shape_middle);
 				}else{
-					tv.setTextColor(Color.WHITE);
-					tv.setBackground(getResources().getDrawable(R.drawable.change_group_circle_shape));
+//					tv.setTextColor(Color.WHITE);
+					tv.setBackgroundResource(R.drawable.change_group_circle_shape);
 				}
 			}
 		}

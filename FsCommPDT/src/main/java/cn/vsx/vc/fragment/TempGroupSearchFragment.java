@@ -2,6 +2,7 @@ package cn.vsx.vc.fragment;
 
 import android.annotation.SuppressLint;
 import android.os.Handler;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -60,8 +62,8 @@ public class TempGroupSearchFragment extends BaseFragment{
     LinearLayout iv_goback_contacts;
     @Bind(R.id.iv_delete_edittext)
     LinearLayout iv_delete_edittext;
-//    @Bind(R.id.btn_search_allcontacts)
-//    Button btn_search_allcontacts;
+    @Bind(R.id.btn_search_allcontacts)
+    Button btn_search_allcontacts;
     @Bind(R.id.tv_search_nothing)
     TextView tv_search_nothing;
     @Bind(R.id.rl_search_result)
@@ -124,6 +126,9 @@ public class TempGroupSearchFragment extends BaseFragment{
         tempGroupSearchAdapter = new TempGroupSearchAdapter(context, searchMemberListExceptMe,-1);
         tempGroupSearchAdapter.setInterGroup(isInterGroup);
         lv_search_allcontacts.setAdapter(tempGroupSearchAdapter);
+        btn_search_allcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
+        btn_search_allcontacts.setTextColor(ContextCompat.getColor(getContext(),R.color.search_button_text_color1));
+        btn_search_allcontacts.setEnabled(false);
     }
 
     @Override
@@ -143,7 +148,7 @@ public class TempGroupSearchFragment extends BaseFragment{
         });
         iv_goback_contacts.setOnClickListener(new OnClickListenerImpGoBackContactsList());
         iv_delete_edittext.setOnClickListener(new OnClickListenerImpDeleteEditText());
-//        btn_search_allcontacts.setOnClickListener(new OnClickListenerImpSearchContats());
+        btn_search_allcontacts.setOnClickListener(new OnClickListenerImpSearchContats());
         lv_search_allcontacts.setOnScrollListener(new OnScrollListenerImpSearchList());
         et_search_allcontacts.addTextChangedListener(new TextWatcherImpSearch());
         et_search_allcontacts.setOnEditorActionListener(new TextView.OnEditorActionListener() {
@@ -381,18 +386,27 @@ public class TempGroupSearchFragment extends BaseFragment{
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             if (s.toString().contains(" ")) {
                 String[] str = s.toString().split(" ");
-                String str1 = "";
+                StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < str.length; i++) {
-                    str1 += str[i];
+                    sb.append(str[i]);
                 }
-                et_search_allcontacts.setText(str1);
+
+                et_search_allcontacts.setText(sb.toString());
 
                 et_search_allcontacts.setSelection(start);
 
-            }else if ( s.length() > 0 && !DataUtil.isLegalSearch(s)) {
-                ToastUtil.showToast(context, "搜索的内容不合法！");
             }
-            tv_search_nothing.setText("搜索联系人");
+            if(TextUtils.isEmpty(s.toString())){
+                iv_delete_edittext.setVisibility(View.INVISIBLE);
+                btn_search_allcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
+                btn_search_allcontacts.setTextColor(ContextCompat.getColor(getContext(),R.color.search_button_text_color1));
+                btn_search_allcontacts.setEnabled(false);
+            }else {
+                iv_delete_edittext.setVisibility(View.VISIBLE);
+                btn_search_allcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape2);
+                btn_search_allcontacts.setTextColor(ContextCompat.getColor(getContext(),R.color.white));
+                btn_search_allcontacts.setEnabled(true);
+            }
         }
 
         @Override

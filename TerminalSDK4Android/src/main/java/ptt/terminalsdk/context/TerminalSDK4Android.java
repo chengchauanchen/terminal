@@ -26,7 +26,6 @@ import android.widget.TextView;
 import org.apache.log4j.Level;
 import org.ddpush.im.client.v1.ServerConnectionEstablishedHandler;
 import org.ddpush.im.util.StringUtil;
-import org.easydarwin.push.EasyPusher;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -698,25 +697,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 	};
 
-	public String getLivePushKEY(){
-		//默认为手机设备的key
-//		String KEY = "6A36334A743536526D3430416B4941367858394938504A6A626935365A574E305A574D7563485230567778576F4E6A7734456468646D6C754A6B4A68596D397A595541794D4445325257467A65555268636E6470626C526C5957316C59584E35";
-//		try {
-//			PackageManager pManager=application.getPackageManager();
-//			PackageInfo info = pManager.getPackageInfo(application.getPackageName(), 0);
-//			String packageName = info.packageName;
-//			logger.info("packageName----->"+packageName);
-//			if ("cn.zectec.ptt".equals(packageName)){
-//				KEY = "6A36334A743536526D3430416B4941367858394938504A6A626935365A574E305A574D7563485230567778576F4E6A7734456468646D6C754A6B4A68596D397A595541794D4445325257467A65555268636E6470626C526C5957316C59584E35";
-//			}else if("cn.zectec.icentroview".equals(packageName)){
-//				KEY = "6A36334A743536526D3432416A633941767A424C634F356A4C6E706C6447566A4C6D6C6A5A573530636E5A705A56634D56714459384F424859585A7062695A4359574A76633246414D6A41784E6B566863336C4559584A33615735555A5746745A57467A65513D3D";
-//			}
-//		} catch (PackageManager.NameNotFoundException e) {
-//			e.printStackTrace();
-//		}
-		return EasyPusher.PUSHKEY;
-//		return KEY;
-	}
 
 
 //	@Override
@@ -728,7 +708,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 	@Override
 	public void setAPKUpdateAddress(String identifyPath) {
-		String updatePath = identifyPath.replace("/register/private/identify", "/u/version.xml");
+		String updatePath = identifyPath.replace("/register/private/identify", "/apk/version.xml");
 		TerminalFactory.getSDK().putParam(Params.UPDATE_URL, updatePath);
 	}
 

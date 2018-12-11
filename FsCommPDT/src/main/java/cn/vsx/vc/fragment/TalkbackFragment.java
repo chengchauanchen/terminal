@@ -75,7 +75,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.BaseActivity;
-import cn.vsx.vc.activity.DeleteTemporaryGroupMemberActivity;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.GroupMemberActivity;
 import cn.vsx.vc.activity.NewMainActivity;
@@ -384,8 +383,7 @@ public class TalkbackFragment extends BaseFragment {
                 myHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTING
-                                || MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING) {
+                        if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTING || MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING) {
                             change2Waiting();
                         } else if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
                             //什么都不用做
@@ -877,7 +875,7 @@ public class TalkbackFragment extends BaseFragment {
     private ReceivePTTUpHandler receivePTTUpHandler = new ReceivePTTUpHandler() {
         @Override
         public void handler() {
-            logger.info("ppt.触发了receivePTTDownHandler");
+            logger.info("ppt.触发了ReceivePTTUpHandler");
             myHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -1195,20 +1193,10 @@ public class TalkbackFragment extends BaseFragment {
             @Override
             public void onClick(View view) {
                 if (DataUtil.isExistGroup(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0))) {
-                    if(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).id==-1){//临时组
-                        Intent intent= new Intent(MyApplication.instance, DeleteTemporaryGroupMemberActivity.class);
-                        intent.putExtra("groupId", DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).id);
-                        intent.putExtra("groupName", DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
-                        intent.putExtra("isTemporaryGroup",true);
-                        startActivity(intent);
-                    }else {
-                        Intent intent = new Intent(MyApplication.instance, GroupMemberActivity.class);
-                        intent.putExtra("groupId", DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).id);
-                        intent.putExtra("groupName", DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
-                        intent.putExtra("isTemporaryGroup",true);
-                        startActivity(intent);
-                    }
-
+                    Intent intent = new Intent(MyApplication.instance, GroupMemberActivity.class);
+                    intent.putExtra("groupId", MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
+                    intent.putExtra("groupName", DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
+                    startActivity(intent);
                 } else {
                     ToastUtil.showToast(context, "未知错误,成员不在该组中！");
                 }
@@ -1541,7 +1529,8 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTUpHandler);
 
         try {
-            MyApplication.instance.unregisterReceiver(mBatInfoReceiver);
+            getContext().unregisterReceiver(mBatInfoReceiver);
+            getActivity().unregisterReceiver(mbtBroadcastReceiver);
         } catch (Exception e) {
             e.printStackTrace();
         }

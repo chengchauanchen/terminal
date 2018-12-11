@@ -712,6 +712,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                                         myHandler.post(new Runnable() {
                                             @Override
                                             public void run() {
+                                                isCheckFinished = false;
                                                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "连通失败，请输入正确的IP和端口号");
                                             }
                                         });
@@ -887,7 +888,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     private void initDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(RegistActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("网络没有连接，是否打开网络？");
         builder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
             @Override
@@ -1151,11 +1152,11 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private void sendUuid(final String ip, final String port) {
         reAuthCount++;
         if (reAuthCount > 3) {
-            changeProgressMsg("登录失败");
+            changeProgressMsg("登录失败，请检查网络是否连接");
             myHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    finish();
+                    exit();
                 }
             }, 500);
         } else {
@@ -1404,7 +1405,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, "");
             MyTerminalFactory.getSDK().putParam(UrlParams.SEX, "");
             MyTerminalFactory.getSDK().putParam(UrlParams.EMAIL, "");
-            MyTerminalFactory.getSDK().putParam(UrlParams.AVATAR_URL, "");
+//            MyTerminalFactory.getSDK().putParam(UrlParams.AVATAR_URL, "");
             MyTerminalFactory.getSDK().putParam(UrlParams.COMPANY, "");
             MyTerminalFactory.getSDK().putParam(UrlParams.POSITION, "");
             MyTerminalFactory.getSDK().putParam(UrlParams.ROLE_CODE, "");

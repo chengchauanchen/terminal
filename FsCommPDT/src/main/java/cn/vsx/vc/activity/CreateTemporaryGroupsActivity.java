@@ -1,10 +1,11 @@
 package cn.vsx.vc.activity;
 
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
+import android.support.v4.widget.TextViewCompat;
+import android.text.TextUtils;
 import android.view.Display;
 import android.view.View;
 import android.view.Window;
@@ -12,10 +13,10 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bigkoo.pickerview.OptionsPickerView;
-import com.zectec.imageandfileselector.view.CheckBox;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,19 +49,30 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
     @Bind(R.id.create_temporary_group_name)
     EditText create_temporary_group_name;
-    @Bind(R.id.checkbox_yes)
-    CheckBox checkbox_yes;
-    @Bind(R.id.checkbox_no)
-    CheckBox checkbox_no;
+    @Bind(R.id.iv_locked)
+    ImageView ivLocked;
+    @Bind(R.id.iv_unlocked)
+    ImageView ivUnlocked;
     @Bind(R.id.btn_create_temporary_group)
     Button btn_create_temporary_group;
-    @Bind(R.id.to_create_temporary_groups)
-    CheckBox to_create_temporary_groups;
+    @Bind(R.id.iv_change)
+    ImageView iv_change;
+    @Bind(R.id.iv_unchange)
+    ImageView iv_unchange;
     @Bind(R.id.exist_time)
     TextView exist_time;
     @Bind(R.id.locked_time)
     TextView locked_time;
-
+    @Bind(R.id.ll_lock_time)
+    LinearLayout ll_lock_time;
+    @Bind(R.id.tv_locked)
+    TextView tv_locked;
+    @Bind(R.id.tv_unlocked)
+    TextView tv_unlocked;
+    @Bind(R.id.tv_change)
+    TextView tv_change;
+    @Bind(R.id.tv_unchange)
+    TextView tv_unchange;
 
     private Handler myHandler = new Handler();
     private ArrayList<Integer> list;
@@ -72,7 +84,6 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     private AlertDialog alertDialog;
     private boolean forceSwitchGroup;
     private TimerTask timerTaskLock;
-    private ActivityManager manager;
     private List<Integer> signs;
 
     @Override
@@ -86,7 +97,11 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         right_btn.setVisibility(View.GONE);
         left_btn.setVisibility(View.GONE);
         ok_btn.setVisibility(View.GONE);
-        to_create_temporary_groups.setChecked(true,false);
+        iv_change.setSelected(true);
+        iv_unchange.setSelected(false);
+        ivLocked.setSelected(false);
+        ivUnlocked.setSelected(true);
+        ll_lock_time.setVisibility(View.GONE);
         initOptionsPickerViewA();
         initOptionsPickerViewB();
     }
@@ -121,7 +136,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                 .setLinkage(false)//设置是否联动，默认 true
                 .isCenterLabel(false) //是否只显示中间选中项的 label 文字，false 则每项 item 全部都带有 label。
                 .setCyclic(false, false, false)//循环与否
-                .setSelectOptions(0, 2, 0)  //设置默认选中项
+                .setSelectOptions(23, 59, 59)  //设置默认选中项
                 .setOutSideCancelable(false)//点击外部 dismiss default true
                 .isDialog(false)//是否显示为对话框样式
                 .build();
@@ -160,7 +175,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                 .setLinkage(false)//设置是否联动，默认 true
                 .isCenterLabel(false) //是否只显示中间选中项的 label 文字，false 则每项 item 全部都带有 label。
                 .setCyclic(false, false, false)//循环与否
-                .setSelectOptions(0, 0, 0)  //设置默认选中项
+                .setSelectOptions(0, 10, 0)  //设置默认选中项
                 .setOutSideCancelable(false)//点击外部 dismiss default true
                 .isDialog(false)//是否显示为对话框样式
                 .build();
@@ -176,45 +191,99 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
         //创建临时组
         news_bar_back.setOnClickListener(this);
-        checkbox_yes.setOnClickListener(new View.OnClickListener() {
+        ivLocked.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View v) {
-                if (checkbox_yes.isChecked()) {
-                    checkbox_yes.setChecked(false, false);
-                    checkbox_no.setChecked(true, false);
+            public void onClick(View v){
+                if (ivLocked.isSelected()) {
+                    ivLocked.setSelected(false);
+                    ivUnlocked.setSelected(true);
+                    ll_lock_time.setVisibility(View.GONE);
+                    TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_unchecked);
+                    TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_checked);
                 } else {
-                    checkbox_yes.setChecked(true, false);
-                    checkbox_no.setChecked(false, false);
-                    to_create_temporary_groups.setChecked(true,false);
+                    TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
+                    TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
+                    TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
+                    TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
+                    ivLocked.setSelected(true);
+                    ivUnlocked.setSelected(false);
+                    iv_change.setSelected(true);
+                    iv_unchange.setSelected(false);
+                    ll_lock_time.setVisibility(View.VISIBLE);
                 }
             }
         });
-        checkbox_no.setOnClickListener(new View.OnClickListener() {
+        ivUnlocked.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View v) {
-                if (checkbox_no.isChecked()) {
-                    checkbox_no.setChecked(false, false);
-                    checkbox_yes.setChecked(true, false);
+            public void onClick(View v){
+                if (ivUnlocked.isSelected()) {
+                    ivUnlocked.setSelected(false);
+                    ivLocked.setSelected(true);
+                    iv_change.setSelected(true);
+                    iv_unchange.setSelected(false);
+                    ll_lock_time.setVisibility(View.VISIBLE);
+                    TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
+                    TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
+                    TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
+                    TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
                 } else {
-                    checkbox_no.setChecked(true, false);
-                    checkbox_yes.setChecked(false, false);
+                    ivUnlocked.setSelected(true);
+                    ivLocked.setSelected(false);
+                    ll_lock_time.setVisibility(View.GONE);
+                    TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_unchecked);
+                    TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_checked);
                 }
             }
         });
-        to_create_temporary_groups.setOnClickListener(new View.OnClickListener() {
+        iv_change.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View v) {
-                if (to_create_temporary_groups.isChecked()) {
-                    to_create_temporary_groups.setChecked(false, false);
-                    if(checkbox_yes.isChecked()){
-                        checkbox_yes.setChecked(false,false);
-                        checkbox_no.setChecked(true,false);
+            public void onClick(View v){
+                if(iv_change.isSelected()){
+                    if(ivLocked.isSelected()){
+                        ivLocked.setSelected(true);
+                        ivUnlocked.setSelected(false);
+                        iv_change.setSelected(true);
+                        iv_unchange.setSelected(false);
+                        TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
+                        TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
+                        TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
+                        TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
+                    }else {
+                        iv_change.setSelected(false);
+                        iv_unchange.setSelected(true);
+                        TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_unchecked);
+                        TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_checked);
                     }
-                } else {
-                    to_create_temporary_groups.setChecked(true, false);
+                }else {
+                    iv_change.setSelected(true);
+                    iv_unchange.setSelected(false);
+                    TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
+                    TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
                 }
             }
         });
+
+        iv_unchange.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                if(iv_change.isSelected()){
+                    if(ivLocked.isSelected()){
+                        ivLocked.setSelected(true);
+                        ivUnlocked.setSelected(false);
+                        iv_change.setSelected(true);
+                        iv_unchange.setSelected(false);
+                        ToastUtil.showToast(CreateTemporaryGroupsActivity.this,"锁定状态下自动将组员切换到所创建的临时组");
+                    }else {
+                        iv_change.setSelected(false);
+                        iv_unchange.setSelected(true);
+                    }
+                }else {
+                    iv_change.setSelected(true);
+                    iv_unchange.setSelected(false);
+                }
+            }
+        });
+
         btn_create_temporary_group.setOnClickListener(new OnClickListenerImplementation());
 
         exist_time.setOnClickListener(new View.OnClickListener() {
@@ -236,7 +305,6 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     @Override
     public void initData() {
 
-        manager = (ActivityManager)getSystemService(ACTIVITY_SERVICE);
         list = getIntent().getIntegerArrayListExtra("list");
         logger.info("创建临时组成员列表："+list.toString());
         int index1=0;
@@ -272,11 +340,12 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         //从1开始判断
         int sign = getSign(1);
         int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0);
-        create_temporary_group_name.setText("临时组"+ sign +"-"+String.valueOf(memberId).substring(4));
-        exist_time.setText("0时10分0秒");
-        locked_time.setText("0时0分0秒");
-        checkbox_no.setChecked(true,false);
-        checkbox_yes.setChecked(false,false);
+        String s = String.valueOf(memberId);
+        create_temporary_group_name.setText("临时组"+ sign +"-"+s.substring(s.length()-4));
+        exist_time.setText("23时59分59秒");
+        locked_time.setText("0时10分0秒");
+        ivUnlocked.setSelected(true);
+        ivLocked.setSelected(false);
     }
 
     //获取临时组名字里的编号
@@ -334,11 +403,11 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         }
     }
 
-    private int existHour = 0;
-    private int existMin = 10;//默认时间最低两分钟
-    private int existSec = 0;
+    private int existHour = 23;
+    private int existMin = 59;
+    private int existSec = 59;//默认存活时间23小时59分59秒
     private int lockedHour = 0;
-    private int lockedMin = 0;
+    private int lockedMin = 10;//默认锁定时间10分钟
     private int lockedSec = 0;
 
 
@@ -350,9 +419,9 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
             final String temporaryGroupsName = create_temporary_group_name.getText().toString().trim();
             final long existTime = existHour * 3600  + existMin * 60  +existSec ;
             final long lockedTime = lockedHour * 3600  + lockedMin * 60 +lockedSec;
-            forceSwitchGroup = to_create_temporary_groups.isChecked();
-
-            if(temporaryGroupsName.equals("")||temporaryGroupsName==null){
+            forceSwitchGroup = iv_change.isSelected();
+            final boolean finalIslock = ivLocked.isSelected();
+            if(TextUtils.isEmpty(temporaryGroupsName)){
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(),"临时组名称不可为空");
                 return;
             }
@@ -368,11 +437,11 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(),"锁定时间不能大于23时59分59秒");
                 return;
             }
-            if(lockedTime>existTime){
+            if(finalIslock && lockedTime>existTime){
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(),"锁定时间不能大于存活时间");
                 return;
             }
-            if(!StringUtil.isValidTempGroupName(temporaryGroupsName)){
+            if(StringUtil.isEmoji(temporaryGroupsName)){
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入合法的临时组名称");
                 return;
             }
@@ -400,7 +469,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                 toJump.setVisibility(View.INVISIBLE);
             }
 
-            final boolean finalIslock = checkbox_yes.isChecked();
+
             logger.error("创建临时组：" + "forceSwitchGroup" + forceSwitchGroup + ",temporaryGroupsName" + temporaryGroupsName + ",pushMemberList" + list.toString() + ",existTime" + existTime + ",islock" + finalIslock + ",lockedTime" + lockedTime);
             //延时创建临时组
             if (timerTaskLock != null) {

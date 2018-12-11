@@ -7,7 +7,7 @@ android {
     defaultConfig {
         applicationId "cn.vsx.vc"
         minSdkVersion 19
-        targetSdkVersion 19
+        targetSdkVersion 26
 
         multiDexEnabled true
 
@@ -63,6 +63,8 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
+
+
     dexOptions {
 //        incremental true
         javaMaxHeapSize "4g"
@@ -83,7 +85,7 @@ dependencies {
     compile 'com.android.support:multidex:1.0.3'
     //noinspection GradleCompatible
     compile 'com.android.support:support-v4:25.3.0'
-//    //noinspection GradleCompatible
+    //noinspection GradleCompatible
     compile 'com.android.support:appcompat-v7:25.3.0'
     compile 'com.github.liuguangqiang.swipeback:library:1.0.2@aar'
     //noinspection GradleCompatible
@@ -98,9 +100,7 @@ dependencies {
     compile 'skin.support:skin-support:2.2.3'
     // skin-support 基础控件支持
     compile 'skin.support:skin-support-design:2.2.3'
-    //时间选择器
-    compile 'com.contrarywind:Android-PickerView:3.2.7'
-
+    // skin-support-design material design 控件支持[可选]
     implementation 'android.arch.lifecycle:runtime:1.0.3'
     implementation 'android.arch.lifecycle:extensions:1.0.0'
     implementation 'android.arch.lifecycle:reactivestreams:1.0.0'
@@ -111,13 +111,10 @@ dependencies {
         exclude module: 'support-v4'
         exclude module: 'appcompat-v7'
     }
+    //时间选择器
+    compile 'com.contrarywind:Android-PickerView:3.2.7'
+    implementation files('libs/HyteraSDK2.0.jar')
 }
-
-
-
-
-
-
 
 
 

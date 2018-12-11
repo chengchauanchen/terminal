@@ -335,7 +335,9 @@ public class UserInfoActivity extends BaseActivity {
             myHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    userPhone.setText(MyTerminalFactory.getSDK().getParam(Params.PHONE_NO, ""));
+                    if(null != userPhone){
+                        userPhone.setText(MyTerminalFactory.getSDK().getParam(Params.PHONE_NO, ""));
+                    }
                 }
             });
         }

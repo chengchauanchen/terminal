@@ -161,6 +161,7 @@
     <color name="exit_btn">#ff4a4a</color>
     <color name="divider">#bfbfbf</color>
     <color name="TRANSPARENT">#00000000</color>
+    <color name="translucent">#7f000000</color>
     <color name="light_blue">#EE000000</color><!--刷新背景色 -->
 
 
@@ -510,7 +511,6 @@
     <color name="progress_bar_color">#42CC8A</color>
     
     <color name="camera_text">#6ffaca</color>
-    
     <!--ble-->
     <color name="ble_bg">#0d182b</color>
     <color name="ble_usable_bg">#0d182b</color>
@@ -523,4 +523,14 @@
     <color name="open_ble_tv">#ffffff</color>
     <color name="ble_line">#000000</color>
     <color name="close_ble">#95CAFF</color>
+    
+    <!--临时组-->
+    <color name="edittext_bg">#0d182b</color>
+    <color name="textview_color">#637e9e</color>
+    <color name="edittext_textcolor">#34B4FF</color>
+    <color name="textview_describe">#FFE4B5</color>
+    <color name="temp_group_bg">#0d182b</color>
+    <color name="confirm_create">#cc0091ff</color>
+    <color name="textview_checked">#34B4FF</color>
+    <color name="textview_unchecked">#637e9e</color>
 </resources>

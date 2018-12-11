@@ -399,7 +399,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
             }
         }
         mQueue.clear();
-        mClient = null;
+//        mClient = null;
         mNewestStample = 0;
     }
 
@@ -751,6 +751,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                                         previewStampUs = info.presentationTimeUs;
 
                                         if (true && Build.VERSION.SDK_INT >= 21) {
+                                            Log.d(TAG, String.format("releaseoutputbuffer:%d,stampUs:%d", index, previewStampUs));
                                             mCodec.releaseOutputBuffer(index, previewStampUs);
                                         } else {
                                             if (newSleepUs < 0) {
@@ -812,7 +813,6 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
         format.setInteger(MediaFormat.KEY_FRAME_RATE, 0);
 //        format.setInteger(MediaFormat.KEY_BIT_RATE, mWidth*mHeight*0.7*2);
         mObject.addTrack(format, true);
-
         format = new MediaFormat();
         int audioObjectType = 2;
         int sampleRateIndex = getSampleIndex(mMediaInfo.sample);

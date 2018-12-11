@@ -1,10 +1,13 @@
 package cn.vsx.vc.activity;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.HeaderViewListAdapter;
@@ -16,10 +19,12 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.TimerTask;
 
 import butterknife.Bind;
 import butterknife.OnClick;
 import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupCurrentOnlineMemberListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseAddMemberToTempGroupMessageHandler;
@@ -27,7 +32,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRemoveMemberToTe
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupMemberAdapter;
-import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.fragment.PersonSearchFragment;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -81,9 +85,9 @@ public class GroupMemberActivity extends BaseActivity {
     private int screenWidth;
     private int groupId;
     String groupName;
-    private boolean isTemporaryGroup;
     private int total=0;
-
+    private boolean canAdd;//只有自己创建的临时组才能添加和删除人
+    private boolean isTemporaryGroup;
     public void setListViewHeightBasedOnChildren(ListView listView) {
         if (listView == null)
             return;
@@ -150,15 +154,24 @@ public class GroupMemberActivity extends BaseActivity {
     public void initData() {
         groupId = getIntent().getIntExtra("groupId", 0);
         groupName = getIntent().getStringExtra("groupName");
-        isTemporaryGroup = DataUtil.getGroupByGroupNo(groupId).getDepartmentId() == -1;
+        Group group = DataUtil.getGroupByGroupNo(groupId);
+        isTemporaryGroup = group.getDepartmentId() == -1;
+        //只有自己创建的临时组才能添加和删除人
+        if(group.getCreatedMemberNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,-1) && isTemporaryGroup){
+            canAdd = true;
+        }
         rightBtn.setVisibility(View.GONE);
         ok_btn.setVisibility(View.GONE);
-
+        logger.info( "是否为我创建的临时组:" + canAdd+"-----groupNo："+groupId);
         if(isTemporaryGroup){
             in_title_bar.setVisibility(View.GONE);
             temp_title_bar.setVisibility(View.VISIBLE);
             rightBtn.setVisibility(View.GONE);
             ok_btn.setVisibility(View.GONE);
+            if(!canAdd){
+                add_btn.setVisibility(View.GONE);
+                delete_btn.setVisibility(View.GONE);
+            }
         }else {
             in_title_bar.setVisibility(View.VISIBLE);
             temp_title_bar.setVisibility(View.GONE);
@@ -236,9 +249,51 @@ public class GroupMemberActivity extends BaseActivity {
                 break;
             case R.id.delete_text:
                 if(MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size()<2){//当前组仅剩创建者本身的时候点击删除销临时组
-                    MyTerminalFactory.getSDK().getTempGroupManager().destroyTempGroup4PC(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0));
-                    ToastUtil.showToast(getApplicationContext(),"临时组已销毁");
-                    finish();
+
+                    final AlertDialog alertDialog = new AlertDialog.Builder(GroupMemberActivity.this).create();
+                    alertDialog.show();
+                    Display display = getWindowManager().getDefaultDisplay();
+                    int heigth = display.getWidth();
+                    int width = display.getHeight();
+                    Window window = alertDialog.getWindow();
+                    WindowManager.LayoutParams layoutParams = window.getAttributes();
+                    layoutParams.width=width/2;
+                    layoutParams.height=heigth/2;
+                    window.setAttributes(layoutParams);
+                    window.setContentView(R.layout.dialog_delete_temporary_group);
+                    final LinearLayout ll_select = window.findViewById(R.id.ll_select);
+                    final LinearLayout  ll_success = window.findViewById(R.id.ll_success);
+                    Button btn_confirm = window.findViewById(R.id.btn_confirm);
+                    btn_confirm.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            myHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    ll_success.setVisibility(View.VISIBLE);
+                                    ll_select.setVisibility(View.GONE);
+                                    MyTerminalFactory.getSDK().getTempGroupManager().destroyTempGroup4PC(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0));
+                                    TimerTask task =new TimerTask() {
+                                        @Override
+                                        public void run() {
+                                            alertDialog.dismiss();
+                                            finish();
+                                        }
+                                    };
+                                    MyTerminalFactory.getSDK().getTimer().schedule(task,1000);
+
+                                }
+                            });
+
+                        }
+                    });
+                    Button btn_cancel = window.findViewById(R.id.btn_cancel);
+                    btn_cancel.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            alertDialog.dismiss();
+                        }
+                    });
                 }else {
                     List<Member> deleteMemberList = sortAdapter.getDeleteMemberList();
                     MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0),MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),deleteMemberList);
@@ -270,7 +325,7 @@ public class GroupMemberActivity extends BaseActivity {
      **/
     private ReceiveGetGroupCurrentOnlineMemberListHandler mReceiveGetGroupCurrentOnlineMemberListHandler = new ReceiveGetGroupCurrentOnlineMemberListHandler() {
         @Override
-        public void handler(final List<Member> memberList,String type) {
+        public void handler(final List<Member> memberList,boolean isAllMember,int groupId) {
             myHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -318,7 +373,7 @@ public class GroupMemberActivity extends BaseActivity {
         @Override
         public void handler(int methodResult, String resultDesc, int tempGroupNo){
             if(methodResult == BaseCommonCode.SUCCESS_CODE){
-                if(tempGroupNo == groupId){
+                if(tempGroupNo == groupId && canAdd){
                     myHandler.postDelayed(new Runnable(){
                         @Override
                         public void run(){
@@ -336,16 +391,14 @@ public class GroupMemberActivity extends BaseActivity {
         @Override
         public void handler(int methodResult, String resultDesc, int tempGroupNo){
             if(methodResult == BaseCommonCode.SUCCESS_CODE){
-                if(tempGroupNo == groupId){
-                    if(isTemporaryGroup){
-                        myHandler.postDelayed(new Runnable(){
-                            @Override
-                            public void run(){
-                                MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
-                                ToastUtil.showToast(GroupMemberActivity.this,"添加成功");
-                            }
-                        },2000);
-                    }
+                if(tempGroupNo == groupId && canAdd){
+                    myHandler.postDelayed(new Runnable(){
+                        @Override
+                        public void run(){
+                            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
+                            ToastUtil.showToast(GroupMemberActivity.this,"添加成功");
+                        }
+                    },2000);
                 }
             }
         }

@@ -160,11 +160,13 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
         //titlebar初始化
         if(type ==CREATE_TEMP_GROUP){
             barTitle.setText("创建临时组");
+            okBtn.setText("下一步");
         }else if(type ==INCREASE_MEMBER){
             barTitle.setText("添加组员");
+            okBtn.setText("确定");
         }
         rightBtn.setVisibility(View.GONE);
-        okBtn.setText("下一步");
+
     }
 
     @Override
@@ -201,11 +203,19 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
                 } else if(type == Constants.TYPE_USER){
 
                     if(!mIncreaseTemporaryGroupMemberAdapter.getSelectMember().isEmpty()){
-                        okBtn.setText("下一步(" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember().size() + ")");
+                        if(type ==CREATE_TEMP_GROUP){
+                            okBtn.setText("下一步(" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember().size() + ")");
+                        }else {
+                            okBtn.setText("确定(" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember().size() + ")");
+                        }
                         okBtn.setBackgroundResource(R.drawable.live_theme_confirm_bg);
                         ll_select_member.setVisibility(View.VISIBLE);
                     }else {
-                        okBtn.setText("下一步");
+                        if(type ==CREATE_TEMP_GROUP){
+                            okBtn.setText("下一步");
+                        }else {
+                            okBtn.setText("确定");
+                        }
                         okBtn.setBackgroundResource(R.drawable.live_theme_confirm_bg);
                         ll_select_member.setVisibility(View.GONE);
                     }

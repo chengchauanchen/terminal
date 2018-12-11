@@ -86,6 +86,13 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 //        db.close();
     }
 
+    @Override
+    public void deleteMessageFromSQLite(long message_id){
+        SQLiteDatabase db = helper.getWritableDatabase();
+        String sql = "DELETE FROM terminalMessage WHERE message_id = ?";
+        db.execSQL(sql, new String[]{""+message_id});
+    }
+
     public synchronized void deleteMessageFromSQLite(int messageCategory, int targetId, int memberId) {
         SQLiteDatabase db = helper.getWritableDatabase();
         if (messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {

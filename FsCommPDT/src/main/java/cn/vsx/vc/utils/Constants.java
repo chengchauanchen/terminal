@@ -10,12 +10,15 @@ package cn.vsx.vc.utils;
 
 public class Constants{
 
-    public static final String PLAYKEY = "79393674363536526D3432414D7435517279476D63505A6A6269353263336775646D4E584446616732504467523246326157346D516D466962334E68514449774D545A4659584E355247467964326C75564756686257566863336B3D";
+
     public static final String MEMBER_DATA="member_data";
     public static final String CATALOG_DATA="catalog_data";
     public static final String GROUP_DATA="group_data";
     public static final String GROUP_CATALOG_DATA="group_catalog_data";
-
+    public static final String LAWRECODER = "rtsp://192.168.0.100/live";
+//    public static final String LAWRECODER = "rtsp://192.168.1.100:10555/10000220_2428640747588420616.sdp";
+    //测试url
+//    public static final String LAWRECODER = "rtsp://184.72.239.149/vod/mp4://BigBuckBunny_175k.mov";
 //    public final static int TYPE_TEMP_FOLDER = 98;
 
     public final static int TYPE_TEMP_TITLE = 98;

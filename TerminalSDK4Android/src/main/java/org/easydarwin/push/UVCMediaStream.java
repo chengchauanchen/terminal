@@ -188,7 +188,7 @@ public class UVCMediaStream{
         cameraOpen = true;
         mSWCodec = PreferenceManager.getDefaultSharedPreferences(mApplicationContext).getBoolean("key-sw-codec", false);
 
-        ArrayList<CodecInfo> infos = listEncoders("video/avc");
+        ArrayList<UVCMediaStream.CodecInfo> infos = listEncoders("video/avc");
         if(infos.isEmpty())
             mSWCodec = true;
         if(mSWCodec){
