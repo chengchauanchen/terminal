@@ -19,8 +19,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import cn.vsx.hamster.common.CallMode;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
+import ptt.terminalsdk.context.MyTerminalFactory;
+
 public class AudioStream{
-    private static AudioStream _this;
     EasyMuxer muxer;
     private int samplingRate = 8000;
     private int bitRate = 16000;
@@ -36,6 +40,7 @@ public class AudioStream{
     protected MediaCodec.BufferInfo mBufferInfo = new MediaCodec.BufferInfo();
     protected ByteBuffer[] mBuffers = null;
     Set<Pusher> sets = new HashSet<>();
+    private boolean groupCalling = false;//是否正在组呼
     /**
      * There are 13 supported frequencies by ADTS.
      **/
@@ -60,6 +65,8 @@ public class AudioStream{
     private MediaFormat newFormat;
 
     public AudioStream() {
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         int i = 0;
         for (; i < AUDIO_SAMPLING_RATES.length; i++) {
             if (AUDIO_SAMPLING_RATES[i] == samplingRate) {
@@ -68,6 +75,25 @@ public class AudioStream{
             }
         }
     }
+
+    /**
+     * 被动方组呼来了
+     */
+    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
+        @Override
+        public void handler(final int memberId, final String memberName, final int groupId,
+                            String version, CallMode currentCallMode) {
+            groupCalling = true;
+        }
+    };
+
+    //组呼停止
+    private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler() {
+        @Override
+        public void handler(int reasonCode) {
+            groupCalling = false;
+        }
+    };
 
     public void addPusher(Pusher pusher){
         boolean shouldStart =false;
@@ -189,10 +215,10 @@ public class AudioStream{
         this.muxer = muxer;
     }
 
-    public static synchronized AudioStream getInstance() {
-        if (_this == null) _this = new AudioStream();
-        return _this;
-    }
+//    public static synchronized AudioStream getInstance() {
+//        if (_this == null) _this = new AudioStream();
+//        return _this;
+//    }
 
     private class WriterThread extends Thread{
 
@@ -236,7 +262,9 @@ public class AudioStream{
                     Iterator<Pusher> it = p.iterator();
                     while (it.hasNext()){
                         Pusher ps = it.next();
-                        ps.push(mBuffer.array(), 0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000, 0);
+                        if(!groupCalling){
+                            ps.push(mBuffer.array(), 0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000, 0);
+                        }
                     }
 
                     mMediaCodec.releaseOutputBuffer(index, false);
@@ -270,6 +298,8 @@ public class AudioStream{
 
     private void stop() {
         logger.info("audioStream---stop");
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         try {
             Thread t = mThread;
             mThread = null;

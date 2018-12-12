@@ -15,7 +15,11 @@ import org.easydarwin.push.Pusher;
 
 import java.nio.ByteBuffer;
 
+import cn.vsx.hamster.common.CallMode;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import ptt.terminalsdk.BuildConfig;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
  * 作者：ly-xuxiaolong
@@ -41,7 +45,7 @@ public class USBAudioStream{
     protected MediaCodec.BufferInfo mBufferInfo = new MediaCodec.BufferInfo();
     protected ByteBuffer[] mBuffers = null;
     private Logger logger = Logger.getLogger(getClass());
-
+    private boolean groupCalling = false;//是否正在组呼
     /**
      * There are 13 supported frequencies by ADTS.
      **/
@@ -66,6 +70,8 @@ public class USBAudioStream{
     private MediaFormat newFormat;
 
     public USBAudioStream(Pusher easyPusher) {
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         this.easyPusher = easyPusher;
         int i = 0;
         for (; i < AUDIO_SAMPLING_RATES.length; i++) {
@@ -75,6 +81,25 @@ public class USBAudioStream{
             }
         }
     }
+
+    /**
+     * 被动方组呼来了
+     */
+    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
+        @Override
+        public void handler(final int memberId, final String memberName, final int groupId,
+                            String version, CallMode currentCallMode) {
+            groupCalling = true;
+        }
+    };
+
+    //组呼停止
+    private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler() {
+        @Override
+        public void handler(int reasonCode) {
+            groupCalling = false;
+        }
+    };
 
     /**
      * 编码
@@ -206,7 +231,9 @@ public class USBAudioStream{
                     mBuffer.position(7 + mBufferInfo.size);
                     addADTStoPacket(mBuffer.array(), mBufferInfo.size + 7);
                     mBuffer.flip();
-                    easyPusher.push(mBuffer.array(), 0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000, 0);
+                    if(!groupCalling){
+                        easyPusher.push(mBuffer.array(), 0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000, 0);
+                    }
                     if (BuildConfig.DEBUG)
                         Log.i(TAG, String.format("push audio stamp:%d", mBufferInfo.presentationTimeUs / 1000));
                     mMediaCodec.releaseOutputBuffer(index, false);
@@ -240,6 +267,8 @@ public class USBAudioStream{
 
     public void stop() {
         logger.info("USBAudioStream --stop");
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         try {
             Thread t = mThread;
             mThread = null;
