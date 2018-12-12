@@ -188,8 +188,8 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
         mIncreaseTemporaryGroupMemberAdapter.setOnItemClickListener(new IncreaseTemporaryGroupMemberAdapter.ItemClickListener(){
 
             @Override
-            public void onItemClick(View view, int postion, int type) {
-                if (type == Constants.TYPE_DEPARTMENT) {
+            public void onItemClick(View view, int postion, int itemType) {
+                if (itemType == Constants.TYPE_DEPARTMENT) {
                     MemberResponse memberResponse = (MemberResponse) mDatas.get(postion).getBean();
                     if (memberResponse != null) {
                         CatalogBean catalog = new CatalogBean();
@@ -200,14 +200,10 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
                         catalogBeanList.addAll(mCatalogList);
                         updateData(memberResponse, catalogBeanList);
                     }
-                } else if(type == Constants.TYPE_USER){
+                } else if(itemType == Constants.TYPE_USER){
 
                     if(!mIncreaseTemporaryGroupMemberAdapter.getSelectMember().isEmpty()){
-                        if(type ==CREATE_TEMP_GROUP){
-                            okBtn.setText("下一步(" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember().size() + ")");
-                        }else {
-                            okBtn.setText("确定(" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember().size() + ")");
-                        }
+                        okBtn.setText("确定(" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember().size() + ")");
                         okBtn.setBackgroundResource(R.drawable.live_theme_confirm_bg);
                         ll_select_member.setVisibility(View.VISIBLE);
                     }else {

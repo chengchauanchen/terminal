@@ -1,11 +1,11 @@
 package cn.vsx.vc.fragment;
 
 import android.annotation.SuppressLint;
-import android.app.Fragment;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.ChatBaseActivity;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -52,7 +53,7 @@ public class LocationFragment extends Fragment{
     String url;
     private boolean isLocation;
     private String name;
-
+    private FrameLayout fragment_contener;
     private Logger logger = Logger.getLogger(getClass());
     private Handler myHandler = new Handler();
 
@@ -160,6 +161,23 @@ public class LocationFragment extends Fragment{
                 ToastUtil.showToast(getActivity(), "获取人脸识别信息失败！");
             }
         }
+        ((ChatBaseActivity) getActivity()).setBackListener(new ChatBaseActivity.OnBackListener(){
+            @Override
+            public void onBack(){
+                if(null !=fragment_contener){
+                    fragment_contener.setVisibility(View.GONE);
+                }
+                if(null != getActivity() && !isDetached()){
+                    getActivity().getSupportFragmentManager().beginTransaction().remove(LocationFragment.this).commit();
+                    getActivity().getSupportFragmentManager().popBackStack();
+                    ((ChatBaseActivity) getActivity()).setBackListener(null);
+                }
+            }
+        });
+    }
+
+    public void setFragment_contener(FrameLayout fragment_contener){
+        this.fragment_contener = fragment_contener;
     }
 
     private void hookWebView(){

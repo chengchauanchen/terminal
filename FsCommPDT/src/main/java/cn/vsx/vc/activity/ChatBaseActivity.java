@@ -1323,7 +1323,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
             setViewVisibility(fl_fragment_container, View.VISIBLE);
             LocationFragment locationFragment = LocationFragment.getInstance(url, name, false);
             locationFragment.setFrameLayout(fl_fragment_container);
-            getFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commit();
+            getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commit();
         }
     };
 
@@ -1345,7 +1345,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     if(TextUtils.isEmpty(TerminalFactory.getSDK().getParam(Params.LOCATION_URL,""))){
                         ToastUtil.showToast(ChatBaseActivity.this,"请去管理后台配置定位url");
                     }else {
-                        getFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, LocationFragment.getInstance(url, "", true)).commit();
+                        LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
+                        locationFragment.setFragment_contener(fl_fragment_container);
+                        getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container,locationFragment ).commit();
                     }
                 }else {
                     setViewVisibility(fl_fragment_container, View.VISIBLE);
@@ -1353,7 +1355,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     if(TextUtils.isEmpty(TerminalFactory.getSDK().getParam(Params.LOCATION_URL,""))){
                         ToastUtil.showToast(ChatBaseActivity.this,"请去管理后台配置定位url");
                     }else {
-                        getFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, LocationFragment.getInstance(url, "", true)).commit();
+                        LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
+                        locationFragment.setFragment_contener(fl_fragment_container);
+                        getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container,locationFragment ).commit();
                     }
                 }
             }

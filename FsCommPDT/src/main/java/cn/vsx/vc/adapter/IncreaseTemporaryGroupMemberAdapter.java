@@ -25,7 +25,6 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.ContactItemBean;
-import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -156,6 +155,7 @@ public class IncreaseTemporaryGroupMemberAdapter extends RecyclerView.Adapter<Re
     }
 
     public void setSelectItem(int memberNo){
+        boolean added = false;
         for(ContactItemBean next : mDatas){
             if(next.getBean() instanceof Member){
                 Member bean = (Member) next.getBean();
@@ -163,12 +163,18 @@ public class IncreaseTemporaryGroupMemberAdapter extends RecyclerView.Adapter<Re
                     bean.setChecked(true);
                     removeExistMember(memberNo);
                     addMembers.add(bean);
+                    added = true;
                     break;
                 }
             }
         }
-        Member member = (Member) DataUtil.getMemberByMemberNo(memberNo).clone();
-        addMembers.add(member);
+        if(!added){
+            //如果当前不在当前部门，就去子部门查询
+            Member member = (Member) cn.vsx.hamster.terminalsdk.tools.DataUtil.getMemberByMemberNo(memberNo).clone();
+            member.setChecked(true);
+            removeExistMember(memberNo);
+            addMembers.add(member);
+        }
         listener.onItemClick(null,-1,TYPE_USER);
         notifyDataSetChanged();
     }

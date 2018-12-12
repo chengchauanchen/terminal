@@ -5,12 +5,14 @@ import com.baidu.location.BDLocation;
 
 import org.apache.log4j.Logger;
 
+import java.util.List;
 import java.util.TimerTask;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetBaiDuLocationHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.CoordTransformUtils;
 
 /**
  * Created by zckj on 2017/8/28.
@@ -50,7 +52,8 @@ public class MyLocationListener extends BDAbstractLocationListener {
                 || lastLocation.getLongitude() == 4.9E-324){
             return 0;
         }
-        return lastLocation.getLongitude();
+        List<Double> doubles = CoordTransformUtils.bd2wgs(lastLocation.getLatitude(), lastLocation.getLongitude());
+        return doubles.get(1);
     }
 
     public double getBDLatitude(){
@@ -60,7 +63,8 @@ public class MyLocationListener extends BDAbstractLocationListener {
                 || lastLocation.getLatitude() == 4.9E-324){
             return 0;
         }
-        return lastLocation.getLatitude();
+        List<Double> doubles = CoordTransformUtils.bd2wgs(lastLocation.getLatitude(), lastLocation.getLongitude());
+        return doubles.get(0);
     }
 
     public String getAddress(){
