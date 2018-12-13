@@ -56,6 +56,7 @@ import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.CallAbbreviatedWindowService;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.PhoneAdapter;
+import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack,Actions {
@@ -221,7 +222,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
 	protected ReceiveExitHandler receiveExitHandler = new ReceiveExitHandler() {
 		@Override
-		public void handle(){
+		public void handle(String msg){
+			ToastUtil.showToast(BaseActivity.this,msg);
 			myHandler.post(new Runnable(){
 				@Override
 				public void run(){
