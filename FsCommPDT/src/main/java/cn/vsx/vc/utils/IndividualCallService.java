@@ -2122,7 +2122,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                     if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
                         return;
                     }
-                    MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+//                    MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
                     btn_live_look_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_dodgerblue2);
                 }
             });
@@ -2142,9 +2142,9 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
                             return;
                         }
-                        if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.PLAYING) {
-                            MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
-                        }
+//                        if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.PLAYING) {
+//                            MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
+//                        }
                         btn_live_look_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_yellow);
                     }
                 });
@@ -3607,7 +3607,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                 btn_live_look_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_dodgerblue2);
             }
             MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
-            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+//            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
             livingViewHideOrShow();
         }
@@ -3658,8 +3658,11 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                                     // tv_live_groupName.setText(DataUtil.getGroupByGroupNo(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)).name);
                                     // tv_live_speakingName.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""));
                                     // tv_live_speakingId.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_ID,"")+"");
-                                    if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.PLAYING) {
-                                        MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
+//                                    if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.PLAYING) {
+//                                        MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
+//                                    }
+                                    if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
+                                        MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(true);
                                     }
                                 } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
                                     ToastUtil.showToast(IndividualCallService.this, "当前组是只听组，不能发起组呼");
