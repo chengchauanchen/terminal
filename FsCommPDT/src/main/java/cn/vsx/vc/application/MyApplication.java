@@ -5,6 +5,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.support.multidex.MultiDex;
 import android.util.Log;
@@ -29,6 +31,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.IndividualCallService;
@@ -84,6 +87,14 @@ public class MyApplication extends Application {
 		MyTerminalFactory.getSDK().setLoginFlag();
 		registerActivityLifecycleCallbacks(new SimpleActivityLifecycle());
 
+		try{
+			ApplicationInfo appInfo = this.getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+			String apkType=appInfo.metaData.getString("APKTYPE");
+			Log.e("MyApplication", " APKTYPE == " + apkType);
+			MyTerminalFactory.getSDK().putParam(Params.APK_TYPE,apkType);
+		}catch(PackageManager.NameNotFoundException e){
+			e.printStackTrace();
+		}
 		//开启voip电话服务
 		MyTerminalFactory.getSDK().getVoipCallManager().startService(getApplicationContext());
 		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_PHONE.toString());

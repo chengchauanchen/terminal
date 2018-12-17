@@ -86,6 +86,9 @@
         android:persistent="true"
         android:theme="@style/AppTheme"
         tools:replace="label, theme">
+        <meta-data
+            android:name="APKTYPE"
+            android:value="${apk_type}"/>
         <activity
             android:name=".activity.RegistActivity"
             android:label="@string/app_name"

@@ -437,6 +437,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     sendPhoto();
                     break;
                 case ReceiverSendFileHandler.FILE:
+                    getSupportFragmentManager().popBackStack();
                     sendFile();
                     break;
                 case ReceiverSendFileHandler.LOCATION:
