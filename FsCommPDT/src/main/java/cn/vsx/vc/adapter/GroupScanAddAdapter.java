@@ -34,7 +34,6 @@ public class GroupScanAddAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     private List<GroupItemBean> mDatas;
     private ItemClickListener listener;
     List<Integer> memberIds=new ArrayList<>();
-    List<Integer> scanGroups = MyTerminalFactory.getSDK().getConfigManager().getScanGroups();
 
     public GroupScanAddAdapter(Context context, List<GroupItemBean> datas) {
         this.mContext=context;
@@ -70,7 +69,7 @@ public class GroupScanAddAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
             final GroupViewHolder holder= (GroupViewHolder) viewHolder;
             final Group group= (Group) mDatas.get(position).getBean();
             holder.tvName.setText(group.getName()+"");
-            if (scanGroups.contains(group.getNo())){
+            if (MyTerminalFactory.getSDK().getConfigManager().getScanGroups().contains(group.getNo())){
                 holder.tvAddScanGroup.setVisibility(View.INVISIBLE);
                 holder.ivScanGroup.setVisibility(View.VISIBLE);
             }else {
@@ -87,7 +86,7 @@ public class GroupScanAddAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 @Override
                 public void onClick(View view) {
                     if(cTime-lastTime>MIN_CLICK_TIME){
-                        if(scanGroups.size()>=10){
+                        if(MyTerminalFactory.getSDK().getConfigManager().getScanGroups().size()>=10){
                             Toast.makeText(mContext,"已超出扫描组最大添加数量",Toast.LENGTH_SHORT).show();
                             return;
                         }

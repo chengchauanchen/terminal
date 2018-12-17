@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +30,8 @@ import cn.vsx.vc.fragment.ScanGroupSearchFragment;
 import cn.vsx.vc.model.GroupCatalogBean;
 import cn.vsx.vc.model.GroupItemBean;
 import cn.vsx.vc.utils.Constants;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by Administrator on 2017/3/16 0016.
@@ -297,6 +298,10 @@ public class ChangeGroupActivity extends BaseActivity {
                 finish();
                 break;
             case R.id.iv_search://搜索
+                if(MyTerminalFactory.getSDK().getConfigManager().getScanGroups().size()>=10){
+                    Toast.makeText(ChangeGroupActivity.this,"已超出扫描组最大添加数量",Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 ScanGroupSearchFragment groupSearchFragment = new ScanGroupSearchFragment();
                 fl_fragment_container_main.setVisibility(View.VISIBLE);
                 getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, groupSearchFragment).commit();

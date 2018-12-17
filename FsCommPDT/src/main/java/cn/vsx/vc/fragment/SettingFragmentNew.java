@@ -512,7 +512,6 @@ public class SettingFragmentNew extends BaseFragment {
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
         MyApplication.instance.stopIndividualCallService();
-        TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
         TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
         Process.killProcess(Process.myPid());
     }

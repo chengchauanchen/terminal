@@ -464,10 +464,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         @Override
         public void onClick(View v) {
             String itemsData = xcd_available_ip.getItemsData();
-            company = company.replaceAll(company, "<font color='#0081e3'>" + company + "</font>");
-
-            if (company.equals(itemsData) || company.equals(itemsData)) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "选择单位");
+            if(company.equals(itemsData)){
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请选择单位");
                 return;
             }
 

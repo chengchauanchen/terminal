@@ -158,13 +158,13 @@ public class XCDropDownListView extends LinearLayout {
             }
 
             // 设置数据
-            listItemView.tv.setText(mData.get(position).toString());
-            if (position != mData.size() - 1) {
-                listItemView.tv.setTextColor(ContextCompat.getColor(getContext(),R.color.regist_host_name));
-            } else {
-                listItemView.tv.setTextColor(ContextCompat.getColor(getContext(),R.color.regist_add_host_name));
-            }
             final String text = mData.get(position).toString();
+            listItemView.tv.setText(text);
+            if(text.equals("添加单位")){
+                listItemView.tv.setTextColor(ContextCompat.getColor(getContext(),R.color.regist_add_host_name));
+            }else {
+                listItemView.tv.setTextColor(ContextCompat.getColor(getContext(),R.color.regist_host_name));
+            }
             listItemView.layout.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {

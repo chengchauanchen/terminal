@@ -90,7 +90,7 @@ public class MyApplication extends Application {
 		try{
 			ApplicationInfo appInfo = this.getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
 			String apkType=appInfo.metaData.getString("APKTYPE");
-			Log.e("MyApplication", " APKTYPE == " + apkType);
+			Log.d("MyApplication", " APKTYPE == " + apkType);
 			MyTerminalFactory.getSDK().putParam(Params.APK_TYPE,apkType);
 		}catch(PackageManager.NameNotFoundException e){
 			e.printStackTrace();
