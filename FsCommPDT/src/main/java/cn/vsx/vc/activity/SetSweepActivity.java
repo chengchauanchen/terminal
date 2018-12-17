@@ -71,7 +71,10 @@ public class SetSweepActivity extends BaseActivity {
                 finish();
                 break;
             case R.id.right_add:
-
+                if(groupSweeps.size()>=10){
+                    ToastUtil.showToast(SetSweepActivity.this,"扫描组不能超过10个");
+                    return;
+                }
                 Intent intent = new Intent(this, ChangeGroupActivity.class);
 //                intent.putExtra("INTENTFROM", 2);
                 startActivity(intent);

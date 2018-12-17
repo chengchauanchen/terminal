@@ -224,7 +224,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 		@Override
 		public void handle(String msg){
 			ToastUtil.showToast(BaseActivity.this,msg);
-			myHandler.post(new Runnable(){
+			myHandler.postDelayed(new Runnable(){
 				@Override
 				public void run(){
 					Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
@@ -243,7 +243,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 					MyApplication.instance.stopIndividualCallService();
 					Process.killProcess(Process.myPid());
 				}
-			});
+			},2000);
 		}
 	};
 

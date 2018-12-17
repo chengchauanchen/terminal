@@ -1174,11 +1174,17 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     @Override
                     public void onApiConnectResult(int i){
                         logger.info("onApiConnectResult:"+i);
+                        if(i ==0){
+                            callManager.interceptPtt();
+                        }
                     }
 
                     @Override
                     public void onApiDisconnected(int i){
                         logger.info("onApiDisconnected:"+i);
+                        if(null != callManager){
+                            callManager.cancelInterceptPtt();
+                        }
                     }
                 });
             }catch(SDKException e){

@@ -428,7 +428,12 @@ public class TemporaryAdapter extends BaseAdapter {
                     break;
                 case MESSAGE_GROUP_CALL_RECEIVED:
                 case MESSAGE_VOICE_RECEIVED:
-                    voiceReceivedHolder = (ChatViewHolder.VoiceReceivedHolder) convertView.getTag();
+                    try{
+                        voiceReceivedHolder = (ChatViewHolder.VoiceReceivedHolder) convertView.getTag();
+                    }catch(ClassCastException e){
+                        logger.error("出错的消息:"+terminalMessage);
+                        e.printStackTrace();
+                    }
                     break;
                 case MESSAGE_GROUP_CALL_SEND:
                 case MESSAGE_VOICE_SEND:
@@ -492,7 +497,12 @@ public class TemporaryAdapter extends BaseAdapter {
                 break;
             case MESSAGE_GROUP_CALL_RECEIVED:
             case MESSAGE_VOICE_RECEIVED:
-                setData(position, terminalMessage, viewType, voiceReceivedHolder);
+                try{
+                    setData(position, terminalMessage, viewType, voiceReceivedHolder);
+                }catch(Exception e){
+                    logger.error("出错的消息："+terminalMessage);
+                    e.printStackTrace();
+                }
                 break;
             case MESSAGE_GROUP_CALL_SEND:
             case MESSAGE_VOICE_SEND:

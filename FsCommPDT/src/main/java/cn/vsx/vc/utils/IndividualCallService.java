@@ -3378,9 +3378,9 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                 if(currentType == MyApplication.TYPE.PUSH ||currentType == MyApplication.TYPE.IDLE){
                     return;
                 }
-//                if (errorcode != 0) {
-//                    stopPull();
-//                }
+                if (errorcode != 0) {
+                    stopPull();
+                }
                 if (errorcode == -101){
                     sendMessage("请检查网络连接");
                     TerminalFactory.getSDK().getLiveManager().ceaseWatching();

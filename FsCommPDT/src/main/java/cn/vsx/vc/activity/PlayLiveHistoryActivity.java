@@ -316,9 +316,14 @@ public class PlayLiveHistoryActivity extends BaseActivity{
         public void handler(TerminalMessage terminalMessage){
             if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode() || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE){
                 if(mediaPlayer != null && mediaPlayer.isPlaying()){
-                    mediaPlayer.pause();
-                    iv_pause_continue.setImageResource(R.drawable.on_pause);
-                    iv_pause.setVisibility(View.VISIBLE);
+                    mHandler.post(new Runnable(){
+                        @Override
+                        public void run(){
+                            mediaPlayer.pause();
+                            iv_pause_continue.setImageResource(R.drawable.on_pause);
+                            iv_pause.setVisibility(View.VISIBLE);
+                        }
+                    });
                 }
             }
         }
