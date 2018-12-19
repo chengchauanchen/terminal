@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
-import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Display;
@@ -49,8 +48,6 @@ public class ImagePreviewItemFragment extends BaseFragment{
     private String storrPath;
     private ImageView iv_save_picture;
     private Handler myHandler = new Handler();
-    //定义回调函数及变量
-    protected BackHandlerInterface backHandlerInterface;
     //    private ImageView preview_image;
     private ViewPager mViewPager;
     private List<ImageBean> mImageList = new ArrayList<>();
@@ -73,23 +70,9 @@ public class ImagePreviewItemFragment extends BaseFragment{
         this.fragment_contener = fragment_contener;
     }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState){
-        super.onCreate(savedInstanceState);
-        //回调函数赋值
-        if(!(getActivity() instanceof BackHandlerInterface)){
-            throw new ClassCastException("Hosting activity must implement BackHandlerInterface");
-        }else{
-            backHandlerInterface = (BackHandlerInterface) getActivity();
-        }
-    }
 
-    @Override
-    public void onStart(){
-        super.onStart();
-        //将自己的实例传出去
-        backHandlerInterface.setSelectedFragment(this);
-    }
+
+
 
 
     @Override

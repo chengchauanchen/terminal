@@ -18,6 +18,7 @@ import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
+import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
@@ -33,9 +34,11 @@ public class ScanGroupSearchAdapter extends BaseAdapter{
     private List<Group> searchGroupList;
     private String keyWords;
     private LayoutInflater inflater;
+    private Context context;
     private List<Integer>MemberIds = new ArrayList<>();
     private List<Integer> scanGroupList = MyTerminalFactory.getSDK().getConfigManager().getScanGroups();
     public ScanGroupSearchAdapter (Context context, List<Group> searchGroupList) {
+        this.context = context;
         this.searchGroupList = searchGroupList;
         this.inflater = LayoutInflater.from(context);
     }
@@ -99,6 +102,10 @@ public class ScanGroupSearchAdapter extends BaseAdapter{
         viewHolder.tvAddScanGroup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if(MyTerminalFactory.getSDK().getConfigManager().getScanGroups().size()>=10){
+                    ToastUtil.showToast(context,"扫描组不能超过10个");
+                    return;
+                }
                 MemberIds.clear();
                 MemberIds.add(searchGroupList.get(position).getNo());
                 MyTerminalFactory.getSDK().getGroupScanManager().setScanGroupList(MemberIds,true);
