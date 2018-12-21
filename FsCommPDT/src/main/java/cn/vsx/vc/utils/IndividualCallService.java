@@ -99,6 +99,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -133,7 +134,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerLiveTimeoutHandler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAboutLiveMemberListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetRtspStreamUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
@@ -1005,7 +1005,6 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetRtspStreamUrlHandler);//观看视频
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);//请求开视频
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberNotLivingHandler);//观看时，发现没有在直播
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveGetAboutLiveMemberListHandler);//推送列表
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNobodyRequestVideoLiveHandler);//对方取消请求
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverActivePushVideoHandler);//上报视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoHandler);//请求视频
@@ -2237,7 +2236,6 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetRtspStreamUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberNotLivingHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetAboutLiveMemberListHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNobodyRequestVideoLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
@@ -2491,39 +2489,39 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
     String dateString;
 
 
-    /**
-     * 获取到可推送成员列表
-     */
-    private ReceiveGetAboutLiveMemberListHandler receiveGetAboutLiveMemberListHandler = new ReceiveGetAboutLiveMemberListHandler() {
-        @Override
-        public void handler(final List<Member> liveMemberList) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    logger.info("推送列表成员-----memberList" + liveMemberList);
-                    memberList.clear();
-                    memberList.addAll(liveMemberList);
-                    //过滤已经在观看的人
-
-                    Iterator<Member> iterator = memberList.iterator();
-                    while(iterator.hasNext()){
-                        Member member = iterator.next();
-                        for(int j = 0; j < watchLiveList.size(); j++){
-                            if(member.getId() == watchLiveList.get(j).getId()){
-                                iterator.remove();
-                                break;
-                            }
-                        }
-                        //过滤正在上报的人
-                        if(liveMember !=null && member.getId()== liveMember.getId()){
-                            iterator.remove();
-                        }
-                    }
-                    liveContactsAdapter.refreshLiveContactsAdapter(-1, memberList);
-                }
-            });
-        }
-    };
+//    /**
+//     * 获取到可推送成员列表
+//     */
+//    private ReceiveGetAboutLiveMemberListHandler receiveGetAboutLiveMemberListHandler = new ReceiveGetAboutLiveMemberListHandler() {
+//        @Override
+//        public void handler(final List<Member> liveMemberList) {
+//            myHandler.post(new Runnable() {
+//                @Override
+//                public void run() {
+//                    logger.info("推送列表成员-----memberList" + liveMemberList);
+//                    memberList.clear();
+//                    memberList.addAll(liveMemberList);
+//                    //过滤已经在观看的人
+//
+//                    Iterator<Member> iterator = memberList.iterator();
+//                    while(iterator.hasNext()){
+//                        Member member = iterator.next();
+//                        for(int j = 0; j < watchLiveList.size(); j++){
+//                            if(member.getId() == watchLiveList.get(j).getId()){
+//                                iterator.remove();
+//                                break;
+//                            }
+//                        }
+//                        //过滤正在上报的人
+//                        if(liveMember !=null && member.getId()== liveMember.getId()){
+//                            iterator.remove();
+//                        }
+//                    }
+//                    liveContactsAdapter.refreshLiveContactsAdapter(-1, memberList);
+//                }
+//            });
+//        }
+//    };
 
     /**
      * 组成员遥毙消息
@@ -5062,12 +5060,13 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
 
     private void inviteSelectMember(){
         memberList.clear();
-        TerminalFactory.getSDK().getLiveManager().getPushMemberList(true,true);
         ll_live_selectmember_theme.setVisibility(View.GONE);
         liveContactsAdapter = new LiveContactsAdapter(getApplicationContext(), memberList,true);
         liveContactsAdapter.setOnItemClickListener(new OnInvitaListViewItemClick());
         lv_live_selsectmember_listview.setAdapter(liveContactsAdapter);
         img_cencle.setVisibility(View.GONE);
+
+        initInviteMember();
     }
 
     //接收到上报视频的回调
@@ -5130,7 +5129,6 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
     };
     private void pushSelectMember() {
         memberList.clear();
-        MyTerminalFactory.getSDK().getLiveManager().getPushMemberList(true,true);
 
         ll_live_selectmember_theme.setVisibility(View.VISIBLE);
         //theme = TerminalFactory.getSDK().getParam(Params.MEMBER_NAME,"")+"上报图像";
@@ -5140,11 +5138,12 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         lv_live_selsectmember_listview.setAdapter(liveContactsAdapter);
 
         img_cencle.setVisibility(View.GONE);
+
+        initInviteMember();
     }
 
     private void requestSelectMember() {//请求图像
         memberList.clear();
-        MyTerminalFactory.getSDK().getLiveManager().getPushMemberList(false,true);
         btn_live_selectmember_start.setText("开始");
         btn_live_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg_no);
         ll_live_selectmember_theme.setVisibility(View.GONE);
@@ -5156,8 +5155,32 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         liveContactsAdapter.setOnItemClickListener(new OnInvitaListViewItemClick());
         lv_live_selsectmember_listview.setAdapter(liveContactsAdapter);
         img_cencle.setVisibility(View.GONE);
+        initInviteMember();
     }
 
+    private void initInviteMember(){
+        List<Member> liveMemberList = new ArrayList<>(MyTerminalFactory.getSDK().getConfigManager().getPhoneMembers());
+        Collections.sort(liveMemberList);
+        logger.info("推送列表成员-----memberList" + liveMemberList);
+        memberList.clear();
+        memberList.addAll(liveMemberList);
+        //过滤已经在观看的人
+        Iterator<Member> iterator = memberList.iterator();
+        while(iterator.hasNext()){
+            Member member = iterator.next();
+            for(int j = 0; j < watchLiveList.size(); j++){
+                if(member.getId() == watchLiveList.get(j).getId()){
+                    iterator.remove();
+                    break;
+                }
+            }
+            //过滤正在上报的人
+            if(liveMember !=null && member.getId()== liveMember.getId()){
+                iterator.remove();
+            }
+        }
+        liveContactsAdapter.refreshLiveContactsAdapter(-1, memberList);
+    }
 
     private void pushRecoderView(String theme){
         logger.error("=====pushRecoderView======="+theme);
