@@ -11,16 +11,17 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.AbsListView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONObject;
@@ -92,13 +93,14 @@ import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverTransponHandler;
 import cn.vsx.vc.utils.DataUtil;
+import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.FileUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
+import cn.vsx.vc.utils.ToastUtil;
+import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
-import cn.vsx.vc.view.MyListView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
-import ptt.terminalsdk.tools.ToastUtil;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
@@ -122,9 +124,10 @@ public abstract class ChatBaseActivity extends BaseActivity{
     protected List<TerminalMessage> allFailMessageList = new ArrayList<>();//当前会话所有发送失败消息集合
     protected List<TerminalMessage> historyFailMessageList = new ArrayList<>();//当前会话历史发送失败消息集合
     protected Map<Integer, TerminalMessage> unFinishMsgList = new HashMap<>();//
-    RelativeLayout rl_include_listview;
+//    RelativeLayout rl_include_listview;
     TextView newsBarGroupName;
-    MyListView groupCallList;
+    SwipeRefreshLayout sflCallList;
+    FixedRecyclerView groupCallList;
     FrameLayout fl_fragment_container;
     EditText groupCallNewsEt;
     FunctionHidePlus funcation;
@@ -187,11 +190,10 @@ public abstract class ChatBaseActivity extends BaseActivity{
 //        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverToFaceRecognitionHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSelectChatListHandler);
-        groupCallList.setOnRefreshListener(new OnRefreshListenerImplementationImpl());
-        groupCallList.setOnScrollListener(new OnScrollListenerImpl());
+        sflCallList.setOnRefreshListener(new OnRefreshListenerImplementationImpl());
         groupCallList.setOnTouchListener(mMessageTouchListener);
         setOnPTTVolumeBtnStatusChangedListener(new OnPTTVolumeBtnStatusChangedListenerImp());
-        rl_include_listview.setOnTouchListener(new OnInclude_listviewTouchListener());
+//        rl_include_listview.setOnTouchListener(new OnInclude_listviewTouchListener());
     }
     @Override
     public void initData() {
@@ -457,7 +459,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         groupCallList.postDelayed(new Runnable() {
             @Override
             public void run() {
-                groupCallList.setSelection(temporaryAdapter.getCount() - 1);
+                groupCallList.scrollToPosition(temporaryAdapter.getItemCount() - 1);
             }
         },10);
     }
@@ -843,7 +845,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     }
 
     protected void setListSelection (int position) {
-        groupCallList.setSelection(position);
+        groupCallList.scrollToPosition(position);
     }
 
     @Override
@@ -1018,11 +1020,16 @@ public abstract class ChatBaseActivity extends BaseActivity{
     /***  获取ViewPos **/
     private int getViewPos (int positionForList) {
         int viewPos = -1;
-        int firstVisiablePos = groupCallList.getFirstVisiblePosition() - 1;
-        int lastVisiablePos = groupCallList.getLastVisiblePosition() - 1;
-        if (positionForList >= firstVisiablePos && positionForList <= lastVisiablePos) {
-            viewPos = positionForList - firstVisiablePos;
+        RecyclerView.LayoutManager layoutManager = groupCallList.getLayoutManager();
+        if (layoutManager instanceof LinearLayoutManager) {
+            LinearLayoutManager linearManager = (LinearLayoutManager) layoutManager;
+            int firstVisiablePos = linearManager.findFirstVisibleItemPosition();
+            int lastVisiablePos = linearManager.findLastVisibleItemPosition();
+            if (positionForList >= firstVisiablePos && positionForList <= lastVisiablePos) {
+                viewPos = positionForList - firstVisiablePos;
+            }
         }
+
         return viewPos;
     }
 
@@ -1545,12 +1552,15 @@ public abstract class ChatBaseActivity extends BaseActivity{
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSendFileHandler);
     }
 
+    /**
+     * 获取数据并刷新页面
+     */
     private void refreshData(){
         refreshing = true;
         // 下拉刷新操作
         if (chatMessageList.size() <= 0) {
             refreshing = false;
-            ToastUtil.showToast(ChatBaseActivity.this, "没有更多消息了！");
+            stopRefreshAndToast("没有更多消息了！");
             return;
         }
         List<TerminalMessage> groupMessageRecord1 = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupMessageRecord(
@@ -1562,20 +1572,41 @@ public abstract class ChatBaseActivity extends BaseActivity{
             intersetMessageToList(groupMessageRecord1, historyFailMessageList);
             List<TerminalMessage> groupMessageRecord2 = new ArrayList<>();
             groupMessageRecord2.addAll(chatMessageList);
-            chatMessageList.clear();
-            chatMessageList.addAll(groupMessageRecord1);
-            chatMessageList.addAll(groupMessageRecord2);
-            //            if(temporaryAdapter!=null){
-            //                temporaryAdapter.notifyDataSetChanged();
-            //            }
-            //滚动到之前的位置
-            if(groupMessageRecord1.size()+1 < chatMessageList.size()){
-                setListSelection(groupMessageRecord1.size()+1);
-            }
+            stopRefresh(groupMessageRecord1,groupMessageRecord2,groupMessageRecord1.size());
         }else {
-            ToastUtil.showToast(ChatBaseActivity.this, "没有更多消息了！");
+            stopRefreshAndToast("没有更多消息了！");
         }
         refreshing = false;
+    }
+    /**
+     * 停止刷新
+     */
+    private void stopRefresh(final List<TerminalMessage> groupMessageRecord1,final List<TerminalMessage> groupMessageRecord2,final int position){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                chatMessageList.clear();
+                chatMessageList.addAll(groupMessageRecord1);
+                chatMessageList.addAll(groupMessageRecord2);
+                if(temporaryAdapter!=null){
+                    temporaryAdapter.notifyItemRangeInserted(0,position);
+                }
+                groupCallList.smoothScrollBy(0, -DensityUtil.dip2px(ChatBaseActivity.this,30));
+                sflCallList.setRefreshing(false);
+            }
+        });
+    }
+    /**
+     * 停止刷新
+     */
+    private void stopRefreshAndToast(final String messge){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                sflCallList.setRefreshing(false);
+                ToastUtil.showToast(ChatBaseActivity.this, messge);
+            }
+        });
     }
 
     /**  转发 **/
@@ -1705,75 +1736,18 @@ public abstract class ChatBaseActivity extends BaseActivity{
         }
     };
 
-    private final class OnScrollListenerImpl implements AbsListView.OnScrollListener{
-
-        @Override
-        public void onScrollStateChanged(AbsListView view, int scrollState){
-        }
-
-        @Override
-        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount){
-            if(!refreshing && firstVisibleItem == 0 && visibleItemCount >0 && totalItemCount > visibleItemCount){
-                refreshData();
-            }
-        }
-
-    }
-
     /**  下拉刷新   */
-    private final class OnRefreshListenerImplementationImpl implements MyListView.OnRefreshListener {
+    private final class OnRefreshListenerImplementationImpl implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onRefresh() {
             MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
-                    /***先睡2s在进行加载更多数据**/
-                    try {
-                        Thread.sleep(2000L);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            groupCallList.refreshFinish();
-                            // 下拉刷新操作
-                            if (chatMessageList.size() <= 0) {
-                                ToastUtil.showToast(ChatBaseActivity.this, "没有更多消息了！");
-                                return;
-                            }
-                            List<TerminalMessage> groupMessageRecord1 = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupMessageRecord(
-                                    isGroup ? MessageCategory.MESSAGE_TO_GROUP.getCode() : MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), userId,
-                                    chatMessageList.get(0).sendTime - 1, TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
-                            if (groupMessageRecord1 != null && groupMessageRecord1.size() > 0 ) {
-                                logger.info("会话列表刷新成功");
-                                Collections.sort(groupMessageRecord1);
-                                intersetMessageToList(groupMessageRecord1, historyFailMessageList);
-                                List<TerminalMessage> groupMessageRecord2 = new ArrayList<>();
-                                groupMessageRecord2.addAll(chatMessageList);
-                                chatMessageList.clear();
-                                chatMessageList.addAll(groupMessageRecord1);
-                                chatMessageList.addAll(groupMessageRecord2);
-
-                                if(temporaryAdapter!=null){
-                                    temporaryAdapter.notifyDataSetChanged();
-                                }
-                                if(groupMessageRecord1.size()+1 < chatMessageList.size()){
-                                    setListSelection(groupMessageRecord1.size()+1);
-                                }
-                            }else {
-                                ToastUtil.showToast(ChatBaseActivity.this, "没有更多消息了！");
-                            }
-                        }
-                    });
+                    refreshData();
                 }
             });
         }
 
-        @Override
-        public void onLoadMore() {
-
-        }
     }
 
     private final class OnInclude_listviewTouchListener implements View.OnTouchListener {
@@ -1805,7 +1779,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private ReceiverSelectChatListHandler mReceiverSelectChatListHandler = new ReceiverSelectChatListHandler() {
         @Override
         public void handler() {
-//            groupCallList.smoothScrollToPosition(chatMessageList.size() - 1);
             setListSelection(chatMessageList.size() - 1);
         }
     };

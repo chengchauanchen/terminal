@@ -5,13 +5,13 @@ import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.BaseAdapter;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -71,6 +71,7 @@ import cn.vsx.vc.fragment.VideoPreviewItemFragment;
 import cn.vsx.vc.holder.ChatViewHolder;
 import cn.vsx.vc.model.ChatMember;
 import cn.vsx.vc.receive.SendRecvHelper;
+import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
@@ -85,8 +86,8 @@ import static cn.vsx.vc.receive.Actions.SEND_LIVE_THEME;
  * Created by zckj on 2017/3/22.
  */
 
-public class TemporaryAdapter extends BaseAdapter {
-    final int VIEW_TYPE = 26;
+public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
+//    private final int VIEW_TYPE = 28;
 
     private static final int MESSAGE_SHORT_TEXT_RECEIVED = 0;//短文本
     private static final int MESSAGE_LONG_TEXT_RECEIVED = 1;//长文本
@@ -101,20 +102,22 @@ public class TemporaryAdapter extends BaseAdapter {
     private static final int MESSAGE_VIDEO_LIVE_RECEIVED = 10;//图像记录
     private static final int MESSAGE_GROUP_CALL_RECEIVED = 11;//组呼
     private static final int MESSAGE_HYPERLINK_RECEIVED = 12;//超链接
+    private static final int MESSAGE_GB28181_RECODE_RECEIVED = 13;//视频平台
 
-    private static final int MESSAGE_SHORT_TEXT_SEND = 13;//短文本
-    private static final int MESSAGE_LONG_TEXT_SEND = 14;//长文本
-    private static final int MESSAGE_IMAGE_SEND = 15;//图片
-    private static final int MESSAGE_VOICE_SEND = 16;//录音
-    private static final int MESSAGE_VEDIO_SEND = 17;//小视频
-    private static final int MESSAGE_FILE_SEND = 18;//文件
-    private static final int MESSAGE_LOCATION_SEND = 19;//位置
-    private static final int MESSAGE_AFFICHE_SEND = 20;//公告
-    private static final int MESSAGE_WARNING_INSTANCE_SEND = 21;//警情
-    private static final int MESSAGE_PRIVATE_CALL_SEND = 22;//个呼
-    private static final int MESSAGE_VIDEO_LIVE_SEND = 23;//图像记录
-    private static final int MESSAGE_GROUP_CALL_SEND = 24;//组呼
-    private static final int MESSAGE_HYPERLINK_SEND = 25;//超链接
+    private static final int MESSAGE_SHORT_TEXT_SEND = 14;//短文本
+    private static final int MESSAGE_LONG_TEXT_SEND = 15;//长文本
+    private static final int MESSAGE_IMAGE_SEND = 16;//图片
+    private static final int MESSAGE_VOICE_SEND = 17;//录音
+    private static final int MESSAGE_VEDIO_SEND = 18;//小视频
+    private static final int MESSAGE_FILE_SEND = 19;//文件
+    private static final int MESSAGE_LOCATION_SEND = 20;//位置
+    private static final int MESSAGE_AFFICHE_SEND = 21;//公告
+    private static final int MESSAGE_WARNING_INSTANCE_SEND = 22;//警情
+    private static final int MESSAGE_PRIVATE_CALL_SEND = 23;//个呼
+    private static final int MESSAGE_VIDEO_LIVE_SEND = 24;//图像记录
+    private static final int MESSAGE_GROUP_CALL_SEND = 25;//组呼
+    private static final int MESSAGE_HYPERLINK_SEND = 26;//超链接
+    private static final int MESSAGE_GB28181_RECODE_SEND = 27;//视频平台
 
     public static final int MIN_CLICK_DELAY_TIME = 1000;
     private long lastClickTime = 0;
@@ -198,19 +201,94 @@ public class TemporaryAdapter extends BaseAdapter {
 //        });
 //    }
 
-    @Override
-    public int getCount() {
-        return chatMessageList.size();
-    }
-
-    @Override
-    public Object getItem(int position) {
-        return chatMessageList.get(position);
-    }
 
     @Override
     public long getItemId(int position) {
         return position;
+    }
+
+    @Override
+    public int getItemCount() {
+        return chatMessageList.size();
+    }
+
+    @Override
+    public ChatViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        ChatViewHolder holder = null;
+        switch (viewType) {
+            case MESSAGE_LONG_TEXT_RECEIVED:
+            case MESSAGE_SHORT_TEXT_RECEIVED:
+                holder =  new ChatViewHolder.TextReceivedHolder(getViewByType(viewType, parent),true);
+                break;
+            case MESSAGE_LONG_TEXT_SEND:
+            case MESSAGE_SHORT_TEXT_SEND:
+                holder =   new ChatViewHolder.TextSendHolder(getViewByType(viewType, parent),false);
+                break;
+            case MESSAGE_IMAGE_RECEIVED:
+                holder =   new ChatViewHolder.ImageReceivedHolder(getViewByType(viewType, parent),true);
+                break;
+            case MESSAGE_IMAGE_SEND:
+                holder =   new ChatViewHolder.ImageSendHolder(getViewByType(viewType, parent),false);
+                break;
+            case MESSAGE_GROUP_CALL_RECEIVED:
+            case MESSAGE_VOICE_RECEIVED:
+                holder =   new ChatViewHolder.VoiceReceivedHolder(getViewByType(viewType, parent),true);
+                break;
+            case MESSAGE_GROUP_CALL_SEND:
+            case MESSAGE_VOICE_SEND:
+                holder =   new ChatViewHolder.VoiceSendHolder(getViewByType(viewType, parent),false);
+                break;
+            case MESSAGE_FILE_RECEIVED:
+                holder =   new ChatViewHolder.FileReceivedHolder(getViewByType(viewType, parent),true);
+                break;
+            case MESSAGE_FILE_SEND:
+                holder =   new ChatViewHolder.FileSendHolder(getViewByType(viewType, parent),false);
+                break;
+            case MESSAGE_VEDIO_RECEIVED:
+                holder =   new ChatViewHolder.VideoReceivedHolder(getViewByType(viewType, parent),true);
+                break;
+            case MESSAGE_VEDIO_SEND:
+                holder =   new ChatViewHolder.VideoSendHolder(getViewByType(viewType, parent),false);
+                break;
+            case MESSAGE_LOCATION_RECEIVED:
+                holder =   new ChatViewHolder.LocationReceivedHolder(getViewByType(viewType, parent),true);
+                break;
+            case MESSAGE_LOCATION_SEND:
+                holder =   new ChatViewHolder.LocationSendHolder(getViewByType(viewType, parent),false);
+                break;
+            case MESSAGE_WARNING_INSTANCE_RECEIVED:
+            case MESSAGE_VIDEO_LIVE_RECEIVED:
+            case MESSAGE_GB28181_RECODE_RECEIVED:
+                holder =   new ChatViewHolder.LiveReceivedHolder(getViewByType(viewType, parent),true);
+                break;
+            case MESSAGE_WARNING_INSTANCE_SEND:
+            case MESSAGE_VIDEO_LIVE_SEND:
+            case MESSAGE_GB28181_RECODE_SEND:
+                holder =   new ChatViewHolder.LiveSendHolder(getViewByType(viewType, parent),false);
+                break;
+            case MESSAGE_PRIVATE_CALL_RECEIVED:
+                holder =   new ChatViewHolder.PrivateCallReceivedHolder(getViewByType(viewType, parent),true);
+                break;
+            case MESSAGE_PRIVATE_CALL_SEND:
+                holder =   new ChatViewHolder.PrivateCallSendHolder(getViewByType(viewType, parent),false);
+                break;
+            case MESSAGE_HYPERLINK_RECEIVED:
+                holder =   new ChatViewHolder.HyperlinkReceivedHolder(getViewByType(viewType, parent),true);
+                break;
+            case MESSAGE_HYPERLINK_SEND:
+                holder =   new ChatViewHolder.HyperlinkSendHolder(getViewByType(viewType, parent),false);
+                break;
+        }
+        return holder;
+    }
+
+    @Override
+    public void onBindViewHolder(ChatViewHolder holder, int position) {
+        if(holder!=null){
+            final TerminalMessage terminalMessage = chatMessageList.get(position);
+            final int viewType = getItemViewType(position);
+            setData(position, terminalMessage, viewType, holder);
+        }
     }
 
     @Override
@@ -255,6 +333,9 @@ public class TemporaryAdapter extends BaseAdapter {
             if (chatMessageList.get(position).messageType == MessageType.HYPERLINK.getCode()) {
                 return MESSAGE_HYPERLINK_RECEIVED;
             }
+            if(chatMessageList.get(position).messageType == MessageType.GB28181_RECORD.getCode()){
+                return MESSAGE_GB28181_RECODE_RECEIVED;
+            }
         } else {//发送
             if (chatMessageList.get(position).messageType == MessageType.SHORT_TEXT.getCode()) {
                 return MESSAGE_SHORT_TEXT_SEND;
@@ -295,261 +376,12 @@ public class TemporaryAdapter extends BaseAdapter {
             if (chatMessageList.get(position).messageType == MessageType.HYPERLINK.getCode()) {
                 return MESSAGE_HYPERLINK_SEND;
             }
+            if(chatMessageList.get(position).messageType == MessageType.GB28181_RECORD.getCode()){
+                return MESSAGE_GB28181_RECODE_SEND;
+            }
         }
 
         return MESSAGE_SHORT_TEXT_SEND;
-    }
-
-    @Override
-    public int getViewTypeCount() {
-        return VIEW_TYPE;
-    }
-
-    @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        final TerminalMessage terminalMessage = chatMessageList.get(position);
-        final int viewType = getItemViewType(position);
-        ChatViewHolder.TextReceivedHolder textReceivedHolder = null;
-        ChatViewHolder.TextSendHolder textSendHolder = null;
-        ChatViewHolder.ImageReceivedHolder imageReceivedHolder = null;
-        ChatViewHolder.ImageSendHolder imageSendHolder = null;
-        ChatViewHolder.VoiceReceivedHolder voiceReceivedHolder = null;
-        ChatViewHolder.VoiceSendHolder voiceSendHolder = null;
-        ChatViewHolder.FileReceivedHolder fileReceivedHolder = null;
-        ChatViewHolder.FileSendHolder fileSendHolder = null;
-        ChatViewHolder.VideoReceivedHolder videoReceivedHolder = null;
-        ChatViewHolder.VideoSendHolder videoSendHolder = null;
-        ChatViewHolder.LocationReceivedHolder locationReceivedHolder = null;
-        ChatViewHolder.LocationSendHolder locationSendHolder = null;
-        ChatViewHolder.LiveReceivedHolder liveReceivedHolder = null;
-        ChatViewHolder.LiveSendHolder liveSendHolder = null;
-        ChatViewHolder.PrivateCallReceivedHolder privateCallReceivedHolder = null;
-        ChatViewHolder.PrivateCallSendHolder privateCallSendHolder = null;
-        ChatViewHolder.HyperlinkReceivedHolder hyperlinkReceivedHolder = null;
-        ChatViewHolder.HyperlinkSendHolder hyperlinkSendHolder = null;
-        if (convertView == null) {
-            convertView = getViewByType(viewType, parent);
-            switch (viewType) {
-                case MESSAGE_LONG_TEXT_RECEIVED:
-                case MESSAGE_SHORT_TEXT_RECEIVED:
-                    textReceivedHolder = new ChatViewHolder.TextReceivedHolder();
-                    handleViewAndHolder(viewType, convertView, textReceivedHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_LONG_TEXT_SEND:
-                case MESSAGE_SHORT_TEXT_SEND:
-                    textSendHolder = new ChatViewHolder.TextSendHolder();
-                    handleViewAndHolder(viewType, convertView, textSendHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_IMAGE_RECEIVED:
-                    imageReceivedHolder = new ChatViewHolder.ImageReceivedHolder();
-                    handleViewAndHolder(viewType, convertView, imageReceivedHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_IMAGE_SEND:
-                    imageSendHolder = new ChatViewHolder.ImageSendHolder();
-                    handleViewAndHolder(viewType, convertView, imageSendHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_GROUP_CALL_RECEIVED:
-                case MESSAGE_VOICE_RECEIVED:
-                    voiceReceivedHolder = new ChatViewHolder.VoiceReceivedHolder();
-                    handleViewAndHolder(viewType, convertView, voiceReceivedHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_GROUP_CALL_SEND:
-                case MESSAGE_VOICE_SEND:
-                    voiceSendHolder = new ChatViewHolder.VoiceSendHolder();
-                    handleViewAndHolder(viewType, convertView, voiceSendHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_FILE_RECEIVED:
-                    fileReceivedHolder = new ChatViewHolder.FileReceivedHolder();
-                    handleViewAndHolder(viewType, convertView, fileReceivedHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_FILE_SEND:
-                    fileSendHolder = new ChatViewHolder.FileSendHolder();
-                    handleViewAndHolder(viewType, convertView, fileSendHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_VEDIO_RECEIVED:
-                    videoReceivedHolder = new ChatViewHolder.VideoReceivedHolder();
-                    handleViewAndHolder(viewType, convertView, videoReceivedHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_VEDIO_SEND:
-                    videoSendHolder = new ChatViewHolder.VideoSendHolder();
-                    handleViewAndHolder(viewType, convertView, videoSendHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_LOCATION_RECEIVED:
-                    locationReceivedHolder = new ChatViewHolder.LocationReceivedHolder();
-                    handleViewAndHolder(viewType, convertView, locationReceivedHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_LOCATION_SEND:
-                    locationSendHolder = new ChatViewHolder.LocationSendHolder();
-                    handleViewAndHolder(viewType, convertView, locationSendHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_WARNING_INSTANCE_RECEIVED:
-                case MESSAGE_VIDEO_LIVE_RECEIVED:
-                    liveReceivedHolder = new ChatViewHolder.LiveReceivedHolder();
-                    handleViewAndHolder(viewType, convertView, liveReceivedHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_WARNING_INSTANCE_SEND:
-                case MESSAGE_VIDEO_LIVE_SEND:
-                    liveSendHolder = new ChatViewHolder.LiveSendHolder();
-                    handleViewAndHolder(viewType, convertView, liveSendHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_PRIVATE_CALL_RECEIVED:
-                    privateCallReceivedHolder = new ChatViewHolder.PrivateCallReceivedHolder();
-                    handleViewAndHolder(viewType, convertView, privateCallReceivedHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_PRIVATE_CALL_SEND:
-                    privateCallSendHolder = new ChatViewHolder.PrivateCallSendHolder();
-                    handleViewAndHolder(viewType, convertView, privateCallSendHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_HYPERLINK_RECEIVED:
-                    hyperlinkReceivedHolder = new ChatViewHolder.HyperlinkReceivedHolder();
-                    handleViewAndHolder(viewType, convertView, hyperlinkReceivedHolder, terminalMessage, position);
-                    break;
-                case MESSAGE_HYPERLINK_SEND:
-                    hyperlinkSendHolder = new ChatViewHolder.HyperlinkSendHolder();
-                    handleViewAndHolder(viewType, convertView, hyperlinkSendHolder, terminalMessage, position);
-                    break;
-            }
-
-        } else {
-            switch (viewType) {
-                case MESSAGE_LONG_TEXT_RECEIVED:
-                case MESSAGE_SHORT_TEXT_RECEIVED:
-                    textReceivedHolder = (ChatViewHolder.TextReceivedHolder) convertView.getTag();
-                    break;
-                case MESSAGE_LONG_TEXT_SEND:
-                case MESSAGE_SHORT_TEXT_SEND:
-                    textSendHolder = (ChatViewHolder.TextSendHolder) convertView.getTag();
-                    break;
-                case MESSAGE_IMAGE_RECEIVED:
-                    imageReceivedHolder = (ChatViewHolder.ImageReceivedHolder) convertView.getTag();
-                    break;
-                case MESSAGE_IMAGE_SEND:
-                    imageSendHolder = (ChatViewHolder.ImageSendHolder) convertView.getTag();
-                    break;
-                case MESSAGE_GROUP_CALL_RECEIVED:
-                case MESSAGE_VOICE_RECEIVED:
-                    try{
-                        voiceReceivedHolder = (ChatViewHolder.VoiceReceivedHolder) convertView.getTag();
-                    }catch(ClassCastException e){
-                        logger.error("出错的消息:"+terminalMessage);
-                        e.printStackTrace();
-                    }
-                    break;
-                case MESSAGE_GROUP_CALL_SEND:
-                case MESSAGE_VOICE_SEND:
-                    voiceSendHolder = (ChatViewHolder.VoiceSendHolder) convertView.getTag();
-                    break;
-                case MESSAGE_FILE_RECEIVED:
-                    fileReceivedHolder = (ChatViewHolder.FileReceivedHolder) convertView.getTag();
-                    break;
-                case MESSAGE_FILE_SEND:
-                    fileSendHolder = (ChatViewHolder.FileSendHolder) convertView.getTag();
-                    break;
-                case MESSAGE_VEDIO_RECEIVED:
-                    videoReceivedHolder = (ChatViewHolder.VideoReceivedHolder) convertView.getTag();
-                    break;
-                case MESSAGE_VEDIO_SEND:
-                    videoSendHolder = (ChatViewHolder.VideoSendHolder) convertView.getTag();
-                    break;
-                case MESSAGE_LOCATION_RECEIVED:
-                    locationReceivedHolder = (ChatViewHolder.LocationReceivedHolder) convertView.getTag();
-                    break;
-                case MESSAGE_LOCATION_SEND:
-                    locationSendHolder = (ChatViewHolder.LocationSendHolder) convertView.getTag();
-                    break;
-                case MESSAGE_WARNING_INSTANCE_RECEIVED:
-                case MESSAGE_VIDEO_LIVE_RECEIVED:
-                    liveReceivedHolder = (ChatViewHolder.LiveReceivedHolder) convertView.getTag();
-                    break;
-                case MESSAGE_WARNING_INSTANCE_SEND:
-                case MESSAGE_VIDEO_LIVE_SEND:
-                    liveSendHolder = (ChatViewHolder.LiveSendHolder) convertView.getTag();
-                    break;
-                case MESSAGE_PRIVATE_CALL_RECEIVED:
-                    privateCallReceivedHolder = (ChatViewHolder.PrivateCallReceivedHolder) convertView.getTag();
-                    break;
-                case MESSAGE_PRIVATE_CALL_SEND:
-                    privateCallSendHolder = (ChatViewHolder.PrivateCallSendHolder) convertView.getTag();
-                    break;
-                case MESSAGE_HYPERLINK_RECEIVED:
-                    hyperlinkReceivedHolder = (ChatViewHolder.HyperlinkReceivedHolder) convertView.getTag();
-                    break;
-                case MESSAGE_HYPERLINK_SEND:
-                    hyperlinkSendHolder = (ChatViewHolder.HyperlinkSendHolder) convertView.getTag();
-                    break;
-            }
-
-        }
-        switch (viewType) {
-            case MESSAGE_LONG_TEXT_RECEIVED:
-            case MESSAGE_SHORT_TEXT_RECEIVED:
-                setData(position, terminalMessage, viewType, textReceivedHolder);
-                break;
-            case MESSAGE_LONG_TEXT_SEND:
-            case MESSAGE_SHORT_TEXT_SEND:
-                setData(position, terminalMessage, viewType, textSendHolder);
-                break;
-            case MESSAGE_IMAGE_RECEIVED:
-                setData(position, terminalMessage, viewType, imageReceivedHolder);
-                break;
-            case MESSAGE_IMAGE_SEND:
-                setData(position, terminalMessage, viewType, imageSendHolder);
-                break;
-            case MESSAGE_GROUP_CALL_RECEIVED:
-            case MESSAGE_VOICE_RECEIVED:
-                try{
-                    setData(position, terminalMessage, viewType, voiceReceivedHolder);
-                }catch(Exception e){
-                    logger.error("出错的消息："+terminalMessage);
-                    e.printStackTrace();
-                }
-                break;
-            case MESSAGE_GROUP_CALL_SEND:
-            case MESSAGE_VOICE_SEND:
-                setData(position, terminalMessage, viewType, voiceSendHolder);
-                break;
-            case MESSAGE_FILE_RECEIVED:
-                setData(position, terminalMessage, viewType, fileReceivedHolder);
-                break;
-            case MESSAGE_FILE_SEND:
-                setData(position, terminalMessage, viewType, fileSendHolder);
-                break;
-            case MESSAGE_VEDIO_RECEIVED:
-                setData(position, terminalMessage, viewType, videoReceivedHolder);
-                break;
-            case MESSAGE_VEDIO_SEND:
-                setData(position, terminalMessage, viewType, videoSendHolder);
-                break;
-            case MESSAGE_LOCATION_RECEIVED:
-                setData(position, terminalMessage, viewType, locationReceivedHolder);
-                break;
-            case MESSAGE_LOCATION_SEND:
-                setData(position, terminalMessage, viewType, locationSendHolder);
-                break;
-            case MESSAGE_WARNING_INSTANCE_RECEIVED:
-            case MESSAGE_VIDEO_LIVE_RECEIVED:
-                setData(position, terminalMessage, viewType, liveReceivedHolder);
-                break;
-            case MESSAGE_WARNING_INSTANCE_SEND:
-            case MESSAGE_VIDEO_LIVE_SEND:
-                setData(position, terminalMessage, viewType, liveSendHolder);
-                break;
-            case MESSAGE_PRIVATE_CALL_RECEIVED:
-                setData(position, terminalMessage, viewType, privateCallReceivedHolder);
-                break;
-            case MESSAGE_PRIVATE_CALL_SEND:
-                setData(position, terminalMessage, viewType, privateCallSendHolder);
-                break;
-            case MESSAGE_HYPERLINK_RECEIVED:
-                setData(position, terminalMessage, viewType, hyperlinkReceivedHolder);
-                break;
-            case MESSAGE_HYPERLINK_SEND:
-                setData(position, terminalMessage, viewType, hyperlinkSendHolder);
-                break;
-        }
-
-
-        return convertView;
     }
 
     private void setData(int position, TerminalMessage terminalMessage, int viewType, ChatViewHolder holder) {
@@ -743,6 +575,7 @@ public class TemporaryAdapter extends BaseAdapter {
                     } else {
                         groupCallItemClick(terminalMessage, position);
                     }
+                    gb28181ItemClick(terminalMessage, viewType);
                 }
                 InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(holder.reBubble.getWindowToken(), 0);
@@ -937,6 +770,16 @@ public class TemporaryAdapter extends BaseAdapter {
             holder.live_bubble = (RelativeLayout) convertView.findViewById(R.id.live_bubble);
             holder.live_tv_chatcontent = (TextView) convertView.findViewById(R.id.live_tv_chatcontent);
         }
+        if (viewType == MESSAGE_GB28181_RECODE_RECEIVED || viewType == MESSAGE_GB28181_RECODE_SEND) {
+            holder.tvContent = (TextView) convertView.findViewById(R.id.tv_chatcontent);
+            if (viewType == MESSAGE_GB28181_RECODE_RECEIVED) {
+                holder.ll_botoom_to_watch = (LinearLayout) convertView.findViewById(R.id.ll_botoom_to_watch);
+                holder.tv_watch_time = (TextView) convertView.findViewById(R.id.tv_watch_time);
+            }
+            holder.live_bubble = (RelativeLayout) convertView.findViewById(R.id.live_bubble);
+            holder.live_tv_chatcontent = (TextView) convertView.findViewById(R.id.live_tv_chatcontent);
+            holder.iv_image = (ImageView) convertView.findViewById(R.id.iv_image);
+        }
         if (viewType == MESSAGE_HYPERLINK_RECEIVED || viewType == MESSAGE_HYPERLINK_SEND) {
             holder.lv_face_pair = (ListView) convertView.findViewById(R.id.lv_face_pair);
             holder.tv_error_msg = (TextView) convertView.findViewById(R.id.tv_error_msg);
@@ -1048,8 +891,11 @@ public class TemporaryAdapter extends BaseAdapter {
             handlerPrivateCallData(terminalMessage, holder);
         }
         /**  直播接收条目  */
-        if (viewType == MESSAGE_VIDEO_LIVE_RECEIVED) {
+        if (viewType == MESSAGE_VIDEO_LIVE_RECEIVED || viewType == MESSAGE_VIDEO_LIVE_SEND) {
             handlerLiveData(terminalMessage, holder);
+        }
+        if(viewType == MESSAGE_GB28181_RECODE_RECEIVED || viewType == MESSAGE_GB28181_RECODE_SEND){
+            handleGB28181Data(terminalMessage, holder);
         }
         /**  定位条目 */
         if (terminalMessage.messageType == MessageType.POSITION.getCode()) {
@@ -1170,6 +1016,18 @@ public class TemporaryAdapter extends BaseAdapter {
         holder.lv_face_pair.setLayoutParams(params);
     }
 
+    private void handleGB28181Data(TerminalMessage terminalMessage, ChatViewHolder holder){
+        JSONObject messageBody = terminalMessage.messageBody;
+        //设置默认上报视频者，防止数组下标越界异常
+        if(messageBody.containsKey(JsonParam.DEVICE_NAME)){
+            setText(holder.tvContent, messageBody.getString(JsonParam.DEVICE_NAME));
+        }
+        holder.live_bubble.setVisibility(View.GONE);
+        if(null != holder.ll_botoom_to_watch){
+            holder.ll_botoom_to_watch.setVisibility(View.GONE);
+        }
+        holder.iv_image.setImageResource(R.drawable.law_recoder_image);
+    }
     /***  设置图像观看数据 **/
     private void handlerLiveData(TerminalMessage terminalMessage, ChatViewHolder holder) {
         JSONObject messageBody = terminalMessage.messageBody;
@@ -1745,6 +1603,17 @@ public class TemporaryAdapter extends BaseAdapter {
 
     }
 
+    private void gb28181ItemClick(TerminalMessage terminalMessage, int viewType){
+        if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+            if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())){
+                if(viewType == MESSAGE_GB28181_RECODE_RECEIVED){
+                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGoWatchRTSPHandler.class,terminalMessage);
+                }
+            }else {
+                ToastUtil.showToast(activity, "没有图像接收功能权限");
+            }
+        }
+    }
 
     /**
      * 点击图像接收条目
@@ -1829,9 +1698,11 @@ public class TemporaryAdapter extends BaseAdapter {
                 return inflater.inflate(R.layout.row_sent_location, parent, false);
             case MESSAGE_WARNING_INSTANCE_RECEIVED:
             case MESSAGE_VIDEO_LIVE_RECEIVED:
+            case MESSAGE_GB28181_RECODE_RECEIVED:
                 return inflater.inflate(R.layout.row_receiver_live, parent, false);
             case MESSAGE_WARNING_INSTANCE_SEND:
             case MESSAGE_VIDEO_LIVE_SEND:
+            case MESSAGE_GB28181_RECODE_SEND:
                 return inflater.inflate(R.layout.row_send_live, parent, false);
             case MESSAGE_PRIVATE_CALL_RECEIVED:
                 return inflater.inflate(R.layout.row_receiver_private_call, parent, false);
@@ -1849,7 +1720,7 @@ public class TemporaryAdapter extends BaseAdapter {
     public void openPhoto(TerminalMessage terminalMessage, ChatViewHolder chatViewHolder) {
 
         mImgList = findImages();
-        logger.error("adapter ---getCount():" + getCount());
+        logger.error("adapter ---getCount():" + getItemCount());
         logger.error("mImgList.size():" + mImgList.size());
         int currentPos = mImgUrlList.indexOf(terminalMessage.messagePath);
         logger.info("图片列表位置：" + currentPos+"路径："+terminalMessage.messagePath);

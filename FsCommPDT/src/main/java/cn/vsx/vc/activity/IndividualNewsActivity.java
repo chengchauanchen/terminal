@@ -6,14 +6,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.LinearLayoutManager;
 import android.text.TextUtils;
+import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
@@ -65,8 +67,9 @@ import cn.vsx.vc.record.MediaManager;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
+import cn.vsx.vc.utils.ToastUtil;
+import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
-import cn.vsx.vc.view.MyListView;
 import cn.vsx.vc.view.VolumeViewLayout;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -78,7 +81,6 @@ import okio.BufferedSource;
 import okio.Okio;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.PhoneAdapter;
-import ptt.terminalsdk.tools.ToastUtil;
 
 
 /**
@@ -106,10 +108,14 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     FunctionHidePlus funcation;
     @Bind(R.id.btn_record)
     AudioRecordButton record;
-    @Bind(R.id.rl_include_listview)
-    RelativeLayout rl_include_listview;
+//    @Bind(R.id.rl_include_listview)
+//    RelativeLayout rl_include_listview;
+
+    @Bind(R.id.sfl_call_list)
+    SwipeRefreshLayout sflCallList;
     @Bind(R.id.group_call_list)
-    MyListView groupCallList;
+    FixedRecyclerView groupCallList;
+
     @Bind(R.id.fl_fragment_container)
     FrameLayout fl_fragment_container;
     @Bind(R.id.group_call_news_et)
@@ -141,8 +147,16 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     @Override
     public void initView() {
-        super.rl_include_listview = rl_include_listview;
+        sflCallList.setColorSchemeResources(R.color.colorPrimary);
+        sflCallList.setProgressViewOffset(false, 0, (int) TypedValue
+                .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources()
+                        .getDisplayMetrics()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+        groupCallList.setLayoutManager(linearLayoutManager);
+//        super.rl_include_listview = rl_include_listview;
         super.newsBarGroupName = newsBarGroupName;
+        super.sflCallList = sflCallList;
         super.groupCallList = groupCallList;
         super.fl_fragment_container = fl_fragment_container;
         super.groupCallNewsEt = groupCallNewsEt;
@@ -190,6 +204,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         logger.info("member：" + member.toString());
         funcation.setFunction(false, userId);
     }
+
 
     @Override
     public void postVideo() {
@@ -489,7 +504,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                                 });
                             }
                         } else {//点击不同条目
-
                             //播放当前的
                             executorService.execute(new Runnable() {
                                 public void run() {

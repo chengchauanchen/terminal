@@ -59,6 +59,7 @@
                     />
 
                 <ImageView
+                    android:id="@+id/iv_image"
                     android:layout_marginTop="10dp"
                     android:src="@drawable/video_1"
                     android:layout_width="40dp"

@@ -9,8 +9,11 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.TextViewCompat;
+import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -69,13 +72,13 @@ import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
+import cn.vsx.vc.utils.ToastUtil;
+import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
-import cn.vsx.vc.view.MyListView;
 import cn.vsx.vc.view.RoundProgressBarWidthNumber;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
-import ptt.terminalsdk.tools.ToastUtil;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 
@@ -100,8 +103,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     LinearLayout ll_individual_call_come;
     @Bind(R.id.ll_speaker)
     LinearLayout ll_speaker;
-    @Bind(R.id.rl_include_listview)
-    RelativeLayout rlIncludeListview;
+//    @Bind(R.id.rl_include_listview)
+//    RelativeLayout rlIncludeListview;
     @Bind(R.id.group_call_activity_help)
     ImageView group_call_activity_help;
     @Bind(R.id.tv_pre_speak)
@@ -111,8 +114,11 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     TextView newsBarGroupName;
     @Bind(R.id.btn_ptt)
     Button ptt;
+
+    @Bind(R.id.sfl_call_list)
+    SwipeRefreshLayout sflCallList;
     @Bind(R.id.group_call_list)
-    MyListView groupCallList;
+    FixedRecyclerView groupCallList;
     @Bind(R.id.fl_fragment_container)
     FrameLayout fl_fragment_container;
     @Bind(R.id.group_call_news_et)
@@ -166,8 +172,16 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     @SuppressLint("WrongConstant")
     @Override
     public void initView() {
-        super.rl_include_listview = rlIncludeListview;
+        sflCallList.setColorSchemeResources(R.color.colorPrimary);
+        sflCallList.setProgressViewOffset(false, 0, (int) TypedValue
+                .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources()
+                        .getDisplayMetrics()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
+        groupCallList.setLayoutManager(linearLayoutManager);
+//        super.rl_include_listview = rlIncludeListview;
         super.newsBarGroupName = newsBarGroupName;
+        super.sflCallList = sflCallList;
         super.groupCallList = groupCallList;
         super.fl_fragment_container = fl_fragment_container;
         super.groupCallNewsEt = groupCallNewsEt;

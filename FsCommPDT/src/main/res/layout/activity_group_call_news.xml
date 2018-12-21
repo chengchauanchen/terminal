@@ -83,14 +83,19 @@
         >
 
 
-        <cn.vsx.vc.view.MyListView
-            android:id="@+id/group_call_list"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/sfl_call_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            
-            android:divider="@null"
-            android:transcriptMode="normal"
-            android:listSelector="@android:color/transparent"></cn.vsx.vc.view.MyListView>
+            android:background="@drawable/group_call_news_listview_bg">
+
+            <cn.vsx.vc.view.FixedRecyclerView
+                android:id="@+id/group_call_list"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:overScrollMode="never" />
+        </android.support.v4.widget.SwipeRefreshLayout>
 
         <!--进度条-->
         <RelativeLayout
@@ -101,7 +106,7 @@
             android:background="@drawable/black_round_bg1"
             android:paddingBottom="@dimen/y10"
             android:paddingTop="@dimen/y10"
-            android:visibility="visible"
+            android:visibility="gone"
             >
 
             <TextView
