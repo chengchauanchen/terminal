@@ -177,7 +177,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources()
                         .getDisplayMetrics()));
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setStackFromEnd(true);
         groupCallList.setLayoutManager(linearLayoutManager);
 //        super.rl_include_listview = rlIncludeListview;
         super.newsBarGroupName = newsBarGroupName;

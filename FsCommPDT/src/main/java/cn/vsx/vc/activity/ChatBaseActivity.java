@@ -193,6 +193,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         sflCallList.setOnRefreshListener(new OnRefreshListenerImplementationImpl());
         groupCallList.setOnTouchListener(mMessageTouchListener);
         setOnPTTVolumeBtnStatusChangedListener(new OnPTTVolumeBtnStatusChangedListenerImp());
+        groupCallList.addOnLayoutChangeListener(myOnLayoutChangeListener);
 //        rl_include_listview.setOnTouchListener(new OnInclude_listviewTouchListener());
     }
     @Override
@@ -327,6 +328,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         HashMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getSerializable(Params.MESSAGE_SEND_FAIL, new HashMap<String, List<TerminalMessage>>());
         sendFailMap.put(userId+"", allFailMessageList);
         MyTerminalFactory.getSDK().putSerializable(Params.MESSAGE_SEND_FAIL, sendFailMap);
+        groupCallList.removeOnLayoutChangeListener(myOnLayoutChangeListener);
     }
 
 
@@ -1898,4 +1900,27 @@ public abstract class ChatBaseActivity extends BaseActivity{
     public interface OnBackListener{
         void onBack();
     }
+
+    /**
+     * 对recyclerview的大小变化的监听
+     */
+    private View.OnLayoutChangeListener myOnLayoutChangeListener = new View.OnLayoutChangeListener() {
+
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+            if (oldBottom != -1 && oldBottom > bottom) {
+                if(groupCallList!=null){
+                    groupCallList.requestLayout();
+                    groupCallList.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (temporaryAdapter != null) {
+                                groupCallList.scrollToPosition(temporaryAdapter.getItemCount() - 1);
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    };
 }

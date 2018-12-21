@@ -152,7 +152,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                 .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources()
                         .getDisplayMetrics()));
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-        linearLayoutManager.setStackFromEnd(true);
         groupCallList.setLayoutManager(linearLayoutManager);
 //        super.rl_include_listview = rl_include_listview;
         super.newsBarGroupName = newsBarGroupName;
