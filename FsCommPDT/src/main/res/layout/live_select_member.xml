@@ -140,7 +140,7 @@
             >
             <TextView
                 android:gravity="center_vertical"
-                android:id="@+id/tv_checktext"
+                android:id="@+id/tv_check_text_live"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/x5"

@@ -33,14 +33,20 @@ import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
+import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextPaint;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -48,7 +54,11 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -101,9 +111,11 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.IndividualCallType;
 import cn.vsx.hamster.common.MessageCategory;
+import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.util.JsonParam;
+import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
@@ -111,8 +123,8 @@ import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
-import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.model.MemberResponse;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.IndividualCallPttStatusHandler;
@@ -157,15 +169,21 @@ import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.LiveHistoryActivity;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.activity.TransparentActivity;
+import cn.vsx.vc.adapter.CatalogAdapter;
+import cn.vsx.vc.adapter.IncreaseTemporaryGroupMemberAdapter;
 import cn.vsx.vc.adapter.LiveContactsAdapter;
 import cn.vsx.vc.adapter.MemberEnterAdapter;
 import cn.vsx.vc.adapter.StackViewAdapter;
+import cn.vsx.vc.adapter.TempGroupSearchAdapter;
 import cn.vsx.vc.adapter.WatchMemberAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.model.CatalogBean;
+import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
 import cn.vsx.vc.receive.RecvCallBack;
+import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRemoveWindowViewHandler;
@@ -351,8 +369,8 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
     TextView tv_live_selectmember_theme;
     @Bind(R.id.iv_live_selectmember_theme)
     ImageView iv_live_selectmember_theme;
-    @Bind(R.id.tv_checktext)
-    TextView tv_checktext;
+    @Bind(R.id.tv_check_text_live)
+    TextView tv_check_text_live;
     @Bind(R.id.search_select)
     ImageView search_select;
     @Bind(R.id.et_search_allcontacts)
@@ -464,113 +482,185 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
     TextView tv_uvc_live_speakingId;
     @Bind(R.id.ll_function)
     LinearLayout ll_function;
+    @Bind(R.id.live_connecting)
+    RelativeLayout live_connecting;
+    @Bind(R.id.iv_connecting_animate)
+    ImageView iv_connecting_animate;
     private ImageView iv_phone_camera;
     private ImageView iv_out_camera;
     private TextView tv_out_camera;
+    //视频平台
+    @Bind(R.id.video_platform)
+    RelativeLayout video_platform;
+    @Bind(R.id.re_video_root)
+    RelativeLayout re_video_root;
+    @Bind(R.id.sv_gb28181)
+    TextureView sv_gb28181;
+    @Bind(R.id.tv_device_name)
+    TextView tv_device_name;
+    @Bind(R.id.tv_gb28181_time)
+    TextView tv_gb28181_time;
+    @Bind(R.id.iv_close)
+    ImageView iv_close;
+    @Bind(R.id.ll_invite_member)
+    LinearLayout ll_invite_member;
+
+    @Bind(R.id.all_member_view)
+    LinearLayout all_member_view;
+    @Bind(R.id.news_bar_back)
+    ImageView news_bar_back;
+    @Bind(R.id.bar_title)
+    TextView bar_title;
+    @Bind(R.id.catalog_recyclerview)
+    RecyclerView mCatalogRecyclerview;
+    @Bind(R.id.iv_search)
+    ImageView iv_search;
+    @Bind(R.id.right_btn)
+    ImageView right_btn;
+    @Bind(R.id.swipeRefreshLayout)
+    SwipeRefreshLayout swipeRefreshLayout;
+    @Bind(R.id.recyclerview)
+    RecyclerView mRecyclerview;
+    @Bind(R.id.ok_btn)
+    Button okBtn;
+    @Bind(R.id.ll_select_member)
+    LinearLayout ll_select_member;
+    @Bind(R.id.tv_checktext)
+    TextView tv_checktext;
+
+    @Bind(R.id.layout_search_member)
+    LinearLayout layout_search_member;
+    @Bind(R.id.ll_goback_contacts)
+    LinearLayout ll_goback_contacts;
+    @Bind(R.id.et_search_all_member)
+    EditText et_search_all_member;
+    @Bind(R.id.ll_delete_edittext)
+    LinearLayout ll_delete_edittext;
+    @Bind(R.id.btn_search_all_member)
+    Button btn_search_all_member;
+    @Bind(R.id.tv_search_nothing)
+    TextView tv_search_nothing;
+    @Bind(R.id.rl_search_result)
+    RelativeLayout rl_search_result;
+    @Bind(R.id.tv_search_contactscount)
+    TextView tv_search_contactscount;
+    @Bind(R.id.lv_search_all_member)
+    ListView lv_search_all_member;
+    @Bind(R.id.tv_search_notdata)
+    TextView tv_search_notdata;
+
     private int mLiveWidth;//视频流的宽
     private int mLiveHeight;//视频流的高
+    //上部分
+    private List<CatalogBean> mCatalogList = new ArrayList<>();
 
+    //下部分
+    private List<ContactItemBean> mDatas = new ArrayList<>();
+    private List<CatalogBean> mInitCatalogList=new ArrayList<>();
+    private List<Member> searchMemberListExceptMe = new ArrayList<>();/**搜索到的结果集合*/
     @SuppressWarnings("HandlerLeak,SimpleDateFormat")
     private Handler myHandler = new Handler(){
-        @Override
-        public void handleMessage(Message msg){
-            super.handleMessage(msg);
-            switch(msg.what){
-                case AUTOHANGUP:
-                    myHandler.removeMessages(AUTOHANGUP);
-                    logger.error("执行了半双工超时机制；挂断个呼！！！");
-                    MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
-                    popup_ICTV_speaking_time.pause();
-                    ICTV_half_duplex_time_speaking.pause();
-                    tv_half_duplex_prompt.setText("通话结束");
-                    removeView();
-                    break;
-                case MSG_STATE:
-                    String state = msg.getData().getString("state");
-                    ToastUtil.showToast(IndividualCallService.this, state);
-                    break;
-                case CURRENTTIME:
-                    SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
-                    Date currentTime = new Date();
-                    dateString = formatter.format(currentTime);
-                    if(currentType == MyApplication.TYPE.PUSH || currentType == MyApplication.TYPE.RECODERPUSH){
-                        tv_live_realtime.setText(dateString);
-                    }else if(currentType == MyApplication.TYPE.UVCPUSH){
-                        tv_uvc_live_time.setText(dateString);
-                    }
-                    sendEmptyMessageDelayed(CURRENTTIME, 10000);
-                    break;
-                case HIDELIVINGVIEW:
-                    myHandler.removeMessages(HIDELIVINGVIEW);
-                    if(currentType == MyApplication.TYPE.PUSH){
-                        hideLivingView();
-                    }else if(currentType == MyApplication.TYPE.UVCPUSH){
-                        hideUVCLiveView();
-                    }
-                    break;
-                case CLOSEPRIVATECALL:
-                    callMember = null;
-                    tv_request_prompt.setText(callResultDesc);
-                    tv_speaking_toast.setVisibility(View.VISIBLE);
-                    tv_speaking_toast.setText(callResultDesc);
-                    popup_ICTV_speaking_time.stop();
-                    logger.info("CLOSEPRIVATECALL:"+callResultDesc);
-                    removeView();
-                    ToastUtil.showToast(getApplicationContext(),callResultDesc);
-                    break;
-                case DISSMISS_CURRENT_DIALOG:
-                    TerminalMessage terminalMessage = (TerminalMessage) msg.obj;
-                    if(dialogAdded && null !=stackViewAdapter && data.contains(terminalMessage)){
-                        data.remove(terminalMessage);
-                        stackViewAdapter.setData(data);
-                    }
-                    break;
-                case WATCH_LIVE:
-                    TerminalMessage terminalMessage1 = (TerminalMessage) msg.obj;
-                    int position = msg.arg1;
-                    PTTProtolbuf.NotifyDataMessage.Builder builder = PTTProtolbuf.NotifyDataMessage.newBuilder();
-                    builder.setMessageUrl(terminalMessage1.messageUrl);
-                    builder.setMessageFromName(terminalMessage1.messageFromName);
-                    builder.setMessageFromNo(terminalMessage1.messageFromId);
-                    builder.setMessageToName(terminalMessage1.messageToName);
-                    builder.setMessageToNo(terminalMessage1.messageToId);
-                    builder.setMessageType(terminalMessage1.messageType);
-                    builder.setMessageVersion(terminalMessage1.messageVersion);
-                    builder.setResultCode(terminalMessage1.resultCode);
-                    builder.setSendingTime(terminalMessage1.sendTime);
-                    builder.setMessageBody(terminalMessage1.messageBody.toString());
-                    PTTProtolbuf.NotifyDataMessage message = builder.build();
-                    int resultCode = MyTerminalFactory.getSDK().getLiveManager().requestToWatchLiving(message);
-                    if (resultCode == 0) {
-                        live_theme = terminalMessage1.messageFromName+"上报图像";
-                        if (TextUtils.isEmpty(terminalMessage1.messageBody.getString(JsonParam.TITLE))){
-                            String liver = (String) data.get(position).messageBody.get("liver");
-                            if(!TextUtils.isEmpty(liver)){
-                                if(liver.contains("_")){
-                                    String[] split = liver.split("_");
-                                    if(split.length>0){
-                                        live_theme = split[1]+"上报图像";
-                                    }
-                                }
+                @Override
+                public void handleMessage(Message msg){
+                    super.handleMessage(msg);
+                    switch(msg.what){
+                        case AUTOHANGUP:
+                            myHandler.removeMessages(AUTOHANGUP);
+                            logger.error("执行了半双工超时机制；挂断个呼！！！");
+                            MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
+                            popup_ICTV_speaking_time.pause();
+                            ICTV_half_duplex_time_speaking.pause();
+                            tv_half_duplex_prompt.setText("通话结束");
+                            removeView();
+                            break;
+                        case MSG_STATE:
+                            String state = msg.getData().getString("state");
+                            ToastUtil.showToast(IndividualCallService.this, state);
+                            break;
+                        case CURRENTTIME:
+                            SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
+                            Date currentTime = new Date();
+                            dateString = formatter.format(currentTime);
+                            if(currentType == MyApplication.TYPE.PUSH || currentType == MyApplication.TYPE.RECODERPUSH){
+                                tv_live_realtime.setText(dateString);
+                            }else if(currentType == MyApplication.TYPE.UVCPUSH){
+                                tv_uvc_live_time.setText(dateString);
                             }
-                        }else {
-                            live_theme = terminalMessage1.messageBody.getString(JsonParam.TITLE);
-                        }
-                        data.remove(stackViewAdapter.getItem(position));
-                        stackViewAdapter.remove(position);
-                        video_dialog.setVisibility(View.GONE);
-                    } else {
-                        ToastUtil.livingFailToast(IndividualCallService.this, resultCode, TerminalErrorCode.LIVING_PLAYING.getErrorCode());
+                            tv_gb28181_time.setVisibility(View.VISIBLE);
+                            tv_gb28181_time.setText(dateString);
+                            sendEmptyMessageDelayed(CURRENTTIME, 10000);
+                            break;
+                        case HIDELIVINGVIEW:
+                            myHandler.removeMessages(HIDELIVINGVIEW);
+                            if(currentType == MyApplication.TYPE.PUSH){
+                                hideLivingView();
+                            }else if(currentType == MyApplication.TYPE.UVCPUSH){
+                                hideUVCLiveView();
+                            }
+                            break;
+                        case CLOSEPRIVATECALL:
+                            callMember = null;
+                            tv_request_prompt.setText(callResultDesc);
+                            tv_speaking_toast.setVisibility(View.VISIBLE);
+                            tv_speaking_toast.setText(callResultDesc);
+                            popup_ICTV_speaking_time.stop();
+                            logger.info("CLOSEPRIVATECALL:"+callResultDesc);
+                            removeView();
+                            ToastUtil.showToast(getApplicationContext(),callResultDesc);
+                            break;
+                        case DISSMISS_CURRENT_DIALOG:
+                            TerminalMessage terminalMessage = (TerminalMessage) msg.obj;
+                            if(dialogAdded && null !=stackViewAdapter && data.contains(terminalMessage)){
+                                data.remove(terminalMessage);
+                                stackViewAdapter.setData(data);
+                            }
+                            break;
+                        case WATCH_LIVE:
+                            TerminalMessage terminalMessage1 = (TerminalMessage) msg.obj;
+                            int position = msg.arg1;
+                            PTTProtolbuf.NotifyDataMessage.Builder builder = PTTProtolbuf.NotifyDataMessage.newBuilder();
+                            builder.setMessageUrl(terminalMessage1.messageUrl);
+                            builder.setMessageFromName(terminalMessage1.messageFromName);
+                            builder.setMessageFromNo(terminalMessage1.messageFromId);
+                            builder.setMessageToName(terminalMessage1.messageToName);
+                            builder.setMessageToNo(terminalMessage1.messageToId);
+                            builder.setMessageType(terminalMessage1.messageType);
+                            builder.setMessageVersion(terminalMessage1.messageVersion);
+                            builder.setResultCode(terminalMessage1.resultCode);
+                            builder.setSendingTime(terminalMessage1.sendTime);
+                            builder.setMessageBody(terminalMessage1.messageBody.toString());
+                            PTTProtolbuf.NotifyDataMessage message = builder.build();
+                            int resultCode = MyTerminalFactory.getSDK().getLiveManager().requestToWatchLiving(message);
+                            if (resultCode == 0) {
+                                live_theme = terminalMessage1.messageFromName+"上报图像";
+                                if (TextUtils.isEmpty(terminalMessage1.messageBody.getString(JsonParam.TITLE))){
+                                    String liver = (String) data.get(position).messageBody.get("liver");
+                                    if(!TextUtils.isEmpty(liver)){
+                                        if(liver.contains("_")){
+                                            String[] split = liver.split("_");
+                                            if(split.length>0){
+                                                live_theme = split[1]+"上报图像";
+                                            }
+                                        }
+                                    }
+                                }else {
+                                    live_theme = terminalMessage1.messageBody.getString(JsonParam.TITLE);
+                                }
+                                data.remove(stackViewAdapter.getItem(position));
+                                stackViewAdapter.remove(position);
+                                video_dialog.setVisibility(View.GONE);
+                            } else {
+                                ToastUtil.livingFailToast(IndividualCallService.this, resultCode, TerminalErrorCode.LIVING_PLAYING.getErrorCode());
+                            }
+                            break;
+                        case CANCELLIVE:
+                            finishVideoLive();
+                            break;
+                        default:
+                            break;
                     }
-                    break;
-                case CANCELLIVE:
-                    finishVideoLive();
-                    break;
-                default:
-                    break;
-            }
-        }
-    };
+                }
+            };
 
     private String theme;
 
@@ -601,6 +691,14 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
     private AccessoryManager mAccessoryManager;
     private PushRTSPClient pushRTSPClient;
     private String id;//自己发起直播返回的callId和member拼接
+    private CatalogAdapter mCatalogAdapter;
+    private IncreaseTemporaryGroupMemberAdapter mIncreaseTemporaryGroupMemberAdapter;
+    private String gb28181Url;
+    private String deviceName;
+    private String deviceId;
+    private String deviceDeptId;
+    private String deviceDeptName;
+    private TempGroupSearchAdapter tempGroupSearchAdapter;
 
     public static void setOnClickListener(OnClickListener listener){
         mListener = listener;
@@ -622,9 +720,9 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         }
         /**个呼到来页面*/
         private void showPop(){
-//            btn_live_selectmember_start.setText("开始");
-//            btn_live_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg);
-            tv_checktext.setText("");
+            //            btn_live_selectmember_start.setText("开始");
+            //            btn_live_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg);
+            tv_check_text_live.setText("");
             selectItem.clear();
             tv_comingCall.setText("来电...");
             refresh();
@@ -766,7 +864,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             },1000);
 
             //关闭个呼呼叫界面
-//            myHandler.sendEmptyMessageDelayed(CLOSEPRIVATECALL,10000);
+            //            myHandler.sendEmptyMessageDelayed(CLOSEPRIVATECALL,10000);
         }
         private void callRejection(){
 
@@ -858,7 +956,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         // service被异常停止后，系统尝试重启service，不能保证100%重启成功
-//        KeepLiveManager.getInstance().setServiceForeground(this);
+        //        KeepLiveManager.getInstance().setServiceForeground(this);
         return START_STICKY;
     }
 
@@ -896,7 +994,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCurrentGroupIndividualCallHandler);
 
-
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGoWatchRTSPHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUVCCameraConnectChangeHandler);//直播成功
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseMyselfLiveHandler);//直播成功
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseStartLiveHandler);//请求时，对方拒绝
@@ -1072,12 +1170,12 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         ll_live_selectmember_theme.setOnClickListener(new EditThemeOnclickListener());
         btn_live_selectmember_start.setOnClickListener(new SelectMemberOKOnClickListener());
         iv_live_selectmember_return.setOnClickListener(new SelectMemberReturnOnClickListener());
-//        lv_live_selsectmember_listview.setOnItemClickListener(new SelectMemberOnItemClickListener());
+        //        lv_live_selsectmember_listview.setOnItemClickListener(new SelectMemberOnItemClickListener());
         iv_live_selectmember_search.setOnClickListener(new SearchMemberOnClickListener());
         et_search_member_reported.addTextChangedListener(new SearchMemberTextChangeListener());
         //直播界面
         ll_live_chage_camera.setOnClickListener(new ChangeCameraOnClickListener());
-//        lv_live_member_info.setOnItemClickListener(new MemberListViewOnClickListener());
+        //        lv_live_member_info.setOnItemClickListener(new MemberListViewOnClickListener());
         lv_live_member_info.setOnTouchListener(new LiveMemberListTouchListener());
         ll_live_hangup_total.setOnClickListener(new LiveHangUpOnClikListener());
         iv_uvc_hangup.setOnClickListener(new LiveHangUpOnClikListener());
@@ -1110,7 +1208,18 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
 
         lv_uvc_live_member_info.setOnTouchListener(new LiveMemberListTouchListener());
         layout_call_prompt.setVisibility(View.GONE);
+        sv_gb28181.setOpaque(false);
+        sv_gb28181.setSurfaceTextureListener(new GB28181SurfaceTextureListener());
+        video_platform.setVisibility(View.GONE);
+        iv_close.setOnClickListener(new LiveHangUpLookOnClikListener());
+        ll_invite_member.setOnClickListener(new InviteAllMemberListener());
+        news_bar_back.setOnClickListener(new OnBackListener());
+        bar_title.setText("选择成员");
+        iv_search.setOnClickListener(new SearchListener());
+        okBtn.setOnClickListener(new InviteMemberOkListener());
+        right_btn.setVisibility(View.GONE);
 
+        initSearchView();
         windowManager = (WindowManager) this.getSystemService(WINDOW_SERVICE);
         layoutParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.WRAP_CONTENT,
                 WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.TYPE_PHONE ,
@@ -1181,13 +1290,207 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                     }else if(currentType == MyApplication.TYPE.UVCPUSH){
                         uvcMediaStream.setSurfaceTexture(textureView.getSurfaceTexture());
                     }else if(currentType == MyApplication.TYPE.RECODERPUSH){
-//                        pushRecoder(textureView.getSurfaceTexture());
+                        //                        pushRecoder(textureView.getSurfaceTexture());
                     }
                 }else {
                     getSv(currentType, textureView);
                 }
             }
         }, 300);
+    }
+
+    private void showAllMemberView(){
+        initRecycler();
+        initData();
+    }
+
+    private void initRecycler(){
+        mCatalogList.clear();
+        mDatas.clear();
+        if(null != mIncreaseTemporaryGroupMemberAdapter){
+            mIncreaseTemporaryGroupMemberAdapter.getSelectMember().clear();
+        }
+        mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(this, OrientationHelper.HORIZONTAL, false));
+        mCatalogAdapter = new CatalogAdapter(this, mCatalogList);
+        mCatalogRecyclerview.setAdapter(mCatalogAdapter);
+
+        mRecyclerview.setLayoutManager(new LinearLayoutManager(this));
+        mIncreaseTemporaryGroupMemberAdapter = new IncreaseTemporaryGroupMemberAdapter(this, mDatas);
+        mRecyclerview.setAdapter(mIncreaseTemporaryGroupMemberAdapter);
+
+        mCatalogAdapter.setOnItemClick(new CatalogAdapter.ItemClickListener() {
+            @Override
+            public void onItemClick(View view, int position) {
+                MemberResponse memberResponse = mCatalogList.get(position).getBean();
+
+                List<CatalogBean> catalogList = new ArrayList<>();
+                catalogList.addAll(mCatalogList.subList(0, position + 1));
+                updateData(memberResponse,catalogList);
+            }
+        });
+
+        mIncreaseTemporaryGroupMemberAdapter.setOnItemClickListener(new IncreaseTemporaryGroupMemberAdapter.ItemClickListener(){
+
+            @Override
+            public void onItemClick(View view, int postion, int itemType) {
+                if (itemType == Constants.TYPE_DEPARTMENT) {
+                    MemberResponse memberResponse = (MemberResponse) mDatas.get(postion).getBean();
+                    if (memberResponse != null) {
+                        CatalogBean catalog = new CatalogBean();
+                        catalog.setName(memberResponse.getName());
+                        catalog.setBean(memberResponse);
+                        mCatalogList.add(catalog);
+                        List<CatalogBean> catalogBeanList = new ArrayList<>();
+                        catalogBeanList.addAll(mCatalogList);
+                        updateData(memberResponse, catalogBeanList);
+                    }
+                } else if(itemType == Constants.TYPE_USER){
+
+                    if(!mIncreaseTemporaryGroupMemberAdapter.getSelectMember().isEmpty()){
+                        okBtn.setText("确定(" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember().size() + ")");
+                        okBtn.setBackgroundResource(R.drawable.live_theme_confirm_bg);
+                        ll_select_member.setVisibility(View.VISIBLE);
+                    }else {
+                        okBtn.setText("确定");
+                        okBtn.setBackgroundResource(R.drawable.live_theme_confirm_bg);
+                        ll_select_member.setVisibility(View.GONE);
+                    }
+
+
+                    StringBuffer sb = new StringBuffer();
+                    Log.e("OnInvitaListViewItemCli", "selectItem:" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember());
+                    for (Member m : mIncreaseTemporaryGroupMemberAdapter.getSelectMember()) {
+                        sb.append(m.getName() + "  ");
+                    }
+                    tv_checktext.setText(sb);
+                    //获取textview宽度
+                    TextPaint textPaint = new TextPaint();
+                    textPaint = tv_check_text_live.getPaint();
+                    float textPaintWidth = textPaint.measureText(sb.toString());
+
+                    if (textPaintWidth >= screenWidth - (screenWidth / 4)) {
+                        horizonMenu.setLayoutParams(new LinearLayout.LayoutParams(screenWidth - (screenWidth / 4), ViewGroup.LayoutParams.WRAP_CONTENT));
+                        logger.info("textView的宽度达到了屏幕的五分之四");
+                    } else {
+                        horizonMenu.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                    }
+                    //滚动到最右边
+                    horizonMenu.post(new Runnable(){
+                        @Override
+                        public void run(){
+                            horizonMenu.fullScroll(HorizontalScrollView.FOCUS_RIGHT);
+                        }
+                    });
+                }
+            }
+        });
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                TerminalFactory.getSDK().getConfigManager().updataPhoneMemberInfo();
+                myHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        // 加载完数据设置为不刷新状态，将下拉进度收起来
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
+                }, 1200);
+            }
+        });
+    }
+
+
+    private void initData(){
+        MemberResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
+        if(mMemberResponse ==null){
+            return;
+        }
+        okBtn.setText("确定");
+        mInitCatalogList.clear();
+        CatalogBean catalog=new CatalogBean();
+        catalog.setName(mMemberResponse.getName());
+        catalog.setBean(mMemberResponse);
+        mInitCatalogList.add(catalog);
+        updateData(mMemberResponse,mInitCatalogList);
+    }
+
+    /**
+     * 设置数据
+     */
+    private void updateData(MemberResponse memberResponse,List<CatalogBean> catalogBeanList){
+        mDatas.clear();
+        mCatalogList.clear();
+        mCatalogList.addAll(catalogBeanList);
+        addData(memberResponse);
+        mIncreaseTemporaryGroupMemberAdapter.notifyDataSetChanged();
+        mCatalogAdapter.notifyDataSetChanged();
+        mCatalogRecyclerview.scrollToPosition(mCatalogList.size() - 1);
+    }
+
+    private void addData(MemberResponse memberResponse){
+        if (memberResponse != null){
+            addItemMember(memberResponse);
+            addItemDepartment(memberResponse);
+        }
+    }
+
+    /**
+     * 添加子成员
+     */
+    @SuppressWarnings("unchecked")
+    private void addItemMember(MemberResponse memberResponse){
+        //子成员
+        List<Member> memberList = memberResponse.getMembers();
+
+        if(null != memberList && !memberList.isEmpty()){
+            List<ContactItemBean> itemMemberList = new ArrayList<>();
+            Iterator<Member> iterator = memberList.iterator();
+            while(iterator.hasNext()){
+                //不要直接使用MemberResponse里的数据，会一直保存在内存里,下次进来时还是选中状态
+                Member member = (Member) iterator.next().clone();
+                for(Member selectMember : mIncreaseTemporaryGroupMemberAdapter.getSelectMember()){
+                    if(selectMember.getNo() == member.getNo()){
+                        member.setChecked(true);
+                        break;
+                    }
+                }
+                //过滤掉自己
+                if(member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+                    iterator.remove();
+                    continue;
+                }
+                if(member.getName()==null){
+                    continue;
+                }
+                ContactItemBean<Member> bean = new ContactItemBean<>();
+                bean.setBean(member);
+                bean.setType(Constants.TYPE_USER);
+                itemMemberList.add(bean);
+            }
+            mDatas.addAll(itemMemberList);
+        }
+    }
+
+    /**
+     * 添加子部门
+     */
+    @SuppressWarnings("unchecked")
+    private void addItemDepartment(MemberResponse memberResponse){
+        List<MemberResponse> data = memberResponse.getChildren();
+        if(data!=null && !data.isEmpty()){
+            for(MemberResponse next : data){
+                if(next.getName() ==null){
+                    continue;
+                }
+                ContactItemBean<MemberResponse> bean = new ContactItemBean<>();
+                bean.setType(Constants.TYPE_DEPARTMENT);
+                bean.setName(next.getName());
+                bean.setBean(next);
+                mDatas.add(bean);
+                //                Collections.sort(mDatas);
+            }
+        }
     }
 
     private void refresh() {
@@ -1219,7 +1522,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         emergency_group_call.setVisibility(View.GONE);
         pop_minimize.setVisibility(View.GONE);
 
-//        layout_volume.setVisibility(View.GONE);
+        //        layout_volume.setVisibility(View.GONE);
         live_select_member.setVisibility(View.GONE);
         live_edit_theme.setVisibility(View.GONE);
         live_request.setVisibility(View.GONE);
@@ -1230,6 +1533,10 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         ll_live_look_invite_member.setVisibility(View.GONE);
         ll_live_look_hangup.setVisibility(View.GONE);
         usbLive.setVisibility(View.GONE);
+        live_connecting.setVisibility(View.GONE);
+        video_platform.setVisibility(View.GONE);
+        all_member_view.setVisibility(View.GONE);
+        layout_search_member.setVisibility(View.GONE);
     }
     public void removeView() {
         logger.info("sjl_视图移除viewAdded为："+viewAdded);
@@ -1473,7 +1780,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         @Override
         public void onClick(View v) {
             Log.e("callservice", "OnClickListenerImplementationRequestHangup取消呼叫");
-//            myHandler.removeMessages(CLOSEPRIVATECALL);
+            //            myHandler.removeMessages(CLOSEPRIVATECALL);
             tv_request_prompt.setText("已取消");
 
             myHandler.postDelayed(new Runnable() {
@@ -1588,11 +1895,36 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
 
             }else if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
                 // TODO: 2018/5/4 去看警情
+            }else if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+                // TODO: 2018/12/17
+                goWatchGB28121(terminalMessage);
+            }
+        }
+    }
+
+    private void goWatchGB28121(TerminalMessage terminalMessage){
+        if(terminalMessage.messageBody.containsKey(JsonParam.GB28181_RTSP_URL)){
+//            String gateWayUrl = MyTerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
+//            deviceId = terminalMessage.messageBody.getString(JsonParam.DEVICE_ID);
+//            gb28181Url = gateWayUrl+"DevAor="+deviceId;
+            gb28181Url = terminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL);
+            logger.info("播放地址："+gb28181Url);
+            deviceName = terminalMessage.messageBody.getString(JsonParam.DEVICE_NAME);
+            deviceDeptId = terminalMessage.messageBody.getString(JsonParam.DEVICE_DEPT_ID);
+            deviceDeptName = terminalMessage.messageBody.getString(JsonParam.DEVICE_DEPT_NAME);
+            refresh();
+            hideAllView();
+            video_platform.setVisibility(View.VISIBLE);
+
+            currentType = MyApplication.TYPE.PULL;
+            String deviceName = terminalMessage.messageBody.getString(JsonParam.DEVICE_NAME);
+            tv_device_name.setText(deviceName);
+            if(null !=sv_gb28181.getSurfaceTexture()){
+                startPullGB28121(sv_gb28181.getSurfaceTexture());
             }
         }
     }
     private final class OnClickListenerCallCommingWindow implements View.OnClickListener{
-
         @Override
         public void onClick(View v) {
             status = 3;
@@ -1653,20 +1985,20 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             }
             wakeLockComing.acquire(10000);
             logger.info("main点亮屏幕");
-//            if (MyApplication.instance.isScreenOff) {//个呼时，点亮锁屏
-//                sendBroadcast(new Intent("MainActivityfinish"));
-//            }
-//            if (isBackground(getApplicationContext())) {//程序处于后台
-////                sendBroadcast(new Intent("MainActivityfinish"));
-//                logger.info("main程序拿到前台");
-//
-//            }
+            //            if (MyApplication.instance.isScreenOff) {//个呼时，点亮锁屏
+            //                sendBroadcast(new Intent("MainActivityfinish"));
+            //            }
+            //            if (isBackground(getApplicationContext())) {//程序处于后台
+            ////                sendBroadcast(new Intent("MainActivityfinish"));
+            //                logger.info("main程序拿到前台");
+            //
+            //            }
 
             //判断是否锁屏
             KeyguardManager mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
             boolean flag = mKeyguardManager.inKeyguardRestrictedInputMode();
             if(flag){
-//                //无屏保界面
+                //                //无屏保界面
                 if(MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0) != 1){
                     Intent intent = new Intent(IndividualCallService.this,TransparentActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
@@ -1768,9 +2100,9 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                 SignalServerErrorCode.getInstanceByCode(resultCode);
                 callResultDesc = "对方不在线";
                 logger.info("ReceiveResponseStartIndividualCallHandler:"+resultCode+"="+ callResultDesc);
-//                if (SignalServerErrorCode.getInstanceByCode(resultCode) != null) {
-//                    individualCallBinder.busyWithEachOther();
-//                }
+                //                if (SignalServerErrorCode.getInstanceByCode(resultCode) != null) {
+                //                    individualCallBinder.busyWithEachOther();
+                //                }
                 individualCallBinder.busyWithEachOther();
                 MyApplication.instance.isCallState = false;
 
@@ -1806,8 +2138,6 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             });
         }
     };
-
-
 
     boolean isBackground(Context context) {
         ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -1896,6 +2226,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartIndividualCallHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveCurrentGroupIndividualCallHandler);
 
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGoWatchRTSPHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUVCCameraConnectChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseStartLiveHandler);
@@ -1988,6 +2319,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
 
         }
     };
+
     //ptt个呼等待
     private IndividualCallPttStatusHandler individualCallPttStatusHandler = new IndividualCallPttStatusHandler() {
         @Override
@@ -2122,7 +2454,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                     if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
                         return;
                     }
-//                    MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+                    //                    MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
                     btn_live_look_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_dodgerblue2);
                 }
             });
@@ -2136,15 +2468,15 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                     @Override
                     public void run() {
                         if (!CheckMyPermission.selfPermissionGranted(IndividualCallService.this, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
-//                            CheckMyPermission.permissionPrompt(IndividualCallService.this, Manifest.permission.RECORD_AUDIO);
+                            //                            CheckMyPermission.permissionPrompt(IndividualCallService.this, Manifest.permission.RECORD_AUDIO);
                             return;
                         }
                         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
                             return;
                         }
-//                        if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.PLAYING) {
-//                            MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
-//                        }
+                        //                        if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.PLAYING) {
+                        //                            MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
+                        //                        }
                         btn_live_look_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_yellow);
                     }
                 });
@@ -2219,8 +2551,8 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         @Override
         public void handler(int resultCode, final String resultDesc, boolean isRegisted) {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-//                stopPull();
-//                stopPush();
+                //                stopPull();
+                //                stopPush();
                 finishVideoLive();
             }
         }
@@ -2249,7 +2581,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                         }
                         showToast("网络连接已断开");
                         memberEnterList.clear();
-//                        finishVideoLive();
+                        //                        finishVideoLive();
 
                     } else {
                         MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, false);
@@ -2317,7 +2649,6 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                         transparentIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                         startActivity(transparentIntent);
                     }
-
                     activePush = false;
 
                     if("PDC760".equals(Build.MODEL)){
@@ -2336,16 +2667,16 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                             //外置摄像头没连接，弹窗选择是否用执法记录仪
                             showSwitchCameraView(false);
 
-//                            logger.error("内置摄像头开启");
-//                            currentType = MyApplication.TYPE.PUSH;
-//                            MyTerminalFactory.getSDK().getLiveManager().responseLiving(true);
-//                            refresh();
-//                            hideAllView();
-//                            live.setVisibility(View.VISIBLE);
-//                            pushView("");
-//
-//                            PromptManager.getInstance().stopRing();
-//                            MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
+                            //                            logger.error("内置摄像头开启");
+                            //                            currentType = MyApplication.TYPE.PUSH;
+                            //                            MyTerminalFactory.getSDK().getLiveManager().responseLiving(true);
+                            //                            refresh();
+                            //                            hideAllView();
+                            //                            live.setVisibility(View.VISIBLE);
+                            //                            pushView("");
+                            //
+                            //                            PromptManager.getInstance().stopRing();
+                            //                            MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
                         }
                     }else {
                         refresh();
@@ -2357,7 +2688,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
 
                         btn_live_selectmember_start.setText("开始");
                         btn_live_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg_no);
-                        tv_checktext.setText("");
+                        tv_check_text_live.setText("");
                         selectItem.clear();
                         hideKey();
                         wakeLockComing.acquire();
@@ -2397,6 +2728,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                         }
                         currentType = MyApplication.TYPE.PULL;
                         streamMediaServerUrl = rtspUrl;
+                        Log.e("IndividualCallService", "svLive.getSurfaceTexture():" + svLive.getSurfaceTexture());
                         if (svLive.getSurfaceTexture() != null){
                             startPull(svLive);
                         }
@@ -2486,7 +2818,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                     resultData.putString("event-msg", "EasyRTSP 进程名称长度不匹配");
                     break;
             }
-//            mResultReceiver.send(EasyRTSPClient.RESULT_EVENT, resultData);
+            //            mResultReceiver.send(EasyRTSPClient.RESULT_EVENT, resultData);
         }
     }
 
@@ -2525,9 +2857,9 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             if (ms != null) {    // switch from background to front
                 ms.stopPreview();
                 mService.inActivePreview();
-//                ms.destroyCamera();
+                //                ms.destroyCamera();
                 ms.setSurfaceTexture(surfaceTexture);
-//                ms.createCamera();
+                //                ms.createCamera();
                 ms.startPreview();
                 uvcMediaStream = ms;
 
@@ -2587,6 +2919,23 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                         showToast(resultDesc);
                         finishVideoLive();
                     }
+                }
+            });
+        }
+    };
+
+    private ReceiveGoWatchRTSPHandler receiveGoWatchRTSPHandler = new ReceiveGoWatchRTSPHandler(){
+        @Override
+        public void handler(TerminalMessage terminalMessage){
+            layoutParams1.flags =
+                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED|
+                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
+                            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+            myHandler.post(new Runnable(){
+                @Override
+                public void run(){
+                    goWatchGB28121(terminalMessage);
                 }
             });
         }
@@ -2657,7 +3006,16 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                 mResultReceiver = null;
                 pushCallback = null;
                 id = null;
+                gb28181Url = null;
+                deviceName = null;
+                deviceId = null;
+                deviceDeptId = null;
+                deviceDeptName = null;
                 currentType = MyApplication.TYPE.IDLE;
+                mCatalogList.clear();
+                mInitCatalogList.clear();
+                mDatas.clear();
+                tv_checktext.setText("");
                 hideAllView();
                 //如果弹窗已经添加，显示弹窗内容
                 if(switchCameraViewAdd){
@@ -2679,7 +3037,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         isPushing = false;
         boolean isStreaming = uvcMediaStream != null && uvcMediaStream.isStreaming();
         if (uvcMediaStream != null) {
-//            uvcMediaStream.stopPreview();
+            //            uvcMediaStream.stopPreview();
         } else {
             return;
         }
@@ -2797,8 +3155,8 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     if (s.length() > 29) { //判断EditText中输入的字符数是不是已经大于6
-//                        viewHolder.et_live_edit_import_theme.setText(s.toString().substring(0,30)); //设置EditText只显示前面6位字符
-//                        viewHolder.et_live_edit_import_theme.setSelection(30);//让光标移至末端
+                        //                        viewHolder.et_live_edit_import_theme.setText(s.toString().substring(0,30)); //设置EditText只显示前面6位字符
+                        //                        viewHolder.et_live_edit_import_theme.setSelection(30);//让光标移至末端
                         ToastUtil.showToast(IndividualCallService.this, "输入字数已达上限");
                     }
                 }
@@ -2867,7 +3225,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                 return;
             }
 
-            tv_checktext.setText("");
+            tv_check_text_live.setText("");
             et_search_allcontacts.setText("");
             selectItem.clear();
             total = 0;
@@ -2887,7 +3245,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                         showSwitchCameraView(true);
                     }else {
                         if("PDC760".equals(Build.MODEL)){
-//                        if(true){
+                            //                        if(true){
                             showSwitchCameraView(false);
                         }else {
                             requestStartLive();
@@ -2942,7 +3300,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         if (requestCode == BaseCommonCode.SUCCESS_CODE) {
             refresh();
             hideAllView();
-            if(currentType == MyApplication.TYPE.PUSH){
+            if(currentType == MyApplication.TYPE.PUSH ){
                 live.setVisibility(View.VISIBLE);
                 pushView(theme);
             }else if(currentType == MyApplication.TYPE.RECODERPUSH){
@@ -2990,7 +3348,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         public void onClick(View v) {
             hideKey();
             selectItem.clear();
-            tv_checktext.setText("");
+            tv_check_text_live.setText("");
             et_search_allcontacts.setText("");
             total = 0;
             btn_live_selectmember_start.setText("开始");
@@ -3058,10 +3416,10 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                     currentType = MyApplication.TYPE.PUSH;
                     MyTerminalFactory.getSDK().getLiveManager().responseLiving(true);
 
-                refresh();
-                hideAllView();
-                live.setVisibility(View.VISIBLE);
-                pushView("");
+                    refresh();
+                    hideAllView();
+                    live.setVisibility(View.VISIBLE);
+                    pushView("");
 
                     PromptManager.getInstance().stopRing();
                     MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
@@ -3126,11 +3484,280 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             hideAllView();
             total = 0;
             live_select_member.setVisibility(View.VISIBLE);
-//            btn_live_selectmember_start.setText("开始(" + total + ")");
+            //            btn_live_selectmember_start.setText("开始(" + total + ")");
             btn_live_selectmember_start.setText("开始");
             btn_live_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg_no);
             //adapter中走上报的逻辑
             inviteSelectMember();
+        }
+    }
+
+    private final class InviteAllMemberListener implements View.OnClickListener{
+        @Override
+        public void onClick(View v){
+            refresh();
+            hideAllView();
+            all_member_view.setVisibility(View.VISIBLE);
+            showAllMemberView();
+        }
+    }
+
+    private final class SearchListener implements View.OnClickListener{
+        @Override
+        public void onClick(View v){
+            // TODO: 2018/12/17
+            layoutParams1.flags =
+                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED|
+                            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED |
+                            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
+                            WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
+            refresh();
+            hideAllView();
+            layout_search_member.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void initSearchView(){
+        tv_search_nothing.setText("搜索联系人");
+        rl_search_result.setVisibility(View.GONE);
+        tempGroupSearchAdapter = new TempGroupSearchAdapter(getApplicationContext(), searchMemberListExceptMe,-1);
+        tempGroupSearchAdapter.setInterGroup(true);
+        lv_search_all_member.setAdapter(tempGroupSearchAdapter);
+        btn_search_all_member.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
+        btn_search_all_member.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.search_button_text_color1));
+        btn_search_all_member.setEnabled(false);
+
+
+        lv_search_all_member.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                List<Member> members = new ArrayList<>();
+                members.add(searchMemberListExceptMe.get(position));
+                inviteOtherMemberToWatch(members);
+                searchMemberListExceptMe.clear();
+                tv_search_notdata.setVisibility(View.GONE);
+            }
+        });
+        ll_goback_contacts.setOnClickListener(new OnClickListenerImpGoBackContactsList());
+        ll_delete_edittext.setOnClickListener(new OnClickListenerImpDeleteEditText());
+        btn_search_all_member.setOnClickListener(new OnClickListenerImpSearchContats());
+        lv_search_all_member.setOnScrollListener(new OnScrollListenerImpSearchList());
+        et_search_all_member.addTextChangedListener(new TextWatcherImpSearch());
+        et_search_all_member.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+                if(i == EditorInfo.IME_ACTION_SEARCH) {
+                    doSearch();
+                }
+                return false;
+            }
+        });
+
+    }
+
+    /*************************************************************Handler和其他监听**************************************************************************************/
+    /**关闭搜索页，返回到个呼通讯录*/
+    private final class OnClickListenerImpGoBackContactsList implements
+            View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            et_search_all_member.setText("");
+            InputMethodUtil.hideInputMethod(getApplicationContext(), et_search_all_member);
+
+            searchMemberListExceptMe.clear();
+            tv_search_notdata.setVisibility(View.GONE);
+            refresh();
+            hideAllView();
+            video_platform.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**清除搜索框中的内容*/
+    private final class OnClickListenerImpDeleteEditText implements
+            View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            et_search_all_member.setText("");
+            InputMethodUtil.showInputMethod(getApplicationContext());
+        }
+    }
+
+    /**点击搜索按钮进行搜索*/
+    private final class OnClickListenerImpSearchContats implements
+            View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            doSearch();
+        }
+    }
+
+    private int pageIndex = 0;
+    private int totalPages;
+    private String keyWord;
+    private final class OnScrollListenerImpSearchList implements
+            AbsListView.OnScrollListener {
+        @Override
+        public void onScrollStateChanged(AbsListView view, int scrollState) {
+            int lastVisiblePosition = lv_search_all_member.getLastVisiblePosition();
+            int itemCount = lv_search_all_member.getCount();
+            //            logger.info("----->onScrollStateChanged    lastVisiblePosition="+lastVisiblePosition+"    itemCount="+itemCount);
+            if ( lastVisiblePosition == itemCount - 1) {// && scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE
+                if (pageIndex < totalPages) {//没加载完，加载数据
+                    tv_search_notdata.setVisibility(View.GONE);
+                    if (TextUtils.isEmpty(keyWord)) {
+                        ToastUtil.showToast(getApplicationContext(), "搜索的内容不能为空");
+                    }
+                }else {//加载完了，提示文字
+                    tv_search_notdata.setVisibility(View.VISIBLE);
+                    if (tv_search_notdata != null){
+                        tv_search_notdata.setVisibility(View.GONE);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onScroll(AbsListView view, int firstVisibleItem,
+                             int visibleItemCount, int totalItemCount) {
+        }
+    }
+
+    private final class TextWatcherImpSearch implements TextWatcher {
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (s.toString().contains(" ")) {
+                String[] str = s.toString().split(" ");
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0; i < str.length; i++) {
+                    sb.append(str[i]);
+                }
+
+                et_search_allcontacts.setText(sb.toString());
+
+                et_search_allcontacts.setSelection(start);
+
+            }
+            if(TextUtils.isEmpty(s.toString())){
+                ll_delete_edittext.setVisibility(View.INVISIBLE);
+                btn_search_all_member.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
+                btn_search_all_member.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.search_button_text_color1));
+                btn_search_all_member.setEnabled(false);
+            }else {
+                ll_delete_edittext.setVisibility(View.VISIBLE);
+                btn_search_all_member.setBackgroundResource(R.drawable.rectangle_with_corners_shape2);
+                btn_search_all_member.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.white));
+                btn_search_all_member.setEnabled(true);
+            }
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count,
+                                      int after) {}
+
+        @Override
+        public void afterTextChanged(Editable s) {}
+    }
+
+    //搜索
+    private void doSearch(){
+        InputMethodUtil.hideInputMethod(getApplicationContext(), et_search_all_member);
+        keyWord = et_search_all_member.getText().toString();
+        tempGroupSearchAdapter.setFilterKeyWords(keyWord);
+        groupMember.clear();
+        groupMember.addAll(DataUtil.getAllMembersExceptMe(MyTerminalFactory.getSDK().getConfigManager().getPhoneMembers()));
+        tv_search_nothing.setVisibility(View.VISIBLE);
+        tv_search_nothing.setText("搜索联系人");
+        rl_search_result.setVisibility(View.GONE);
+        searchMemberListExceptMe.clear();
+        pageIndex = 0;
+        tv_search_notdata.setVisibility(View.GONE);
+
+        if (TextUtils.isEmpty(keyWord)) {
+            ToastUtil.showToast(getApplicationContext(), "搜索的内容不能为空");
+        }else {
+            searchMemberFromGroup();
+        }
+    }
+
+
+    private final class InviteMemberOkListener implements View.OnClickListener{
+        @Override
+        public void onClick(View v){
+            inviteOtherMemberToWatch(mIncreaseTemporaryGroupMemberAdapter.getSelectMember());
+        }
+    }
+
+    private void inviteOtherMemberToWatch(List<Member>members ){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(JsonParam.SEND_STATE,MessageSendStateEnum.SENDING);
+        jsonObject.put(JsonParam.DEVICE_ID, deviceId);
+        jsonObject.put(JsonParam.GB28181_RTSP_URL, gb28181Url);
+        jsonObject.put(JsonParam.DEVICE_NAME, deviceName);
+        jsonObject.put(JsonParam.DEVICE_DEPT_ID, deviceDeptId);
+        jsonObject.put(JsonParam.DEVICE_DEPT_NAME, deviceDeptName);
+        jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
+        TerminalMessage mTerminalMessage = new TerminalMessage();
+        mTerminalMessage.messageFromId =  MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+        mTerminalMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
+        mTerminalMessage.messageToId = NoCodec.encodeMemberNo(0);
+        mTerminalMessage.messageToName = "";
+        mTerminalMessage.sendTime = System.currentTimeMillis();
+        mTerminalMessage.messageType = MessageType.GB28181_RECORD.getCode();
+        mTerminalMessage.messageBody = jsonObject;
+        List<Integer> ids = new ArrayList<>();
+        for(Member member : members){
+            ids.add(NoCodec.encodeMemberNo(member.getNo()));
+        }
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("",mTerminalMessage,ids);
+        refresh();
+        hideAllView();
+        video_platform.setVisibility(View.VISIBLE);
+    }
+
+    private final class OnBackListener implements View.OnClickListener{
+        @Override
+        public void onClick(View v){
+            refresh();
+            hideAllView();
+            video_platform.setVisibility(View.VISIBLE);
+
+            mCatalogList.clear();
+            mDatas.clear();
+            tv_checktext.setText("");
+        }
+    }
+
+    private List<Member> groupMember = new ArrayList<>();
+
+    /***  进行组内搜索 **/
+    private void searchMemberFromGroup () {
+        searchMemberListExceptMe.clear();
+        for(Member member : groupMember) {
+            String name = member.getName();
+            String id = String.valueOf(member.getNo());
+            if(!Util.isEmpty(name) && !Util.isEmpty(keyWord) && name.toLowerCase().contains(keyWord.toLowerCase())) {
+                searchMemberListExceptMe.add(member);
+            }
+            else if(!Util.isEmpty(id) && !Util.isEmpty(keyWord) && id.contains(keyWord)) {
+                searchMemberListExceptMe.add(member);
+            }
+        }
+        if (searchMemberListExceptMe.size() == 0) {
+            //            if (isInterGroup) {
+            //                tv_search_nothing.setText("当前组不存在该用户");
+            //            }
+            //            else {
+            tv_search_nothing.setText("联系人不存在");
+            //            }
+            rl_search_result.setVisibility(View.GONE);
+        } else {
+            tv_search_nothing.setVisibility(View.GONE);
+            rl_search_result.setVisibility(View.VISIBLE);
+
+            if (tempGroupSearchAdapter != null) {
+                tempGroupSearchAdapter.refreshSearchContactsAdapter(0, -1, 0);
+                et_search_all_member.setSelection(0);
+            }
         }
     }
 
@@ -3263,6 +3890,29 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         });
     }
 
+    private final class GB28181SurfaceTextureListener implements TextureView.SurfaceTextureListener{
+        @Override
+        public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height){
+            Log.e("GB28181SurfaceTextureLi", "onSurfaceTextureAvailable");
+            startPullGB28121(surface);
+        }
+
+        @Override
+        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height){
+        }
+
+        @Override
+        public boolean onSurfaceTextureDestroyed(SurfaceTexture surface){
+            Log.e("GB28181SurfaceTextureLi", "onSurfaceTextureDestroyed");
+            stopPull();
+            return true;
+        }
+
+        @Override
+        public void onSurfaceTextureUpdated(SurfaceTexture surface){
+        }
+    }
+
     private final class SurfaceTextureListener implements TextureView.SurfaceTextureListener {
         @Override
         public void onSurfaceTextureAvailable(final SurfaceTexture surface, int width, int height) {
@@ -3304,7 +3954,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             if (currentType == MyApplication.TYPE.PULL) {
                 stopPull();
             } else if (currentType == MyApplication.TYPE.PUSH) {
-//                mMediaStream.setSurfaceTexture(null);
+                //                mMediaStream.setSurfaceTexture(null);
                 stopPush();
             }else if(currentType == MyApplication.TYPE.UVCPUSH){
                 //                uvcMediaStream.setSurfaceTexture(null);
@@ -3324,6 +3974,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
     }
 
     private void stopPull() {
+        myHandler.removeMessages(CURRENTTIME);
         if(currentType == MyApplication.TYPE.RECODERPUSH){
             if(null !=pushRTSPClient){
                 pushRTSPClient.stop();
@@ -3355,12 +4006,16 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         }
 
         @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
+        protected void onReceiveResult(int resultCode, Bundle resultData){
             super.onReceiveResult(resultCode, resultData);
             logger.error("currentType:" + currentType+"---"+resultCode + "---" + resultData);
             if (resultCode == EasyRTSPClient.RESULT_VIDEO_DISPLAYED) {
                 pullcount = 0;
+                isPulling = true;
             } else if (resultCode == EasyRTSPClient.RESULT_VIDEO_SIZE) {
+                if(isPulling){
+                    return;
+                }
                 mLiveWidth = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_WIDTH);
                 mLiveHeight = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_HEIGHT);
                 onVideoSizeChange();
@@ -3435,23 +4090,64 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             return;
         }
         svLive.setTransform(new Matrix());
+        sv_gb28181.setTransform(new Matrix());
         float ratioView = rl_live_general_view.getWidth() * 1.0f/rl_live_general_view.getHeight();
+        float gb18181RatioView = re_video_root.getWidth() * 1.0f/re_video_root.getHeight();
         float ratio = mLiveWidth * 1.0f/mLiveHeight;
         // 屏幕比视频的宽高比更小.表示视频是过于宽屏了.
         if (ratioView - ratio < 0){
             // 宽为基准.
             svLive.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
             svLive.getLayoutParams().height = (int) (rl_live_general_view.getWidth() / ratio + 0.5f);
+
         }
         // 视频是竖屏了.
         else{
             svLive.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             svLive.getLayoutParams().width = (int) (rl_live_general_view.getHeight() * ratio + 0.5f);
+
+        }
+
+        if (gb18181RatioView - ratio < 0){
+            // 宽为基准.
+
+            sv_gb28181.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+            sv_gb28181.getLayoutParams().height = (int) (re_video_root.getWidth() / ratio + 0.5f);
+        }
+        // 视频是竖屏了.
+        else{
+
+            sv_gb28181.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            sv_gb28181.getLayoutParams().width = (int) (re_video_root.getHeight() * ratio + 0.5f);
         }
 
         svLive.requestLayout();
+        sv_gb28181.requestLayout();
     }
 
+    private void startPullGB28121(SurfaceTexture surface){
+        myHandler.sendEmptyMessage(CURRENTTIME);
+        if(!TextUtils.isEmpty(gb28181Url)){
+            if(null == mResultReceiver){
+                mResultReceiver = new RtspReceiver(new Handler());
+            }
+            mStreamRender = new EasyRTSPClient(IndividualCallService.this, PLAYKEY,
+                    surface, mResultReceiver);
+            try {
+                if (gb28181Url != null) {
+                    mStreamRender.start(gb28181Url, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                //Toast.makeText(IndividualCallService.this, e.getMessage(), Toast.LENGTH_SHORT).show();
+                logger.error("IndividualCallService :"+e.toString());
+            }
+        }else {
+            ToastUtil.showToast(IndividualCallService.this,"没有获取到流地址");
+            finishVideoLive();
+        }
+    }
     private void startPull(TextureView textureView) {
         logger.info("开始播放");
         livingViewHideOrShow();
@@ -3498,7 +4194,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             mMediaStream.release();
             mMediaStream = null;
             mService.setMediaStream(null);
-//            stopService(new Intent(VideoLiveActivity.this, BackgroundCameraService.class));
+            //            stopService(new Intent(VideoLiveActivity.this, BackgroundCameraService.class));
             logger.info("---->>>>页面关闭，停止推送视频");
         } else {
             if (isStreaming) {
@@ -3534,8 +4230,8 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         isPushing = true;
     }
     private void pushStream(SurfaceTexture surface) {
-//        final File easyPusher = new File(Environment.getExternalStorageDirectory() + ("/EasyPusher"));
-//        easyPusher.mkdir();
+        //        final File easyPusher = new File(Environment.getExternalStorageDirectory() + ("/EasyPusher"));
+        //        easyPusher.mkdir();
 
         livingViewHideOrShow();
         if (mService != null) {
@@ -3543,9 +4239,9 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             if (ms != null) {    // switch from background to front
                 ms.stopPreview();
                 mService.inActivePreview();
-//                ms.destroyCamera();
+                //                ms.destroyCamera();
                 ms.setSurfaceTexture(surface);
-//                ms.createCamera();
+                //                ms.createCamera();
                 ms.startPreview();
                 mMediaStream = ms;
                 if (ms.isStreaming()) {
@@ -3578,14 +4274,14 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
 
             if (MyApplication.instance.getGroupListenenState() == LISTENING) {
                 individual_call_half_duplex_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_gray);
-//                btn_live_look_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_gray);
+                //                btn_live_look_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_gray);
             }
             if(MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED){
 
                 startAutoHangUpTimer();
             }
-            //            else {
-//            }
+            //else {
+            //            }
             MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
             //MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
@@ -3607,7 +4303,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                 btn_live_look_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_dodgerblue2);
             }
             MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
-//            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+            //            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
             livingViewHideOrShow();
         }
@@ -3658,9 +4354,9 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                                     // tv_live_groupName.setText(DataUtil.getGroupByGroupNo(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)).name);
                                     // tv_live_speakingName.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""));
                                     // tv_live_speakingId.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_ID,"")+"");
-//                                    if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.PLAYING) {
-//                                        MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
-//                                    }
+                                    //                                    if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.PLAYING) {
+                                    //                                        MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
+                                    //                                    }
                                     if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
                                         MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(true);
                                     }
@@ -3900,7 +4596,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             bundle.putSerializable("TerminalMessage",terminalMessage);
             intent.putExtra("bundle",bundle);
             Log.e("IndividualCallService", "通知栏消息:" + terminalMessage);
-//            intent.putExtra("TerminalMessage",terminalMessage);
+            //            intent.putExtra("TerminalMessage",terminalMessage);
             PendingIntent pIntent=PendingIntent.getBroadcast(getApplicationContext(),noticeId,intent,PendingIntent.FLAG_UPDATE_CURRENT);
             NotificationManager notificationManager=(NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             Notification.Builder myBuilder = new Notification.Builder(getApplicationContext());
@@ -3963,7 +4659,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             MyApplication.instance.isPttPress = true;
             tv_half_duplex_prompt.setText("我准备说话");
             tv_half_duplex_prompt.setTextColor(Color.YELLOW);
-//            ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().playPrompt();
+            //            ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().playPrompt();
             individual_call_half_duplex_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_yellow);
         } else if (resultCode == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {
             individual_call_half_duplex_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_yellow);
@@ -3976,7 +4672,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
     private void pttDownDoThing() {
         logger.info("pttDownDoThing执行了 isPttPress：" + MyApplication.instance.isPttPress);
         if (!CheckMyPermission.selfPermissionGranted(IndividualCallService.this, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
-//            CheckMyPermission.permissionPrompt(IndividualCallService.this, Manifest.permission.RECORD_AUDIO);
+            //            CheckMyPermission.permissionPrompt(IndividualCallService.this, Manifest.permission.RECORD_AUDIO);
             return;
         }
         //没有组呼权限
@@ -4010,13 +4706,13 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             MyTerminalFactory.getSDK().getVideoProxy().start().unregister(this);
             MyTerminalFactory.getSDK().getLiveManager().ceaseLiving();
             isPushing = false;
-//            if (MyTerminalFactory.getSDK().getLiveManager().getVideoLivePushingStateMachine().getCurrentState() != VideoLivePushingState.PUSHING) {
-//            }
+            //            if (MyTerminalFactory.getSDK().getLiveManager().getVideoLivePushingStateMachine().getCurrentState() != VideoLivePushingState.PUSHING) {
+            //            }
         } else if (currentType == MyApplication.TYPE.PULL) {
             MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
             isPulling = false;
-//            if (MyTerminalFactory.getSDK().getLiveManager().getVideoLivePlayingStateMachine().getCurrentState() != VideoLivePlayingState.PLAYING) {
-//            }
+            //            if (MyTerminalFactory.getSDK().getLiveManager().getVideoLivePlayingStateMachine().getCurrentState() != VideoLivePlayingState.PLAYING) {
+            //            }
         }
     }
 
@@ -4081,7 +4777,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             logger.info("startCamera ----->  " + url);
         }
 
-//        initSpninner();
+        //        initSpninner();
     }
 
     private void startUVCCamera(){
@@ -4091,8 +4787,8 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         width = Integer.parseInt(splitR[0]);
         height = Integer.parseInt(splitR[1]);
         logger.error("分辨率--width:" + width+"----height:"+height);
-//        uvcMediaStream.updateResolution(width, height);
-//                uvcMediaStream.setDgree(getDgree());
+        //        uvcMediaStream.updateResolution(width, height);
+        //                uvcMediaStream.setDgree(getDgree());
         uvcMediaStream.createCamera();
         uvcMediaStream.startPreview();
         logger.info("------>>>>startCamera");
@@ -4117,7 +4813,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                 if (mMediaStream != null) {
                     logger.error("initSpninner width"+width+"height"+height);
                     mMediaStream.updateResolution(width, height);
-//                    mMediaStream.reStartStream();
+                    //                    mMediaStream.reStartStream();
                 }
             }
 
@@ -4131,17 +4827,17 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
     private void initResolution() {
         listResolution = new ArrayList<>(Arrays.asList("1920x1080", "1280x720", "640x480", "320x240"));
         listResolutionName = new ArrayList<>(Arrays.asList("超清", "高清", "标清", "流畅"));
-//        listResolution = new ArrayList<>();
-//        listResolution = VideoUtil.getSupportResolution();
+        //        listResolution = new ArrayList<>();
+        //        listResolution = VideoUtil.getSupportResolution();
         logger.info("listResolution----->"+listResolution);
         //手机支持的分辨率，暂时没有用注释掉
-//        boolean supportdefault = listResolution.contains(String.format("%dx%d", width, height));
-//        if (!supportdefault) {
-//            String r = listResolution.get(0);
-//            String[] splitR = r.split("x");
-//            width = Integer.parseInt(splitR[0]);
-//            height = Integer.parseInt(splitR[1]);
-//        }
+        //        boolean supportdefault = listResolution.contains(String.format("%dx%d", width, height));
+        //        if (!supportdefault) {
+        //            String r = listResolution.get(0);
+        //            String[] splitR = r.split("x");
+        //            width = Integer.parseInt(splitR[0]);
+        //            height = Integer.parseInt(splitR[1]);
+        //        }
     }
 
     private void hideUVCLiveView(){
@@ -4184,7 +4880,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             lv_live_member_info.setVisibility(View.VISIBLE);
             ll_live_hangup_total.setVisibility(View.VISIBLE);
             ll_live_invite_member.setVisibility(View.VISIBLE);
-//            ll_live_chage_camera.setVisibility(View.GONE);
+            //            ll_live_chage_camera.setVisibility(View.GONE);
         }else if(currentType == MyApplication.TYPE.PUSH){
             iv_live_retract.setVisibility(View.VISIBLE);
             tv_live_realtime.setVisibility(View.VISIBLE);
@@ -4233,9 +4929,9 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         public void onFocusChange(View v, boolean hasFocus) {
             EditText etx = (EditText) v;
             if (hasFocus) {
-//                search_select_request.setVisibility(View.VISIBLE);
+                //                search_select_request.setVisibility(View.VISIBLE);
             } else {
-//                search_select_request.setVisibility(View.VISIBLE);
+                //                search_select_request.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -4350,7 +5046,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                         individual_call_half_duplex_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_dodgerblue2);
                         individual_call_half_duplex_ptt.setEnabled(true);
                         logger.info("当前个呼状态："+MyApplication.instance.getIndividualState());
-                        if(MyApplication.instance.getIndividualState() == IndividualCallState.SPEAKING){
+                        if(MyApplication.instance.getIndividualState() ==IndividualCallState.SPEAKING){
                             //只有在半双工个呼接通了才发送超时检测
                             startAutoHangUpTimer();//对方抬起，启动时间检测机制
                         }
@@ -4573,12 +5269,12 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                     } else {//直接请求
                         int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(member.id,"");
 
-//                        Intent intent=new Intent(mContext, LiveRequestActivity.class);
-//                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                        intent.putExtra("requestCode",requestCode);
-//                        intent.putExtra("data",member);
-//
-//                        startActivity(intent);
+                        //                        Intent intent=new Intent(mContext, LiveRequestActivity.class);
+                        //                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        //                        intent.putExtra("requestCode",requestCode);
+                        //                        intent.putExtra("data",member);
+                        //
+                        //                        startActivity(intent);
 
                         if (requestCode == BaseCommonCode.SUCCESS_CODE){
                             //请求成功,直接开始推送视频
@@ -4956,7 +5652,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                             //没有观看就关掉界面
                             hideKey();
                             selectItem.clear();
-                            tv_checktext.setText("");
+                            tv_check_text_live.setText("");
                             et_search_allcontacts.setText("");
                             total = 0;
                             btn_live_selectmember_start.setText("开始");
@@ -5022,10 +5718,10 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             for (Member m : selectItem) {
                 sb.append(m.getName() + "  ");
             }
-            tv_checktext.setText(sb);
+            tv_check_text_live.setText(sb);
             //获取textview宽度
             TextPaint textPaint = new TextPaint();
-            textPaint = tv_checktext.getPaint();
+            textPaint = tv_check_text_live.getPaint();
             float textPaintWidth = textPaint.measureText(sb.toString());
             if (textPaintWidth >= screenWidth - (screenWidth / 4)) {
                 horizonMenu.setLayoutParams(new LinearLayout.LayoutParams(screenWidth - (screenWidth / 4), ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -5066,6 +5762,17 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         }
     }
 
+    private void showConnectingAnimate(){
+        Animation anim = AnimationUtils.loadAnimation(this, R.anim.connecting_anim);
+        if (anim != null){
+            iv_connecting_animate.startAnimation(anim);
+        }
+    }
+
+    private void hideConnectingAnimate(){
+        iv_connecting_animate.clearAnimation();
+    }
+
     private long sendDataTime = 0;
     private class OutCameraClickListener implements View.OnClickListener{
 
@@ -5078,23 +5785,26 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                 sendDataTime = System.currentTimeMillis();
                 sendData();
                 currentType = MyApplication.TYPE.RECODERPUSH;
+                hideAllView();
+                live_connecting.setVisibility(View.VISIBLE);
+                showConnectingAnimate();
                 //如果超过10秒没有点击确认，就取消上报
                 myHandler.sendEmptyMessageDelayed(CANCELLIVE,10000);
 
                 //用普通手机测试代码
-//                myHandler.removeMessages(CANCELLIVE);
-//                currentType = MyApplication.TYPE.RECODERPUSH;
-//                if(activePush){
-//                    requestStartLive();
-//                }else{
-//                    MyTerminalFactory.getSDK().getLiveManager().responseLiving(true);
-//                    refresh();
-//                    hideAllView();
-//                    live.setVisibility(View.VISIBLE);
-//                    pushRecoderView("");
-//                    PromptManager.getInstance().stopRing();
-//                    MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
-//                }
+                //                myHandler.removeMessages(CANCELLIVE);
+                //                currentType = MyApplication.TYPE.RECODERPUSH;
+                //                if(activePush){
+                //                    requestStartLive();
+                //                }else{
+                //                    MyTerminalFactory.getSDK().getLiveManager().responseLiving(true);
+                //                    refresh();
+                //                    hideAllView();
+                //                    live.setVisibility(View.VISIBLE);
+                //                    pushRecoderView("");
+                //                    PromptManager.getInstance().stopRing();
+                //                    MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
+                //                }
             }else {
                 currentType = MyApplication.TYPE.UVCPUSH;
                 if(activePush){
@@ -5135,6 +5845,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
             logger.info("HRCPP_NB_ACC_TransparentDataWithAP:"+"AccType:" + i + "--DataLen:" + i1+"--hex:"+toHex(bytes));
             if(toHex(bytes).endsWith("100")){
                 logger.info("被拒绝");
+                finishVideoLive();
                 myHandler.removeMessages(CANCELLIVE);
                 myHandler.sendEmptyMessage(CANCELLIVE);
             }else if(toHex(bytes).endsWith("000")){
@@ -5142,6 +5853,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                 if(System.currentTimeMillis() - lastReceiveTime > 1000 && System.currentTimeMillis() - sendDataTime <=10000){
                     lastReceiveTime = System.currentTimeMillis();
                     logger.info("接受");
+                    hideAllView();
                     myHandler.removeMessages(CANCELLIVE);
                     currentType = MyApplication.TYPE.RECODERPUSH;
                     if(activePush){

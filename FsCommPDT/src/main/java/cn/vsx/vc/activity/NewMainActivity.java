@@ -3,6 +3,7 @@ package cn.vsx.vc.activity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
@@ -21,6 +22,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -606,6 +608,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private String live_theme;
     private String live_name;
     private CallManager callManager;
+    private UpdateManager updateManager;
     //    private LiveNewsAdaptere liveNewsAdapter;
 
     /**
@@ -1128,15 +1131,12 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     @Override
     public void initData() {
         //先判断悬浮窗权限，没打开就关闭
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            //
-            if (!Settings.canDrawOverlays(this)) {
-                Log.e("NewMainActivity", "未开启悬浮窗权限");
-                // SYSTEM_ALERT_WINDOW permission not granted...
-                cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this, "请打开悬浮窗权限，否则私密呼叫和图像功能无法使用！");
-                exitApp();
-                return;
-            }
+        if(!checkFloatPermission(this)){
+            Log.e("NewMainActivity", "未开启悬浮窗权限");
+            // SYSTEM_ALERT_WINDOW permission not granted...
+            ToastUtil.showToast(NewMainActivity.this, "请打开悬浮窗权限，否则私密呼叫和图像功能无法使用！");
+            exitApp();
+            return;
         }
         WindowManager windowManager = (WindowManager) getSystemService(Service.WINDOW_SERVICE);
         width = windowManager.getDefaultDisplay().getWidth();
@@ -1192,17 +1192,53 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             }
             //版本自动更新检测
             if (MyTerminalFactory.getSDK().getParam(Params.IS_AUTO_UPDATE, false) && !MyApplication.instance.isUpdatingAPP) {
-                final UpdateManager manager = new UpdateManager(NewMainActivity.this);
+                updateManager = new UpdateManager(NewMainActivity.this);
                 timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        manager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL,""),false);
+                        updateManager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL,""),false);
                     }
                 }, 4000);
             }
         }
 
         judgePermission();
+    }
+
+    public boolean checkFloatPermission(Context context) {
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            try {
+                Class cls = Class.forName("android.content.Context");
+                Field declaredField = cls.getDeclaredField("APP_OPS_SERVICE");
+                declaredField.setAccessible(true);
+                Object obj = declaredField.get(cls);
+                if (!(obj instanceof String)) {
+                    return false;
+                }
+                String str2 = (String) obj;
+                obj = cls.getMethod("getSystemService", String.class).invoke(context, str2);
+                cls = Class.forName("android.app.AppOpsManager");
+                Field declaredField2 = cls.getDeclaredField("MODE_ALLOWED");
+                declaredField2.setAccessible(true);
+                Method checkOp = cls.getMethod("checkOp", Integer.TYPE, Integer.TYPE, String.class);
+                int result = (Integer) checkOp.invoke(obj, 24, Binder.getCallingUid(), context.getPackageName());
+                return result == declaredField2.getInt(cls);
+            } catch (Exception e) {
+                return false;
+            }
+        } else {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                AppOpsManager appOpsMgr = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+                if (appOpsMgr == null)
+                    return false;
+                int mode = appOpsMgr.checkOpNoThrow("android:system_alert_window", android.os.Process.myUid(), context
+                        .getPackageName());
+                return mode == AppOpsManager.MODE_ALLOWED || mode == AppOpsManager.MODE_IGNORED;
+            } else {
+                return Settings.canDrawOverlays(context);
+            }
+        }
     }
 
     private void exitApp() {
@@ -1515,7 +1551,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     }
 
     public static final int OVERLAY_PERMISSION_REQ_CODE = 1234;
-
+    public static final int REQUEST_INSTALL_PACKAGES_CODE = 1235;
+    public static final int GET_UNKNOWN_APP_SOURCES = 1236;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
@@ -1527,6 +1564,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     // 创建直播服务
                     startLiveService();
                 }
+            }
+        }else if(requestCode == GET_UNKNOWN_APP_SOURCES){
+            if(null !=updateManager){
+                updateManager.checkIsAndroidO(false);
             }
         }
     }
@@ -1559,6 +1600,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     permissionDenied(requestCode);
                 }
                 break;
+            case REQUEST_INSTALL_PACKAGES_CODE:
+                if(grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED){
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+                    startActivityForResult(intent, GET_UNKNOWN_APP_SOURCES);
+                }
             default:
                 break;
 

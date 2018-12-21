@@ -1,5 +1,7 @@
 package cn.vsx.vc.application;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.Context;
@@ -12,6 +14,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,13 +32,15 @@ import java.net.URL;
 import java.util.HashMap;
 
 import cn.vsx.vc.R;
-import ptt.terminalsdk.tools.ToastUtil;
+import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.tools.PhoneAdapter;
+
+import static cn.vsx.vc.activity.NewMainActivity.REQUEST_INSTALL_PACKAGES_CODE;
 
 public class UpdateManager
 {
 	private Logger logger = Logger.getLogger(getClass());
-	
+
 	private String updateUrl = null;
 	private String url_apk = null;
 	/* 下载中 */
@@ -62,17 +67,17 @@ public class UpdateManager
 		{
 			switch (msg.what)
 			{
-			// 正在下载
-			case DOWNLOAD:
-				//设置进度条位置
-				mProgress.setProgress(progress);
-				break;
-			case DOWNLOAD_FINISH:
-				// 安装文件
-				installApk();
-				break;
-			default:
-				break;
+				// 正在下载
+				case DOWNLOAD:
+					//设置进度条位置
+					mProgress.setProgress(progress);
+					break;
+				case DOWNLOAD_FINISH:
+					// 安装文件
+					checkIsAndroidO(true);
+					break;
+				default:
+					break;
 			}
 		};
 	};
@@ -101,11 +106,10 @@ public class UpdateManager
 
 	/**
 	 * 检查软件是否有更新版本
-	 * 
+	 *
 	 * @return
 	 */
-	private boolean isUpdate()
-	{
+	private boolean isUpdate(){
 		try {
 			// 获取当前软件版本
 			int versionCode = getVersionCode(mContext);
@@ -136,7 +140,7 @@ public class UpdateManager
 
 	/**
 	 * 获取软件版本号
-	 * 
+	 *
 	 * @param context
 	 * @return
 	 */
@@ -159,7 +163,7 @@ public class UpdateManager
 	 */
 	public void showNoticeDialog(){
 		mHandler.post(new Runnable() {
-			
+
 			@Override
 			public void run() {
 				try{
@@ -169,25 +173,25 @@ public class UpdateManager
 					builder.setMessage(R.string.soft_update_info);
 					// 更新
 					builder.setPositiveButton(R.string.soft_update_updatebtn, new OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
-                        {
-                            dialog.dismiss();
-                            // 显示下载对话框
-                            showDownloadDialog();
-                        }
-                    });
+					{
+						@Override
+						public void onClick(DialogInterface dialog, int which)
+						{
+							dialog.dismiss();
+							// 显示下载对话框
+							showDownloadDialog();
+						}
+					});
 					// 稍后更新
 					builder.setNegativeButton(R.string.soft_update_later, new OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
-                        {
-                            dialog.dismiss();
-                            MyApplication.instance.isUpdatingAPP = false;
-                        }
-                    });
+					{
+						@Override
+						public void onClick(DialogInterface dialog, int which)
+						{
+							dialog.dismiss();
+							MyApplication.instance.isUpdatingAPP = false;
+						}
+					});
 					builder.setCancelable(false);
 					builder.show();
 					MyApplication.instance.isUpdatingAPP = true;
@@ -314,33 +318,46 @@ public class UpdateManager
 	/**
 	 * 安装APK文件
 	 */
-	private void installApk()
-	{
+	private void installApk(){
 		File apkfile = new File(mSavePath, "4gptt.apk");
-		if (!apkfile.exists())
-		{
+		if (!apkfile.exists()){
 			return;
 		}
 		// 通过Intent安装APK文件
-//		Intent i = new Intent(Intent.ACTION_VIEW);
-//		i.setDataAndType(getUriForFile(mContext, apkfile), "application/vnd.android.package-archive");
-//		mContext.startActivity(i);
 
-		if(Build.VERSION.SDK_INT>=24) {//判读版本是否在7.0以上
- 			Uri apkUri = FileProvider.getUriForFile(mContext, cn.vsx.vc.BuildConfig.APPLICATION_ID+".myprovider", apkfile);//在AndroidManifest中的android:authorities值
-			Intent install = new Intent(Intent.ACTION_VIEW);
-			install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			install.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-			install.setDataAndType(apkUri, "application/vnd.android.package-archive");
-			mContext.startActivity(install);
-		} else{
-			Intent install = new Intent(Intent.ACTION_VIEW);
-			install.setDataAndType(Uri.fromFile(apkfile), "application/vnd.android.package-archive");
-			install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			mContext.startActivity(install);
+		Intent intent = new Intent(Intent.ACTION_VIEW);
+		//判断是否是AndroidN以及更高的版本
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+			Uri contentUri = FileProvider.getUriForFile(mContext, "com.zectec.fileprovider", apkfile);
+			intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
+		} else {
+			intent.setDataAndType(Uri.fromFile(apkfile), "application/vnd.android.package-archive");
+			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 		}
-
+		mContext.startActivity(intent);
+		android.os.Process.killProcess(android.os.Process.myPid());
 
 		logger.info("下载完成，通过Intent开始安装APK文件");
 	}
+
+	public void checkIsAndroidO(boolean install){
+		if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.O){
+			boolean b = mContext.getPackageManager().canRequestPackageInstalls();
+			if (b) {
+				installApk();
+			} else {
+				//请求安装未知应用来源的权限
+				if(install){
+					ActivityCompat.requestPermissions((Activity)mContext, new String[]{Manifest.permission.REQUEST_INSTALL_PACKAGES}, REQUEST_INSTALL_PACKAGES_CODE);
+				}else {
+					ToastUtil.showToast(mContext,"请允许安装未知应用来源，否则无法安装");
+				}
+			}
+		}else {
+			installApk();
+		}
+	}
+
 }

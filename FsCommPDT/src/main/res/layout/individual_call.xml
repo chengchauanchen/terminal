@@ -13,7 +13,7 @@
     <!-- 缩小化-->
     <include layout="@layout/popupwindow_minimize"
         android:id="@+id/pop_minimize"/>
-
+    
     <include layout="@layout/layout_call_prompt"
         android:id="@+id/layout_call_prompt"/>
     
@@ -52,9 +52,22 @@
         android:id="@+id/live_connecting"
         android:visibility="gone"
         layout="@layout/live_connecting"/>
+    
+    <include
+        android:id="@+id/video_platform"
+        layout="@layout/video_platform"/>
+    
+    <include
+        android:id="@+id/all_member_view"
+        layout="@layout/layout_all_member"/>
+    
+    <include
+        android:id="@+id/layout_search_member"
+        layout="@layout/layout_search_member"/>
+    
     <!--外置摄像头上报视频-->
     <include
         android:id="@+id/usb_live"
         layout="@layout/usbvideo_live"/>
-    
+
 </FrameLayout>
