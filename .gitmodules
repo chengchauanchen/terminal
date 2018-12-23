@@ -7,3 +7,6 @@
 [submodule "ProtoBuf"]
 	path = ProtoBuf
 	url = http://www.vsxin.com:4040/converged/ProtoBuf.git
+[submodule "DDPush"]
+	path = DDPush
+	url = http://www.vsxin.com:4040/converged/DDPush.git
