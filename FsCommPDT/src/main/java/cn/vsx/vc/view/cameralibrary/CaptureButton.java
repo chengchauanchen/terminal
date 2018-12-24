@@ -12,6 +12,8 @@ import android.os.CountDownTimer;
 import android.view.MotionEvent;
 import android.view.View;
 
+import org.apache.log4j.Logger;
+
 import cn.vsx.vc.view.cameralibrary.listener.CaptureListener;
 import cn.vsx.vc.view.cameralibrary.util.CheckPermission;
 import cn.vsx.vc.view.cameralibrary.util.LogUtil;
@@ -73,6 +75,7 @@ public class CaptureButton extends View{
     private CaptureListener captureLisenter;        //按钮回调接口
     private RecordCountDownTimer timer;             //计时器
     private AnimatorSet animatorSet;
+    protected Logger logger = Logger.getLogger(getClass());
 
     public CaptureButton(Context context) {
         super(context);
@@ -144,6 +147,7 @@ public class CaptureButton extends View{
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        logger.info("CaptureButton---onTouchEvent:"+event.getAction());
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 LogUtil.i("state = " + state);
@@ -175,6 +179,7 @@ public class CaptureButton extends View{
     //当手指松开按钮时候处理的逻辑
     private void handlerUnpressByState() {
         removeCallbacks(longPressRunnable); //移除长按逻辑的Runnable
+        logger.info("CaptureButton---handlerUnpressByState:"+state);
         //根据当前状态处理
         switch (state) {
             //当前是点击按下
@@ -334,6 +339,7 @@ public class CaptureButton extends View{
     private class LongPressRunnable implements Runnable {
         @Override
         public void run() {
+            logger.info("CaptureButton---LongPressRunnable");
             state = STATE_LONG_PRESS;   //如果按下后经过500毫秒则会修改当前状态为长按状态
             //没有录制权限
             if (CheckPermission.getRecordState() != CheckPermission.STATE_SUCCESS) {
@@ -386,5 +392,19 @@ public class CaptureButton extends View{
     //设置状态
     public void resetState() {
         state = STATE_IDLE;
+    }
+
+    @Override
+    public void onWindowFocusChanged(boolean hasWindowFocus) {
+        super.onWindowFocusChanged(hasWindowFocus);
+        logger.info("CaptureButton---onWindowFocusChanged:hasWindowFocus:"+hasWindowFocus);
+        if(!hasWindowFocus&&(state == STATE_RECORDERING)){
+            state = STATE_BAN;
+            progress = 0;       //重制进度
+            timer.cancel(); //停止计时器
+            button_outside_radius = button_radius;
+            button_inside_radius = button_radius * 0.75f;
+            postInvalidate();
+        }
     }
 }
