@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import cn.vsx.hamster.common.MessageFunEnum;
 import cn.vsx.hamster.protolbuf.codec.PTTMsgCodec;
 import cn.vsx.hamster.terminalsdk.manager.channel.AbsClientChannel;
 import cn.vsx.hamster.terminalsdk.manager.channel.ClientChannelMessageDispatcher;
@@ -59,20 +60,25 @@ public class ClientChannel extends AbsClientChannel {
 	}
 
 	public void sendMessage(GeneratedMessage message, final PushMessageSendResultHandler handler){
+		sendMessage(message, handler, MessageFunEnum.MESSAGE_FOR_WORK.getCode());
+	}
+
+	@Override
+	public void sendMessage(GeneratedMessage message, final PushMessageSendResultHandler handler, int messageFun) {
 		if(MyTerminalFactory.getSDK().hasNetwork()){
 			logger.info("发送消息："+message.getClass()+"----->"+message);
 			try {
-				messageService.sendMessage(PTTMsgCodec.INSTANCE.getEncode().encodeMessage(message), new PushMessageSendResultHandlerAidl.Stub() {
-                    @Override
-                    public void handler(boolean sendOK, String uuid) throws RemoteException {
-                        handler.handler(sendOK, uuid);
-                    }
-                });
+				messageService.sendMessage(PTTMsgCodec.INSTANCE.getEncode().encodeMessage(message, messageFun), new PushMessageSendResultHandlerAidl.Stub() {
+					@Override
+					public void handler(boolean sendOK, String uuid) throws RemoteException {
+						handler.handler(sendOK, uuid);
+					}
+				});
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
-			byte[] bytes = PTTMsgCodec.INSTANCE.getEncode().encodeMessage(message);
+			byte[] bytes = PTTMsgCodec.INSTANCE.getEncode().encodeMessage(message, messageFun);
 			logger.info("bytes="+ Arrays.toString(bytes));
 		}
 		else{
