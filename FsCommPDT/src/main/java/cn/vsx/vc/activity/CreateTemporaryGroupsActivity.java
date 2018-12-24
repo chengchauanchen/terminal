@@ -6,10 +6,7 @@ import android.graphics.Color;
 import android.os.Handler;
 import android.support.v4.widget.TextViewCompat;
 import android.text.TextUtils;
-import android.view.Display;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -29,6 +26,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseCreateTempGroup4
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.CreateTemporaryGroupsDialog;
 import cn.vsx.vc.utils.StringUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -85,6 +83,9 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     private boolean forceSwitchGroup;
     private TimerTask timerTaskLock;
     private List<Integer> signs;
+    //创建临时组的弹窗提示
+    private CreateTemporaryGroupsDialog createTemporaryGroupsDialog;
+
 
     @Override
     public int getLayoutResId() {
@@ -104,6 +105,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         ll_lock_time.setVisibility(View.GONE);
         initOptionsPickerViewA();
         initOptionsPickerViewB();
+        createTemporaryGroupsDialog = new CreateTemporaryGroupsDialog(this);
     }
 
     private void initOptionsPickerViewA() {
@@ -374,15 +376,28 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         myHandler.post(new Runnable() {
             @Override
             public void run() {
+                checkDialogIsNotNull();
                 if(resultCode== BaseCommonCode.SUCCESS_CODE){
-                    alertDialog.dismiss();
-                    CreateTemporaryGroupsActivity.this.finish();
-                    startActivity(new Intent(CreateTemporaryGroupsActivity.this,NewMainActivity.class));
-                    //刷新通讯录组群列表
-                    MyTerminalFactory.getSDK().getConfigManager().updateAllGroups();
+                    createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_SUCCESS,"",forceSwitchGroup);
+                    myHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            //刷新通讯录组群列表
+                            MyTerminalFactory.getSDK().getConfigManager().updateAllGroups();
+                            dismissTemporaryGroupDialog();
+                            startActivity(new Intent(CreateTemporaryGroupsActivity.this,NewMainActivity.class));
+                            CreateTemporaryGroupsActivity.this.finish();
+                        }
+                    },2000);
                 }else {
-                    alertDialog.dismiss();
-                    ToastUtil.showToast(CreateTemporaryGroupsActivity.this,resultDesc);
+                    createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_FAIL,resultDesc,forceSwitchGroup);
+                    myHandler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            dismissTemporaryGroupDialog();
+                        }
+                    },2000);
+
                 }
 
             }
@@ -449,27 +464,9 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "名称不合法");
                 return;
             }
-
-
-            alertDialog = new AlertDialog.Builder(CreateTemporaryGroupsActivity.this).create();
-            alertDialog.show();
-            Display display = getWindowManager().getDefaultDisplay();
-            int heigth = display.getWidth();
-            int width = display.getHeight();
-            Window window = alertDialog.getWindow();
-            WindowManager.LayoutParams layoutParams = window.getAttributes();
-            layoutParams.width=width/2;
-            layoutParams.height=heigth/2;
-            window.setAttributes(layoutParams);
-            window.setContentView(R.layout.dialog_create_temporary_group);
-            TextView toJump=(TextView)window.findViewById(R.id.text_toJump);
-            if(forceSwitchGroup){
-                toJump.setVisibility(View.VISIBLE);
-            }else {
-                toJump.setVisibility(View.INVISIBLE);
-            }
-
-
+           //显示提示框
+            checkDialogIsNotNull();
+            createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_CREATTING,"",forceSwitchGroup);
             logger.error("创建临时组：" + "forceSwitchGroup" + forceSwitchGroup + ",temporaryGroupsName" + temporaryGroupsName + ",pushMemberList" + list.toString() + ",existTime" + existTime + ",islock" + finalIslock + ",lockedTime" + lockedTime);
             //延时创建临时组
             if (timerTaskLock != null) {
@@ -482,15 +479,25 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                     MyTerminalFactory.getSDK().getTempGroupManager().createTempGroup(forceSwitchGroup,temporaryGroupsName,list,existTime, finalIslock,lockedTime);
                 }
             };
-            MyTerminalFactory.getSDK().getTimer().schedule(timerTaskLock, 5000);
-
-
-
-
+            MyTerminalFactory.getSDK().getTimer().schedule(timerTaskLock, 2000);
         }
     }
 
+    /**
+     * 创建临时组的弹窗非空规避
+     */
+    private void checkDialogIsNotNull(){
+        if(createTemporaryGroupsDialog==null){
+            createTemporaryGroupsDialog = new CreateTemporaryGroupsDialog(CreateTemporaryGroupsActivity.this);
+        }
+    }
 
-
-
+    /**
+     * 关闭创建临时组的弹窗
+     */
+    private void dismissTemporaryGroupDialog(){
+        if(createTemporaryGroupsDialog!=null){
+            createTemporaryGroupsDialog.dismiss();
+        }
+    }
 }

@@ -7,18 +7,19 @@
     >
     
     <ImageView
+        android:id="@+id/dialog_icon"
         android:layout_width="@dimen/x40"
         android:layout_height="@dimen/x40"
         android:layout_above="@+id/text_context"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/dialog_icon"
+        android:src="@drawable/dialog_icon_creatting"
         />
 
     <TextView
         android:id="@+id/text_context"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="创建成功"
+        android:text="正在创建..."
         android:textSize="25dp"
         android:layout_marginTop="@dimen/x5"
         android:layout_marginBottom="@dimen/x5"
@@ -32,6 +33,7 @@
         android:layout_below="@+id/text_context"
         android:layout_centerHorizontal="true"
         android:text="正在跳转...."
-        android:textSize="12sp"
-        android:textColor="#EFB152"/>
+        android:textSize="14sp"
+        android:textColor="#EFB152"
+        android:visibility="invisible"/>
 </RelativeLayout>
