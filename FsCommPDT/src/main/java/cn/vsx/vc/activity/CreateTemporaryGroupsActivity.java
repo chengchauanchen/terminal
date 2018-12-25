@@ -274,14 +274,22 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                         ivUnlocked.setSelected(false);
                         iv_change.setSelected(true);
                         iv_unchange.setSelected(false);
+                        TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
+                        TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
+                        TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
+                        TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
                         ToastUtil.showToast(CreateTemporaryGroupsActivity.this,"锁定状态下自动将组员切换到所创建的临时组");
                     }else {
                         iv_change.setSelected(false);
                         iv_unchange.setSelected(true);
+                        TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_unchecked);
+                        TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_checked);
                     }
                 }else {
                     iv_change.setSelected(true);
                     iv_unchange.setSelected(false);
+                    TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
+                    TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
                 }
             }
         });
