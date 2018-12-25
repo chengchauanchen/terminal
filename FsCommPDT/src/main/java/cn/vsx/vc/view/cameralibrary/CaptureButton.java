@@ -405,6 +405,12 @@ public class CaptureButton extends View{
             button_outside_radius = button_radius;
             button_inside_radius = button_radius * 0.75f;
             postInvalidate();
+            if (captureLisenter != null) {
+                if (recorded_time < min_duration)
+                    captureLisenter.recordShort(recorded_time);//回调录制时间过短
+                else
+                    captureLisenter.recordEnd(recorded_time,false);  //回调录制结束
+            }
         }
     }
 }
