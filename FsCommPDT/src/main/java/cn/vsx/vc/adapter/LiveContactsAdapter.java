@@ -47,8 +47,6 @@ public class LiveContactsAdapter extends BaseAdapter {
     private String keyWords = "";
     private boolean isPush;
     private OnItemClickListener onItemClickListener;
-    //上一个被选中的item
-    private int lastCheckedItem = -1;
 
     public LiveContactsAdapter(Context context, List<Member> list, boolean isPush) {
         this.context = context;
@@ -85,7 +83,7 @@ public class LiveContactsAdapter extends BaseAdapter {
     }
 
     @Override
-    public Object getItem(int position) {
+    public Member getItem(int position) {
         return list.get(position);
     }
 
@@ -166,12 +164,20 @@ public class LiveContactsAdapter extends BaseAdapter {
         viewHolder.rbSelectmember.setVisibility(View.GONE);
         viewHolder.cbSelectmember.setVisibility(View.VISIBLE);
 
+       if(isPush){
+           //上报图像
+           viewHolder.cbSelectmember.setChecked(list.get(position).isChecked);
+        }else{
+          //请求图像   由于请求图像每次只能选择一个人，这里需要规避从搜索列表转到全列表显示时，之前已经选择的不能取消的问题
+           if(liveMember!=null){
+               //之前已经有选择的
+               viewHolder.cbSelectmember.setChecked(member.id == liveMember.id);
+           }else{
+               //之前没有选择
+               viewHolder.cbSelectmember.setChecked(list.get(position).isChecked);
+           }
+       }
 
-        if(list.get(position).isChecked){
-            viewHolder.cbSelectmember.setChecked(true);
-        }else {
-            viewHolder.cbSelectmember.setChecked(false);
-        }
 
         convertView.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -201,16 +207,18 @@ public class LiveContactsAdapter extends BaseAdapter {
                         viewHolder.cbSelectmember.setChecked(false);
                         member.isChecked = false;
                         liveMember = null;
-                        lastCheckedItem = -1;
                     }else {
                         //取消上一个选中的item
-                        if(lastCheckedItem!=-1){
-                            list.get(lastCheckedItem).isChecked = false;
+                        if(liveMember!=null){
+                            for (Member member:list) {
+                                if(member.id == liveMember.id){
+                                    member.isChecked = false;
+                                }
+                            }
                         }
                         viewHolder.cbSelectmember.setChecked(true);
                         member.isChecked = true;
                         liveMember = member;
-                        lastCheckedItem = position;
                     }
                 }
                 //回调到listview界面

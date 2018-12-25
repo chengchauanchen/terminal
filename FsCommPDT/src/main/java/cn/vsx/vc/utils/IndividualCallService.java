@@ -5700,11 +5700,11 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
         public void onItemClick(int position,boolean checked,boolean isPush){
             if(isPush){
                 if(checked){
-                    selectItem.add(memberList.get(position));
+                    selectItem.add(liveContactsAdapter.getItem(position));
                     total++;
                 }else {
                     total--;
-                    selectItem.remove(memberList.get(position));
+                    selectItem.remove(liveContactsAdapter.getItem(position));
                 }
                 if(total>0){
                     btn_live_selectmember_start.setText("开始(" + total + ")");
@@ -5717,10 +5717,10 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                 if(checked){
                     total = 1;
                     selectItem.clear();
-                    selectItem.add(memberList.get(position));
+                    selectItem.add(liveContactsAdapter.getItem(position));
                 }else {
                     total = 0;
-                    selectItem.remove(memberList.get(position));
+                    selectItem.remove(liveContactsAdapter.getItem(position));
                 }
                 if(total>0){
                     btn_live_selectmember_start.setText("开始(" + total + ")");
