@@ -89,17 +89,24 @@ public class ExpandableItemAdapter extends BaseMultiItemQuickAdapter<MultiItemEn
                         }
 
                         boolean isCheck = f.getIsCheck();
-                        f.setIsCheck(!isCheck);
-                        if (f.getIsCheck()) {
-                            if (Constant.files.size() >= 1) {
-                                Toast.makeText(mContext, "只能同时发送5个文件！", Toast.LENGTH_SHORT).show();
+                        if (isCheck) {
+                            //之前已经选择-现在执行取消选择
+                            f.setIsCheck(!isCheck);
+                            Constant.files.remove(f.getFilePath());
+                            ((CheckBox) helper.getView(R.id.cb_file)).setChecked(false, true);
+                        } else {
+                            //之前没有选择-现在执行选择
+                            if (Constant.files.size() >= Constant.FILE_COUNT_MAX) {
+                                //如果已经选择的数量大于最大数量，提示
+                                Toast.makeText(mContext, Constant.FILE_COUNT_MAX_PROMPT, Toast.LENGTH_SHORT).show();
                             }else {
+                                //如果已经选择的数量不大于最大数量，添加并选择
+                                f.setIsCheck(!isCheck);
                                 Constant.files.put(f.getFilePath(), f);
                                 ((CheckBox) helper.getView(R.id.cb_file)).setChecked(true, true);
                             }
-                        } else {
-                            Constant.files.remove(f.getFilePath());
-                            ((CheckBox) helper.getView(R.id.cb_file)).setChecked(false, true);
+
+
                         }
                         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverCheckFileHandler.class);
                     }

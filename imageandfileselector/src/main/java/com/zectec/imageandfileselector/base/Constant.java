@@ -14,4 +14,8 @@ public class Constant {
     public static ArrayMap<String, FileInfo> files = new ArrayMap<>();
     public static ArrayMap<String, Image> images = new ArrayMap<>();
     public static ArrayMap<String, Record> records = new ArrayMap<>();
+
+    //同时发送文件的最大数量
+    public static final int FILE_COUNT_MAX = 5;
+    public static final String FILE_COUNT_MAX_PROMPT = "只能同时发送"+FILE_COUNT_MAX+"个文件!";
 }

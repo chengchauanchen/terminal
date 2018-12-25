@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Set;
 
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverCheckFileHandler;
+import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileHandler;
 
 import static com.zectec.imageandfileselector.utils.FileUtil.fileFilter;
 
@@ -173,20 +174,25 @@ public class SDCardFragment extends BaseFragment implements View.OnClickListener
 
                 if (adapter.getItemViewType(position) == MultipleItem.FILE) {
                     boolean isCheck = fileInfos.get(position).getIsCheck();
-                    fileInfos.get(position).setIsCheck(!isCheck);
                     CheckBox checkBox = (CheckBox) view.findViewById(R.id.cb_file);
-                    if (fileInfos.get(position).getIsCheck()) {
-                        if (Constant.files.size() >= 1) {
+                    if (isCheck) {
+                        //之前已经选择-现在执行取消选择
+                        fileInfos.get(position).setIsCheck(!isCheck);
+                        Constant.files.remove(fileInfos.get(position).getFilePath());
+                        if(checkBox != null)
+                            checkBox.setChecked(false, true);
+                    } else {
+                        //之前没有选择-现在执行选择
+                        if (Constant.files.size() >= Constant.FILE_COUNT_MAX) {
+                            //如果已经选择的数量大于最大数量，提示
+                            Toast.makeText(SDCardFragment.this.getActivity(), Constant.FILE_COUNT_MAX_PROMPT, Toast.LENGTH_SHORT).show();
                         }else {
+                            //如果已经选择的数量不大于最大数量，添加并选择
+                            fileInfos.get(position).setIsCheck(!isCheck);
                             Constant.files.put(fileInfos.get(position).getFilePath(), fileInfos.get(position));
                             if(checkBox != null)
                                 checkBox.setChecked(true, true);
                         }
-
-                    } else {
-                        Constant.files.remove(fileInfos.get(position).getFilePath());
-                        if(checkBox != null)
-                            checkBox.setChecked(false, true);
                     }
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverCheckFileHandler.class);
                     updateSizAndCount();
