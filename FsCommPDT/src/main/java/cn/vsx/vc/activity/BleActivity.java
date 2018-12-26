@@ -14,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.TextViewCompat;
@@ -31,6 +32,8 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +71,9 @@ public class BleActivity extends BaseActivity{
     private String connectingDeviceAddress;//正在连接中的设备地址
     private boolean connecting;//是否正在连接中
     private int connectingPosition;//正在连接的设备在列表中的位置
+    private Logger logger = Logger.getLogger(this.getClass());
+    //申请定位权限的请求code
+    private static final int REQUEST_PERMISSION_ACCESS_COARSE_LOCATION_CODE = 10;
 
     @Override
     public int getLayoutResId(){
@@ -85,21 +91,28 @@ public class BleActivity extends BaseActivity{
             public void onBtnClick(boolean currState){
                 if(currState){
                     //打开蓝牙
-                    enableBluetooth(true);
-                    tv_close_ble.setVisibility(View.GONE);
-                    rl_usable_device.setVisibility(View.VISIBLE);
-                    mHandler.postDelayed(scanDevice,2000);
+                    if(enableBluetooth(true)){
+                        tv_close_ble.setVisibility(View.GONE);
+                        rl_usable_device.setVisibility(View.VISIBLE);
+                        mHandler.postDelayed(scanDevice,2000);
+                    }else{
+                        switch_ble.initToggleState(false);
+                        ToastUtil.showToast(BleActivity.this,"请打开蓝牙的权限");
+                    }
                 }else{
                     //关闭蓝牙
-                    if(mScanning){
-                        scanLeDevice(false);
+                    if(enableBluetooth(false)){
+                        if(mScanning){
+                            scanLeDevice(false);
+                        }
+                        mLeDevices.clear();
+                        devices.clear();
+                        mLeDeviceListAdapter.notifyDataSetChanged();
+                        rl_usable_device.setVisibility(View.GONE);
+                        tv_close_ble.setVisibility(View.VISIBLE);
+                    }else{
+                        switch_ble.initToggleState(true);
                     }
-                    mLeDevices.clear();
-                    devices.clear();
-                    mLeDeviceListAdapter.notifyDataSetChanged();
-                    enableBluetooth(false);
-                    rl_usable_device.setVisibility(View.GONE);
-                    tv_close_ble.setVisibility(View.VISIBLE);
                 }
             }
         });
@@ -113,7 +126,7 @@ public class BleActivity extends BaseActivity{
         //Android6.0以上连接蓝牙需要获得位置权限
         if(Build.VERSION.SDK_INT >= 23){
             if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED){
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 10);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_ACCESS_COARSE_LOCATION_CODE);
             }
         }
         BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -173,17 +186,29 @@ public class BleActivity extends BaseActivity{
         });
     }
 
+    /**
+     * 打开或者关闭蓝牙是否成功
+     * @param enable
+     * @return
+     */
     public boolean enableBluetooth(boolean enable) {
         if (enable) {
             if (!mBluetoothAdapter.isEnabled()) {
-                mBluetoothAdapter.enable();
+               boolean result =  mBluetoothAdapter.enable();
+                logger.info("蓝牙的"+(enable?"打开":"关闭")+"操作是否成功："+result);
+                return result;
+            }else{
+                return true;
             }
-            return true;
+
         } else {
             if (mBluetoothAdapter.isEnabled()) {
-                mBluetoothAdapter.disable();
+                boolean result =  mBluetoothAdapter.disable();
+                logger.info("蓝牙的"+(enable?"打开":"关闭")+"操作是否成功："+result);
+                return result;
+            }else{
+                return true;
             }
-            return false;
         }
     }
 
@@ -191,6 +216,7 @@ public class BleActivity extends BaseActivity{
     private void showConnectingAnimate(){
         Animation anim = AnimationUtils.loadAnimation(this, R.anim.loading_dialog_progressbar_anim);
         if (anim != null){
+            iv_connecting.setVisibility(View.VISIBLE);
             iv_connecting.startAnimation(anim);
         }
     }
@@ -198,6 +224,7 @@ public class BleActivity extends BaseActivity{
     private void hideConnectingAnimate(){
         if(mScanning){
             iv_connecting.clearAnimation();
+            iv_connecting.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -366,6 +393,29 @@ public class BleActivity extends BaseActivity{
             }
         }
     };
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case REQUEST_PERMISSION_ACCESS_COARSE_LOCATION_CODE: {
+                // 如果请求被取消，则结果数组为空。
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    logger.info("同意定位服务的申请");
+                    if(mBluetoothAdapter!=null){
+                        if(switch_ble.isChecked()){
+                            mHandler.postDelayed(scanDevice,500);
+                        }
+                    }
+                } else {
+                    logger.info("拒绝定位服务的申请");
+                    ToastUtil.showToast(this, "位置信息权限未打开，蓝牙搜索功能将不能使用。");
+                }
+                return;
+            }
+        }
+    }
 
     // 适配器为持有设备通过扫描发现。
     private class LeDeviceListAdapter extends BaseAdapter{

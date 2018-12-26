@@ -250,5 +250,11 @@ public class MToggleButton extends SkinCompatView {
         // 刷新view
         flushView();
     }
-
+    /**
+     * 获取当前的选择状态
+     * @return
+     */
+    public boolean isChecked() {
+        return currState;
+    }
 }
