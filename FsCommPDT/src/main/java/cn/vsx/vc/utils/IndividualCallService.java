@@ -2335,7 +2335,7 @@ public class IndividualCallService extends Service implements RecvCallBack,Actio
                             }
                             tv_half_duplex_prompt.setText("对方正在说话");
                             tv_half_duplex_prompt.setTextColor(Color.YELLOW);
-                            individual_call_half_duplex_ptt.setBackgroundResource(R.drawable.ptt_individual_call_wait);
+                            individual_call_half_duplex_ptt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_gray);
                             individual_call_half_duplex_ptt.setEnabled(false);
                             ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().playPromptCalled();
                             cancelAutoHangUpTimer();//对方按下开始说话，取消时间检测
