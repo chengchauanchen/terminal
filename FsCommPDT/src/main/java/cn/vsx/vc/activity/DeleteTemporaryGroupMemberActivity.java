@@ -6,7 +6,6 @@ import android.text.Editable;
 import android.text.TextPaint;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -186,7 +185,7 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
                     logger.info("警务通列表成员-----memberList" + allMembers);
                     memberList.clear();
                     memberList.addAll(allMembers);
-                    liveContactsAdapter.refreshLiveContactsAdapter(-1, memberList);
+                    liveContactsAdapter.addData(memberList);
                 }
             });
         }
@@ -207,7 +206,7 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
             if (TextUtils.isEmpty(String.valueOf(s))) {
                 lv_create_temporary_select_member_listview.setVisibility(View.VISIBLE);
                 ll_no_info.setVisibility(View.GONE);
-                liveContactsAdapter.bind(memberList, selectItem, s.toString());
+                liveContactsAdapter.setKeyWords(s.toString());
                 img_cencle.setVisibility(View.GONE);
             } else {
                 if (get(s.toString()).size() <= 0) {
@@ -217,7 +216,7 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
                 } else {
                     lv_create_temporary_select_member_listview.setVisibility(View.VISIBLE);
                     ll_no_info.setVisibility(View.GONE);
-                    liveContactsAdapter.bind(get(s.toString()), selectItem, s.toString());
+                    liveContactsAdapter.setKeyWords(s.toString());
                 }
 
                 img_cencle.setVisibility(View.VISIBLE);
@@ -247,48 +246,33 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
     private class OnInvitaListViewItemClick implements LiveContactsAdapter.OnItemClickListener {
 
         @Override
-        public void onItemClick(int position, boolean checked, boolean isPush) {
-            if (isPush) {
-                if (checked) {
-                    selectItem.add(memberList.get(position));
-                    total++;
-                } else {
-                    total--;
-                    selectItem.remove(memberList.get(position));
+        public void onItemClick(List<Member>pushMembers ,Member liveMember,boolean isPush) {
+
+            StringBuffer sb = new StringBuffer();
+            if(isPush){
+                for(Member m : pushMembers){
+                    sb.append(m.getName()).append("  ");
                 }
-                if (total > 0) {
-                    btn_create_temporary_selectmember_start.setText("下一步(" + total + ")");
+                if(!pushMembers.isEmpty()){
+                    btn_create_temporary_selectmember_start.setText(String.format("开始(%s)",pushMembers.size()));
                     btn_create_temporary_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg);
-                } else {
-                    btn_create_temporary_selectmember_start.setText("下一步");
+                }else{
+                    btn_create_temporary_selectmember_start.setText("开始");
                     btn_create_temporary_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg);
                 }
-            } else {
-                if (checked) {
-                    total = 1;
-                    selectItem.clear();
-                    selectItem.add(memberList.get(position));
-                } else {
-                    total = 0;
-                    selectItem.remove(memberList.get(position));
-                }
-                if (total > 0) {
-                    btn_create_temporary_selectmember_start.setText("下一步(" + total + ")");
+            }else{
+
+                if(null != liveMember){
+                    sb.append(liveMember.getName());
+                    btn_create_temporary_selectmember_start.setText(String.format("开始(%s)",1));
                     btn_create_temporary_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg);
-                } else {
-                    btn_create_temporary_selectmember_start.setText("下一步");
+                }else{
+                    btn_create_temporary_selectmember_start.setText("开始");
                     btn_create_temporary_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg_no);
                 }
             }
-
-
             et_search_allcontacts.setText("");
 
-            StringBuffer sb = new StringBuffer();
-            Log.e("OnInvitaListViewItemCli", "selectItem:" + selectItem);
-            for (Member m : selectItem) {
-                sb.append(m.getName() + "  ");
-            }
             tv_checktext.setText(sb);
             //获取textview宽度
             TextPaint textPaint = new TextPaint();

@@ -16,7 +16,6 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.vc.R;
@@ -24,8 +23,8 @@ import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.ShouTaiBean;
 import cn.vsx.vc.utils.HandleIdUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by jamie on 2017/10/27.
@@ -185,13 +184,7 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
         MyApplication.instance.isCallState = true;
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
-            int callID = list.get(groupPosition).memberList.get(childPosition).id;
-            int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(callID,"");
-            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, list.get(groupPosition).memberList.get(childPosition));
-            } else {
-                ToastUtil.individualCallFailToast(activity, resultCode);
-            }
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, list.get(groupPosition).memberList.get(childPosition));
 
         } else {
             ToastUtil.showToast(activity, "网络连接异常，请检查网络！");

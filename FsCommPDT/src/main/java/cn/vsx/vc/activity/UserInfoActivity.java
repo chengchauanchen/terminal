@@ -25,7 +25,6 @@ import butterknife.Bind;
 import butterknife.OnClick;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MemberChangeType;
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
@@ -44,7 +43,6 @@ import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
-import ptt.terminalsdk.tools.PhoneAdapter;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -60,8 +58,8 @@ public class UserInfoActivity extends BaseActivity {
     TextView user_Name;
     @Bind(R.id.user_no)
     TextView user_no;
-//    @Bind(R.id.user_ID_number)
-//    TextView user_ID_number;
+    //    @Bind(R.id.user_ID_number)
+    //    TextView user_ID_number;
     @Bind(R.id.user_address)
     LinearLayout userAddress;
     @Bind(R.id.user_phone)
@@ -102,7 +100,7 @@ public class UserInfoActivity extends BaseActivity {
         barTitle.setText("个人信息");
         rightBtn.setVisibility(View.GONE);
         btnOk.setVisibility(View.GONE);
-//        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true,0);
+        //        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true,0);
     }
 
     @Override
@@ -131,7 +129,7 @@ public class UserInfoActivity extends BaseActivity {
         Glide.with(UserInfoActivity.this).load(DataUtil.getMemberByMemberNo(userId).avatarUrl).asBitmap().placeholder(R.drawable.user_photo)//加载中显示的图片
                 .error(R.drawable.user_photo)//加载失败时显示的图片
                 .into(userLogo);
-        
+
         initBottomMenu();
     }
 
@@ -237,9 +235,8 @@ public class UserInfoActivity extends BaseActivity {
             return;
         }
 
-        List<Integer> memberIds = new ArrayList<>();
-        memberIds.add(userId);
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, memberIds);
+
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId);
     }
 
 
@@ -261,20 +258,13 @@ public class UserInfoActivity extends BaseActivity {
         MyApplication.instance.isCallState = true;
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
-            int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(userId, "");
-            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                if (!PhoneAdapter.isF25()) {
-                }
-                if(member!=null){
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
-                    MyApplication.instance.isPopupWindowShow = true;
-                }else {
-                    ToastUtil.showToast(UserInfoActivity.this,"获取人员信息失败");
-                }
+            if(member!=null){
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+                MyApplication.instance.isPopupWindowShow = true;
             }else {
-                ToastUtil.individualCallFailToast(UserInfoActivity.this, resultCode);
-//                ToastUtil.showToast(this, "组成员列表。。。请求个呼失败");
+                ToastUtil.showToast(UserInfoActivity.this,"获取人员信息失败");
             }
+
         } else {
             ToastUtil.showToast(this, "网络连接异常，请检查网络！");
         }
@@ -286,17 +276,17 @@ public class UserInfoActivity extends BaseActivity {
             case R.id.news_bar_back:
                 finish();
                 break;
-//            case R.id.add_note:
-//                if (!DataUtil.isExistContacts(member)) {//不在个呼通讯录中
-//                    MyTerminalFactory.getSDK().getContactsManager().modifyContacts(Operation4PrivateAddressList.ADD.getCode(),member.id);
-//                    add_note.setText("从通讯录移除");
-//                }else {
-//                    if (member.id != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {//自己不能移除
-//                        MyTerminalFactory.getSDK().getContactsManager().modifyContacts(Operation4PrivateAddressList.REMOVE.getCode(),member.id);
-//                        add_note.setText("添加到通讯录 ");
-//                    }
-//                }
-//                break;
+            //            case R.id.add_note:
+            //                if (!DataUtil.isExistContacts(member)) {//不在个呼通讯录中
+            //                    MyTerminalFactory.getSDK().getContactsManager().modifyContacts(Operation4PrivateAddressList.ADD.getCode(),member.id);
+            //                    add_note.setText("从通讯录移除");
+            //                }else {
+            //                    if (member.id != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {//自己不能移除
+            //                        MyTerminalFactory.getSDK().getContactsManager().modifyContacts(Operation4PrivateAddressList.REMOVE.getCode(),member.id);
+            //                        add_note.setText("添加到通讯录 ");
+            //                    }
+            //                }
+            //                break;
         }
     }
 
@@ -306,7 +296,7 @@ public class UserInfoActivity extends BaseActivity {
         mPictures.add(new Picture("电话",R.drawable.ic_mobile));
         mPictures.add(new Picture("个呼",R.drawable.ic_call));
     }
-    
+
     private void setHasVideo(){
         mPictures.clear();
         mPictures.add(new Picture("发消息",R.drawable.ic_message));

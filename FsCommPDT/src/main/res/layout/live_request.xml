@@ -15,7 +15,7 @@
             android:id="@+id/iv_avatar_request"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            tools:src="@drawable/user_photo"
+            android:src="@drawable/user_photo"
             android:layout_marginLeft="20dp"/>
         <LinearLayout
             android:layout_width="match_parent"

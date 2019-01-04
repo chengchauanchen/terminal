@@ -69,4 +69,46 @@
     <string name="release_cancel">松开 取消</string>
     <string name="current_group_members">%1$d人在线</string>
     <string name="current_push_member">%1$s上报图像</string>
+    
+    <!--个呼-->
+    <string name="no_answer">未接听</string>
+    <string name="press_talk">按住PTT说话</string>
+    <string name="talking">正在通话…</string>
+    <string name="stop_talk">通话结束</string>
+    <string name="other_cancel">对方已取消</string>
+    <string name="other_stop_call">对方已挂断</string>
+    <string name="open_overlay_permisson">请打开悬浮窗权限，否则私密呼叫和图像功能无法使用！</string>
+    <string name="no_recorde_permisson">没有开启悬浮窗权限</string>
+    <string name="no_group_call_permission">没有组呼权限</string>
+    <string name="i_pre_speaking">我准备说话</string>
+    <string name="other_speaking">对方正在说话</string>
+    <string name="i_speaking">我正在讲话</string>
+    <string name="cannot_talk">当前组是只听组，不能发起组呼</string>
+    <string name="net_work_disconnect">网络连接已断开</string>
+    
+    <!--收到视频上报-->
+    <string name="refused">已拒绝</string>
+    <string name="out_camera">外置摄像头</string>
+    <string name="recoder_camera">执法记录仪</string>
+    
+    <!--视频上报-->
+    <string name="no_push_authority">没有图像推送权限</string>
+    <string name="no_pull_authority">没有图像请求权限</string>
+    <string name="pushing_stream">推流中…</string>
+    <string name="push_stoped">上报已结束</string>
+    <string name="push_failed">图像上传失败</string>
+    <string name="theme_cannot_empty">输入主题不能为空</string>
+    <string name="i_pushing_video">我正在上报视频</string>
+    <string name="no_members_data">没有获取到成员数据</string>
+    <string name="confirm">确定</string>
+    <string name="canceled">已取消</string>
+    <string name="other_no_answer">对方无应答</string>
+    <string name="please_select_live_member">请选择请求图像人</string>
+    <string name="please_check_network">请检查网络连接</string>
+    <string name="no_rtsp_data">没有获取到数据流地址或图像上传已结束</string>
+    <string name="time_up">试播时间到</string>
+    <string name="voice_not_support">音频格式不支持</string>
+    <string name="video_not_support">视频格式不支持</string>
+    <string name="watch_finished">观看已结束</string>
+
 </resources>

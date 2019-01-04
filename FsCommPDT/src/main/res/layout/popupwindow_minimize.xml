@@ -1,54 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
- android:layout_width="wrap_content"
-    android:id="@+id/rl_pop"
-    android:layout_alignParentRight="true"
-    android:layout_height="wrap_content">
-
-    <RelativeLayout
-
-
-        android:id="@+id/popup_ll_speaking_prompt"
+<RelativeLayout android:id="@+id/rl_pop"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/individual_call_button_off_shape">
+    
+    <ImageView
+        android:id="@+id/img_phone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/individual_call_button_off_shape"
-
-        >
-
-        <ImageView
-            android:id="@+id/img_phone"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="@dimen/x10"
-            android:layout_gravity="center_horizontal"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/phone"/>
-        <TextView
-            android:id="@+id/tv_waiting"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/x10"
-            android:layout_marginBottom="@dimen/x10"
-            android:layout_marginLeft="@dimen/x10"
-            android:layout_marginRight="@dimen/x10"
-            android:layout_below="@id/img_phone"
-            android:text="等待接听"
-            android:textColor="@color/white"
-            android:textSize="13sp"
-            />
-        <cn.vsx.vc.view.IndividualCallTimerView
-            android:visibility="invisible"
-            android:layout_below="@id/img_phone"
-            android:id="@+id/popup_ICTV_speaking_time"
-            android:layout_gravity="center"
-            android:gravity="center_vertical"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/x10"
-            android:layout_marginBottom="@dimen/x10"
-            android:layout_marginLeft="@dimen/x10"
-            android:layout_marginRight="@dimen/x10"
-            />
-    </RelativeLayout>
+        android:layout_centerHorizontal="true"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="@dimen/x10"
+        android:src="@drawable/phone" />
+    
+    <TextView
+        android:id="@+id/tv_waiting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/img_phone"
+        android:layout_marginBottom="@dimen/x10"
+        android:layout_marginLeft="@dimen/x10"
+        android:layout_marginRight="@dimen/x10"
+        android:layout_marginTop="@dimen/x10"
+        android:text="等待接听"
+        android:textColor="@color/white"
+        android:textSize="13sp" />
+    
+    <cn.vsx.vc.view.IndividualCallTimerView
+        android:id="@+id/popup_ICTV_speaking_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/img_phone"
+        android:layout_gravity="center"
+        android:layout_marginBottom="@dimen/x10"
+        android:layout_marginLeft="@dimen/x10"
+        android:layout_marginRight="@dimen/x10"
+        android:layout_marginTop="@dimen/x10"
+        android:gravity="center_vertical"
+        android:visibility="invisible" />
 </RelativeLayout>

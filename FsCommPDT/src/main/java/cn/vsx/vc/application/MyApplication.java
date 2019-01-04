@@ -32,9 +32,9 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.IndividualCallService;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import skin.support.SkinCompatManager;
 import skin.support.design.app.SkinMaterialViewInflater;
@@ -59,6 +59,7 @@ public class MyApplication extends Application {
 	public boolean isPttPress = false;
 	public boolean isPopupWindowShow = false;
 	public boolean isMoved = false;
+	public boolean viewAdded;
 	public boolean usbAttached;//外置摄像头是否连接
 	public static List<Integer> catchGroupIdList = new ArrayList<>();
 	public boolean isPlayVoice = false;
@@ -180,28 +181,26 @@ public class MyApplication extends Application {
 		IDLE
 	}
 	public void startIndividualCallService() {
-		Intent intent1 = new Intent(this,IndividualCallService.class);
+		Intent intent1 = new Intent(this,ReceiveHandlerService.class);
 		isBinded=bindService(intent1,conn,BIND_AUTO_CREATE);
 	}
 	public void stopIndividualCallService(){
 		if (conn != null) {
-			if (individualCallBinder != null) {
-				individualCallBinder.removeServiceView();
-			}
+
 			Log.i("服务状态1：",""+conn);
 			Log.i("服务状态2：",""+isBinded);
 			if (isBinded) {
 				unbindService(conn);
 				isBinded=false;
 			}
-			stopService(new Intent(this, IndividualCallService.class));
+			stopService(new Intent(this, ReceiveHandlerService.class));
 		}
 	}
-	private IndividualCallService.IndividualCallBinder individualCallBinder;
+	private ReceiveHandlerService.ReceiveHandlerBinder individualCallBinder;
 	private ServiceConnection conn = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			individualCallBinder = (IndividualCallService.IndividualCallBinder) service;
+			individualCallBinder = (ReceiveHandlerService.ReceiveHandlerBinder) service;
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {

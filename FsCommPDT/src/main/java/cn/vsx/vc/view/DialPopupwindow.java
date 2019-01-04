@@ -23,13 +23,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.DataUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by weishixin on 2017/12/14.
@@ -124,21 +123,13 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                         inputString = "88" + inputString;
                     }
                     int callId = Integer.parseInt(inputString);
-                    int resultCode = -1;
-                    if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                        resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(callId,"");
-                    }else {
+                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
                         ToastUtil.showToast(context,"没有个呼权限");
                         dismiss();
                         return;
                     }
-
-                    if (resultCode == BaseCommonCode.SUCCESS_CODE){
-                        Member member = DataUtil.getMemberByMemberNo(callId);
-                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
-                    }else {
-                        ToastUtil.individualCallFailToast(context, resultCode);
-                    }
+                    Member member = DataUtil.getMemberByMemberNo(callId);
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
                 } catch (NumberFormatException e) {
                     e.printStackTrace();
                 }

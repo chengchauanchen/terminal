@@ -2,40 +2,39 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:splitMotionEvents="false"
     android:background="@drawable/call_background"
-    android:orientation="vertical">
-
+    android:orientation="vertical"
+    android:splitMotionEvents="false">
+    
     <ImageView
-        android:layout_alignParentRight="true"
         android:id="@+id/individual_call_retract_emergency"
         android:layout_width="@dimen/x40"
         android:layout_height="@dimen/y18"
+        android:layout_alignParentRight="true"
         android:layout_marginRight="@dimen/x20"
         android:layout_marginTop="@dimen/y15"
         android:background="@drawable/new_call_reset_icon" />
-
-
+    
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
         android:layout_below="@id/individual_call_retract_emergency"
-        >
-
-
+        android:gravity="center_vertical">
+        
         <ImageView
             android:id="@+id/iv_member_portrait_chooice"
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_margin="12dp"
             android:background="@drawable/user_photo" />
+        
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/iv_member_portrait_chooice"
             android:orientation="vertical">
+            
             <TextView
                 android:id="@+id/tv_member_name_chooice"
                 android:layout_width="wrap_content"
@@ -44,7 +43,7 @@
                 android:text="张星星"
                 android:textColor="@color/white"
                 android:textSize="20sp" />
-
+            
             <TextView
                 android:id="@+id/tv_member_id_chooice"
                 android:layout_width="wrap_content"
@@ -54,77 +53,55 @@
                 android:textColor="@color/white"
                 android:textSize="15sp" />
         </LinearLayout>
-
+        
         <TextView
             android:id="@+id/tv_comingCall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/x20"
-            android:text=""
+            android:text="来电..."
             android:textColor="@color/white"
             android:textSize="15sp" />
     </RelativeLayout>
+    
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
         android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:orientation="vertical">
+        
         <ImageView
             android:layout_width="@dimen/x35"
             android:layout_height="@dimen/x60"
-            android:src="@drawable/phone_white_x"
             android:layout_gravity="center_horizontal"
-            />
+            android:src="@drawable/phone_white_x" />
+        
         <TextView
-            android:layout_gravity="center_horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
             android:layout_marginTop="5px"
-            android:text="终端"/>
+            android:textColor="@color/translucent"
+            android:text="终端" />
     </LinearLayout>
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="@dimen/x180">
-        <TextView
-            android:id="@+id/tv_chooice_prompt"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingTop="1dp"
-            android:paddingBottom="1dp"
-            android:paddingLeft="2dp"
-            android:paddingRight="2dp"
-            android:text=""
-            android:background="#213649"
-            android:textColor="@color/white"
-            android:textStyle="normal" />
-    </LinearLayout>
-    <View
-        android:id="@+id/individual_call_chooice_view"
-        android:layout_width="1dp"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        />
-
+    
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/y30"
         android:layout_marginTop="@dimen/y50"
         android:gravity="center_horizontal"
-        android:orientation="horizontal"
-        android:paddingBottom="@dimen/y30">
-
+        android:orientation="horizontal">
+        
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
+            
             <LinearLayout
                 android:id="@+id/ll_individual_call_refuse"
                 android:layout_width="wrap_content"
@@ -132,14 +109,14 @@
                 android:background="@drawable/individual_call_refuse_button_shape"
                 android:gravity="center"
                 android:orientation="vertical">
-
+                
                 <ImageView
                     android:layout_width="@dimen/x80"
                     android:layout_height="@dimen/x30"
-                    android:src="@drawable/phone_withe"
-                    android:background="@drawable/phone_withe_shape1" />
+                    android:background="@drawable/phone_withe_shape1"
+                    android:src="@drawable/phone_withe" />
             </LinearLayout>
-
+            
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -148,16 +125,14 @@
                 android:text="挂断"
                 android:textColor="@color/white"
                 android:textSize="16dp" />
-
         </LinearLayout>
-
+        
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/x50"
             android:orientation="vertical">
-
-
+            
             <LinearLayout
                 android:id="@+id/ll_individual_call_accept"
                 android:layout_width="wrap_content"
@@ -165,16 +140,16 @@
                 android:background="@drawable/individual_call_accept_button_shape"
                 android:gravity="center"
                 android:orientation="vertical">
-
+                
                 <ImageView
                     android:layout_width="@dimen/x80"
                     android:layout_height="@dimen/x30"
-                    android:paddingTop="2dp"
+                    android:background="@drawable/phone_withe_shape2"
                     android:paddingBottom="2dp"
-                    android:src="@drawable/phone"
-                    android:background="@drawable/phone_withe_shape2" />
+                    android:paddingTop="2dp"
+                    android:src="@drawable/phone" />
             </LinearLayout>
-
+            
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -183,11 +158,7 @@
                 android:text="接听"
                 android:textColor="@color/white"
                 android:textSize="16dp" />
-
         </LinearLayout>
-
     </LinearLayout>
-
-
 </RelativeLayout>
 

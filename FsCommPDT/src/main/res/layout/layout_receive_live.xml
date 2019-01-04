@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="19dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+        
+        <ImageView
+            android:id="@+id/iv_avatar_report"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginLeft="20dp"
+            android:src="@drawable/user_photo" />
+        
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            
+            <TextView
+                android:id="@+id/tv_live_report_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="pad"
+                android:textColor="@color/white"
+                android:textSize="@dimen/tv_live_request_name_textsize" />
+            
+            <TextView
+                android:id="@+id/tv_live_report_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1000000"
+                android:textColor="@color/white"
+                android:textSize="@dimen/tv_live_request_id_textsize" />
+        </LinearLayout>
+        
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginRight="20dp"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:text="请求中..."
+            android:textColor="@color/white" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/ll_live_respond_refuse_total"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/live_request_hangup_bottom"
+        android:layout_marginLeft="50dp"
+        android:orientation="vertical">
+        
+        <ImageView
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:background="@drawable/individual_call_refuse_button" />
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:text="挂断"
+            android:textColor="@color/white"
+            android:textSize="16dp" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/ll_live_respond_accept_total"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="@dimen/live_request_answer_bottom"
+        android:layout_marginRight="50dp"
+        android:orientation="vertical">
+        
+        <ImageView
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:background="@drawable/individual_call_accept_button" />
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:text="接受"
+            android:textColor="@color/white"
+            android:textSize="16dp" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:orientation="vertical"
+        android:visibility="visible">
+        
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="请求您上报图像"
+            android:textColor="#fff799"
+            android:textSize="30sp" />
+    </LinearLayout>
+</RelativeLayout>

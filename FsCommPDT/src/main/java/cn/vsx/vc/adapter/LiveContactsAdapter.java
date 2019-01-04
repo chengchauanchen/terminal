@@ -3,31 +3,27 @@ package cn.vsx.vc.adapter;
 import android.content.Context;
 import android.text.Html;
 import android.text.Spanned;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.HandleIdUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
-
-import static ptt.terminalsdk.tools.PhoneAdapter.logger;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by zckj on 2017/6/13.
@@ -35,56 +31,50 @@ import static ptt.terminalsdk.tools.PhoneAdapter.logger;
 
 public class LiveContactsAdapter extends BaseAdapter {
 
-    private List<Member> list;
+    private List<Member> data = new ArrayList<>();
     private Context context;
-    //上报图像时被选中的人，推送给他们看
-//    private Map<Integer, Boolean> pushMap;
-    // 用来控制CheckBox的选中状况
-//    private HashMap<Integer, Boolean> isSelected = new HashMap<>();
-
-    private List<Member> pushMembers = new ArrayList<>();
-    private Member memberExceptMe;// 上一个人
     private String keyWords = "";
     private boolean isPush;
+    private int lastCheckedItem = -1;
     private OnItemClickListener onItemClickListener;
+    private List<Member> pushMembers = new ArrayList<>();
+    private Member liveMember;//请求上报者
 
     public LiveContactsAdapter(Context context, List<Member> list, boolean isPush) {
         this.context = context;
-        this.list = new ArrayList<>();
-        this.list.addAll(list);
+        for(Member member : list){
+            if(member.isChecked()){
+                member.setChecked(false);
+            }
+        }
+        Collections.sort(list);
+        data.addAll(list);
         this.isPush = isPush;
     }
 
-    public void bind(List<Member> stringList, List<Member> item, String keyWords) {
-        this.keyWords = keyWords;
-        this.list = stringList;
-
-        notifyDataSetChanged();
-    }
-
-    public boolean isChecked(List<Member> item, int id) {
-        Log.e("sjl_", "isChecked:" + item.size());
-        for (int i = 0; i < item.size(); i++) {
-            Log.e("sjl_", "item.get(i).id:" + item.get(i).id);
-            if (item.get(i).id == id) {
-                return true;
+    public void addData(List<Member> list){
+        for(Member member : list){
+            if(member.isChecked()){
+                member.setChecked(false);
             }
         }
-        return false;
+        Collections.sort(list);
+        data.addAll(list);
+        notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        if (list.size() > 0) {
-            return list.size();
-        } else {
+        if (data.isEmpty()) {
             return 0;
+        } else {
+            return data.size();
         }
     }
 
     @Override
-    public Member getItem(int position) {
-        return list.get(position);
+    public Object getItem(int position) {
+        return data.get(position);
     }
 
     @Override
@@ -103,28 +93,25 @@ public class LiveContactsAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-
-        final Member member = list.get(position);
+        Member member = data.get(position);
         // 获取上一个人
+        // 当前位置的上一个人，判断首位拼英
+        Member aboveCurrentMember;
         if (position == 0) {
-            memberExceptMe = null;
+            aboveCurrentMember = null;
         } else {
-            memberExceptMe = list.get(position - 1);
+            aboveCurrentMember = data.get(position - 1);
         }
         // 当前人  拼音的首字母  和 上一个人的拼音的首字母  如果相同  隐藏
         boolean isShow = true; // 是否显示拼音
-        if (memberExceptMe == null) {
-            isShow = true;
-        } else {
-            logger.info(member.pinyin);
-
-            if (member.pinyin.charAt(0) == memberExceptMe.pinyin.charAt(0)) {
+        if(null != aboveCurrentMember){
+            if (member.pinyin.charAt(0) == aboveCurrentMember.pinyin.charAt(0)) {
                 isShow = false;
             }
         }
 
         final String name = member.getName();
-        String id = HandleIdUtil.handleId(member.id);
+        String id = HandleIdUtil.handleId(member.getNo());
         if (!Util.isEmpty(name) && !Util.isEmpty(keyWords) && name.toLowerCase().contains(keyWords.toLowerCase())) {
             int index = name.toLowerCase().indexOf(keyWords.toLowerCase());
             int len = keyWords.length();
@@ -151,108 +138,86 @@ public class LiveContactsAdapter extends BaseAdapter {
             viewHolder.tv_selectmember_id.setText(id);
         }
         viewHolder.tv_pinyin.setVisibility(isShow ? View.VISIBLE : View.GONE);
-        viewHolder.tv_pinyin.setText(member.pinyin.charAt(0) + "");
+        viewHolder.tv_pinyin.setText(member.pinyin.substring(0,1));
 
-        if (member.terminalMemberType.equals("TERMINAL_PAD")) {
+        if (member.terminalMemberType.equals(TerminalMemberType.TERMINAL_PAD.getValue())){
             viewHolder.img_terminalMemberType.setBackgroundResource(R.drawable.pad);
-        } else if (member.terminalMemberType.equals("TERMINAL_PHONE")) {
+        } else if (member.terminalMemberType.equals(TerminalMemberType.TERMINAL_PHONE.getValue())) {
             viewHolder.img_terminalMemberType.setBackgroundResource(R.drawable.imgphone);
         } else  {
             viewHolder.img_terminalMemberType.setBackgroundResource(R.drawable.pc);
         }
 
-        viewHolder.rbSelectmember.setVisibility(View.GONE);
-        viewHolder.cbSelectmember.setVisibility(View.VISIBLE);
+        if(data.get(position).isChecked){
+            viewHolder.iv_select.setSelected(true);
+        }else {
+            viewHolder.iv_select.setSelected(false);
+        }
 
-       if(isPush){
-           //上报图像
-           viewHolder.cbSelectmember.setChecked(list.get(position).isChecked);
-        }else{
-          //请求图像   由于请求图像每次只能选择一个人，这里需要规避从搜索列表转到全列表显示时，之前已经选择的不能取消的问题
-           if(liveMember!=null){
-               //之前已经有选择的
-               viewHolder.cbSelectmember.setChecked(member.id == liveMember.id);
-           }else{
-               //之前没有选择
-               viewHolder.cbSelectmember.setChecked(list.get(position).isChecked);
-           }
-       }
+        convertView.setOnClickListener(v -> {
 
-
-        convertView.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-
-                //如果是上报逻辑
-                if(isPush){
-                    //判断有没有推送的权限
-                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
-                        ToastUtil.showToast(context,"您没有推送权限，点“开始”按钮直接上报");
-                        return;
+            //如果是上报逻辑
+            if(isPush){
+                //判断有没有推送的权限
+                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
+                    ToastUtil.showToast(context,"您没有推送权限，点“开始”按钮直接上报");
+                    return;
+                }else {
+                    if(member.isChecked){
+                        member.setChecked(false);
+                        pushMembers.remove(member);
                     }else {
-                        if(viewHolder.cbSelectmember.isChecked()){
-                            viewHolder.cbSelectmember.setChecked(false);
-                            member.isChecked = false;
-                            pushMembers.remove(member);
-                        }else {
-                            viewHolder.cbSelectmember.setChecked(true);
-                            member.isChecked = true;
-                            pushMembers.add(member);
-                        }
+                        member.setChecked(true);
+                        pushMembers.add(member);
                     }
                 }
-                //如果是请求逻辑
-                else{
-                    if(viewHolder.cbSelectmember.isChecked()){
-                        viewHolder.cbSelectmember.setChecked(false);
-                        member.isChecked = false;
-                        liveMember = null;
-                    }else {
-                        //取消上一个选中的item
-                        if(liveMember!=null){
-                            for (Member member:list) {
-                                if(member.id == liveMember.id){
-                                    member.isChecked = false;
-                                }
-                            }
-                        }
-                        viewHolder.cbSelectmember.setChecked(true);
-                        member.isChecked = true;
-                        liveMember = member;
-                    }
-                }
-                //回调到listview界面
-                if(onItemClickListener!=null){
-                    onItemClickListener.onItemClick(position,member.isChecked,isPush);
-                }
-                notifyDataSetChanged();
             }
+            //如果是请求逻辑
+            else{
+                if(member.isChecked){
+                    member.setChecked(false);
+                    liveMember = null;
+                    lastCheckedItem = -1;
+                }else {
+                    //取消上一个选中的item
+                    if(lastCheckedItem!=-1){
+                        data.get(lastCheckedItem).setChecked(false);
+                    }
+                    member.setChecked(true);
+                    liveMember = member;
+                    lastCheckedItem = position;
+                }
+
+            }
+            //回调到listview界面
+            if(onItemClickListener!=null){
+                onItemClickListener.onItemClick(pushMembers,liveMember,isPush);
+            }
+            notifyDataSetChanged();
         });
         return convertView;
     }
 
-    public List<Integer> getPushMemberList() {
-        List<Integer> pushNos = new ArrayList<>();
+    public ArrayList<Integer> getPushMemberList() {
+        ArrayList<Integer> pushNos = new ArrayList<>();
         for(Member pushMember : pushMembers){
             pushNos.add(pushMember.getId());
         }
         return pushNos;
     }
 
-    private Member liveMember;
+
 
     public Member getLiveMember() {
-        if (liveMember!=null&&liveMember.isChecked ) {
+        if (liveMember!=null&&liveMember.isChecked() ) {
             return liveMember;
         } else {
             return null;
         }
     }
 
-    public void notifyLiveMember() {
-        if (liveMember != null) {
-            liveMember.isChecked = false;
-        }
+    public void setKeyWords(String keyWords){
+        this.keyWords = keyWords;
     }
 
     static class ViewHolder {
@@ -266,10 +231,8 @@ public class LiveContactsAdapter extends BaseAdapter {
         TextView tv_selectmember_id;
         @Bind(R.id.tv_selectmember_name)
         TextView tvSelectmemberName;
-        @Bind(R.id.cb_selectmember)
-        CheckBox cbSelectmember;
-        @Bind(R.id.rb_selectmember)
-        RadioButton rbSelectmember;
+        @Bind(R.id.iv_select)
+        ImageView iv_select;
         @Bind(R.id.img_terminalMemberType)
         ImageView img_terminalMemberType;
 
@@ -278,43 +241,10 @@ public class LiveContactsAdapter extends BaseAdapter {
         }
     }
 
-    public void refreshLiveContactsAdapter(int mPosition, List<Member> list) {
-        this.list = new ArrayList<>();
-        this.list.addAll(list);
-        notifyDataSetChanged();
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener){
+        this.onItemClickListener = onItemClickListener;
     }
-
-    public Member getData(int id) {
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i).id == id) {
-                return list.get(i);
-            }
-        }
-        return new Member();
+    public interface OnItemClickListener{
+        void onItemClick(List<Member>pushMembers ,Member liveMember,boolean isPush);
     }
-
-//    public void setIsSelected(HashMap<Integer, Boolean> isSelected) {
-//        this.isSelected.clear();
-//        this.isSelected.putAll(isSelected);
-//        Log.e("LiveContactsAdapter", "setIsSelected---isSelected:" + isSelected);
-//    }
-
-     public int getKey(HashMap<Integer,Boolean> map,boolean value){
-         Integer key = null;
-
-         for(Integer getKey: map.keySet()){
-             if(map.get(getKey).equals(value)){
-                 key = getKey;
-             }
-         }
-         return key;
-
-     }
-
-     public void setOnItemClickListener(OnItemClickListener onItemClickListener){
-         this.onItemClickListener = onItemClickListener;
-     }
-     public interface OnItemClickListener{
-         void onItemClick(int position ,boolean checked,boolean isPush);
-     }
 }

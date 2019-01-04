@@ -1,10 +1,17 @@
 package ptt.terminalsdk.service;
 
+import android.annotation.TargetApi;
 import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.IBinder;
+import android.support.annotation.RequiresApi;
+import android.support.v4.app.NotificationCompat;
 
 /**
  * 作者：xuxiaolong
@@ -35,22 +42,52 @@ public class KeepLiveManager{
      * @param service
      */
     public void setServiceForeground(Service service){
+
+
         //设置service为前台服务，提高优先级
         if (Build.VERSION.SDK_INT < 18) {
             //Android4.3以下 ，此方法能有效隐藏Notification上的图标
             service.startForeground(GRAY_SERVICE_ID, new Notification());
-        } else if(Build.VERSION.SDK_INT>18 && Build.VERSION.SDK_INT<25){
+        } else if(Build.VERSION.SDK_INT <25){
             //Android4.3 - Android7.0，此方法能有效隐藏Notification上的图标
             Intent innerIntent = new Intent(service, GrayInnerService.class);
             service.startService(innerIntent);
             service.startForeground(GRAY_SERVICE_ID, new Notification());
-        }else{
+        }else if(Build.VERSION.SDK_INT <Build.VERSION_CODES.O){
             //Android7.1 google修复了此漏洞，暂无解决方法（现状：Android7.1以上app启动后通知栏会出现一条"正在运行"的通知消息）
             service.startForeground(GRAY_SERVICE_ID, new Notification());
         }
+        else{
+            startMyOwnForeground(service);
+        }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private String createNotificationChannel(Service service,String channelId, String channelName){
+        NotificationChannel chan = new NotificationChannel(channelId,
+                channelName, NotificationManager.IMPORTANCE_NONE);
+        chan.setLightColor(Color.BLUE);
+        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        NotificationManager manager = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
+        if(null !=manager){
+            manager.createNotificationChannel(chan);
+        }
+        return channelId;
+    }
 
+    @TargetApi(Build.VERSION_CODES.O)
+    private void startMyOwnForeground(Service service){
+        String channelId = "";
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            channelId = createNotificationChannel(service,"cn.vsx.vc", "Background Service");
+        }
+        NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(service.getApplicationContext(), channelId);
+        Notification notification = notificationBuilder.setOngoing(true)
+                .setPriority(NotificationManager.IMPORTANCE_MIN)
+                .setCategory(Notification.CATEGORY_SERVICE)
+                .build();
+        service.startForeground(2, notification);
+    }
 
     /**
      * 辅助Service

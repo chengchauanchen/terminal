@@ -22,9 +22,7 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -80,7 +78,6 @@ import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.PhoneAdapter;
 
 
 /**
@@ -108,8 +105,8 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     FunctionHidePlus funcation;
     @Bind(R.id.btn_record)
     AudioRecordButton record;
-//    @Bind(R.id.rl_include_listview)
-//    RelativeLayout rl_include_listview;
+    //    @Bind(R.id.rl_include_listview)
+    //    RelativeLayout rl_include_listview;
 
     @Bind(R.id.sfl_call_list)
     SwipeRefreshLayout sflCallList;
@@ -152,8 +149,9 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                 .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources()
                         .getDisplayMetrics()));
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        linearLayoutManager.setStackFromEnd(true);
         groupCallList.setLayoutManager(linearLayoutManager);
-//        super.rl_include_listview = rl_include_listview;
+        //        super.rl_include_listview = rl_include_listview;
         super.newsBarGroupName = newsBarGroupName;
         super.sflCallList = sflCallList;
         super.groupCallList = groupCallList;
@@ -188,7 +186,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverIndividualCallFromMsgItemHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverCloseKeyBoardHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverReplayIndividualChatVoiceHandler);
-//        MyTerminalFactory.getSDK().registReceiveHandler(receiveHistoryMultimediaFailHandler);
+        //        MyTerminalFactory.getSDK().registReceiveHandler(receiveHistoryMultimediaFailHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMultimediaMessageCompleteHandler);
         super.initListener();
     }
@@ -207,29 +205,28 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     @Override
     public void postVideo() {
-//        if (!ActivityCollector.isActivityExist(VideoLiveActivity.class)) {
-//            Intent intent = new Intent(this, VideoLiveActivity.class);
-//            intent.setAction("InitiativeVideoLive");
-//            intent.putExtra("userId", userId);
-//            intent.putExtra("userName", userName);
-//            intent.putExtra("number", 1);
-//            startActivity(intent);
-//        }
-        List<Integer> memberIds = new ArrayList<>();
-        memberIds.add(userId);
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, memberIds);
+        //        if (!ActivityCollector.isActivityExist(VideoLiveActivity.class)) {
+        //            Intent intent = new Intent(this, VideoLiveActivity.class);
+        //            intent.setAction("InitiativeVideoLive");
+        //            intent.putExtra("userId", userId);
+        //            intent.putExtra("userName", userName);
+        //            intent.putExtra("number", 1);
+        //            startActivity(intent);
+        //        }
+
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId);
     }
 
     @Override
     public void requestVideo() {
-//        if (!ActivityCollector.isActivityExist(VideoLiveActivity.class)) {
-//            Intent intent = new Intent(this, VideoLiveActivity.class);
-//            intent.setAction("RequestOtherLive");
-//            intent.putExtra("userId", userId);
-//            intent.putExtra("userName", userName);
-//            intent.putExtra("number", 2);
-//            startActivity(intent);
-//        }
+        //        if (!ActivityCollector.isActivityExist(VideoLiveActivity.class)) {
+        //            Intent intent = new Intent(this, VideoLiveActivity.class);
+        //            intent.setAction("RequestOtherLive");
+        //            intent.putExtra("userId", userId);
+        //            intent.putExtra("userName", userName);
+        //            intent.putExtra("number", 2);
+        //            startActivity(intent);
+        //        }
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member(userId, userName));
     }
 
@@ -280,22 +277,15 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     private void activeIndividualCall() {
         MyApplication.instance.isCallState = true;
         Member member = DataUtil.getMemberByMemberNo(userId);
-//        Member member = new Member(userId, HandleIdUtil.handleName(userName));
+        //        Member member = new Member(userId, HandleIdUtil.handleName(userName));
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
 
-            int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(userId,"");
-            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                if (!PhoneAdapter.isF25()) {
-                }
-                if(member!=null){
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
-                    MyApplication.instance.isPopupWindowShow = true;
-                }else {
-                    ToastUtil.showToast(IndividualNewsActivity.this,"获取成员信息失败");
-                }
-            } else {
-                ToastUtil.individualCallFailToast(this, resultCode);
+            if(member!=null){
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+                MyApplication.instance.isPopupWindowShow = true;
+            }else {
+                ToastUtil.showToast(IndividualNewsActivity.this,"获取成员信息失败");
             }
         } else {
             ToastUtil.showToast(this, "网络连接异常，请检查网络！");
@@ -306,7 +296,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
      * 下载录音文件并播放
      */
     public void downloadRecordFileOrPlay(final TerminalMessage terminalMessage, final MediaPlayer.OnCompletionListener onCompletionListener) {
-//        logger.info("准备播放个呼音频数据");
+        //        logger.info("准备播放个呼音频数据");
         final int[] resultCode = {TerminalErrorCode.UNKNOWN_ERROR.getErrorCode()};
         final String[] resultDes = {""};
         File file = null;
@@ -406,9 +396,9 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                 startActivity(intent);
                 break;
             case R.id.individual_news_help:
-//                Intent intent = new Intent(this, HelpActivity.class);
-//                intent.setAction("5");
-//                startActivity(intent);
+                //                Intent intent = new Intent(this, HelpActivity.class);
+                //                intent.setAction("5");
+                //                startActivity(intent);
                 break;
             case R.id.iv_call:
                 hideKey();
@@ -533,7 +523,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
             myHandler.post(new Runnable() {
                 @Override
                 public void run() {
-//                    logger.error("播放完成的回调触发了========> "+lastPosition+"/"+mposition+"/"+chatMessageList.size());
+                    //                    logger.error("播放完成的回调触发了========> "+lastPosition+"/"+mposition+"/"+chatMessageList.size());
                     MyApplication.instance.isPlayVoice = false;
                     isSameItem = true;
                     chatMessageList.get(mposition).messageBody.put(JsonParam.UNREAD, false);
@@ -587,7 +577,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                         Collections.sort(chatMessageList);
                         if (temporaryAdapter != null) {
                             temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-//                            temporaryAdapter.notifyDataSetChanged();
+                            //                            temporaryAdapter.notifyDataSetChanged();
                         }
                         lastPosition = mposition;
                     } else {

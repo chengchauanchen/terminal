@@ -70,17 +70,14 @@ import cn.vsx.vc.dialog.TranspondDialog;
 import cn.vsx.vc.fragment.VideoPreviewItemFragment;
 import cn.vsx.vc.holder.ChatViewHolder;
 import cn.vsx.vc.model.ChatMember;
-import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.DataUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
-
-import static cn.vsx.vc.receive.Actions.SEND_LIVE_THEME;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by zckj on 2017/3/22.
@@ -1625,9 +1622,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 if (viewType == MESSAGE_VIDEO_LIVE_RECEIVED && terminalMessage.messageBody.getIntValue("remark") != 1) {
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverChatListItemClickHandler.class,
                             terminalMessage, isReceiver(terminalMessage));
-                    Intent intent = new Intent(SEND_LIVE_THEME);
-                    intent.putExtra("live_theme", liveTheme);
-                    SendRecvHelper.send(activity, intent);
+
 
                 }
             } else {

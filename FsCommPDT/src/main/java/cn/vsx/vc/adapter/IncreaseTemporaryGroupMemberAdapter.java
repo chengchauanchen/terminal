@@ -18,7 +18,6 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.vc.R;
@@ -188,12 +187,7 @@ public class IncreaseTemporaryGroupMemberAdapter extends RecyclerView.Adapter<Re
         MyApplication.instance.isCallState = true;
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
-            int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(member.no,"");
-            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
-            } else {
-                ToastUtil.individualCallFailToast(mContext, resultCode);
-            }
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
 
         } else {
             ToastUtil.showToast(mContext, "网络连接异常，请检查网络！");

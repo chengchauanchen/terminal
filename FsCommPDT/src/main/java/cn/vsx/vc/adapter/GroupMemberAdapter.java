@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -34,9 +33,8 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.PhoneAdapter;
+import ptt.terminalsdk.tools.ToastUtil;
 
 public class GroupMemberAdapter extends BaseAdapter {
     private List<Member> currentGroupMembers = new ArrayList<>();
@@ -262,18 +260,7 @@ public class GroupMemberAdapter extends BaseAdapter {
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network){
             if ( currentGroupMembers.size() > 0) {
-
-                int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(currentGroupMembers.get(position).id,"");
-                Log.e("sjl_","resultCode:"+resultCode);
-                if (resultCode == BaseCommonCode.SUCCESS_CODE){
-                    if (!PhoneAdapter.isF25()) {
-                    }
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, currentGroupMembers.get(position));
-                    MyApplication.instance.isPopupWindowShow = true;
-                }else {
-                    ToastUtil.individualCallFailToast(mContext, resultCode);
-//                    ToastUtil.showToast(mContext, "组成员列表。。。请求个呼失败");
-                }
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, currentGroupMembers.get(position));
             }
         } else {
             ToastUtil.showToast(mContext, "网络连接异常，请检查网络！");

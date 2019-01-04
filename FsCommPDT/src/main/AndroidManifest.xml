@@ -183,7 +183,7 @@
         
         <service android:name=".service.LockScreenService" />
         <service android:name=".utils.CallAbbreviatedWindowService" />
-        <service android:name=".utils.IndividualCallService" />
+        
         <service android:name="org.easydarwin.easypusher.BackgroundCameraService" />
         <service
             android:name="ptt.terminalsdk.service.MessageService"
@@ -244,5 +244,44 @@
         <activity android:name=".activity.LiveHistoryActivity"
             android:launchMode="singleTask"/>
         <activity android:name=".activity.BleActivity"/>
+        <service android:name=".service.ReceiveHandlerService"
+            android:enabled="true"
+            android:exported="false"/>
+        <service
+            android:name=".service.UVCPushService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".service.PhonePushService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".service.PullLivingService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".service.RecoderPushService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".service.InviteMemberService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".service.LiveRequestService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".service.PullGB28181Service"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+        android:name=".service.SwitchCameraService"
+        android:enabled="true"
+        android:exported="false"/>
+        <service
+            android:name=".service.CallingService"
+            android:enabled="true"
+            android:exported="false"/>
     </application>
 </manifest>

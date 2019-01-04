@@ -16,7 +16,6 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -25,9 +24,8 @@ import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.ShouTaiBean;
 import cn.vsx.vc.utils.HandleIdUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.PhoneAdapter;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by jamie on 2017/10/27.
@@ -195,15 +193,8 @@ public class PoliceAffairsAdapter extends BaseExpandableListAdapter {
 
         if (network){
             if ( list.size() > 0) {
-                int callId = list.get(groupPosition).memberList.get(childPosition).id;
-                int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(callId,"");
-                if (resultCode == BaseCommonCode.SUCCESS_CODE){
-                    if (!PhoneAdapter.isF25()) {
-                    }
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, list.get(groupPosition).memberList.get(childPosition));
-                }else {
-                    ToastUtil.individualCallFailToast(activity, resultCode);
-                }
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, list.get(groupPosition).memberList.get(childPosition));
+
             }
         } else {
             ToastUtil.showToast(activity, "网络连接异常，请检查网络！");

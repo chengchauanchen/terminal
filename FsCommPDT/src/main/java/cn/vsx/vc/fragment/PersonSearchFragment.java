@@ -41,11 +41,8 @@ import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.PhoneAdapter;
-
-import static ptt.terminalsdk.tools.ToastUtil.individualCallFailToast;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by gt358 on 2017/10/11.
@@ -176,21 +173,9 @@ public class PersonSearchFragment  extends BaseFragment{
         if (network){
             if ( searchMemberListExceptMe.size() > 0) {
 
-                int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(searchMemberListExceptMe.get(position).id,"");
-                if (resultCode == BaseCommonCode.SUCCESS_CODE){
-                    if (!PhoneAdapter.isF25()) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-//                                ll_contacts_call_delete.setVisibility(View.INVISIBLE);
-                            }
-                        });
-                    }
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, searchMemberListExceptMe.get(position));
-                    MyApplication.instance.isPopupWindowShow = true;
-                }else {
-                    individualCallFailToast(context, resultCode);
-                }
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, searchMemberListExceptMe.get(position));
+                MyApplication.instance.isPopupWindowShow = true;
+
             }
         } else {
             ToastUtil.showToast(context, "网络连接异常，请检查网络！");

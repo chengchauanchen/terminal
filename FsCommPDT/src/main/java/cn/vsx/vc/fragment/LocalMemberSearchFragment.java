@@ -32,7 +32,6 @@ import java.util.List;
 import butterknife.Bind;
 import cn.vsx.hamster.common.MemberAddressList;
 import cn.vsx.hamster.common.MemberChangeType;
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
@@ -47,9 +46,8 @@ import cn.vsx.vc.receiveHandle.ReceiverDialogDimissHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.PhoneAdapter;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by gt358 on 2017/10/25.
@@ -254,26 +252,15 @@ public class LocalMemberSearchFragment extends BaseFragment{
         if (network){
             if ( searchList.size() > 0) {
 
-                int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(searchList.get(position).id,"");
-                if (resultCode == BaseCommonCode.SUCCESS_CODE){
-                    if (!PhoneAdapter.isF25()) {
-                        myHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                //                                ll_contacts_call_delete.setVisibility(View.INVISIBLE);
-                            }
-                        });
-                    }
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, searchList.get(position));
-                    MyApplication.instance.isPopupWindowShow = true;
-                }else {
-                    ToastUtil.individualCallFailToast(context, resultCode);
-                }
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, searchList.get(position));
+                MyApplication.instance.isPopupWindowShow = true;
+
             }
         } else {
             ToastUtil.showToast(context, "网络连接异常，请检查网络！");
         }
     }
+
     private final class TextWatcherImpSearch implements TextWatcher {
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {

@@ -1208,25 +1208,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     public boolean checkFloatPermission(Context context) {
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            try {
-                Class cls = Class.forName("android.content.Context");
-                Field declaredField = cls.getDeclaredField("APP_OPS_SERVICE");
-                declaredField.setAccessible(true);
-                Object obj = declaredField.get(cls);
-                if (!(obj instanceof String)) {
-                    return false;
-                }
-                String str2 = (String) obj;
-                obj = cls.getMethod("getSystemService", String.class).invoke(context, str2);
-                cls = Class.forName("android.app.AppOpsManager");
-                Field declaredField2 = cls.getDeclaredField("MODE_ALLOWED");
-                declaredField2.setAccessible(true);
-                Method checkOp = cls.getMethod("checkOp", Integer.TYPE, Integer.TYPE, String.class);
-                int result = (Integer) checkOp.invoke(obj, 24, Binder.getCallingUid(), context.getPackageName());
-                return result == declaredField2.getInt(cls);
-            } catch (Exception e) {
-                return false;
-            }
+            return true;
         } else {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 AppOpsManager appOpsMgr = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);

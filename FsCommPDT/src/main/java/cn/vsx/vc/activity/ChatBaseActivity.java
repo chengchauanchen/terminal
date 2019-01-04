@@ -64,8 +64,6 @@ import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
-import cn.vsx.hamster.errcode.module.TerminalErrorCode;
-import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -86,12 +84,12 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.fragment.LocationFragment;
 import cn.vsx.vc.fragment.TransponFragment;
 import cn.vsx.vc.model.ChatMember;
-import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverTransponHandler;
+import cn.vsx.vc.service.PullLivingService;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.FileUtil;
@@ -1425,33 +1423,10 @@ public abstract class ChatBaseActivity extends BaseActivity{
     };
 
     private void watchLive(TerminalMessage terminalMessage){
-        PTTProtolbuf.NotifyDataMessage.Builder builder = PTTProtolbuf.NotifyDataMessage.newBuilder();
-        builder.setMessageUrl(terminalMessage.messageUrl);
-        builder.setMessageFromName(terminalMessage.messageFromName);
-        builder.setMessageFromNo(terminalMessage.messageFromId);
-        builder.setMessageToName(terminalMessage.messageToName);
-        builder.setMessageToNo(terminalMessage.messageToId);
-        builder.setMessageType(terminalMessage.messageType);
-        builder.setMessageVersion(terminalMessage.messageVersion);
-        builder.setResultCode(terminalMessage.resultCode);
-        builder.setSendingTime(terminalMessage.sendTime);
-        builder.setMessageBody(terminalMessage.messageBody.toString());
-        PTTProtolbuf.NotifyDataMessage message = builder.build();
-        int resultCode = MyTerminalFactory.getSDK().getLiveManager().requestToWatchLiving(message);
-        if(resultCode == 0){
-            Intent intent = new Intent("send_live_theme");
-            if (TextUtils.isEmpty(terminalMessage.messageBody.getString(JsonParam.TITLE))){
-                // TODO: 2018/8/10 如果是转发的有问题
-                live_theme = terminalMessage.messageFromName+"上报图像";
-            }else {
-                live_theme = terminalMessage.messageBody.getString(JsonParam.TITLE);
-            }
-            intent.putExtra("live_theme",live_theme);
-            SendRecvHelper.send(ChatBaseActivity.this,intent);
-
-        } else {
-            ToastUtil.livingFailToast(ChatBaseActivity.this, resultCode, TerminalErrorCode.LIVING_PLAYING.getErrorCode());
-        }
+        Intent intent = new Intent(this, PullLivingService.class);
+        intent.putExtra(cn.vsx.vc.utils.Constants.WATCH_TYPE, cn.vsx.vc.utils.Constants.ACTIVE_WATCH);
+        intent.putExtra(cn.vsx.vc.utils.Constants.TERMINALMESSAGE, terminalMessage);
+        startService(intent);
     }
 
     /**  显示转发popupwindow **/

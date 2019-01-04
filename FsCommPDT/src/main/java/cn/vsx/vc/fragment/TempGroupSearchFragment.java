@@ -46,10 +46,7 @@ import cn.vsx.vc.receiveHandle.ReceiverSelectTempGroupMemberHandler;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.PhoneAdapter;
 import ptt.terminalsdk.tools.ToastUtil;
-
-import static ptt.terminalsdk.tools.ToastUtil.individualCallFailToast;
 
 /**
  * Created by gt358 on 2017/10/11.
@@ -189,6 +186,7 @@ public class TempGroupSearchFragment extends BaseFragment{
         et_search_allcontacts.setText("");
         searchMemberListExceptMe.clear();
     }
+
     private void activeIndividualCall(int position) {
         MyApplication.instance.isCallState = true;
         logger.info("tag--先响铃，再停止");
@@ -196,21 +194,9 @@ public class TempGroupSearchFragment extends BaseFragment{
         if (network){
             if ( searchMemberListExceptMe.size() > 0) {
 
-                int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(searchMemberListExceptMe.get(position).id,"");
-                if (resultCode == BaseCommonCode.SUCCESS_CODE){
-                    if (!PhoneAdapter.isF25()) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-//                                ll_contacts_call_delete.setVisibility(View.INVISIBLE);
-                            }
-                        });
-                    }
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, searchMemberListExceptMe.get(position));
-                    MyApplication.instance.isPopupWindowShow = true;
-                }else {
-                    individualCallFailToast(context, resultCode);
-                }
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, searchMemberListExceptMe.get(position));
+                MyApplication.instance.isPopupWindowShow = true;
+
             }
         } else {
             ToastUtil.showToast(context, "网络连接异常，请检查网络！");

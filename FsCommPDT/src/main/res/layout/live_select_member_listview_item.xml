@@ -61,37 +61,31 @@
                 android:textSize="12sp" />
         </LinearLayout>
         <ImageView
+            android:id="@+id/img_terminalMemberType"
             android:layout_marginLeft="@dimen/x25"
             android:layout_gravity="center"
             android:layout_marginRight="@dimen/x15"
-            android:id="@+id/img_terminalMemberType"
             android:layout_width="25dp"
             android:layout_height="25dp" />
         <View
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"/>
-        <CheckBox
-            android:layout_gravity="center_vertical"
-            android:id="@+id/cb_selectmember"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginRight="@dimen/x20"
-            android:focusable="false"
-            android:clickable="false"
-            android:button="@drawable/checkbox"
-            
-            />
-        <RadioButton
-            android:visibility="visible"
-            android:button="@drawable/radiobutton"
-            android:layout_gravity="center"
-            android:id="@+id/rb_selectmember"
-            android:layout_width="26dp"
-            android:layout_height="25dp"
-            android:layout_marginRight="30dp"
-            android:focusable="false"
-            android:clickable="false"
-            />
+        <ImageView
+            android:id="@+id/iv_select"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/checkbox"
+            android:layout_marginRight="@dimen/x20"/>
+        <!--<CheckBox-->
+            <!--android:layout_gravity="center_vertical"-->
+            <!--android:id="@+id/cb_selectmember"-->
+            <!--android:layout_width="30dp"-->
+            <!--android:layout_height="30dp"-->
+            <!--android:layout_marginRight="@dimen/x20"-->
+            <!--android:focusable="false"-->
+            <!--android:clickable="false"-->
+            <!--android:button="@drawable/checkbox"/>-->
+        
     </LinearLayout>
 </LinearLayout>

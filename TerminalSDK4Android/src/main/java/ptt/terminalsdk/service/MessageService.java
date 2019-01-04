@@ -3,6 +3,7 @@ package ptt.terminalsdk.service;
 import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -196,7 +197,7 @@ public class MessageService extends Service {
 
     /**得到日志的存储位置*/
     public String getLogDirectory() {
-        return this.getFilesDir()
+        return Environment.getExternalStorageDirectory()
                 + File.separator + this.getApplicationInfo().loadLabel(this.getPackageManager())+ File.separator + "logs"
                 + File.separator;
     }

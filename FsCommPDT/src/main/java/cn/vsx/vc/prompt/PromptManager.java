@@ -3,6 +3,7 @@ package cn.vsx.vc.prompt;
 import android.content.Context;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.os.SystemClock;
 import android.os.Vibrator;
 import android.text.TextUtils;
 
@@ -59,9 +60,7 @@ public class PromptManager {
 		public void handler(boolean forbid) {
 			logger.info("PromptManager收到遥毙，此时forbid状态为：" + forbid);
 			if(forbid){
-				if (soundPool != null) {
-					soundPool.stop(streamId);
-				}
+				stopRing();
 			}
 		}
 	};
@@ -71,9 +70,7 @@ public class PromptManager {
 		@Override
 		public void handler() {
 			logger.info("PromptManager收到删除消息");
-			if (soundPool != null) {
-				soundPool.stop(streamId);
-			}
+			stopRing();
 		}
 	};
 
@@ -81,8 +78,8 @@ public class PromptManager {
 		@Override
 		public void handler(boolean connected) {
 			logger.info("PromptManager收到网络状态通知：connected = "+connected);
-			if (!connected && soundPool != null) {
-				soundPool.stop(streamId);
+			if (!connected) {
+				stopRing();
 			}
 		}
 	};
@@ -99,7 +96,7 @@ public class PromptManager {
 					vibrator.vibrate(requestGroupCallOk,-1);
 					cancelVibrator();
 					if(soundPool != null){
-						soundPool.play(soundMap.get(R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
+						streamId =soundPool.play(soundMap.get(R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
 					}
 				}else if(methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode() ||
 						methodResult == SignalServerErrorCode.GROUP_CALL_IS_CANCELED.getErrorCode()){
@@ -107,7 +104,7 @@ public class PromptManager {
 				}else{
 					//组呼失败，发提示音
 					if(soundPool != null){
-						soundPool.play(soundMap.get(R.raw.request_call_fail), 0.5f, 0.5f, 0, 0, 1);
+						streamId =soundPool.play(soundMap.get(R.raw.request_call_fail), 0.5f, 0.5f, 0, 0, 1);
 					}
 				}
 			}
@@ -120,9 +117,9 @@ public class PromptManager {
 			if(soundPool != null){
 
 				if (isCalled){
-					soundPool.play(soundMap.get(R.raw.cease_call), 0.5f, 0.5f, 0, 0, 1);
+					streamId =soundPool.play(soundMap.get(R.raw.cease_call), 0.5f, 0.5f, 0, 0, 1);
 				}else {
-					soundPool.play(soundMap.get(ptt.terminalsdk.R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
+					streamId =soundPool.play(soundMap.get(ptt.terminalsdk.R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
 
 				}
 
@@ -139,7 +136,7 @@ public class PromptManager {
 			TerminalMemberType terminalMemberTypeEnum = DataUtil.getMemberByMemberNo(memberId).getTerminalMemberTypeEnum();
 			if (terminalMemberTypeEnum == TerminalMemberType.TERMINAL_PDT){
 				if(soundPool != null){
-					soundPool.play(soundMap.get(ptt.terminalsdk.R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
+					streamId =soundPool.play(soundMap.get(ptt.terminalsdk.R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
 				}
 			}
 		}
@@ -152,7 +149,7 @@ public class PromptManager {
 				if(soundPool != null && MyApplication.instance.getIndividualState() == IndividualCallState.IDLE
 						&& MyApplication.instance.getVideoLivePushingState() == VideoLivePushingState.IDLE
 						&& MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.IDLE){
-					soundPool.play(soundMap.get(R.raw.change_group_ok), 0.5f, 0.5f, 0, 0, 1);
+					streamId =soundPool.play(soundMap.get(R.raw.change_group_ok), 0.5f, 0.5f, 0, 0, 1);
 				}
 			}
 		}
@@ -212,7 +209,7 @@ public class PromptManager {
 					&& MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.IDLE
 					&& MyApplication.instance.getVideoLivePushingState() == VideoLivePushingState.IDLE){
 				if (JSONObject.parseObject(message.getMessageBody()).getIntValue("remark") == 2) {//Remark为通知观看时，才响铃
-					soundPool.play(soundMap.get(R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
+					streamId =soundPool.play(soundMap.get(R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
 					logger.info("被叫收到邀请自己去观看直播的通知，开始响铃----------");
 				}
 			}
@@ -251,26 +248,25 @@ public class PromptManager {
 	 */
 	public void groupCallCommingRing(){
 		if(soundMap !=null){
-			soundPool.play(soundMap.get(R.raw.receive_group_comming), 0.5f, 0.5f, 0, 0, 1);
+			streamId =soundPool.play(soundMap.get(R.raw.receive_group_comming), 0.5f, 0.5f, 0, 0, 1);
 		}
 	}
 
 	public void stopRing(){
 		if(soundPool != null){
 			logger.info("停止响铃---------->" + streamId);
-			soundPool.stop(streamId);
+			if(streamId !=0){
+				soundPool.stop(streamId);
+				streamId = 0;
+			}
 		}
 	}
 
 	public void delayedStopRing(){
 		if(soundPool != null){
 			logger.info("3秒后停止响铃---------->" + streamId);
-			try {
-				Thread.sleep(3000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			soundPool.stop(streamId);
+			SystemClock.sleep(3000);
+			stopRing();
 		}
 	}
 

@@ -1,7 +1,5 @@
 package cn.vsx.vc.receiveHandle;
 
-import java.util.List;
-
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 
 /**
@@ -9,5 +7,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverActivePushVideoHandler extends ReceiveHandler {
-    public void handler(List<Integer> memberIds);
+    public void handler(int memberId);
 }
