@@ -283,5 +283,17 @@
             android:name=".service.CallingService"
             android:enabled="true"
             android:exported="false"/>
+        <service
+            android:name=".service.ReceiveCallComingService"
+            android:enabled="true"
+            android:exported="false"/>
+        <service
+            android:name=".service.ReceiveLiveCommingService"
+            android:enabled="true"
+            android:exported="false"/>
+        <service
+            android:name=".service.StartIndividualCallService"
+            android:enabled="true"
+            android:exported="false"/>
     </application>
 </manifest>

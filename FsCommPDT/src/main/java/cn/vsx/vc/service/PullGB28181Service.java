@@ -128,13 +128,11 @@ public class PullGB28181Service extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
     }
 
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
-        mHandler.post(() -> {
-            if(connected && null != mSvGb28181.getSurfaceTexture()){
-                startPullGB28121(mSvGb28181.getSurfaceTexture());
-            }
-        });
-    };
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> mHandler.post(() -> {
+        if(connected && null != mSvGb28181.getSurfaceTexture()){
+            startPullGB28121(mSvGb28181.getSurfaceTexture());
+        }
+    });
 
     private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> myHandler.post(this::setPushAuthority);
 
