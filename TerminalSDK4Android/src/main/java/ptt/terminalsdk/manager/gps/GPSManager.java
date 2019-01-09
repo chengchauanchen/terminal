@@ -13,15 +13,17 @@ import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
 import android.widget.Toast;
 
-import org.apache.log4j.Logger;
-import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
+import com.google.gson.Gson;
 
+import org.apache.log4j.Logger;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimerTask;
 
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf.NotifyForceUploadGpsMessage;
-import cn.vsx.hamster.protolbuf.PTTProtolbuf.UploadGpsMessage;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.channel.ServerMessageReceivedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGPSLocationHandler;
@@ -258,23 +260,44 @@ public class GPSManager {
 				forceUpload();
 			}
 			//上传GPS位置信息
-			UploadGpsMessage.Builder uploadGpsMessageBuilder = UploadGpsMessage.newBuilder();
-			uploadGpsMessageBuilder.setMemberId(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
-			uploadGpsMessageBuilder.setSessionId(MyTerminalFactory.getSDK().getParam(Params.SESSION_ID));
-			uploadGpsMessageBuilder.setVersion(MyTerminalFactory.getSDK().getParam(Params.VERSION, 0));
-			uploadGpsMessageBuilder.setLongitude(location.getLongitude());
-			uploadGpsMessageBuilder.setLatitude(location.getLatitude());
-			uploadGpsMessageBuilder.setSpeedRate(location.getSpeed());
-			uploadGpsMessageBuilder.setElevation(location.getAltitude());
-//			uploadGpsMessageBuilder.setDirection(location.getDirection());
-//			uploadGpsMessageBuilder.setLocation(location.getAddrStr());
-			MyTerminalFactory.getSDK().getClientChannel().sendMessage(uploadGpsMessageBuilder.build(), new PushMessageSendResultHandler() {
+			String ip = MyTerminalFactory.getSDK().getParam(Params.GPS_IP);
+			int port = MyTerminalFactory.getSDK().getParam(Params.GPS_PORT,0);
+//			final String url = "http://192.168.1.174:6666/save";
+			final String url = "http://"+ip+":"+port+"/save";
+			Map<String,Object> params = new HashMap<>();
+			params.put("terminalno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
+			params.put("longitude",location.getLongitude());
+			params.put("latitude",location.getLatitude());
+			params.put("speed",location.getSpeed());
+			params.put("bearing",location.getBearing());
+			params.put("altitude",location.getAltitude());
 
+			Gson gson = new Gson();
+			final String json = gson.toJson(params);
+			MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable(){
 				@Override
-				public void handler(boolean sendOK, String uuid) {
-					logger.info("上传gps数据:" + sendOK);
+				public void run(){
+					MyTerminalFactory.getSDK().getHttpClient().postJson(url,"gps="+json);
 				}
 			});
+
+//			UploadGpsMessage.Builder uploadGpsMessageBuilder = UploadGpsMessage.newBuilder();
+//			uploadGpsMessageBuilder.setMemberId(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+//			uploadGpsMessageBuilder.setSessionId(MyTerminalFactory.getSDK().getParam(Params.SESSION_ID));
+//			uploadGpsMessageBuilder.setVersion(MyTerminalFactory.getSDK().getParam(Params.VERSION, 0));
+//			uploadGpsMessageBuilder.setLongitude(location.getLongitude());
+//			uploadGpsMessageBuilder.setLatitude(location.getLatitude());
+//			uploadGpsMessageBuilder.setSpeedRate(location.getSpeed());
+//			uploadGpsMessageBuilder.setElevation(location.getAltitude());
+////			uploadGpsMessageBuilder.setDirection(location.getDirection());
+////			uploadGpsMessageBuilder.setLocation(location.getAddrStr());
+//			MyTerminalFactory.getSDK().getClientChannel().sendMessage(uploadGpsMessageBuilder.build(), new PushMessageSendResultHandler() {
+//
+//				@Override
+//				public void handler(boolean sendOK, String uuid) {
+//					logger.info("上传gps数据:" + sendOK);
+//				}
+//			});
 		}
 
 

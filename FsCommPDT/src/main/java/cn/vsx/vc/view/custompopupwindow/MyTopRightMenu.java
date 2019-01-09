@@ -20,17 +20,16 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
-import cn.vsx.vc.activity.DeleteTemporaryGroupMemberActivity;
 import cn.vsx.vc.activity.IncreaseTemporaryGroupMemberActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.SystemUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.DialogUtil;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by zckj on 2017/3/16.
@@ -114,7 +113,7 @@ public class MyTopRightMenu {
                                                         ToastUtil.showToast(context,"没有图像上报功能权限");
                                                         return;
                                                     }
-                                                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, new ArrayList<Integer>());
+                                                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,0);
                                                 }
 
 
