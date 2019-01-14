@@ -195,7 +195,6 @@ public class TempGroupSearchFragment extends BaseFragment{
             if ( searchMemberListExceptMe.size() > 0) {
 
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, searchMemberListExceptMe.get(position));
-                MyApplication.instance.isPopupWindowShow = true;
 
             }
         } else {

@@ -103,7 +103,8 @@ public class LiveRequestService extends BaseService{
     private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc)-> mHandler.post(() -> {
         ToastUtil.showToast(getApplicationContext(),resultDesc);
         MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-        windowManager.removeView(rootView);
+        PromptManager.getInstance().stopRing();//停止响铃
+        removeView();
     });
 
     /**
@@ -113,7 +114,7 @@ public class LiveRequestService extends BaseService{
         PromptManager.getInstance().stopRing();//停止响铃
         ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.other_no_answer));
         MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-        windowManager.removeView(rootView);
+        removeView();
     };
 
     /**
@@ -122,7 +123,8 @@ public class LiveRequestService extends BaseService{
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (methodResult, resultDesc) -> {
         ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
         MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-        windowManager.removeView(rootView);
+        PromptManager.getInstance().stopRing();//停止响铃
+        removeView();
     };
 
     /**
@@ -132,7 +134,8 @@ public class LiveRequestService extends BaseService{
         if (Util.isEmpty(rtspUrl)) {
             ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.no_rtsp_data));
             MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-            windowManager.removeView(rootView);
+            PromptManager.getInstance().stopRing();//停止响铃
+            removeView();
         }else {
             logger.info("rtspUrl ----> " + rtspUrl);
             PromptManager.getInstance().stopRing();
@@ -141,7 +144,8 @@ public class LiveRequestService extends BaseService{
             intent.putExtra(Constants.RTSP_URL,rtspUrl);
             intent.putExtra(Constants.LIVE_MEMBER,liveMember);
             startService(intent);
-            mHandler.postDelayed(() -> windowManager.removeView(rootView),1000);
+            removeView();
+//            mHandler.postDelayed(this::removeView,1000);
         }
     });
 }

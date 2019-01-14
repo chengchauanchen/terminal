@@ -45,6 +45,7 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
+import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
@@ -606,10 +607,9 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 return true;
             }
 
-            boolean isNetOffLine = MyTerminalFactory.getSDK().getParam(Params.NET_OFFLINE, false);
 
-            if (isNetOffLine) {
-                ToastUtil.showToast(GroupCallNewsActivity.this, "无网络连接");
+            if (MyTerminalFactory.getSDK().getAuthManagerTwo().getLoginStatus() != AuthManagerTwo.ONLINE) {
+                ToastUtil.showToast(GroupCallNewsActivity.this, GroupCallNewsActivity.this.getResources().getString(R.string.net_work_disconnect));
                 return true;
             }
 
@@ -741,10 +741,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 @Override
                 public void run() {
                     if (!connected) {
-                        MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, true);
                         noNetWork.setVisibility(View.VISIBLE);
                     } else {
-                        MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, false);
                         noNetWork.setVisibility(View.GONE);
                     }
                 }

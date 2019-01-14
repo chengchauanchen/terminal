@@ -41,6 +41,7 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetRtspStreamUrlHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberNotLivingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
@@ -59,7 +60,6 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
-import static cn.vsx.vc.pager.PTTViewPager.myHandler;
 import static org.easydarwin.config.Config.PLAYKEY;
 import static org.easydarwin.config.Config.RTMPPLAYKEY;
 
@@ -105,6 +105,7 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberNotLivingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         mPopupMiniLive.setOnTouchListener(miniPopOnTouchListener);
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
@@ -170,6 +171,12 @@ public class PullLivingService extends BaseService{
 
     @Override
     protected void handleMesage(Message msg){
+        switch(msg.what){
+            case OFF_LINE:
+                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_pull));
+                removeView();
+                break;
+        }
     }
 
     @SuppressLint("InflateParams")
@@ -213,9 +220,10 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberNotLivingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetRtspStreamUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
     }
 
-    private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> myHandler.post(this::setAuthorityView);
+    private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setAuthorityView);
 
     private ReceivePTTUpHandler receivePTTUpHandler = ()-> {
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
@@ -279,9 +287,14 @@ public class PullLivingService extends BaseService{
 
     private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
         if(!connected){
-            return;
+            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+            mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
         }
-        mHandler.post(() -> {
+    };
+
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
+        mHandler.removeMessages(OFF_LINE);
+        if(resultCode == BaseCommonCode.SUCCESS_CODE){
             if(MyApplication.instance.isMiniLive){
                 if(null != mSvLivePop.getSurfaceTexture()){
                     startPull(mSvLivePop);
@@ -291,8 +304,10 @@ public class PullLivingService extends BaseService{
                     startPull(mSvLive);
                 }
             }
-        });
-    };
+        }else {
+            mHandler.sendEmptyMessage(OFF_LINE);
+        }
+    });
 
     private IGotaKeyHandler.Stub gotaKeHandler = new IGotaKeyHandler.Stub(){
         @Override

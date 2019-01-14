@@ -57,7 +57,6 @@ public class MyApplication extends Application {
 	public boolean isPttViewPager = true;
 	public boolean isTalkbackFragment = true;
 	public boolean isPttPress = false;
-	public boolean isPopupWindowShow = false;
 	public boolean isMoved = false;
 	public boolean viewAdded;
 	public boolean usbAttached;//外置摄像头是否连接

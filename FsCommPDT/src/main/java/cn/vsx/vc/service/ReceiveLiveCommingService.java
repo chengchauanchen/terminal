@@ -77,7 +77,6 @@ public class ReceiveLiveCommingService extends BaseService{
     protected void initView(Intent intent){
         memberName = intent.getStringExtra(Constants.MEMBER_NAME);
         memberId = intent.getIntExtra(Constants.MEMBER_ID, 0);
-        windowManager.addView(rootView, layoutParams);
         mTvLiveReportName.setText(memberName);
         mTvLiveReportId.setText(HandleIdUtil.handleId(memberId));
         PromptManager.getInstance().VideoLiveInCommimgRing();

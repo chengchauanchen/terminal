@@ -693,7 +693,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		@Override
 		public void handler(boolean connected) {
 			logger.info("***********UDPClientBase**************connected = "+connected);
-			TerminalFactory.getSDK().putParam(Params.NET_OFFLINE, !connected);
 			notifyReceiveHandler(ReceiveServerConnectionEstablishedHandler.class, connected);
 		}
 	};

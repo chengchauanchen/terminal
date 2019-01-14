@@ -336,7 +336,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 @Override
                 public void run() {
                     if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                        MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, false);
                         if (!MyTerminalFactory.getSDK().getParam(Params.IS_FIRST_LOGIN, true)
                                 && !MyTerminalFactory.getSDK().getParam(Params.IS_UPDATE_DATA, true)) {
                             logger.info("不是第一次登录，也不需要更新数据，直接进入主界面");

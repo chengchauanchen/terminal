@@ -91,6 +91,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLiveNewsClickHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePopBackStackHandler;
@@ -270,7 +271,15 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
     };
 
-
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = new ReceiveLoginResponseHandler(){
+        @Override
+        public void handler(int resultCode, String resultDesc){
+            if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                noNetWork.setVisibility(View.GONE);
+                MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord());
+            }
+        }
+    };
 
     /**
      * 网络连接状态
@@ -284,7 +293,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 public void run() {
                     if (!connected) {
                         noNetWork.setVisibility(View.VISIBLE);
-                        MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, true);
                         if (ll_emergency_prompt != null && ll_emergency_prompt.getVisibility() == View.VISIBLE) {
                             ll_emergency_prompt.setVisibility(View.GONE);
                             ICTV_emergency_time.stop();
@@ -293,16 +301,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                             ll_groupCall_prompt.setVisibility(View.GONE);
                             ICTV_groupCall_time.stop();
                         }
-                        MyApplication.instance.isPopupWindowShow = false;
-                    } else {
-                        noNetWork.setVisibility(View.GONE);
-                        MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, false);
-                        MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
-                            @Override
-                            public void run() {
-                                MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
-                            }
-                        });
                     }
                 }
             });
@@ -542,7 +540,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                             popupWindow.showAsDropDown(my_view);
                             //                            viewHolder.ICTV_speaking_time_emergency.stop();
                             //                            viewHolder.ICTV_speaking_time_emergency.start();
-                            MyApplication.instance.isPopupWindowShow = true;
                             //                            viewHolder.tv_current_folder.setText(emergencyFolder.name);
                             //                            viewHolder.tv_current_group.setText(emergencyGroup.name);
                         } else {//普通组呼成功
@@ -590,7 +587,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                         //                        viewHolder.emergency_group_call.setVisibility(View.GONE);
                         popupWindow.dismiss();
 
-                        MyApplication.instance.isPopupWindowShow = false;
                     }
                     if (ll_groupCall_prompt != null && ll_groupCall_prompt.isShown()) {
                         ICTV_groupCall_time.stop();
@@ -702,7 +698,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                                         recoverRequestPop();
                                         //                                        viewHolder.individual_call_request.setVisibility(View.VISIBLE);
 
-                                        MyApplication.instance.isPopupWindowShow = true;
                                         //                                        viewHolder.tv_member_name_request.setText(calleeMember.getName());
                                         //                                        viewHolder.tv_member_id_request.setText("ID:" + calleeMember.id);
                                     }
@@ -1037,10 +1032,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         //        viewHolder.individual_call_retract_emergency.setOnClickListener(new OnClickListenerImplementationEmergencyGroupRetract());//等待接听收缩页面
         //        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyInviteToWatchHandler);
         //        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveLiveNewsClickHandler);
         //
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
 
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveUnReadCountChangedHandler);
 
@@ -1512,22 +1507,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
     }
 
-    /**
-     * 点击视频直播消息按钮
-     **/
-    private ReceiveLiveNewsClickHandler receiveLiveNewsClickHandler = new ReceiveLiveNewsClickHandler() {
-        @Override
-        public void handler() {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    showLiveNews();
-                    MyApplication.instance.isPopupWindowShow = true;
-                }
-            });
-        }
-    };
-
     public void showLiveNews() {
         popupWindow.showAsDropDown(my_view);
         //        hidePopwView();
@@ -1712,10 +1691,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         //        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyInviteToWatchHandler);
         //        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLiveNewsClickHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTUpHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceivePopBackStackHandler);
 
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveUnReadCountChangedHandler);
@@ -1778,58 +1757,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         //记录当前的checkedId
         outState.putInt("currentCheckedId", currentCheckedId);
     }
-    private Method noteStateNotSavedMethod;
-    private Object fragmentMgr;
-    private String[] activityClassName = {"Activity", "FragmentActivity"};
-    private void invokeFragmentManagerNoteStateNotSaved() {
-        //java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState
-        try {
-            if (noteStateNotSavedMethod != null && fragmentMgr != null) {
-                noteStateNotSavedMethod.invoke(fragmentMgr);
-                return;
-            }
-            Class cls = getClass();
-            do {
-                cls = cls.getSuperclass();
-            } while (!(activityClassName[0].equals(cls.getSimpleName())
-                    || activityClassName[1].equals(cls.getSimpleName())));
 
-            Field fragmentMgrField = prepareField(cls, "mFragments");
-            if (fragmentMgrField != null) {
-                fragmentMgr = fragmentMgrField.get(this);
-                noteStateNotSavedMethod = getDeclaredMethod(fragmentMgr, "noteStateNotSaved");
-                if (noteStateNotSavedMethod != null) {
-                    noteStateNotSavedMethod.invoke(fragmentMgr);
-                }
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-    private Field prepareField(Class<?> c, String fieldName) throws NoSuchFieldException {
-        while (c != null) {
-            try {
-                Field f = c.getDeclaredField(fieldName);
-                f.setAccessible(true);
-                return f;
-            } finally {
-                c = c.getSuperclass();
-            }
-        }
-        throw new NoSuchFieldException();
-    }
-    private Method getDeclaredMethod(Object object, String methodName, Class<?>... parameterTypes) {
-        Method method = null;
-        for (Class<?> clazz = object.getClass(); clazz != Object.class; clazz = clazz.getSuperclass()) {
-            try {
-                method = clazz.getDeclaredMethod(methodName, parameterTypes);
-                return method;
-            } catch (Exception e) {
-            }
-        }
-        return null;
-    }
 
     public void exit(){
 

@@ -317,7 +317,6 @@ public class CallingService extends BaseService{
 
     private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = (connected) -> {
         if(!connected){
-            MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, true);
             if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
                 removeView();
                 mIctvSpeakingTimeSpeaking.pause();

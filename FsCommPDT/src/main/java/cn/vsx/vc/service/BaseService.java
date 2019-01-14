@@ -40,6 +40,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 public abstract class BaseService extends Service{
 
     protected Logger logger = Logger.getLogger(this.getClass());
+    protected final String TAG = this.getClass().getSimpleName();
     protected WindowManager windowManager;
     protected WindowManager.LayoutParams layoutParams;
     protected WindowManager.LayoutParams layoutParams1;
@@ -47,6 +48,8 @@ public abstract class BaseService extends Service{
     protected PowerManager.WakeLock wakeLock;
     protected View rootView;
     private boolean dialogAdd;//是否添加了弹窗
+    public static final int OFF_LINE_TIME = 60*1000;
+    protected static final int OFF_LINE = 55;
 
     @SuppressLint("HandlerLeak")
     protected Handler mHandler = new Handler(){
@@ -173,6 +176,7 @@ public abstract class BaseService extends Service{
     }
 
     protected void removeView(){
+        logger.info(TAG+"--removeView");
         mHandler.removeCallbacksAndMessages(null);
         if(dialogAdd){
             windowManager.removeView(rootView);

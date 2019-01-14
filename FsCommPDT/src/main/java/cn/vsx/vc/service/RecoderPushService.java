@@ -40,6 +40,7 @@ import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
@@ -55,7 +56,6 @@ import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
-import static cn.vsx.vc.pager.PTTViewPager.myHandler;
 import static org.easydarwin.config.Config.PLAYKEY;
 
 public class RecoderPushService extends BaseService{
@@ -98,12 +98,13 @@ public class RecoderPushService extends BaseService{
     protected void initListener(){
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
 
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
@@ -160,6 +161,10 @@ public class RecoderPushService extends BaseService{
                 mHandler.removeMessages(HIDELIVINGVIEW);
                 hideLivingView();
                 break;
+            case OFF_LINE:
+                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_push));
+                removeView();
+                break;
         }
     }
 
@@ -179,21 +184,14 @@ public class RecoderPushService extends BaseService{
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
     }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId){
-
-        return super.onStartCommand(intent, flags, startId);
-    }
-
-
 
     @SuppressLint("InflateParams")
     @Override
@@ -283,20 +281,23 @@ public class RecoderPushService extends BaseService{
         mHandler.post(() -> mLlLiveGroupCall.setVisibility(View.GONE));
     };
 
-    /**
-     * 网络连接状态
-     */
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> mHandler.post(() -> {
-        logger.info("网络：" + connected);
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
         if(!connected){
-            MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, true);
-        }else{
-            MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, false);
+            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+            mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
+        }
+    };
+
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
+        mHandler.removeMessages(OFF_LINE);
+        if(resultCode == BaseCommonCode.SUCCESS_CODE){
             if(MyApplication.instance.isMiniLive){
                 pushLawRecorder(mSvLivePop.getSurfaceTexture());
             }else{
                 pushLawRecorder(mSvLive.getSurfaceTexture());
             }
+        }else {
+            mHandler.sendEmptyMessage(OFF_LINE);
         }
     });
 
@@ -304,8 +305,8 @@ public class RecoderPushService extends BaseService{
      * 通知直播停止 通知界面关闭视频页
      **/
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (methodResult, resultDesc) -> {
-        ptt.terminalsdk.tools.ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
-        finishVideoLive();
+        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
+        mHandler.post(this::finishVideoLive);
     };
 
     /**
@@ -336,7 +337,7 @@ public class RecoderPushService extends BaseService{
         }
     }, 1000);
 
-    private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> myHandler.post(this::setAuthorityView);
+    private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setAuthorityView);
 
     /**
      * 观看成员的进入和退出

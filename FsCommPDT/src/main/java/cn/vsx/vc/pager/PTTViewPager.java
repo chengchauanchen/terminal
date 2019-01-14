@@ -439,7 +439,7 @@ public class PTTViewPager extends BaseViewPager {
 //    ImageView talkback_change_session;
 
     private TalkbackFragment takebackFragment;
-    public static Handler myHandler = new Handler();
+    public Handler myHandler = new Handler();
     private Logger logger = Logger.getLogger(getClass());
     private boolean canScroll = true;
     private LazyViewPager view_pager;

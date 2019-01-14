@@ -39,6 +39,7 @@ import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
@@ -55,8 +56,6 @@ import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
-
-import static cn.vsx.vc.pager.PTTViewPager.myHandler;
 
 /**
  * 外置摄像头上报视频
@@ -129,10 +128,11 @@ public class UVCPushService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
 
         mSvUvcLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvUvcLive.setOnClickListener(svOnClickListener);
@@ -190,6 +190,10 @@ public class UVCPushService extends BaseService{
                 mHandler.removeMessages(HIDELIVINGVIEW);
                 hideLivingView();
                 break;
+            case OFF_LINE:
+                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_push));
+                removeView();
+                break;
         }
     }
 
@@ -200,10 +204,11 @@ public class UVCPushService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
     }
 
     @Override
@@ -218,7 +223,7 @@ public class UVCPushService extends BaseService{
     @Override
     protected void initBroadCastReceiver(){}
 
-    private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> myHandler.post(this::setAuthorityView);
+    private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setAuthorityView);
 
     /**
      * 自己发起直播的响应
@@ -258,7 +263,7 @@ public class UVCPushService extends BaseService{
      **/
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (methodResult, resultDesc) -> {
         ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
-        finishVideoLive();
+        mHandler.post(this::finishVideoLive);
     };
 
     private String ip;
@@ -303,20 +308,23 @@ public class UVCPushService extends BaseService{
         }
     });
 
-    /**
-     * 网络连接状态
-     */
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> mHandler.post(() -> {
-        logger.info("网络：" + connected);
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
         if(!connected){
-            MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, true);
-        }else{
-            MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, false);
+            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+            mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
+        }
+    };
+
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
+        mHandler.removeMessages(OFF_LINE);
+        if(resultCode == BaseCommonCode.SUCCESS_CODE){
             if(MyApplication.instance.isMiniLive){
                 pushStream(mSvLivePop.getSurfaceTexture());
             }else{
                 pushStream(mSvUvcLive.getSurfaceTexture());
             }
+        }else {
+            mHandler.sendEmptyMessage(OFF_LINE);
         }
     });
 

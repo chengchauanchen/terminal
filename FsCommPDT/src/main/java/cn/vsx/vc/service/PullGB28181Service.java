@@ -27,7 +27,9 @@ import java.util.Date;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.util.JsonParam;
+import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.vc.R;
@@ -35,7 +37,6 @@ import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
-import static cn.vsx.vc.pager.PTTViewPager.myHandler;
 import static org.easydarwin.config.Config.PLAYKEY;
 
 public class PullGB28181Service extends BaseService{
@@ -51,6 +52,7 @@ public class PullGB28181Service extends BaseService{
     private String gb28181Url;
     private Logger logger = Logger.getLogger(this.getClass());
     private static final int CURRENTTIME = 1;
+
 
     private EasyRTSPClient mStreamRender;
     private TerminalMessage terminalMessage;
@@ -92,6 +94,7 @@ public class PullGB28181Service extends BaseService{
         mLlInviteMember.setOnClickListener(inviteOnClickListener);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
     }
 
     @Override
@@ -118,6 +121,10 @@ public class PullGB28181Service extends BaseService{
             case CURRENTTIME:
                 setCurrentTime();
                 break;
+            case OFF_LINE:
+                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_pull));
+                removeView();
+                break;
         }
     }
 
@@ -126,15 +133,29 @@ public class PullGB28181Service extends BaseService{
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
     }
 
     private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> mHandler.post(() -> {
-        if(connected && null != mSvGb28181.getSurfaceTexture()){
-            startPullGB28121(mSvGb28181.getSurfaceTexture());
+        if(!connected){
+            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+            mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
         }
     });
 
-    private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> myHandler.post(this::setPushAuthority);
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
+        mHandler.removeMessages(OFF_LINE);
+        if(resultCode == BaseCommonCode.SUCCESS_CODE){
+            if(null != mSvGb28181.getSurfaceTexture()){
+                startPullGB28121(mSvGb28181.getSurfaceTexture());
+            }
+        }else {
+            mHandler.sendEmptyMessage(OFF_LINE);
+        }
+    });
+
+
+    private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setPushAuthority);
 
     private View.OnClickListener inviteOnClickListener = v->{
         Intent intent = new Intent(PullGB28181Service.this,InviteMemberService.class);

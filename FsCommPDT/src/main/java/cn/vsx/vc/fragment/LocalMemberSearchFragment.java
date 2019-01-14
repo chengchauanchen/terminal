@@ -253,7 +253,6 @@ public class LocalMemberSearchFragment extends BaseFragment{
             if ( searchList.size() > 0) {
 
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, searchList.get(position));
-                MyApplication.instance.isPopupWindowShow = true;
 
             }
         } else {

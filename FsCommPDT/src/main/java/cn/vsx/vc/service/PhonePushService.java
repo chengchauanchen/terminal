@@ -39,6 +39,7 @@ import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
@@ -55,8 +56,6 @@ import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
-
-import static cn.vsx.vc.pager.PTTViewPager.myHandler;
 
 /**
  * 普通手机上报视频
@@ -136,10 +135,11 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
 
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLive.setOnClickListener(svOnClickListener);
@@ -200,6 +200,10 @@ public class PhonePushService extends BaseService{
                 mHandler.removeMessages(HIDELIVINGVIEW);
                 hideLivingView();
                 break;
+            case OFF_LINE:
+                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_push));
+                removeView();
+                break;
         }
     }
 
@@ -220,10 +224,11 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
     }
 
     private void hideAllView(){
@@ -259,7 +264,7 @@ public class PhonePushService extends BaseService{
         }
     };
 
-    private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> myHandler.post(this::setPushAuthority);
+    private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setPushAuthority);
 
     private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = (reasonCode) -> {
         logger.info("收到组呼停止");
@@ -313,20 +318,23 @@ public class PhonePushService extends BaseService{
         }
     });
 
-    /**
-     * 网络连接状态
-     */
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> mHandler.post(() -> {
-        logger.info("网络：" + connected);
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
         if(!connected){
-            MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, true);
-        }else{
-            MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, false);
+            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+            mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
+        }
+    };
+
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
+        mHandler.removeMessages(OFF_LINE);
+        if(resultCode == BaseCommonCode.SUCCESS_CODE){
             if(MyApplication.instance.isMiniLive){
                 pushStream(mSvLivePop.getSurfaceTexture());
             }else{
                 pushStream(mSvLive.getSurfaceTexture());
             }
+        }else {
+            mHandler.sendEmptyMessage(OFF_LINE);
         }
     });
 
@@ -541,7 +549,7 @@ public class PhonePushService extends BaseService{
 
     private void pushStream(SurfaceTexture surface){
         if(mMediaStream != null){    // switch from background to front
-            mMediaStream.stopPreview();
+//            mMediaStream.stopPreview();
             mMediaStream.setSurfaceTexture(surface);
             mMediaStream.startPreview();
             if(mMediaStream.isStreaming()){
@@ -614,7 +622,6 @@ public class PhonePushService extends BaseService{
     }
 
     private void hideLivingView(){
-        mTvLiveRealtime.setVisibility(View.GONE);
         mIvLiveRetract.setVisibility(View.GONE);
         mLlLiveChageCamera.setVisibility(View.GONE);
         mLlLiveHangupTotal.setVisibility(View.GONE);

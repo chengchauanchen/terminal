@@ -283,7 +283,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
             if(member!=null){
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
-                MyApplication.instance.isPopupWindowShow = true;
             }else {
                 ToastUtil.showToast(IndividualNewsActivity.this,"获取成员信息失败");
             }

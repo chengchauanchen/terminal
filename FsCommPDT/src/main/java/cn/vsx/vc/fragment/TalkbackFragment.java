@@ -452,11 +452,6 @@ public class TalkbackFragment extends BaseFragment {
             myHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (!connected) {
-                        MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, true);
-                    } else {
-                        MyTerminalFactory.getSDK().putParam(Params.NET_OFFLINE, false);
-                    }
                     setCurrentGroupView();
                 }
             });

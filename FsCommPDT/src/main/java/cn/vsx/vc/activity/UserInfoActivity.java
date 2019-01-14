@@ -260,7 +260,6 @@ public class UserInfoActivity extends BaseActivity {
         if (network) {
             if(member!=null){
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
-                MyApplication.instance.isPopupWindowShow = true;
             }else {
                 ToastUtil.showToast(UserInfoActivity.this,"获取人员信息失败");
             }

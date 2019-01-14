@@ -111,5 +111,7 @@
     <string name="video_not_support">视频格式不支持</string>
     <string name="watch_finished">观看已结束</string>
     <string name="huang_up">已挂断</string>
+    <string name="exit_pull">网络无法连接，已退出观看</string>
+    <string name="exit_push">网络无法连接，已退出上报</string>
 
 </resources>
