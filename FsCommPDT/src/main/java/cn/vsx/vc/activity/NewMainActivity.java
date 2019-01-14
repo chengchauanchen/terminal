@@ -22,7 +22,6 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -78,7 +77,6 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.StopGroupCallReason;
-import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -1149,12 +1147,17 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         startService(new Intent(NewMainActivity.this, LockScreenService.class));
         MyApplication.instance.startUVCCameraService();
         //注册voip
-        String account = MyTerminalFactory.getSDK().getParam(UrlParams.ACCOUNT, "");
+//        String account = MyTerminalFactory.getSDK().getParam(UrlParams.ACCOUNT, "");
+        String account = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)+"";
         String voipServerIp = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_IP, "");
-        String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, "");
+//        String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, 0)+"";
+        String voipServerPort = "5060";
         String server = voipServerIp+":"+voipServerPort;
         if(account.contains("@lzy")){
             account=account.substring(0,6);
+        }
+        if(account.startsWith("88")|| account.startsWith("86")){
+            account = account.substring(2);
         }
         logger.info("voip账号："+account+",密码："+ account+"，服务器地址："+server);
         MyTerminalFactory.getSDK().getVoipCallManager().clearCache();

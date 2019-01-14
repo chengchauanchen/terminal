@@ -25,11 +25,14 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.alibaba.fastjson.JSONObject;
+import com.xuchongyang.easyphone.callback.PhoneCallback;
 import com.zectec.imageandfileselector.utils.FileUtil;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.http.util.TextUtils;
 import org.apache.log4j.Logger;
+import org.linphone.core.LinphoneAddress;
+import org.linphone.core.LinphoneCall;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -47,6 +50,8 @@ import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
+import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
@@ -176,7 +181,8 @@ public class ReceiveHandlerService extends Service{
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverActivePushVideoHandler);//上报视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoHandler);//请求视频
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
-
+        //监听voip来电
+        MyTerminalFactory.getSDK().getVoipCallManager().addCallback(null,phoneCallback);
     }
 
     @Override
@@ -343,6 +349,25 @@ public class ReceiveHandlerService extends Service{
     }
 
 
+    private PhoneCallback phoneCallback = new PhoneCallback(){
+        @Override
+        public void incomingCall(LinphoneCall linphoneCall){
+            super.incomingCall(linphoneCall);
+            //将状态机至于正在个呼状态
+            int code = TerminalFactory.getSDK().getTerminalStateManager().openFunction(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.IDLE);
+            if(code == BaseCommonCode.SUCCESS_CODE){
+                Intent intent = new Intent(ReceiveHandlerService.this,ReceiveVoipService.class);
+                Log.e("ReceiveHandlerService", "Domain:"+linphoneCall.getCallLog().getFrom().getDomain());
+                LinphoneAddress from = linphoneCall.getCallLog().getFrom();
+                String userName = from.getUserName();
+                Log.e("ReceiveHandlerService", "userName:"+userName);
+                String displayName = from.getDisplayName();
+                Log.e("ReceiveHandlerService", "displayName:"+displayName);
+                intent.putExtra(Constants.USER_NAME,userName);
+                startService(intent);
+            }
+        }
+    };
     /**
      * 收到别人请求我开启直播的通知
      **/

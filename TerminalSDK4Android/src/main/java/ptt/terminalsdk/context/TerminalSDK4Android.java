@@ -490,6 +490,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	}
 	@Override
 	public void clearMessage() {
+		logger.info("删除所有存储数据");
 		TerminalFactory.getSDK().putParam(Params.MESSAGE_VERSION, 0l);
 		DeleteData.deleteSerializableData();
 		DeleteData.deleteSQLiteDatabase();

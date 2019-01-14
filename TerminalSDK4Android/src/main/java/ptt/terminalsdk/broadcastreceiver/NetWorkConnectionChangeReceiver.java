@@ -7,7 +7,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
 
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
@@ -39,9 +39,7 @@ public class NetWorkConnectionChangeReceiver extends BroadcastReceiver {
             success = true;
         }
         Log.i("网络状态", "网络是否连接："+success);
-
-        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveServerConnectionEstablishedHandler.class,success);
-
+        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveNetworkChangeHandler.class,success);
 
     }
 

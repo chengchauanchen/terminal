@@ -120,6 +120,13 @@ public class VoipManager{
     }
 
     /**
+     * 接听来电
+     */
+    public void acceptCall(){
+        EasyLinphone.acceptCall();
+    }
+
+    /**
      * 挂断电话
      */
     public void hangUp() {

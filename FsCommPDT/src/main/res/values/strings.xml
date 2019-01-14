@@ -110,5 +110,6 @@
     <string name="voice_not_support">音频格式不支持</string>
     <string name="video_not_support">视频格式不支持</string>
     <string name="watch_finished">观看已结束</string>
+    <string name="huang_up">已挂断</string>
 
 </resources>

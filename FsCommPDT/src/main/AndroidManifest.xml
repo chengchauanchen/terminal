@@ -295,5 +295,13 @@
             android:name=".service.StartIndividualCallService"
             android:enabled="true"
             android:exported="false"/>
+        <service
+            android:name=".service.ReceiveVoipService"
+            android:enabled="true"
+            android:exported="false"/>
+        <service
+            android:name=".service.MultipartyCallService"
+            android:enabled="true"
+            android:exported="false"/>
     </application>
 </manifest>

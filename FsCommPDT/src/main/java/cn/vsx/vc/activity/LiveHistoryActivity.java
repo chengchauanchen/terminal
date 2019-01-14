@@ -128,7 +128,7 @@ public class LiveHistoryActivity extends BaseActivity{
             @Override
             public void run(){
                 String serverIp = TerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_IP, "");
-                String serverPort = TerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT, "");
+                String serverPort = TerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT, 0)+"";
                 String url = "http://"+serverIp+":"+serverPort+"/api/v1/query_records";
                 Map<String,String> paramsMap = new HashMap<>();
                 logger.info("消息："+terminalMessage);
@@ -155,7 +155,7 @@ public class LiveHistoryActivity extends BaseActivity{
                         duration = jsonObject.getString("duration");
                         String hls = jsonObject.getString("hls");
                         String fileServerIp = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_IP);
-                        String port = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT,"");
+                        String port = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT,0)+"";
 
                         liveUrl = "http://"+fileServerIp+":"+port+hls;
                         mHandler.sendEmptyMessage(GET_URL);

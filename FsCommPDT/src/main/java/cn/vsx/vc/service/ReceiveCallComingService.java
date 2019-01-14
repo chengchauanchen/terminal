@@ -108,9 +108,7 @@ public class ReceiveCallComingService extends BaseService{
         callType = intent.getIntExtra(Constants.CALL_TYPE, 0);
         memberName = intent.getStringExtra(Constants.MEMBER_NAME);
         memberId = intent.getIntExtra(Constants.MEMBER_ID, 0);
-        if(null != wakeLock){
-            wakeLock.acquire(10 * 1000);
-        }
+        wakeLock.acquire(10 * 1000);
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         if(null != imm && InputMethodUtil.inputMethodSate(getApplicationContext())){
             imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
@@ -174,7 +172,6 @@ public class ReceiveCallComingService extends BaseService{
         startService(intent);
         mTimerView.stop();
         mHandler.postDelayed(this::removeView,2000);
-
     }
 
     private void retract(){

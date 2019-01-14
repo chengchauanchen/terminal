@@ -1295,7 +1295,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
         if (userInfo != null) {
             if (!(userInfo.get("account") + "").equals(MyTerminalFactory.getSDK().getParam(UrlParams.ACCOUNT, ""))) {
-                logger.error("获取到的警号变了！！！！");
+                logger.error("获取到的警号变了，删除所有数据！！！！");
                 DeleteData.deleteAllData();
             }
             TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK,true);

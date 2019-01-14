@@ -1,6 +1,8 @@
 package ptt.terminalsdk.tools;
 
 
+import org.apache.log4j.Logger;
+
 import java.io.File;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -13,8 +15,10 @@ import static cn.vsx.hamster.terminalsdk.TerminalFactory.getSDK;
  */
 
 public class DeleteData {
+	private static Logger logger = Logger.getLogger("DeleteData");
 	//删除所有数据
 	public static void deleteAllData(){
+		logger.info("删除所有数据");
 		deleteSharedPreferences();
 		deleteSerializableData();
 		deleteSQLiteDatabase();
@@ -115,6 +119,7 @@ public class DeleteData {
 	}
 	//删除数据库记录
 	public static void deleteSQLiteDatabase(){
+		logger.info("删除数据库据");
 		TerminalFactory.getSDK().getSQLiteDBManager().deleteTerminalMessage();
 		TerminalFactory.getSDK().getSQLiteDBManager().deleteFolder();
 		TerminalFactory.getSDK().getSQLiteDBManager().deletePDTMember();
