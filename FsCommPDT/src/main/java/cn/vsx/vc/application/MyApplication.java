@@ -95,8 +95,7 @@ public class MyApplication extends Application {
 		}catch(PackageManager.NameNotFoundException e){
 			e.printStackTrace();
 		}
-		//开启voip电话服务
-		MyTerminalFactory.getSDK().getVoipCallManager().startService(getApplicationContext());
+		MyTerminalFactory.getSDK().getAuthManagerTwo().initIp();
 		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_PHONE.toString());
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
 		//		SkinCompatManager.

@@ -68,6 +68,8 @@ public class KeepLiveManager{
         NotificationChannel chan = new NotificationChannel(channelId,
                 channelName, NotificationManager.IMPORTANCE_NONE);
         chan.setLightColor(Color.BLUE);
+        chan.setSound(null,null);
+        chan.enableVibration(false);
         chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
         NotificationManager manager = (NotificationManager) service.getSystemService(Context.NOTIFICATION_SERVICE);
         if(null !=manager){

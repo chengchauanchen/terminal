@@ -39,11 +39,9 @@ import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
@@ -135,11 +133,9 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
 
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLive.setOnClickListener(svOnClickListener);
@@ -202,8 +198,24 @@ public class PhonePushService extends BaseService{
                 break;
             case OFF_LINE:
                 ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_push));
-                removeView();
+                stopBusiness();
                 break;
+        }
+    }
+
+    @Override
+    protected void onNetworkChanged(boolean connected){
+        if(!connected){
+            if(!mHandler.hasMessages(OFF_LINE)){
+                mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
+            }
+        }else {
+            mHandler.removeMessages(OFF_LINE);
+            if(MyApplication.instance.isMiniLive){
+                pushStream(mSvLivePop.getSurfaceTexture());
+            }else{
+                pushStream(mSvLive.getSurfaceTexture());
+            }
         }
     }
 
@@ -224,11 +236,9 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
     }
 
     private void hideAllView(){
@@ -318,25 +328,6 @@ public class PhonePushService extends BaseService{
         }
     });
 
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
-        if(!connected){
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
-            mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
-        }
-    };
-
-    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
-        mHandler.removeMessages(OFF_LINE);
-        if(resultCode == BaseCommonCode.SUCCESS_CODE){
-            if(MyApplication.instance.isMiniLive){
-                pushStream(mSvLivePop.getSurfaceTexture());
-            }else{
-                pushStream(mSvLive.getSurfaceTexture());
-            }
-        }else {
-            mHandler.sendEmptyMessage(OFF_LINE);
-        }
-    });
 
     /**
      * 根据权限设置组呼PTT图标
@@ -437,7 +428,9 @@ public class PhonePushService extends BaseService{
     private View.OnClickListener changeCameraOnClickListener = v -> changeCamera();
 
     private View.OnClickListener svOnClickListener = v->{
-        mMediaStream.getCamera().autoFocus(null);//屏幕聚焦
+        if(null != mMediaStream && mMediaStream.isStreaming()){
+            mMediaStream.getCamera().autoFocus(null);//屏幕聚焦
+        }
         showLivingView();
         mHandler.removeMessages(HIDELIVINGVIEW);
         mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
@@ -543,13 +536,12 @@ public class PhonePushService extends BaseService{
         PromptManager.getInstance().stopRing();//停止响铃
         stopPush();
         hideAllView();
-        removeView();
-        stopSelf();
+        stopBusiness();
     }
 
     private void pushStream(SurfaceTexture surface){
         if(mMediaStream != null){    // switch from background to front
-//            mMediaStream.stopPreview();
+            mMediaStream.stopPreview();
             mMediaStream.setSurfaceTexture(surface);
             mMediaStream.startPreview();
             if(mMediaStream.isStreaming()){

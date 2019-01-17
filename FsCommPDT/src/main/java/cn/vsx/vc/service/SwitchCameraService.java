@@ -86,8 +86,22 @@ public class SwitchCameraService extends BaseService{
     protected void handleMesage(Message msg){
         switch(msg.what){
             case CANCELLIVE:
-                removeView();
+                stopBusiness();
                 break;
+            case OFF_LINE:
+                stopBusiness();
+                break;
+        }
+    }
+
+    @Override
+    protected void onNetworkChanged(boolean connected){
+        if(!connected){
+            if(!mHandler.hasMessages(OFF_LINE)){
+                mHandler.sendEmptyMessageDelayed(OFF_LINE,3000);
+            }
+        }else {
+            mHandler.removeMessages(OFF_LINE);
         }
     }
 
@@ -133,13 +147,13 @@ public class SwitchCameraService extends BaseService{
         intent.putExtra(Constants.THEME,theme);
         intent.putExtra(Constants.PUSH_MEMBERS,pushMembers);
         startService(intent);
-        removeView();
+        mHandler.postDelayed(this::removeView,500);
     };
 
     private ReceiveUVCCameraConnectChangeHandler receiveUVCCameraConnectChangeHandler = connected -> {
         MyApplication.instance.usbAttached = connected;
         if(!connected){
-            removeView();
+            stopBusiness();
         }
     };
 
@@ -169,7 +183,7 @@ public class SwitchCameraService extends BaseService{
             intent.putExtra(Constants.THEME,theme);
             intent.putExtra(Constants.PUSH_MEMBERS,pushMembers);
             startService(intent);
-            removeView();
+            mHandler.postDelayed(this::removeView,500);
         }
     };
     private long lastReceiveTime = 0;
@@ -196,7 +210,7 @@ public class SwitchCameraService extends BaseService{
             if(toHex(bytes).endsWith("100")){
                 logger.info("被拒绝");
                 hideConnectingAnimate();
-                removeView();
+                stopBusiness();
 
             }else if(toHex(bytes).endsWith("000")){
 
@@ -209,7 +223,7 @@ public class SwitchCameraService extends BaseService{
                     intent.putExtra(Constants.PUSH_MEMBERS,pushMembers);
                     startService(intent);
                     mHandler.removeMessages(CANCELLIVE);
-                    removeView();
+                    mHandler.postDelayed(()->removeView(),500);
                 }
             }
         }

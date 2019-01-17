@@ -311,11 +311,11 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         super.doOtherDestroy();
     }
 
-    @Override
-    protected void receiveIndividualCall() {
-        super.receiveIndividualCall();
-        funcation.hideKeyboard(true);
-    }
+
+//    protected void receiveIndividualCall() {
+//        super.receiveIndividualCall();
+//        funcation.hideKeyboard(true);
+//    }
 
     @Override
     public void onClick(View v) {
@@ -1084,7 +1084,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     /*** 强制切组回调消息 **/
     private ReceiveForceChangeGroupHandler mReceiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
         @Override
-        public void handler(final int memberId, final int toGroupId,boolean forceSwitchGroup) {
+        public void handler(final int memberId, final int toGroupId,boolean forceSwitchGroup,String tempGroupType) {
             logger.info("GroupCallNewsActivity接受了ReceiveForceChangeGroupHandler======"+"toGroupId:"+toGroupId+"===memberId:"+memberId);
             if(!forceSwitchGroup){
                 return;

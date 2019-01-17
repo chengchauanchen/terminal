@@ -40,11 +40,9 @@ import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
@@ -98,13 +96,11 @@ public class RecoderPushService extends BaseService{
     protected void initListener(){
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
 
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
@@ -162,9 +158,26 @@ public class RecoderPushService extends BaseService{
                 hideLivingView();
                 break;
             case OFF_LINE:
+                mHandler.removeMessages(OFF_LINE);
                 ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_push));
-                removeView();
+                stopBusiness();
                 break;
+        }
+    }
+
+    @Override
+    protected void onNetworkChanged(boolean connected){
+        if(!connected){
+            if(!mHandler.hasMessages(OFF_LINE)){
+                mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
+            }
+        }else {
+            mHandler.removeMessages(OFF_LINE);
+            if(MyApplication.instance.isMiniLive){
+                pushLawRecorder(mSvLivePop.getSurfaceTexture());
+            }else{
+                pushLawRecorder(mSvLive.getSurfaceTexture());
+            }
         }
     }
 
@@ -184,13 +197,11 @@ public class RecoderPushService extends BaseService{
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
     }
 
     @SuppressLint("InflateParams")
@@ -261,8 +272,6 @@ public class RecoderPushService extends BaseService{
         }
     };
 
-
-
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
             ptt.terminalsdk.tools.ToastUtil.showToast(getApplicationContext(),"没有组呼听的权限");
@@ -280,26 +289,6 @@ public class RecoderPushService extends BaseService{
         logger.info("收到组呼停止");
         mHandler.post(() -> mLlLiveGroupCall.setVisibility(View.GONE));
     };
-
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
-        if(!connected){
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
-            mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
-        }
-    };
-
-    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
-        mHandler.removeMessages(OFF_LINE);
-        if(resultCode == BaseCommonCode.SUCCESS_CODE){
-            if(MyApplication.instance.isMiniLive){
-                pushLawRecorder(mSvLivePop.getSurfaceTexture());
-            }else{
-                pushLawRecorder(mSvLive.getSurfaceTexture());
-            }
-        }else {
-            mHandler.sendEmptyMessage(OFF_LINE);
-        }
-    });
 
     /**
      * 通知直播停止 通知界面关闭视频页
@@ -456,12 +445,7 @@ public class RecoderPushService extends BaseService{
                 if(errorcode != 0){
                     stopPull();
                 }
-                if(errorcode == -101){
-                    ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.please_check_network));
-                    TerminalFactory.getSDK().getLiveManager().ceaseWatching();
-                    finishVideoLive();
-                }
-                if(errorcode == 500 || errorcode == 404 || errorcode == -32){
+                if(errorcode == 500 || errorcode == 404 || errorcode == -32 || errorcode == -101){
                     if(pullcount < 10){
                         try{
                             Thread.sleep(300);
@@ -495,8 +479,7 @@ public class RecoderPushService extends BaseService{
 
     private void finishVideoLive(){
         stopPull();
-        windowManager.removeView(rootView);
-        stopSelf();
+        stopBusiness();
     }
 
     private void stopPull(){

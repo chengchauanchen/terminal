@@ -18,7 +18,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.PowerManager;
 import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
@@ -53,7 +52,6 @@ import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
-import cn.vsx.vc.utils.CallAbbreviatedWindowService;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.PhoneAdapter;
 import cn.vsx.vc.utils.ToastUtil;
@@ -65,101 +63,20 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 	private HeadsetPlugReceiver headsetPlugReceiver;
 	private PowerManager.WakeLock wakeLock;
 	private PowerManager.WakeLock wakeLockScreen;
-	private CallAbbreviatedWindowService.MyBinder myBinder;
+
 
 	private SensorManager sensorManager;// 传感器管理对象,调用距离传感器，控制屏幕
 	private PowerManager powerManager;
 	protected final String TAG = getClass().getSimpleName();
-//	private InputMethodManager imm;
-//	public void hideSoftKeyBoard() {
-//
-//		logger.info("sjl_进入收起键盘的方法");
-////		InputMethodManager imm =  (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-////		if(imm != null) {
-////			logger.info("sjl_:"+imm);
-////			imm.hideSoftInputFromWindow(getWindow().getDecorView().getWindowToken(),
-////					InputMethodManager.HIDE_NOT_ALWAYS);
-////		}
-//		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
-//		if(imm.isActive()&&getCurrentFocus()!=null){
-//			if (getCurrentFocus().getWindowToken()!=null) {
-//				imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-//			}
-//		}
-//	}
 
-	/**
-	 * 判断某个服务是否正在运行的方法
-	 *
-	 * @param mContext
-	 * @param cls
-	 *            是包名+服务的类名（例如：net.loonggg.testbackstage.TestService）
-	 * @return true代表正在运行，false代表服务没有正在运行
-	 */
-	public boolean isServiceWork(Context mContext, Class cls) {
-		boolean isWork = false;
-		ActivityManager myAM = (ActivityManager) mContext
-				.getSystemService(Context.ACTIVITY_SERVICE);
-		List<ActivityManager.RunningServiceInfo> myList = myAM.getRunningServices(Integer.MAX_VALUE);
-		String serviceName = cls.getCanonicalName();
-		if (myList.size() <= 0) {
-			return false;
-		}
-		for (int i = 0; i < myList.size(); i++) {
-			String mName = myList.get(i).service.getClassName().toString();
-			if (mName.equals(serviceName)) {
-				isWork = true;
-				break;
-			}
-		}
-		return isWork;
-	}
-
-	@Override
-	protected void onStart() {
-//		DisplayMetrics dm = new DisplayMetrics();
-//		// 获取屏幕信息
-//		getWindowManager().getDefaultDisplay().getMetrics(dm);
-//		int screenWidth = dm.widthPixels;
-//		int screenHeigh = dm.heightPixels;
-//		Log.v("sjl__获取屏幕宽度", "宽度:" + screenWidth + ",高度:" + screenHeigh);
-		super.onStart();
-
-		MyTerminalFactory.getSDK().registReceiveHandler(receiveExitHandler);
-		MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
-		MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
-
-		setPttVolumeChangedListener();
-	}
-
-	//成员被删除了,销毁锁屏
+    //成员被删除了
 	private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
 		@Override
 		public void handler() {
-			myHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					MyApplication.instance.stopIndividualCallService();
-				}
-			});
+			myHandler.post(() -> MyApplication.instance.stopIndividualCallService());
 		}
 	};
 
-
-
-	public void hideKey() {}
-
-	/**   个呼到来---子类继承 **/
-	protected void receiveIndividualCall () {}
-
-	//停止个呼结束提示音
-	Handler stopPromptHandler = new Handler() {
-		@Override
-		public void handleMessage(Message msg) {
-			super.handleMessage(msg);
-			PromptManager.getInstance().stopRing();
-		}
-	};
 
 	private boolean isBackground(Context context) {
 		ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
@@ -179,6 +96,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 		return false;
 	}
 
+	@SuppressWarnings("unused")
 	private void setMySpeakerphoneOn(boolean on) {
 		if (on) {
 			if (!audioManager.isSpeakerphoneOn() && audioManager.getMode() == AudioManager.MODE_NORMAL) {
@@ -308,7 +226,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 			//插入耳机时的电源锁
 			wakeLockScreen = powerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP
 					| PowerManager.SCREEN_DIM_WAKE_LOCK, "wakeLock");
-			registerHeadsetPlugReceiver();
+
 		}
 
 	}
@@ -346,11 +264,22 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 	 */
 	public abstract void doOtherDestroy();
 
-	@Override
-	protected void onStop() {
-		super.onStop();
 
-	}
+    @Override
+    protected void onResume(){
+        super.onResume();
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveExitHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
+        registerHeadsetPlugReceiver();
+        setPttVolumeChangedListener();
+    }
+
+    @Override
+    protected void onPause(){
+        super.onPause();
+        unregisterHeadsetPlugReceiver();
+    }
 
 	@Override
 	protected void onDestroy() {
@@ -358,7 +287,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 			doOtherDestroy();
 			ButterKnife.unbind(this);//解除绑定，官方文档只对fragment做了解绑
 			ActivityCollector.removeActivity(this);
-			unregisterHeadsetPlugReceiver();
+
 			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
 			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
 			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);

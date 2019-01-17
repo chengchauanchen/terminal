@@ -246,7 +246,7 @@ public class TalkbackFragment extends BaseFragment {
     private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
 
         @Override
-        public void handler(int memberId, int toGroupId,boolean forceSwitchGroup) {
+        public void handler(int memberId, int toGroupId,boolean forceSwitchGroup,String tempGroupType) {
             if(!forceSwitchGroup){
                 return;
             }

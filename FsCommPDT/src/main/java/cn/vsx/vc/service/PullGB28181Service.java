@@ -27,10 +27,7 @@ import java.util.Date;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.util.JsonParam;
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.Constants;
@@ -93,8 +90,6 @@ public class PullGB28181Service extends BaseService{
         mIvClose.setOnClickListener(closeOnClickListener);
         mLlInviteMember.setOnClickListener(inviteOnClickListener);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
     }
 
     @Override
@@ -123,8 +118,22 @@ public class PullGB28181Service extends BaseService{
                 break;
             case OFF_LINE:
                 ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_pull));
-                removeView();
+                stopBusiness();
                 break;
+        }
+    }
+
+    @Override
+    protected void onNetworkChanged(boolean connected){
+        if(!connected){
+            if(!mHandler.hasMessages(OFF_LINE)){
+                mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
+            }
+        }else {
+            mHandler.removeMessages(OFF_LINE);
+            if(null != mSvGb28181.getSurfaceTexture()){
+                startPullGB28121(mSvGb28181.getSurfaceTexture());
+            }
         }
     }
 
@@ -132,28 +141,7 @@ public class PullGB28181Service extends BaseService{
     public void onDestroy(){
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
     }
-
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> mHandler.post(() -> {
-        if(!connected){
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
-            mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
-        }
-    });
-
-    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
-        mHandler.removeMessages(OFF_LINE);
-        if(resultCode == BaseCommonCode.SUCCESS_CODE){
-            if(null != mSvGb28181.getSurfaceTexture()){
-                startPullGB28121(mSvGb28181.getSurfaceTexture());
-            }
-        }else {
-            mHandler.sendEmptyMessage(OFF_LINE);
-        }
-    });
-
 
     private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setPushAuthority);
 
@@ -174,7 +162,7 @@ public class PullGB28181Service extends BaseService{
 
     private View.OnClickListener closeOnClickListener = v -> {
         ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.watch_finished));
-        finishVideoLive();
+        stopBusiness();
     };
 
     private TextureView.SurfaceTextureListener GB28181SurfaceTextureListener  = new TextureView.SurfaceTextureListener(){
@@ -223,7 +211,7 @@ public class PullGB28181Service extends BaseService{
             }
         }else {
             ToastUtil.showToast(PullGB28181Service.this,getResources().getString(R.string.no_rtsp_data));
-            finishVideoLive();
+            stopBusiness();
         }
     }
 
@@ -247,13 +235,13 @@ public class PullGB28181Service extends BaseService{
                 onVideoSizeChange();
             } else if (resultCode == EasyRTSPClient.RESULT_TIMEOUT) {
                 ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.time_up));
-                finishVideoLive();
+                stopBusiness();
             } else if (resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_AUDIO) {
                 ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.voice_not_support));
-                finishVideoLive();
+                stopBusiness();
             } else if (resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_VIDEO) {
                 ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.video_not_support));
-                finishVideoLive();
+                stopBusiness();
             } else if (resultCode == EasyRTSPClient.RESULT_EVENT) {
 
                 int errorcode = resultData.getInt("errorcode");
@@ -263,11 +251,7 @@ public class PullGB28181Service extends BaseService{
                 if (errorcode != 0) {
                     stopPull();
                 }
-                if (errorcode == -101){
-                    ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.please_check_network));
-                    finishVideoLive();
-                }
-                if (errorcode == 500 || errorcode == 404 ||errorcode ==-32) {
+                if (errorcode == 500 || errorcode == 404 ||errorcode ==-32 || errorcode == -101) {
                     if (pullcount < 10) {
                         try {
                             Thread.sleep(300);
@@ -277,7 +261,8 @@ public class PullGB28181Service extends BaseService{
                                 pullcount++;
 
                             }else{
-                                finishVideoLive();
+                                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
+                                stopBusiness();
                             }
 
                         } catch (Exception e) {
@@ -285,11 +270,11 @@ public class PullGB28181Service extends BaseService{
                         }
                     } else {
                         ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
-                        finishVideoLive();
+                        stopBusiness();
                     }
                 } else if(errorcode !=0){
                     ToastUtil.showToast(getApplicationContext(),resultDataString);
-                    finishVideoLive();
+                    stopBusiness();
                 }
             }
         }
@@ -320,12 +305,6 @@ public class PullGB28181Service extends BaseService{
         mSvGb28181.requestLayout();
     }
 
-    private void finishVideoLive(){
-        mHandler.removeCallbacksAndMessages(null);
-        MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-        windowManager.removeView(rootView);
-        stopSelf();
-    }
 
     @SuppressLint("SimpleDateFormat")
     private void setCurrentTime(){

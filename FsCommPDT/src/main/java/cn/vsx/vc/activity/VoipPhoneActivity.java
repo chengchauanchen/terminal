@@ -125,7 +125,7 @@ public class VoipPhoneActivity extends BaseActivity{
                 TerminalFactory.getSDK().getTerminalStateManager().openFunction(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.IDLE);//将状态机至于正在个呼状态
                 voipCallRequest.setVisibility(View.GONE);
                 voipCallSpeaking.setVisibility(View.VISIBLE);
-                ictVspeakingTimeSpeaking.start();
+                ictVspeakingTimeSpeaking.onStart();
             }
 
             @Override
@@ -176,7 +176,7 @@ public class VoipPhoneActivity extends BaseActivity{
                         callRecords.add(callRecord);
                         MyTerminalFactory.getSDK().getSQLiteDBManager().addCallRecord(callRecords);
 
-                        ictVspeakingTimeSpeaking.stop();
+                        ictVspeakingTimeSpeaking.onStop();
                         try{
                             finish();
                         }catch (Exception e){
@@ -208,7 +208,7 @@ public class VoipPhoneActivity extends BaseActivity{
                         CopyOnWriteArrayList<CallRecord> callRecords = MyTerminalFactory.getSDK().getSQLiteDBManager().getCallRecords();
                         callRecords.add(callRecord);
                         MyTerminalFactory.getSDK().getSQLiteDBManager().addCallRecord(callRecords);
-                        ictVspeakingTimeSpeaking.stop();
+                        ictVspeakingTimeSpeaking.onStop();
                         ToastUtil.showToast(VoipPhoneActivity.this,"对方已挂断");
                         SystemClock.sleep(2000);
                         try{

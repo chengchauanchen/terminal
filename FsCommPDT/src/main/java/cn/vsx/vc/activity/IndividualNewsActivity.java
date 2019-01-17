@@ -252,9 +252,8 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         super.doOtherDestroy();
     }
 
-    @Override
+
     protected void receiveIndividualCall() {
-        super.receiveIndividualCall();
         funcation.hideKeyboard(true);
     }
 

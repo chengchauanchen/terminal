@@ -16,7 +16,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/iv_individual_call_retract_half_duplex"
+        android:layout_below="@+id/iv_individual_call_retract_half_duplex"
         android:gravity="center_vertical"
         android:orientation="horizontal">
         

@@ -36,7 +36,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicatio
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
@@ -138,7 +137,6 @@ public class CallingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(individualCallPttStatusHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
         mLlIndividualCallRetractSpeaking.setOnClickListener(retractListener);
@@ -164,6 +162,27 @@ public class CallingService extends BaseService{
                 logger.error("执行了半双工超时机制；挂断个呼！！！");
                 individualCallStopped();
                 break;
+            case OFF_LINE:
+                mHandler.removeMessages(OFF_LINE);
+                mPopupICTVSpeakingTime.onPause();
+                mIctvSpeakingTimeSpeaking.onPause();
+                mIctvHalfDuplexTimeSpeaking.onPause();
+                stopBusiness();
+                break;
+        }
+    }
+
+    @Override
+    protected void onNetworkChanged(boolean connected){
+        if(!connected){
+            if(!mHandler.hasMessages(OFF_LINE)){
+                mHandler.sendEmptyMessageDelayed(OFF_LINE,3000);
+            }
+        }else {
+            mHandler.removeMessages(OFF_LINE);
+            mPopupICTVSpeakingTime.onContinue();
+            mIctvSpeakingTimeSpeaking.onContinue();
+            mIctvHalfDuplexTimeSpeaking.onContinue();
         }
     }
 
@@ -172,7 +191,6 @@ public class CallingService extends BaseService{
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(individualCallPttStatusHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
@@ -315,20 +333,6 @@ public class CallingService extends BaseService{
         });
     };
 
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = (connected) -> {
-        if(!connected){
-            if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
-                removeView();
-                mIctvSpeakingTimeSpeaking.pause();
-                mIctvHalfDuplexTimeSpeaking.pause();
-                mPopupICTVSpeakingTime.stop();
-                PromptManager.getInstance().stopRing();
-                cancelAutoHangUpTimer();
-            }
-            ToastUtil.showToast(CallingService.this, getResources().getString(R.string.net_work_disconnect));
-        }
-    };
-
     /**
      * 主动方请求组呼的消息
      */
@@ -382,12 +386,12 @@ public class CallingService extends BaseService{
 
     private void stopCall(){
         MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
-        mPopupICTVSpeakingTime.stop();
-        mIctvHalfDuplexTimeSpeaking.stop();
-        mIctvSpeakingTimeSpeaking.stop();
+        mPopupICTVSpeakingTime.onStop();
+        mIctvHalfDuplexTimeSpeaking.onStop();
+        mIctvSpeakingTimeSpeaking.onStop();
         PromptManager.getInstance().stopRing();
         hideAllView();
-        removeView();
+        stopBusiness();
     }
 
     private void retract(){
@@ -411,21 +415,20 @@ public class CallingService extends BaseService{
     }
 
     private void individualCallStopped(){
-        mPopupICTVSpeakingTime.pause();
+        mPopupICTVSpeakingTime.onStop();
         if(individualCallType == IndividualCallType.FULL_DUPLEX.getCode()){
-            mIctvSpeakingTimeSpeaking.pause();
+            mIctvSpeakingTimeSpeaking.onStop();
             mTvSpeakingPrompt.setText(getResources().getString(R.string.stop_talk));
         }else if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){
-            mIctvHalfDuplexTimeSpeaking.pause();
+            mIctvHalfDuplexTimeSpeaking.onStop();
             mTvHalfDuplexPrompt.setText(getResources().getString(R.string.stop_talk));
         }
 
-        mPopupICTVSpeakingTime.stop();
         PromptManager.getInstance().IndividualHangUpRing();
         PromptManager.getInstance().delayedStopRing();
         MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         cancelAutoHangUpTimer();
-        removeView();
+        stopBusiness();
     }
 
     private void startAutoHangUpTimer(){
@@ -478,15 +481,12 @@ public class CallingService extends BaseService{
     }
 
     private void recoverSpeakingPop(){
-        mPopupICTVSpeakingTime.stop();
-        mPopupICTVSpeakingTime.start();
+        mPopupICTVSpeakingTime.onStart();
         if(individualCallType == IndividualCallType.FULL_DUPLEX.getCode()){
-            mIctvSpeakingTimeSpeaking.stop();
-            mIctvSpeakingTimeSpeaking.start();
+            mIctvSpeakingTimeSpeaking.onStart();
             mTvSpeakingPrompt.setText(getResources().getString(R.string.talking));
         }else if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){
-            mIctvHalfDuplexTimeSpeaking.stop();
-            mIctvHalfDuplexTimeSpeaking.start();
+            mIctvHalfDuplexTimeSpeaking.onStart();
             mTvHalfDuplexPrompt.setText(getResources().getString(R.string.press_talk));
         }
         if(mPopMinimize.getVisibility() == View.VISIBLE){
@@ -550,7 +550,7 @@ public class CallingService extends BaseService{
                 return;
             }
             if(KILL_ACT_CALL.equals(intent.getAction())){
-                removeView();
+                stopBusiness();
             }
         }
     };

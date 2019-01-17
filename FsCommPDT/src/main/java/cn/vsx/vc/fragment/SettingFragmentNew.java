@@ -417,7 +417,7 @@ public class SettingFragmentNew extends BaseFragment {
 
     private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
         @Override
-        public void handler(int memberId, int toGroupId,boolean forceSwitchGroup) {
+        public void handler(int memberId, int toGroupId,boolean forceSwitchGroup,String tempGroupType) {
             if(!forceSwitchGroup){
                 return;
             }
@@ -569,7 +569,7 @@ public class SettingFragmentNew extends BaseFragment {
                     @Override
                     public void run() {
                         if(System.currentTimeMillis()-currentTime>5000){
-                            MyTerminalFactory.getSDK().getLogFileManager().uploadLogFile();
+                            MyTerminalFactory.getSDK().getLogFileManager().uploadAllLogFile();
                             currentTime = System.currentTimeMillis();
                         }else {
                             ToastUtil.showToast("您已经上传过日志了，请稍后再上传",getActivity());

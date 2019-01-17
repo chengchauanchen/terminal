@@ -848,9 +848,8 @@ public abstract class ChatBaseActivity extends BaseActivity{
         groupCallList.scrollToPosition(position);
     }
 
-    @Override
+
     public void hideKey() {
-        super.hideKey();
         funcation.hideKey();
     }
 

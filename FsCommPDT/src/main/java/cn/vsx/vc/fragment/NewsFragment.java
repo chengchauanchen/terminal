@@ -110,10 +110,10 @@ public class NewsFragment extends BaseFragment {
     private boolean isFirstCall;
 
     private void saveMessagesToSql(){
-        logger.info("---------保存消息列表---------");
+        logger.info("---------保存消息列表---------"+messageList);
         MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(messageList);
-
     }
+
     private void loadMessages(){
         terminalMessageData.clear();
         messageList.clear();
@@ -1083,7 +1083,7 @@ public class NewsFragment extends BaseFragment {
     /**强制切组*/
     private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
         @Override
-        public void handler(int memberId, int toGroupId,boolean forceSwitchGroup) {
+        public void handler(int memberId, int toGroupId,boolean forceSwitchGroup,String tempGroupType) {
             if(!forceSwitchGroup){
                 return;
             }
@@ -1214,13 +1214,14 @@ public class NewsFragment extends BaseFragment {
                     //说明组列表中没有这个组了
                     iterator.remove();//消息列表中移除
                     removeMemberMap(next.messageToId);
+                    continue;
                 }else {
                     Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
                     next.messageToName = groupInfo.name;
                     saveMemberMap(next);
                 }
                 //去掉响应组
-                if(DataUtil.getGroupByGroupNo(next.messageToId).getGroupType() == GroupType.RESPONSE){
+                if( DataUtil.getGroupByGroupNo(next.messageToId).getGroupType() == GroupType.RESPONSE){
                     iterator.remove();//消息列表中移除
                 }
             }
@@ -1273,8 +1274,6 @@ public class NewsFragment extends BaseFragment {
             setFirstMessage();
             //再保存到数据库
             saveMessagesToSql();
-            //保存当前聊天的人或者组的名字
-
             if(mMessageListAdapter !=null){
                 mMessageListAdapter.notifyDataSetChanged();
             }

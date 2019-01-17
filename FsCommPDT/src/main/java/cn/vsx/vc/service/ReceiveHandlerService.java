@@ -353,6 +353,7 @@ public class ReceiveHandlerService extends Service{
         @Override
         public void incomingCall(LinphoneCall linphoneCall){
             super.incomingCall(linphoneCall);
+            Log.e("ReceiveHandlerService", "incomingCall");
             //将状态机至于正在个呼状态
             int code = TerminalFactory.getSDK().getTerminalStateManager().openFunction(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.IDLE);
             if(code == BaseCommonCode.SUCCESS_CODE){
@@ -402,10 +403,6 @@ public class ReceiveHandlerService extends Service{
         Intent intent = new Intent(ReceiveHandlerService.this,PullGB28181Service.class);
         intent.putExtra(Constants.TERMINALMESSAGE,terminalMessage);
         startService(intent);
-    }
-
-    private void showToast(final String resultDesc){
-        ToastUtil.showToast(ReceiveHandlerService.this, resultDesc);
     }
 
 
@@ -627,6 +624,7 @@ public class ReceiveHandlerService extends Service{
                 return;
             }
         }
+        logger.info("显示弹窗");
         hideAllView();
         // 如果已经添加了就只更新view
         if(dialogAdded){
@@ -706,7 +704,7 @@ public class ReceiveHandlerService extends Service{
             startService(intent);
 
         }else{//直接请求
-            int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(member.id, "");
+            int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(member.getNo(), "");
 
             if(requestCode == BaseCommonCode.SUCCESS_CODE){
 

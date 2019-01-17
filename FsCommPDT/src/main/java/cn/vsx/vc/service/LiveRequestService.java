@@ -82,6 +82,14 @@ public class LiveRequestService extends BaseService{
     }
 
     @Override
+    protected void onNetworkChanged(boolean connected){
+        if(!connected){
+            MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId);
+            stopBusiness();
+        }
+    }
+
+    @Override
     public void onDestroy(){
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseStartLiveHandler);
@@ -91,10 +99,9 @@ public class LiveRequestService extends BaseService{
     }
 
     private View.OnClickListener cancelOnClickListener = v ->{
-        MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId);
-        PromptManager.getInstance().stopRing();
         ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.canceled));
-        removeView();
+        MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId);
+        stopBusiness();
     };
 
     /**
@@ -102,19 +109,15 @@ public class LiveRequestService extends BaseService{
      **/
     private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc)-> mHandler.post(() -> {
         ToastUtil.showToast(getApplicationContext(),resultDesc);
-        MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-        PromptManager.getInstance().stopRing();//停止响铃
-        removeView();
+        stopBusiness();
     });
 
     /**
      * 超时未回复answer 通知界面关闭
      **/
     private ReceiveAnswerLiveTimeoutHandler receiveAnswerLiveTimeoutHandler = () -> {
-        PromptManager.getInstance().stopRing();//停止响铃
         ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.other_no_answer));
-        MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-        removeView();
+        stopBusiness();
     };
 
     /**
@@ -122,9 +125,7 @@ public class LiveRequestService extends BaseService{
      **/
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (methodResult, resultDesc) -> {
         ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
-        MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-        PromptManager.getInstance().stopRing();//停止响铃
-        removeView();
+        stopBusiness();
     };
 
     /**
@@ -133,9 +134,7 @@ public class LiveRequestService extends BaseService{
     private ReceiveGetRtspStreamUrlHandler receiveGetRtspStreamUrlHandler = (final String rtspUrl, final Member liveMember, long callId)-> mHandler.post(() -> {
         if (Util.isEmpty(rtspUrl)) {
             ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.no_rtsp_data));
-            MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-            PromptManager.getInstance().stopRing();//停止响铃
-            removeView();
+            stopBusiness();
         }else {
             logger.info("rtspUrl ----> " + rtspUrl);
             PromptManager.getInstance().stopRing();
@@ -144,8 +143,7 @@ public class LiveRequestService extends BaseService{
             intent.putExtra(Constants.RTSP_URL,rtspUrl);
             intent.putExtra(Constants.LIVE_MEMBER,liveMember);
             startService(intent);
-            removeView();
-//            mHandler.postDelayed(this::removeView,1000);
+            mHandler.postDelayed(this::removeView,500);
         }
     });
 }

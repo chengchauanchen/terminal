@@ -190,7 +190,7 @@ public class MessageService extends Service {
         logConfigurator.setFilePattern("%d %-5p [%t][%c{2}]-[%l] %m%n");
         logConfigurator.setUseLogCatAppender(true);
         logConfigurator.setMaxFileSize(1024 * 1024 * 10);
-        logConfigurator.setMaxBackupSize(1);
+        logConfigurator.setMaxBackupSize(0);
         logConfigurator.setImmediateFlush(true);
         logConfigurator.configure();
     }

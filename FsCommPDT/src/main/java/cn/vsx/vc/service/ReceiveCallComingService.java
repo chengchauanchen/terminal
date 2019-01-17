@@ -83,6 +83,24 @@ public class ReceiveCallComingService extends BaseService{
 
     @Override
     protected void handleMesage(Message msg){
+        switch(msg.what){
+            case OFF_LINE:
+                stopBusiness();
+            break;
+        }
+    }
+
+    @Override
+    protected void onNetworkChanged(boolean connected){
+        if(!connected){
+            mTimerView.onPause();
+            if(!mHandler.hasMessages(OFF_LINE)){
+                mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
+            }
+        }else {
+            mHandler.removeMessages(OFF_LINE);
+            mTimerView.onContinue();
+        }
     }
 
     @Override
@@ -119,7 +137,7 @@ public class ReceiveCallComingService extends BaseService{
         mTvMemberIdChooice.setText(HandleIdUtil.handleId(memberId));
         mTvMemberNameChooice.setText(HandleIdUtil.handleName(memberName));
         PromptManager.getInstance().IndividualCallNotifyRing();
-        mTimerView.start();
+        mTimerView.onStart();
     }
 
     @Override
@@ -158,9 +176,8 @@ public class ReceiveCallComingService extends BaseService{
     private void refuseCall(){
         MyTerminalFactory.getSDK().getIndividualCallManager().responseIndividualCall(false);
         MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
-        PromptManager.getInstance().stopRing();
-        mTimerView.stop();
-        removeView();
+        mTimerView.onStop();
+        stopBusiness();
     }
 
     private void acceptCall(){
@@ -170,8 +187,8 @@ public class ReceiveCallComingService extends BaseService{
         intent.putExtra(Constants.MEMBER_NAME, memberName);
         intent.putExtra(Constants.MEMBER_ID, memberId);
         startService(intent);
-        mTimerView.stop();
-        mHandler.postDelayed(this::removeView,2000);
+        mTimerView.onStop();
+        mHandler.postDelayed(this::removeView,500);
     }
 
     private void retract(){
@@ -181,10 +198,10 @@ public class ReceiveCallComingService extends BaseService{
     }
 
     private void individualCallStopped(){
-        mTimerView.stop();
+        mTimerView.onStop();
         MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         PromptManager.getInstance().IndividualHangUpRing();
         PromptManager.getInstance().delayedStopRing();
-        removeView();
+        stopBusiness();
     }
 }

@@ -2,8 +2,8 @@
 <manifest package="cn.vsx.vc"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="2"
-    android:versionName="1.0.1">
+    android:versionCode="3"
+    android:versionName="1.0.3">
     
     <!-- android:sharedUserId="android.uid.system" -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -182,7 +182,6 @@
         
         
         <service android:name=".service.LockScreenService" />
-        <service android:name=".utils.CallAbbreviatedWindowService" />
         
         <service android:name="org.easydarwin.easypusher.BackgroundCameraService" />
         <service

@@ -343,7 +343,10 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 db.replace(MESSAGE_LIST, null, values);
             }
             db.setTransactionSuccessful();  //设置事务成功完成
-        }finally{
+        }catch(Exception e){
+            logger.error(e);
+        }
+        finally{
             //结束事务
             db.endTransaction();
         }

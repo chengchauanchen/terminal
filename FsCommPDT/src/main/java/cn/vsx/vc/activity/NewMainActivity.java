@@ -65,8 +65,6 @@ import org.apache.log4j.Logger;
 import org.easydarwin.easypusher.BackgroundCameraService;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -90,7 +88,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformati
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLiveNewsClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
@@ -275,8 +272,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler(int resultCode, String resultDesc){
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                noNetWork.setVisibility(View.GONE);
-                MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord());
+                myHandler.post(() -> noNetWork.setVisibility(View.GONE));
+                MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
             }
         }
     };
@@ -295,7 +292,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                         noNetWork.setVisibility(View.VISIBLE);
                         if (ll_emergency_prompt != null && ll_emergency_prompt.getVisibility() == View.VISIBLE) {
                             ll_emergency_prompt.setVisibility(View.GONE);
-                            ICTV_emergency_time.stop();
+                            ICTV_emergency_time.onStop();
                         }
                         if (ll_groupCall_prompt != null && ll_groupCall_prompt.getVisibility() == View.VISIBLE) {
                             ll_groupCall_prompt.setVisibility(View.GONE);
@@ -530,7 +527,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                             //弹出紧急组呼的呼叫界面
                             ll_emergency_prompt.setVisibility(View.VISIBLE);
                             tv_emergency_member.setText("正在紧急呼叫组：" + emergencyGroup.name + " ··· ···");
-                            ICTV_emergency_time.start();
+                            ICTV_emergency_time.onStart();
                             //                            hidePopwView();
                             //                            viewHolder.emergency_group_call.setVisibility(View.VISIBLE);
                             if (timerTask != null) {
@@ -580,7 +577,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 @Override
                 public void run() {
                     if (currentCallMode == CallMode.EMERGENCY_CALL_MODE) {
-                        ICTV_emergency_time.stop();
+                        ICTV_emergency_time.onStop();
                         ll_emergency_prompt.setVisibility(View.GONE);
 
                         //                        viewHolder.ICTV_speaking_time_emergency.stop();
@@ -1141,11 +1138,14 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         //开启服务，开启锁屏界面
         startService(new Intent(NewMainActivity.this, LockScreenService.class));
         MyApplication.instance.startUVCCameraService();
+
+        //开启voip电话服务
+        MyTerminalFactory.getSDK().getVoipCallManager().startService(getApplicationContext());
         //注册voip
-//        String account = MyTerminalFactory.getSDK().getParam(UrlParams.ACCOUNT, "");
+        //        String account = MyTerminalFactory.getSDK().getParam(UrlParams.ACCOUNT, "");
         String account = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)+"";
         String voipServerIp = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_IP, "");
-//        String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, 0)+"";
+        //        String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, 0)+"";
         String voipServerPort = "5060";
         String server = voipServerIp+":"+voipServerPort;
         if(account.contains("@lzy")){
@@ -1154,11 +1154,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         if(account.startsWith("88")|| account.startsWith("86")){
             account = account.substring(2);
         }
+        account = "1004";
         logger.info("voip账号："+account+",密码："+ account+"，服务器地址："+server);
-        MyTerminalFactory.getSDK().getVoipCallManager().clearCache();
-        if(!TextUtils.isEmpty(account)){
-            MyTerminalFactory.getSDK().getVoipCallManager().login(account,account,server);
-        }
+        initVoip(account,account,server);
+
         MyTerminalFactory.getSDK().getVideoProxy().setActivity(this);
 
         String machineType = android.os.Build.MODEL;
@@ -1201,6 +1200,16 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
 
         judgePermission();
+    }
+
+    private void initVoip(String account,String password,String server){
+
+        myHandler.postDelayed(() -> {
+            MyTerminalFactory.getSDK().getVoipCallManager().clearCache();
+            if(!TextUtils.isEmpty(account)){
+                MyTerminalFactory.getSDK().getVoipCallManager().login(account,password,server);
+            }
+        },1000);
     }
 
     public boolean checkFloatPermission(Context context) {

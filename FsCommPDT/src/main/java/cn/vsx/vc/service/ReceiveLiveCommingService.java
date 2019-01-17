@@ -89,6 +89,22 @@ public class ReceiveLiveCommingService extends BaseService{
 
     @Override
     protected void handleMesage(Message msg){
+        switch(msg.what){
+            case OFF_LINE:
+                stopBusiness();
+            break;
+        }
+    }
+
+    @Override
+    protected void onNetworkChanged(boolean connected){
+        if(!connected){
+            if(!mHandler.hasMessages(OFF_LINE)){
+                mHandler.sendEmptyMessageDelayed(OFF_LINE,3000);
+            }
+        }else {
+            mHandler.removeMessages(OFF_LINE);
+        }
     }
 
     @Override
@@ -103,7 +119,7 @@ public class ReceiveLiveCommingService extends BaseService{
     private ReceiveNobodyRequestVideoLiveHandler receiveNobodyRequestVideoLiveHandler = () -> {
         ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.other_cancel));
         MyTerminalFactory.getSDK().getLiveManager().ceaseLiving();
-        mHandler.post(this::removeView);
+        mHandler.post(this::stopBusiness);
     };
 
     private ReceiveRemoveSwitchCameraViewHandler receiveRemoveSwitchCameraViewHandler = this::removeView;
@@ -114,8 +130,7 @@ public class ReceiveLiveCommingService extends BaseService{
     private ReceiveAnswerLiveTimeoutHandler receiveAnswerLiveTimeoutHandler = () -> {
         PromptManager.getInstance().stopRing();//停止响铃
         ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.other_cancel));
-        MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-        removeView();
+        stopBusiness();
     };
 
     
@@ -142,7 +157,7 @@ public class ReceiveLiveCommingService extends BaseService{
         MyTerminalFactory.getSDK().getLiveManager().responseLiving(false);
         PromptManager.getInstance().stopRing();
         MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
-        removeView();
+        stopBusiness();
     };
 
 

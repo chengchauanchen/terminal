@@ -81,14 +81,19 @@ public class MultipartyCallService extends BaseService{
     protected void handleMesage(Message msg){
     }
 
+    @Override
+    protected void onNetworkChanged(boolean connected){
+
+    }
+
     private View.OnClickListener hungUpOnClickListener = v-> huangUp();
 
     private void huangUp(){
         mTvSpeakingToast.setText(getResources().getString(R.string.huang_up));
         MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
-        mIctvSpeakingTimeSpeaking.stop();
-        removeView();
+        mIctvSpeakingTimeSpeaking.onStop();
+        stopBusiness();
     }
 
     private PhoneCallback phoneCallback = new PhoneCallback(){
@@ -97,7 +102,7 @@ public class MultipartyCallService extends BaseService{
         public void callConnected(LinphoneCall linphoneCall){
             super.callConnected(linphoneCall);
             MyTerminalFactory.getSDK().getIndividualCallManager().responseIndividualCall(true);
-            mIctvSpeakingTimeSpeaking.start();
+            mIctvSpeakingTimeSpeaking.onStart();
         }
 
         @Override

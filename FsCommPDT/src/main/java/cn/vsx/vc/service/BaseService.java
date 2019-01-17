@@ -22,12 +22,20 @@ import android.view.WindowManager;
 import org.apache.log4j.Logger;
 
 import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
+import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverRemoveWindowViewHandler;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
@@ -47,9 +55,10 @@ public abstract class BaseService extends Service{
     protected int screenWidth;
     protected PowerManager.WakeLock wakeLock;
     protected View rootView;
-    private boolean dialogAdd;//是否添加了弹窗
+    protected boolean dialogAdd;//是否添加了弹窗
     public static final int OFF_LINE_TIME = 60*1000;
     protected static final int OFF_LINE = 55;
+
 
     @SuppressLint("HandlerLeak")
     protected Handler mHandler = new Handler(){
@@ -78,7 +87,10 @@ public abstract class BaseService extends Service{
         initHomeBroadCastReceiver();
         initBroadCastReceiver();
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
     }
 
     @Override
@@ -87,7 +99,9 @@ public abstract class BaseService extends Service{
             windowManager.addView(rootView, layoutParams1);
             MyApplication.instance.viewAdded = true;
             dialogAdd = true;
-            initView(intent);
+            if(null != intent){
+                initView(intent);
+            }
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -167,24 +181,57 @@ public abstract class BaseService extends Service{
 
     protected abstract void handleMesage(Message msg);
 
+    protected abstract void onNetworkChanged(boolean connected);
+
 
     @Override
     public void onDestroy(){
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
     }
 
+    /**
+     * 重置状态机
+     */
+    protected void revertStateMachine(){
+
+        if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
+            MyTerminalFactory.getSDK().getLiveManager().ceaseLiving();
+        }
+        if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+            MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
+        }
+        if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
+            MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
+        }
+    }
+
+    /**
+     * 移除view并停止service
+     */
     protected void removeView(){
-        logger.info(TAG+"--removeView");
+        logger.info(TAG+"--removeView--dialogAdd:"+dialogAdd);
         mHandler.removeCallbacksAndMessages(null);
         if(dialogAdd){
             windowManager.removeView(rootView);
             dialogAdd = false;
             MyApplication.instance.viewAdded = false;
         }
+        PromptManager.getInstance().stopRing();
         MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverRemoveWindowViewHandler.class);
         stopSelf();
+    }
+
+    /**
+     * 退出业务状态
+     */
+    protected void stopBusiness(){
+        revertStateMachine();
+        removeView();
     }
 
     /**
@@ -203,18 +250,42 @@ public abstract class BaseService extends Service{
         }
     };
 
+    /**
+     * 手机端网络变化
+     */
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = connected -> {
+        if(!connected){
+            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+        }
+        onNetworkChanged(connected);
+    };
 
     /**
-     * 信令服务发送NotifyForceRegisterMessage消息时，先去reAuth(false)，然后login()
+     * 服务端通知强制重新认证登陆
      */
-    private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = (resultCode, resultDesc, isRegisted) -> {
-        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-            MyTerminalFactory.getSDK().getLiveManager().ceaseLiving();
-            MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-            MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
+    private ReceiveForceReloginHandler receiveForceReloginHandler = version -> {
+        ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+        removeView();
+    };
+
+    /**
+     * 跟信令的连接状态
+     */
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
+        if(!connected){
+            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+        }
+        mHandler.post(()-> onNetworkChanged(connected));
+    };
+
+    /**
+     * 登陆响应
+     */
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
+        if(resultCode != BaseCommonCode.SUCCESS_CODE){
             removeView();
         }
-    };
+    });
 
     private BroadcastReceiver mBroadcastReceiv = new BroadcastReceiver(){
         @Override

@@ -149,6 +149,13 @@ public class InviteMemberService extends BaseService{
     }
 
     @Override
+    protected void onNetworkChanged(boolean connected){
+        if(!connected){
+            stopBusiness();
+        }
+    }
+
+    @Override
     protected void initData(){
         mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(getApplicationContext(), OrientationHelper.HORIZONTAL,false));
         mCatalogAdapter=new CatalogAdapter(getApplicationContext(),mCatalogList);
@@ -161,6 +168,7 @@ public class InviteMemberService extends BaseService{
     @Override
     protected void initBroadCastReceiver(){
     }
+
 
     @Override
     public void onDestroy(){
@@ -192,7 +200,7 @@ public class InviteMemberService extends BaseService{
      **/
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (methodResult, resultDesc) -> {
         ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
-        removeView();
+        stopBusiness();
     };
 
     private View.OnClickListener editThemeOnClickListener = v->{

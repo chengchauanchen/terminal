@@ -41,18 +41,15 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetRtspStreamUrlHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberNotLivingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
-import cn.vsx.vc.receiveHandle.ReceiverRemoveWindowViewHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -104,8 +101,6 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberNotLivingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         mPopupMiniLive.setOnTouchListener(miniPopOnTouchListener);
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
@@ -174,8 +169,28 @@ public class PullLivingService extends BaseService{
         switch(msg.what){
             case OFF_LINE:
                 ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_pull));
-                removeView();
+                stopBusiness();
                 break;
+        }
+    }
+
+    @Override
+    protected void onNetworkChanged(boolean connected){
+        if(!connected){
+            if(!mHandler.hasMessages(OFF_LINE)){
+                mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
+            }
+        }else {
+            mHandler.removeMessages(OFF_LINE);
+            if(MyApplication.instance.isMiniLive){
+                if(null != mSvLivePop.getSurfaceTexture()){
+                    startPull(mSvLivePop);
+                }
+            }else {
+                if(null != mSvLive.getSurfaceTexture()){
+                    startPull(mSvLive);
+                }
+            }
         }
     }
 
@@ -219,8 +234,6 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberNotLivingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetRtspStreamUrlHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
     }
 
     private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setAuthorityView);
@@ -253,10 +266,13 @@ public class PullLivingService extends BaseService{
         }
     };
 
+    /**
+     * 获取到流地址
+     */
     private ReceiveGetRtspStreamUrlHandler receiveGetRtspStreamUrlHandler = (final String rtspUrl, final Member liveMember, long callId)-> mHandler.post(() -> {
         if (Util.isEmpty(rtspUrl)) {
             ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.no_rtsp_data));
-            finishVideoLive();
+            stopBusiness();
         }else {
             logger.info("rtspUrl ----> " + rtspUrl);
             PullLivingService.this.liveMember = liveMember;
@@ -273,8 +289,7 @@ public class PullLivingService extends BaseService{
      */
     private ReceiveMemberNotLivingHandler receiveMemberNotLivingHandler = callId -> {
         ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
-        TerminalFactory.getSDK().getLiveManager().ceaseWatching();
-        finishVideoLive();
+        stopBusiness();
     };
 
     /**
@@ -282,32 +297,8 @@ public class PullLivingService extends BaseService{
      **/
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (methodResult, resultDesc) -> {
         ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
-        mHandler.post(this::finishVideoLive);
+        mHandler.post(this::stopBusiness);
     };
-
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
-        if(!connected){
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
-            mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
-        }
-    };
-
-    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
-        mHandler.removeMessages(OFF_LINE);
-        if(resultCode == BaseCommonCode.SUCCESS_CODE){
-            if(MyApplication.instance.isMiniLive){
-                if(null != mSvLivePop.getSurfaceTexture()){
-                    startPull(mSvLivePop);
-                }
-            }else {
-                if(null != mSvLive.getSurfaceTexture()){
-                    startPull(mSvLive);
-                }
-            }
-        }else {
-            mHandler.sendEmptyMessage(OFF_LINE);
-        }
-    });
 
     private IGotaKeyHandler.Stub gotaKeHandler = new IGotaKeyHandler.Stub(){
         @Override
@@ -404,7 +395,7 @@ public class PullLivingService extends BaseService{
         }
     };
 
-    private View.OnClickListener hangUpOnClickListener = v-> finishVideoLive();
+    private View.OnClickListener hangUpOnClickListener = v-> stopBusiness();
 
     private View.OnClickListener retractOnClickListener = v -> showPopMiniView();
 
@@ -502,12 +493,7 @@ public class PullLivingService extends BaseService{
                 if(errorcode != 0){
                     stopPull();
                 }
-                if(errorcode == -101){
-                    ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.please_check_network));
-                    TerminalFactory.getSDK().getLiveManager().ceaseWatching();
-                    finishVideoLive();
-                }
-                if(errorcode == 500 || errorcode == 404 || errorcode == -32){
+                if(errorcode == 500 || errorcode == 404 || errorcode == -32 || errorcode == -101){
                     if(pullcount < 10){
                         try{
                             Thread.sleep(300);
@@ -519,31 +505,23 @@ public class PullLivingService extends BaseService{
                                 startPull(mSvLivePop);
                                 pullcount++;
                             }else{
-                                TerminalFactory.getSDK().getLiveManager().ceaseWatching();
+                                ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
+                                stopBusiness();
                             }
                         }catch(Exception e){
                             e.printStackTrace();
                         }
                     }else{
                         ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
-                        TerminalFactory.getSDK().getLiveManager().ceaseWatching();
-                        finishVideoLive();
+                        stopBusiness();
                     }
                 }else if(errorcode != 0){
                     ToastUtil.showToast(getApplicationContext(), resultDataString);
-                    finishVideoLive();
+                    stopBusiness();
                 }
             }
         }
     }
-
-    private void finishVideoLive(){
-        MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-        windowManager.removeView(rootView);
-        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverRemoveWindowViewHandler.class);
-        stopSelf();
-    }
-
 
     private void stopPull(){
         if(rtspPlay){

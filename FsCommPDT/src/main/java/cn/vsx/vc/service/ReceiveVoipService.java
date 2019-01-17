@@ -11,7 +11,6 @@ import android.widget.TextView;
 import cn.vsx.vc.R;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.utils.Constants;
-import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
  * 作者：ly-xuxiaolong
@@ -76,16 +75,16 @@ public class ReceiveVoipService extends BaseService{
     protected void handleMesage(Message msg){
     }
 
-    private View.OnClickListener refuseOnclickListener = v->{
-        MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
-        PromptManager.getInstance().stopRing();
-        removeView();
-    };
+    @Override
+    protected void onNetworkChanged(boolean connected){
+    }
+
+    private View.OnClickListener refuseOnclickListener = v-> stopBusiness();
 
     private View.OnClickListener acceptOnclickListener = v->{
         Intent intent = new Intent(ReceiveVoipService.this,MultipartyCallService.class);
         intent.putExtra(Constants.USER_NAME,userName);
         startService(intent);
-        mHandler.postDelayed(this::removeView,2000);
+        mHandler.postDelayed(this::removeView,500);
     };
 }

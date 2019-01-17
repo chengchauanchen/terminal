@@ -109,7 +109,7 @@ public class StartIndividualCallService extends BaseService{
             mTvMemberNameRequest.setText(memberName);
             mTvMemberIdRequest.setText(HandleIdUtil.handleId(memberId));
         }else {
-            removeView();
+            stopBusiness();
             ToastUtil.individualCallFailToast(getApplicationContext(), resultCode);
         }
 
@@ -117,6 +117,26 @@ public class StartIndividualCallService extends BaseService{
 
     @Override
     protected void handleMesage(Message msg){
+        switch(msg.what){
+            case OFF_LINE:
+                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+                mTimerView.onStop();
+                stopBusiness();
+            break;
+        }
+    }
+
+    @Override
+    protected void onNetworkChanged(boolean connected){
+        if(!connected){
+            mTimerView.onPause();
+            if(!mHandler.hasMessages(OFF_LINE)){
+                mHandler.sendEmptyMessageDelayed(OFF_LINE,3000);
+            }
+        }else {
+            mHandler.removeMessages(OFF_LINE);
+            mTimerView.onContinue();
+        }
     }
 
     @Override
@@ -173,7 +193,7 @@ public class StartIndividualCallService extends BaseService{
      */
     private ReceiveResponseStartIndividualCallHandler receiveResponseStartIndividualCallHandler = (resultCode, resultDesc, individualCallType) -> {
         logger.info("ReceiveResponseStartIndividualCallHandler====" + "resultCode:" + resultCode + "=====resultDesc:" + resultDesc);
-        mTimerView.stop();
+        mTimerView.onStop();
         if(resultCode == BaseCommonCode.SUCCESS_CODE){//对方接听
             logger.info("对方接受了你的个呼:" + resultCode + resultDesc + "callType;" + individualCallType);
             mHandler.post(() -> callAnswer(individualCallType));
@@ -182,7 +202,7 @@ public class StartIndividualCallService extends BaseService{
             mHandler.postDelayed(() -> {
                 PromptManager.getInstance().IndividualHangUpRing();
                 PromptManager.getInstance().delayedStopRing();
-                removeView();
+                stopBusiness();
             },500);
         }
     };
@@ -191,11 +211,11 @@ public class StartIndividualCallService extends BaseService{
      * 对方拒绝直播，通知界面关闭响铃页
      **/
     private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc) -> {
-        mTimerView.stop();
+        mTimerView.onStop();
         ToastUtil.showToast(getApplicationContext(),resultDesc);
         PromptManager.getInstance().IndividualHangUpRing();
         PromptManager.getInstance().delayedStopRing();
-        removeView();
+        stopBusiness();
     };
 
     private void callAnswer(int individualCallType){
@@ -205,14 +225,12 @@ public class StartIndividualCallService extends BaseService{
         intent.putExtra(Constants.MEMBER_NAME,memberName);
         intent.putExtra(Constants.MEMBER_ID,memberId);
         startService(intent);
-        mHandler.postDelayed(this::removeView,2000);
-
+        mTimerView.onStop();
+        mHandler.postDelayed(this::removeView,500);
     }
 
     private void individualCallStopped(){
-        mTimerView.stop();
-        PromptManager.getInstance().stopRing();
-        MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
-        removeView();
+        mTimerView.onStop();
+        stopBusiness();
     }
 }

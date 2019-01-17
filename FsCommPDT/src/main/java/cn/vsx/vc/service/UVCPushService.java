@@ -39,7 +39,6 @@ import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
@@ -128,7 +127,6 @@ public class UVCPushService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
@@ -192,8 +190,24 @@ public class UVCPushService extends BaseService{
                 break;
             case OFF_LINE:
                 ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_push));
-                removeView();
+                stopBusiness();
                 break;
+        }
+    }
+
+    @Override
+    protected void onNetworkChanged(boolean connected){
+        if(!connected){
+            if(!mHandler.hasMessages(OFF_LINE)){
+                mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
+            }
+        }else {
+            mHandler.removeMessages(OFF_LINE);
+            if(MyApplication.instance.isMiniLive){
+                pushStream(mSvLivePop.getSurfaceTexture());
+            }else{
+                pushStream(mSvUvcLive.getSurfaceTexture());
+            }
         }
     }
 
@@ -204,7 +218,6 @@ public class UVCPushService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
@@ -315,18 +328,6 @@ public class UVCPushService extends BaseService{
         }
     };
 
-    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
-        mHandler.removeMessages(OFF_LINE);
-        if(resultCode == BaseCommonCode.SUCCESS_CODE){
-            if(MyApplication.instance.isMiniLive){
-                pushStream(mSvLivePop.getSurfaceTexture());
-            }else{
-                pushStream(mSvUvcLive.getSurfaceTexture());
-            }
-        }else {
-            mHandler.sendEmptyMessage(OFF_LINE);
-        }
-    });
 
     private View.OnClickListener hangUpOnClickListener = v-> finishVideoLive();
 
@@ -515,11 +516,8 @@ public class UVCPushService extends BaseService{
 
     private void finishVideoLive(){
         mHandler.removeCallbacksAndMessages(null);
-        MyTerminalFactory.getSDK().getLiveManager().ceaseLiving();
-        PromptManager.getInstance().stopRing();//停止响铃
         stopPush();
-        hideAllView();
-        removeView();
+        stopBusiness();
     }
 
 
