@@ -824,15 +824,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         }
         /**  图片  */
         if (terminalMessage.messageType == MessageType.PICTURE.getCode()) {
-            if(terminalMessage.messageBody.containsKey(JsonParam.PICTURE_THUMB_URL)){
-                String pictureThumbUrl = MyTerminalFactory.getSDK().getParam(Params.FDFS_DOWNLOAD_URL)+
-                terminalMessage.messageBody.getString(JsonParam.PICTURE_THUMB_URL);
-
-                if (pictureThumbUrl.startsWith("http")) {
-                    PhotoUtils.getInstance().loadNetBitmap(activity, pictureThumbUrl, holder.ivContent, holder.tv_progress, holder.progressBar);
-                } else {
-                    PhotoUtils.getInstance().loadLocalBitmap(activity, pictureThumbUrl, holder.ivContent);
-                }
+            if (terminalMessage.messagePath.startsWith("http")) {
+                PhotoUtils.getInstance().loadNetBitmap(activity, terminalMessage.messagePath, holder.ivContent, holder.tv_progress, holder.progressBar);
+            } else {
+                PhotoUtils.getInstance().loadLocalBitmap(activity, terminalMessage.messagePath, holder.ivContent);
             }
         }
         /** 小视频 */
@@ -1726,41 +1721,34 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     public void openPhoto(TerminalMessage terminalMessage, ChatViewHolder chatViewHolder) {
-
+        //加载原图
+        File file = new File(terminalMessage.messagePath);
         mImgList = findImages();
         logger.error("adapter ---getCount():" + getItemCount());
         logger.error("mImgList.size():" + mImgList.size());
         int currentPos = mImgUrlList.indexOf(terminalMessage.messagePath);
         logger.info("图片列表位置：" + currentPos+"路径："+terminalMessage.messagePath);
-        // TODO: 2019/1/18
-        if (terminalMessage.messagePath.startsWith("http")) {
-            PhotoUtils.getInstance().loadNetBitmap(activity, terminalMessage.messagePath, chatViewHolder.ivContent, chatViewHolder.tv_progress, chatViewHolder.progressBar);
-        } else {
-            PhotoUtils.getInstance().loadLocalBitmap(activity, terminalMessage.messagePath, chatViewHolder.ivContent);
-        }
-//        File file = new File(terminalMessage.messagePath);
-//        if (!isDownloadingPicture) {
-//            /**  如果文件不存在就下载, 文件存在但是是缩略图，也要下载原图 **/
-//            if (!file.exists() || (file.exists() && terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE)
-//                    && terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE))) {
-//                logger.error("哎呀---------->本地图片被删了或为缩略图，重新去服务器下载！");
-//                isDownloadingPicture = true;
-//                MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
-//                downloadProgressBar = chatViewHolder.progressBar;
-//                download_tv_progressBars = chatViewHolder.tv_progress;
-//                setProgress(downloadProgressBar, 0);
-//                setText(download_tv_progressBars, "0%");
-//                setViewVisibility(downloadProgressBar, View.VISIBLE);
-//                setViewVisibility(download_tv_progressBars, View.VISIBLE);
-//                MyTerminalFactory.getSDK().download(terminalMessage, true);
-//            } else {
+        if (!isDownloadingPicture){
+            if(terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE) && terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE)||
+                    !file.exists()){
+                logger.error("哎呀---------->本地图片被删了或为缩略图，重新去服务器下载！");
+                isDownloadingPicture = true;
+                MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
+                downloadProgressBar = chatViewHolder.progressBar;
+                download_tv_progressBars = chatViewHolder.tv_progress;
+                setProgress(downloadProgressBar, 0);
+                setText(download_tv_progressBars, "0%");
+                setViewVisibility(downloadProgressBar, View.VISIBLE);
+                setViewVisibility(download_tv_progressBars, View.VISIBLE);
+                MyTerminalFactory.getSDK().download(terminalMessage, true);
+            }else {
                 setViewVisibility(fragment_contener, View.VISIBLE);
                 ImagePreviewItemFragment imagePreviewItemFragment = ImagePreviewItemFragment.getInstance(mImgList, currentPos);
 
                 imagePreviewItemFragment.setFragment_contener(fragment_contener);
                 activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, imagePreviewItemFragment).commit();
-//            }
-//        }
+            }
+        }
     }
 
     /**
@@ -1928,7 +1916,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if (msg.messageType == MessageType.PICTURE.getCode()) {
                 ImageBean bean = new ImageBean();
                 bean.setPath(msg.messagePath);
-                bean.setReceive(isReceiver(msg));
+//                bean.setReceive(isReceiver(msg));
                 mImgList.add(bean);
                 mImgUrlList.add(msg.messagePath);
             }

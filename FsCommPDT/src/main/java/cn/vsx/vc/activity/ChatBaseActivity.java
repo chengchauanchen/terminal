@@ -1189,6 +1189,16 @@ public abstract class ChatBaseActivity extends BaseActivity{
 //                            }else if(terminalMessage.messageType==MessageType.AUDIO.getCode()){
 ////                                setRecordMessageUnread(terminalMessage);
 //                            }
+
+//                            if (terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
+//                                Map<Integer, TerminalMessage> sendDataSuccessMap = MyTerminalFactory.getSDK().getTerminalMessageManager().getSendDataSuccessMap();
+//                                if(!sendDataSuccessMap.containsKey(terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID))){
+//                                    chatMessageList.add(terminalMessage);
+//                                    sendDataSuccessMap.clear();
+//                                }
+//                            }else {
+//                                chatMessageList.add(terminalMessage);
+//                            }
                             chatMessageList.add(terminalMessage);
                             if(temporaryAdapter!=null){
                                 temporaryAdapter.notifyDataSetChanged();
@@ -1295,11 +1305,11 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     if(terminalMessage.messageType ==  MessageType.PICTURE.getCode()) {
                         temporaryAdapter.isDownloadingPicture = false;
                         replaceMessage(terminalMessage);
-
-//                        if(terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE) &&
-//                                !terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE)) {
-//                            temporaryAdapter.openPhotoAfterDownload(terminalMessage);
-//                        }
+                        //如果是原图下载完了就打开
+                        if(terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE) &&
+                                !terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE)) {
+                            temporaryAdapter.openPhotoAfterDownload(terminalMessage);
+                        }
                     }
 
                     if(terminalMessage.messageType ==  MessageType.FILE.getCode()) {
