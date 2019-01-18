@@ -1295,10 +1295,11 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     if(terminalMessage.messageType ==  MessageType.PICTURE.getCode()) {
                         temporaryAdapter.isDownloadingPicture = false;
                         replaceMessage(terminalMessage);
-                        if(terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE) &&
-                                !terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE)) {
-                            temporaryAdapter.openPhotoAfterDownload(terminalMessage);
-                        }
+
+//                        if(terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE) &&
+//                                !terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE)) {
+//                            temporaryAdapter.openPhotoAfterDownload(terminalMessage);
+//                        }
                     }
 
                     if(terminalMessage.messageType ==  MessageType.FILE.getCode()) {

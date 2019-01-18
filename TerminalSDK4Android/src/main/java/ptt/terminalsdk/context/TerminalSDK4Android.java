@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
@@ -30,6 +31,7 @@ import org.ddpush.im.util.StringUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,6 +39,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
+import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.TerminalSDKBaseImpl;
@@ -547,7 +550,13 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 	/**界面需要上传进度展示*/
 	public void upload(String url, File file, TerminalMessage terminalMessage, boolean isNeedUi){
-		TerminalFactory.getSDK().getTerminalMessageManager().uploadDataByOkHttp(url, file, terminalMessage, isNeedUi);
+		if(terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()){
+			Bitmap bitmap = createVideoThumbnail(terminalMessage.messagePath);
+			String picture = HttpUtil.saveFileByBitmap(getPhotoRecordDirectory(), System.currentTimeMillis()+".jpg", bitmap);
+			TerminalFactory.getSDK().getTerminalMessageManager().uploadVideo(url, file, terminalMessage, isNeedUi,picture);
+		}else {
+			TerminalFactory.getSDK().getTerminalMessageManager().uploadDataByOkHttp(url, file, terminalMessage, isNeedUi);
+		}
 	}
 	@Override
 	public RequestBody uploadProgress(RequestBody requestBody0, final TerminalMessage terminalMessage) {
@@ -729,4 +738,25 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		logger.info(" TerminalSDK4Android--------> account = "+account);
 		return account;
 	}
+
+	private Bitmap createVideoThumbnail(String videoPath) {
+		Bitmap bitmap = null;
+		MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+		try {
+			retriever.setDataSource(videoPath);
+			bitmap = retriever.getFrameAtTime();
+		} catch (IllegalArgumentException ex) {
+			// Assume this is a corrupt video file
+		} catch (RuntimeException ex) {
+			// Assume this is a corrupt video file.
+		} finally {
+			try {
+				retriever.release();
+			} catch (RuntimeException ex) {
+				// Ignore failures while cleaning up.
+			}
+		}
+		return bitmap;
+	}
+
 }

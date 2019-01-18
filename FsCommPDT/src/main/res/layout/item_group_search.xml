@@ -27,6 +27,9 @@
             android:layout_marginLeft="@dimen/x9"
             android:layout_toRightOf="@id/iv_head"
             android:text="7B-11T"
+            android:maxLines="1"
+            android:maxEms="8"
+            android:ellipsize="end"
             android:textColor="@color/group_text_gray"
             android:textSize="@dimen/x12" />
 
