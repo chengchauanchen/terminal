@@ -439,6 +439,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     sendPhoto();
                     break;
                 case ReceiverSendFileHandler.FILE:
+                    setViewVisibility(fl_fragment_container, View.GONE);
                     getSupportFragmentManager().popBackStack();
                     sendFile();
                     break;
@@ -1190,15 +1191,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
 ////                                setRecordMessageUnread(terminalMessage);
 //                            }
 
-//                            if (terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
-//                                Map<Integer, TerminalMessage> sendDataSuccessMap = MyTerminalFactory.getSDK().getTerminalMessageManager().getSendDataSuccessMap();
-//                                if(!sendDataSuccessMap.containsKey(terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID))){
-//                                    chatMessageList.add(terminalMessage);
-//                                    sendDataSuccessMap.clear();
-//                                }
-//                            }else {
-//                                chatMessageList.add(terminalMessage);
-//                            }
                             chatMessageList.add(terminalMessage);
                             if(temporaryAdapter!=null){
                                 temporaryAdapter.notifyDataSetChanged();
@@ -1324,7 +1316,8 @@ public abstract class ChatBaseActivity extends BaseActivity{
                         replaceMessage(terminalMessage);
                     }
                     if(terminalMessage.messageType ==  MessageType.VIDEO_CLIPS.getCode()) {
-//                        temporaryAdapter.openFileAfterDownload(terminalMessage);点击以后再打开
+                        File file = new File(terminalMessage.messagePath);
+                        temporaryAdapter.openVideo(terminalMessage,file);
                         temporaryAdapter.isDownloading = false;
                         terminalMessage.messageBody.put(JsonParam.IS_DOWNLOADINF, false);
                         replaceMessage(terminalMessage);

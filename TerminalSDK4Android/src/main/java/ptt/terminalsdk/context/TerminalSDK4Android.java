@@ -31,7 +31,6 @@ import org.ddpush.im.util.StringUtil;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,6 +40,7 @@ import java.io.Serializable;
 
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.UrlParams;
+import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.TerminalSDKBaseImpl;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
@@ -553,6 +553,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		if(terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()){
 			Bitmap bitmap = createVideoThumbnail(terminalMessage.messagePath);
 			String picture = HttpUtil.saveFileByBitmap(getPhotoRecordDirectory(), System.currentTimeMillis()+".jpg", bitmap);
+			terminalMessage.messageBody.put(JsonParam.PICTURE_THUMB_URL,picture);
 			TerminalFactory.getSDK().getTerminalMessageManager().uploadVideo(url, file, terminalMessage, isNeedUi,picture);
 		}else {
 			TerminalFactory.getSDK().getTerminalMessageManager().uploadDataByOkHttp(url, file, terminalMessage, isNeedUi);

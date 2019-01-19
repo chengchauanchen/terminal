@@ -91,4 +91,19 @@ public class StringUtil{
         Matcher m = p.matcher(source);
         return m.find();
     }
+
+    /**
+     * 将paramValue中的汉字提取出来
+     * @param paramValue
+     * @return
+     */
+    public static String getChinese(String paramValue) {
+        String str = "";
+        String regex = "([\u4e00-\u9fa5]+)";
+        Matcher matcher = Pattern.compile(regex).matcher(paramValue);
+        while (matcher.find()) {
+            str += matcher.group(0);
+        }
+        return str;
+    }
 }

@@ -567,11 +567,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                     privateCallClick(terminalMessage);
                     locationItemClick(terminalMessage);
                     liveItemClick(terminalMessage, viewType);
-                    if (terminalMessage.messageBody.containsKey(JsonParam.FILE_NAME)) {
-                        individualNewsRecordItemClick(terminalMessage, position);
-                    } else {
-                        groupCallItemClick(terminalMessage, position);
-                    }
+                    individualNewsRecordItemClick(terminalMessage, position);
+                    groupCallItemClick(terminalMessage, position);
                     gb28181ItemClick(terminalMessage, viewType);
                 }
                 InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -842,21 +839,15 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if(videoTime >0){
                 setText(holder.tvDuration, videoTime/1000 + "''");
             }
-            openFile(terminalMessage, holder);
+//            openFile(terminalMessage, holder);
             if(terminalMessage.messageBody.containsKey(JsonParam.PICTURE_THUMB_URL)){
-                String pictureThumbUrl = MyTerminalFactory.getSDK().getParam(Params.FDFS_DOWNLOAD_URL)+
-                        terminalMessage.messageBody.getString(JsonParam.PICTURE_THUMB_URL);
-                if (pictureThumbUrl.startsWith("http")) {
+                String pictureThumbUrl = terminalMessage.messageBody.getString(JsonParam.PICTURE_THUMB_URL);
+                if(pictureThumbUrl.startsWith("http")){
                     PhotoUtils.getInstance().loadNetBitmap(activity, pictureThumbUrl, holder.ivContent, holder.tv_progress, holder.progressBar);
-                } else {
+                }else {
                     PhotoUtils.getInstance().loadLocalBitmap(activity, pictureThumbUrl, holder.ivContent);
                 }
             }
-//            if(terminalMessage.messagePath.startsWith("http")){
-//                PhotoUtils.getInstance().loadLocalResource(activity,holder.ivContent);
-//            }else {
-//                PhotoUtils.getInstance().loadLocalBitmap(activity, terminalMessage.messagePath, holder.ivContent);
-//            }
 
         }
         /**  文件  */
@@ -1570,7 +1561,21 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private void videoItemClick(ChatViewHolder chatViewHolder, TerminalMessage terminalMessage, int type) {
         if (terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
             if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())){
-                openFileAfterDownload(terminalMessage);
+                File file = new File(terminalMessage.messagePath);
+                if (!file.exists()) {
+                    // TODO: 2019/1/17 下载视频
+                    isDownloading = true;
+                    MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
+                    downloadProgressBar = chatViewHolder.progressBar;
+                    download_tv_progressBars = chatViewHolder.tv_progress;
+                    setProgress(downloadProgressBar, 0);
+                    setText(download_tv_progressBars, "0%");
+                    setViewVisibility(downloadProgressBar, View.VISIBLE);
+                    setViewVisibility(download_tv_progressBars, View.VISIBLE);
+                    MyTerminalFactory.getSDK().download(terminalMessage, true);
+                }else {
+                    openVideo(terminalMessage,file);
+                }
             }else {
                 ToastUtil.showToast(activity,"没有图像观看功能权限");
             }
@@ -1644,17 +1649,15 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
      * 点击播放组呼或者录音
      **/
     public void groupCallItemClick(TerminalMessage terminalMessage, int position) {
-        if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
-            if (terminalMessage.messageType == MessageType.GROUP_CALL.getCode() || terminalMessage.messageType == MessageType.AUDIO.getCode()) {
+        if(terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){
+            if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 if (MyApplication.instance.isPlayVoice) {
                     MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
-
                 }
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupChatVoiceHandler.class, position);
-
+            } else {
+                ToastUtil.showToast(activity, "没有组呼听权限");
             }
-        } else {
-            ToastUtil.showToast(activity, "没有组呼听权限");
         }
 
     }
@@ -1736,9 +1739,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
                 downloadProgressBar = chatViewHolder.progressBar;
                 download_tv_progressBars = chatViewHolder.tv_progress;
-                setProgress(downloadProgressBar, 0);
-                setText(download_tv_progressBars, "0%");
-                setViewVisibility(downloadProgressBar, View.VISIBLE);
+//                setProgress(downloadProgressBar, 0);
+//                setText(download_tv_progressBars, "0%");
+//                setViewVisibility(downloadProgressBar, View.VISIBLE);
                 setViewVisibility(download_tv_progressBars, View.VISIBLE);
                 MyTerminalFactory.getSDK().download(terminalMessage, true);
             }else {
@@ -1805,6 +1808,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         logger.info("图片列表位置：" + currentPos+"  路径："+terminalMessage.messagePath);
         File file = new File(terminalMessage.messagePath);
         if (!file.exists()) {
+            //下载图片
             return;
         }
         setViewVisibility(fragment_contener, View.VISIBLE);
@@ -1813,6 +1817,19 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
         imagePreviewItemFragment.setFragment_contener(fragment_contener);
         activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, imagePreviewItemFragment).commit();
+    }
+
+    public void openVideo(TerminalMessage terminalMessage,File file){
+        if(terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()){
+            if(file.exists()){
+                setViewVisibility(fragment_contener, View.VISIBLE);
+                VideoPreviewItemFragment videoPreviewItemFragment = VideoPreviewItemFragment.newInstance(file.getAbsolutePath());
+                videoPreviewItemFragment.setFragment_contener(fragment_contener);
+                activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, videoPreviewItemFragment).commit();
+            }else {
+                ToastUtil.showToast(activity,"下载视频失败");
+            }
+        }
     }
 
     /***  下载完后打开文件 **/

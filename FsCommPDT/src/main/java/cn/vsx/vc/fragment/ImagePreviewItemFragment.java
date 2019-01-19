@@ -3,11 +3,9 @@ package cn.vsx.vc.fragment;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
-import android.support.annotation.RequiresApi;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.Display;
@@ -26,11 +24,9 @@ import com.zectec.imageandfileselector.base.BaseFragment;
 import com.zectec.imageandfileselector.bean.ImageBean;
 import com.zectec.imageandfileselector.receivehandler.ReceiverSaveImgHandler;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
-import com.zectec.imageandfileselector.utils.PhotoUtils;
 
 import org.apache.log4j.Logger;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +46,7 @@ public class ImagePreviewItemFragment extends BaseFragment{
     private FrameLayout fragment_contener;
     private Bitmap bitmap;
     private String storrPath;
-    private ImageView iv_save_picture;
+//    private ImageView iv_save_picture;
     private Handler myHandler = new Handler();
     //    private ImageView preview_image;
     private ViewPager mViewPager;
@@ -85,7 +81,7 @@ public class ImagePreviewItemFragment extends BaseFragment{
     @Override
     public void initView(){
         mViewPager = rootView.findViewById(R.id.vp);
-        iv_save_picture = rootView.findViewById(R.id.iv_save_picture);
+//        iv_save_picture = rootView.findViewById(R.id.iv_save_picture);
         mImageList = getArguments().getParcelableArrayList(DATA);
         int pos = getArguments().getInt(POSITION);
         adapter = new MyAdapter(mImageList, getActivity());
@@ -97,11 +93,11 @@ public class ImagePreviewItemFragment extends BaseFragment{
 
             @Override
             public void onPageSelected(int position){
-                if(mImageList.get(position).isReceive()){
-                    iv_save_picture.setVisibility(View.VISIBLE);
-                }else{
-                    iv_save_picture.setVisibility(View.GONE);
-                }
+//                if(mImageList.get(position).isReceive()){
+//                    iv_save_picture.setVisibility(View.VISIBLE);
+//                }else{
+//                    iv_save_picture.setVisibility(View.GONE);
+//                }
                 storrPath = mImageList.get(position).getPath();
             }
 
@@ -111,14 +107,14 @@ public class ImagePreviewItemFragment extends BaseFragment{
         });
         mViewPager.setCurrentItem(pos);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverSaveImgHandler);
-        iv_save_picture.setOnClickListener(new View.OnClickListener(){
-            @RequiresApi(api = Build.VERSION_CODES.M)
-            @Override
-            public void onClick(View v){
-                int curpos = mViewPager.getCurrentItem();
-                PhotoUtils.savePhotoTo(getActivity(), new File(mImageList.get(curpos).getPath()));
-            }
-        });
+//        iv_save_picture.setOnClickListener(new View.OnClickListener(){
+//            @RequiresApi(api = Build.VERSION_CODES.M)
+//            @Override
+//            public void onClick(View v){
+//                int curpos = mViewPager.getCurrentItem();
+//                PhotoUtils.savePhotoTo(getActivity(), new File(mImageList.get(curpos).getPath()));
+//            }
+//        });
         ((ChatBaseActivity) getActivity()).setBackListener(new ChatBaseActivity.OnBackListener(){
             @Override
             public void onBack(){
@@ -142,7 +138,7 @@ public class ImagePreviewItemFragment extends BaseFragment{
                 public void run(){
                     if(isSave){
                         Toast.makeText(getActivity(), "已保存到"+path+"文件夹", Toast.LENGTH_LONG).show();
-                        iv_save_picture.setVisibility(View.GONE);
+//                        iv_save_picture.setVisibility(View.GONE);
                     }else{
                         Toast.makeText(getActivity(), "保存失败", Toast.LENGTH_LONG).show();
                     }
