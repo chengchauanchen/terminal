@@ -1,6 +1,5 @@
 package cn.vsx.vc.activity;
 
-import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -9,16 +8,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.PowerManager;
 import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -61,12 +55,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
 	private AudioManager audioManager;
 	private HeadsetPlugReceiver headsetPlugReceiver;
-	private PowerManager.WakeLock wakeLock;
-	private PowerManager.WakeLock wakeLockScreen;
 
-
-	private SensorManager sensorManager;// 传感器管理对象,调用距离传感器，控制屏幕
-	private PowerManager powerManager;
+	protected Logger logger = Logger.getLogger(BaseActivity.class);
 	protected final String TAG = getClass().getSimpleName();
 
     //成员被删除了
@@ -116,7 +106,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
 
 	private Handler myHandler = new Handler(Looper.getMainLooper());
-	public Logger logger = Logger.getLogger(BaseActivity.class);
+
 
 	/**组成员遥毙消息*/
 	protected ReceiveNotifyMemberKilledHandler receiveNotifyMemberKilledHandler = new ReceiveNotifyMemberKilledHandler() {
@@ -218,15 +208,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
 			initListener();
 
-			powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 			audioManager= (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-			sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-			//距离感应器的电源锁
-			wakeLock = powerManager.newWakeLock(32, "wakeLock");
-			//插入耳机时的电源锁
-			wakeLockScreen = powerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP
-					| PowerManager.SCREEN_DIM_WAKE_LOCK, "wakeLock");
-
 		}
 
 	}
@@ -338,8 +320,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
 	/**注册耳机插入拔出的监听*/
 	private void registerHeadsetPlugReceiver() {
-		headsetPlugReceiver = new HeadsetPlugReceiver(sensorManager,
-				sensorEventListener, wakeLockScreen);
+		headsetPlugReceiver = new HeadsetPlugReceiver(getApplicationContext());
 		IntentFilter filter = new IntentFilter();
 		filter.addAction("android.intent.action.HEADSET_PLUG");
 		registerReceiver(headsetPlugReceiver, filter);
@@ -351,33 +332,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 			unregisterReceiver(headsetPlugReceiver);
 		}
 	}
-	/**距离感应器*/
-	@SuppressLint("Wakelock")
-	private SensorEventListener sensorEventListener = new SensorEventListener() {
 
-		@Override
-		public void onSensorChanged(SensorEvent event) {
-			float[] its = event.values;
-			if (its != null && event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
-				// 经过测试，当手贴近距离感应器的时候its[0]返回值为0.0，当手离开时返回1.0
-				if (its[0] == 0.0) {// 贴近手机
-					logger.info("hands up in calling activity贴近手机");
-					if (!wakeLock.isHeld()) {
-						wakeLock.acquire();// 申请设备电源锁
-					}
-				} else {// 远离手机
-					logger.info("hands moved in calling activity远离手机");
-					if (wakeLock.isHeld()) {
-						wakeLock.release(); // 释放设备电源锁
-					}
-				}
-			}
-		}
-
-		@Override
-		public void onAccuracyChanged(Sensor sensor, int accuracy) {
-		}
-	};
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {

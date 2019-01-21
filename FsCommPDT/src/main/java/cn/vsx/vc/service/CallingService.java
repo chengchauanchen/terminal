@@ -43,6 +43,7 @@ import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
+import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.view.IndividualCallTimerView;
 import cn.vsx.vc.view.IndividualCallView;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -259,6 +260,7 @@ public class CallingService extends BaseService{
                     }else if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){
                         mIndividualCallHalfDuplex.setVisibility(View.VISIBLE);
                     }
+                    SensorUtil.getInstance().registSensor();
                 }
                 break;
         }
@@ -445,6 +447,7 @@ public class CallingService extends BaseService{
     }
 
     protected void showPopMiniView(){
+        SensorUtil.getInstance().unregistSensor();
         windowManager.removeView(rootView);
         windowManager.addView(rootView,layoutParams);
         hideAllView();
@@ -456,6 +459,7 @@ public class CallingService extends BaseService{
 
     @Override
     protected void initView(Intent intent){
+        SensorUtil.getInstance().registSensor();
         individualCallType = intent.getIntExtra(Constants.CALL_TYPE, 0);
         String memberName = intent.getStringExtra(Constants.MEMBER_NAME);
         int memberId = intent.getIntExtra(Constants.MEMBER_ID, 0);

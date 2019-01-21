@@ -35,6 +35,7 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverRemoveWindowViewHandler;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -230,6 +231,7 @@ public abstract class BaseService extends Service{
      * 退出业务状态
      */
     protected void stopBusiness(){
+        SensorUtil.getInstance().unregistSensor();
         revertStateMachine();
         removeView();
     }

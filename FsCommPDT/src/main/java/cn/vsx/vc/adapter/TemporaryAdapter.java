@@ -1262,35 +1262,37 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     private String getCallLength(long time) {
-        int hours = (int) (time / 3600);
+        int hours = (int) (time % 3600);
         time -= hours * 3600;
-        int minutes = (int) (time / 60);
+        int minutes = (int) (time % 60);
         time -= minutes * 60;
         int sec = (int) time;
 
         String timeStr = "";
         if (hours != 0) {
-            if (hours > 10) {
+            if (hours >= 10) {
                 timeStr = hours + ":" + minutes + ":" + sec + "";
-            } else if (hours < 10) {
+            } else{
                 timeStr = "0" + hours + ":" + minutes + ":" + sec + "";
             }
         } else if (minutes != 0) {
-            if (minutes > 10 && sec > 10) {
-                timeStr = minutes + ":" + sec + "";
-            } else if (minutes < 10 && sec < 10) {
-                timeStr = "0" + minutes + ":" + "0" + sec + "";
-            } else if (minutes > 10 && sec < 10) {
-                timeStr = "0" + minutes + ":" + "0" + sec + "";
-            } else if (minutes < 10 && sec > 10) {
-                timeStr = "0" + minutes + ":" + sec + "";
+            if(minutes >= 10){
+                if(sec >= 10){
+                    timeStr = minutes + ":" + sec ;
+                }else {
+                    timeStr = minutes + ":" + "0"+sec ;
+                }
+            }else {
+                if(sec >= 10){
+                    timeStr = "0"+minutes + ":" + sec ;
+                }else {
+                    timeStr = "0"+minutes + ":" + "0"+sec ;
+                }
             }
         } else
             timeStr = +sec + "秒";
 
         return timeStr;
-
-
     }
 
     /**

@@ -5,38 +5,37 @@ import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.hardware.Sensor;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.media.AudioManager;
+import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 
 import org.apache.log4j.Logger;
 
+import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.HeadSetUtil.OnHeadSetListener;
+import cn.vsx.vc.utils.SensorUtil;
 
 public class HeadsetPlugReceiver extends BroadcastReceiver {
 	private Logger logger = Logger.getLogger(getClass());
 	private Context context;
-	private SensorManager sensorManager;
-	private SensorEventListener sensorEventListener;
 	private WakeLock wakeLockScreen;
 	private Dialog dialog;
 	private AudioManager audioManager;
+	private PowerManager powerManager;
 
-	public HeadsetPlugReceiver(){}
-	public HeadsetPlugReceiver(SensorManager sensorManager,
-                               SensorEventListener sensorEventListener, WakeLock wakeLockScreen) {
-		this.sensorManager = sensorManager;
-		this.sensorEventListener = sensorEventListener;
-		this.wakeLockScreen = wakeLockScreen;
+	public HeadsetPlugReceiver(Context context) {
+		this.context = context;
+		powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+		wakeLockScreen = powerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP
+				| PowerManager.SCREEN_DIM_WAKE_LOCK, "wakeLock");
 	}
 
 	@Override
 	public void onReceive(final Context context, Intent intent) {
 		this.context = context;
 		audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
+
 		// intent.getIntExtra("state" , 0); //0代表拔出，1代表插入
 		// intent.getStringExtra("name"); //字符串，代表headset的类型 h2w
 		// intent.getIntExtra("microphone", 1); //1代表这个headset有麦克风，0则没有
@@ -47,9 +46,12 @@ public class HeadsetPlugReceiver extends BroadcastReceiver {
 			if (dialog == null) {
 				dialog = new AlertDialog.Builder(context).create();
 			}
+			//个呼中插上耳机不要距离监听，拔出耳机需要
+			//缩小也不需要
+
 			if (intent.getIntExtra("state", 0) == 0) {//耳机拔出
-				//注销距离监听
-				sensorManager.unregisterListener(sensorEventListener);
+				MyApplication.instance.headset = false;
+				SensorUtil.getInstance().registSensor();
 				// 注销耳机线控监听
 				HeadSetUtil.getInstance().close(context);
 				if (null != wakeLockScreen && wakeLockScreen.isHeld()) {
@@ -67,18 +69,14 @@ public class HeadsetPlugReceiver extends BroadcastReceiver {
 				logger.info("耳机拔出，声音类型："+audioManager.getMode()+"	扬声器状态："+audioManager.isSpeakerphoneOn());
 				
 			} else if (intent.getIntExtra("state", 0) == 1) {//耳机插入
-				
+				MyApplication.instance.headset = true;
 //				if (MyTerminalFactory.getSDK().getGroupCallManager().getGroupCallListenStateMachine().getCurrentState() == GroupCallListenState.LISTENING
 //						&& audioManager.getMode() == AudioManager.MODE_NORMAL) {
 //					audioManager.setSpeakerphoneOn(false);
 //				}
 				logger.info("耳机插入，声音类型："+audioManager.getMode()+"	扬声器状态："+audioManager.isSpeakerphoneOn());
-				
-				//注册距离监听
-				sensorManager.registerListener(sensorEventListener,
-						sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),// 距离感应器
-						SensorManager.SENSOR_DELAY_NORMAL);// 注册传感器，第一个参数为距离监听器，第二个是传感器类型，第三个是延迟类型
-				
+
+				SensorUtil.getInstance().unregistSensor();
 				// 注册耳机线控按钮监听
 				HeadSetUtil.getInstance().setOnHeadSetListener(headSetListener);
 				HeadSetUtil.getInstance().open(context);

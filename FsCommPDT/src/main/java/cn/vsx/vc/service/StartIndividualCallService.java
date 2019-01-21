@@ -22,6 +22,7 @@ import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
+import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.view.IndividualCallTimerView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -90,6 +91,7 @@ public class StartIndividualCallService extends BaseService{
 
     @Override
     protected void showPopMiniView(){
+        SensorUtil.getInstance().unregistSensor();
         MyApplication.instance.isMiniLive = true;
         mRlIndividualCallRequest.setVisibility(View.GONE);
         mPopMinimize.setVisibility(View.VISIBLE);
@@ -99,6 +101,7 @@ public class StartIndividualCallService extends BaseService{
 
     @Override
     protected void initView(Intent intent){
+        SensorUtil.getInstance().registSensor();
         PromptManager.getInstance().IndividualCallRequestRing();
         memberId = intent.getIntExtra(Constants.MEMBER_ID,0);
         int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(memberId,"");
@@ -182,6 +185,7 @@ public class StartIndividualCallService extends BaseService{
                     windowManager.removeView(rootView);
                     windowManager.addView(rootView, layoutParams1);
                     MyApplication.instance.isMiniLive = false;
+                    SensorUtil.getInstance().registSensor();
                 }
                 break;
         }
