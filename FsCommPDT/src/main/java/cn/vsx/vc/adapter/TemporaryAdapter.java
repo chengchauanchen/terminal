@@ -1262,9 +1262,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     private String getCallLength(long time) {
-        int hours = (int) (time % 3600);
+        int hours = (int) Math.floor(time / 3600);
         time -= hours * 3600;
-        int minutes = (int) (time % 60);
+        int minutes = (int) Math.floor(time / 60);
         time -= minutes * 60;
         int sec = (int) time;
 
