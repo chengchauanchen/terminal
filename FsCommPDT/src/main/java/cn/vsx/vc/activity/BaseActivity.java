@@ -116,7 +116,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
 
 	private Handler myHandler = new Handler(Looper.getMainLooper());
-	public Logger logger = Logger.getLogger(getClass());
+	public Logger logger = Logger.getLogger(BaseActivity.class);
 
 	/**组成员遥毙消息*/
 	protected ReceiveNotifyMemberKilledHandler receiveNotifyMemberKilledHandler = new ReceiveNotifyMemberKilledHandler() {
