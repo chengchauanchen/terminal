@@ -20,21 +20,6 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
-    
-    <style name="main_tab_bottom">
-        <item name="android:textSize">@dimen/x10</item>
-        <item name="android:textColor">@drawable/bottom_text_color</item>
-        <item name="android:ellipsize">marquee</item>
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:gravity">center</item>
-        <item name="android:paddingLeft">@dimen/x16</item>
-        <item name="android:paddingRight">@dimen/x16</item>
-        <item name="android:paddingBottom">@dimen/x4</item>
-        <item name="android:paddingTop">@dimen/x4</item>
-        <!-- 去按钮立体效果 -->
-        <item name="android:button">@null</item>
-    </style>
 
     <style name="wrap_content_style">
         <item name="android:layout_width">wrap_content</item>
@@ -42,11 +27,7 @@
         <item name="android:gravity">center</item>
     </style>
     
-     <!-- 设置界面图标 -->
-    <style name="setting_image_style">
-        <item name="android:layout_width">30dp</item>
-        <item name="android:layout_height">30dp</item>
-    </style>
+
     
     <!-- 对讲界面顶部图标 -->
     <style name="image_wrap_content_style">
@@ -96,24 +77,8 @@
         <item name="android:textColor">#fcc236</item>
         <item name="android:text">@string/pre_speaking</item>
     </style>
-    
-    <!-- 转组提示信息 -->
-    <style name="change_group_promp" parent="wrap_content_style">
-        <item name="android:textColor">@color/new_call_gruop_name</item>
-        <item name="android:text">@string/change_group_promp</item>
-        <item name="android:layout_marginLeft">@dimen/x5</item>
-        <item name="android:layout_marginRight">@dimen/x5</item>
-        <item name="android:layout_marginTop">@dimen/y2</item>
-        <item name="android:layout_marginBottom">@dimen/y2</item>
-        <item name="android:textStyle">normal</item>
-    </style>
-    
-    <!-- 切组中间的圆圈 -->
-    <style name="change_group_circle_middle" parent="wrap_content_style">
-        <item name="android:textColor">@color/dodgerblue2</item>
-        <item name="android:background">@drawable/change_group_circle_shape_middle</item>
-        <item name="android:textStyle">normal</item>
-    </style>
+
+
     <!-- 切组两边的圆圈 -->
     <style name="change_group_circle" parent="wrap_content_style">
         <item name="android:textColor">@color/white</item>
@@ -133,12 +98,7 @@
         <item name="android:layout_marginLeft">@dimen/x18</item>
     </style>
 
-    <style name="setting_text_style_rigth">
-        <item name="android:textSize">@dimen/x12</item>
-        <item name="android:textColor">#a0a0a0</item>
-        <item name="android:textStyle">normal</item>
-        <item name="android:layout_marginRight">@dimen/x23</item>
-    </style>
+
 
     <style name="setting_MToggleButton">
         <item name="android:layout_width">@dimen/x44</item>
@@ -152,63 +112,6 @@
         <item name="mtogglebutton_button_on">@drawable/mtogglebutton_button_on</item>
     </style>
 
-    <!-- 水平方向音量调节seekbar -->
-    <style name="Widget.SeekBar.Normal" parent="@android:style/Widget.SeekBar">
-        <item name="android:maxHeight">3.0dip</item>
-        <item name="android:minHeight">3.0dip</item>
-        <item name="android:indeterminateOnly">false</item>
-        <item name="android:indeterminateDrawable">@android:drawable/progress_horizontal</item>
-        <item name="android:progressDrawable">@drawable/seekbar_define_color_style</item>
-        <item name="android:thumb">@drawable/seekbar_thumb_color_style</item>
-        <item name="android:thumbOffset">0dip</item>
-    </style>
-    
-    <style name="press_to_talk" parent="wrap_content_style">
-        <item name="android:textColor">#7f7f7f</item>
-        <item name="android:text">@string/press_to_talk_text</item>
-        <item name="android:textStyle">normal</item>
-    </style>
-    
-        <!-- 准备说话 -->
-    <style name="pre_to_talk" parent="wrap_content_style">
-        <item name="android:textColor">#7f7f7f</item>
-        <item name="android:text">@string/pre_speaking</item>
-        <item name="android:textStyle">normal</item>
-    </style>
-    
-     <!-- 其它人正在说话 -->
-    <style name="other_is_talking" parent="wrap_content_style">
-        <item name="android:textColor">#7f7f7f</item>
-        <item name="android:text">@string/other_is_talking_text</item>
-        <item name="android:textStyle">normal</item>
-    </style>
-    
-     <!-- 排队中.... -->
-    <style name="wait_in_line" parent="wrap_content_style">
-        <item name="android:textColor">#7f7f7f</item>
-        <item name="android:text">@string/wait_in_line_text</item>
-        <item name="android:textStyle">normal</item>
-    </style>
-    
-    <!-- 您已被禁言 -->
-    <style name="not_speak" parent="wrap_content_style">
-        <item name="android:textColor">#7f7f7f</item>
-        <item name="android:text">@string/not_speak</item>
-        <item name="android:textStyle">normal</item>
-    </style>
-    <!-- 您已被禁听 -->
-    <style name="not_listen" parent="wrap_content_style">
-        <item name="android:textColor">#7f7f7f</item>
-        <item name="android:text">@string/not_listen</item>
-        <item name="android:textStyle">normal</item>
-    </style>
-    <!-- 您已被禁言和禁听 -->
-    <style name="not_listen_and_speak" parent="wrap_content_style">
-        <item name="android:textColor">#7f7f7f</item>
-        <item name="android:text">@string/not_listen_and_speak</item>
-        <item name="android:textStyle">normal</item>
-    </style>
-    
     <!-- PTT按钮 -->
     <style name="ptt_button" >
         <item name="android:layout_width">280dp</item>
@@ -217,25 +120,8 @@
         <item name="android:layout_gravity">top</item>
     </style>
     
-    <!-- 操作菜单样式 -->
-    <style name="operate_menu" parent="wrap_content_style">
-        <item name="android:layout_marginLeft">10dp</item>
-        <item name="android:layout_marginRight">10dp</item>
-    </style>
-    
-    <!-- 操作菜单样式 -->
-    <style name="operate_menu_default" parent="wrap_content_style">
-        <item name="android:textColor">#7f7f7f</item>
-        <item name="android:textSize">16dp</item>
-        <item name="android:textStyle">normal</item>
-    </style>
-    
-    <!-- 操作菜单样式 -->
-    <style name="operate_menu_selected" parent="wrap_content_style">
-        <item name="android:textColor">#0092ff</item>
-        <item name="android:textSize">16dp</item>
-        <item name="android:textStyle">normal</item>
-    </style>
+
+
     
     <!-- 进度条样式 -->
     <style name="progress_dialog" parent="@android:style/Theme.Dialog">
@@ -257,29 +143,6 @@
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
-    
-    <!-- popuwindow样式 -->
-    <style name="popupwindow_anim" parent="@android:style/Animation.Activity">
-        <item name="android:windowEnterAnimation">@anim/popupwindow_enter</item>
-        <item name="android:windowExitAnimation">@anim/popupwindow_exit</item>
-    </style>
-    
-    <!-- 锁屏界面样式 -->
-    <style name="LockScreenBase" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="android:windowIsTranslucent">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:colorBackgroundCacheHint">@null</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:backgroundDimEnabled">false</item>
-        <item name="android:windowAnimationStyle">@null</item>
-        <item name="android:windowContentOverlay">@null</item> 
-    </style>
-
-    <!--通话页面弹出-->
-    <style name="AnimationWindow">
-        <item name="android:windowEnterAnimation">@anim/scale_enter</item>
-        <item name="android:windowExitAnimation">@anim/scale_exit</item>
-    </style>
 
     <style name="TRM_ANIM_STYLE">
         <item name="android:windowEnterAnimation">@anim/trm_popup_enter</item>
@@ -287,22 +150,7 @@
     </style>
 
 
-    <!--群组界面-顶部组LinearLayout的style-->
-    <style name="linearlayout_group_style">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">@dimen/y29</item>
-        <item name="android:background">@color/itemblue</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
 
-    <!--群组界面-组图标style-->
-    <style name="group_icon_style">
-        <item name="android:layout_width">@dimen/x17</item>
-        <item name="android:layout_height">@dimen/x17</item>
-        <item name="android:layout_centerVertical">true</item>
-        <item name="android:layout_marginLeft">@dimen/x34</item>
-    </style>
-    
     <!--群组界面-组名style-->
     <style name="group_name">
         <item name="android:layout_width">wrap_content</item>
@@ -312,16 +160,6 @@
         <item name="android:textSize">@dimen/x12</item>
     </style>
 
-    <!--群组界面-组类型style-->
-    <style name="group_style">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/group_text_gray</item>
-        <item name="android:textSize">@dimen/x10</item>
-        <item name="android:layout_marginRight">@dimen/x30</item>
-        <item name="android:layout_alignParentRight">true</item>
-        <item name="android:layout_centerVertical">true</item>
-    </style>
     <!--<style name="LiveAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         &lt;!&ndash; Customize your theme here. &ndash;&gt;
         <item name="windowActionBar">false</item>
@@ -411,18 +249,7 @@
     <style name="normal_group_color">
         <item name="android:textColor">@color/group_text_gray</item>
     </style>
-    
-    <style name="mediacontroler_seekBar" >
-        <item name="android:maxHeight">1dip</item>
-        <item name="android:minHeight">1dip</item>
-        <item name="android:indeterminateOnly">false</item>
-        <item name="android:indeterminateDrawable">@android:drawable/progress_horizontal</item>
-        <item name="android:progressDrawable">@drawable/seekbar_define_color_style</item>
-        <item name="android:thumb">@drawable/seekbar_thumb_color_style</item>
-        <item name="android:thumbOffset">0dip</item>
-    </style>
-    
-    
+
     <style name="ble_connect_tv">
         <item name="android:textColor">@color/device_name_connect</item>
     </style>

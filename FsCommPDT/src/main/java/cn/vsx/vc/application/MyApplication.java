@@ -30,7 +30,6 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
-import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.utils.CommonGroupUtil;
@@ -70,10 +69,8 @@ public class MyApplication extends Application {
 	public boolean volumePress = false; //记录音量是否按下
 	public boolean isCallState = false; //记录主动个呼嘟嘟声
 
-	public Member callerMember;//被叫用的主叫对象
-	public Member calleeMember;//主叫用的被叫成员对象
-	public boolean isInitiativeCall = false; //记录个呼是主动方还是被叫方
 	public boolean isMiniLive;//直播视频缩到小窗口
+	public boolean headset;//耳机是否插入
 
 	/**标记个呼来或者请求图形来，是否做了接受或拒绝的操作，默认是false*/
 	public boolean isPrivateCallOrVideoLiveHand = false;

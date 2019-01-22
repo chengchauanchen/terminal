@@ -567,11 +567,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                     privateCallClick(terminalMessage);
                     locationItemClick(terminalMessage);
                     liveItemClick(terminalMessage, viewType);
-                    if (terminalMessage.messageBody.containsKey(JsonParam.FILE_NAME)) {
-                        individualNewsRecordItemClick(terminalMessage, position);
-                    } else {
-                        groupCallItemClick(terminalMessage, position);
-                    }
+                    individualNewsRecordItemClick(terminalMessage, position);
+                    groupCallItemClick(terminalMessage, position);
                     gb28181ItemClick(terminalMessage, viewType);
                 }
                 InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -842,11 +839,14 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if(videoTime >0){
                 setText(holder.tvDuration, videoTime/1000 + "''");
             }
-            openFile(terminalMessage, holder);
-            if(terminalMessage.messagePath.startsWith("http")){
-                PhotoUtils.getInstance().loadLocalResource(activity,holder.ivContent);
-            }else {
-                PhotoUtils.getInstance().loadLocalBitmap(activity, terminalMessage.messagePath, holder.ivContent);
+//            openFile(terminalMessage, holder);
+            if(terminalMessage.messageBody.containsKey(JsonParam.PICTURE_THUMB_URL)){
+                String pictureThumbUrl = terminalMessage.messageBody.getString(JsonParam.PICTURE_THUMB_URL);
+                if(pictureThumbUrl.startsWith("http")){
+                    PhotoUtils.getInstance().loadNetBitmap(activity, pictureThumbUrl, holder.ivContent, holder.tv_progress, holder.progressBar);
+                }else {
+                    PhotoUtils.getInstance().loadLocalBitmap(activity, pictureThumbUrl, holder.ivContent);
+                }
             }
 
         }
@@ -1262,35 +1262,37 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     private String getCallLength(long time) {
-        int hours = (int) (time / 3600);
+        int hours = (int) Math.floor(time / 3600);
         time -= hours * 3600;
-        int minutes = (int) (time / 60);
+        int minutes = (int) Math.floor(time / 60);
         time -= minutes * 60;
         int sec = (int) time;
 
         String timeStr = "";
         if (hours != 0) {
-            if (hours > 10) {
+            if (hours >= 10) {
                 timeStr = hours + ":" + minutes + ":" + sec + "";
-            } else if (hours < 10) {
+            } else{
                 timeStr = "0" + hours + ":" + minutes + ":" + sec + "";
             }
         } else if (minutes != 0) {
-            if (minutes > 10 && sec > 10) {
-                timeStr = minutes + ":" + sec + "";
-            } else if (minutes < 10 && sec < 10) {
-                timeStr = "0" + minutes + ":" + "0" + sec + "";
-            } else if (minutes > 10 && sec < 10) {
-                timeStr = "0" + minutes + ":" + "0" + sec + "";
-            } else if (minutes < 10 && sec > 10) {
-                timeStr = "0" + minutes + ":" + sec + "";
+            if(minutes >= 10){
+                if(sec >= 10){
+                    timeStr = minutes + ":" + sec ;
+                }else {
+                    timeStr = minutes + ":" + "0"+sec ;
+                }
+            }else {
+                if(sec >= 10){
+                    timeStr = "0"+minutes + ":" + sec ;
+                }else {
+                    timeStr = "0"+minutes + ":" + "0"+sec ;
+                }
             }
         } else
             timeStr = +sec + "秒";
 
         return timeStr;
-
-
     }
 
     /**
@@ -1561,11 +1563,24 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private void videoItemClick(ChatViewHolder chatViewHolder, TerminalMessage terminalMessage, int type) {
         if (terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
             if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())){
-                openFileAfterDownload(terminalMessage);
+                File file = new File(terminalMessage.messagePath);
+                if (!file.exists()) {
+                    // TODO: 2019/1/17 下载视频
+                    isDownloading = true;
+                    MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
+                    downloadProgressBar = chatViewHolder.progressBar;
+                    download_tv_progressBars = chatViewHolder.tv_progress;
+                    setProgress(downloadProgressBar, 0);
+                    setText(download_tv_progressBars, "0%");
+                    setViewVisibility(downloadProgressBar, View.VISIBLE);
+                    setViewVisibility(download_tv_progressBars, View.VISIBLE);
+                    MyTerminalFactory.getSDK().download(terminalMessage, true);
+                }else {
+                    openVideo(terminalMessage,file);
+                }
             }else {
                 ToastUtil.showToast(activity,"没有图像观看功能权限");
             }
-
         }
 
     }
@@ -1636,17 +1651,15 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
      * 点击播放组呼或者录音
      **/
     public void groupCallItemClick(TerminalMessage terminalMessage, int position) {
-        if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
-            if (terminalMessage.messageType == MessageType.GROUP_CALL.getCode() || terminalMessage.messageType == MessageType.AUDIO.getCode()) {
+        if(terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){
+            if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 if (MyApplication.instance.isPlayVoice) {
                     MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
-
                 }
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupChatVoiceHandler.class, position);
-
+            } else {
+                ToastUtil.showToast(activity, "没有组呼听权限");
             }
-        } else {
-            ToastUtil.showToast(activity, "没有组呼听权限");
         }
 
     }
@@ -1713,31 +1726,28 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     public void openPhoto(TerminalMessage terminalMessage, ChatViewHolder chatViewHolder) {
-
+        //加载原图
+        File file = new File(terminalMessage.messagePath);
         mImgList = findImages();
         logger.error("adapter ---getCount():" + getItemCount());
         logger.error("mImgList.size():" + mImgList.size());
         int currentPos = mImgUrlList.indexOf(terminalMessage.messagePath);
         logger.info("图片列表位置：" + currentPos+"路径："+terminalMessage.messagePath);
-
-        File file = new File(terminalMessage.messagePath);
-        if (!isDownloadingPicture) {
-            /**  如果文件不存在就下载, 文件存在但是是缩略图，也要下载原图 **/
-            if (!file.exists() || (file.exists() && terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE)
-                    && terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE))) {
+        if (!isDownloadingPicture){
+            if(terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE) && terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE)||
+                    !file.exists()){
                 logger.error("哎呀---------->本地图片被删了或为缩略图，重新去服务器下载！");
                 isDownloadingPicture = true;
                 MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
                 downloadProgressBar = chatViewHolder.progressBar;
                 download_tv_progressBars = chatViewHolder.tv_progress;
-                setProgress(downloadProgressBar, 0);
-                setText(download_tv_progressBars, "0%");
-                setViewVisibility(downloadProgressBar, View.VISIBLE);
+//                setProgress(downloadProgressBar, 0);
+//                setText(download_tv_progressBars, "0%");
+//                setViewVisibility(downloadProgressBar, View.VISIBLE);
                 setViewVisibility(download_tv_progressBars, View.VISIBLE);
                 MyTerminalFactory.getSDK().download(terminalMessage, true);
-            } else {
+            }else {
                 setViewVisibility(fragment_contener, View.VISIBLE);
-                //        ImagePreviewItemFragment imagePreviewItemFragment = ImagePreviewItemFragment.getInstance(terminalMessage.messagePath, isReceiver(terminalMessage));
                 ImagePreviewItemFragment imagePreviewItemFragment = ImagePreviewItemFragment.getInstance(mImgList, currentPos);
 
                 imagePreviewItemFragment.setFragment_contener(fragment_contener);
@@ -1800,6 +1810,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         logger.info("图片列表位置：" + currentPos+"  路径："+terminalMessage.messagePath);
         File file = new File(terminalMessage.messagePath);
         if (!file.exists()) {
+            //下载图片
             return;
         }
         setViewVisibility(fragment_contener, View.VISIBLE);
@@ -1810,14 +1821,28 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, imagePreviewItemFragment).commit();
     }
 
+    public void openVideo(TerminalMessage terminalMessage,File file){
+        if(terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()){
+            if(file.exists()){
+                setViewVisibility(fragment_contener, View.VISIBLE);
+                VideoPreviewItemFragment videoPreviewItemFragment = VideoPreviewItemFragment.newInstance(file.getAbsolutePath());
+                videoPreviewItemFragment.setFragment_contener(fragment_contener);
+                activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, videoPreviewItemFragment).commit();
+            }else {
+                ToastUtil.showToast(activity,"下载视频失败");
+            }
+        }
+    }
+
     /***  下载完后打开文件 **/
     public void openFileAfterDownload(TerminalMessage terminalMessage) {
         File file = new File(terminalMessage.messagePath);
         if (!file.exists()) {
 //            ToastUtil.showToast(activity, "下载失败!");
+            // TODO: 2019/1/17 下载视频
+
             return;
         }
-        // TODO: 2018/10/15 用videoView打开视频而不是用自带软件
         if(terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()){
             setViewVisibility(fragment_contener, View.VISIBLE);
             VideoPreviewItemFragment videoPreviewItemFragment = VideoPreviewItemFragment.newInstance(file.getAbsolutePath());
@@ -1910,7 +1935,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if (msg.messageType == MessageType.PICTURE.getCode()) {
                 ImageBean bean = new ImageBean();
                 bean.setPath(msg.messagePath);
-                bean.setReceive(isReceiver(msg));
+//                bean.setReceive(isReceiver(msg));
                 mImgList.add(bean);
                 mImgUrlList.add(msg.messagePath);
             }

@@ -1,6 +1,5 @@
 package cn.vsx.vc.record;
 
-
 import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
@@ -49,6 +48,14 @@ public class MediaManager {
             mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
             mPlayer.setOnCompletionListener(onCompletionListener);
             Log.d("MediaManager",filePathString);
+//            //将路径中的汉字替换掉
+//            String gradeChineseStr = StringUtil.getChinese(filePathString);
+//            String[] arr = new String[gradeChineseStr.length()];
+//            for(int i = 0; i < gradeChineseStr.length(); i++){
+//                arr[i] = gradeChineseStr.substring(i, i+1);
+//                String gradeStr = URLEncoder.encode(arr[i]);
+//                filePathString = filePathString.replace(arr[i],gradeStr);
+//            }
             mPlayer.setDataSource(filePathString);
             mPlayer.prepare();
             mPlayer.start();

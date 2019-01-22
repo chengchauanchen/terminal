@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Message;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
@@ -24,6 +25,7 @@ import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
+import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.view.IndividualCallTimerView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -51,6 +53,10 @@ public class ReceiveCallComingService extends BaseService{
     private RelativeLayout mPopMinimize;
     private TextView mTvWaiting;
     private IndividualCallTimerView mTimerView;
+    private float downX = 0;
+    private float downY = 0;
+    private int oddOffsetX = 0;
+    private int oddOffsetY = 0;
 
     @SuppressLint("InflateParams")
     @Override
@@ -103,17 +109,21 @@ public class ReceiveCallComingService extends BaseService{
         }
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void initListener(){
+        SensorUtil.getInstance().registSensor();
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
         mLlIndividualCallRefuse.setOnClickListener(refuseCallListener);
         mLlIndividualCallAccept.setOnClickListener(acceptCallListener);
         mIndividualCallRetractEmergency.setOnClickListener(retractOnClickListener);
+        mPopMinimize.setOnTouchListener(miniPopOnTouchListener);
     }
 
     @Override
     protected void showPopMiniView(){
+        SensorUtil.getInstance().unregistSensor();
         MyApplication.instance.isMiniLive = true;
         mRlCallChooice.setVisibility(View.GONE);
         mPopMinimize.setVisibility(View.VISIBLE);
@@ -172,6 +182,47 @@ public class ReceiveCallComingService extends BaseService{
     private View.OnClickListener acceptCallListener = v -> acceptCall();
 
     private View.OnClickListener retractOnClickListener = v -> retract();
+
+    @SuppressLint("ClickableViewAccessibility")
+    private View.OnTouchListener miniPopOnTouchListener = (v, event) -> {
+        //触摸点到边界屏幕的距离
+        int x = (int) event.getRawX();
+        int y = (int) event.getRawY();
+        switch(event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                //触摸点到自身边界的距离
+                downX = event.getX();
+                downY = event.getY();
+                oddOffsetX = layoutParams.x;
+                oddOffsetY = layoutParams.y;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float moveX = event.getX();
+                float moveY = event.getY();
+                //不除以3，拖动的view抖动的有点厉害
+                if(Math.abs(downX - moveX) > 5 || Math.abs(downY - moveY) > 5){
+                    // 更新浮动窗口位置参数
+                    layoutParams.x = (int) (screenWidth - (x + downX));
+                    layoutParams.y = (int) (y - downY);
+                    windowManager.updateViewLayout(rootView, layoutParams);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                int newOffsetX = layoutParams.x;
+                int newOffsetY = layoutParams.y;
+                if(Math.abs(newOffsetX - oddOffsetX) <= 30 && Math.abs(newOffsetY - oddOffsetY) <= 30){
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverCloseKeyBoardHandler.class);
+                    windowManager.removeView(rootView);
+                    windowManager.addView(rootView, layoutParams1);
+                    MyApplication.instance.isMiniLive = false;
+                    mRlCallChooice.setVisibility(View.VISIBLE);
+                    mPopMinimize.setVisibility(View.GONE);
+                    SensorUtil.getInstance().registSensor();
+                }
+                break;
+        }
+        return true;
+    };
 
     private void refuseCall(){
         MyTerminalFactory.getSDK().getIndividualCallManager().responseIndividualCall(false);

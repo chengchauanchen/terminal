@@ -53,7 +53,7 @@ public class SwitchCameraService extends BaseService{
     @Override
     @SuppressLint("InflateParams")
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_switch_camera, null);
+        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_switch_camera_service, null);
     }
 
     @Override
