@@ -26,24 +26,31 @@
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/iv_member_portrait_chooice"
             android:orientation="vertical">
-            
             <TextView
                 android:id="@+id/tv_member_name_chooice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/y2"
-                android:text="张星星"
+                android:text="1002"
                 android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:textSize="20sp"/>
             
-            <TextView
-                android:id="@+id/tv_member_id_chooice"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/y2"
-                android:text="123456789"
-                android:textColor="@color/white"
-                android:textSize="15sp" />
+            <!--<TextView-->
+                <!--android:id="@+id/tv_member_name_chooice"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_margin="@dimen/y2"-->
+                <!--android:text="张星星"-->
+                <!--android:textColor="@color/white"-->
+                <!--android:textSize="20sp" />-->
+            <!---->
+            <!--<TextView-->
+                <!--android:id="@+id/tv_member_id_chooice"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_margin="@dimen/y2"-->
+                <!--android:text="123456789"-->
+                <!--android:textColor="@color/white"-->
+                <!--android:textSize="15sp" />-->
         </LinearLayout>
         
         <TextView

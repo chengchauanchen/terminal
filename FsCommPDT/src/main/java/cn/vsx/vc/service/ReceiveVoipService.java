@@ -9,8 +9,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import cn.vsx.vc.R;
-import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.utils.Constants;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
  * 作者：ly-xuxiaolong
@@ -23,7 +24,7 @@ public class ReceiveVoipService extends BaseService{
 
 //    private ImageView mIvMemberPortraitChooice;
     private TextView mTvMemberNameChooice;
-    private TextView mTvMemberIdChooice;
+//    private TextView mTvMemberIdChooice;
     private LinearLayout mLlIndividualCallRefuse;
     private LinearLayout mLlIndividualCallAccept;
     private String userName;
@@ -38,7 +39,7 @@ public class ReceiveVoipService extends BaseService{
     protected void findView(){
 //        mIvMemberPortraitChooice =  rootView.findViewById(R.id.iv_member_portrait_chooice);
         mTvMemberNameChooice =  rootView.findViewById(R.id.tv_member_name_chooice);
-        mTvMemberIdChooice =  rootView.findViewById(R.id.tv_member_id_chooice);
+//        mTvMemberIdChooice =  rootView.findViewById(R.id.tv_member_id_chooice);
         mLlIndividualCallRefuse =  rootView.findViewById(R.id.ll_individual_call_refuse);
         mLlIndividualCallAccept =  rootView.findViewById(R.id.ll_individual_call_accept);
 
@@ -56,13 +57,13 @@ public class ReceiveVoipService extends BaseService{
     protected void initListener(){
         mLlIndividualCallRefuse.setOnClickListener(refuseOnclickListener);
         mLlIndividualCallAccept.setOnClickListener(acceptOnclickListener);
-        // TODO: 2019/1/11 超时检测
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallEndHandler);
     }
 
     @Override
     protected void initView(Intent intent){
         wakeLock.acquire(10 * 1000);
-        PromptManager.getInstance().IndividualCallNotifyRing();
+//        PromptManager.getInstance().IndividualCallNotifyRing();
         userName = intent.getStringExtra(Constants.USER_NAME);
         mTvMemberNameChooice.setText(userName);
     }
@@ -79,6 +80,12 @@ public class ReceiveVoipService extends BaseService{
     protected void onNetworkChanged(boolean connected){
     }
 
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipCallEndHandler);
+    }
+
     private View.OnClickListener refuseOnclickListener = v-> stopBusiness();
 
     private View.OnClickListener acceptOnclickListener = v->{
@@ -86,5 +93,9 @@ public class ReceiveVoipService extends BaseService{
         intent.putExtra(Constants.USER_NAME,userName);
         startService(intent);
         mHandler.postDelayed(this::removeView,500);
+    };
+
+    private ReceiveVoipCallEndHandler receiveVoipCallEndHandler = (linphoneCall)->{
+        stopBusiness();
     };
 }

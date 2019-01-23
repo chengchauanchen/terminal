@@ -26,6 +26,7 @@ import android.widget.RelativeLayout;
 
 import com.alibaba.fastjson.JSONObject;
 import com.xuchongyang.easyphone.callback.PhoneCallback;
+import com.xuchongyang.easyphone.callback.RegistrationCallback;
 import com.zectec.imageandfileselector.utils.FileUtil;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
@@ -71,6 +72,9 @@ import cn.vsx.vc.adapter.StackViewAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
+import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
+import cn.vsx.vc.receiveHandle.ReceiveVoipConnectedHandler;
+import cn.vsx.vc.receiveHandle.ReceiveVoipErrorHandler;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.receiver.NotificationClickReceiver;
@@ -181,8 +185,10 @@ public class ReceiveHandlerService extends Service{
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverActivePushVideoHandler);//上报视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoHandler);//请求视频
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
+        //开启voip电话服务
+        MyTerminalFactory.getSDK().getVoipCallManager().startService(getApplicationContext());
         //监听voip来电
-        MyTerminalFactory.getSDK().getVoipCallManager().addCallback(null,phoneCallback);
+        MyTerminalFactory.getSDK().getVoipCallManager().addCallback(voipRegistrationCallback,voipPhoneCallback);
     }
 
     @Override
@@ -228,7 +234,60 @@ public class ReceiveHandlerService extends Service{
         }
     }
 
+    private RegistrationCallback voipRegistrationCallback = new RegistrationCallback(){
+        @Override
+        public void registrationOk(){
+            super.registrationOk();
+            MyTerminalFactory.getSDK().putParam(Params.VOIP_SUCCESS,true);
+            logger.info("voip注册成功");
+        }
 
+        @Override
+        public void registrationFailed(){
+            super.registrationFailed();
+            MyTerminalFactory.getSDK().putParam(Params.VOIP_SUCCESS,false);
+            logger.error("voip注册失败");
+        }
+    };
+
+    private PhoneCallback voipPhoneCallback = new PhoneCallback(){
+        @Override
+        public void incomingCall(LinphoneCall linphoneCall){
+            super.incomingCall(linphoneCall);
+            //将状态机至于正在个呼状态
+            int code = TerminalFactory.getSDK().getTerminalStateManager().openFunction(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.IDLE);
+            if(code == BaseCommonCode.SUCCESS_CODE){
+                //将个呼状态机移动到响铃中
+                if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.RINGING)) {
+                    TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.RINGING);
+                }
+                Intent intent = new Intent(ReceiveHandlerService.this,ReceiveVoipService.class);
+                LinphoneAddress from = linphoneCall.getCallLog().getFrom();
+                String userName = from.getUserName();
+                intent.putExtra(Constants.USER_NAME,userName);
+                startService(intent);
+            }
+        }
+        @Override
+        public void callConnected(LinphoneCall linphoneCall){
+            super.callConnected(linphoneCall);
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveVoipConnectedHandler.class,linphoneCall);
+        }
+
+        @Override
+        public void callEnd(LinphoneCall linphoneCall){
+            super.callEnd(linphoneCall);
+            //电话接通之后挂断，还有主叫拨号时挂断
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveVoipCallEndHandler.class,linphoneCall);
+        }
+
+        @Override
+        public void error(LinphoneCall linphoneCall){
+            super.error(linphoneCall);
+            //被叫收到来电，挂断电话，主叫会回调此方法
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveVoipErrorHandler.class,linphoneCall);
+        }
+    };
 
     /**
      * 关闭当前弹窗
@@ -349,26 +408,7 @@ public class ReceiveHandlerService extends Service{
     }
 
 
-    private PhoneCallback phoneCallback = new PhoneCallback(){
-        @Override
-        public void incomingCall(LinphoneCall linphoneCall){
-            super.incomingCall(linphoneCall);
-            Log.e("ReceiveHandlerService", "incomingCall");
-            //将状态机至于正在个呼状态
-            int code = TerminalFactory.getSDK().getTerminalStateManager().openFunction(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.IDLE);
-            if(code == BaseCommonCode.SUCCESS_CODE){
-                Intent intent = new Intent(ReceiveHandlerService.this,ReceiveVoipService.class);
-                Log.e("ReceiveHandlerService", "Domain:"+linphoneCall.getCallLog().getFrom().getDomain());
-                LinphoneAddress from = linphoneCall.getCallLog().getFrom();
-                String userName = from.getUserName();
-                Log.e("ReceiveHandlerService", "userName:"+userName);
-                String displayName = from.getDisplayName();
-                Log.e("ReceiveHandlerService", "displayName:"+displayName);
-                intent.putExtra(Constants.USER_NAME,userName);
-                startService(intent);
-            }
-        }
-    };
+
     /**
      * 收到别人请求我开启直播的通知
      **/

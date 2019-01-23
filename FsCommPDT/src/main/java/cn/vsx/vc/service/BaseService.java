@@ -15,6 +15,7 @@ import android.os.PowerManager;
 import android.support.annotation.Nullable;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -111,7 +112,8 @@ public abstract class BaseService extends Service{
     protected void initWakeLock(){
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         if(null != powerManager){
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "wakeLock");
+            wakeLock = powerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakeLock");
         }
     }
 
@@ -206,6 +208,7 @@ public abstract class BaseService extends Service{
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
         }
+        Log.d("BaseService", "MyApplication.instance.getIndividualState():" + MyApplication.instance.getIndividualState());
         if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
             MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         }
@@ -223,7 +226,7 @@ public abstract class BaseService extends Service{
             MyApplication.instance.viewAdded = false;
         }
         PromptManager.getInstance().stopRing();
-        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverRemoveWindowViewHandler.class);
+        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverRemoveWindowViewHandler.class,this.getClass().getSimpleName());
         stopSelf();
     }
 

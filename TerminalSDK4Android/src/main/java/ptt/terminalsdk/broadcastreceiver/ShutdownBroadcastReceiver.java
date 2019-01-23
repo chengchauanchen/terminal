@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 
 /**
  * Created by zckj on 2017/4/5.
@@ -19,8 +19,7 @@ public class ShutdownBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (null != intent.getAction() && intent.getAction().equals(ACTION_SHUTDOWN)) {
-
-            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveServerConnectionEstablishedHandler.class, false);
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveExitHandler.class, "关机");
         }
     }
 }

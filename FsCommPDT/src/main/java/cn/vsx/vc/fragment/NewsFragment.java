@@ -110,18 +110,20 @@ public class NewsFragment extends BaseFragment {
     private boolean isFirstCall;
 
     private void saveMessagesToSql(){
-        logger.info("---------保存消息列表---------"+messageList);
-        MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(messageList);
+        synchronized(NewsFragment.this){
+            logger.info("---------保存消息列表---------"+messageList);
+            MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(messageList);
+        }
     }
 
     private void loadMessages(){
-        terminalMessageData.clear();
-        messageList.clear();
-        //获取消息列表(每个人聊天记录的第一条)
-        //如果有电话记录则增加一条电话记录的消息
-        messageList.addAll(TerminalFactory.getSDK().getTerminalMessageManager().getMessageList());
-
-
+        synchronized(NewsFragment.this){
+            terminalMessageData.clear();
+            clearData();
+            List<TerminalMessage> messageList = TerminalFactory.getSDK().getTerminalMessageManager().getMessageList();
+            logger.info("从数据库取出消息列表："+messageList);
+            addData(messageList);
+        }
     }
 
     /**
@@ -160,7 +162,7 @@ public class NewsFragment extends BaseFragment {
             //最后一条消息
             terminalMessage = groupMessageRecord.get(groupMessageRecord.size()-1);
         }
-        messageList.add(0,terminalMessage);
+        addData(0,terminalMessage);
         if(mMessageListAdapter != null){
             mMessageListAdapter.notifyDataSetChanged();
         }
@@ -190,9 +192,9 @@ public class NewsFragment extends BaseFragment {
         }
 
         if(currentGroupMessage != null) {
-            messageList.clear();
-            messageList.add(currentGroupMessage);
-            messageList.addAll(temporaryList);
+            clearData();
+            addData(currentGroupMessage);
+            addData(temporaryList);
             saveMemberMap(currentGroupMessage);
         }
 
@@ -286,8 +288,6 @@ public class NewsFragment extends BaseFragment {
     }
     @Override
     public void onDestroyView() {
-        messageList.clear();
-        terminalMessageData.clear();
         ButterKnife.unbind(this);
         mHandler.removeCallbacksAndMessages(null);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePersonMessageNotifyDateHandler);
@@ -308,6 +308,8 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverDeleteMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
+        clearData();
+        terminalMessageData.clear();
         super.onDestroyView();
     }
 
@@ -518,8 +520,8 @@ public class NewsFragment extends BaseFragment {
                 mHandler.post(new Runnable(){
                     @Override
                     public void run(){
-                        messageList.clear();
-                        messageList.addAll(terminalMessageData);
+                        clearData();
+                        addData(terminalMessageData);
                         sortMessageList();
                         unReadCountChanged();
                     }
@@ -748,8 +750,8 @@ public class NewsFragment extends BaseFragment {
                     mHandler.post(new Runnable(){
                         @Override
                         public void run(){
-                            messageList.clear();
-                            messageList.addAll(terminalMessageData);
+                            clearData();
+                            addData(terminalMessageData);
                             sortMessageList();
                             unReadCountChanged();
                             //通知notification
@@ -1030,13 +1032,7 @@ public class NewsFragment extends BaseFragment {
         @Override
         public void handler(final boolean connected) {
             if(connected){
-                mHandler.post(new Runnable(){
-                    @Override
-                    public void run(){
-                        loadMessages();
-                        sortMessageList();
-                    }
-                });
+                MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
             }
         }
     };
@@ -1057,7 +1053,7 @@ public class NewsFragment extends BaseFragment {
             }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
                 MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_GROUP.getCode(), terminalMessage.messageToId, myId);
             }
-            messageList.remove(deletePos);
+            removeData(deletePos);
             sortMessageList();
             unReadCountChanged();
             deletePos = -1;
@@ -1104,7 +1100,7 @@ public class NewsFragment extends BaseFragment {
             mHandler.post(new Runnable(){
                 @Override
                 public void run(){
-                    messageList.clear();
+                    clearData();
                     saveMessagesToSql();
                     if(mMessageListAdapter != null){
                         mMessageListAdapter.notifyDataSetChanged();
@@ -1173,7 +1169,7 @@ public class NewsFragment extends BaseFragment {
                         TerminalMessage terminalMessage = new TerminalMessage();
                         terminalMessage.messageType=MessageType.CALL_RECORD.getCode();
                         terminalMessage.messageCategory=MessageCategory.MESSAGE_TO_PERSONAGE.getCode();
-                        messageList.add(terminalMessage);
+                        addData(terminalMessage);
                         SharedPreferences.Editor editor = context.getSharedPreferences("CallRecord",
                                 MODE_PRIVATE).edit();
                         editor.putBoolean("isFirstCall", false);
@@ -1255,6 +1251,36 @@ public class NewsFragment extends BaseFragment {
         idNameMap.remove(id);
         TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
     }
+
+    private void clearData(){
+        synchronized(NewsFragment.this){
+            messageList.clear();
+        }
+    }
+
+    private void removeData(int position){
+        synchronized(NewsFragment.this){
+            messageList.remove(position);
+        }
+    }
+
+    private void addData(List<TerminalMessage> terminalMessages){
+        synchronized(NewsFragment.this){
+            messageList.addAll(terminalMessages);
+        }
+    }
+
+    private void addData(TerminalMessage terminalMessage){
+        synchronized(NewsFragment.this){
+            messageList.add(terminalMessage);
+        }
+    }
+    private void addData(int position ,TerminalMessage terminalMessage){
+        synchronized(NewsFragment.this){
+            messageList.add(position,terminalMessage);
+        }
+    }
+
 
     /**
      * 对聊天列表排序

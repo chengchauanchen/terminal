@@ -303,7 +303,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 terminalMessage.sendTime = cursor.getLong(cursor.getColumnIndex("send_time"));
                 //消息列表数据库才有unread_count这个字段
                 try {
-                    if (cursor.getColumnIndex("unread_count") == 3) {
+                    if (cursor.getColumnIndex("unread_count") != -1) {
                         terminalMessage.unReadCount = cursor.getInt(cursor.getColumnIndex("unread_count"));
                     }
                 } catch (Exception e) {

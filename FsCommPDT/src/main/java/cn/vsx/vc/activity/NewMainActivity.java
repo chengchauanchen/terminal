@@ -30,6 +30,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -58,7 +59,6 @@ import com.hytera.api.SDKManager;
 import com.hytera.api.base.common.CallManager;
 import com.hytera.api.base.common.CommonManager;
 import com.hytera.call.param.dsp.PhysicalPttListener;
-import com.xuchongyang.easyphone.callback.RegistrationCallback;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.log4j.Logger;
@@ -86,6 +86,7 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
@@ -330,6 +331,33 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     MyApplication.instance.notifyAll();
                 }
             }
+        }
+    };
+
+    protected ReceiveExitHandler receiveExitHandler = new ReceiveExitHandler() {
+        @Override
+        public void handle(String msg){
+            cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this,msg);
+            myHandler.postDelayed(new Runnable(){
+                @Override
+                public void run(){
+                    Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
+                    stoppedCallIntent.putExtra("stoppedResult","0");
+                    SendRecvHelper.send(getApplicationContext(),stoppedCallIntent);
+
+                    MyTerminalFactory.getSDK().exit();//停止服务
+                    PromptManager.getInstance().stop();
+                    for (Activity activity : ActivityCollector.getAllActivity().values()) {
+                        activity.finish();
+                    }
+                    TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
+                    TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
+                    MyApplication.instance.isClickVolumeToCall = false;
+                    MyApplication.instance.isPttPress = false;
+                    MyApplication.instance.stopIndividualCallService();
+                    Process.killProcess(Process.myPid());
+                }
+            },2000);
         }
     };
 
@@ -1033,6 +1061,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveExitHandler);
 
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveUnReadCountChangedHandler);
 
@@ -1043,22 +1072,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         bv_person_contacts.setOnClickListener(new BottomViewClickListener());
         bv_group_contacts.setOnClickListener(new BottomViewClickListener());
         bv_setting.setOnClickListener(new BottomViewClickListener());
-
-        MyTerminalFactory.getSDK().getVoipCallManager().addCallback(new RegistrationCallback(){
-            @Override
-            public void registrationOk(){
-                super.registrationOk();
-                MyTerminalFactory.getSDK().putParam(Params.VOIP_SUCCESS,true);
-                logger.info("voip注册成功");
-            }
-
-            @Override
-            public void registrationFailed(){
-                super.registrationFailed();
-                MyTerminalFactory.getSDK().putParam(Params.VOIP_SUCCESS,false);
-                logger.error("voip注册失败");
-            }
-        },null);
 
         if(null != callManager){
             callManager.addPhysicalPttListener(new PhysicalPttListener(){
@@ -1139,24 +1152,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         startService(new Intent(NewMainActivity.this, LockScreenService.class));
         MyApplication.instance.startUVCCameraService();
 
-        //开启voip电话服务
-        MyTerminalFactory.getSDK().getVoipCallManager().startService(getApplicationContext());
-        //注册voip
-        //        String account = MyTerminalFactory.getSDK().getParam(UrlParams.ACCOUNT, "");
-        String account = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)+"";
-        String voipServerIp = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_IP, "");
-        //        String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, 0)+"";
-        String voipServerPort = "5060";
-        String server = voipServerIp+":"+voipServerPort;
-        if(account.contains("@lzy")){
-            account=account.substring(0,6);
-        }
-        if(account.startsWith("88")|| account.startsWith("86")){
-            account = account.substring(2);
-        }
-        account = "1004";
-        logger.info("voip账号："+account+",密码："+ account+"，服务器地址："+server);
-        initVoip(account,account,server);
+        initVoip();
 
         MyTerminalFactory.getSDK().getVideoProxy().setActivity(this);
 
@@ -1202,14 +1198,26 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         judgePermission();
     }
 
-    private void initVoip(String account,String password,String server){
-
-        myHandler.postDelayed(() -> {
-            MyTerminalFactory.getSDK().getVoipCallManager().clearCache();
-            if(!TextUtils.isEmpty(account)){
-                MyTerminalFactory.getSDK().getVoipCallManager().login(account,password,server);
-            }
-        },1000);
+    private void initVoip(){
+        //注册voip
+        //        String account = MyTerminalFactory.getSDK().getParam(UrlParams.ACCOUNT, "");
+        String account = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)+"";
+        String voipServerIp = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_IP, "");
+        //        String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, 0)+"";
+        String voipServerPort = "5060";
+        String server = voipServerIp+":"+voipServerPort;
+        if(account.contains("@lzy")){
+            account=account.substring(0,6);
+        }
+        if(account.startsWith("88")|| account.startsWith("86")){
+            account = account.substring(2);
+        }
+        account = "1003";
+        logger.info("voip账号："+account+",密码："+ account+"，服务器地址："+server);
+        MyTerminalFactory.getSDK().getVoipCallManager().clearCache();
+        if(!TextUtils.isEmpty(account)){
+            MyTerminalFactory.getSDK().getVoipCallManager().login(account,account,server);
+        }
     }
 
     public boolean checkFloatPermission(Context context) {
@@ -1705,6 +1713,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceivePopBackStackHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
 
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveUnReadCountChangedHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowPopupwindowHandler);

@@ -400,20 +400,13 @@ public class CallingService extends BaseService{
         windowManager.removeView(rootView);
         windowManager.addView(rootView, layoutParams);
         hideAllView();
-        showPopView();
+        showPopMiniView();
     }
 
     private void hideAllView(){
         mIndividualCallSpeaking.setVisibility(View.GONE);
         mIndividualCallHalfDuplex.setVisibility(View.GONE);
         mPopMinimize.setVisibility(View.GONE);
-    }
-
-    protected void showPopView(){
-        MyApplication.instance.isMiniLive = true;
-        mPopMinimize.setVisibility(View.VISIBLE);
-        mTvWaiting.setVisibility(View.GONE);
-        mPopupICTVSpeakingTime.setVisibility(View.VISIBLE);
     }
 
     private void individualCallStopped(){
@@ -428,7 +421,6 @@ public class CallingService extends BaseService{
 
         PromptManager.getInstance().IndividualHangUpRing();
         PromptManager.getInstance().delayedStopRing();
-        MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         cancelAutoHangUpTimer();
         stopBusiness();
     }

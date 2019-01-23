@@ -644,7 +644,7 @@ public class JCameraView extends FrameLayout implements CameraInterface.CameraOp
     //关闭弹窗了，将相机重新打开
     private ReceiverRemoveWindowViewHandler mReceiverRemoveWindowViewHandler = new ReceiverRemoveWindowViewHandler(){
         @Override
-        public void handle(){
+        public void handle(String className){
             post(new Runnable(){
                 @Override
                 public void run(){

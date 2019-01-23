@@ -1,7 +1,6 @@
 package cn.vsx.vc.activity;
 
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -13,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -33,22 +31,18 @@ import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
 import cn.vsx.vc.receive.RecvCallBack;
-import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.PhoneAdapter;
-import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack,Actions {
@@ -128,32 +122,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 		}
 	};
 
-	protected ReceiveExitHandler receiveExitHandler = new ReceiveExitHandler() {
-		@Override
-		public void handle(String msg){
-			ToastUtil.showToast(BaseActivity.this,msg);
-			myHandler.postDelayed(new Runnable(){
-				@Override
-				public void run(){
-					Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
-					stoppedCallIntent.putExtra("stoppedResult","0");
-					SendRecvHelper.send(getApplicationContext(),stoppedCallIntent);
 
-					MyTerminalFactory.getSDK().exit();//停止服务
-					PromptManager.getInstance().stop();
-					for (Activity activity : ActivityCollector.getAllActivity().values()) {
-						activity.finish();
-					}
-					TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
-					TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
-					MyApplication.instance.isClickVolumeToCall = false;
-					MyApplication.instance.isPttPress = false;
-					MyApplication.instance.stopIndividualCallService();
-					Process.killProcess(Process.myPid());
-				}
-			},2000);
-		}
-	};
 
 	static Method findViewBinderForClassMethod;
 	static {
@@ -250,7 +219,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     @Override
     protected void onResume(){
         super.onResume();
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveExitHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
         registerHeadsetPlugReceiver();
@@ -270,7 +238,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 			ButterKnife.unbind(this);//解除绑定，官方文档只对fragment做了解绑
 			ActivityCollector.removeActivity(this);
 
-			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
 			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
 			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
 

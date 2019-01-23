@@ -13,13 +13,13 @@
         android:gravity="center_vertical"
         android:layout_marginTop="40dp">
         
-        <ImageView
-            android:id="@+id/iv_member_portrait_speaking"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_gravity="center_vertical"
-            android:layout_margin="12dp"
-            android:background="@drawable/user_photo" />
+        <!--<ImageView-->
+            <!--android:id="@+id/iv_member_portrait_speaking"-->
+            <!--android:layout_width="60dp"-->
+            <!--android:layout_height="60dp"-->
+            <!--android:layout_gravity="center_vertical"-->
+            <!--android:layout_margin="12dp"-->
+            <!--android:background="@drawable/user_photo" />-->
         
         <LinearLayout
             android:layout_width="wrap_content"
@@ -27,36 +27,44 @@
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/iv_member_portrait_speaking"
             android:orientation="vertical">
-            
             <TextView
                 android:id="@+id/tv_member_name_speaking"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/y2"
-                android:text="张星星"
+                android:text="1002"
+                android:layout_marginLeft="@dimen/x50"
                 android:textColor="@color/white"
-                android:textSize="20sp" />
+                android:textSize="20sp"/>
             
-            <TextView
-                android:id="@+id/tv_member_id_speaking"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/y2"
-                android:text="123456789"
-                android:textColor="@color/white"
-                android:textSize="15sp" />
+            <!--<TextView-->
+                <!--android:id="@+id/tv_member_name_speaking"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_margin="@dimen/y2"-->
+                <!--android:text="张星星"-->
+                <!--android:textColor="@color/white"-->
+                <!--android:textSize="20sp" />-->
+            <!---->
+            <!--<TextView-->
+                <!--android:id="@+id/tv_member_id_speaking"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_margin="@dimen/y2"-->
+                <!--android:text="123456789"-->
+                <!--android:textColor="@color/white"-->
+                <!--android:textSize="15sp" />-->
         </LinearLayout>
         
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/x20"
-            android:text="正在通话..."
-            android:textColor="@color/white"
-            android:textSize="15sp"
-            android:textStyle="normal" />
+        <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:layout_marginRight="@dimen/x20"-->
+            <!--android:text="正在通话..."-->
+            <!--android:textColor="@color/white"-->
+            <!--android:textSize="15sp"-->
+            <!--android:textStyle="normal" />-->
     </RelativeLayout>
     
     <RelativeLayout

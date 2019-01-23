@@ -12,14 +12,12 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONObject;
-import com.xuchongyang.easyphone.callback.PhoneCallback;
-
-import org.linphone.core.LinphoneCall;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
@@ -29,6 +27,9 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
+import cn.vsx.vc.receiveHandle.ReceiveVoipConnectedHandler;
+import cn.vsx.vc.receiveHandle.ReceiveVoipErrorHandler;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.IndividualCallView;
@@ -66,7 +67,17 @@ public class VoipPhoneActivity extends BaseActivity{
     @Override
     public void initView() {
 
-
+        //将状态机至于正在个呼状态
+        int code = TerminalFactory.getSDK().getTerminalStateManager().openFunction(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.IDLE);
+        if(code == BaseCommonCode.SUCCESS_CODE){
+            if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.RINGING)){
+                //将个呼状态机移动到响铃状态
+                TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.RINGING);
+            }
+        }else {
+            finish();
+            return;
+        }
         //请求界面
         voipCallRequest = findViewById(R.id.voip_call_request);
         memberNameRequest = findViewById(R.id.tv_member_name_request);//名字
@@ -90,138 +101,128 @@ public class VoipPhoneActivity extends BaseActivity{
     }
 
     @Override
-    public void initListener() {
-
-        llHangupRequest.setOnClickListener(new View.OnClickListener() {
+    public void initListener(){
+        llHangupRequest.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void onClick(View v) {
-                ToastUtil.showToast(VoipPhoneActivity.this,"通话已结束");
-                status=HANG_UP_SELF+"";
-                MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
-
-            }
-        });
-
-        llHangupSpreaking.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ToastUtil.showToast(VoipPhoneActivity.this,"通话已结束");
-                status=CALL_END+"";
+            public void onClick(View v){
+                ToastUtil.showToast(VoipPhoneActivity.this, "通话已结束");
+                status = HANG_UP_SELF + "";
                 MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
             }
         });
-
-        MyTerminalFactory.getSDK().getVoipCallManager().addCallback(null, new PhoneCallback(){
-
+        llHangupSpreaking.setOnClickListener(new View.OnClickListener(){
             @Override
-            public void outgoingInit(LinphoneCall linphoneCall){
-                super.outgoingInit(linphoneCall);
+            public void onClick(View v){
+                ToastUtil.showToast(VoipPhoneActivity.this, "通话已结束");
+                status = CALL_END + "";
+                MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
             }
+        });
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipConnectedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallEndHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipErrorHandler);
+    }
 
-            @Override
-            public void callConnected(LinphoneCall linphoneCall){
-                super.callConnected(linphoneCall);
-                Log.d("VoipPhoneActivity", "电话接通");
-                TerminalFactory.getSDK().getTerminalStateManager().openFunction(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.IDLE);//将状态机至于正在个呼状态
+    private ReceiveVoipConnectedHandler receiveVoipConnectedHandler = (linphoneCall)->{
+        Log.d("VoipPhoneActivity", "电话接通");
+
+        if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().getCurrentState() == IndividualCallState.RINGING){
+            if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.SPEAKING)){
+                //将状态机移动到说话状态
+                TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.SPEAKING);
                 voipCallRequest.setVisibility(View.GONE);
                 voipCallSpeaking.setVisibility(View.VISIBLE);
                 ictVspeakingTimeSpeaking.onStart();
             }
+        }
+    };
 
+    private ReceiveVoipCallEndHandler receiveVoipCallEndHandler = (linphoneCall)->{
+        //电话接通之后挂断，还有主叫拨号时挂断
+        //                linphoneCall.getCallLog().getCallDuration()
+        Log.e("VoipPhoneActivity", "电话挂断");
+        TerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
+        mHandler.post(new Runnable() {
             @Override
-            public void callEnd(final LinphoneCall linphoneCall){
-                super.callEnd(linphoneCall);
-                //电话接通之后挂断，还有主叫拨号时挂断
-//                linphoneCall.getCallLog().getCallDuration()
-                Log.e("VoipPhoneActivity", "电话挂断");
-                TerminalFactory.getSDK().getTerminalStateManager().closeFunction(TerminalState.INDIVIDUAL_CALLING);
-                mHandler.post(new Runnable() {
+            public void run() {
+                if(status.equals("0")){
+                    status="呼出 " + DataUtil.secToTime(linphoneCall.getCallLog().getCallDuration());
+                }
+
+                CallRecord callRecord = new CallRecord();
+                callRecord.setCallId(linphoneCall.getCallLog().getCallId());
+                callRecord.setMemberName(userName);
+                callRecord.setPhone(phone);
+                callRecord.setCallRecords(status);
+                callRecord.setTime(DataUtil.getNowTime());
+                String url = MyTerminalFactory.getSDK().getParam(Params.DOWNLOAD_VOIP_FILE_URL,"") +"?callId="+callRecord.getCallId();
+                callRecord.setPath(url);
+
+                final TerminalMessage terminalMessage = new TerminalMessage();
+                terminalMessage.messageFromId=MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0);
+                terminalMessage.messageFromName=MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME,"");
+                terminalMessage.messageToId=userId;
+                terminalMessage.messageToName=userName;
+                terminalMessage.messagePath=url;
+                terminalMessage.messageCategory= MessageCategory.MESSAGE_TO_GROUP.getCode();
+                terminalMessage.messageType= MessageType.CALL_RECORD.getCode();
+                terminalMessage.sendTime=System.currentTimeMillis();
+                terminalMessage.messageBody=new JSONObject();
+                terminalMessage.messageVersion=0;
+                terminalMessage.resultCode=0;
+                new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        if(status.equals("0")){
-                            status="呼出 " + DataUtil.secToTime(linphoneCall.getCallLog().getCallDuration());
-                        }
-
-                        CallRecord callRecord = new CallRecord();
-                        callRecord.setCallId(linphoneCall.getCallLog().getCallId());
-                        callRecord.setMemberName(userName);
-                        callRecord.setPhone(phone);
-                        callRecord.setCallRecords(status);
-                        callRecord.setTime(DataUtil.getNowTime());
-                        String url = MyTerminalFactory.getSDK().getParam(Params.DOWNLOAD_VOIP_FILE_URL,"") +"?callId="+callRecord.getCallId();
-                        callRecord.setPath(url);
-
-                        final TerminalMessage terminalMessage = new TerminalMessage();
-                        terminalMessage.messageFromId=MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0);
-                        terminalMessage.messageFromName=MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME,"");
-                        terminalMessage.messageToId=userId;
-                        terminalMessage.messageToName=userName;
-                        terminalMessage.messagePath=url;
-                        terminalMessage.messageCategory= MessageCategory.MESSAGE_TO_GROUP.getCode();
-                        terminalMessage.messageType= MessageType.CALL_RECORD.getCode();
-                        terminalMessage.sendTime=System.currentTimeMillis();
-                        terminalMessage.messageBody=new JSONObject();
-                        terminalMessage.messageVersion=0;
-                        terminalMessage.resultCode=0;
-                        new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                MyTerminalFactory.getSDK().getTerminalMessageManager().sendMessageToApplyServer(terminalMessage,"bbbb");  //转发通话记录给应用服务
-                            }
-                        }).start();
-
-
-
-                        CopyOnWriteArrayList<CallRecord> callRecords = MyTerminalFactory.getSDK().getSQLiteDBManager().getCallRecords();
-                        callRecords.add(callRecord);
-                        MyTerminalFactory.getSDK().getSQLiteDBManager().addCallRecord(callRecords);
-
-                        ictVspeakingTimeSpeaking.onStop();
-                        try{
-                            finish();
-                        }catch (Exception e){
-                            logger.error(e.toString());
-                        }
-
-
+                        MyTerminalFactory.getSDK().getTerminalMessageManager().sendMessageToApplyServer(terminalMessage,"bbbb");  //转发通话记录给应用服务
                     }
-                });
+                }).start();
+
+
+
+                CopyOnWriteArrayList<CallRecord> callRecords = MyTerminalFactory.getSDK().getSQLiteDBManager().getCallRecords();
+                callRecords.add(callRecord);
+                MyTerminalFactory.getSDK().getSQLiteDBManager().addCallRecord(callRecords);
+
+                ictVspeakingTimeSpeaking.onStop();
+                try{
+                    finish();
+                }catch (Exception e){
+                    logger.error(e.toString());
+                }
+
+
             }
-
-            @Override
-            public void error(final LinphoneCall linphoneCall){
-                super.error(linphoneCall);
-                //被叫收到来电，挂断电话，主叫会回调此方法
-                Log.e("VoipPhoneActivity", "error");
-                TerminalFactory.getSDK().getTerminalStateManager().closeFunction(TerminalState.INDIVIDUAL_CALLING);
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() { ;
-                        status=CALL_ERROR+"";
-                        CallRecord callRecord = new CallRecord();
-                        callRecord.setCallId(linphoneCall.getCallLog().getCallId());
-                        callRecord.setMemberName(userName);
-                        callRecord.setPhone(phone);
-                        callRecord.setTime(DataUtil.getNowTime());
-                        callRecord.setCallRecords(status);
-
-                        CopyOnWriteArrayList<CallRecord> callRecords = MyTerminalFactory.getSDK().getSQLiteDBManager().getCallRecords();
-                        callRecords.add(callRecord);
-                        MyTerminalFactory.getSDK().getSQLiteDBManager().addCallRecord(callRecords);
-                        ictVspeakingTimeSpeaking.onStop();
-                        ToastUtil.showToast(VoipPhoneActivity.this,"对方已挂断");
-                        SystemClock.sleep(2000);
-                        try{
-                            finish();
-                        }catch (Exception e){
-                            logger.error(e.toString());
-                        }
-                    }
-                });
-            }
-
         });
-    }
+    };
+
+    private ReceiveVoipErrorHandler receiveVoipErrorHandler = (linphoneCall)->{
+        Log.e("VoipPhoneActivity", "error");
+        TerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() { ;
+                status=CALL_ERROR+"";
+                CallRecord callRecord = new CallRecord();
+                callRecord.setCallId(linphoneCall.getCallLog().getCallId());
+                callRecord.setMemberName(userName);
+                callRecord.setPhone(phone);
+                callRecord.setTime(DataUtil.getNowTime());
+                callRecord.setCallRecords(status);
+
+                CopyOnWriteArrayList<CallRecord> callRecords = MyTerminalFactory.getSDK().getSQLiteDBManager().getCallRecords();
+                callRecords.add(callRecord);
+                MyTerminalFactory.getSDK().getSQLiteDBManager().addCallRecord(callRecords);
+                ictVspeakingTimeSpeaking.onStop();
+                ToastUtil.showToast(VoipPhoneActivity.this,"对方已挂断");
+                SystemClock.sleep(2000);
+                try{
+                    finish();
+                }catch (Exception e){
+                    logger.error(e.toString());
+                }
+            }
+        });
+    };
 
     @Override
     public void initData() {
@@ -267,7 +268,9 @@ public class VoipPhoneActivity extends BaseActivity{
 
     @Override
     public void doOtherDestroy() {
-
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipConnectedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipCallEndHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipErrorHandler);
 
         if (getSharedPreferences("CallRecord", MODE_PRIVATE).getBoolean("isFirstCall", true)) {//第一次打VOIP电话结束通知消息列表添加电话助手
             SharedPreferences.Editor editor = getSharedPreferences("CallRecord",

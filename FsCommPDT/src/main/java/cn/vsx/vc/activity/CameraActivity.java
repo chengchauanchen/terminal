@@ -198,7 +198,7 @@ public class CameraActivity extends BaseActivity {
 
     private ReceiverRemoveWindowViewHandler mReceiverRemoveWindowViewHandler = new ReceiverRemoveWindowViewHandler(){
         @Override
-        public void handle(){
+        public void handle(String className){
             runOnUiThread(new Runnable(){
                 @Override
                 public void run(){
