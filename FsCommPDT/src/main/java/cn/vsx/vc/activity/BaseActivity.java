@@ -248,7 +248,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 				LocalBroadcastManager.getInstance(BaseActivity.this).unregisterReceiver(
 						mBroadcastReceiv);
 			}
-			logger=null;
 		}catch(Exception e){
 			e.printStackTrace();
 		}
