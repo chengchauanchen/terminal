@@ -188,7 +188,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         super.funcation = funcation;
         super.ptt = ptt;
 //        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false,0);
-        setStatusBarColor();
+//        setStatusBarColor();
         allViewDefault();
         funcation.setPttOnTouchLitener(new FunctionHidePlus.PttOnTouchLitener() {
             @Override

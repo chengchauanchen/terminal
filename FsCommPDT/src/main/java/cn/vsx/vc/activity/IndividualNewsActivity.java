@@ -139,6 +139,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     @Override
     public int getLayoutResId() {
+        setSatusBarTransparent();
         return R.layout.activity_individual_news;
     }
 
@@ -159,7 +160,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         super.groupCallNewsEt = groupCallNewsEt;
         super.funcation = funcation;
         super.ptt = ptt;
-        setStatusBarColor();
+//        setStatusBarColor();
         groupCallList.setVerticalScrollBarEnabled(false);
         record.setAudioPauseListener(new AudioRecordButton.AudioPauseListener(){
             @Override

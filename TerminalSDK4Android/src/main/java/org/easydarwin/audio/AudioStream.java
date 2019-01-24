@@ -262,9 +262,7 @@ public class AudioStream{
                     Iterator<Pusher> it = p.iterator();
                     while (it.hasNext()){
                         Pusher ps = it.next();
-                        if(!groupCalling){
-                            ps.push(mBuffer.array(), 0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000, 0);
-                        }
+                        ps.push(mBuffer.array(), 0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000, 0);
                     }
 
                     mMediaCodec.releaseOutputBuffer(index, false);
