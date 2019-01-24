@@ -169,7 +169,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     protected  void setStatusBarColor () {
         SystemBarTintManager tintManager = new SystemBarTintManager(this);
         tintManager.setStatusBarTintEnabled(true);
-        tintManager.setTintColor(ContextCompat.getColor(this, R.color.group_call_news_bar_bg));
+        tintManager.setTintColor(ContextCompat.getColor(this, R.color.ble_bg));
     }
 
     public void initListener () {
