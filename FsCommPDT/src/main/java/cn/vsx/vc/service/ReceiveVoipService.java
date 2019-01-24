@@ -9,6 +9,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import cn.vsx.vc.R;
+import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -86,7 +87,13 @@ public class ReceiveVoipService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipCallEndHandler);
     }
 
-    private View.OnClickListener refuseOnclickListener = v-> stopBusiness();
+    private View.OnClickListener refuseOnclickListener = v-> {
+        if(null != MyApplication.instance.linphoneCall){
+            MyTerminalFactory.getSDK().getVoipCallManager().refuseCall(MyApplication.instance.linphoneCall);
+            MyApplication.instance.linphoneCall = null;
+        }
+        stopBusiness();
+    };
 
     private View.OnClickListener acceptOnclickListener = v->{
         Intent intent = new Intent(ReceiveVoipService.this,MultipartyCallService.class);

@@ -97,10 +97,7 @@ public class MultipartyCallService extends BaseService{
 
     private void huangUp(){
         mTvSpeakingToast.setText(getResources().getString(R.string.huang_up));
-        if(null != MyApplication.instance.linphoneCall){
-            MyTerminalFactory.getSDK().getVoipCallManager().refuseCall(MyApplication.instance.linphoneCall);
-            MyApplication.instance.linphoneCall = null;
-        }
+        MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
         mIctvSpeakingTimeSpeaking.onStop();
         stopBusiness();
     }
