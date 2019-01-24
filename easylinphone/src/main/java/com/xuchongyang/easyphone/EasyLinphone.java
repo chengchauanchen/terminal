@@ -12,9 +12,11 @@ import com.xuchongyang.easyphone.linphone.LinphoneUtils;
 import com.xuchongyang.easyphone.linphone.PhoneBean;
 import com.xuchongyang.easyphone.service.LinphoneService;
 
+import org.linphone.core.LinphoneCall;
 import org.linphone.core.LinphoneCallParams;
 import org.linphone.core.LinphoneCore;
 import org.linphone.core.LinphoneCoreException;
+import org.linphone.core.Reason;
 import org.linphone.mediastream.video.AndroidVideoWindowImpl;
 
 import static java.lang.Thread.sleep;
@@ -115,6 +117,11 @@ public class EasyLinphone {
         } catch (LinphoneCoreException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void refusedCall(LinphoneCall linphoneCall){
+//        LinphoneManager.getLc().stopRinging();
+        LinphoneManager.getLc().declineCall(linphoneCall,Reason.Declined);
     }
 
     /**

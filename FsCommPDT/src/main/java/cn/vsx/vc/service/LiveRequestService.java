@@ -65,6 +65,7 @@ public class LiveRequestService extends BaseService{
 
     @Override
     protected void initView(Intent intent){
+
         String memberName = intent.getStringExtra(Constants.MEMBER_NAME);
         memberId = intent.getIntExtra(Constants.MEMBER_ID, 0);
         //开始响铃

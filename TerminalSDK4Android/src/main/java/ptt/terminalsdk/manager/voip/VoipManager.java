@@ -7,6 +7,7 @@ import com.xuchongyang.easyphone.callback.PhoneCallback;
 import com.xuchongyang.easyphone.callback.RegistrationCallback;
 
 import org.apache.log4j.Logger;
+import org.linphone.core.LinphoneCall;
 
 import java.io.File;
 import java.io.IOException;
@@ -131,6 +132,10 @@ public class VoipManager{
      */
     public void hangUp() {
         EasyLinphone.hangUp();
+    }
+
+    public void refuseCall(LinphoneCall linphoneCall){
+        EasyLinphone.refusedCall(linphoneCall);
     }
 
     /**

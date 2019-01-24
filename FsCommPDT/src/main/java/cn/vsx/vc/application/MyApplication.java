@@ -12,6 +12,7 @@ import android.support.multidex.MultiDex;
 import android.util.Log;
 
 import org.easydarwin.push.UVCCameraService;
+import org.linphone.core.LinphoneCall;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +72,7 @@ public class MyApplication extends Application {
 
 	public boolean isMiniLive;//直播视频缩到小窗口
 	public boolean headset;//耳机是否插入
+	public LinphoneCall linphoneCall;//当前来电
 
 	/**标记个呼来或者请求图形来，是否做了接受或拒绝的操作，默认是false*/
 	public boolean isPrivateCallOrVideoLiveHand = false;

@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import cn.vsx.vc.R;
+import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipConnectedHandler;
@@ -96,15 +97,21 @@ public class MultipartyCallService extends BaseService{
 
     private void huangUp(){
         mTvSpeakingToast.setText(getResources().getString(R.string.huang_up));
-        MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+        if(null != MyApplication.instance.linphoneCall){
+            MyTerminalFactory.getSDK().getVoipCallManager().refuseCall(MyApplication.instance.linphoneCall);
+            MyApplication.instance.linphoneCall = null;
+        }
         mIctvSpeakingTimeSpeaking.onStop();
         stopBusiness();
     }
 
-    private ReceiveVoipConnectedHandler receiveVoipConnectedHandler = (linphoneCall)->{
-        MyTerminalFactory.getSDK().getIndividualCallManager().responseIndividualCall(true);
-        mIctvSpeakingTimeSpeaking.onStart();
-    };
+    private ReceiveVoipConnectedHandler receiveVoipConnectedHandler = (linphoneCall)-> mHandler.post(new Runnable(){
+        @Override
+        public void run(){
+            MyTerminalFactory.getSDK().getIndividualCallManager().responseIndividualCall(true);
+            mIctvSpeakingTimeSpeaking.onStart();
+        }
+    });
 
-    private ReceiveVoipCallEndHandler receiveVoipCallEndHandler = (linphoneCall)-> huangUp();
+    private ReceiveVoipCallEndHandler receiveVoipCallEndHandler = linphoneCall -> mHandler.post(this::huangUp);
 }

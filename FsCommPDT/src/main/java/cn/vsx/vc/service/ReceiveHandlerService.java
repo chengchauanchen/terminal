@@ -53,6 +53,7 @@ import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
@@ -261,6 +262,7 @@ public class ReceiveHandlerService extends Service{
                 if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.RINGING)) {
                     TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.RINGING);
                 }
+                MyApplication.instance.linphoneCall = linphoneCall;
                 Intent intent = new Intent(ReceiveHandlerService.this,ReceiveVoipService.class);
                 LinphoneAddress from = linphoneCall.getCallLog().getFrom();
                 String userName = from.getUserName();
@@ -687,6 +689,10 @@ public class ReceiveHandlerService extends Service{
 
     //接收到上报视频的回调
     private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = memberId -> {
+        if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+            ToastUtil.showToast(getApplicationContext(),"视频观看中无法上报");
+            return;
+        }
         logger.error("上报给：" + memberId);
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
             ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.no_push_authority));
@@ -732,6 +738,10 @@ public class ReceiveHandlerService extends Service{
      * 请求直播
      */
     private ReceiverRequestVideoHandler receiverRequestVideoHandler = member -> {
+        if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+            ToastUtil.showToast(getApplicationContext(),"视频观看中无法请求上报");
+            return;
+        }
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
             ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.no_pull_authority));
             return;

@@ -125,16 +125,21 @@ public class VoipPhoneActivity extends BaseActivity{
 
     private ReceiveVoipConnectedHandler receiveVoipConnectedHandler = (linphoneCall)->{
         Log.d("VoipPhoneActivity", "电话接通");
-
-        if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().getCurrentState() == IndividualCallState.RINGING){
-            if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.SPEAKING)){
-                //将状态机移动到说话状态
-                TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.SPEAKING);
-                voipCallRequest.setVisibility(View.GONE);
-                voipCallSpeaking.setVisibility(View.VISIBLE);
-                ictVspeakingTimeSpeaking.onStart();
+        mHandler.post(new Runnable(){
+            @Override
+            public void run(){
+                if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().getCurrentState() == IndividualCallState.RINGING){
+                    if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.SPEAKING)){
+                        //将状态机移动到说话状态
+                        TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.SPEAKING);
+                        voipCallRequest.setVisibility(View.GONE);
+                        voipCallSpeaking.setVisibility(View.VISIBLE);
+                        ictVspeakingTimeSpeaking.onStart();
+                    }
+                }
             }
-        }
+        });
+
     };
 
     private ReceiveVoipCallEndHandler receiveVoipCallEndHandler = (linphoneCall)->{
@@ -200,7 +205,7 @@ public class VoipPhoneActivity extends BaseActivity{
         TerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         mHandler.post(new Runnable() {
             @Override
-            public void run() { ;
+            public void run() {
                 status=CALL_ERROR+"";
                 CallRecord callRecord = new CallRecord();
                 callRecord.setCallId(linphoneCall.getCallLog().getCallId());

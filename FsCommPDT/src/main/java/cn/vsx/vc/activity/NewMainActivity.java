@@ -1203,8 +1203,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         //        String account = MyTerminalFactory.getSDK().getParam(UrlParams.ACCOUNT, "");
         String account = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)+"";
         String voipServerIp = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_IP, "");
-        //        String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, 0)+"";
-        String voipServerPort = "5060";
+        String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, 0)+"";
         String server = voipServerIp+":"+voipServerPort;
         if(account.contains("@lzy")){
             account=account.substring(0,6);
@@ -1212,7 +1211,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         if(account.startsWith("88")|| account.startsWith("86")){
             account = account.substring(2);
         }
-        account = "1003";
         logger.info("voip账号："+account+",密码："+ account+"，服务器地址："+server);
         MyTerminalFactory.getSDK().getVoipCallManager().clearCache();
         if(!TextUtils.isEmpty(account)){

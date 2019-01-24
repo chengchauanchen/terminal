@@ -95,7 +95,5 @@ public class ReceiveVoipService extends BaseService{
         mHandler.postDelayed(this::removeView,500);
     };
 
-    private ReceiveVoipCallEndHandler receiveVoipCallEndHandler = (linphoneCall)->{
-        stopBusiness();
-    };
+    private ReceiveVoipCallEndHandler receiveVoipCallEndHandler = (linphoneCall)-> mHandler.post(this::stopBusiness);
 }
