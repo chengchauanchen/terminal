@@ -4,23 +4,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:zhy="http://schemas.android.com/apk/res-auto"
-    android:fitsSystemWindows="true"
     >
-    <!--<View-->
-        <!--android:id="@+id/my_view"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="0dp" />-->
-    <!--<View-->
-        <!--android:id="@+id/top"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="@dimen/y10"-->
-        <!--android:background="@color/group_call_news_bar_bg"/>-->
+    <View
+        android:id="@+id/v_top"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x20"
+        android:background="@drawable/titel_bar_bg"
+        />
 
     <LinearLayout
         android:id="@+id/rl_topbar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/y30"
         android:gravity="center_vertical"
+        android:layout_below="@+id/v_top"
         android:background="@drawable/titel_bar_bg"
         >
         <ImageView
