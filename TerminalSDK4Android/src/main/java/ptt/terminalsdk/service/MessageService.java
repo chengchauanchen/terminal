@@ -186,7 +186,7 @@ public class MessageService extends Service {
 
         LogConfigurator logConfigurator = new LogConfigurator();
         logConfigurator.setFileName(getLogDirectory() + "log.txt");
-        logConfigurator.setRootLevel(Level.ALL);
+        logConfigurator.setRootLevel(Level.INFO);
         logConfigurator.setFilePattern("%d %-5p [%t][%c{2}]-[%l] %m%n");
         logConfigurator.setUseLogCatAppender(true);
         logConfigurator.setMaxFileSize(1024 * 1024 * 10);
