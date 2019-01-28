@@ -3,22 +3,21 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/group_call_news_listview_bg"
+    android:fitsSystemWindows="true"
     xmlns:zhy="http://schemas.android.com/apk/res-auto">
 
-    <View
-        android:id="@+id/v_top"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/x20"
-        android:background="@drawable/titel_bar_bg"
-        />
+    <!--<View-->
+        <!--android:id="@+id/v_top"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="?attr/actionBarSize"-->
+        <!--android:background="@drawable/titel_bar_bg"-->
+        <!--/>-->
 
     <LinearLayout
         android:id="@+id/rl_topbar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/y30"
+        android:layout_height="?attr/actionBarSize"
         android:gravity="center_vertical"
-        android:layout_below="@+id/v_top"
         android:background="@drawable/titel_bar_bg"
         >
         <ImageView
