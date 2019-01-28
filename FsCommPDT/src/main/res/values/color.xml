@@ -339,8 +339,8 @@
     <color name="search_all_contacts_background">#F3F4F8</color>
     <color name="search_all_line">#000000</color>
     <color name="search_all_text_color">#33A7FC</color>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#0d182b</color>
+    <color name="colorPrimaryDark">#0d182b</color>
     <color name="colorAccent">#71a3df</color>
 
 
