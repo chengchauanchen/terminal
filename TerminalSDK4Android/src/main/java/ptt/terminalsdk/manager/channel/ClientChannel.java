@@ -64,7 +64,7 @@ public class ClientChannel extends AbsClientChannel {
 	}
 
 	@Override
-	public void sendMessage(GeneratedMessage message, final PushMessageSendResultHandler handler, int messageFun) {
+	public void sendMessage(GeneratedMessage message, final PushMessageSendResultHandler handler, byte messageFun) {
 		if(MyTerminalFactory.getSDK().hasNetwork()){
 			logger.info("发送消息："+message.getClass()+"----->"+message);
 			try {
