@@ -5,8 +5,6 @@ import android.app.Activity;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.net.Uri;
@@ -79,7 +77,7 @@ public class UpdateManager
 				default:
 					break;
 			}
-		};
+		}
 	};
 
 	public UpdateManager(Context context)
@@ -162,42 +160,28 @@ public class UpdateManager
 	 * 显示软件更新对话框
 	 */
 	public void showNoticeDialog(){
-		mHandler.post(new Runnable() {
-
-			@Override
-			public void run() {
-				try{
-					// 构造对话框
-					Builder builder = new Builder(mContext);
-					builder.setTitle(R.string.soft_update_title);
-					builder.setMessage(R.string.soft_update_info);
-					// 更新
-					builder.setPositiveButton(R.string.soft_update_updatebtn, new OnClickListener()
-					{
-						@Override
-						public void onClick(DialogInterface dialog, int which)
-						{
-							dialog.dismiss();
-							// 显示下载对话框
-							showDownloadDialog();
-						}
-					});
-					// 稍后更新
-					builder.setNegativeButton(R.string.soft_update_later, new OnClickListener()
-					{
-						@Override
-						public void onClick(DialogInterface dialog, int which)
-						{
-							dialog.dismiss();
-							MyApplication.instance.isUpdatingAPP = false;
-						}
-					});
-					builder.setCancelable(false);
-					builder.show();
-					MyApplication.instance.isUpdatingAPP = true;
-				}catch(Exception e){
-					e.printStackTrace();
-				}
+		mHandler.post(() -> {
+			try{
+				// 构造对话框
+				Builder builder = new Builder(mContext);
+				builder.setTitle(R.string.soft_update_title);
+				builder.setMessage(R.string.soft_update_info);
+				// 更新
+				builder.setPositiveButton(R.string.soft_update_updatebtn, (dialog, which) -> {
+					dialog.dismiss();
+					// 显示下载对话框
+					showDownloadDialog();
+				});
+				// 稍后更新
+				builder.setNegativeButton(R.string.soft_update_later, (dialog, which) -> {
+					dialog.dismiss();
+					MyApplication.instance.isUpdatingAPP = false;
+				});
+				builder.setCancelable(false);
+				builder.show();
+				MyApplication.instance.isUpdatingAPP = true;
+			}catch(Exception e){
+				e.printStackTrace();
 			}
 		});
 	}
@@ -215,16 +199,11 @@ public class UpdateManager
 		mProgress = (ProgressBar) v.findViewById(R.id.update_progress);
 		builder.setView(v);
 		// 取消更新
-		builder.setNegativeButton(R.string.soft_update_cancel, new OnClickListener()
-		{
-			@Override
-			public void onClick(DialogInterface dialog, int which)
-			{
-				dialog.dismiss();
-				MyApplication.instance.isUpdatingAPP = false;
-				// 设置取消状态
-				cancelUpdate = true;
-			}
+		builder.setNegativeButton(R.string.soft_update_cancel, (dialog, which) -> {
+			dialog.dismiss();
+			MyApplication.instance.isUpdatingAPP = false;
+			// 设置取消状态
+			cancelUpdate = true;
 		});
 		mDownloadDialog = builder.create();
 		mDownloadDialog.setCancelable(false);
@@ -313,7 +292,7 @@ public class UpdateManager
 			mDownloadDialog.dismiss();
 			MyApplication.instance.isUpdatingAPP = false;
 		}
-	};
+	}
 
 	/**
 	 * 安装APK文件

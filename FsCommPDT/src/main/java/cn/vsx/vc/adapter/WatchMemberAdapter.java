@@ -79,7 +79,4 @@ public class WatchMemberAdapter extends BaseAdapter {
         }
     }
 
-    public void refreshWatchMemberAdapter(){
-        notifyDataSetChanged();
-    }
 }

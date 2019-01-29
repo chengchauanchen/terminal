@@ -55,32 +55,23 @@ public class PromptManager {
 	private int streamId;
 
 	/**组成员遥毙消息*/
-	private ReceiveNotifyMemberKilledHandler receiveNotifyMemberKilledHandler = new ReceiveNotifyMemberKilledHandler() {
-		@Override
-		public void handler(boolean forbid) {
-			logger.info("PromptManager收到遥毙，此时forbid状态为：" + forbid);
-			if(forbid){
-				stopRing();
-			}
-		}
-	};
-
-	//成员被删除了
-	private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
-		@Override
-		public void handler() {
-			logger.info("PromptManager收到删除消息");
+	private ReceiveNotifyMemberKilledHandler receiveNotifyMemberKilledHandler = forbid -> {
+		logger.info("PromptManager收到遥毙，此时forbid状态为：" + forbid);
+		if(forbid){
 			stopRing();
 		}
 	};
 
-	private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler() {
-		@Override
-		public void handler(boolean connected) {
-			logger.info("PromptManager收到网络状态通知：connected = "+connected);
-			if (!connected) {
-				stopRing();
-			}
+	//成员被删除了
+	private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = () -> {
+		logger.info("PromptManager收到删除消息");
+		stopRing();
+	};
+
+	private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
+		logger.info("PromptManager收到网络状态通知：connected = "+connected);
+		if (!connected) {
+			stopRing();
 		}
 	};
 

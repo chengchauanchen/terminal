@@ -53,8 +53,6 @@ public class MyListView extends ListView {
 	// 提示信息
 	// 日期
 	private int measuredHeight;
-	private RotateAnimation down2up;
-	private RotateAnimation up2down;
 
 	/**
 	 * 初始化view的方法 1.添加刷新头 2.隐藏刷新头 3.跟着手指一起显示
@@ -83,11 +81,11 @@ public class MyListView extends ListView {
 	}
 
 	private void initAnimation() {
-		down2up = new RotateAnimation(0, -180, Animation.RELATIVE_TO_SELF,
+		RotateAnimation down2up = new RotateAnimation(0, -180, Animation.RELATIVE_TO_SELF,
 				0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
 		down2up.setDuration(200);
 		down2up.setFillAfter(true);
-		up2down = new RotateAnimation(-180, -360, Animation.RELATIVE_TO_SELF,
+		RotateAnimation up2down = new RotateAnimation(-180, -360, Animation.RELATIVE_TO_SELF,
 				0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
 		up2down.setDuration(200);
 		up2down.setFillAfter(true);

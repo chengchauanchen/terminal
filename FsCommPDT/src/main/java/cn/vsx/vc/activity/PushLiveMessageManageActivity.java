@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
-import android.widget.AdapterView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -51,14 +50,11 @@ public class PushLiveMessageManageActivity extends BaseActivity{
     public void initView() {
         mPushLiveListAdapter = new PushLiveListAdapter(this, mLiveMessageList);
         pl_video_send.setAdapter(mPushLiveListAdapter);
-        pl_video_send.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-                Intent intent = new Intent(PushLiveMessageManageActivity.this,LiveHistoryActivity.class);
-                Log.e("PushLiveMessageManageAc", "position:" + position+"----id:"+id);
-                intent.putExtra("terminalMessage",mLiveMessageList.get(position));
-                PushLiveMessageManageActivity.this.startActivity(intent);
-            }
+        pl_video_send.setOnItemClickListener((parent, view, position, id) -> {
+            Intent intent = new Intent(PushLiveMessageManageActivity.this,LiveHistoryActivity.class);
+            Log.e("PushLiveMessageManageAc", "position:" + position+"----id:"+id);
+            intent.putExtra("terminalMessage",mLiveMessageList.get(position));
+            PushLiveMessageManageActivity.this.startActivity(intent);
         });
     }
 
@@ -110,12 +106,9 @@ public class PushLiveMessageManageActivity extends BaseActivity{
                 String liverId_Name = terminalMessage.messageBody.getString(JsonParam.LIVER);
                 int liverId = Integer.parseInt(liverId_Name.substring(0, liverId_Name.indexOf("_")));
                 if(liverId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mLiveMessageList.add(terminalMessage);
-                            mPushLiveListAdapter.notifyDataSetChanged();
-                        }
+                    mHandler.post(() -> {
+                        mLiveMessageList.add(terminalMessage);
+                        mPushLiveListAdapter.notifyDataSetChanged();
                     });
                 }
             }

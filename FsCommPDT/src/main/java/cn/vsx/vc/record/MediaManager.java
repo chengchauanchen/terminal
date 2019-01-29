@@ -32,13 +32,9 @@ public class MediaManager {
         if (mPlayer == null) {
             mPlayer = new MediaPlayer();
             //保险起见，设置报错监听
-            mPlayer.setOnErrorListener(new OnErrorListener() {
-
-                @Override
-                public boolean onError(MediaPlayer mp, int what, int extra) {
-                    mPlayer.reset();
-                    return false;
-                }
+            mPlayer.setOnErrorListener((mp, what, extra) -> {
+                mPlayer.reset();
+                return false;
             });
         } else {
             mPlayer.reset();//就重置
@@ -73,20 +69,16 @@ public class MediaManager {
     public static MediaPlayer getMediaPlayer(){
 
         return mPlayer;
-    };
+    }
 
     public static void playSound(String filePathString,
                                  OnCompletionListener onCompletionListener, Context context) {
         if (mPlayer == null) {
             mPlayer = new MediaPlayer();
             //保险起见，设置报错监听
-            mPlayer.setOnErrorListener(new OnErrorListener() {
-
-                @Override
-                public boolean onError(MediaPlayer mp, int what, int extra) {
-                    mPlayer.reset();
-                    return false;
-                }
+            mPlayer.setOnErrorListener((mp, what, extra) -> {
+                mPlayer.reset();
+                return false;
             });
         } else {
             mPlayer.reset();//就重置

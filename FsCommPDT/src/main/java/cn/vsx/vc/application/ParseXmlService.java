@@ -13,7 +13,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 public class ParseXmlService{
 	public static HashMap<String, String> parseXml(InputStream inStream) throws Exception{
-		HashMap<String, String> hashMap = new HashMap<String, String>();
+		HashMap<String, String> hashMap = new HashMap<>();
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
@@ -22,7 +22,7 @@ public class ParseXmlService{
 		NodeList childNodes = root.getChildNodes();
 		for (int j = 0; j < childNodes.getLength(); j++)
 		{
-			Node childNode = (Node) childNodes.item(j);
+			Node childNode =  childNodes.item(j);
 			if (childNode.getNodeType() == Node.ELEMENT_NODE)
 			{
 				Element childElement = (Element) childNode;

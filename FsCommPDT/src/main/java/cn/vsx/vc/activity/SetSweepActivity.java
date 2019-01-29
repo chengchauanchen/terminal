@@ -17,8 +17,8 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetScanGroupListResultHa
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupSweepAdapter;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 
 /**
@@ -88,18 +88,15 @@ public class SetSweepActivity extends BaseActivity {
 
         @Override
         public void handler(final List<Integer> scanGroups, final int errorCode, final String errorDesc) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    logger.info("ReceiveSetScanGroupListResultHandler："+errorDesc+"======="+scanGroups);
-                    if(errorCode== BaseCommonCode.SUCCESS_CODE){
-                        groupSweeps.clear();
-                        groupSweeps.addAll(scanGroups);
-                        adapter.notifyDataSetChanged();
-                        ToastUtil.toast(SetSweepActivity.this,"扫描组删除成功");
-                    }else {
-                        ToastUtil.toast(SetSweepActivity.this,"删除失败,"+errorDesc);
-                    }
+            myHandler.post(() -> {
+                logger.info("ReceiveSetScanGroupListResultHandler："+errorDesc+"======="+scanGroups);
+                if(errorCode== BaseCommonCode.SUCCESS_CODE){
+                    groupSweeps.clear();
+                    groupSweeps.addAll(scanGroups);
+                    adapter.notifyDataSetChanged();
+                    ToastUtil.toast(SetSweepActivity.this,"扫描组删除成功");
+                }else {
+                    ToastUtil.toast(SetSweepActivity.this,"删除失败,"+errorDesc);
                 }
             });
 
@@ -110,13 +107,10 @@ public class SetSweepActivity extends BaseActivity {
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
         @Override
         public void handler() {//更新组扫描的开关，主组名字
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    groupSweeps.clear();
-                    groupSweeps.addAll(TerminalFactory.getSDK().getConfigManager().getScanGroups());
-                    adapter.notifyDataSetChanged();
-                }
+            myHandler.post(() -> {
+                groupSweeps.clear();
+                groupSweeps.addAll(TerminalFactory.getSDK().getConfigManager().getScanGroups());
+                adapter.notifyDataSetChanged();
             });
         }
     };

@@ -266,8 +266,8 @@ public class SildingFinishLayout extends SkinCompatRelativeLayout{
 	
 
 	public interface OnSildingFinishListener {
-		public void onSildingBack();
-		public void onSildingForward();
+		void onSildingBack();
+		void onSildingForward();
 	}
 
 }

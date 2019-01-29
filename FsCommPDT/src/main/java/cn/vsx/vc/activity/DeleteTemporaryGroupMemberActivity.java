@@ -62,7 +62,6 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
 
     private List<Member> memberList = new ArrayList<>();
     private List<Member> selectItem = new ArrayList<>();
-    private int total = 0;
     private int screenWidth;
     private LiveContactsAdapter liveContactsAdapter;
     private Handler myHandler = new Handler();
@@ -109,12 +108,7 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
         et_search_allcontacts.addTextChangedListener(new EditChangeListener());
         et_search_allcontacts.setOnFocusChangeListener(new EditListener());
         liveContactsAdapter.setOnItemClickListener(new OnInvitaListViewItemClick());
-        img_cencle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                et_search_allcontacts.setText("");
-            }
-        });
+        img_cencle.setOnClickListener(v -> et_search_allcontacts.setText(""));
     }
 
     @Override
@@ -136,7 +130,6 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
         memberList.clear();
         tv_checktext.setText("");
         et_search_allcontacts.setText("");
-        total = 0;
         btn_create_temporary_selectmember_start.setText("下一步");
         btn_create_temporary_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg);
     }
@@ -179,14 +172,11 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
     private ReceiveUpdatePhoneMemberHandler receiveUpdatePhoneMemberHandler = new ReceiveUpdatePhoneMemberHandler() {
         @Override
         public void handler(final List<Member> allMembers) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    logger.info("警务通列表成员-----memberList" + allMembers);
-                    memberList.clear();
-                    memberList.addAll(allMembers);
-                    liveContactsAdapter.addData(memberList);
-                }
+            myHandler.post(() -> {
+                logger.info("警务通列表成员-----memberList" + allMembers);
+                memberList.clear();
+                memberList.addAll(allMembers);
+                liveContactsAdapter.addData(memberList);
             });
         }
     };

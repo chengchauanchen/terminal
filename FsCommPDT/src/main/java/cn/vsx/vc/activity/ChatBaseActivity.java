@@ -101,7 +101,6 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.IDLE;
 
@@ -117,12 +116,11 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private static final int STORAGE_PERMISSIONS_REQUEST_CODE = 0x14;/** 请求存储读取权限 */
 
     protected Logger logger = Logger.getLogger(getClass());
-    protected HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<Integer, String>());
+    protected HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
 
     protected List<TerminalMessage> allFailMessageList = new ArrayList<>();//当前会话所有发送失败消息集合
     protected List<TerminalMessage> historyFailMessageList = new ArrayList<>();//当前会话历史发送失败消息集合
     protected Map<Integer, TerminalMessage> unFinishMsgList = new HashMap<>();//
-//    RelativeLayout rl_include_listview;
     TextView newsBarGroupName;
     SwipeRefreshLayout sflCallList;
     FixedRecyclerView groupCallList;
@@ -142,7 +140,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
     protected boolean isGroup;//组会话还是个人会话
     private OnBackListener backListener;
     private long lastVersion;//最后一条发送成功的消息的version
-    private String live_theme;
     private boolean refreshing;
     private static final int WATCH_LIVE = 0;
     protected Handler handler = new Handler(){
@@ -167,10 +164,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
             window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//                window.setStatusBarColor(Color.TRANSPARENT);
-//                window.setNavigationBarColor(Color.TRANSPARENT);
-//            }
         }
     }
 
@@ -194,14 +187,12 @@ public abstract class ChatBaseActivity extends BaseActivity{
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowTransponPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowCopyPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverTransponHandler);
-//        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverToFaceRecognitionHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSelectChatListHandler);
         sflCallList.setOnRefreshListener(new OnRefreshListenerImplementationImpl());
         groupCallList.setOnTouchListener(mMessageTouchListener);
         setOnPTTVolumeBtnStatusChangedListener(new OnPTTVolumeBtnStatusChangedListenerImp());
         groupCallList.addOnLayoutChangeListener(myOnLayoutChangeListener);
-//        rl_include_listview.setOnTouchListener(new OnInclude_listviewTouchListener());
     }
     @Override
     public void initData() {
@@ -220,7 +211,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         if (chatMessageList.size() > 0) {
             lastVersion = chatMessageList.get(chatMessageList.size() - 1).messageVersion;
         }
-        HashMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getSerializable(Params.MESSAGE_SEND_FAIL, new HashMap<String, List<TerminalMessage>>());
+        HashMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getSerializable(Params.MESSAGE_SEND_FAIL, new HashMap<>());
         if(sendFailMap != null ) {
             List<TerminalMessage> list = sendFailMap.get(userId + "");
             if(list != null) {
@@ -257,7 +248,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
         if (chatMessageList.size() > 0){
             setListSelection(chatMessageList.size() - 1);
         }
-//        keyHeight = MyTerminalFactory.getSDK().getParam(Params.KEYBOARD_HEIGHT, 0);
     }
 
     @Override
@@ -321,7 +311,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveDownloadFinishHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUploadProgressHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveDownloadProgressHandler);
-//        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveGetBaiDuLocationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveGetGPSLocationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupOrMemberNotExistHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendDataMessageSuccessHandler);
@@ -332,7 +321,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverTransponHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverToFaceRecognitionHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSelectChatListHandler);
-        HashMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getSerializable(Params.MESSAGE_SEND_FAIL, new HashMap<String, List<TerminalMessage>>());
+        HashMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getSerializable(Params.MESSAGE_SEND_FAIL, new HashMap<>());
         sendFailMap.put(userId+"", allFailMessageList);
         MyTerminalFactory.getSDK().putSerializable(Params.MESSAGE_SEND_FAIL, sendFailMap);
         groupCallList.removeOnLayoutChangeListener(myOnLayoutChangeListener);
@@ -366,7 +355,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
         switch (requestCode) {
             case CAMERA_PERMISSIONS_REQUEST_CODE: {//调用系统相机申请拍照权限回调
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    PhotoUtils.openCamera(this, CODE_CAMERA_REQUEST);
                     startActivityForResult(new Intent(ChatBaseActivity.this,CameraActivity.class),CODE_CAMERA_REQUEST);
                 } else {
                     ToastUtil.showToast(this, "需要相机的权限");
@@ -453,7 +441,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     sendFile();
                     break;
                 case ReceiverSendFileHandler.LOCATION:
-//                    MyTerminalFactory.getSDK().registReceiveHandler(mReceiveGetBaiDuLocationHandler);
                     MyTerminalFactory.getSDK().registReceiveHandler(mReceiveGetGPSLocationHandler);
                     MyTerminalFactory.getSDK().getBDGPSManager().myListener.baiduUpdate();
                     sendLocation(0, 0, TEMP_TOKEN_ID, false, false);
@@ -466,12 +453,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     };
 
     private void scrollMyListViewToBottom() {
-        groupCallList.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                groupCallList.scrollToPosition(temporaryAdapter.getItemCount() - 1);
-            }
-        },10);
+        groupCallList.postDelayed(() -> groupCallList.scrollToPosition(temporaryAdapter.getItemCount() - 1),10);
     }
 
     /**发送录音*/
@@ -735,10 +717,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
     /** 发送文本 */
     private void sendText () {
-//        if(MyTerminalFactory.getSDK().getParam(Params.NET_OFFLINE, false)) {
-//            ToastUtil.showToast(this, "网络已断开！");
-//            return;
-//        }
         String msg = groupCallNewsEt.getText().toString();
         if(TextUtils.isEmpty(msg)) {
             return;
@@ -864,7 +842,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     }
 
     private void saveMemberMap(TerminalMessage terminalMessage) {
-        idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<Integer, String>()));
+        idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>()));
         idNameMap.put(terminalMessage.messageFromId, terminalMessage.messageFromName);
         idNameMap.put(terminalMessage.messageToId, terminalMessage.messageToName);
         TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
@@ -922,38 +900,35 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
     /**  发送信令服务器失败  **/
     private void sendMessageFail (final TerminalMessage terminalMessage, final int resultCode) {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_FAIL);
-                logger.info("发送信令服务器失败"+terminalMessage);
-                boolean isContainFail = false;
-                for (TerminalMessage terminalMessage1 : allFailMessageList) {
-                    if (terminalMessage1.messageBody.containsKey(JsonParam.TOKEN_ID) && terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
-                            terminalMessage1.messageBody.getIntValue(JsonParam.TOKEN_ID) == terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
-                        isContainFail = true;
-                        terminalMessage1.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_FAIL);
-                        break;
-                    }
+        handler.post(() -> {
+            terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_FAIL);
+            logger.info("发送信令服务器失败"+terminalMessage);
+            boolean isContainFail = false;
+            for (TerminalMessage terminalMessage1 : allFailMessageList) {
+                if (terminalMessage1.messageBody.containsKey(JsonParam.TOKEN_ID) && terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
+                        terminalMessage1.messageBody.getIntValue(JsonParam.TOKEN_ID) == terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
+                    isContainFail = true;
+                    terminalMessage1.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_FAIL);
+                    break;
                 }
-                if (!isContainFail) {
-                    allFailMessageList.add(terminalMessage);
-                }
+            }
+            if (!isContainFail) {
+                allFailMessageList.add(terminalMessage);
+            }
 
-                Iterator<TerminalMessage> it = chatMessageList.iterator();
-                while(it.hasNext()){
-                    TerminalMessage next = it.next();
-                    if(next.messageBody.containsKey(JsonParam.TOKEN_ID) && terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
-                            next.messageBody.getIntValue(JsonParam.TOKEN_ID) == terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)){
-                        it.remove();
-                    }
+            Iterator<TerminalMessage> it = chatMessageList.iterator();
+            while(it.hasNext()){
+                TerminalMessage next = it.next();
+                if(next.messageBody.containsKey(JsonParam.TOKEN_ID) && terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
+                        next.messageBody.getIntValue(JsonParam.TOKEN_ID) == terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)){
+                    it.remove();
                 }
-                terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_FAIL);
-                terminalMessage.resultCode = resultCode;
-                chatMessageList.add(terminalMessage);
-                if(temporaryAdapter!=null){
-                    temporaryAdapter.notifyDataSetChanged();
-                }
+            }
+            terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_FAIL);
+            terminalMessage.resultCode = resultCode;
+            chatMessageList.add(terminalMessage);
+            if(temporaryAdapter!=null){
+                temporaryAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -1047,17 +1022,14 @@ public abstract class ChatBaseActivity extends BaseActivity{
         @Override
         public void handler(final double longitude, final double latitude) {
             logger.error("ReceiveGetGPSLocationHandler-------"+" "+longitude+"/"+latitude);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if(longitude != 0.0 && latitude != 0.0) {//获取位置成功
-                        sendLocation(longitude, latitude, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
-                    }else {//获取位置失败
-                        sendLocation(longitude, latitude, TEMP_TOKEN_ID, false, true);
-                        ToastUtil.showToast(ChatBaseActivity.this, "GPS定位失败！");
-                    }
-                    MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveGetGPSLocationHandler);
+            handler.post(() -> {
+                if(longitude != 0.0 && latitude != 0.0) {//获取位置成功
+                    sendLocation(longitude, latitude, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
+                }else {//获取位置失败
+                    sendLocation(longitude, latitude, TEMP_TOKEN_ID, false, true);
+                    ToastUtil.showToast(ChatBaseActivity.this, "GPS定位失败！");
                 }
+                MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveGetGPSLocationHandler);
             });
         }
     };
@@ -1098,175 +1070,126 @@ public abstract class ChatBaseActivity extends BaseActivity{
         @Override
         public void handler(final TerminalMessage terminalMessage) {
             logger.info("接收到消息-----》"+terminalMessage.toString());
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    saveMemberMap(terminalMessage);
-                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {//个人消息
-                        if(TextUtils.isEmpty(HandleIdUtil.handleName(idNameMap.get(userId)))){
-                            newsBarGroupName.setText(HandleIdUtil.handleName(terminalMessage.messageFromName));
-                        }else {
-                            newsBarGroupName.setText(HandleIdUtil.handleName(idNameMap.get(userId)));
-                        }
+            handler.post(() -> {
+                saveMemberMap(terminalMessage);
+                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {//个人消息
+                    if(TextUtils.isEmpty(HandleIdUtil.handleName(idNameMap.get(userId)))){
+                        newsBarGroupName.setText(HandleIdUtil.handleName(terminalMessage.messageFromName));
+                    }else {
+                        newsBarGroupName.setText(HandleIdUtil.handleName(idNameMap.get(userId)));
                     }
-                    //转发
-                    if (temporaryAdapter.transponMessage != null
-                            && terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)
-                            && terminalMessage.messageToId != userId
-                            && terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID)
-                            && terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID) == temporaryAdapter.transponMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
-                        temporaryAdapter.transponMessage = null;
-                        if (terminalMessage.resultCode == 0)
-                            ToastUtil.showToast(ChatBaseActivity.this, "转发成功");
-                        else
-                            ToastUtil.showToast(ChatBaseActivity.this, "转发失败");
+                }
+                //转发
+                if (temporaryAdapter.transponMessage != null
+                        && terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)
+                        && terminalMessage.messageToId != userId
+                        && terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID)
+                        && terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID) == temporaryAdapter.transponMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
+                    temporaryAdapter.transponMessage = null;
+                    if (terminalMessage.resultCode == 0)
+                        ToastUtil.showToast(ChatBaseActivity.this, "转发成功");
+                    else
+                        ToastUtil.showToast(ChatBaseActivity.this, "转发失败");
+                    return;
+                }
+
+                if (isGroup){//组会话界面
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode())//个人消息屏蔽
                         return;
+                    if(terminalMessage.messageToId != userId)//其它组的屏蔽
+                        return;
+                }else {//个人会话界面
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode())//组消息屏蔽
+                        return;
+                    if(terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//自己发的
+                        if (terminalMessage.messageToId != userId)
+                            return;
+                    }else {//接收的
+                        if(terminalMessage.messageFromId != userId)//其它人的屏蔽
+                            return;
                     }
-
-                    if (isGroup){//组会话界面
-                        if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode())//个人消息屏蔽
+                    /**  图像推送消息，去图像推送助手 **/
+                    if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()){
+                        if(terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)
+                                && terminalMessage.messageBody.containsKey(JsonParam.REMARK)
+                                && (terminalMessage.messageBody.getIntValue(JsonParam.REMARK) == Remark.ACTIVE_VIDEO_LIVE)
+                                && terminalMessage.resultCode==0){
+                            //自己上报的消息，不显示在聊天界面
                             return;
-                        if(terminalMessage.messageToId != userId)//其它组的屏蔽
-                            return;
-                    }else {//个人会话界面
-                        if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode())//组消息屏蔽
-                            return;
-                        if(terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//自己发的
-                            if (terminalMessage.messageToId != userId)
-                                return;
-                        }else {//接收的
-                            if(terminalMessage.messageFromId != userId)//其它人的屏蔽
-                                return;
-                        }
-                        /**  图像推送消息，去图像推送助手 **/
-                        if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()){
-                            if(terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)
-                                    && terminalMessage.messageBody.containsKey(JsonParam.REMARK)
-                                    && (terminalMessage.messageBody.getIntValue(JsonParam.REMARK) == Remark.ACTIVE_VIDEO_LIVE)
-                                    && terminalMessage.resultCode==0){
-                                //自己上报的消息，不显示在聊天界面
-                                return;
-                            }else {
-                                Iterator<TerminalMessage> iterator = chatMessageList.iterator();
-                                while(iterator.hasNext()){
-                                    TerminalMessage next = iterator.next();
-                                    //删除之前的上报消息
-                                    if(null == next.messageBody ||
-                                            TextUtils.isEmpty(next.messageBody.getString(JsonParam.CALLID)) ||
-                                            null == terminalMessage.messageBody ||
-                                            TextUtils.isEmpty(terminalMessage.messageBody.getString(JsonParam.CALLID))){
-                                        continue;
-                                    }
-                                    if(next.messageBody.getString(JsonParam.CALLID).equals(terminalMessage.messageBody.getString(JsonParam.CALLID))){
-                                        iterator.remove();
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    //发送失败的消息重新发送，成功后改变状态
-                    if (/*terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)
-                            && terminalMessage.messageType != MessageType.GROUP_CALL.getCode()
-                            && terminalMessage.messageType != MessageType.PRIVATE_CALL.getCode()
-                            && terminalMessage.messageType != MessageType.VIDEO_LIVE.getCode()*/true) {
-
-                        boolean isSendFail = false;
-                        Iterator<TerminalMessage> it = chatMessageList.iterator();
-                        while(it.hasNext()){
-                            TerminalMessage next = it.next();
-                            if(next.messageBody.containsKey(JsonParam.TOKEN_ID) && terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
-                                    next.messageBody.getIntValue(JsonParam.TOKEN_ID) == terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)){
-                                it.remove();
-                                isSendFail = true;
-                            }
-                        }
-                        if (terminalMessage.messageType == MessageType.HYPERLINK.getCode()) {//人脸识别
-                            int code = terminalMessage.messageBody.getIntValue(JsonParam.CODE);
-                            if (code != 0) {
-                                if (!isContainMessage(terminalMessage)) {
-                                    chatMessageList.add(terminalMessage);
-                                    if(temporaryAdapter!=null){
-                                        temporaryAdapter.notifyDataSetChanged();
-                                    }
-                                    lastVersion = terminalMessage.messageVersion;
-                                }
-                            }
                         }else {
-                            //NewsFragment已经保存过数据，此处不需要再保存
+                            Iterator<TerminalMessage> iterator = chatMessageList.iterator();
+                            while(iterator.hasNext()){
+                                TerminalMessage next = iterator.next();
+                                //删除之前的上报消息
+                                if(null == next.messageBody ||
+                                        TextUtils.isEmpty(next.messageBody.getString(JsonParam.CALLID)) ||
+                                        null == terminalMessage.messageBody ||
+                                        TextUtils.isEmpty(terminalMessage.messageBody.getString(JsonParam.CALLID))){
+                                    continue;
+                                }
+                                if(next.messageBody.getString(JsonParam.CALLID).equals(terminalMessage.messageBody.getString(JsonParam.CALLID))){
+                                    iterator.remove();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                //发送失败的消息重新发送，成功后改变状态
+                if (/*terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)
+                        && terminalMessage.messageType != MessageType.GROUP_CALL.getCode()
+                        && terminalMessage.messageType != MessageType.PRIVATE_CALL.getCode()
+                        && terminalMessage.messageType != MessageType.VIDEO_LIVE.getCode()*/true) {
+
+                    boolean isSendFail = false;
+                    Iterator<TerminalMessage> it = chatMessageList.iterator();
+                    while(it.hasNext()){
+                        TerminalMessage next = it.next();
+                        if(next.messageBody.containsKey(JsonParam.TOKEN_ID) && terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
+                                next.messageBody.getIntValue(JsonParam.TOKEN_ID) == terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)){
+                            it.remove();
+                            isSendFail = true;
+                        }
+                    }
+                    if (terminalMessage.messageType == MessageType.HYPERLINK.getCode()) {//人脸识别
+                        int code = terminalMessage.messageBody.getIntValue(JsonParam.CODE);
+                        if (code != 0) {
+                            if (!isContainMessage(terminalMessage)) {
+                                chatMessageList.add(terminalMessage);
+                                if(temporaryAdapter!=null){
+                                    temporaryAdapter.notifyDataSetChanged();
+                                }
+                                lastVersion = terminalMessage.messageVersion;
+                            }
+                        }
+                    }else {
+                        //NewsFragment已经保存过数据，此处不需要再保存
 //                            if (terminalMessage.messageType==MessageType.GROUP_CALL.getCode()) {
 //                                setGroupMessageUnread(terminalMessage);
 //                            }else if(terminalMessage.messageType==MessageType.AUDIO.getCode()){
 ////                                setRecordMessageUnread(terminalMessage);
 //                            }
 
-                            chatMessageList.add(terminalMessage);
-                            if(temporaryAdapter!=null){
-                                temporaryAdapter.notifyDataSetChanged();
-                            }
-                            lastVersion = terminalMessage.messageVersion;
+                        chatMessageList.add(terminalMessage);
+                        if(temporaryAdapter!=null){
+                            temporaryAdapter.notifyDataSetChanged();
                         }
-
-                        Collections.sort(chatMessageList);
-                        setListSelection(chatMessageList.size() - 1);
-
-
-                        if (isSendFail) {
-                            /**  发送失败的消息重新发送，发送成功将其从失败列表中删除  ***/
-                            int failPos = getPosByTokenId(terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID), allFailMessageList);
-                            if (failPos != -1) {
-                                allFailMessageList.remove(failPos);
-                            }
-                        }
+                        lastVersion = terminalMessage.messageVersion;
                     }
 
+                    Collections.sort(chatMessageList);
+                    setListSelection(chatMessageList.size() - 1);
 
-//                    if (terminalMessage.messageType == MessageType.HYPERLINK.getCode()
-//                            && terminalMessage.messageFromId != userId) {
-//                        return;
-//                    }
-//                    /**  图片消息不在这添加 **/
-//                    if (terminalMessage.messageType == MessageType.PICTURE.getCode() ||
-//                            terminalMessage.messageType == MessageType.LONG_TEXT.getCode())
-//                        return;
-//                    /**   组呼界面不接受个呼和图像消息，，，，，个呼界面不接收组呼消息   **/
-//                    if ((isGroup &&(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() || terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode()))
-//                            || (!isGroup && terminalMessage.messageType == MessageType.GROUP_CALL.getCode()))
-//                        return;
-//                    //发送消息
-//                    if (terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
-//                        if (terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
-//                                terminalMessage.messageType == MessageType.GROUP_CALL.getCode()) {
-//                            if (!isContainMessage(terminalMessage)) {
-//                                chatMessageList.add(terminalMessage);
-//                                lastVersion = terminalMessage.messageVersion;
-//                            }
-//                        }
-//                    } else {//接收的消息
-//                        if (terminalMessage.messageType == MessageType.HYPERLINK.getCode()) {//人脸识别
-//                            int code = terminalMessage.messageBody.getIntValue(JsonParam.CODE);
-//                            if (code != 0) {
-//                                if (!isContainMessage(terminalMessage)) {
-//                                    chatMessageList.add(terminalMessage);
-//                                    lastVersion = terminalMessage.messageVersion;
-//                                }
-//                            }
-//                        } else {
-//                            if (terminalMessage.messageType == MessageType.GROUP_CALL.getCode()) {
-//                                setGroupMessageUnread(terminalMessage);
-//                            }
-//                            if (!isContainMessage(terminalMessage)) {
-//                                lastVersion = terminalMessage.messageVersion;
-//                                chatMessageList.add(terminalMessage);
-//                            }
-//
-//                        }
-//
-//                    }
-//                    temporaryAdapter.notifyDataSetChanged();
-//                    setListSelection(chatMessageList.size() - 1);
 
+                    if (isSendFail) {
+                        /**  发送失败的消息重新发送，发送成功将其从失败列表中删除  ***/
+                        int failPos = getPosByTokenId(terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID), allFailMessageList);
+                        if (failPos != -1) {
+                            allFailMessageList.remove(failPos);
+                        }
+                    }
                 }
+
             });
 
         }
@@ -1276,63 +1199,60 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private ReceiveDownloadFinishHandler mReceiveDownloadFinishHandler = new ReceiveDownloadFinishHandler() {
         @Override
         public void handler(final TerminalMessage terminalMessage, final boolean success) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if(!success){
-                        return;
-                    }
-                    if (isGroup){//组消息
-                        if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode())//个人消息屏蔽
-                            return;
-                        if(terminalMessage.messageToId != userId)//其它组的屏蔽
-                            return;
-                    }else {//个人消息
-                        if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode())//个人消息屏蔽
-                            return;
-                        if(terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//自己发的
-                            if (terminalMessage.messageToId != userId)
-                                return;
-                        }else {//接收的
-                            if(terminalMessage.messageFromId != userId)//其它人的屏蔽
-                                return;
-                        }
-                    }
-
-                    if (terminalMessage.messageType ==  MessageType.LONG_TEXT.getCode()
-                            || terminalMessage.messageType == MessageType.HYPERLINK.getCode()){
-                        replaceMessage(terminalMessage);
-                    }
-                    if(terminalMessage.messageType ==  MessageType.PICTURE.getCode()) {
-                        temporaryAdapter.isDownloadingPicture = false;
-                        replaceMessage(terminalMessage);
-                        //如果是原图下载完了就打开
-                        if(terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE) &&
-                                !terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE)) {
-                            temporaryAdapter.openPhotoAfterDownload(terminalMessage);
-                        }
-                    }
-
-                    if(terminalMessage.messageType ==  MessageType.FILE.getCode()) {
-                        temporaryAdapter.openFileAfterDownload(terminalMessage);
-                        temporaryAdapter.isDownloading = false;
-                        terminalMessage.messageBody.put(JsonParam.IS_DOWNLOADINF, false);
-                        replaceMessage(terminalMessage);
-                    }
-                    if(terminalMessage.messageType == MessageType.AUDIO.getCode()){
-                        temporaryAdapter.isDownloading = false;
-                        terminalMessage.messageBody.put(JsonParam.IS_DOWNLOADINF, false);
-                        replaceMessage(terminalMessage);
-                    }
-                    if(terminalMessage.messageType ==  MessageType.VIDEO_CLIPS.getCode()) {
-                        File file = new File(terminalMessage.messagePath);
-                        temporaryAdapter.openVideo(terminalMessage,file);
-                        temporaryAdapter.isDownloading = false;
-                        terminalMessage.messageBody.put(JsonParam.IS_DOWNLOADINF, false);
-                        replaceMessage(terminalMessage);
-                    }
-
+            handler.post(() -> {
+                if(!success){
+                    return;
                 }
+                if (isGroup){//组消息
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode())//个人消息屏蔽
+                        return;
+                    if(terminalMessage.messageToId != userId)//其它组的屏蔽
+                        return;
+                }else {//个人消息
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode())//个人消息屏蔽
+                        return;
+                    if(terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//自己发的
+                        if (terminalMessage.messageToId != userId)
+                            return;
+                    }else {//接收的
+                        if(terminalMessage.messageFromId != userId)//其它人的屏蔽
+                            return;
+                    }
+                }
+
+                if (terminalMessage.messageType ==  MessageType.LONG_TEXT.getCode()
+                        || terminalMessage.messageType == MessageType.HYPERLINK.getCode()){
+                    replaceMessage(terminalMessage);
+                }
+                if(terminalMessage.messageType ==  MessageType.PICTURE.getCode()) {
+                    temporaryAdapter.isDownloadingPicture = false;
+                    replaceMessage(terminalMessage);
+                    //如果是原图下载完了就打开
+                    if(terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE) &&
+                            !terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE)) {
+                        temporaryAdapter.openPhotoAfterDownload(terminalMessage);
+                    }
+                }
+
+                if(terminalMessage.messageType ==  MessageType.FILE.getCode()) {
+                    temporaryAdapter.openFileAfterDownload(terminalMessage);
+                    temporaryAdapter.isDownloading = false;
+                    terminalMessage.messageBody.put(JsonParam.IS_DOWNLOADINF, false);
+                    replaceMessage(terminalMessage);
+                }
+                if(terminalMessage.messageType == MessageType.AUDIO.getCode()){
+                    temporaryAdapter.isDownloading = false;
+                    terminalMessage.messageBody.put(JsonParam.IS_DOWNLOADINF, false);
+                    replaceMessage(terminalMessage);
+                }
+                if(terminalMessage.messageType ==  MessageType.VIDEO_CLIPS.getCode()) {
+                    File file = new File(terminalMessage.messagePath);
+                    temporaryAdapter.openVideo(terminalMessage,file);
+                    temporaryAdapter.isDownloading = false;
+                    terminalMessage.messageBody.put(JsonParam.IS_DOWNLOADINF, false);
+                    replaceMessage(terminalMessage);
+                }
+
             });
         }
     };
@@ -1395,34 +1315,31 @@ public abstract class ChatBaseActivity extends BaseActivity{
             /**  上报图像  **/
             if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
                 //先请求看视频上报是否已经结束
-                MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable(){
-                    @Override
-                    public void run(){
-                        String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
-                        int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
-                        String url = "http://"+serverIp+":"+serverPort+"/file/download/isLiving";
-                        Map<String,String> paramsMap = new HashMap<>();
-                        paramsMap.put("callId",terminalMessage.messageBody.getString(JsonParam.CALLID));
-                        paramsMap.put("sign", SignatureUtil.sign(paramsMap));
-                        logger.info("查看视频播放是否结束url："+url);
-                        String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
-                        logger.info("查看视频播放是否结束结果："+result);
-                        if(!Util.isEmpty(result)){
-                            JSONObject jsonObject = JSONObject.parseObject(result);
-                            boolean living = jsonObject.getBoolean("living");
-                            Long endChatTime = jsonObject.getLong("endChatTime");
-                            if(living){
-                                Message msg = Message.obtain();
-                                msg.what = WATCH_LIVE;
-                                msg.obj = terminalMessage;
-                                handler.sendMessage(msg);
-                            }else {
-                                // TODO: 2018/8/7
-                                Intent intent = new Intent(ChatBaseActivity.this,LiveHistoryActivity.class);
-                                intent.putExtra("terminalMessage",terminalMessage);
+                MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+                    String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
+                    int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
+                    String url = "http://"+serverIp+":"+serverPort+"/file/download/isLiving";
+                    Map<String,String> paramsMap = new HashMap<>();
+                    paramsMap.put("callId",terminalMessage.messageBody.getString(JsonParam.CALLID));
+                    paramsMap.put("sign", SignatureUtil.sign(paramsMap));
+                    logger.info("查看视频播放是否结束url："+url);
+                    String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
+                    logger.info("查看视频播放是否结束结果："+result);
+                    if(!Util.isEmpty(result)){
+                        JSONObject jsonObject = JSONObject.parseObject(result);
+                        boolean living = jsonObject.getBoolean("living");
+                        Long endChatTime = jsonObject.getLong("endChatTime");
+                        if(living){
+                            Message msg = Message.obtain();
+                            msg.what = WATCH_LIVE;
+                            msg.obj = terminalMessage;
+                            handler.sendMessage(msg);
+                        }else {
+                            // TODO: 2018/8/7
+                            Intent intent = new Intent(ChatBaseActivity.this,LiveHistoryActivity.class);
+                            intent.putExtra("terminalMessage",terminalMessage);
 //                                intent.putExtra("endChatTime",endChatTime);
-                                ChatBaseActivity.this.startActivity(intent);
-                            }
+                            ChatBaseActivity.this.startActivity(intent);
                         }
                     }
                 });
@@ -1445,15 +1362,12 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private ReceiverShowTransponPopupHandler mReceiverShowTransponPopupHandler = new ReceiverShowTransponPopupHandler() {
         @Override
         public void handler() {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    /**  没有进行组呼的时候才弹出 **/
-                    TransponFragment transponFragment = TransponFragment.getInstance(userId, temporaryAdapter.transponMessage.messageType);
-                    transponFragment.setFragmentContainer(fl_fragment_container);
-                    setViewVisibility(fl_fragment_container, View.VISIBLE);
-                    getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, transponFragment).commit();
-                }
+            handler.post(() -> {
+                /**  没有进行组呼的时候才弹出 **/
+                TransponFragment transponFragment = TransponFragment.getInstance(userId, temporaryAdapter.transponMessage.messageType);
+                transponFragment.setFragmentContainer(fl_fragment_container);
+                setViewVisibility(fl_fragment_container, View.VISIBLE);
+                getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, transponFragment).commit();
             });
         }
     };
@@ -1461,21 +1375,18 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private ReceiverShowCopyPopupHandler mReceiverShowCopyPopupHandler = new ReceiverShowCopyPopupHandler(){
         @Override
         public void handler(final TerminalMessage terminalMessage) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    ClipboardManager cmb = (ClipboardManager) ChatBaseActivity.this.getSystemService(Context.CLIPBOARD_SERVICE);
-                    if (terminalMessage.messageType == 1){
-                        cmb.setText(temporaryAdapter.transponMessage.messageBody.getString(JsonParam.CONTENT));
-                    }else if (terminalMessage.messageType == 2){
-                        logger.info("sjl_:"+terminalMessage.messageType+","+temporaryAdapter.transponMessage.messagePath);
-                        String path = temporaryAdapter.transponMessage.messagePath;
-                        File file = new File(path);
-                        String content = com.zectec.imageandfileselector.utils.FileUtil.getStringFromFile(file);
-                        cmb.setText(content);
-                    }
-                    ToastUtil.showToast("复制成功",ChatBaseActivity.this);
+            handler.post(() -> {
+                ClipboardManager cmb = (ClipboardManager) ChatBaseActivity.this.getSystemService(Context.CLIPBOARD_SERVICE);
+                if (terminalMessage.messageType == 1){
+                    cmb.setText(temporaryAdapter.transponMessage.messageBody.getString(JsonParam.CONTENT));
+                }else if (terminalMessage.messageType == 2){
+                    logger.info("sjl_:"+terminalMessage.messageType+","+temporaryAdapter.transponMessage.messagePath);
+                    String path = temporaryAdapter.transponMessage.messagePath;
+                    File file = new File(path);
+                    String content = com.zectec.imageandfileselector.utils.FileUtil.getStringFromFile(file);
+                    cmb.setText(content);
                 }
+                ToastUtil.showToast("复制成功",ChatBaseActivity.this);
             });
         }
     };
@@ -1487,43 +1398,40 @@ public abstract class ChatBaseActivity extends BaseActivity{
                 return;
             Observable.just(msgType)
                     .subscribeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Action1<Integer>() {
-                        @Override
-                        public void call(Integer msgType) {
-                            if(showOrHidden) {
-                                switch (msgType) {
-                                    case ReceiverSendFileCheckMessageHandler.PHOTO_ALBUM://从相册中选择相片
-                                        if (ContextCompat.checkSelfPermission(ChatBaseActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                                            ActivityCompat.requestPermissions(ChatBaseActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
-                                        }
-                                        else {
-                                            setViewVisibility(fl_fragment_container, View.VISIBLE);
-                                            getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, new ImageSelectorFragment()).commit();
-                                        }
-                                        break;
-                                    case ReceiverSendFileCheckMessageHandler.CAMERA://调用相机拍照
-                                        autoObtainCameraPermission();
-                                        break;
-                                    case ReceiverSendFileCheckMessageHandler.FILE://选取文件
-                                        if (ContextCompat.checkSelfPermission(ChatBaseActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                                            ActivityCompat.requestPermissions(ChatBaseActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
-                                        }
-                                        else {
-                                            setViewVisibility(fl_fragment_container, View.VISIBLE);
-                                            getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container,  new FileMainFragment()).commit();
-                                        }
-                                        break;
-                                    case ReceiverSendFileCheckMessageHandler.POST_BACK_VIDEO://上报图像
-                                        postVideo();
-                                        break;
-                                    case ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO://请求图像
-                                        requestVideo();
-                                        break;
-                                }
+                    .subscribe(msgType1 -> {
+                        if(showOrHidden) {
+                            switch (msgType1) {
+                                case ReceiverSendFileCheckMessageHandler.PHOTO_ALBUM://从相册中选择相片
+                                    if (ContextCompat.checkSelfPermission(ChatBaseActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                                        ActivityCompat.requestPermissions(ChatBaseActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
+                                    }
+                                    else {
+                                        setViewVisibility(fl_fragment_container, View.VISIBLE);
+                                        getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, new ImageSelectorFragment()).commit();
+                                    }
+                                    break;
+                                case ReceiverSendFileCheckMessageHandler.CAMERA://调用相机拍照
+                                    autoObtainCameraPermission();
+                                    break;
+                                case ReceiverSendFileCheckMessageHandler.FILE://选取文件
+                                    if (ContextCompat.checkSelfPermission(ChatBaseActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                                        ActivityCompat.requestPermissions(ChatBaseActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
+                                    }
+                                    else {
+                                        setViewVisibility(fl_fragment_container, View.VISIBLE);
+                                        getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container,  new FileMainFragment()).commit();
+                                    }
+                                    break;
+                                case ReceiverSendFileCheckMessageHandler.POST_BACK_VIDEO://上报图像
+                                    postVideo();
+                                    break;
+                                case ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO://请求图像
+                                    requestVideo();
+                                    break;
                             }
-                            else {
-                                setViewVisibility(fl_fragment_container, View.GONE);
-                            }
+                        }
+                        else {
+                            setViewVisibility(fl_fragment_container, View.GONE);
                         }
                     });
         }
@@ -1571,30 +1479,24 @@ public abstract class ChatBaseActivity extends BaseActivity{
      * 停止刷新
      */
     private void stopRefresh(final List<TerminalMessage> groupMessageRecord1,final List<TerminalMessage> groupMessageRecord2,final int position){
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                chatMessageList.clear();
-                chatMessageList.addAll(groupMessageRecord1);
-                chatMessageList.addAll(groupMessageRecord2);
-                if(temporaryAdapter!=null){
-                    temporaryAdapter.notifyItemRangeInserted(0,position);
-                }
-                groupCallList.smoothScrollBy(0, -DensityUtil.dip2px(ChatBaseActivity.this,30));
-                sflCallList.setRefreshing(false);
+        handler.post(() -> {
+            chatMessageList.clear();
+            chatMessageList.addAll(groupMessageRecord1);
+            chatMessageList.addAll(groupMessageRecord2);
+            if(temporaryAdapter!=null){
+                temporaryAdapter.notifyItemRangeInserted(0,position);
             }
+            groupCallList.smoothScrollBy(0, -DensityUtil.dip2px(ChatBaseActivity.this,30));
+            sflCallList.setRefreshing(false);
         });
     }
     /**
      * 停止刷新
      */
     private void stopRefreshAndToast(final String messge){
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                sflCallList.setRefreshing(false);
-                ToastUtil.showToast(ChatBaseActivity.this, messge);
-            }
+        handler.post(() -> {
+            sflCallList.setRefreshing(false);
+            ToastUtil.showToast(ChatBaseActivity.this, messge);
         });
     }
 
@@ -1665,36 +1567,33 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
             final int viewPos = getViewPos(position);
             logger.info("上传中viewPos:" + viewPos+"percentInt:"+percentInt);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    ProgressBar progressBar_pre_upload = null;
-                    TextView tv_progress_pre_upload = null;
-                    if (viewPos != -1) {
-                        View childView = groupCallList.getChildAt(viewPos);
-                        if (childView != null) {
-                            progressBar_pre_upload = (ProgressBar) childView.findViewById(R.id.progress_bar);
-                            tv_progress_pre_upload = (TextView) childView.findViewById(R.id.tv_progress);
-                        }
+            handler.post(() -> {
+                ProgressBar progressBar_pre_upload = null;
+                TextView tv_progress_pre_upload = null;
+                if (viewPos != -1) {
+                    View childView = groupCallList.getChildAt(viewPos);
+                    if (childView != null) {
+                        progressBar_pre_upload = (ProgressBar) childView.findViewById(R.id.progress_bar);
+                        tv_progress_pre_upload = (TextView) childView.findViewById(R.id.tv_progress);
                     }
-                    if (percentInt >= 100) {
-                        temporaryAdapter.progressPercentMap.remove(tokenId);
-                        /***  文件正在发送更新进度条显示 **/
-                        if (progressBar_pre_upload != null && tv_progress_pre_upload != null) {
-                            progressBar_pre_upload.setVisibility(View.GONE);
-                            tv_progress_pre_upload.setVisibility(View.GONE);
-                        }
-                    }
-                    else {
-                        if (progressBar_pre_upload != null && tv_progress_pre_upload != null) {
-                            progressBar_pre_upload.setVisibility(View.VISIBLE);
-                            tv_progress_pre_upload.setVisibility(View.VISIBLE);
-                            progressBar_pre_upload.setProgress(percentInt);
-                            setText( tv_progress_pre_upload, percentInt + "%");
-                        }
-                    }
-
                 }
+                if (percentInt >= 100) {
+                    temporaryAdapter.progressPercentMap.remove(tokenId);
+                    /***  文件正在发送更新进度条显示 **/
+                    if (progressBar_pre_upload != null && tv_progress_pre_upload != null) {
+                        progressBar_pre_upload.setVisibility(View.GONE);
+                        tv_progress_pre_upload.setVisibility(View.GONE);
+                    }
+                }
+                else {
+                    if (progressBar_pre_upload != null && tv_progress_pre_upload != null) {
+                        progressBar_pre_upload.setVisibility(View.VISIBLE);
+                        tv_progress_pre_upload.setVisibility(View.VISIBLE);
+                        progressBar_pre_upload.setProgress(percentInt);
+                        setText( tv_progress_pre_upload, percentInt + "%");
+                    }
+                }
+
             });
         }
     };
@@ -1704,21 +1603,18 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
         @Override
         public void handler(final float percent, TerminalMessage terminalMessage) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if(temporaryAdapter.downloadProgressBar != null
-                            && temporaryAdapter.download_tv_progressBars != null) {
-                        int percentInt = (int) (percent * 100);
-                        temporaryAdapter.downloadProgressBar.setProgress(percentInt);
-                        setText(temporaryAdapter.download_tv_progressBars, percentInt + "%");
+            handler.post(() -> {
+                if(temporaryAdapter.downloadProgressBar != null
+                        && temporaryAdapter.download_tv_progressBars != null) {
+                    int percentInt = (int) (percent * 100);
+                    temporaryAdapter.downloadProgressBar.setProgress(percentInt);
+                    setText(temporaryAdapter.download_tv_progressBars, percentInt + "%");
 
-                        if(percentInt >= 100) {
-                            setViewVisibility(temporaryAdapter.downloadProgressBar, View.GONE);
-                            setViewVisibility(temporaryAdapter.download_tv_progressBars, View.GONE);
-                            temporaryAdapter.downloadProgressBar = null;
-                            temporaryAdapter.download_tv_progressBars = null;
-                        }
+                    if(percentInt >= 100) {
+                        setViewVisibility(temporaryAdapter.downloadProgressBar, View.GONE);
+                        setViewVisibility(temporaryAdapter.download_tv_progressBars, View.GONE);
+                        temporaryAdapter.downloadProgressBar = null;
+                        temporaryAdapter.download_tv_progressBars = null;
                     }
                 }
             });
@@ -1729,12 +1625,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private final class OnRefreshListenerImplementationImpl implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onRefresh() {
-            MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
-                @Override
-                public void run() {
-                    refreshData();
-                }
-            });
+            MyTerminalFactory.getSDK().getThreadPool().execute(() -> refreshData());
         }
 
     }
@@ -1765,12 +1656,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     }
 
     /**  弹出底部菜单栏 **/
-    private ReceiverSelectChatListHandler mReceiverSelectChatListHandler = new ReceiverSelectChatListHandler() {
-        @Override
-        public void handler() {
-            setListSelection(chatMessageList.size() - 1);
-        }
-    };
+    private ReceiverSelectChatListHandler mReceiverSelectChatListHandler = () -> setListSelection(chatMessageList.size() - 1);
 
     /**设置音量键为ptt键时的监听*/
     private final class OnPTTVolumeBtnStatusChangedListenerImp
@@ -1809,25 +1695,22 @@ public abstract class ChatBaseActivity extends BaseActivity{
             }
             final int viewPos = getViewPos(position);
             logger.info("发送成功position:"+position+",viewPos:" + viewPos);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (viewPos != -1) {
-                        View childView = groupCallList.getChildAt(viewPos);
-                        temporaryAdapter.progressPercentMap.remove(tokenId);
-                        if (childView != null) {
-                            ProgressBar progressBar_pre_upload = childView.findViewById(R.id.progress_bar);
-                            TextView tv_progress_pre_upload = childView.findViewById(R.id.tv_progress);
-                            if(null !=progressBar_pre_upload){
-                                progressBar_pre_upload.setVisibility(View.GONE);
-                            }
-                            if(null !=tv_progress_pre_upload){
-                                tv_progress_pre_upload.setVisibility(View.GONE);
-                            }
+            handler.post(() -> {
+                if (viewPos != -1) {
+                    View childView = groupCallList.getChildAt(viewPos);
+                    temporaryAdapter.progressPercentMap.remove(tokenId);
+                    if (childView != null) {
+                        ProgressBar progressBar_pre_upload = childView.findViewById(R.id.progress_bar);
+                        TextView tv_progress_pre_upload = childView.findViewById(R.id.tv_progress);
+                        if(null !=progressBar_pre_upload){
+                            progressBar_pre_upload.setVisibility(View.GONE);
+                        }
+                        if(null !=tv_progress_pre_upload){
+                            tv_progress_pre_upload.setVisibility(View.GONE);
                         }
                     }
-
                 }
+
             });
             temporaryAdapter.setUploadFinished();
             funcation.showBottom(false);
@@ -1858,24 +1741,17 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private ReceiveGroupOrMemberNotExistHandler receiveGroupOrMemberNotExistHandler = new ReceiveGroupOrMemberNotExistHandler() {
         @Override
         public void handler(final TerminalMessage terminalMessage) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (terminalMessage.messageToId == userId) {
-                        ToastUtil.showToast(ChatBaseActivity.this, SignalServerErrorCode.getInstanceByCode(terminalMessage.resultCode).getErrorDiscribe());
-                        sendMessageFail(terminalMessage, terminalMessage.resultCode);
-                        if (temporaryAdapter != null)
-                            temporaryAdapter.notifyDataSetChanged();
-                    }
+            handler.post(() -> {
+                if (terminalMessage.messageToId == userId) {
+                    ToastUtil.showToast(ChatBaseActivity.this, SignalServerErrorCode.getInstanceByCode(terminalMessage.resultCode).getErrorDiscribe());
+                    sendMessageFail(terminalMessage, terminalMessage.resultCode);
+                    if (temporaryAdapter != null)
+                        temporaryAdapter.notifyDataSetChanged();
                 }
             });
         }
     };
 
-//    @Override
-//    public void setSelectedFragment(ImagePreviewItemFragment backHandledFragment) {
-//        imagePreviewItemFragment = backHandledFragment;
-//    }
 
     public void setSmoothScrollToPosition(int position){
         groupCallList.smoothScrollToPosition(position);
@@ -1898,12 +1774,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
             if (oldBottom != -1 && oldBottom > bottom) {
                 if(groupCallList!=null){
                     groupCallList.requestLayout();
-                    groupCallList.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (temporaryAdapter != null) {
-                                groupCallList.scrollToPosition(temporaryAdapter.getItemCount() - 1);
-                            }
+                    groupCallList.post(() -> {
+                        if (temporaryAdapter != null) {
+                            groupCallList.scrollToPosition(temporaryAdapter.getItemCount() - 1);
                         }
                     });
                 }

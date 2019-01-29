@@ -99,17 +99,14 @@ public class ScanGroupSearchAdapter extends BaseAdapter{
         }
 
         //设置扫描组点击事件
-        viewHolder.tvAddScanGroup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(MyTerminalFactory.getSDK().getConfigManager().getScanGroups().size()>=10){
-                    ToastUtil.showToast(context,"扫描组不能超过10个");
-                    return;
-                }
-                MemberIds.clear();
-                MemberIds.add(searchGroupList.get(position).getNo());
-                MyTerminalFactory.getSDK().getGroupScanManager().setScanGroupList(MemberIds,true);
+        viewHolder.tvAddScanGroup.setOnClickListener(view -> {
+            if(MyTerminalFactory.getSDK().getConfigManager().getScanGroups().size()>=10){
+                ToastUtil.showToast(context,"扫描组不能超过10个");
+                return;
             }
+            MemberIds.clear();
+            MemberIds.add(searchGroupList.get(position).getNo());
+            MyTerminalFactory.getSDK().getGroupScanManager().setScanGroupList(MemberIds,true);
         });
 
         return convertView;

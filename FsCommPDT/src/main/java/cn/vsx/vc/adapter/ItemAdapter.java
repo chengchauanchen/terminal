@@ -46,8 +46,8 @@ public class ItemAdapter extends BaseAdapter {
         if (convertView == null) {
             holder = new ViewHolder();
             convertView = inflater.inflate(R.layout.tem_layout, null);
-            holder.icon = (ImageView) convertView.findViewById(R.id.imageview);
-            holder.title = (TextView) convertView.findViewById(R.id.textview);
+            holder.icon =  convertView.findViewById(R.id.imageview);
+            holder.title =  convertView.findViewById(R.id.textview);
             convertView.setTag(holder);
         } else {
             holder = (ViewHolder) convertView.getTag();
@@ -74,7 +74,7 @@ public class ItemAdapter extends BaseAdapter {
     }
 
     public static List<ItemAdapter.DataHolder> iniDatas() {
-        List<ItemAdapter.DataHolder> list = new ArrayList<ItemAdapter.DataHolder>();
+        List<ItemAdapter.DataHolder> list = new ArrayList<>();
         ItemAdapter.DataHolder dataHolder1 = new ItemAdapter.DataHolder("录音电话", R.drawable.tel);
         ItemAdapter.DataHolder dataHolder2 = new ItemAdapter.DataHolder("普通电话", R.drawable.tel);
         list.add(dataHolder1);

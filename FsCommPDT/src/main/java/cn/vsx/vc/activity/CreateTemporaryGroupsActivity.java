@@ -1,6 +1,5 @@
 package cn.vsx.vc.activity;
 
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
@@ -76,10 +75,9 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     private ArrayList<Integer> list;
     private OptionsPickerView optionsPickerViewA;
     private OptionsPickerView optionsPickerViewB;
-    private List<Integer>options1Items=new ArrayList();
-    private List<Integer>options2Items=new ArrayList();
-    private List<Integer>options3Items=new ArrayList();
-    private AlertDialog alertDialog;
+    private List<Integer>options1Items=new ArrayList<>();
+    private List<Integer>options2Items=new ArrayList<>();
+    private List<Integer>options3Items=new ArrayList<>();
     private boolean forceSwitchGroup;
     private TimerTask timerTaskLock;
     private List<Integer> signs;
@@ -110,21 +108,13 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
     private void initOptionsPickerViewA() {
 
-        optionsPickerViewA = new OptionsPickerView.Builder(this, new OptionsPickerView.OnOptionsSelectListener() {
-            @Override
-            public void onOptionsSelect(final int options1, final int options2, final int options3, View v) {
-                existHour=options1;
-                existMin=options2;
-                existSec=options3;
+        optionsPickerViewA = new OptionsPickerView.Builder(this, (options1, options2, options3, v) -> {
+            existHour=options1;
+            existMin=options2;
+            existSec=options3;
 
-                logger.info("存在时间"+options1+"时"+options2+"分"+options3+"秒");
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        exist_time.setText(options1+"时"+options2+"分"+options3+"秒");
-                    }
-                });
-            }
+            logger.info("存在时间"+options1+"时"+options2+"分"+options3+"秒");
+            myHandler.post(() -> exist_time.setText(options1+"时"+options2+"分"+options3+"秒"));
         }).setLabels("时", "分", "秒").setSubmitText("确定")//确定按钮文字
                 .setCancelText("取消")//取消按钮文字
                 .setTitleText("")//标题
@@ -148,22 +138,14 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
     private void initOptionsPickerViewB() {
 
-        optionsPickerViewB = new OptionsPickerView.Builder(this, new OptionsPickerView.OnOptionsSelectListener() {
-            @Override
-            public void onOptionsSelect(final int options1, final int options2, final int options3, View v) {
-                lockedHour=options1;
-                lockedMin=options2;
-                lockedSec=options3;
+        optionsPickerViewB = new OptionsPickerView.Builder(this, (options1, options2, options3, v) -> {
+            lockedHour=options1;
+            lockedMin=options2;
+            lockedSec=options3;
 
-                logger.info("锁定时间"+options1+"时"+options2+"分"+options3+"秒");
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        locked_time.setText(options1+"时"+options2+"分"+options3+"秒");
-                    }
-                });
+            logger.info("锁定时间"+options1+"时"+options2+"分"+options3+"秒");
+            myHandler.post(() -> locked_time.setText(options1+"时"+options2+"分"+options3+"秒"));
 
-            }
         }).setLabels("时", "分", "秒").setSubmitText("确定")//确定按钮文字
                 .setCancelText("取消")//取消按钮文字
                 .setTitleText("")//标题
@@ -193,122 +175,100 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
         //创建临时组
         news_bar_back.setOnClickListener(this);
-        ivLocked.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                if (ivLocked.isSelected()) {
-                    ivLocked.setSelected(false);
-                    ivUnlocked.setSelected(true);
-                    ll_lock_time.setVisibility(View.GONE);
-                    TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_unchecked);
-                    TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_checked);
-                } else {
-                    TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
-                    TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
-                    TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
-                    TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
+        ivLocked.setOnClickListener(v -> {
+            if (ivLocked.isSelected()) {
+                ivLocked.setSelected(false);
+                ivUnlocked.setSelected(true);
+                ll_lock_time.setVisibility(View.GONE);
+                TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_unchecked);
+                TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_checked);
+            } else {
+                TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
+                TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
+                TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
+                TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
+                ivLocked.setSelected(true);
+                ivUnlocked.setSelected(false);
+                iv_change.setSelected(true);
+                iv_unchange.setSelected(false);
+                ll_lock_time.setVisibility(View.VISIBLE);
+            }
+        });
+        ivUnlocked.setOnClickListener(v -> {
+            if (ivUnlocked.isSelected()) {
+                ivUnlocked.setSelected(false);
+                ivLocked.setSelected(true);
+                iv_change.setSelected(true);
+                iv_unchange.setSelected(false);
+                ll_lock_time.setVisibility(View.VISIBLE);
+                TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
+                TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
+                TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
+                TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
+            } else {
+                ivUnlocked.setSelected(true);
+                ivLocked.setSelected(false);
+                ll_lock_time.setVisibility(View.GONE);
+                TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_unchecked);
+                TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_checked);
+            }
+        });
+        iv_change.setOnClickListener(v -> {
+            if(iv_change.isSelected()){
+                if(ivLocked.isSelected()){
                     ivLocked.setSelected(true);
                     ivUnlocked.setSelected(false);
                     iv_change.setSelected(true);
                     iv_unchange.setSelected(false);
-                    ll_lock_time.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-        ivUnlocked.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                if (ivUnlocked.isSelected()) {
-                    ivUnlocked.setSelected(false);
-                    ivLocked.setSelected(true);
-                    iv_change.setSelected(true);
-                    iv_unchange.setSelected(false);
-                    ll_lock_time.setVisibility(View.VISIBLE);
                     TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
                     TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
                     TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
                     TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
-                } else {
-                    ivUnlocked.setSelected(true);
-                    ivLocked.setSelected(false);
-                    ll_lock_time.setVisibility(View.GONE);
-                    TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_unchecked);
-                    TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_checked);
-                }
-            }
-        });
-        iv_change.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                if(iv_change.isSelected()){
-                    if(ivLocked.isSelected()){
-                        ivLocked.setSelected(true);
-                        ivUnlocked.setSelected(false);
-                        iv_change.setSelected(true);
-                        iv_unchange.setSelected(false);
-                        TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
-                        TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
-                        TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
-                        TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
-                    }else {
-                        iv_change.setSelected(false);
-                        iv_unchange.setSelected(true);
-                        TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_unchecked);
-                        TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_checked);
-                    }
                 }else {
-                    iv_change.setSelected(true);
-                    iv_unchange.setSelected(false);
-                    TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
-                    TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
+                    iv_change.setSelected(false);
+                    iv_unchange.setSelected(true);
+                    TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_unchecked);
+                    TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_checked);
                 }
+            }else {
+                iv_change.setSelected(true);
+                iv_unchange.setSelected(false);
+                TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
+                TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
             }
         });
 
-        iv_unchange.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                if(iv_change.isSelected()){
-                    if(ivLocked.isSelected()){
-                        ivLocked.setSelected(true);
-                        ivUnlocked.setSelected(false);
-                        iv_change.setSelected(true);
-                        iv_unchange.setSelected(false);
-                        TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
-                        TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
-                        TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
-                        TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
-                        ToastUtil.showToast(CreateTemporaryGroupsActivity.this,"锁定状态下自动将组员切换到所创建的临时组");
-                    }else {
-                        iv_change.setSelected(false);
-                        iv_unchange.setSelected(true);
-                        TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_unchecked);
-                        TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_checked);
-                    }
-                }else {
+        iv_unchange.setOnClickListener(v -> {
+            if(iv_change.isSelected()){
+                if(ivLocked.isSelected()){
+                    ivLocked.setSelected(true);
+                    ivUnlocked.setSelected(false);
                     iv_change.setSelected(true);
                     iv_unchange.setSelected(false);
+                    TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
+                    TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
                     TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
                     TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
+                    ToastUtil.showToast(CreateTemporaryGroupsActivity.this,"锁定状态下自动将组员切换到所创建的临时组");
+                }else {
+                    iv_change.setSelected(false);
+                    iv_unchange.setSelected(true);
+                    TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_unchecked);
+                    TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_checked);
                 }
+            }else {
+                iv_change.setSelected(true);
+                iv_unchange.setSelected(false);
+                TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
+                TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
             }
         });
 
         btn_create_temporary_group.setOnClickListener(new OnClickListenerImplementation());
 
-        exist_time.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                optionsPickerViewA.show();
-            }
-        });
+        exist_time.setOnClickListener(v -> optionsPickerViewA.show());
 
-        locked_time.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                optionsPickerViewB.show();
-            }
-        });
+        locked_time.setOnClickListener(v -> optionsPickerViewB.show());
 
     }
 
@@ -381,34 +341,23 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     @Override
     public void handler(int tempGroupNo, final int resultCode, final String resultDesc) {
 
-        myHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                checkDialogIsNotNull();
-                if(resultCode== BaseCommonCode.SUCCESS_CODE){
-                    createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_SUCCESS,"",forceSwitchGroup);
-                    myHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            //刷新通讯录组群列表
-                            MyTerminalFactory.getSDK().getConfigManager().updateAllGroups();
-                            dismissTemporaryGroupDialog();
-                            startActivity(new Intent(CreateTemporaryGroupsActivity.this,NewMainActivity.class));
-                            CreateTemporaryGroupsActivity.this.finish();
-                        }
-                    },2000);
-                }else {
-                    createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_FAIL,resultDesc,forceSwitchGroup);
-                    myHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            dismissTemporaryGroupDialog();
-                        }
-                    },2000);
-
-                }
+        myHandler.post(() -> {
+            checkDialogIsNotNull();
+            if(resultCode== BaseCommonCode.SUCCESS_CODE){
+                createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_SUCCESS,"",forceSwitchGroup);
+                myHandler.postDelayed(() -> {
+                    //刷新通讯录组群列表
+                    MyTerminalFactory.getSDK().getConfigManager().updateAllGroups();
+                    dismissTemporaryGroupDialog();
+                    startActivity(new Intent(CreateTemporaryGroupsActivity.this,NewMainActivity.class));
+                    CreateTemporaryGroupsActivity.this.finish();
+                },2000);
+            }else {
+                createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_FAIL,resultDesc,forceSwitchGroup);
+                myHandler.postDelayed(() -> dismissTemporaryGroupDialog(),2000);
 
             }
+
         });
     }
 };

@@ -4,7 +4,6 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import cn.vsx.hamster.terminalsdk.tools.PinYinUtils;
-import cn.vsx.hamster.terminalsdk.tools.Util;
 
 /**
  * Created by XX on 2018/4/13.

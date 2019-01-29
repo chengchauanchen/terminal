@@ -1,6 +1,5 @@
 package cn.vsx.vc.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -13,37 +12,20 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.zectec.imageandfileselector.receivehandler.ReceiverIndividualCallForAddressBookHandler;
-import com.zectec.imageandfileselector.receivehandler.ReceiverIndividualMsgForAddressBookHandler;
-import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
-
-import org.apache.http.util.TextUtils;
-import org.apache.log4j.Logger;
-
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Member;
-import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
-import cn.vsx.vc.activity.IncreaseTemporaryGroupMemberActivity;
-import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.UserInfoActivity;
-import cn.vsx.vc.utils.CallPhoneUtil;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
-import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.ToastUtil;
 
 public class TempGroupSearchAdapter extends BaseAdapter {
 
 	private Context context;
 	private List<Member> searchMembersList;
-	private SearchContactsAdapter.ViewHolder holder;
 	private int searchListPosition;
 	private int activeMode;
 	private int errorCode;
@@ -62,12 +44,7 @@ public class TempGroupSearchAdapter extends BaseAdapter {
 		this.searchListPosition = searchListPosition;
 		this.activeMode = activeMode;
 		this.errorCode = errorCode;
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				notifyDataSetChanged();
-			}
-		});
+		handler.post(() -> notifyDataSetChanged());
 	}
 
 	@Override
@@ -87,7 +64,7 @@ public class TempGroupSearchAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(final int position, View convertView, final ViewGroup parent) {
-		holder = null;
+		SearchContactsAdapter.ViewHolder holder = null;
 		if (convertView == null) {
 			convertView = View.inflate(context, R.layout.fragment_temp_group_item, null);
 			holder = new SearchContactsAdapter.ViewHolder(convertView);
@@ -128,85 +105,12 @@ public class TempGroupSearchAdapter extends BaseAdapter {
 		} else {
 			holder.tv_member_id.setText(id);
 		}
-
-//		if(interGroup) {
-//			holder.iv_search_msg.setVisibility(View.VISIBLE);
-//		}
-//		else {
-//			holder.iv_search_msg.setVisibility(View.GONE);
-//		}
-//		if (DataUtil.isExistContacts(searchContactsBean)) {//当要显示五角星时，判断是否已经在个呼通讯录中；
-//			holder.iv_search_add_remove.setBackgroundResource(R.drawable.select_b);
-//		}else {
-//			holder.iv_search_add_remove.setBackgroundResource(R.drawable.popupwindow_add_contacts_gray);
-//		}
-
-//		if (searchContactsBean.id == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)) {
-//			holder.tv_me.setVisibility(View.VISIBLE);
-//			holder.iv_search_add_remove.setVisibility(View.GONE);
-//			holder.iv_search_call.setVisibility(View.GONE);
-//			holder.iv_search_msg.setVisibility(View.GONE);
-//		}
-//		else {
-//			holder.tv_me.setVisibility(View.GONE);
-//			holder.iv_search_add_remove.setVisibility(View.VISIBLE);
-//			holder.iv_search_call.setVisibility(View.VISIBLE);
-//			holder.iv_search_msg.setVisibility(View.VISIBLE);
-//		}
-
-//		if (TerminalMemberType.TERMINAL_PDT.equals(searchContactsBean.getTerminalMemberTypeEnum())||searchContactsBean.id == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
-//			holder.llDialTo.setVisibility(View.GONE);
-//		}else {
-//			holder.llDialTo.setVisibility(View.VISIBLE);
-//		}
-
-
-//		holder.iv_search_call.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View view) {
-//				OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverIndividualCallForAddressBookHandler.class, 2, position);
-//			}
-//		});
-//		holder.iv_search_msg.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				Intent intent = new Intent(context, IndividualNewsActivity.class);
-//				intent.putExtra("isGroup", false);
-//				intent.putExtra("userId", searchContactsBean.id);
-//				intent.putExtra("userName", searchContactsBean.getName());
-//				context.startActivity(intent);
-//			}
-//		});
-//
-//		holder.llDialTo.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View view) {
-//				if (!android.text.TextUtils.isEmpty(searchContactsBean.phone)) {
-//					CallPhoneUtil.callPhone((Activity) context, searchContactsBean.phone);
-//				}else {
-//					ToastUtil.showToast(context,"暂无该用户电话号码");
-//				}
-//			}
-//		});
-		holder.iv_member_portrait.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Intent intent = new Intent(context, UserInfoActivity.class);
-				intent.putExtra("userId", searchContactsBean.getNo());
-				intent.putExtra("userName", searchContactsBean.getName());
-				context.startActivity(intent);
-			}
+		holder.iv_member_portrait.setOnClickListener(view -> {
+			Intent intent = new Intent(context, UserInfoActivity.class);
+			intent.putExtra("userId", searchContactsBean.getNo());
+			intent.putExtra("userName", searchContactsBean.getName());
+			context.startActivity(intent);
 		});
-//		holder. ll_search_add_remove.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				if (!DataUtil.isExistContacts(searchContactsBean)) {//不在个呼通讯录中
-//					MyTerminalFactory.getSDK().getContactsManager().modifyContacts(Operation4PrivateAddressList.ADD.getCode(),searchContactsBean.id);
-//				}else {
-//					MyTerminalFactory.getSDK().getContactsManager().modifyContacts(Operation4PrivateAddressList.REMOVE.getCode(),searchContactsBean.id);
-//				}
-//			}
-//		});
 		return convertView;
 	}
 
@@ -239,7 +143,6 @@ public class TempGroupSearchAdapter extends BaseAdapter {
 		TextView tv_me;
 		@Bind(R.id.shoutai_dial_to)
 		LinearLayout llDialTo;
-
 
 		public ViewHolder(View rootView) {
 			ButterKnife.bind(this,rootView);

@@ -8,7 +8,6 @@ import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -120,8 +119,8 @@ public class LocalMemberSearchFragment extends BaseFragment{
                 if (s.toString().contains(" ")) {
                     String[] str = s.toString().split(" ");
                     String str1 = "";
-                    for (int i = 0; i < str.length; i++) {
-                        str1 += str[i];
+                    for (String aStr : str) {
+                        str1 += aStr;
                     }
                     et_search_allcontacts.setText(str1);
 
@@ -136,25 +135,19 @@ public class LocalMemberSearchFragment extends BaseFragment{
             }
         });
 
-        et_search_allcontacts.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-                if(i == EditorInfo.IME_ACTION_SEARCH) {
-                    doSearch();
-                }
-                return false;
+        et_search_allcontacts.setOnEditorActionListener((textView, i, keyEvent) -> {
+            if(i == EditorInfo.IME_ACTION_SEARCH) {
+                doSearch();
             }
+            return false;
         });
 
-        personContactsAdapter.setOnItemBtnClick(new LocalMemberSearchAdapter.OnItemBtnClickListener() {
-            @Override
-            public void onItemBtnClick() {
-                et_search_allcontacts.setText("");
-                InputMethodUtil.hideInputMethod(context, et_search_allcontacts);
+        personContactsAdapter.setOnItemBtnClick(() -> {
+            et_search_allcontacts.setText("");
+            InputMethodUtil.hideInputMethod(context, et_search_allcontacts);
 
-                searchList.clear();
-                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceivePopBackStackHandler.class);
-            }
+            searchList.clear();
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceivePopBackStackHandler.class);
         });
     }
 
@@ -173,12 +166,7 @@ public class LocalMemberSearchFragment extends BaseFragment{
         editText.requestFocus();
         final InputMethodManager inputMethodManager = ((InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE));
         if(inputMethodManager!=null){
-            editText.postDelayed(new Runnable(){
-                @Override
-                public void run(){
-                    inputMethodManager.showSoftInput(editText, 0);
-                }
-            },50);
+            editText.postDelayed(() -> inputMethodManager.showSoftInput(editText, 0),50);
         }
     }
 
@@ -227,12 +215,7 @@ public class LocalMemberSearchFragment extends BaseFragment{
             }
         }
         if (searchList.size() == 0) {
-            //            if (isInterGroup) {
-            //                tv_search_nothing.setText("当前组不存在该用户");
-            //            }
-            //            else {
             tv_search_nothing.setText("联系人不存在");
-            //            }
             rl_search_result.setVisibility(View.GONE);
         } else {
             tv_search_nothing.setVisibility(View.GONE);
@@ -338,25 +321,19 @@ public class LocalMemberSearchFragment extends BaseFragment{
 
     }
 
-    private ReceiverIndividualCallForAddressBookHandler mReceiverIndividualCallForAddressBookHandler = new ReceiverIndividualCallForAddressBookHandler() {
-        @Override
-        public void handler(int where, int position) {
-            if(where == 4) {
-                activeIndividualCall(position);
-            }
+    private ReceiverIndividualCallForAddressBookHandler mReceiverIndividualCallForAddressBookHandler = (where, position) -> {
+        if(where == 4) {
+            activeIndividualCall(position);
         }
     };
 
-    private ReceiverIndividualMsgForAddressBookHandler mReceiverIndividualMsgForAddressBookHandler = new ReceiverIndividualMsgForAddressBookHandler() {
-        @Override
-        public void handler(int where, int position) {
-            if(where == 4) {
-                Intent intent = new Intent(context, IndividualNewsActivity.class);
-                intent.putExtra("isGroup", false);
-                intent.putExtra("userId", searchList.get(position).id);
-                intent.putExtra("userName", searchList.get(position).getName());
-                context.startActivity(intent);
-            }
+    private ReceiverIndividualMsgForAddressBookHandler mReceiverIndividualMsgForAddressBookHandler = (where, position) -> {
+        if(where == 4) {
+            Intent intent = new Intent(context, IndividualNewsActivity.class);
+            intent.putExtra("isGroup", false);
+            intent.putExtra("userId", searchList.get(position).id);
+            intent.putExtra("userName", searchList.get(position).getName());
+            context.startActivity(intent);
         }
     };
 
@@ -380,29 +357,21 @@ public class LocalMemberSearchFragment extends BaseFragment{
     private ReceiveNotifyMemberChangeHandler mReceiveNotifyMemberChangeHandler = new ReceiveNotifyMemberChangeHandler() {
         @Override
         public void handler(MemberChangeType memberChangeType) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (mposition >= 0) {
-                        searchList.remove(mposition);
-                        if (searchList.size() == 0) {
-                            //            if (isInterGroup) {
-                            //                tv_search_nothing.setText("当前组不存在该用户");
-                            //            }
-                            //            else {
-                            tv_search_nothing.setText("联系人不存在");
-                            //            }
-                            rl_search_result.setVisibility(View.GONE);
-                        } else {
-                            tv_search_nothing.setVisibility(View.GONE);
-                            rl_search_result.setVisibility(View.VISIBLE);
+            myHandler.post(() -> {
+                if (mposition >= 0) {
+                    searchList.remove(mposition);
+                    if (searchList.size() == 0) {
+                        tv_search_nothing.setText("联系人不存在");
+                        rl_search_result.setVisibility(View.GONE);
+                    } else {
+                        tv_search_nothing.setVisibility(View.GONE);
+                        rl_search_result.setVisibility(View.VISIBLE);
 
-                            if (personContactsAdapter != null) {
-                                personContactsAdapter.notifyDataSetChanged();
-                            }
+                        if (personContactsAdapter != null) {
+                            personContactsAdapter.notifyDataSetChanged();
                         }
-                        mposition = -1;
                     }
+                    mposition = -1;
                 }
             });
         }

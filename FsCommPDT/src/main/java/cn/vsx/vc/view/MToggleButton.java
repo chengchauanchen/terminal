@@ -141,18 +141,15 @@ public class MToggleButton extends SkinCompatView {
         paint.setAntiAlias(true);
 
         // 添加按钮的监听事件
-        setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // 点击时切换按钮的状态，声明一个布尔的变量
-                currState = !currState;
-                // 设置按钮状态的监听
-                if (onBtnClickListener != null) {
-                    onBtnClickListener.onBtnClick(currState);
-                }
-                // 刷新状态
-                flushState();
+        setOnClickListener(v -> {
+            // 点击时切换按钮的状态，声明一个布尔的变量
+            currState = !currState;
+            // 设置按钮状态的监听
+            if (onBtnClickListener != null) {
+                onBtnClickListener.onBtnClick(currState);
             }
+            // 刷新状态
+            flushState();
         });
 
 

@@ -11,5 +11,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  * 修订历史：
  */
 public interface ReceiveGoWatchRTSPHandler extends ReceiveHandler{
-    public void handler(TerminalMessage terminalMessage);
+    void handler(TerminalMessage terminalMessage);
 }

@@ -57,15 +57,14 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.service.LockScreenService;
-import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.DataUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import cn.vsx.vc.view.MyRelativeLayout;
 import cn.vsx.vc.view.TimerView;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.PhoneAdapter;
+import ptt.terminalsdk.tools.ToastUtil;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.GRANTED;
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.IDLE;
@@ -77,12 +76,9 @@ public class LockScreenActivity extends BaseActivity {
         @Override
         public void handler() {
             logger.info("receiveMemberDeleteHandler"+"被调用了");
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    LockScreenActivity.this.finish();
-                    stopService(new Intent(LockScreenActivity.this, LockScreenService.class));
-                }
+            mHandler.post(() -> {
+                LockScreenActivity.this.finish();
+                stopService(new Intent(LockScreenActivity.this, LockScreenService.class));
             });
         }
     };
@@ -91,11 +87,8 @@ public class LockScreenActivity extends BaseActivity {
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
         @Override
         public void handler() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setCurrentGroupView();//当前的组和文件夹名字重置
-                }
+            mHandler.post(() -> {
+                setCurrentGroupView();//当前的组和文件夹名字重置
             });
         }
     };
@@ -104,31 +97,20 @@ public class LockScreenActivity extends BaseActivity {
         @Override
         public void handler(final boolean connected) {
             logger.info("锁屏界面服务是否连接：" + connected);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                }
+            mHandler.post(() -> {
             });
         }
     };
     /**
      * 信令服务发送NotifyForceRegisterMessage消息时，先去reAuth(false)，然后login()
      */
-    private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = new ReceiveSendUuidResponseHandler() {
-        @Override
-        public void handler(int resultCode, final String resultDesc, boolean isRegisted) {
-            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                if(isRegisted){
-                    TerminalFactory.getSDK().getAuthManagerTwo().login();
-                    logger.info("信令服务器通知NotifyForceRegisterMessage消息，在LockScreenActivity中登录了");
-                }else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            LockScreenActivity.this.finish();
-                        }
-                    });
-                }
+    private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = (resultCode, resultDesc, isRegisted) -> {
+        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+            if(isRegisted){
+                TerminalFactory.getSDK().getAuthManagerTwo().login();
+                logger.info("信令服务器通知NotifyForceRegisterMessage消息，在LockScreenActivity中登录了");
+            }else {
+                runOnUiThread(() -> LockScreenActivity.this.finish());
             }
         }
     };
@@ -138,12 +120,9 @@ public class LockScreenActivity extends BaseActivity {
     private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = new ReceiveUpdateFoldersAndGroupsHandler(){
         @Override
         public void handler() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    //当前文件夹、组数据的显示设置
-                    setCurrentGroupView();
-                }
+            mHandler.post(() -> {
+                //当前文件夹、组数据的显示设置
+                setCurrentGroupView();
             });
         }
     };
@@ -155,16 +134,13 @@ public class LockScreenActivity extends BaseActivity {
 
         @Override
         public void handler(int reasonCode) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setCurrentGroupView();
-                    MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
-                    if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.WAITING && MyApplication.instance.getGroupSpeakState() != GRANTED) {
-                        change2Silence();
-                    }
-
+            mHandler.post(() -> {
+                setCurrentGroupView();
+                MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
+                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.WAITING && MyApplication.instance.getGroupSpeakState() != GRANTED) {
+                    change2Silence();
                 }
+
             });
         }
     };
@@ -177,13 +153,10 @@ public class LockScreenActivity extends BaseActivity {
         public void handler(int memberId, final String memberName, final int groupId,
                             String version, CallMode currentCallMode) {
             if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        change2Listening();
-                        setCurrentGroupScanView(groupId);
-                        MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, memberName);
-                    }
+                mHandler.post(() -> {
+                    change2Listening();
+                    setCurrentGroupScanView(groupId);
+                    MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, memberName);
                 });
             }
 
@@ -197,18 +170,15 @@ public class LockScreenActivity extends BaseActivity {
         @Override
         public void handler(final int resultCode, String resultDesc) {
             if (currentCallMode == CallMode.GENERAL_CALL_MODE) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
-                            change2Listening();
-                        } else {
-                            //如果是停止组呼
-                            MyApplication.instance.isPttPress = false;
+                mHandler.post(() -> {
+                    if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
+                        change2Listening();
+                    } else {
+                        //如果是停止组呼
+                        MyApplication.instance.isPttPress = false;
 //                            myHandler.removeMessages(1);
 //                            timeProgress = 60;
-                            change2Silence();
-                        }
+                        change2Silence();
                     }
                 });
             }
@@ -225,29 +195,18 @@ public class LockScreenActivity extends BaseActivity {
             if (currentCallMode == CallMode.GENERAL_CALL_MODE) {
 
                 if (methodResult == 0) {//请求成功，开始组呼
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            change2Speaking();
-                            setCurrentGroupView();
-                        }
+                    mHandler.post(() -> {
+                        change2Speaking();
+                        setCurrentGroupView();
                     });
                 } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            change2Waiting();
-                        }
-                    });
+                    mHandler.post(() -> change2Waiting());
                 } else {//请求失败
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (MyApplication.instance.getGroupListenenState() != GroupCallListenState.LISTENING) {
-                                change2Silence();
-                            } else {
-                                change2Listening();
-                            }
+                    mHandler.post(() -> {
+                        if (MyApplication.instance.getGroupListenenState() != GroupCallListenState.LISTENING) {
+                            change2Silence();
+                        } else {
+                            change2Listening();
                         }
                     });
                 }
@@ -372,8 +331,6 @@ public class LockScreenActivity extends BaseActivity {
                     break;
             }
         }
-
-        ;
     };
 
     private BroadcastReceiver openLockReceiver = new BroadcastReceiver() {
@@ -458,12 +415,9 @@ public class LockScreenActivity extends BaseActivity {
 
         registerReceiver(openLockReceiver, new IntentFilter(Intent.ACTION_USER_PRESENT));
         setOnPTTVolumeBtnStatusChangedListener(new OnPTTVolumeBtnStatusChangedListenerImp());
-        rl_lock_screen.setScreenLockListener(new MyRelativeLayout.ScreenLockListener(){
-            @Override
-            public void onScreenLock(){
-                Log.d("LockScreenActivity", "执行动画");
-                playAnimation();
-            }
+        rl_lock_screen.setScreenLockListener(() -> {
+            Log.d("LockScreenActivity", "执行动画");
+            playAnimation();
         });
 
     }
@@ -578,15 +532,11 @@ public class LockScreenActivity extends BaseActivity {
     }
 
     private void setCurrentGroupView() {
-//        tv_current_group = (TextView) findViewById(R.id.tv_current_group);
-//        tv_current_folder = (TextView) findViewById(R.id.tv_current_folder);
         tv_current_group.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
         tv_current_folder.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).getDepartmentName());
     }
 
     private void setCurrentGroupScanView(final int groupId) {
-//        tv_current_group = (TextView) findViewById(R.id.tv_current_group);
-//        tv_current_folder = (TextView) findViewById(R.id.tv_current_folder);
         tv_current_group.setText(DataUtil.getGroupByGroupNo(groupId).name);
         tv_current_folder.setText(DataUtil.getGroupByGroupNo(groupId).getDepartmentName());
     }
@@ -650,20 +600,10 @@ public class LockScreenActivity extends BaseActivity {
             logger.info("触发了receiveNotifyMemberChangeHandler");
             online_number = MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size();
             if (memberChangeType == MemberChangeType.MEMBER_ACTIVE_GROUP_CALL) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        change2Silence();
-                    }
-                });
+                mHandler.post(() -> change2Silence());
 
             } else if (memberChangeType == MemberChangeType.MEMBER_PROHIBIT_GROUP_CALL) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        change2Forbid();
-                    }
-                });
+                mHandler.post(() -> change2Forbid());
             }
         }
     };

@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.TextViewCompat;
 import android.view.Gravity;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -112,20 +111,17 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         shoutai_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         jingwutong_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         dialPopupwindow = new DialPopupwindow(context);
-        voice_image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!soundOff){
-                    voice_image.setImageResource(R.drawable.volume_off_call);
-                    TerminalFactory.getSDK().getAudioProxy().volumeQuiet();
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true,1);
-                    soundOff =true;
-                }else {
-                    voice_image.setImageResource(R.drawable.horn);
-                    TerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false,1);
-                    soundOff =false;
-                }
+        voice_image.setOnClickListener(view -> {
+            if(!soundOff){
+                voice_image.setImageResource(R.drawable.volume_off_call);
+                TerminalFactory.getSDK().getAudioProxy().volumeQuiet();
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true,1);
+                soundOff =true;
+            }else {
+                voice_image.setImageResource(R.drawable.horn);
+                TerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false,1);
+                soundOff =false;
             }
         });
     }
@@ -141,46 +137,32 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
-        imgbtn_dial.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (dialPopupwindow == null){
-                    dialPopupwindow = new DialPopupwindow(context);
-                }
-                dialPopupwindow.showAtLocation(((Activity)context).findViewById(R.id.rg), Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
+        imgbtn_dial.setOnClickListener(v -> {
+            if (dialPopupwindow == null){
+                dialPopupwindow = new DialPopupwindow(context);
             }
+            dialPopupwindow.showAtLocation(((Activity)context).findViewById(R.id.rg), Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
         });
 
-        activity.setOnBackListener(new NewMainActivity.BackListener() {
-            @Override
-            public void onBack() {
-                    if (groupFragmentNew.isVisible()) {
-                        groupFragmentNew.onBack();
-                    }else if (handPlatformFragment.isVisible()){
-                        handPlatformFragment.onBack();
-                    }else {
-                        policeAffairsFragment.onBack();
-                    }
-            }
+        activity.setOnBackListener(() -> {
+                if (groupFragmentNew.isVisible()) {
+                    groupFragmentNew.onBack();
+                }else if (handPlatformFragment.isVisible()){
+                    handPlatformFragment.onBack();
+                }else {
+                    policeAffairsFragment.onBack();
+                }
         });
 
     }
 
     /*** 自己组呼返回的消息 **/
-    private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
-        @Override
-        public void handler(final int methodResult, String resultDesc) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (methodResult == 0) {
-                        showViewWhenGroupCall("我正在说话");
-                        setViewEnable(false);
-                    }
-                }
-            });
+    private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
+        if (methodResult == 0) {
+            showViewWhenGroupCall("我正在说话");
+            setViewEnable(false);
         }
-    };
+    });
     private void setViewEnable (boolean isEnable) {
 //        newsList.setEnabled(isEnable);
         add_icon.setEnabled(isEnable);
@@ -225,40 +207,22 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
         super.onDestroyView();
     }
-    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
-        @Override
-        public void handler() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setVideoIcon();
-                }
-            });
-        }
-    };
+    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> mHandler.post(() -> setVideoIcon());
     private ReceiveChangeGroupHandler receiveChangeGroupHandler = new ReceiveChangeGroupHandler() {
         @Override
         public void handler(int errorCode, String errorDesc) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
-                }
-            });
+            mHandler.post(() -> setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name));
         }
     };
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
         @Override
         public void handler(int memberId, String memberName, int groupId, final String groupName, CallMode currentCallMode) {
             if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setting_group_name.setText(groupName);
-                        speaking_name.setVisibility(View.VISIBLE);
-                        icon_laba.setVisibility(View.VISIBLE);
-                        speaking_name.setText(MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
-                    }
+                mHandler.post(() -> {
+                    setting_group_name.setText(groupName);
+                    speaking_name.setVisibility(View.VISIBLE);
+                    icon_laba.setVisibility(View.VISIBLE);
+                    speaking_name.setText(MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
                 });
             }
 
@@ -279,34 +243,21 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         }
     };
     /***  自己组呼结束 **/
-    private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = new ReceiveCeaseGroupCallConformationHander() {
-
-        @Override
-        public void handler(int resultCode, String resultDesc) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (MyApplication.instance.getGroupListenenState() == LISTENING) {
-                        return;
-                    }
-                    hideViewWhenStopGroupCall();
-                    setViewEnable(true);
-                }
-            });
-
+    private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = (resultCode, resultDesc) -> mHandler.post(() -> {
+        if (MyApplication.instance.getGroupListenenState() == LISTENING) {
+            return;
         }
-    };
+        hideViewWhenStopGroupCall();
+        setViewEnable(true);
+    });
     private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler(){
 
         @Override
         public void handler(int reasonCode) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
-                    speaking_name.setVisibility(View.GONE);
-                    icon_laba.setVisibility(View.GONE);
-                }
+            mHandler.post(() -> {
+                setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
+                speaking_name.setVisibility(View.GONE);
+                icon_laba.setVisibility(View.GONE);
             });
         }
     };
@@ -316,12 +267,9 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = new ReceiveUpdateFoldersAndGroupsHandler() {
         @Override
         public void handler() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
-                }
+            mHandler.post(() -> {
+                int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
             });
         }
     };
@@ -332,12 +280,9 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
             if(!forceSwitchGroup){
                 return;
             }
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
-                }
+            mHandler.post(() -> {
+                int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
             });
         }
     };

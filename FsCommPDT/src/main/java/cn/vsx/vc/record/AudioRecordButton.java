@@ -13,8 +13,8 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 //录音按钮核心类，包括点击、响应、与弹出对话框交互等操作。
 public class AudioRecordButton extends android.support.v7.widget.AppCompatButton implements AudioManager.AudioStageListener {
@@ -42,13 +42,9 @@ public class AudioRecordButton extends android.support.v7.widget.AppCompatButton
     //最大录音时长（单位:s）。def:60s
     private int MAX_RECORD_TIME = 60;
     //手指按下，音频是否已经准备好录制
-    private boolean mReady;
+//    private boolean mReady;
     //上下文
     Context mContext;
-    //震动类
-    private Vibrator vibrator;
-    //提醒倒计时
-    private int mRemainedTime = 10;
     //设置是否允许录音,这个是是否有录音权限
     private boolean mHasRecordPromission = true;
     private AudioPauseListener audioPauseListener;
@@ -169,8 +165,6 @@ public class AudioRecordButton extends android.support.v7.widget.AppCompatButton
 
             }
         }
-
-        ;
     };
     //是否触发过震动
     boolean isShcok;
@@ -178,6 +172,8 @@ public class AudioRecordButton extends android.support.v7.widget.AppCompatButton
     private void showRemainedTime() {
         //倒计时
         int remainTime = (int) (MAX_RECORD_TIME - mTime);
+        //提醒倒计时
+        int mRemainedTime = 10;
         if (remainTime < mRemainedTime) {
             if (!isShcok) {
                 isShcok = true;
@@ -192,7 +188,8 @@ public class AudioRecordButton extends android.support.v7.widget.AppCompatButton
      * 想设置震动大小可以通过改变pattern来设定，如果开启时间太短，震动效果可能感觉不到
      * */
     private void doShock() {
-        vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
+        //震动类
+        Vibrator vibrator = (Vibrator) mContext.getSystemService(Context.VIBRATOR_SERVICE);
         long[] pattern = {100, 400, 100, 400};   // 停止 开启 停止 开启
         vibrator.vibrate(pattern, -1);           //重复两次上面的pattern 如果只想震动一次，index设为-1
     }

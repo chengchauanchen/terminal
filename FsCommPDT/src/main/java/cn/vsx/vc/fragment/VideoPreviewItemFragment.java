@@ -1,11 +1,9 @@
 package cn.vsx.vc.fragment;
 
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -104,15 +102,12 @@ public class VideoPreviewItemFragment extends BaseFragment{
 
     @Override
     public void initView(){
-        ((ChatBaseActivity) getActivity()).setBackListener(new ChatBaseActivity.OnBackListener(){
-            @Override
-            public void onBack(){
-                if(null !=getActivity() && !isDetached()){
-                    if(null != videoView && videoView.isPlaying()){
-                        videoView.stopPlayback();
-                    }
-                    popBack();
+        ((ChatBaseActivity) getActivity()).setBackListener(() -> {
+            if(null !=getActivity() && !isDetached()){
+                if(null != videoView && videoView.isPlaying()){
+                    videoView.stopPlayback();
                 }
+                popBack();
             }
         });
     }
@@ -155,30 +150,19 @@ public class VideoPreviewItemFragment extends BaseFragment{
         Log.e("文件路径：", filePath);
         videoView.setVideoPath(filePath);
         videoView.start();
-        videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener(){
-            @Override
-            public void onPrepared(MediaPlayer mp){
-                duration = videoView.getDuration();
-                tv_max_time.setText(getTime(duration));
-                mHandler.sendEmptyMessage(UPDATE_PROGRESS);
-            }
+        videoView.setOnPreparedListener(mp -> {
+            duration = videoView.getDuration();
+            tv_max_time.setText(getTime(duration));
+            mHandler.sendEmptyMessage(UPDATE_PROGRESS);
         });
 
-        videoView.setOnCompletionListener(new MediaPlayer.OnCompletionListener(){
-            @Override
-            public void onCompletion(MediaPlayer mp){
-                popBack();
-            }
-        });
+        videoView.setOnCompletionListener(mp -> popBack());
 
-        videoView.setOnTouchListener(new View.OnTouchListener(){
-            @Override
-            public boolean onTouch(View v, MotionEvent event){
-                mHandler.removeMessages(HIDE_SEEK_BAR);
-                ll_seek_bar.setVisibility(View.VISIBLE);
-                mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR,2000);
-                return false;
-            }
+        videoView.setOnTouchListener((v, event) -> {
+            mHandler.removeMessages(HIDE_SEEK_BAR);
+            ll_seek_bar.setVisibility(View.VISIBLE);
+            mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR,2000);
+            return false;
         });
 
         seek_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
@@ -239,13 +223,10 @@ public class VideoPreviewItemFragment extends BaseFragment{
         public void handler(String mainMemberName, int mainMemberId, int individualCallType){
             if(videoView.isPlaying()){
                 videoView.pause();
-                mHandler.post(new Runnable(){
-                    @Override
-                    public void run(){
-                        iv_pause_continue.setImageResource(R.drawable.on_pause);
-                        iv_pause.setVisibility(View.VISIBLE);
-                        mHandler.removeMessages(UPDATE_PROGRESS);
-                    }
+                mHandler.post(() -> {
+                    iv_pause_continue.setImageResource(R.drawable.on_pause);
+                    iv_pause.setVisibility(View.VISIBLE);
+                    mHandler.removeMessages(UPDATE_PROGRESS);
                 });
             }
         }

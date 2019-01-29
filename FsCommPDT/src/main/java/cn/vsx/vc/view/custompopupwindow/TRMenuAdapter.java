@@ -75,13 +75,10 @@ public class TRMenuAdapter extends RecyclerView.Adapter<TRMenuAdapter.TRMViewHol
 //        }
 //        holder.container.setBackgroundDrawable(addStateDrawable(mContext, -1, R.drawable.trm_popup_middle_pressed));
         final int pos = holder.getAdapterPosition();
-        holder.container.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (onMenuItemClickListener != null) {
-                    mTopRightMenu.dismiss();
-                    onMenuItemClickListener.onMenuItemClick(pos);
-                }
+        holder.container.setOnClickListener(v -> {
+            if (onMenuItemClickListener != null) {
+                mTopRightMenu.dismiss();
+                onMenuItemClickListener.onMenuItemClick(pos);
             }
         });
     }

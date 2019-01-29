@@ -8,5 +8,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverShowCopyPopupHandler extends ReceiveHandler {
-    public void handler(TerminalMessage terminalMessage);
+    void handler(TerminalMessage terminalMessage);
 }

@@ -44,10 +44,10 @@ public class DialogManager {
         LayoutInflater inflater = LayoutInflater.from(mContext);
         View view = inflater.inflate(R.layout.dialog_manager, null);
         mDialog.setContentView(view);
-        imgBg = (RelativeLayout) view.findViewById(R.id.dm_rl_bg);
-        tipsTxt = (TextView) view.findViewById(R.id.dm_tv_txt);
-        imgBg2 = (RelativeLayout) view.findViewById(R.id.dm_rl_bg2);
-        tipsTxt2 = (TextView) view.findViewById(R.id.dm_tv_txt2);
+        imgBg =  view.findViewById(R.id.dm_rl_bg);
+        tipsTxt =  view.findViewById(R.id.dm_tv_txt);
+        imgBg2 =  view.findViewById(R.id.dm_rl_bg2);
+        tipsTxt2 =  view.findViewById(R.id.dm_tv_txt2);
         mDialog.setCancelable(false);
     }
 

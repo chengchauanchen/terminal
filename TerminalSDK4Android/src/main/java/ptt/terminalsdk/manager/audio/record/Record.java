@@ -81,7 +81,9 @@ public class Record {
             if(fis != null){
                 try {
                     fis.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }

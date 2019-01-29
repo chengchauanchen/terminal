@@ -51,21 +51,18 @@ public class GroupSweepAdapter extends BaseAdapter {
         if(view ==null){
             viewHoder = new ViewHoder();
             view = LayoutInflater.from(context).inflate(R.layout.item_group_sweep, null);
-            viewHoder.tv_sweep_group = (TextView) view.findViewById(R.id.tv_sweep_group);
-            viewHoder.tv_new_sweep =(TextView) view.findViewById(R.id.tv_new_sweep);
-            viewHoder.iv_delete=(ImageView)view.findViewById(R.id.iv_delete);
+            viewHoder.tv_sweep_group =  view.findViewById(R.id.tv_sweep_group);
+            viewHoder.tv_new_sweep = view.findViewById(R.id.tv_new_sweep);
+            viewHoder.iv_delete = view.findViewById(R.id.iv_delete);
             view.setTag(viewHoder);
         }else {
             viewHoder=(ViewHoder) view.getTag();
         }
             viewHoder.tv_sweep_group.setText(DataUtil.getGroupByGroupNo(list.get(i)).name);
-            viewHoder.iv_delete.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    memberIds.clear();
-                    memberIds.add(list.get(i));
-                    MyTerminalFactory.getSDK().getGroupScanManager().setScanGroupList(memberIds,false);
-                }
+            viewHoder.iv_delete.setOnClickListener(view1 -> {
+                memberIds.clear();
+                memberIds.add(list.get(i));
+                MyTerminalFactory.getSDK().getGroupScanManager().setScanGroupList(memberIds,false);
             });
             if(list.get(i)== MyTerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0)){
                 viewHoder.tv_new_sweep.setVisibility(View.VISIBLE);

@@ -2,7 +2,6 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/common_bg">
 
     <include layout="@layout/layout_base_activity" />
@@ -42,50 +41,6 @@
             android:divider="@null"
              />
 
-        <!--<LinearLayout-->
-            <!--android:id="@+id/select_all"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="@dimen/y30"-->
-            <!--android:gravity="center"-->
-            <!--android:background="@color/itemblue"-->
-            <!--android:orientation="vertical">-->
-
-
-            <!--<TextView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="0dp"-->
-                <!--android:layout_weight="1"-->
-                <!--android:gravity="center"-->
-                <!--android:text="查看组内全部在线成员"-->
-                <!--android:textColor="@color/group_text_gray"-->
-                <!--android:textSize="@dimen/x12" />-->
-
-            <!--<View-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="5dp"-->
-                <!--android:background="@color/common_bg"/>-->
-        <!--</LinearLayout>-->
-
-        <!--<LinearLayout-->
-            <!--android:id="@+id/find_history"-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="@dimen/y29"-->
-            <!--android:layout_marginTop="@dimen/y8"-->
-            <!--android:background="@color/itemblue"-->
-            <!--android:gravity="center_vertical">-->
-
-            <!--<TextView-->
-                <!--android:layout_width="wrap_content"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_centerVertical="true"-->
-                <!--android:layout_marginLeft="@dimen/x14"-->
-                <!--android:text="查找历史记录"-->
-                <!--android:textColor="@color/group_text_gray"-->
-                <!--android:textSize="@dimen/x12" />-->
-        <!--</LinearLayout>-->
-
-        <!--<include layout="@layout/universal_line" />-->
-
     </LinearLayout>
 
     <FrameLayout
@@ -94,12 +49,12 @@
         android:layout_height="match_parent"
         android:background="@color/transparent"
         android:clickable="false"
-        android:focusable="false"></FrameLayout>
+        android:focusable="false"/>
 
     <cn.vsx.vc.view.VolumeViewLayout
         android:id="@+id/volume_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:gravity="center"></cn.vsx.vc.view.VolumeViewLayout>
+        android:gravity="center"/>
 </RelativeLayout>

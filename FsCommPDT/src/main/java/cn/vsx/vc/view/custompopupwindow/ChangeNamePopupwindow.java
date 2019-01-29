@@ -60,8 +60,8 @@ public class ChangeNamePopupwindow extends PopupWindow {
                 if (s.toString().contains(" ")) {
                     String[] str = s.toString().split(" ");
                     String str1 = "";
-                    for (int i = 0; i < str.length; i++) {
-                        str1 += str[i];
+                    for (String aStr : str) {
+                        str1 += aStr;
                     }
                     et_change_name.setText(str1);
 

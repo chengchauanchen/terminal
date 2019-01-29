@@ -53,7 +53,7 @@ import static org.easydarwin.video.RTSPClient.TRANSTYPE_TCP;
  */
 public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
 
-    private static final long LEAST_FRAME_INTERVAL = 10000l;
+    private static final long LEAST_FRAME_INTERVAL = 10000L;
 
     /* 视频编码 */
     public static final int EASY_SDK_VIDEO_CODEC_H264 = 0x1C;		/* H264  */
@@ -631,8 +631,8 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
                     boolean pushBlankBuffersOnStop = true;
 
                     int index = 0;
-                    long previewStampUs = 0l;
-                    long previewTickUs = 0l;
+                    long previewStampUs = 0L;
+                    long previewTickUs = 0L;
                     long differ = 0;
 
                     long previewStampUs1 = 0;
@@ -694,7 +694,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
                             mDecoder.decodeAndSnapAndDisplay(frameInfo);
                             long decodeSpend = System.currentTimeMillis() - decodeBegin;
 
-                            boolean firstFrame = previewStampUs == 0l;
+                            boolean firstFrame = previewStampUs == 0L;
                             if (firstFrame) {
                                 Log.i(TAG, String.format("POST VIDEO_DISPLAYED!!!"));
                                 ResultReceiver rr = mRR;
@@ -702,7 +702,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
                             }
                             long current = frameInfo.stamp;
 
-                            if (previewStampUs != 0l) {
+                            if (previewStampUs != 0L) {
                                 long sleepTime = current - previewStampUs - decodeSpend * 1000;
                                 if (sleepTime > 0) {
                                     long cache = mNewestStample - frameInfo.stamp;
@@ -747,12 +747,12 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
                                         // 输出队列不为空
                                         // -1表示为第一帧数据
                                         long newSleepUs = -1;
-                                        boolean firstTime = previewStampUs == 0l;
+                                        boolean firstTime = previewStampUs == 0L;
                                         if (!firstTime) {
                                             long sleepUs = (info.presentationTimeUs - previewStampUs);
                                             if (sleepUs > 1000000) {
                                                 // 时间戳异常，可能服务器丢帧了。
-                                                newSleepUs = 0l;
+                                                newSleepUs = 0L;
                                             } else {
                                                 long cache = mNewestStample - previewStampUs;
                                                 newSleepUs = fixSleepTime(sleepUs, cache, 000000);

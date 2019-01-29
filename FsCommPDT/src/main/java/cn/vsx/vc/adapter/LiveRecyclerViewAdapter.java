@@ -59,12 +59,9 @@ public class LiveRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         if(getItemViewType(position) == TYPE_DEPARTMENT){
             LiveRecyclerViewAdapter.DepartmentViewHolder holder1 = (LiveRecyclerViewAdapter.DepartmentViewHolder) holder;
             holder1.tvDepartment.setText(mDatas.get(position).getName());
-            holder1.itemView.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View view){
-                    if(listener != null){
-                        listener.onItemClick(position, TYPE_DEPARTMENT);
-                    }
+            holder1.itemView.setOnClickListener(view -> {
+                if(listener != null){
+                    listener.onItemClick(position, TYPE_DEPARTMENT);
                 }
             });
         }else{
@@ -72,40 +69,37 @@ public class LiveRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             final Member member = (Member) mDatas.get(position).getBean();
             userViewHolder.tvName.setText(member.getName() + "");
             userViewHolder.tvId.setText(member.getNo() + "");
-            userViewHolder.itemView.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View view){
-                    if(Constants.PUSH.equals(type)){
-                        if(member.isChecked()){
-                            member.setChecked(false);
-                            selectMember.remove(Integer.valueOf(member.getNo()));
-                        }else{
-                            member.setChecked(true);
-                            selectMember.add(Integer.valueOf(member.getNo()));
-                        }
-                    }else if(Constants.PULL.equals(type)){
-                        if(member.isChecked()){
-                            member.setChecked(false);
-                            selectMember.remove(Integer.valueOf(member.getNo()));
-                            lastPosition = -1;
-                        }else{
-                            if(lastPosition != -1){
-                                Member lastMember = (Member) mDatas.get(lastPosition).getBean();
-                                lastMember.setChecked(false);
-                                liveMember = null;
-                                selectMember.remove(Integer.valueOf(lastMember.getNo()));
-                            }
-                            member.setChecked(true);
-                            liveMember = member;
-                            selectMember.add(Integer.valueOf(member.getNo()));
-                            lastPosition = position;
-                        }
+            userViewHolder.itemView.setOnClickListener(view -> {
+                if(Constants.PUSH.equals(type)){
+                    if(member.isChecked()){
+                        member.setChecked(false);
+                        selectMember.remove(Integer.valueOf(member.getNo()));
+                    }else{
+                        member.setChecked(true);
+                        selectMember.add(Integer.valueOf(member.getNo()));
                     }
-                    if(listener != null){
-                        listener.onItemClick( position, TYPE_USER);
+                }else if(Constants.PULL.equals(type)){
+                    if(member.isChecked()){
+                        member.setChecked(false);
+                        selectMember.remove(Integer.valueOf(member.getNo()));
+                        lastPosition = -1;
+                    }else{
+                        if(lastPosition != -1){
+                            Member lastMember = (Member) mDatas.get(lastPosition).getBean();
+                            lastMember.setChecked(false);
+                            liveMember = null;
+                            selectMember.remove(Integer.valueOf(lastMember.getNo()));
+                        }
+                        member.setChecked(true);
+                        liveMember = member;
+                        selectMember.add(Integer.valueOf(member.getNo()));
+                        lastPosition = position;
                     }
-                    notifyDataSetChanged();
                 }
+                if(listener != null){
+                    listener.onItemClick( position, TYPE_USER);
+                }
+                notifyDataSetChanged();
             });
             if(member.isChecked()){
                 userViewHolder.iv_select.setSelected(true);
@@ -146,7 +140,7 @@ public class LiveRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
 
         public DepartmentViewHolder(View itemView){
             super(itemView);
-            tvDepartment = (TextView) itemView.findViewById(R.id.tv_department);
+            tvDepartment =  itemView.findViewById(R.id.tv_department);
         }
     }
 

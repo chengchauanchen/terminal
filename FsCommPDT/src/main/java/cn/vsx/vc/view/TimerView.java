@@ -34,12 +34,9 @@ public class TimerView extends LinearLayout {
 			public void run() {
 				second--;
 				if(second >= 0){
-					myHandler.post(new Runnable() {
-						@Override
-						public void run() {
-							timerTextView.setText(getTwoNumber(second/60)+":"+getTwoNumber(second%60));
-							invalidate();
-						}
+					myHandler.post(() -> {
+						timerTextView.setText(getTwoNumber(second/60)+":"+getTwoNumber(second%60));
+						invalidate();
 					});
 				}
 			}
@@ -54,13 +51,7 @@ public class TimerView extends LinearLayout {
 	
 	public void stop(){
 		second = 60;
-		myHandler.post(new Runnable() {
-			
-			@Override
-			public void run() {
-				timerTextView.setText(defaultText);
-			}
-		});
+		myHandler.post(() -> timerTextView.setText(defaultText));
 		if(timerTask != null){
 			timerTask.cancel();
 			timerTask = null;

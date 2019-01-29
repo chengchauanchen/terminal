@@ -39,9 +39,9 @@ public class CreateTemporaryGroupsDialog extends Dialog {
     }
 
     private void initView() {
-         icon = (ImageView)findViewById(R.id.dialog_icon);
-         content = (TextView)findViewById(R.id.text_context);
-         toJump = (TextView)findViewById(R.id.text_toJump);
+         icon = findViewById(R.id.dialog_icon);
+         content = findViewById(R.id.text_context);
+         toJump = findViewById(R.id.text_toJump);
     }
 
     private void init() {

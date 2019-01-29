@@ -10,5 +10,5 @@ import cn.vsx.vc.model.ChatMember;
 
 public interface ReceiverTransponHandler extends ReceiveHandler {
 
-    public void handler (ChatMember chatMember);
+    void handler(ChatMember chatMember);
 }

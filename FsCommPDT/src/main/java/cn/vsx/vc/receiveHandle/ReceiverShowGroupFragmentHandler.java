@@ -10,5 +10,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverShowGroupFragmentHandler extends ReceiveHandler {
-    public void handler(List<Group> groupList,boolean isScanGroupSearch);
+    void handler(List<Group> groupList, boolean isScanGroupSearch);
 }

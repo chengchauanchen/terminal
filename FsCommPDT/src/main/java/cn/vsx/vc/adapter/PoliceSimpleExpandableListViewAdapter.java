@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -33,9 +32,6 @@ import cn.vsx.vc.view.CustomExpandableListView;
 public class PoliceSimpleExpandableListViewAdapter extends BaseExpandableListAdapter {
     private Logger logger = Logger.getLogger(getClass());
     private Activity activity;
-    private ViewHolderShiJu viewHolderShiJu;
-    private ViewHolderBuMen viewHolderBuMen;
-    private Map<String, Map<String, List<Member>>> mapMap;
     private List<ShouTaiBean> shouTaiBeenList;
     private List<BuMenBean> bumenList;
 
@@ -84,7 +80,7 @@ public class PoliceSimpleExpandableListViewAdapter extends BaseExpandableListAda
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
-        viewHolderShiJu =null;
+        ViewHolderShiJu viewHolderShiJu = null;
         if (convertView == null){
             convertView = View.inflate(activity,R.layout.jingwutong_item_shiju,null);
             viewHolderShiJu = new ViewHolderShiJu(convertView);
@@ -116,24 +112,13 @@ public class PoliceSimpleExpandableListViewAdapter extends BaseExpandableListAda
         } else {
             viewHolderShiJu.is_jingwutong_shiju.setBackgroundResource(R.drawable.new_folder_close);
         }
-//        Collections.sort(test1Been.get(groupPosition).name);
         return convertView;
 
     }
 
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-//            viewHolderBuMen = null;
-//        if (convertView == null){
-//            convertView = View.inflate(activity,R.layout.item_jingwutong,null);
-//            viewHolderBuMen = new ViewHolderBuMen(convertView);
-//           convertView.setTag(viewHolderBuMen);
-//        }else {
-//            viewHolderBuMen = (ViewHolderBuMen) convertView.getTag();
-//        }
-//        viewHolderBuMen.bumenName.setText(shouTaiBeenList.get(groupPosition).bumenList.get(childPosition).bumenName);
         return getGenericExpandableListView(groupPosition, childPosition);
-//        return convertView;
     }
 
     @Override
@@ -152,12 +137,7 @@ public class PoliceSimpleExpandableListViewAdapter extends BaseExpandableListAda
             ButterKnife.bind(this, rootView);
         }
     }
-    public static class ViewHolderBuMen {
 
-        public ViewHolderBuMen(View rootView) {
-            ButterKnife.bind(this, rootView);
-        }
-    }
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     public ExpandableListView getGenericExpandableListView(int groupPosition, int childPosition){
         AbsListView.LayoutParams layoutParams = new AbsListView.LayoutParams(

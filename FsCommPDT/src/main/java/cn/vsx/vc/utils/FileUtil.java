@@ -5,7 +5,6 @@ import android.os.storage.StorageManager;
 import android.util.Log;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -232,13 +231,7 @@ public class FileUtil {
      * 文件过滤,将手机中隐藏的文件给过滤掉
      */
     public static File[] fileFilter(File file) {
-        File[] files = file.listFiles(new FileFilter() {
-
-            @Override
-            public boolean accept(File pathname) {
-                return !pathname.isHidden();
-            }
-        });
+        File[] files = file.listFiles(pathname -> !pathname.isHidden());
         return files;
     }
 

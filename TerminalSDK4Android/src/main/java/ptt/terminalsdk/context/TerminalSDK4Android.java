@@ -144,6 +144,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				//按照指定的路径创建文件夹
 				dir.mkdirs();
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 		File file = new File(getLogDirectory() + "log.txt");
@@ -152,21 +153,9 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				//在指定的文件夹中创建文件
 				file.createNewFile();
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
-
-//		if (!dir.exists()){
-//			try {
-//				File mkr = new File(getLogDirectory());
-//				mkr.mkdirs();
-//				file.createNewFile();
-//			} catch (IOException e) {
-//				logger.warn("日志生成文件" + e.toString());
-//			}
-//		}
-//        boolean isSuccess = CreateFileOrDirectoryUtils.createFileOrDirectory(file);
-//        logger.error("创建文件夹是否成功" + isSuccess);
-
 		LogConfigurator logConfigurator = new LogConfigurator();
 		logConfigurator.setFileName(getLogDirectory() + "log.txt");
 		logConfigurator.setRootLevel(Level.ALL);
@@ -222,17 +211,23 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
             in.close();
             oin.close();
             return obj;
-        } catch (Exception e) {}
+        } catch (Exception e) {
+			e.printStackTrace();
+		}
         finally{
         	if(in != null){
         		try {
 					in.close();
-				} catch (IOException e) {}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
         	}
         	if(oin != null){
         		try {
         			oin.close();
-				} catch (IOException e) {}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
         	}
         }
     	return defaultValue;
@@ -280,22 +275,30 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
             out.write(b);
             out.flush();
             out.close();
-        } catch (Exception e) {}
+        } catch (Exception e) {
+			e.printStackTrace();
+		}
 		finally {
         	if(bout != null){
         		try {
 					bout.close();
-				} catch (IOException e) {}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
         	}
         	if(oout != null){
         		try {
         			oout.close();
-				} catch (IOException e) {}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
         	}
         	if(out != null){
         		try {
         			out.close();
-				} catch (IOException e) {}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
         	}
         }
 	}
@@ -494,7 +497,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	@Override
 	public void clearMessage() {
 		logger.info("删除所有存储数据");
-		TerminalFactory.getSDK().putParam(Params.MESSAGE_VERSION, 0l);
+		TerminalFactory.getSDK().putParam(Params.MESSAGE_VERSION, 0L);
 		DeleteData.deleteSerializableData();
 		DeleteData.deleteSQLiteDatabase();
 		DeleteData.deleteAudioRecord();
@@ -685,15 +688,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		public void onServiceDisconnected(ComponentName name) {
 			logger.error("mssageServiceConn服务断开连接");
 			connectToServer();
-//			messageService = null;
-//			Intent messageService = new Intent(application, MessageService.class);
-//			if (uuidByte.length != 0 && accessServerIp.length() != 0 && accessServerPort != 0) {
-//				messageService.putExtra("uuid", uuidByte);
-//				messageService.putExtra("accessServerIp", accessServerIp);
-//				messageService.putExtra("accessServerPort", accessServerPort);
-//				application.startService(messageService);
-//			}
-//			application.bindService(messageService, messageServiceConn, Context.BIND_IMPORTANT);
 		}
 	};
 	public ServiceConnection getMessageServiceConn(){
@@ -706,15 +700,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			notifyReceiveHandler(ReceiveServerConnectionEstablishedHandler.class, connected);
 		}
 	};
-
-
-
-//	@Override
-//	protected String newUuid() {
-//		TelephonyManager telephonyManager = (TelephonyManager)application.getSystemService(Context.TELEPHONY_SERVICE);
-//		WifiManager wm = (WifiManager)application.getSystemService(Context.WIFI_SERVICE);
-//		return telephonyManager.getDeviceId()==null?wm.getConnectionInfo().getMacAddress().hashCode()+"":telephonyManager.getDeviceId().hashCode()+"";
-//	}
 
 	@Override
 	public void setAPKUpdateAddress(String identifyPath) {

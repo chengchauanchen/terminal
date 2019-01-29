@@ -4,7 +4,6 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
@@ -31,8 +30,8 @@ import cn.vsx.vc.adapter.ScanGroupSearchAdapter;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.utils.InputMethodUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * 作者：ly-xuxiaolong
@@ -88,7 +87,6 @@ public class ScanGroupSearchFragment extends BaseFragment{
         iv_delete_edittext.setOnClickListener(new OnClickListenerImpDeleteEditText());
         iv_goback_contacts.setOnClickListener(new OnClickListenerImpGoBackContactsList());
         btn_search_allcontacts.setOnClickListener(new OnClickListenerImpSearchContats());
-//        lv_search_allcontacts.setOnItemClickListener(new OnItemClickListenerImpAddCall());
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverCloseKeyBoardHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveSetScanGroupListResultHandler);
         et_search_allcontacts.addTextChangedListener(new TextWatcher() {
@@ -102,8 +100,8 @@ public class ScanGroupSearchFragment extends BaseFragment{
                 if (s.toString().contains(" ")) {
                     String[] str = s.toString().split(" ");
                     String str1 = "";
-                    for (int i = 0; i < str.length; i++) {
-                        str1 += str[i];
+                    for (String aStr : str) {
+                        str1 += aStr;
                     }
                     et_search_allcontacts.setText(str1);
 
@@ -118,14 +116,11 @@ public class ScanGroupSearchFragment extends BaseFragment{
             }
         });
 
-        et_search_allcontacts.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-                if(i == EditorInfo.IME_ACTION_SEARCH) {
-                    doSearch();
-                }
-                return false;
+        et_search_allcontacts.setOnEditorActionListener((textView, i, keyEvent) -> {
+            if(i == EditorInfo.IME_ACTION_SEARCH) {
+                doSearch();
             }
+            return false;
         });
     }
 
@@ -175,7 +170,7 @@ public class ScanGroupSearchFragment extends BaseFragment{
             rl_search_result.setVisibility(View.VISIBLE);
 
             if (scanGroupSearchAdapter != null) {
-                scanGroupSearchAdapter.notifyDataSetChanged();;
+                scanGroupSearchAdapter.notifyDataSetChanged();
                 lv_search_allcontacts.setSelection(0);
             }
         }
@@ -225,15 +220,12 @@ public class ScanGroupSearchFragment extends BaseFragment{
 
         @Override
         public void handler(final List<Integer> scanGroups, final int errorCode, final String errorDesc) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if(errorCode== BaseCommonCode.SUCCESS_CODE){
-                        ToastUtil.toast(getActivity(),"添加扫描组成功");
-                        scanGroupSearchAdapter.notifyDataSetChanged();
-                    }else {
-                        ToastUtil.toast(getActivity(),"添加扫描组失败");
-                    }
+            myHandler.post(() -> {
+                if(errorCode== BaseCommonCode.SUCCESS_CODE){
+                    ToastUtil.toast(getActivity(),"添加扫描组成功");
+                    scanGroupSearchAdapter.notifyDataSetChanged();
+                }else {
+                    ToastUtil.toast(getActivity(),"添加扫描组失败");
                 }
             });
         }

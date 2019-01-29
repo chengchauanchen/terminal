@@ -13,5 +13,5 @@ public interface ReceiverChatListItemClickHandler extends ReceiveHandler {
      * @param terminalMessage 消息
      * @param isReceiver  是否是接受
      */
-    public void handler(TerminalMessage terminalMessage, boolean isReceiver);
+    void handler(TerminalMessage terminalMessage, boolean isReceiver);
 }

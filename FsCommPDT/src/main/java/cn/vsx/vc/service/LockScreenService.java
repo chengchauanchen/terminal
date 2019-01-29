@@ -98,7 +98,7 @@ public class LockScreenService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		logger.debug("开启锁屏服务");
 		return START_STICKY;
-	};
+	}
 	
 	@Override
 	public void onCreate() {

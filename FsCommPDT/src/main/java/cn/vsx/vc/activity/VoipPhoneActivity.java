@@ -43,7 +43,6 @@ public class VoipPhoneActivity extends BaseActivity{
     private TextView memberNameRequest;
     private TextView memberPhoneRequest;
     private TextView requestCall;
-    private TextView tvRequestPrompt;
     private LinearLayout llHangupRequest;
     private TextView memberNameSpeaking;
     private TextView memberPhoneSpeaking;
@@ -102,21 +101,15 @@ public class VoipPhoneActivity extends BaseActivity{
 
     @Override
     public void initListener(){
-        llHangupRequest.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                ToastUtil.showToast(VoipPhoneActivity.this, "通话已结束");
-                status = HANG_UP_SELF + "";
-                MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
-            }
+        llHangupRequest.setOnClickListener(v -> {
+            ToastUtil.showToast(VoipPhoneActivity.this, "通话已结束");
+            status = HANG_UP_SELF + "";
+            MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
         });
-        llHangupSpreaking.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                ToastUtil.showToast(VoipPhoneActivity.this, "通话已结束");
-                status = CALL_END + "";
-                MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
-            }
+        llHangupSpreaking.setOnClickListener(v -> {
+            ToastUtil.showToast(VoipPhoneActivity.this, "通话已结束");
+            status = CALL_END + "";
+            MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
         });
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipConnectedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallEndHandler);
@@ -144,7 +137,6 @@ public class VoipPhoneActivity extends BaseActivity{
 
     private ReceiveVoipCallEndHandler receiveVoipCallEndHandler = (linphoneCall)->{
         //电话接通之后挂断，还有主叫拨号时挂断
-        //                linphoneCall.getCallLog().getCallDuration()
         Log.e("VoipPhoneActivity", "电话挂断");
         TerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         mHandler.post(new Runnable() {
@@ -175,11 +167,8 @@ public class VoipPhoneActivity extends BaseActivity{
                 terminalMessage.messageBody=new JSONObject();
                 terminalMessage.messageVersion=0;
                 terminalMessage.resultCode=0;
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        MyTerminalFactory.getSDK().getTerminalMessageManager().sendMessageToApplyServer(terminalMessage,"bbbb");  //转发通话记录给应用服务
-                    }
+                new Thread(() -> {
+                    MyTerminalFactory.getSDK().getTerminalMessageManager().sendMessageToApplyServer(terminalMessage,"bbbb");  //转发通话记录给应用服务
                 }).start();
 
 

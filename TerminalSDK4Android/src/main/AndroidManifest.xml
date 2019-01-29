@@ -126,26 +126,6 @@
         
         <service android:name=".service.BluetoothLeService"
             android:enabled="true"/>
-        
-        
-        <!--<receiver android:name=".broadcastreceiver.PTTDownAndUpReceiver">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="com.zello.ptt.down"/>-->
-                <!--<action android:name="com.sonim.intent.action.PTT_KEY_DOWN"/>-->
-                <!--<action android:name="android.intent.action.PTT.down"/>-->
-                <!--<action android:name="com.runbo.ptt.key.down"/>-->
-                <!--<action android:name="com.yl.ptt.keydown"/>-->
-                <!--<action android:name="android.intent.action.OPEN_PTT_BUTTON"/>-->
-                <!--<action android:name="com.zello.ptt.up"/>-->
-                <!--<action android:name="com.sonim.intent.action.PTT_KEY_UP"/>-->
-                <!--<action android:name="android.intent.action.PTT.up"/>-->
-                <!--<action android:name="com.runbo.ptt.key.up"/>-->
-                <!--<action android:name="com.yl.ptt.keyup"/>-->
-                <!--<action android:name="CameraKeyDispatch"/>-->
-                <!--<action android:name="SpeakerKeyDispatch"/>-->
-            <!--</intent-filter>-->
-        <!--</receiver>-->
-
     </application>
 
 </manifest>

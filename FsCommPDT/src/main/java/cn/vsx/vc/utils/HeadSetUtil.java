@@ -75,16 +75,16 @@ public class HeadSetUtil {
 	        /**
 	         * 单击触发,主线程。 此接口真正触发是在单击操作1秒后 因为需要判断1秒内是否仍监听到点击，有的话那就是双击了
 	         */
-	        public void onClick();
+			void onClick();
 	        /**
 	         * 双击触发，此接口在主线程，可以放心使用
 	         */
-	        public void onDoubleClick();
+			void onDoubleClick();
 	        /**
 	         * 三连击
 	         */
-	        public void onThreeClick();
-	        public void onClickDown();
-	        public void onClickUp();
+			void onThreeClick();
+	        void onClickDown();
+	        void onClickUp();
 	    }
 	}

@@ -24,7 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
-import android.webkit.ValueCallback;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -61,8 +60,8 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.utils.FileUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by zckj on 2017/7/25.
@@ -79,14 +78,10 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
 
     private Logger logger = Logger.getLogger(getClass());
     private Handler myHandler = new Handler();
-    private ValueCallback<Uri[]> mUploadMessageForAndroid5;
-    private ValueCallback<Uri> mUploadMessage;
     private String txtFileName= System.currentTimeMillis()+"_意见反馈.txt";
     private String logFileName= "log.txt";
-    private static final int STORAGE_PERMISSIONS_REQUEST_CODE = 0x14;
     private List<String> fileNames=new ArrayList<>();
     private Map<String,String> files = new HashMap<>();
-//    private AlertDialog dialog;
     private List<String>problem = new ArrayList<>();
     private WindowManager windowManager;
     private View dialog;
@@ -124,8 +119,8 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
         } else {
             layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
-        RelativeLayout root = (RelativeLayout) dialog.findViewById(R.id.dialog_root);
-        ListView list_dialog = (ListView) dialog.findViewById(R.id.list_dialog);
+        RelativeLayout root =  dialog.findViewById(R.id.dialog_root);
+        ListView list_dialog =  dialog.findViewById(R.id.list_dialog);
         problem.add("组呼失败");
         problem.add("没有消息记录");
         problem.add("发送消息失败");
@@ -184,12 +179,7 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
         //关闭界面
         @JavascriptInterface
         public void closeWebView(){
-            myHandler.post(new Runnable(){
-                @Override
-                public void run(){
-                    finish();
-                }
-            });
+            myHandler.post(() -> finish());
         }
         @JavascriptInterface
         public void deleteFile(String filePath){
@@ -204,13 +194,10 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
         }
         @JavascriptInterface
         public void showDialog(){
-            myHandler.post(new Runnable(){
-                @Override
-                public void run(){
-                    if(!isDialogShow){
-                        windowManager.addView(dialog,layoutParams);
-                        isDialogShow = true;
-                    }
+            myHandler.post(() -> {
+                if(!isDialogShow){
+                    windowManager.addView(dialog,layoutParams);
+                    isDialogShow = true;
                 }
             });
         }
@@ -272,15 +259,12 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
 
                 @Override
                 public void onPageFinished(WebView view, String url) {
-                    myHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                ll_pb.setVisibility(View.GONE);
-                                wv_help.setEnabled(true);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+                    myHandler.post(() -> {
+                        try {
+                            ll_pb.setVisibility(View.GONE);
+                            wv_help.setEnabled(true);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     });
                 }
@@ -317,51 +301,20 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
         } else {
             ToastUtil.showToast(this, "获取帮助文档失败，请重新启动app!");
         }
-        //
-//        wv_help.setWebChromeClient(new WebChromeClient(){
-//
-//
-//            /** Android>=5.0**/
-//            @Override
-//            public boolean onShowFileChooser(WebView webView, ValueCallback<Uri[]> filePathCallback, FileChooserParams fileChooserParams) {
-//                onenFileChooseImpleForAndroid(filePathCallback);
-//                return true;
-//            }
-//            /**
-//             * android 5.0(含) 以上开启图片选择（原生）
-//             *
-//             * 可以自己改图片选择框架。
-//             */
-//            private void onenFileChooseImpleForAndroid(ValueCallback<Uri[]> filePathCallback) {
-//                mUploadMessageForAndroid5 = filePathCallback;
-//                Intent contentSelectionIntent = new Intent(Intent.ACTION_GET_CONTENT);
-//                contentSelectionIntent.addCategory(Intent.CATEGORY_OPENABLE);
-//                contentSelectionIntent.setType("image/*");
-//
-//                Intent chooserIntent = new Intent(Intent.ACTION_CHOOSER);
-//                chooserIntent.putExtra(Intent.EXTRA_INTENT, contentSelectionIntent);
-//                chooserIntent.putExtra(Intent.EXTRA_TITLE, "Image Chooser");
-//
-//                startActivityForResult(chooserIntent, FILE_CHOOSER_RESULT_CODE_FOR_ANDROID_5);
-//            }
-//        });
 //        /*
 //         * 监听手机返回按键，点击返回H5就返回上一级
 //         */
-        wv_help.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((keyCode == KeyEvent.KEYCODE_BACK) && wv_help.canGoBack()) {
-                    if(isDialogShow){
-                        windowManager.removeView(dialog);
-                        isDialogShow = false;
-                    }else {
-                        wv_help.goBack();
-                    }
-                    return true;
+        wv_help.setOnKeyListener((v, keyCode, event) -> {
+            if ((keyCode == KeyEvent.KEYCODE_BACK) && wv_help.canGoBack()) {
+                if(isDialogShow){
+                    windowManager.removeView(dialog);
+                    isDialogShow = false;
+                }else {
+                    wv_help.goBack();
                 }
-                return false;
+                return true;
             }
+            return false;
         });
     }
 
@@ -461,48 +414,36 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
     }
 
     public void setPlatformType(final String result) {
-        myHandler.postDelayed(new Runnable(){
-            @Override
-            public void run(){
-                //android调用H5代码
-                logger.debug("上传的图片路径："+result);
-                wv_help.loadUrl("javascript: cameraResult('"+ result.toString() + "')");
-            }
+        myHandler.postDelayed(() -> {
+            //android调用H5代码
+            logger.debug("上传的图片路径："+result);
+            wv_help.loadUrl("javascript: cameraResult('"+ result.toString() + "')");
         },1000);
     }
 
     /**组成员遥毙消息*/
-    private ReceiveNotifyMemberKilledHandler receiveNotifyMemberKilledHandler = new ReceiveNotifyMemberKilledHandler() {
-        @Override
-        public void handler(boolean forbid) {
-            logger.info("收到遥毙，此时forbid" + forbid);
-            if(forbid){
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        HelpWordActivity.this.finish();
-                        MyApplication.instance.stopIndividualCallService();
-                    }
-                });
-            }
+    private ReceiveNotifyMemberKilledHandler receiveNotifyMemberKilledHandler = forbid -> {
+        logger.info("收到遥毙，此时forbid" + forbid);
+        if(forbid){
+            myHandler.post(() -> {
+                HelpWordActivity.this.finish();
+                MyApplication.instance.stopIndividualCallService();
+            });
         }
     };
     /**日志上传是否成功的消息*/
     private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = new ReceiveLogFileUploadCompleteHandler() {
         @Override
         public void handler(final int resultCode) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                  String result = String.valueOf(resultCode);
-                  if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                      ToastUtil.toast(HelpWordActivity.this, "日志上传成功，感谢您的支持！");
-                      wv_help.loadUrl("javascript: reqSuccess('"+result+ "')");
-                  } else {
-                      ToastUtil.showToast( "日志上传失败，请稍后重试！", HelpWordActivity.this);
-                      wv_help.loadUrl("javascript: reqSuccess('"+result+ "')");
-                  }
-                }
+            myHandler.post(() -> {
+              String result = String.valueOf(resultCode);
+              if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                  ToastUtil.toast(HelpWordActivity.this, "日志上传成功，感谢您的支持！");
+                  wv_help.loadUrl("javascript: reqSuccess('"+result+ "')");
+              } else {
+                  ToastUtil.showToast( "日志上传失败，请稍后重试！", HelpWordActivity.this);
+                  wv_help.loadUrl("javascript: reqSuccess('"+result+ "')");
+              }
             });
         }
     };
@@ -616,7 +557,7 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
     private class ViewHolder{
         private TextView itemTv;
         private ViewHolder(View view){
-            itemTv = (TextView) view.findViewById(R.id.tv_item);
+            itemTv =  view.findViewById(R.id.tv_item);
         }
     }
 }

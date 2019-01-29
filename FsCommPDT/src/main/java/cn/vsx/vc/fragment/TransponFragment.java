@@ -3,7 +3,6 @@ package cn.vsx.vc.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ListView;
 
@@ -15,7 +14,6 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.OnClick;
 import cn.vsx.hamster.common.MessageType;
-import cn.vsx.hamster.terminalsdk.model.Folder;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
@@ -69,33 +67,28 @@ public class TransponFragment extends BaseFragment{
 
     @Override
     public void initListener() {
-        lv_chat_member.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        lv_chat_member.setOnItemClickListener((parent, view, position, id) -> new DialogUtil() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                new DialogUtil() {
-                    @Override
-                    public CharSequence getMessage() {
-                        return "确定转发消息?";
-                    }
-
-                    @Override
-                    public Context getContext() {
-                        return context;
-                    }
-
-                    @Override
-                    public void doConfirmThings() {
-                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverTransponHandler.class, chatLists.get(position));
-                        fragmentContainer.setVisibility(View.GONE);
-                        getFragmentManager().popBackStack();
-                    }
-
-                    @Override
-                    public void doCancelThings() {
-                    }
-                }.showDialog();
+            public CharSequence getMessage() {
+                return "确定转发消息?";
             }
-        });
+
+            @Override
+            public Context getContext() {
+                return context;
+            }
+
+            @Override
+            public void doConfirmThings() {
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverTransponHandler.class, chatLists.get(position));
+                fragmentContainer.setVisibility(View.GONE);
+                getFragmentManager().popBackStack();
+            }
+
+            @Override
+            public void doCancelThings() {
+            }
+        }.showDialog());
     }
 
     @Override

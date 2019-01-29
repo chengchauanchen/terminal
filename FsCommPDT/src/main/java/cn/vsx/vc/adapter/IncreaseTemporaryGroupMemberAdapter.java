@@ -40,11 +40,9 @@ public class IncreaseTemporaryGroupMemberAdapter extends RecyclerView.Adapter<Re
     private Context mContext;
     private List<ContactItemBean> mDatas;
     private List<Member> addMembers = new ArrayList<>();
-//    private static int VOIP=0;
-//    private static int TELEPHONE=1;
 
     private ItemClickListener listener;
-    private List<Integer> addNos = new ArrayList<>();;
+    private List<Integer> addNos = new ArrayList<>();
 
     public IncreaseTemporaryGroupMemberAdapter(Context context, List<ContactItemBean> datas) {
         this.mContext=context;
@@ -69,12 +67,9 @@ public class IncreaseTemporaryGroupMemberAdapter extends RecyclerView.Adapter<Re
         if (getItemViewType(position)==TYPE_DEPARTMENT){
             DepartmentViewHolder holder1= (DepartmentViewHolder) holder;
             holder1.tvDepartment.setText(mDatas.get(position).getName());
-            holder1.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (listener!=null) {
-                        listener.onItemClick(view, position, TYPE_DEPARTMENT);
-                    }
+            holder1.itemView.setOnClickListener(view -> {
+                if (listener!=null) {
+                    listener.onItemClick(view, position, TYPE_DEPARTMENT);
                 }
             });
         }else {
@@ -84,34 +79,28 @@ public class IncreaseTemporaryGroupMemberAdapter extends RecyclerView.Adapter<Re
             userViewHolder.tvId.setText(member.getNo()+"");
             userViewHolder.cbSelectmember.setChecked(member.isChecked());
 
-            userViewHolder.ivLogo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(mContext, UserInfoActivity.class);
-                    intent.putExtra("userId", member.getNo());
-                    intent.putExtra("userName", member.getName());
-                    mContext.startActivity(intent);
-                }
+            userViewHolder.ivLogo.setOnClickListener(view -> {
+                Intent intent = new Intent(mContext, UserInfoActivity.class);
+                intent.putExtra("userId", member.getNo());
+                intent.putExtra("userName", member.getName());
+                mContext.startActivity(intent);
             });
 
-            userViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(member.isChecked()){
-                        member.setChecked(false);
-                        removeExistMember(member.getNo());
+            userViewHolder.itemView.setOnClickListener(v -> {
+                if(member.isChecked()){
+                    member.setChecked(false);
+                    removeExistMember(member.getNo());
 
-                    }else {
-                        member.setChecked(true);
-                        removeExistMember(member.getNo());
-                        addMembers.add(member);
+                }else {
+                    member.setChecked(true);
+                    removeExistMember(member.getNo());
+                    addMembers.add(member);
 
-                    }
-                    if(listener!=null){
-                        listener.onItemClick(v,position,TYPE_USER);
-                    }
-                    notifyDataSetChanged();
                 }
+                if(listener!=null){
+                    listener.onItemClick(v,position,TYPE_USER);
+                }
+                notifyDataSetChanged();
             });
 
 
@@ -201,7 +190,7 @@ public class IncreaseTemporaryGroupMemberAdapter extends RecyclerView.Adapter<Re
 
         public DepartmentViewHolder(View itemView) {
             super(itemView);
-            tvDepartment= (TextView) itemView.findViewById(R.id.tv_department);
+            tvDepartment=  itemView.findViewById(R.id.tv_department);
         }
     }
 
@@ -212,12 +201,6 @@ public class IncreaseTemporaryGroupMemberAdapter extends RecyclerView.Adapter<Re
         TextView tvName;
         @Bind(R.id.shoutai_tv_member_id)
         TextView tvId;
-//        @Bind(R.id.shoutai_dial_to)
-//        LinearLayout llDialTo;
-//        @Bind(R.id.shoutai_message_to)
-//        LinearLayout llMessageTo;
-//        @Bind(R.id.shoutai_call_to)
-//        LinearLayout llCallTo;
         @Bind(R.id.cb_selectmember)
         CheckBox cbSelectmember;
 

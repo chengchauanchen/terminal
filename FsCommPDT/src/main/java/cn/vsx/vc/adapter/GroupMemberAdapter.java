@@ -2,7 +2,6 @@ package cn.vsx.vc.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
@@ -41,8 +40,6 @@ public class GroupMemberAdapter extends BaseAdapter {
     private List<Member> deleteMembers = new ArrayList<>();
     private Context mContext;
     private boolean isDelete;
-    private String phoneNum;
-    private String no;
     private int VOIP=0;
     private int TELEPHONE=1;
     private OnItemClickListener onItemClickListener;
@@ -77,19 +74,19 @@ public class GroupMemberAdapter extends BaseAdapter {
         if (view == null) {
             viewHolder = new ViewHolder();
             view = LayoutInflater.from(mContext).inflate(R.layout.fragment_person_item, null);
-            viewHolder.ll_person_search_item=(LinearLayout)view.findViewById(R.id.ll_person_search_item);
-            viewHolder.userName = (TextView) view.findViewById(R.id.tv_member_name);
-            viewHolder.me = (TextView) view.findViewById(R.id.me);
-            viewHolder.userId = (TextView) view.findViewById(R.id.tv_member_id);
-            viewHolder.userLogo = (ImageView) view.findViewById(R.id.user_logo);
-            viewHolder.messageTo = (LinearLayout) view.findViewById(R.id.message_to);
-            viewHolder.callTo = (LinearLayout) view.findViewById(R.id.call_to);
-            viewHolder.tvLetter = (TextView) view.findViewById(R.id.tv_catagory);
-            viewHolder.catagory = (LinearLayout) view.findViewById(R.id.catagory);
+            viewHolder.ll_person_search_item=view.findViewById(R.id.ll_person_search_item);
+            viewHolder.userName =  view.findViewById(R.id.tv_member_name);
+            viewHolder.me =  view.findViewById(R.id.me);
+            viewHolder.userId =  view.findViewById(R.id.tv_member_id);
+            viewHolder.userLogo =  view.findViewById(R.id.user_logo);
+            viewHolder.messageTo =  view.findViewById(R.id.message_to);
+            viewHolder.callTo =  view.findViewById(R.id.call_to);
+            viewHolder.tvLetter =  view.findViewById(R.id.tv_catagory);
+            viewHolder.catagory =  view.findViewById(R.id.catagory);
             viewHolder.line =  view.findViewById(R.id.lay_line);
-            viewHolder.dialTo= (LinearLayout) view.findViewById(R.id.shoutai_dial_to);
-            viewHolder.cbSelectmember=(CheckBox)view.findViewById(R.id.cb_selectmember);
-            viewHolder.select_delete=(LinearLayout)view.findViewById(R.id.select_delete);
+            viewHolder.dialTo =  view.findViewById(R.id.shoutai_dial_to);
+            viewHolder.cbSelectmember = view.findViewById(R.id.cb_selectmember);
+            viewHolder.select_delete = view.findViewById(R.id.select_delete);
 
             view.setTag(viewHolder);
         } else {
@@ -98,10 +95,10 @@ public class GroupMemberAdapter extends BaseAdapter {
 
         viewHolder.catagory.setVisibility(View.GONE);
 
-        no = HandleIdUtil.handleId(member.no);
+        String no = HandleIdUtil.handleId(member.no);
         viewHolder.userName.setText(member.getName());
-        phoneNum = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no).phone;
-        Log.i("sjl_", "getView: "+phoneNum);
+        String phoneNum = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no).phone;
+        Log.i("sjl_", "getView: "+ phoneNum);
 //        viewHolder.userId.setText(member.id+"");
         if (TextUtils.isEmpty(no)){
             viewHolder.userId.setText(phoneNum);
@@ -144,90 +141,70 @@ public class GroupMemberAdapter extends BaseAdapter {
         }else {
             viewHolder.cbSelectmember.setChecked(false);
         }
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(isDelete){
-                    if (member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
-                        return;
-                    }
-                    if(member.isChecked()){
-                        member.isChecked = false;
-                        deleteMembers.remove(member);
-                    }else {
-                        member.isChecked = true;
-                        deleteMembers.add(member);
-                    }
-                    if(onItemClickListener!=null){
-                        onItemClickListener.onItemClick(v,position,member.isChecked,member);
-                    }
-                    notifyDataSetChanged();
+        view.setOnClickListener(v -> {
+            if(isDelete){
+                if (member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+                    return;
                 }
+                if(member.isChecked()){
+                    member.isChecked = false;
+                    deleteMembers.remove(member);
+                }else {
+                    member.isChecked = true;
+                    deleteMembers.add(member);
+                }
+                if(onItemClickListener!=null){
+                    onItemClickListener.onItemClick(v,position,member.isChecked,member);
+                }
+                notifyDataSetChanged();
             }
         });
 
         //跳转到消息界面
-        viewHolder.messageTo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                IndividualNewsActivity.startCurrentActivity(mContext, member.id, member.getName() );
-            }
-        });
+        viewHolder.messageTo.setOnClickListener(v -> IndividualNewsActivity.startCurrentActivity(mContext, member.id, member.getName() ));
         //跳转到个呼
-        viewHolder.callTo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                    activeIndividualCall(position);
-            }else {
-                    ToastUtil.showToast(mContext,"没有个呼功能权限");
-                }
-
+        viewHolder.callTo.setOnClickListener(v -> {
+            if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                activeIndividualCall(position);
+        }else {
+                ToastUtil.showToast(mContext,"没有个呼功能权限");
             }
+
         });
-        viewHolder.userLogo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(mContext, UserInfoActivity.class);
-                intent.putExtra("userId", member.getNo());
-                intent.putExtra("userName", member.getName());
-                mContext.startActivity(intent);
-            }
+        viewHolder.userLogo.setOnClickListener(view1 -> {
+            Intent intent = new Intent(mContext, UserInfoActivity.class);
+            intent.putExtra("userId", member.getNo());
+            intent.putExtra("userName", member.getName());
+            mContext.startActivity(intent);
         });
-        viewHolder.dialTo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!TextUtils.isEmpty(member.phone)) {
+        viewHolder.dialTo.setOnClickListener(view12 -> {
+            if (!TextUtils.isEmpty(member.phone)) {
 
-                    ItemAdapter adapter = new ItemAdapter(mContext,ItemAdapter.iniDatas());
-                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                    //设置标题
-                    builder.setTitle("拨打电话");
-                    builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int position) {
-                            if(position==VOIP){//voip电话
-                                if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
-                                    Intent intent = new Intent(mContext, VoipPhoneActivity.class);
-                                    intent.putExtra("member",member);
-                                    mContext.startActivity(intent);
-                                }else {
-                                    ToastUtil.showToast(mContext,"voip注册失败，请检查服务器配置");
-                                }
-                            }
-                            else if(position==TELEPHONE){//普通电话
-
-                                CallPhoneUtil.callPhone((Activity) mContext, member.phone);
-
-                            }
-
+                ItemAdapter adapter = new ItemAdapter(mContext,ItemAdapter.iniDatas());
+                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                //设置标题
+                builder.setTitle("拨打电话");
+                builder.setAdapter(adapter, (dialogInterface, position1) -> {
+                    if(position1 ==VOIP){//voip电话
+                        if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
+                            Intent intent = new Intent(mContext, VoipPhoneActivity.class);
+                            intent.putExtra("member",member);
+                            mContext.startActivity(intent);
+                        }else {
+                            ToastUtil.showToast(mContext,"voip注册失败，请检查服务器配置");
                         }
-                    });
-                    builder.create();
-                    builder.show();
-                }else {
-                    ToastUtil.showToast(mContext,"暂无该用户电话号码");
-                }
+                    }
+                    else if(position1 ==TELEPHONE){//普通电话
+
+                        CallPhoneUtil.callPhone((Activity) mContext, member.phone);
+
+                    }
+
+                });
+                builder.create();
+                builder.show();
+            }else {
+                ToastUtil.showToast(mContext,"暂无该用户电话号码");
             }
         });
         return view;

@@ -59,16 +59,13 @@ public class PTTViewPager extends BaseViewPager {
     private ReceivePTTUpHandler receivePTTUpHandler = new ReceivePTTUpHandler() {
         @Override
         public void handler() {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    MyApplication.instance.isClickVolumeToCall = false;
-                    if (MyApplication.instance.getGroupListenenState() == LISTENING) {
-                        change2Listening();
-                    }
-                    else {
-                        change2Silence();
-                    }
+            myHandler.post(() -> {
+                MyApplication.instance.isClickVolumeToCall = false;
+                if (MyApplication.instance.getGroupListenenState() == LISTENING) {
+                    change2Listening();
+                }
+                else {
+                    change2Silence();
                 }
             });
         }
@@ -77,16 +74,13 @@ public class PTTViewPager extends BaseViewPager {
         @Override
         public void handler(int requestGroupCall) {
             if (requestGroupCall == BaseCommonCode.SUCCESS_CODE) {
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!CheckMyPermission.selfPermissionGranted((NewMainActivity) context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
-                            CheckMyPermission.permissionPrompt((NewMainActivity) context, Manifest.permission.RECORD_AUDIO);
-                            return;
-                        }
-                        change2PreSpeaking();
-                        MyApplication.instance.isClickVolumeToCall = true;
+                myHandler.post(() -> {
+                    if (!CheckMyPermission.selfPermissionGranted((NewMainActivity) context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
+                        CheckMyPermission.permissionPrompt((NewMainActivity) context, Manifest.permission.RECORD_AUDIO);
+                        return;
                     }
+                    change2PreSpeaking();
+                    MyApplication.instance.isClickVolumeToCall = true;
                 });
             }else if(requestGroupCall == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()){
                 change2Waiting();
@@ -121,18 +115,15 @@ public class PTTViewPager extends BaseViewPager {
         @Override
         public void handler(final int resultCode, String resultDesc) {
             logger.info("主动方停止组呼的消息ReceiveCeaseGroupCallConformationHander");
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
-                        if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
-                            change2Listening();
-                        } else {
-                            change2Silence();
-                        }
+            myHandler.post(() -> {
+                if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
+                    if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
+                        change2Listening();
+                    } else {
+                        change2Silence();
                     }
-                    setViewEnable(true);
                 }
+                setViewEnable(true);
             });
         }
     };
@@ -149,37 +140,21 @@ public class PTTViewPager extends BaseViewPager {
                 logger.error("isPttPress值为" + MyApplication.instance.isPttPress);
                 if (MyApplication.instance.isPttPress) {
                     if (methodResult == 0) {//请求成功，开始组呼
-                        myHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                change2Speaking();
-                                MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
-                                setViewEnable(false);
-                            }
+                        myHandler.post(() -> {
+                            change2Speaking();
+                            MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
+                            setViewEnable(false);
                         });
                     } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
-                        myHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                ToastUtil.showToast(context, "当前组是只听组，不能发起组呼");
-                            }
-                        });
+                        myHandler.post(() -> ToastUtil.showToast(context, "当前组是只听组，不能发起组呼"));
                     } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
-                        myHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                change2Waiting();
-                            }
-                        });
+                        myHandler.post(() -> change2Waiting());
                     } else {//请求失败
-                        myHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (MyApplication.instance.getGroupListenenState() != GroupCallListenState.LISTENING) {
-                                    change2Silence();
-                                } else {
-                                    change2Listening();
-                                }
+                        myHandler.post(() -> {
+                            if (MyApplication.instance.getGroupListenenState() != GroupCallListenState.LISTENING) {
+                                change2Silence();
+                            } else {
+                                change2Listening();
                             }
                         });
                     }
@@ -195,13 +170,10 @@ public class PTTViewPager extends BaseViewPager {
         @Override
         public void handler(int reasonCode) {
             logger.info("触发了被动方组呼停止receiveGroupCallCeasedIndicationHandler");
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
-                        if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.WAITING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTED) {
-                            change2Silence();
-                        }
+            myHandler.post(() -> {
+                if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
+                    if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.WAITING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTED) {
+                        change2Silence();
                     }
                 }
             });
@@ -223,17 +195,14 @@ public class PTTViewPager extends BaseViewPager {
             logger.info("触发了被动方组呼来了receiveGroupCallIncommingHandler");
 
             if (currentCallMode == CallMode.GENERAL_CALL_MODE&&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if(MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTING
-                                || MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING){
-                            change2Waiting();
-                        }else if(MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED){
-                            //什么都不用做
-                        }else {
-                            change2Listening();
-                        }
+                myHandler.post(() -> {
+                    if(MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTING
+                            || MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING){
+                        change2Waiting();
+                    }else if(MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED){
+                        //什么都不用做
+                    }else {
+                        change2Listening();
                     }
                 });
             }
@@ -250,20 +219,10 @@ public class PTTViewPager extends BaseViewPager {
         public void handler(MemberChangeType memberChangeType) {
             logger.info("触发了receiveNotifyMemberChangeHandler");
             if (memberChangeType == MemberChangeType.MEMBER_ACTIVE_GROUP_CALL) {
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        change2Silence();
-                    }
-                });
+                myHandler.post(() -> change2Silence());
 
             } else if (memberChangeType == MemberChangeType.MEMBER_PROHIBIT_GROUP_CALL) {
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        change2Forbid();
-                    }
-                });
+                myHandler.post(() -> change2Forbid());
             }
         }
     };
@@ -291,12 +250,7 @@ public class PTTViewPager extends BaseViewPager {
         @Override
         public void handler(final boolean connected) {
             logger.info("pttViewPager收到服务是否连接的通知------>" + connected);
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    stateView();
-                }
-            });
+            myHandler.post(() -> stateView());
         }
     };
 
@@ -307,12 +261,7 @@ public class PTTViewPager extends BaseViewPager {
             View.OnClickListener {
         @Override
         public void onClick(View v) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    view_pager.setCurrentItem(2);
-                }
-            });
+            myHandler.post(() -> view_pager.setCurrentItem(2));
         }
     }
 
@@ -323,12 +272,7 @@ public class PTTViewPager extends BaseViewPager {
             View.OnClickListener {
         @Override
         public void onClick(View v) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    view_pager.setCurrentItem(0);
-                }
-            });
+            myHandler.post(() -> view_pager.setCurrentItem(0));
         }
     }
     //    Handler mHandler;
@@ -435,8 +379,6 @@ public class PTTViewPager extends BaseViewPager {
     Button ptt;
     @Bind(R.id.tv_ptt)
     TextView tv_ptt;
-//    @Bind(R.id.talkback_change_session)
-//    ImageView talkback_change_session;
 
     private TalkbackFragment takebackFragment;
     public Handler myHandler = new Handler();
@@ -493,13 +435,8 @@ public class PTTViewPager extends BaseViewPager {
     @Override
     public void initListener() {
         ptt.setOnTouchListener(new OnTouchListenerImplementation());
-        talkback_change_session.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                GroupCallNewsActivity.startCurrentActivity(context, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0),
-                        DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name, speakingId, speakingName);
-            }
-        });
+        talkback_change_session.setOnClickListener(v -> GroupCallNewsActivity.startCurrentActivity(context, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0),
+                DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name, speakingId, speakingName));
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberChangeHandler);
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);

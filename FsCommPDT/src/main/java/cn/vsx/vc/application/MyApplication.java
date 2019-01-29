@@ -97,12 +97,6 @@ public class MyApplication extends Application {
 		MyTerminalFactory.getSDK().getAuthManagerTwo().initIp();
 		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_PHONE.toString());
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
-		//		SkinCompatManager.
-		//				init(this)
-		//				.addInflater(new SkinMaterialViewInflater())    // material design
-		//				.addInflater(new SkinCardViewInflater())        // CardView v7
-		//				.addInflater(new SkinCircleImageViewInflater()) // hdodenhof/CircleImageView
-		//				.loadSkin();
 
 		SkinCompatManager.withoutActivity(this)                         // 基础控件换肤初始化
 				.addInflater(new SkinMaterialViewInflater())            // material design 控件换肤初始化[可选]
@@ -110,12 +104,6 @@ public class MyApplication extends Application {
 				//				.setSkinWindowBackgroundEnable(false)                   // 关闭windowBackground换肤，默认打开[可选]
 				.loadSkin();
 
-		//		if (LeakCanary.isInAnalyzerProcess(this)) {
-		//			// This process is dedicated to LeakCanary for heap analysis.
-		//			// You should not init your app in this process.
-		//			return;
-		//		}
-		//		LeakCanary.install(this);
 	}
 
 

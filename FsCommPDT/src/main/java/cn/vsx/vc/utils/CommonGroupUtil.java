@@ -1,14 +1,14 @@
 package cn.vsx.vc.utils;
 
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-
-import ptt.terminalsdk.context.MyTerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.application.MyApplication;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class CommonGroupUtil {
 

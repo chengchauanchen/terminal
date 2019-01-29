@@ -1,16 +1,13 @@
 package cn.vsx.vc.fragment;
 
-import android.annotation.SuppressLint;
 import android.os.Handler;
 import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AbsListView;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -74,7 +71,6 @@ public class TempGroupSearchFragment extends BaseFragment{
     @Bind(R.id.et_search_allcontacts)
     EditText et_search_allcontacts;
 
-    private LinearLayout ll_search_add_remove;
     private TempGroupSearchAdapter tempGroupSearchAdapter;
 
     private boolean isLocal;
@@ -130,32 +126,26 @@ public class TempGroupSearchFragment extends BaseFragment{
 
     @Override
     public void initListener() {
-        lv_search_allcontacts.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        lv_search_allcontacts.setOnItemClickListener((parent, view, position, id) -> {
 
-                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverSelectTempGroupMemberHandler.class,searchMemberListExceptMe.get(position).getNo(),true);
-                et_search_allcontacts.setText("");
-                InputMethodUtil.hideInputMethod(context, et_search_allcontacts);
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverSelectTempGroupMemberHandler.class,searchMemberListExceptMe.get(position).getNo(),true);
+            et_search_allcontacts.setText("");
+            InputMethodUtil.hideInputMethod(context, et_search_allcontacts);
 
-                searchMemberListExceptMe.clear();
-                tv_search_notdata.setVisibility(View.GONE);
-                getFragmentManager().popBackStack();
-            }
+            searchMemberListExceptMe.clear();
+            tv_search_notdata.setVisibility(View.GONE);
+            getFragmentManager().popBackStack();
         });
         iv_goback_contacts.setOnClickListener(new OnClickListenerImpGoBackContactsList());
         iv_delete_edittext.setOnClickListener(new OnClickListenerImpDeleteEditText());
         btn_search_allcontacts.setOnClickListener(new OnClickListenerImpSearchContats());
         lv_search_allcontacts.setOnScrollListener(new OnScrollListenerImpSearchList());
         et_search_allcontacts.addTextChangedListener(new TextWatcherImpSearch());
-        et_search_allcontacts.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-                if(i == EditorInfo.IME_ACTION_SEARCH) {
-                    doSearch();
-                }
-                return false;
+        et_search_allcontacts.setOnEditorActionListener((textView, i, keyEvent) -> {
+            if(i == EditorInfo.IME_ACTION_SEARCH) {
+                doSearch();
             }
+            return false;
         });
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSearchContactsHandler);
@@ -276,12 +266,7 @@ public class TempGroupSearchFragment extends BaseFragment{
             }
         }
         if (searchMemberListExceptMe.size() == 0) {
-//            if (isInterGroup) {
-//                tv_search_nothing.setText("当前组不存在该用户");
-//            }
-//            else {
-                tv_search_nothing.setText("联系人不存在");
-//            }
+            tv_search_nothing.setText("联系人不存在");
             rl_search_result.setVisibility(View.GONE);
         } else {
             tv_search_nothing.setVisibility(View.GONE);
@@ -329,38 +314,33 @@ public class TempGroupSearchFragment extends BaseFragment{
                             final int totalPages, final int totalMember, final int errorCode, final String errorDesc) {
             logger.info("搜索联系人结果：pageIndex = "+pageIndex+"  totalPages = "+totalPages+"  totalMember = "+totalMember+"  searchMemberList = "+searchMemberList.toString());
 
-            handler.post(new Runnable() {
-                @SuppressLint("NewApi") @Override
-                public void run() {
-                    if (errorCode == BaseCommonCode.SUCCESS_CODE) {//请求成功
-                        if (searchMemberList == null || searchMemberList.size() == 0) {
-                            if (searchMemberListExceptMe.size() == 0) {
-                                tv_search_nothing.setText("用户不存在");
-                            }
-                            return;
-                        }
-//			List<Member> searchResultExceptMe = DataUtil.getAllMembersExceptMe(searchMemberList);
-                        if (TempGroupSearchFragment.this.pageIndex != pageIndex) {
-                            TempGroupSearchFragment.this.searchMemberListExceptMe.addAll(DataUtil.getAllMembersExceptMe(searchMemberList));
-                            TempGroupSearchFragment.this.pageIndex = pageIndex;
-                        }
-                        TempGroupSearchFragment.this.totalPages = totalPages;
-
+            handler.post(() -> {
+                if (errorCode == BaseCommonCode.SUCCESS_CODE) {//请求成功
+                    if (searchMemberList == null || searchMemberList.size() == 0) {
                         if (searchMemberListExceptMe.size() == 0) {
                             tv_search_nothing.setText("用户不存在");
-                            rl_search_result.setVisibility(View.GONE);
-                        } else {
-                            tv_search_nothing.setVisibility(View.GONE);
-                            rl_search_result.setVisibility(View.VISIBLE);
-
-                            if (tempGroupSearchAdapter != null) {
-                                tempGroupSearchAdapter.refreshSearchContactsAdapter(0, -1, 0);
-//                                lv_search_allcontacts.setSelection((pageIndex-1) * visibleItemCount);
-                            }
                         }
-                    } else {
-                        ToastUtil.showToast(context, errorDesc);
+                        return;
                     }
+                    if (TempGroupSearchFragment.this.pageIndex != pageIndex) {
+                        TempGroupSearchFragment.this.searchMemberListExceptMe.addAll(DataUtil.getAllMembersExceptMe(searchMemberList));
+                        TempGroupSearchFragment.this.pageIndex = pageIndex;
+                    }
+                    TempGroupSearchFragment.this.totalPages = totalPages;
+
+                    if (searchMemberListExceptMe.size() == 0) {
+                        tv_search_nothing.setText("用户不存在");
+                        rl_search_result.setVisibility(View.GONE);
+                    } else {
+                        tv_search_nothing.setVisibility(View.GONE);
+                        rl_search_result.setVisibility(View.VISIBLE);
+
+                        if (tempGroupSearchAdapter != null) {
+                            tempGroupSearchAdapter.refreshSearchContactsAdapter(0, -1, 0);
+                        }
+                    }
+                } else {
+                    ToastUtil.showToast(context, errorDesc);
                 }
             });
         }
@@ -372,8 +352,8 @@ public class TempGroupSearchFragment extends BaseFragment{
             if (s.toString().contains(" ")) {
                 String[] str = s.toString().split(" ");
                 StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < str.length; i++) {
-                    sb.append(str[i]);
+                for (String aStr : str) {
+                    sb.append(aStr);
                 }
 
                 et_search_allcontacts.setText(sb.toString());
@@ -405,14 +385,11 @@ public class TempGroupSearchFragment extends BaseFragment{
     private ReceiveNotifyMemberChangeHandler mReceiveNotifyMemberChangeHandler = new ReceiveNotifyMemberChangeHandler() {
         @Override
         public void handler(final MemberChangeType memberChangeType) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (memberChangeType == MemberChangeType.MEMBER_ADD ||
-                            memberChangeType == MemberChangeType.MEMBER_REMOVE||
-                            memberChangeType == MemberChangeType.MEMBER_NAME_MODIFY) {
-                        tempGroupSearchAdapter.notifyDataSetChanged();
-                    }
+            handler.post(() -> {
+                if (memberChangeType == MemberChangeType.MEMBER_ADD ||
+                        memberChangeType == MemberChangeType.MEMBER_REMOVE||
+                        memberChangeType == MemberChangeType.MEMBER_NAME_MODIFY) {
+                    tempGroupSearchAdapter.notifyDataSetChanged();
                 }
             });
         }
@@ -430,22 +407,15 @@ public class TempGroupSearchFragment extends BaseFragment{
     };
 
     /** 列表中个呼按钮点击消息监听 */
-    private ReceiverIndividualCallForAddressBookHandler mReceiverIndividualCallForAddressBookHandler = new ReceiverIndividualCallForAddressBookHandler() {
-        @Override
-        public void handler(int where, int position) {
-            if(where == 2) {
-                activeIndividualCall(position);
-            }
+    private ReceiverIndividualCallForAddressBookHandler mReceiverIndividualCallForAddressBookHandler = (where, position) -> {
+        if(where == 2) {
+            activeIndividualCall(position);
         }
     };
 
-    private ReceiverIndividualMsgForAddressBookHandler mReceiverIndividualMsgForAddressBookHandler = new ReceiverIndividualMsgForAddressBookHandler() {
-        @Override
-        public void handler(int where, int position) {
-            if(where == 2) {
-//                context.startActivity(new Intent(context, IndividualNewsActivity.class));
-                IndividualNewsActivity.startCurrentActivity(context, searchMemberListExceptMe.get(position).id, searchMemberListExceptMe.get(position).getName());
-            }
+    private ReceiverIndividualMsgForAddressBookHandler mReceiverIndividualMsgForAddressBookHandler = (where, position) -> {
+        if(where == 2) {
+            IndividualNewsActivity.startCurrentActivity(context, searchMemberListExceptMe.get(position).id, searchMemberListExceptMe.get(position).getName());
         }
     };
     /*************************************************************Handler和其他监听**************************************************************************************/

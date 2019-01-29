@@ -16,7 +16,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -59,12 +58,7 @@ public class StackViewAdapter extends BaseAdapter{
 
     public void setData(List<TerminalMessage> terminalMessages){
         //先按照时间来排序，再根据类型来排序
-        Collections.sort(terminalMessages, new Comparator<TerminalMessage>() {
-            @Override
-            public int compare(TerminalMessage o1, TerminalMessage o2) {
-                return (o1.sendTime) > (o2.sendTime) ? -1 : 1;
-            }
-        });
+        Collections.sort(terminalMessages, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
         data.clear();
         data.addAll(terminalMessages);
         for(int i = terminalMessages.size()-1; 0 <=i ; i--){
@@ -191,21 +185,15 @@ public class StackViewAdapter extends BaseAdapter{
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
         Date date = new Date(data.get(position).sendTime);
         viewHolder.tv_time.setText(simpleDateFormat.format(date));
-        viewHolder.lv_live_return.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                if(closeDialogListener!=null){
-                    closeDialogListener.onCloseDialogClick(position);
-                }
+        viewHolder.lv_live_return.setOnClickListener(v -> {
+            if(closeDialogListener!=null){
+                closeDialogListener.onCloseDialogClick(position);
             }
         });
         viewHolder.btn_live_gowatch.setTag(data.get(position));
-        viewHolder.btn_live_gowatch.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                if(goWatchListener!=null){
-                    goWatchListener.onGoWatchClick(position);
-                }
+        viewHolder.btn_live_gowatch.setOnClickListener(v -> {
+            if(goWatchListener!=null){
+                goWatchListener.onGoWatchClick(position);
             }
         });
         return convertView;
@@ -221,13 +209,13 @@ public class StackViewAdapter extends BaseAdapter{
         Button btn_live_gowatch;
 
         public ViewHolder(View view){
-            dialog_root = (ConstraintLayout) view.findViewById(R.id.dialog_root);
-            tv_live_theme = (TextView) view.findViewById(R.id.tv_live_theme);
-            iv_warning_level = (ImageView) view.findViewById(R.id.iv_warning_level);
-            video_member = (TextView) view.findViewById(R.id.video_member);
-            tv_time = (TextView) view.findViewById(R.id.tv_time);
-            lv_live_return = (ImageView)view.findViewById(R.id.lv_live_return);
-            btn_live_gowatch = (Button)view.findViewById(R.id.btn_live_gowatch);
+            dialog_root =  view.findViewById(R.id.dialog_root);
+            tv_live_theme =  view.findViewById(R.id.tv_live_theme);
+            iv_warning_level =  view.findViewById(R.id.iv_warning_level);
+            video_member =  view.findViewById(R.id.video_member);
+            tv_time =  view.findViewById(R.id.tv_time);
+            lv_live_return = view.findViewById(R.id.lv_live_return);
+            btn_live_gowatch = view.findViewById(R.id.btn_live_gowatch);
         }
     }
 

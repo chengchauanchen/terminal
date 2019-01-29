@@ -21,12 +21,9 @@ public class DeleteMessageDialog extends Dialog{
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.diaslog_detele_messsage, null);
-        view.findViewById(R.id.tv_message_delete).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverDeleteMessageHandler.class);
-                dismiss();
-            }
+        view.findViewById(R.id.tv_message_delete).setOnClickListener(view1 -> {
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverDeleteMessageHandler.class);
+            dismiss();
         });
         setContentView(view);
     }

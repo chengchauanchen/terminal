@@ -46,8 +46,8 @@ public class SWConsumer extends Thread implements VideoConsumer{
         }
     }
 
-    private ArrayBlockingQueue<TimedBuffer> yuvs = new ArrayBlockingQueue<TimedBuffer>(2);
-    private ArrayBlockingQueue<byte[]> yuv_caches = new ArrayBlockingQueue<byte[]>(10);
+    private ArrayBlockingQueue<TimedBuffer> yuvs = new ArrayBlockingQueue<>(2);
+    private ArrayBlockingQueue<byte[]> yuv_caches = new ArrayBlockingQueue<>(10);
 
     @Override
     public void run(){

@@ -2,7 +2,6 @@ package cn.vsx.vc.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.app.AlertDialog;
@@ -35,8 +34,8 @@ import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.activity.VoipPhoneActivity;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by gt358 on 2017/10/25.
@@ -48,7 +47,6 @@ public class LocalMemberSearchAdapter extends BaseAdapter {
     private List<Member> allMembersExceptMe;
     private Logger logger = Logger.getLogger(PersonContactsAdapter.class);
     private Member memberExceptMe;// 上一个人
-    private ViewHolder holder;
     Handler handler = new Handler();
     private int longClickPos = -1;
     private int VOIP=0;
@@ -61,12 +59,7 @@ public class LocalMemberSearchAdapter extends BaseAdapter {
 
     public void setLongClickPos (int longClickPos) {
         this.longClickPos = longClickPos;
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                notifyDataSetChanged();
-            }
-        });
+        handler.post(() -> notifyDataSetChanged());
     }
 
     public void refreshPersonContactsAdapter() {
@@ -90,7 +83,7 @@ public class LocalMemberSearchAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
-        holder = null;
+        ViewHolder holder = null;
         if (convertView == null) {
             convertView = View.inflate(context, R.layout.fragment_person_item, null);
             holder = new ViewHolder(convertView);
@@ -162,79 +155,55 @@ public class LocalMemberSearchAdapter extends BaseAdapter {
 //        }
         holder.tv_pinyin.setVisibility(View.GONE);
         holder.tv_pinyin.setText(personContactsBean.pinyin.charAt(0)+"");
-        holder.iv_individual_call.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        holder.iv_individual_call.setOnClickListener(view -> {
 
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverIndividualCallForAddressBookHandler.class, 4, position);
-                if (mItemBtnClickListener!=null){
-                    mItemBtnClickListener.onItemBtnClick();
-                }
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverIndividualCallForAddressBookHandler.class, 4, position);
+            if (mItemBtnClickListener!=null){
+                mItemBtnClickListener.onItemBtnClick();
             }
         });
-        holder.iv_individual_msg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverIndividualMsgForAddressBookHandler.class, 4, position);
-                if (mItemBtnClickListener!=null){
-                    mItemBtnClickListener.onItemBtnClick();
-                }
+        holder.iv_individual_msg.setOnClickListener(v -> {
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverIndividualMsgForAddressBookHandler.class, 4, position);
+            if (mItemBtnClickListener!=null){
+                mItemBtnClickListener.onItemBtnClick();
             }
         });
-        holder.llDialTo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!TextUtils.isEmpty(searchContactsBean.phone)) {
+        holder.llDialTo.setOnClickListener(view -> {
+            if (!TextUtils.isEmpty(searchContactsBean.phone)) {
 
-                    ItemAdapter adapter = new ItemAdapter(context,ItemAdapter.iniDatas());
-                    AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                    //设置标题
-                    builder.setTitle("拨打电话");
-                    builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int position) {
-                            if(position==VOIP){//voip电话
-                                if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
-                                    Intent intent = new Intent(context, VoipPhoneActivity.class);
-                                    intent.putExtra("member",searchContactsBean);
-                                    context.startActivity(intent);
-                                }else {
-                                    ToastUtil.showToast(context,"voip注册失败，请检查服务器配置");
-                                }
-                            }
-                            else if(position==TELEPHONE){//普通电话
-
-                                CallPhoneUtil.callPhone((Activity) context, searchContactsBean.phone);
-
-                            }
-
+                ItemAdapter adapter = new ItemAdapter(context,ItemAdapter.iniDatas());
+                AlertDialog.Builder builder = new AlertDialog.Builder(context);
+                //设置标题
+                builder.setTitle("拨打电话");
+                builder.setAdapter(adapter, (dialogInterface, position1) -> {
+                    if(position1 ==VOIP){//voip电话
+                        if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
+                            Intent intent = new Intent(context, VoipPhoneActivity.class);
+                            intent.putExtra("member",searchContactsBean);
+                            context.startActivity(intent);
+                        }else {
+                            ToastUtil.showToast(context,"voip注册失败，请检查服务器配置");
                         }
-                    });
-                    builder.create();
-                    builder.show();
-                }else {
-                    ToastUtil.showToast(context,"暂无该用户电话号码");
-                }
+                    }
+                    else if(position1 ==TELEPHONE){//普通电话
+
+                        CallPhoneUtil.callPhone((Activity) context, searchContactsBean.phone);
+
+                    }
+
+                });
+                builder.create();
+                builder.show();
+            }else {
+                ToastUtil.showToast(context,"暂无该用户电话号码");
             }
         });
-        holder.ivUserLogo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, UserInfoActivity.class);
-                intent.putExtra("userId", searchContactsBean.getNo());
-                intent.putExtra("userName", searchContactsBean.getName());
-                context.startActivity(intent);
-            }
+        holder.ivUserLogo.setOnClickListener(view -> {
+            Intent intent = new Intent(context, UserInfoActivity.class);
+            intent.putExtra("userId", searchContactsBean.getNo());
+            intent.putExtra("userName", searchContactsBean.getName());
+            context.startActivity(intent);
         });
-
-
-//        if (longClickPos == position) {
-//            holder.ll_person_search_item.setBackgroundResource(R.color.group_person_catagory_gray);
-//        }
-//        else {
-//            holder.ll_person_search_item.setBackgroundResource(R.color.white);
-//        }
-
         return convertView;
     }
 

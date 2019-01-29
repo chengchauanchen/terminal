@@ -8,5 +8,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 
 public interface ReceiverSelectChatListHandler extends ReceiveHandler {
 
-    public void handler ();
+    void handler();
 }

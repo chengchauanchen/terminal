@@ -27,9 +27,9 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Comparator;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * A ListAdapter that manages a ListView backed by an array of arbitrary

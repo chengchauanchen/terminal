@@ -36,7 +36,7 @@ public class KilledActivity extends FragmentActivity {
     }
 
     private void setBackground() {
-        RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.rl_kill);
+        RelativeLayout relativeLayout =  findViewById(R.id.rl_kill);
 
         BitmapFactory.Options opts = new BitmapFactory.Options();
         opts.inJustDecodeBounds = true;
@@ -48,6 +48,7 @@ public class KilledActivity extends FragmentActivity {
             Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.regist_bg, opts);
             relativeLayout.setBackgroundDrawable(new BitmapDrawable(bmp));
         } catch (OutOfMemoryError err) {
+            err.printStackTrace();
         }
     }
 }

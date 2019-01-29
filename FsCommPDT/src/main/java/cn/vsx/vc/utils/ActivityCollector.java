@@ -16,11 +16,11 @@ import java.util.Set;
  */
 
 public class ActivityCollector {
-    static Logger logger = Logger.getLogger(ActivityCollector.class);
+    private static Logger logger = Logger.getLogger(ActivityCollector.class);
     /**
      * 存放activity的列表
      */
-    public static HashMap<Class<?>, Activity> activities = new LinkedHashMap<>();
+    private static HashMap<Class<?>, Activity> activities = new LinkedHashMap<>();
 
     /**
      * 添加Activity

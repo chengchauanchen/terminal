@@ -12,7 +12,6 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import cn.vsx.vc.R;
-import cn.vsx.vc.utils.ActivityCollector;
 
 /**
  * 透明activity，用于个呼到来时启动接听界面

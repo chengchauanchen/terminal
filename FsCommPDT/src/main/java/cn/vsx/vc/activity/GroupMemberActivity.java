@@ -71,18 +71,11 @@ public class GroupMemberActivity extends BaseActivity {
     TextView memberNum;
     @Bind(R.id.member_list)
     ListView memberList;
-//    @Bind(R.id.select_all)
-//    LinearLayout selectAll;
-//    @Bind(R.id.find_history)
-//    LinearLayout findHistory;
     @Bind(R.id.volume_layout)
     VolumeViewLayout volumeViewLayout;
-    private WindowManager windowManager;
     private GroupMemberAdapter sortAdapter;
     private Handler myHandler = new Handler();
     private List<Member> currentGroupMembers = new ArrayList<>();
-    private int listviewHight;
-    private int screenWidth;
     private int groupId;
     String groupName;
     private int total=0;
@@ -91,7 +84,6 @@ public class GroupMemberActivity extends BaseActivity {
     public void setListViewHeightBasedOnChildren(ListView listView) {
         if (listView == null)
             return;
-        //sortAdapter = (GroupMemberAdapter) listView.getAdapter();
         if (listView.getAdapter() instanceof HeaderViewListAdapter) {
             HeaderViewListAdapter listAdapter = (HeaderViewListAdapter) listView.getAdapter();
             sortAdapter = (GroupMemberAdapter) listAdapter.getWrappedAdapter();
@@ -109,9 +101,6 @@ public class GroupMemberActivity extends BaseActivity {
         }
         ViewGroup.LayoutParams params = listView.getLayoutParams();
         params.height = totalHeight + (listView.getDividerHeight() * (sortAdapter.getCount() - 1));
-        listviewHight = params.height;
-//        listView.setLayoutParams(params);
-
 
     }
 
@@ -123,14 +112,9 @@ public class GroupMemberActivity extends BaseActivity {
     @Override
     public void initView() {
         // 获取屏幕宽度
-        windowManager = (WindowManager) this.getSystemService(WINDOW_SERVICE);
+        WindowManager windowManager = (WindowManager) this.getSystemService(WINDOW_SERVICE);
         DisplayMetrics dm = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(dm);
-        screenWidth = dm.heightPixels;
-
-//        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false, 0);
-//        sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, true);
-//        memberList.setAdapter(sortAdapter);
     }
 
     @Override
@@ -178,8 +162,6 @@ public class GroupMemberActivity extends BaseActivity {
         }
 
         sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, false);
-//        memberList.addFooterView(new View(GroupMemberActivity.this), null, true);
-//        memberList.setFooterDividersEnabled(false);
         memberList.setAdapter(sortAdapter);
     }
 
@@ -194,15 +176,14 @@ public class GroupMemberActivity extends BaseActivity {
     }
 
     private long lastSearchTime=0;
-    private long currentTime=0;
 
     @OnClick({R.id.news_bar_back, R.id.right_btn,R.id.news_bar_back_temp,R.id.delete_btn,R.id.add_btn,R.id.cancel_text,R.id.delete_text})
     public void onClick(View view) {
-        currentTime=System.currentTimeMillis();
-        if( currentTime- lastSearchTime<1000){
+        long currentTime = System.currentTimeMillis();
+        if( currentTime - lastSearchTime<1000){
             return;
         }
-        lastSearchTime=currentTime;
+        lastSearchTime= currentTime;
 
         switch (view.getId()) {
             case R.id.news_bar_back:
@@ -229,19 +210,16 @@ public class GroupMemberActivity extends BaseActivity {
                 cancel_text.setVisibility(View.VISIBLE);
 
                 sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, true);
-                sortAdapter.setOnItemClickListener(new GroupMemberAdapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view, int position, boolean checked, Member member) {
-                        if(checked){
-                            total++;
-                        }else {
-                            total--;
-                        }
-                        if(total>0){
-                            delete_text.setText("删除(" + total + ")");
-                        }else {
-                            delete_text.setText("删除");
-                        }
+                sortAdapter.setOnItemClickListener((view1, position, checked, member) -> {
+                    if(checked){
+                        total++;
+                    }else {
+                        total--;
+                    }
+                    if(total>0){
+                        delete_text.setText("删除(" + total + ")");
+                    }else {
+                        delete_text.setText("删除");
                     }
                 });
                 memberList.setAdapter(sortAdapter);
@@ -264,36 +242,22 @@ public class GroupMemberActivity extends BaseActivity {
                     final LinearLayout ll_select = window.findViewById(R.id.ll_select);
                     final LinearLayout  ll_success = window.findViewById(R.id.ll_success);
                     Button btn_confirm = window.findViewById(R.id.btn_confirm);
-                    btn_confirm.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            myHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    ll_success.setVisibility(View.VISIBLE);
-                                    ll_select.setVisibility(View.GONE);
-                                    MyTerminalFactory.getSDK().getTempGroupManager().destroyTempGroup4PC(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0));
-                                    TimerTask task =new TimerTask() {
-                                        @Override
-                                        public void run() {
-                                            alertDialog.dismiss();
-                                            finish();
-                                        }
-                                    };
-                                    MyTerminalFactory.getSDK().getTimer().schedule(task,1000);
+                    btn_confirm.setOnClickListener(v -> myHandler.post(() -> {
+                        ll_success.setVisibility(View.VISIBLE);
+                        ll_select.setVisibility(View.GONE);
+                        MyTerminalFactory.getSDK().getTempGroupManager().destroyTempGroup4PC(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0));
+                        TimerTask task =new TimerTask() {
+                            @Override
+                            public void run() {
+                                alertDialog.dismiss();
+                                finish();
+                            }
+                        };
+                        MyTerminalFactory.getSDK().getTimer().schedule(task,1000);
 
-                                }
-                            });
-
-                        }
-                    });
+                    }));
                     Button btn_cancel = window.findViewById(R.id.btn_cancel);
-                    btn_cancel.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            alertDialog.dismiss();
-                        }
-                    });
+                    btn_cancel.setOnClickListener(v -> alertDialog.dismiss());
                 }else {
                     List<Member> deleteMemberList = sortAdapter.getDeleteMemberList();
                     MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0),MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),deleteMemberList);
@@ -302,11 +266,6 @@ public class GroupMemberActivity extends BaseActivity {
                     delete_text.setVisibility(View.GONE);
                     cancel_text.setVisibility(View.GONE);
                 }
-
-
-//                sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, false);
-//                memberList.setAdapter(sortAdapter);
-//                sortAdapter.notifyDataSetChanged();
                 break;
             case R.id.cancel_text:
                 add_btn.setVisibility(View.VISIBLE);
@@ -326,44 +285,35 @@ public class GroupMemberActivity extends BaseActivity {
     private ReceiveGetGroupCurrentOnlineMemberListHandler mReceiveGetGroupCurrentOnlineMemberListHandler = new ReceiveGetGroupCurrentOnlineMemberListHandler() {
         @Override
         public void handler(final List<Member> memberList,boolean isAllMember,int groupId) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if(isFinishing()){
-                        return;
-                    }
+            myHandler.post(() -> {
+                if(isFinishing()){
+                    return;
+                }
 
-                    currentGroupMembers.clear();
-                    currentGroupMembers.addAll(memberList);
-                    for(Member member : currentGroupMembers){
-                        if(member.isChecked()){
-                            member.setChecked(false);
-                        }
+                currentGroupMembers.clear();
+                currentGroupMembers.addAll(memberList);
+                for(Member member : currentGroupMembers){
+                    if(member.isChecked()){
+                        member.setChecked(false);
                     }
-                    Collections.sort(currentGroupMembers);
-                    if (sortAdapter != null) {
-                        sortAdapter.notifyDataSetChanged();
-                    }
+                }
+                Collections.sort(currentGroupMembers);
+                if (sortAdapter != null) {
+                    sortAdapter.notifyDataSetChanged();
+                }
 
-                    if(isTemporaryGroup){
-                        in_title_bar.setVisibility(View.GONE);
-                        temp_title_bar.setVisibility(View.VISIBLE);
-                        barTitle.setText("组内成员");
-                        memberNum.setText("组内成员" + (currentGroupMembers.size()) + "人");
-                        logger.info("组内成员：" + currentGroupMembers.size());
-                    }else {
-                        in_title_bar.setVisibility(View.VISIBLE);
-                        temp_title_bar.setVisibility(View.GONE);
-                        barTitle.setText("组内在线成员");
-                        memberNum.setText("组内在线成员" + (currentGroupMembers.size()) + "人");
-                        logger.info("组内在线成员：" + currentGroupMembers.size());
-                    }
-//                    if (memberList.size() > 5){
-//                        selectAll.setVisibility(View.VISIBLE);
-//                    }
-//                    else{
-//                        selectAll.setVisibility(View.GONE);
-//                    }
+                if(isTemporaryGroup){
+                    in_title_bar.setVisibility(View.GONE);
+                    temp_title_bar.setVisibility(View.VISIBLE);
+                    barTitle.setText("组内成员");
+                    memberNum.setText("组内成员" + (currentGroupMembers.size()) + "人");
+                    logger.info("组内成员：" + currentGroupMembers.size());
+                }else {
+                    in_title_bar.setVisibility(View.VISIBLE);
+                    temp_title_bar.setVisibility(View.GONE);
+                    barTitle.setText("组内在线成员");
+                    memberNum.setText("组内在线成员" + (currentGroupMembers.size()) + "人");
+                    logger.info("组内在线成员：" + currentGroupMembers.size());
                 }
             });
         }
@@ -374,12 +324,9 @@ public class GroupMemberActivity extends BaseActivity {
         public void handler(int methodResult, String resultDesc, int tempGroupNo){
             if(methodResult == BaseCommonCode.SUCCESS_CODE){
                 if(tempGroupNo == groupId && canAdd){
-                    myHandler.postDelayed(new Runnable(){
-                        @Override
-                        public void run(){
-                            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
-                            ToastUtil.showToast(GroupMemberActivity.this,"删除成功");
-                        }
+                    myHandler.postDelayed(() -> {
+                        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
+                        ToastUtil.showToast(GroupMemberActivity.this,"删除成功");
                     },2000);
 
                 }
@@ -392,12 +339,9 @@ public class GroupMemberActivity extends BaseActivity {
         public void handler(int methodResult, String resultDesc, int tempGroupNo){
             if(methodResult == BaseCommonCode.SUCCESS_CODE){
                 if(tempGroupNo == groupId && canAdd){
-                    myHandler.postDelayed(new Runnable(){
-                        @Override
-                        public void run(){
-                            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
-                            ToastUtil.showToast(GroupMemberActivity.this,"添加成功");
-                        }
+                    myHandler.postDelayed(() -> {
+                        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
+                        ToastUtil.showToast(GroupMemberActivity.this,"添加成功");
                     },2000);
                 }
             }

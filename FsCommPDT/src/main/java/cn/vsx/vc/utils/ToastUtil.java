@@ -21,12 +21,7 @@ public class ToastUtil {
 	 */
 	public static void showToast(final String content ,final Activity activity ) {
 
-		activity.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				Toast.makeText(activity, content, Toast.LENGTH_SHORT).show();
-			}
-		});
+		activity.runOnUiThread(() -> Toast.makeText(activity, content, Toast.LENGTH_SHORT).show());
 
 	}
 	
@@ -35,14 +30,11 @@ public class ToastUtil {
 	 * 静态toast  toast 消失 变为null 不消失就不用重新创建
 	 */
     public static void showToast(final Context context, final String text) {
-		handler.post(new Runnable(){
-			@Override
-			public void run(){
-				if (toast == null)
-					toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
-				toast.setText(text);
-				toast.show();
-			}
+		handler.post(() -> {
+			if (toast == null)
+				toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+			toast.setText(text);
+			toast.show();
 		});
     }
     
@@ -52,15 +44,12 @@ public class ToastUtil {
 	 */
     public static void toast(final Activity activity, final String string) {
     	
-		activity.runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				 if (toast == null){
-			            toast = Toast.makeText(activity, string, Toast.LENGTH_SHORT);
-				 }
-		        toast.setText(string);
-		        toast.show();
-			}
+		activity.runOnUiThread(() -> {
+			 if (toast == null){
+					toast = Toast.makeText(activity, string, Toast.LENGTH_SHORT);
+			 }
+			toast.setText(string);
+			toast.show();
 		});
 	}
 	public static void closeToast(){
@@ -75,6 +64,7 @@ public class ToastUtil {
 				//  调用show方法来显示Toast信息提示框
 				method.invoke(obj, new Object[]{});
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}

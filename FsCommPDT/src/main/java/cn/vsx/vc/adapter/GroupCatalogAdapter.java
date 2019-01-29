@@ -11,7 +11,6 @@ import android.widget.TextView;
 import java.util.List;
 
 import cn.vsx.vc.R;
-import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.GroupCatalogBean;
 
 /**
@@ -45,12 +44,9 @@ public class GroupCatalogAdapter extends RecyclerView.Adapter<GroupCatalogAdapte
 
         holder.tvCatalog.setText(mCatalogs.get(position).getName());
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mItemClickListener!=null){
-                    mItemClickListener.onItemClick(view,position);
-                }
+        holder.itemView.setOnClickListener(view -> {
+            if (mItemClickListener!=null){
+                mItemClickListener.onItemClick(view,position);
             }
         });
 
@@ -74,8 +70,8 @@ public class GroupCatalogAdapter extends RecyclerView.Adapter<GroupCatalogAdapte
         TextView tvCatalog;
         public MyViewHolder(View itemView) {
             super(itemView);
-            iv= (ImageView) itemView.findViewById(R.id.iv);
-            tvCatalog= (TextView) itemView.findViewById(R.id.tv_catalog);
+            iv=  itemView.findViewById(R.id.iv);
+            tvCatalog=  itemView.findViewById(R.id.tv_catalog);
         }
     }
 }

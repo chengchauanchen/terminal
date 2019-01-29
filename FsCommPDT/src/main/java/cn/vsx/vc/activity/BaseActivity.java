@@ -105,22 +105,16 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
 
 	/**组成员遥毙消息*/
-	protected ReceiveNotifyMemberKilledHandler receiveNotifyMemberKilledHandler = new ReceiveNotifyMemberKilledHandler() {
-		@Override
-		public void handler(boolean forbid) {
-			logger.error("收到遥毙，此时forbid状态为：" + forbid);
-			if(forbid){
-				myHandler.post(new Runnable() {
-					@Override
-					public void run() {
-						TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
-						TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
-						startActivity(new Intent(BaseActivity.this, KilledActivity.class));
-						BaseActivity.this.finish();
-						MyApplication.instance.stopIndividualCallService();
-					}
-				});
-			}
+	protected ReceiveNotifyMemberKilledHandler receiveNotifyMemberKilledHandler = forbid -> {
+		logger.error("收到遥毙，此时forbid状态为：" + forbid);
+		if(forbid){
+			myHandler.post(() -> {
+				TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
+				TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
+				startActivity(new Intent(BaseActivity.this, KilledActivity.class));
+				BaseActivity.this.finish();
+				MyApplication.instance.stopIndividualCallService();
+			});
 		}
 	};
 

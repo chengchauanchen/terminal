@@ -33,11 +33,7 @@ import ptt.terminalsdk.tools.ToastUtil;
 
 public class PoliceAffairsAdapter extends BaseExpandableListAdapter {
     private Activity activity;
-    private ViewHolder viewHolder;
-    private ViewHolderPerson viewHolderPerson;
     private List<ShouTaiBean.BuMenBean> list;
-    private Member member;
-    private String phoneNo;
 
     public PoliceAffairsAdapter(List<ShouTaiBean.BuMenBean> list, Activity activity){
         this.list = list;
@@ -80,7 +76,7 @@ public class PoliceAffairsAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        viewHolder =null;
+        ViewHolder viewHolder = null;
         if (convertView == null){
             convertView = View.inflate(activity,R.layout.item_jingwutong,null);
             viewHolder = new ViewHolder(convertView);
@@ -101,7 +97,7 @@ public class PoliceAffairsAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-        viewHolderPerson = null;
+        ViewHolderPerson viewHolderPerson = null;
         if (convertView == null){
             convertView = View.inflate(activity,R.layout.jingwutong_item_childview,null);
             viewHolderPerson = new ViewHolderPerson(convertView);
@@ -109,8 +105,8 @@ public class PoliceAffairsAdapter extends BaseExpandableListAdapter {
         }else {
             viewHolderPerson = (ViewHolderPerson) convertView.getTag();
         }
-        member = list.get(groupPosition).memberList.get(childPosition);
-        phoneNo = member.phone;
+        Member member = list.get(groupPosition).memberList.get(childPosition);
+        String phoneNo = member.phone;
         String id = HandleIdUtil.handleId(member.id);
         if (!TextUtils.isEmpty(id)){
             viewHolderPerson.jingwutong_tv_member_id.setText(id);
@@ -126,30 +122,19 @@ public class PoliceAffairsAdapter extends BaseExpandableListAdapter {
         }
 
         viewHolderPerson.jingwutong_tv_member_name.setText(list.get(groupPosition).memberList.get(childPosition).getName());
-        viewHolderPerson.jingwutong_call_to.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                    ToastUtil.showToast(activity,"没有个呼功能权限");
-                }else {
-                    activeIndividualCall(groupPosition,childPosition);
-                }
+        viewHolderPerson.jingwutong_call_to.setOnClickListener(v -> {
+            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                ToastUtil.showToast(activity,"没有个呼功能权限");
+            }else {
+                activeIndividualCall(groupPosition,childPosition);
+            }
 
 
-            }
         });
-        viewHolderPerson.jingwutong_message_to.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Member member = list.get(groupPosition).memberList.get(childPosition);
-                IndividualNewsActivity.startCurrentActivity(activity, member.id, member.getName());
-            }
+        viewHolderPerson.jingwutong_message_to.setOnClickListener(v -> {
+            Member member1 = list.get(groupPosition).memberList.get(childPosition);
+            IndividualNewsActivity.startCurrentActivity(activity, member1.id, member1.getName());
         });
-//        if (member.getTerminalMemberTypeEnum() == TerminalMemberType.TERMINAL_TEST){
-//            convertView.setVisibility(View.GONE);
-//        }else {
-//            convertView.setVisibility(View.VISIBLE);
-//        }
         return convertView;
     }
 

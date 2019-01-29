@@ -2,7 +2,6 @@ package cn.vsx.vc.adapter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -74,12 +73,9 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (getItemViewType(position)==TYPE_DEPARTMENT){
             DepartmentViewHolder holder1= (DepartmentViewHolder) holder;
             holder1.tvDepartment.setText(mDatas.get(position).getName());
-            holder1.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (listener!=null) {
-                        listener.onItemClick(view, position, TYPE_DEPARTMENT);
-                    }
+            holder1.itemView.setOnClickListener(view -> {
+                if (listener!=null) {
+                    listener.onItemClick(view, position, TYPE_DEPARTMENT);
                 }
             });
         }else {
@@ -88,71 +84,53 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             userViewHolder.tvName.setText(member.getName()+"");
             userViewHolder.tvId.setText(member.getNo()+"");
 
-            userViewHolder.llDialTo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (!TextUtils.isEmpty(member.phone)) {
+            userViewHolder.llDialTo.setOnClickListener(view -> {
+                if (!TextUtils.isEmpty(member.phone)) {
 
-                        ItemAdapter adapter = new ItemAdapter(mContext,ItemAdapter.iniDatas());
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                        //设置标题
-                        builder.setTitle("拨打电话");
-                        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int position) {
-                                if(position==VOIP){//voip电话
-                                    if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
-                                        Intent intent = new Intent(mContext, VoipPhoneActivity.class);
-                                        intent.putExtra("member",member);
-                                        mContext.startActivity(intent);
-                                    }else {
-                                        ToastUtil.showToast(mContext,"voip注册失败，请检查服务器配置");
-                                    }
-                                }
-                                else if(position==TELEPHONE){//普通电话
-
-                                  CallPhoneUtil.callPhone((Activity) mContext, member.phone);
-
-                                }
-
+                    ItemAdapter adapter = new ItemAdapter(mContext,ItemAdapter.iniDatas());
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
+                    //设置标题
+                    builder.setTitle("拨打电话");
+                    builder.setAdapter(adapter, (dialogInterface, position1) -> {
+                        if(position1 ==VOIP){//voip电话
+                            if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
+                                Intent intent = new Intent(mContext, VoipPhoneActivity.class);
+                                intent.putExtra("member",member);
+                                mContext.startActivity(intent);
+                            }else {
+                                ToastUtil.showToast(mContext,"voip注册失败，请检查服务器配置");
                             }
-                        });
-                        builder.create();
-                        builder.show();
-                    }else {
-                        ToastUtil.showToast(mContext,"暂无该用户电话号码");
-                    }
+                        }
+                        else if(position1 ==TELEPHONE){//普通电话
+
+                          CallPhoneUtil.callPhone((Activity) mContext, member.phone);
+
+                        }
+
+                    });
+                    builder.create();
+                    builder.show();
+                }else {
+                    ToastUtil.showToast(mContext,"暂无该用户电话号码");
                 }
             });
-            userViewHolder.llMessageTo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName());
+            userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName()));
 
+            userViewHolder.llCallTo.setOnClickListener(view -> {
+                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                    ToastUtil.showToast(mContext,"没有个呼功能权限");
+                }else {
+                    activeIndividualCall(member);
                 }
+
+
             });
 
-            userViewHolder.llCallTo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                        ToastUtil.showToast(mContext,"没有个呼功能权限");
-                    }else {
-                        activeIndividualCall(member);
-                    }
-
-
-                }
-            });
-
-            userViewHolder.ivLogo.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(mContext, UserInfoActivity.class);
-                    intent.putExtra("userId", member.getNo());
-                    intent.putExtra("userName", member.getName());
-                    mContext.startActivity(intent);
-                }
+            userViewHolder.ivLogo.setOnClickListener(view -> {
+                Intent intent = new Intent(mContext, UserInfoActivity.class);
+                intent.putExtra("userId", member.getNo());
+                intent.putExtra("userName", member.getName());
+                mContext.startActivity(intent);
             });
             if(member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
                 userViewHolder.llDialTo.setVisibility(View.GONE);
@@ -208,7 +186,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         public DepartmentViewHolder(View itemView) {
             super(itemView);
-            tvDepartment= (TextView) itemView.findViewById(R.id.tv_department);
+            tvDepartment=  itemView.findViewById(R.id.tv_department);
         }
     }
 

@@ -116,9 +116,6 @@ public class MessageService extends Service {
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        startService(new Intent(this, MessageService.class));
-//        startService(new Intent(this,OnlineService.class));
-//        bindService(new Intent(this,OnlineService.class), onlineServiceConn, Context.BIND_IMPORTANT);
         super.onDestroy();
     }
 
@@ -151,19 +148,6 @@ public class MessageService extends Service {
 
     };
 
-
-//    private ServiceConnection onlineServiceConn = new ServiceConnection() {
-//        @Override
-//        public void onServiceConnected(ComponentName name, IBinder service) {
-//        }
-//        @Override
-//        public void onServiceDisconnected(ComponentName name) {
-//            logger.error("onlineServiceConn服务断开连接，重新启动并绑定");
-//            MessageService.this.startService(new Intent(MessageService.this,OnlineService.class));
-//            MessageService.this.bindService(new Intent(MessageService.this,OnlineService.class), onlineServiceConn, Context.BIND_IMPORTANT);
-//        }
-//    };
-
     @SuppressLint("NewApi")/**日志生成文件保存*/
     public void configLogger() {
 
@@ -173,6 +157,7 @@ public class MessageService extends Service {
                 //按照指定的路径创建文件夹
                 dir.mkdirs();
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         File file = new File(getLogDirectory() + "log.txt");
@@ -181,6 +166,7 @@ public class MessageService extends Service {
                 //在指定的文件夹中创建文件
                 file.createNewFile();
             } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 

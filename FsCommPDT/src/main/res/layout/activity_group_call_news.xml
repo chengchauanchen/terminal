@@ -289,14 +289,14 @@
         android:visibility="gone"
         android:focusable="true"
         android:clickable="true"
-        ></FrameLayout>
+        />
     <cn.vsx.vc.view.VolumeViewLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:layout_centerInParent="true"
         android:id="@+id/volume_layout"
-        ></cn.vsx.vc.view.VolumeViewLayout>
+        />
     <!--<include layout="@layout/layout_base_activity"/>-->
 
 </RelativeLayout>

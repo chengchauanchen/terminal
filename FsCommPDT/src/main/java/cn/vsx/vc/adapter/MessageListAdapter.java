@@ -110,7 +110,6 @@ public class MessageListAdapter extends BaseAdapter {
         }
         //设置最后一条消息时间
         if (terminalMessage.sendTime != 0) {
-//            viewHolder.tv_last_msg_time.setText(DateUtils.getTimestampString(new Date(terminalMessage.sendTime)));
             viewHolder.tv_last_msg_time.setText(DateUtils.getNewChatTime(terminalMessage.sendTime));
         } else {
             viewHolder.tv_last_msg_time.setText("");
@@ -139,13 +138,9 @@ public class MessageListAdapter extends BaseAdapter {
             viewHolder.tv_unread_msg_num.setVisibility(View.VISIBLE);
             if(terminalMessage.unReadCount < 100) {
                 viewHolder.tv_unread_msg_num.setText(""+terminalMessage.unReadCount);
-//                viewHolder.tv_unread_msg_num.setTextSize(context.getResources().getDimensionPixelSize(R.dimen.x5));
-//                viewHolder.tv_unread_msg_num.setTextSize(DensityUtil.sp2px(context, 4));
             }
             else {
                 viewHolder.tv_unread_msg_num.setText("99+");
-//                viewHolder.tv_unread_msg_num.setTextSize(context.getResources().getDimensionPixelSize(R.dimen.x4));
-//                viewHolder.tv_unread_msg_num.setTextSize(DensityUtil.sp2px(context, 3));
             }
         }else {
             viewHolder.tv_unread_msg_num.setVisibility(View.GONE);

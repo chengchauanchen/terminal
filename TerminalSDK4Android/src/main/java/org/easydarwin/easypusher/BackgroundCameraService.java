@@ -1,7 +1,6 @@
 package org.easydarwin.easypusher;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
@@ -20,14 +19,11 @@ import org.easydarwin.push.UVCMediaStream;
 public class BackgroundCameraService extends Service implements TextureView.SurfaceTextureListener {
     private Logger logger = Logger.getLogger(getClass());
     private static final String TAG = BackgroundCameraService.class.getSimpleName();
-    public static final String EXTRA_RR = "extra_rr";
     /**
      * 表示后台是否正在渲染
      */
-    public static final String EXTRA_STREAMING = "extra_streaming";
     private TextureView mOutComeVideoView;
     private WindowManager mWindowManager;
-    private BroadcastReceiver mReceiver = null;
     private MediaStream mMediaStream;
     private UVCMediaStream uvcMediaStream;
     private boolean uvcPush;

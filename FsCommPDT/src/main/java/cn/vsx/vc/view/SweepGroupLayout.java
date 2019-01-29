@@ -12,8 +12,8 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.vsx.hamster.common.GroupScanType;
 import cn.vsx.vc.R;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * 组扫描组件化
@@ -54,15 +54,12 @@ public class SweepGroupLayout extends LinearLayout {
 
     private void initLintener () {
         //是否打开组扫描
-        openSweep.setOnBtnClick(new MToggleButton.OnBtnClickListener() {
-            @Override
-            public void onBtnClick(boolean currState) {
-                IsOpenSweep = currState;
-                if (MyTerminalFactory.getSDK().hasNetwork()){
-                    MyTerminalFactory.getSDK().getGroupScanManager().groupScan(currState, GroupScanType.GROUP_SCANNING.getCode());
-                } else {
-                    ToastUtil.showToast(context, "网络连接异常，请检查网络！");
-                }
+        openSweep.setOnBtnClick(currState -> {
+            IsOpenSweep = currState;
+            if (MyTerminalFactory.getSDK().hasNetwork()){
+                MyTerminalFactory.getSDK().getGroupScanManager().groupScan(currState, GroupScanType.GROUP_SCANNING.getCode());
+            } else {
+                ToastUtil.showToast(context, "网络连接异常，请检查网络！");
             }
         });
     }

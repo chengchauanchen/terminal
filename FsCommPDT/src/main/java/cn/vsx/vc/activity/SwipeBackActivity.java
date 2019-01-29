@@ -52,37 +52,6 @@ public abstract class SwipeBackActivity extends AppCompatActivity implements Swi
         initListener();
     }
 
-    //    @Override
-//    public void setContentView(int layoutResID) {
-//        // 没有标题栏
-//        requestWindowFeature(Window.FEATURE_NO_TITLE);
-//        //不可横屏
-//        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-//
-//        super.setContentView(getContainer());
-//        View view = LayoutInflater.from(this).inflate(layoutResID, null);
-//        swipeBackLayout.addView(view);
-//        ButterKnife.bind(this);
-//
-//        initView();
-//
-//        initData();
-//
-//        initListener();
-//    }
-//
-//    private View getContainer() {
-//        RelativeLayout container = new RelativeLayout(this);
-//        swipeBackLayout = new SwipeBackLayout(this);
-//        swipeBackLayout.setOnSwipeBackListener(this);
-//        ivShadow = new ImageView(this);
-//        ivShadow.setBackgroundColor(getResources().getColor(R.color.black));
-//        RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-//        container.addView(ivShadow, params);
-//        container.addView(swipeBackLayout);
-//        return container;
-//    }
-
     public void setDragEdge(SwipeBackLayout.DragEdge dragEdge) {
         swipeBackLayout.setDragEdge(dragEdge);
     }

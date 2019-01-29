@@ -79,22 +79,16 @@ public class LazyViewPager extends ViewGroup {
         boolean scrolling;
     }
 
-    private static final Comparator<ItemInfo> COMPARATOR = new Comparator<ItemInfo>(){
-        @Override
-        public int compare(ItemInfo lhs, ItemInfo rhs) {
-            return lhs.position - rhs.position;
-        }};
+    private static final Comparator<ItemInfo> COMPARATOR = (lhs, rhs) -> lhs.position - rhs.position;
 
-    private static final Interpolator sInterpolator = new Interpolator() {
-        public float getInterpolation(float t) {
-            // _o(t) = t * t * ((tension + 1) * t + tension)
-            // o(t) = _o(t - 1) + 1
-            t -= 1.0f;
-            return t * t * t + 1.0f;
-        }
+    private static final Interpolator sInterpolator = t -> {
+        // _o(t) = t * t * ((tension + 1) * t + tension)
+        // o(t) = _o(t - 1) + 1
+        t -= 1.0f;
+        return t * t * t + 1.0f;
     };
 
-    private final ArrayList<ItemInfo> mItems = new ArrayList<ItemInfo>();
+    private final ArrayList<ItemInfo> mItems = new ArrayList<>();
 
     private PagerAdapter mAdapter;
     private int mCurItem;   // Index of currently displayed page.
@@ -188,7 +182,7 @@ public class LazyViewPager extends ViewGroup {
          * @param positionOffset Value from [0, 1) indicating the offset from the page at position.
          * @param positionOffsetPixels Value in pixels indicating the offset from position.
          */
-        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels);
+        void onPageScrolled(int position, float positionOffset, int positionOffsetPixels);
 
         /**
          * This method will be invoked when a new page becomes selected. Animation is not
@@ -196,7 +190,7 @@ public class LazyViewPager extends ViewGroup {
          *
          * @param position Position index of the new selected page.
          */
-        public void onPageSelected(int position);
+        void onPageSelected(int position);
 
         /**
          * Called when the scroll state changes. Useful for discovering when the user
@@ -208,7 +202,7 @@ public class LazyViewPager extends ViewGroup {
          * @see android.support.v4.view.ViewPager#SCROLL_STATE_DRAGGING
          * @see android.support.v4.view.ViewPager#SCROLL_STATE_SETTLING
          */
-        public void onPageScrollStateChanged(int state);
+        void onPageScrollStateChanged(int state);
     }
 
     /**

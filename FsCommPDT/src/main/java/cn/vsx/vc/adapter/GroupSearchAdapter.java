@@ -23,8 +23,8 @@ import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.utils.DataUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * 通讯录组搜索adapter
@@ -105,38 +105,32 @@ public class GroupSearchAdapter extends BaseAdapter {
 
 
         //转组按钮点击事件
-        viewHolderGroup.changeGroup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int resultCode = MyTerminalFactory.getSDK().getGroupManager().changeGroup(searchGroupList.get(position).id);
-                if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                    v.setVisibility(View.GONE);
-                    if (mItemBtnClickListener!=null){
-                        mItemBtnClickListener.onItemBtnClick();
-                    }
-                }else {
-                    ToastUtil.groupChangedFailToast(context, resultCode);
+        viewHolderGroup.changeGroup.setOnClickListener(v -> {
+            int resultCode = MyTerminalFactory.getSDK().getGroupManager().changeGroup(searchGroupList.get(position).id);
+            if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                v.setVisibility(View.GONE);
+                if (mItemBtnClickListener!=null){
+                    mItemBtnClickListener.onItemBtnClick();
                 }
+            }else {
+                ToastUtil.groupChangedFailToast(context, resultCode);
             }
         });
 
         //会话按钮点击事件
-        viewHolderGroup.toGroup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(context, GroupCallNewsActivity.class);
-                intent.putExtra("isGroup", true);
-                intent.putExtra("userId", searchGroupList.get(position).id);//组id
-                intent.putExtra("userName", searchGroupList.get(position).name);
-                intent.putExtra("speakingId",searchGroupList.get(position).id);
-                intent.putExtra("speakingName",searchGroupList.get(position).name);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
-                if (mItemBtnClickListener!=null){
-                    mItemBtnClickListener.onItemBtnClick();
-                }
-
+        viewHolderGroup.toGroup.setOnClickListener(view -> {
+            Intent intent = new Intent(context, GroupCallNewsActivity.class);
+            intent.putExtra("isGroup", true);
+            intent.putExtra("userId", searchGroupList.get(position).id);//组id
+            intent.putExtra("userName", searchGroupList.get(position).name);
+            intent.putExtra("speakingId",searchGroupList.get(position).id);
+            intent.putExtra("speakingName",searchGroupList.get(position).name);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+            if (mItemBtnClickListener!=null){
+                mItemBtnClickListener.onItemBtnClick();
             }
+
         });
 
         if(position == searchGroupList.size()-1){

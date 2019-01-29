@@ -106,32 +106,6 @@ public class PushLiveListAdapter extends BaseAdapter {
             }
 
         }
-//        else  {
-//            holder.ll_watch_success.setVisibility(View.GONE);
-//            holder.ll_push_fail.setVisibility(View.VISIBLE);
-//            if(messageBody.getInteger(JsonParam.REMARK) == Remark.ACTIVE_VIDEO_LIVE) {
-//                holder.tv_push_type_fail.setText("自己上报图像");
-//                Log.i("sjl_:看看被遥毙走的哪里","1111111111111111");
-//                if(terminalMessage.resultCode == SignalServerErrorCode.MEMBER_REFUSE.getErrorCode()) {
-//                    holder.tv_push_state.setText("对方已拒绝");
-//                }
-//                else {
-//                    holder.tv_push_state.setText("对方无应答");
-//                }
-//
-//            }
-//            else if(messageBody.getInteger(JsonParam.REMARK) == Remark.REQUIRE_VIDEO_LIVE) {
-//                Log.i("sjl_:看看被遥毙走的哪里","222222222222222222");
-//                holder.tv_push_type_fail.setText(messageBody.getString(JsonParam.ASK_MEMBER_NAME)+"请求您上报图像");
-//                if(terminalMessage.resultCode == SignalServerErrorCode.MEMBER_REFUSE.getErrorCode()) {
-//                    holder.tv_push_state.setText("已拒绝");
-//                }
-//                else {
-//                    holder.tv_push_state.setText("对方无应答");
-//                }
-//            }
-//        }
-
     }
 
     private String getCallLength (long time) {
@@ -157,7 +131,6 @@ public class PushLiveListAdapter extends BaseAdapter {
         if(terminalMessage.sendTime > 0) {
             long messageTime = terminalMessage.sendTime;
             if (position == 0) {
-//                holder.tv_message_time.setText(DateUtils.getTimestampString(new Date(messageTime)));
                 holder.tv_message_time.setText(DateUtils.getNewChatTime(messageTime));
                 holder.tv_message_time.setVisibility(View.VISIBLE);
             } else {
@@ -177,7 +150,6 @@ public class PushLiveListAdapter extends BaseAdapter {
         else {
             long currentTime = System.currentTimeMillis();
             if (position == 0) {
-//                holder.tv_message_time.setText(DateUtils.getTimestampString(new Date(currentTime)));
                 holder.tv_message_time.setText(DateUtils.getNewChatTime(currentTime));
                 holder.tv_message_time.setVisibility(View.VISIBLE);
             }
@@ -203,8 +175,6 @@ public class PushLiveListAdapter extends BaseAdapter {
             if (DateUtils.isCloseEnough(currentTime,lastTime)) {
                 holder.tv_message_time.setVisibility(View.GONE);
             } else {
-//                String timeStr = DateUtils.getTimestampString(new Date(currentTime));
-//                holder.tv_message_time.setText(timeStr);
                 holder.tv_message_time.setText(DateUtils.getNewChatTime(currentTime));
                 holder.tv_message_time.setVisibility(View.VISIBLE);
             }

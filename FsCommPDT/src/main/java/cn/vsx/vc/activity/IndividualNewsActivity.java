@@ -2,7 +2,6 @@ package cn.vsx.vc.activity;
 
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Handler;
@@ -28,7 +27,6 @@ import java.util.concurrent.Executors;
 
 import butterknife.Bind;
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -127,7 +125,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     public static boolean isForeground = false;
     public static int mFromId;
     private Member member;
-    private String mPhoneNo;
 
     public static void startCurrentActivity(Context context, int userId, String userName) {
         Intent intent = new Intent(context, IndividualNewsActivity.class);
@@ -151,7 +148,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                         .getDisplayMetrics()));
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         groupCallList.setLayoutManager(linearLayoutManager);
-        //        super.rl_include_listview = rl_include_listview;
         super.newsBarGroupName = newsBarGroupName;
         super.sflCallList = sflCallList;
         super.groupCallList = groupCallList;
@@ -161,12 +157,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         super.ptt = ptt;
         setStatusBarColor();
         groupCallList.setVerticalScrollBarEnabled(false);
-        record.setAudioPauseListener(new AudioRecordButton.AudioPauseListener(){
-            @Override
-            public void onPause(){
-                sendRecord();
-            }
-        });
+        record.setAudioPauseListener(() -> sendRecord());
     }
 
     @Override
@@ -186,7 +177,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverIndividualCallFromMsgItemHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverCloseKeyBoardHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverReplayIndividualChatVoiceHandler);
-        //        MyTerminalFactory.getSDK().registReceiveHandler(receiveHistoryMultimediaFailHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMultimediaMessageCompleteHandler);
         super.initListener();
     }
@@ -196,7 +186,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         super.initData();
         mFromId = userId;
         member = DataUtil.getMemberByMemberNo(userId);
-        mPhoneNo = member.phone;
+        String mPhoneNo = member.phone;
         logger.info("userId：" + userId);
         logger.info("member：" + member.toString());
         funcation.setFunction(false, userId);
@@ -205,28 +195,12 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     @Override
     public void postVideo() {
-        //        if (!ActivityCollector.isActivityExist(VideoLiveActivity.class)) {
-        //            Intent intent = new Intent(this, VideoLiveActivity.class);
-        //            intent.setAction("InitiativeVideoLive");
-        //            intent.putExtra("userId", userId);
-        //            intent.putExtra("userName", userName);
-        //            intent.putExtra("number", 1);
-        //            startActivity(intent);
-        //        }
 
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId);
     }
 
     @Override
     public void requestVideo() {
-        //        if (!ActivityCollector.isActivityExist(VideoLiveActivity.class)) {
-        //            Intent intent = new Intent(this, VideoLiveActivity.class);
-        //            intent.setAction("RequestOtherLive");
-        //            intent.putExtra("userId", userId);
-        //            intent.putExtra("userName", userName);
-        //            intent.putExtra("number", 2);
-        //            startActivity(intent);
-        //        }
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member(userId, userName));
     }
 
@@ -406,27 +380,24 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                     AlertDialog.Builder builder = new AlertDialog.Builder(IndividualNewsActivity.this);
                     //设置标题
                     builder.setTitle("拨打电话");
-                    builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int position) {
-                            if(position==VOIP){//voip电话
+                    builder.setAdapter(adapter, (dialogInterface, position) -> {
+                        if(position==VOIP){//voip电话
 
 
-                                if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
-                                    Intent intent = new Intent(IndividualNewsActivity.this, VoipPhoneActivity.class);
-                                    intent.putExtra("member",member);
-                                    IndividualNewsActivity.this.startActivity(intent);
-                                }else {
-                                    ToastUtil.showToast(IndividualNewsActivity.this,"voip注册失败，请检查服务器配置");
-                                }
+                            if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
+                                Intent intent1 = new Intent(IndividualNewsActivity.this, VoipPhoneActivity.class);
+                                intent1.putExtra("member",member);
+                                IndividualNewsActivity.this.startActivity(intent1);
+                            }else {
+                                ToastUtil.showToast(IndividualNewsActivity.this,"voip注册失败，请检查服务器配置");
                             }
-                            else if(position==TELEPHONE){//普通电话
+                        }
+                        else if(position==TELEPHONE){//普通电话
 
-                                CallPhoneUtil.callPhone(IndividualNewsActivity.this, member.phone);
-
-                            }
+                            CallPhoneUtil.callPhone(IndividualNewsActivity.this, member.phone);
 
                         }
+
                     });
                     builder.create();
                     builder.show();
@@ -440,12 +411,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     /**
      * 点击个呼条目
      */
-    private ReceiverIndividualCallFromMsgItemHandler mReceiverIndividualCallFromMsgItemHandler = new ReceiverIndividualCallFromMsgItemHandler() {
-        @Override
-        public void handler() {
-            activeIndividualCall();
-        }
-    };
+    private ReceiverIndividualCallFromMsgItemHandler mReceiverIndividualCallFromMsgItemHandler = () -> activeIndividualCall();
 
     private int mposition = -1;
     private int lastPosition = -1;
@@ -461,38 +427,22 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         public void handler(final TerminalMessage terminalMessage, int postion) {
             mposition = postion;
             isReject=false;
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (MyApplication.instance.getIndividualState() == IndividualCallState.IDLE &&
-                            MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE &&
-                            MyApplication.instance.getGroupListenenState() == GroupCallListenState.IDLE) {//不是在组呼也不是在个呼中，可以播放录音
+            myHandler.post(() -> {
+                if (MyApplication.instance.getIndividualState() == IndividualCallState.IDLE &&
+                        MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE &&
+                        MyApplication.instance.getGroupListenenState() == GroupCallListenState.IDLE) {//不是在组呼也不是在个呼中，可以播放录音
 
-                        if (lastPosition == mposition) {//点击同一个条目
-                            if (MyApplication.instance.isPlayVoice) {
-                                logger.error("点击同一条目，停止录音，停止动画");
-                                MediaManager.release();
-                                MyApplication.instance.isPlayVoice = false;
-                                isSameItem = true;
-                                temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-                                temporaryAdapter.notifyDataSetChanged();
-                            } else {
-                                executorService.execute(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (mposition < chatMessageList.size() && mposition >= 0) {
-                                            try {
-                                                downloadRecordFileOrPlay(terminalMessage, onCompletionListener);
-                                            } catch (IndexOutOfBoundsException e) {
-                                                logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        } else {//点击不同条目
-                            //播放当前的
+                    if (lastPosition == mposition) {//点击同一个条目
+                        if (MyApplication.instance.isPlayVoice) {
+                            logger.error("点击同一条目，停止录音，停止动画");
+                            MediaManager.release();
+                            MyApplication.instance.isPlayVoice = false;
+                            isSameItem = true;
+                            temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+                            temporaryAdapter.notifyDataSetChanged();
+                        } else {
                             executorService.execute(new Runnable() {
+                                @Override
                                 public void run() {
                                     if (mposition < chatMessageList.size() && mposition >= 0) {
                                         try {
@@ -504,10 +454,23 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                                 }
                             });
                         }
-
-                    } else {
-                        ToastUtil.showToast(IndividualNewsActivity.this, "当前不可播放录音");
+                    } else {//点击不同条目
+                        //播放当前的
+                        executorService.execute(new Runnable() {
+                            public void run() {
+                                if (mposition < chatMessageList.size() && mposition >= 0) {
+                                    try {
+                                        downloadRecordFileOrPlay(terminalMessage, onCompletionListener);
+                                    } catch (IndexOutOfBoundsException e) {
+                                        logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
+                                    }
+                                }
+                            }
+                        });
                     }
+
+                } else {
+                    ToastUtil.showToast(IndividualNewsActivity.this, "当前不可播放录音");
                 }
             });
         }
@@ -515,22 +478,16 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     /**
      * 录音播放完成的消息
      */
-    private MediaPlayer.OnCompletionListener onCompletionListener = new MediaPlayer.OnCompletionListener() {
-        @Override
-        public void onCompletion(MediaPlayer mediaPlayer) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    //                    logger.error("播放完成的回调触发了========> "+lastPosition+"/"+mposition+"/"+chatMessageList.size());
-                    MyApplication.instance.isPlayVoice = false;
-                    isSameItem = true;
-                    chatMessageList.get(mposition).messageBody.put(JsonParam.UNREAD, false);
-                    temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-                    temporaryAdapter.notifyDataSetChanged();
-                }
-            });
-            autoPlay(mposition+1);
-        }
+    private MediaPlayer.OnCompletionListener onCompletionListener = mediaPlayer -> {
+        myHandler.post(() -> {
+            //                    logger.error("播放完成的回调触发了========> "+lastPosition+"/"+mposition+"/"+chatMessageList.size());
+            MyApplication.instance.isPlayVoice = false;
+            isSameItem = true;
+            chatMessageList.get(mposition).messageBody.put(JsonParam.UNREAD, false);
+            temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+            temporaryAdapter.notifyDataSetChanged();
+        });
+        autoPlay(mposition+1);
     };
     private boolean isReject=false;
     //自动播放下一条语音
@@ -557,34 +514,28 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     /**
      * 开始播放或停止播放的回调
      */
-    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = new ReceiveMultimediaMessageCompleteHandler() {
-        @Override
-        public void handler(final int resultCode, final String resultDes) {
-            logger.info("ReceiveMultimediaMessageCompleteHandler   "+resultCode+"/"+resultDes);
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                        if (lastPosition == mposition) {//点击同一个条目
-                            isSameItem = true;
-                            MyApplication.instance.isPlayVoice = !MyApplication.instance.isPlayVoice;
-                        } else {//点击不同条目
-                            isSameItem = false;
-                            MyApplication.instance.isPlayVoice = false;
-                        }
-                        Collections.sort(chatMessageList);
-                        if (temporaryAdapter != null) {
-                            temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-                            //                            temporaryAdapter.notifyDataSetChanged();
-                        }
-                        lastPosition = mposition;
-                    } else {
-                        logger.info("开始播放或停止播放的回调" + resultDes);
-                        ToastUtil.showToast(IndividualNewsActivity.this, resultDes);
-                    }
+    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = (resultCode, resultDes) -> {
+        logger.info("ReceiveMultimediaMessageCompleteHandler   "+resultCode+"/"+resultDes);
+        myHandler.post(() -> {
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                if (lastPosition == mposition) {//点击同一个条目
+                    isSameItem = true;
+                    MyApplication.instance.isPlayVoice = !MyApplication.instance.isPlayVoice;
+                } else {//点击不同条目
+                    isSameItem = false;
+                    MyApplication.instance.isPlayVoice = false;
                 }
-            });
-        }
+                Collections.sort(chatMessageList);
+                if (temporaryAdapter != null) {
+                    temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+                    //                            temporaryAdapter.notifyDataSetChanged();
+                }
+                lastPosition = mposition;
+            } else {
+                logger.info("开始播放或停止播放的回调" + resultDes);
+                ToastUtil.showToast(IndividualNewsActivity.this, resultDes);
+            }
+        });
     };
 
 
@@ -596,14 +547,11 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         @Override
         public void handler(final boolean connected) {
             logger.info("个人会话页面收到服务是否连接的通知" + connected);
-            IndividualNewsActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!connected) {
-                        noNetWork.setVisibility(View.VISIBLE);
-                    } else {
-                        noNetWork.setVisibility(View.GONE);
-                    }
+            IndividualNewsActivity.this.runOnUiThread(() -> {
+                if (!connected) {
+                    noNetWork.setVisibility(View.VISIBLE);
+                } else {
+                    noNetWork.setVisibility(View.GONE);
                 }
             });
         }
@@ -613,97 +561,57 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     private ReceiveNotifyMemberChangeHandler receiveNotifyMemberChangeHandler = new ReceiveNotifyMemberChangeHandler() {
         @Override
         public void handler(final MemberChangeType memberChangeType) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    funcation.setFunction(false,userId);
-                }
-            });
+            myHandler.post(() -> funcation.setFunction(false,userId));
         }
     };
 
     /**
      * 被动方组呼来了
      */
-    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
-
-        @Override
-        public void handler(int memberId, final String memberName, int groupId,
-                            String version, CallMode currentCallMode) {
-            logger.info("触发了被动方组呼来了receiveGroupCallIncommingHandler:" + currentCallMode);
-            speakingId = groupId;
-            speakingName = memberName;
-            if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
-                ToastUtil.showToast(IndividualNewsActivity.this, "没有组呼听的功能权限");
-            }
+    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, version, currentCallMode) -> {
+        logger.info("触发了被动方组呼来了receiveGroupCallIncommingHandler:" + currentCallMode);
+        speakingId = groupId;
+        speakingName = memberName;
+        if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
+            ToastUtil.showToast(IndividualNewsActivity.this, "没有组呼听的功能权限");
         }
     };
 
     /**
      * 被动方个呼来了，选择接听或挂断
      */
-    private ReceiveNotifyIndividualCallIncommingHandler receiveNotifyIndividualCallIncommingHandler = new ReceiveNotifyIndividualCallIncommingHandler() {
-        @Override
-        public void handler(final String mainMemberName, final int mainMemberId, int individualCallType) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    isReject=true;
-                    MediaManager.release();
-                    MyApplication.instance.isPlayVoice=true;
-                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, 0, "");
-                }
-            });
-
-        }
-    };
+    private ReceiveNotifyIndividualCallIncommingHandler receiveNotifyIndividualCallIncommingHandler = (mainMemberName, mainMemberId, individualCallType) -> handler.post(() -> {
+        isReject=true;
+        MediaManager.release();
+        MyApplication.instance.isPlayVoice=true;
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, 0, "");
+    });
 
     /**
      * 被动方个呼答复超时
      */
-    private ReceiveAnswerIndividualCallTimeoutHandler receiveAnswerIndividualCallTimeoutHandler = new ReceiveAnswerIndividualCallTimeoutHandler() {
-        @Override
-        public void handler() {
+    private ReceiveAnswerIndividualCallTimeoutHandler receiveAnswerIndividualCallTimeoutHandler = () -> {
 
-        }
     };
 
     /**收到别人请求我开启直播的通知**/
-    private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler() {
-        @Override
-        public void handler(final String mainMemberName, final int mainMemberId) {
-            logger.info("ReceiveNotifyLivingIncommingHandler:"+mainMemberName+"/"+mainMemberId);
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    isReject=true;
-                    MediaManager.release();
-                    MyApplication.instance.isPlayVoice=true;
-                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, 0, "");
-                }
-            });
-        }
+    private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId) -> {
+        logger.info("ReceiveNotifyLivingIncommingHandler:"+mainMemberName+"/"+mainMemberId);
+        handler.post(() -> {
+            isReject=true;
+            MediaManager.release();
+            MyApplication.instance.isPlayVoice=true;
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, 0, "");
+        });
     };
 
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
         @Override
         public void handler() {
-            IndividualNewsActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    funcation.setFunction(false, userId);
-                }
-            });
+            IndividualNewsActivity.this.runOnUiThread(() -> funcation.setFunction(false, userId));
         }
     };
-    private ReceiveResponseStartLiveHandler receiveResponseStartLiveHandler = new ReceiveResponseStartLiveHandler() {
-
-        @Override
-        public void handler(int resultCode, String resultDesc) {
-
-            PromptManager.getInstance().stopRing();
-        }
-    };
+    private ReceiveResponseStartLiveHandler receiveResponseStartLiveHandler = (resultCode, resultDesc) -> PromptManager.getInstance().stopRing();
 
     private ReceiverCloseKeyBoardHandler receiverCloseKeyBoardHandler = new ReceiverCloseKeyBoardHandler() {
         @Override

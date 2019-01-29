@@ -35,7 +35,7 @@ public class NotificationClickReceiver extends BroadcastReceiver {
         if(terminalMessage ==null){
             return;
         }
-        HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<Integer, String>());
+        HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
 
 
         if(terminalMessage.messageFromId == terminalMessage.messageToId &&

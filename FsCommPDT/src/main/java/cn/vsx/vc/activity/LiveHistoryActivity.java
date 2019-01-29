@@ -64,14 +64,13 @@ public class LiveHistoryActivity extends BaseActivity{
             super.handleMessage(msg);
             switch(msg.what){
                 case GET_URL:
-//                    iv_live_image.setImageBitmap(getVideoThumbnail(liveUrl));
                     String year = start_time.substring(0, 4);
                     String month = start_time.substring(4, 6);
                     String day = start_time.substring(6, 8);
                     String hour = start_time.substring(8, 10);
                     String min = start_time.substring(10, 12);
                     String second = start_time.substring(12, 14);
-                    StringBuffer sb = new StringBuffer();
+                    StringBuilder sb = new StringBuilder();
                     sb.append(year).append("-").append(month).append("-").append(day).append("  ").append(hour).append(":").append(min).append(":").append(second);
                     tv_live_start_time.setText(sb.toString());
                     tv_live_duration.setText(DataUtil.getTime((int) (Float.valueOf(duration)*1000)));
@@ -124,42 +123,39 @@ public class LiveHistoryActivity extends BaseActivity{
         tv_theme.setText(liveTheme);
 
         //获取播放url
-        MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable(){
-            @Override
-            public void run(){
-                String serverIp = TerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_IP, "");
-                String serverPort = TerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT, 0)+"";
-                String url = "http://"+serverIp+":"+serverPort+"/api/v1/query_records";
-                Map<String,String> paramsMap = new HashMap<>();
-                logger.info("消息："+terminalMessage);
-                String messagePath = terminalMessage.messagePath;
-                int index = messagePath.lastIndexOf("/");
-                int pointIndex = messagePath.lastIndexOf(".");
-                String id = messagePath.substring(index+1,pointIndex);
-                paramsMap.put("id",id);
-                logger.info("获取视频回放url："+url);
-                String result = TerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
-                logger.info("获取视频回放结果："+result);
-                if(!Util.isEmpty(result)){
-                    JSONObject jsonResult = JSONObject.parseObject(result);
-                    Integer code = jsonResult.getInteger("code");
-                    if(code == 0){
-                        JSONObject data = jsonResult.getJSONObject("data");
-                        JSONArray list = data.getJSONArray("list");
-                        if(list.isEmpty()){
-                            ToastUtil.showToast(LiveHistoryActivity.this,"获取视频信息失败");
-                            return;
-                        }
-                        JSONObject jsonObject = list.getJSONObject(0);
-                        start_time = jsonObject.getString("start_time");
-                        duration = jsonObject.getString("duration");
-                        String hls = jsonObject.getString("hls");
-                        String fileServerIp = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_IP);
-                        String port = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT,0)+"";
-
-                        liveUrl = "http://"+fileServerIp+":"+port+hls;
-                        mHandler.sendEmptyMessage(GET_URL);
+        MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+            String serverIp = TerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_IP, "");
+            String serverPort = TerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT, 0)+"";
+            String url = "http://"+serverIp+":"+serverPort+"/api/v1/query_records";
+            Map<String,String> paramsMap = new HashMap<>();
+            logger.info("消息："+terminalMessage);
+            String messagePath = terminalMessage.messagePath;
+            int index = messagePath.lastIndexOf("/");
+            int pointIndex = messagePath.lastIndexOf(".");
+            String id = messagePath.substring(index+1,pointIndex);
+            paramsMap.put("id",id);
+            logger.info("获取视频回放url："+url);
+            String result = TerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
+            logger.info("获取视频回放结果："+result);
+            if(!Util.isEmpty(result)){
+                JSONObject jsonResult = JSONObject.parseObject(result);
+                Integer code = jsonResult.getInteger("code");
+                if(code == 0){
+                    JSONObject data = jsonResult.getJSONObject("data");
+                    JSONArray list = data.getJSONArray("list");
+                    if(list.isEmpty()){
+                        ToastUtil.showToast(LiveHistoryActivity.this,"获取视频信息失败");
+                        return;
                     }
+                    JSONObject jsonObject = list.getJSONObject(0);
+                    start_time = jsonObject.getString("start_time");
+                    duration = jsonObject.getString("duration");
+                    String hls = jsonObject.getString("hls");
+                    String fileServerIp = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_IP);
+                    String port = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT,0)+"";
+
+                    liveUrl = "http://"+fileServerIp+":"+port+hls;
+                    mHandler.sendEmptyMessage(GET_URL);
                 }
             }
         });
@@ -203,13 +199,4 @@ public class LiveHistoryActivity extends BaseActivity{
         }
     };
 
-
-    /**
-     * 给出url，获取视频的第一帧
-     *
-     * @param url
-     * @return
-     */
-//    public static Bitmap getVideoThumbnail(String url) {
-//       return bi
 }

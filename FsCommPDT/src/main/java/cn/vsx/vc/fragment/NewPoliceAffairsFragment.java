@@ -5,7 +5,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
@@ -29,8 +28,8 @@ import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * 警务通
@@ -54,44 +53,30 @@ public class NewPoliceAffairsFragment extends BaseFragment {
     private List<CatalogBean> mInitCatalogList=new ArrayList<>();
 
     //更新警务通成员信息
-    private ReceiveUpdatePhoneMemberHandler receiveUpdatePhoneMemberHandler = new ReceiveUpdatePhoneMemberHandler() {
-        @Override
-        public void handler(List<Member> allMembers) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
-                    List<CatalogBean> catalogBeanList = new ArrayList<>();
-                    CatalogBean bean = new CatalogBean();
-                    bean.setName(memberResponse.getName());
-                    bean.setBean(memberResponse);
-                    catalogBeanList.add(bean);
-                    updateData(memberResponse,catalogBeanList);
-                }
-            });
-        }
-    };
+    private ReceiveUpdatePhoneMemberHandler receiveUpdatePhoneMemberHandler = allMembers -> myHandler.post(() -> {
+        MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
+        List<CatalogBean> catalogBeanList = new ArrayList<>();
+        CatalogBean bean = new CatalogBean();
+        bean.setName(memberResponse.getName());
+        bean.setBean(memberResponse);
+        catalogBeanList.add(bean);
+        updateData(memberResponse,catalogBeanList);
+    });
 
     /**
      * 更新配置信息
      */
-    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler(){
-        @Override
-        public void handler(){//更新当前组
-            CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
-            myHandler.post(new Runnable(){
-                @Override
-                public void run() {
-                    MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
-                    List<CatalogBean> catalogBeanList = new ArrayList<>();
-                    CatalogBean bean = new CatalogBean();
-                    bean.setName(memberResponse.getName());
-                    bean.setBean(memberResponse);
-                    catalogBeanList.add(bean);
-                    updateData(memberResponse,catalogBeanList);
-                }
-            });
-        }
+    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> {//更新当前组
+        CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
+        myHandler.post(() -> {
+            MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
+            List<CatalogBean> catalogBeanList = new ArrayList<>();
+            CatalogBean bean = new CatalogBean();
+            bean.setName(memberResponse.getName());
+            bean.setBean(memberResponse);
+            catalogBeanList.add(bean);
+            updateData(memberResponse,catalogBeanList);
+        });
     };
 
     @Override
@@ -168,7 +153,6 @@ public class NewPoliceAffairsFragment extends BaseFragment {
                 bean.setType(Constants.TYPE_USER);
                 itemMemberList.add(bean);
             }
-//            Collections.sort(itemMemberList);
             mDatas.addAll(itemMemberList);
         }
     }
@@ -189,7 +173,6 @@ public class NewPoliceAffairsFragment extends BaseFragment {
                 bean.setName(next.getName());
                 bean.setBean(next);
                 mDatas.add(bean);
-//                Collections.sort(mDatas);
             }
         }
     }
@@ -201,52 +184,40 @@ public class NewPoliceAffairsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdatePhoneMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
 
-        mCatalogAdapter.setOnItemClick(new CatalogAdapter.ItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                MemberResponse memberResponse=mCatalogList.get(position).getBean();
+        mCatalogAdapter.setOnItemClick((view, position) -> {
+            MemberResponse memberResponse=mCatalogList.get(position).getBean();
 
-                List<CatalogBean> catalogList=new ArrayList<>();
-                catalogList.addAll(mCatalogList.subList(0,position+1));
+            List<CatalogBean> catalogList=new ArrayList<>();
+            catalogList.addAll(mCatalogList.subList(0,position+1));
 
-                updateData(memberResponse,catalogList);
+            updateData(memberResponse,catalogList);
 
-            }
         });
 
 
-        mContactAdapter.setOnItemClickListener(new ContactAdapter.ItemClickListener() {
-            @Override
-            public void onItemClick(View view, int postion, int type) {
-                if (type==Constants.TYPE_DEPARTMENT){
-                    MemberResponse memberResponse= (MemberResponse) mDatas.get(postion).getBean();
-                    CatalogBean catalog=new CatalogBean();
-                    catalog.setName(memberResponse.getName());
-                    catalog.setBean(memberResponse);
-                    mCatalogList.add(catalog);
+        mContactAdapter.setOnItemClickListener((view, postion, type) -> {
+            if (type==Constants.TYPE_DEPARTMENT){
+                MemberResponse memberResponse= (MemberResponse) mDatas.get(postion).getBean();
+                CatalogBean catalog=new CatalogBean();
+                catalog.setName(memberResponse.getName());
+                catalog.setBean(memberResponse);
+                mCatalogList.add(catalog);
 
-                    List<CatalogBean> catalogBeanList=new ArrayList<>();
-                    catalogBeanList.addAll(mCatalogList);
+                List<CatalogBean> catalogBeanList=new ArrayList<>();
+                catalogBeanList.addAll(mCatalogList);
 
-                    updateData(memberResponse,catalogBeanList);
-                }
+                updateData(memberResponse,catalogBeanList);
             }
         });
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                TerminalFactory.getSDK().getConfigManager().updataPhoneMemberInfo();
-                myHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        // 加载完数据设置为不刷新状态，将下拉进度收起来
-                        swipeRefreshLayout.setRefreshing(false);
-                        // 加载完数据设置为不刷新状态，将下拉进度收起来
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            TerminalFactory.getSDK().getConfigManager().updataPhoneMemberInfo();
+            myHandler.postDelayed(() -> {
+                // 加载完数据设置为不刷新状态，将下拉进度收起来
+                swipeRefreshLayout.setRefreshing(false);
+                // 加载完数据设置为不刷新状态，将下拉进度收起来
 
-                    }
-                }, 1200);
-            }
+            }, 1200);
         });
     }
 

@@ -69,12 +69,9 @@ public class TopRightMenu {
         mPopupWindow.setFocusable(true);
         mPopupWindow.setOutsideTouchable(true);
 //        mPopupWindow.setBackgroundDrawable(new ColorDrawable());
-        mPopupWindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
-            @Override
-            public void onDismiss() {
-                if (dimBackground) {
-                    setBackgroundAlpha(alpha, 1f, 300);
-                }
+        mPopupWindow.setOnDismissListener(() -> {
+            if (dimBackground) {
+                setBackgroundAlpha(alpha, 1f, 300);
             }
         });
 
@@ -190,12 +187,9 @@ public class TopRightMenu {
         final WindowManager.LayoutParams lp = mContext.getWindow().getAttributes();
         ValueAnimator animator = ValueAnimator.ofFloat(from, to);
         animator.setDuration(duration);
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                lp.alpha = (float) animation.getAnimatedValue();
-                mContext.getWindow().setAttributes(lp);
-            }
+        animator.addUpdateListener(animation -> {
+            lp.alpha = (float) animation.getAnimatedValue();
+            mContext.getWindow().setAttributes(lp);
         });
         animator.start();
     }

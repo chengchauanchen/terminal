@@ -13,8 +13,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.TextView.OnEditorActionListener;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,14 +63,11 @@ public class EditThemeDialog extends Dialog {
 
         et_live_edit_import_theme.setFilters(allInputFilters.toArray(new InputFilter[]{}));
 
-        et_live_edit_import_theme.setOnEditorActionListener(new OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER || event.getKeyCode() == KeyEvent.KEYCODE_SPACE){
-                    return true;
-                }
-                return false;
+        et_live_edit_import_theme.setOnEditorActionListener((v, actionId, event) -> {
+            if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER || event.getKeyCode() == KeyEvent.KEYCODE_SPACE){
+                return true;
             }
+            return false;
         });
         et_live_edit_import_theme.addTextChangedListener(new TextWatcher() {
             public void onTextChanged(CharSequence s, int start, int before, int count) {

@@ -90,12 +90,9 @@ public class PersonInfoLayout extends LinearLayout {
     private ReceiveChangeNameHandler receiveChangeNameHandler = new ReceiveChangeNameHandler(){
         @Override
         public void handler(final int resultCode, final int memberId, final String newMemberName) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (resultCode == BaseCommonCode.SUCCESS_CODE && memberId == TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
-                        userName.setText(newMemberName);
-                    }
+            myHandler.post(() -> {
+                if (resultCode == BaseCommonCode.SUCCESS_CODE && memberId == TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+                    userName.setText(newMemberName);
                 }
             });
         }
@@ -105,13 +102,7 @@ public class PersonInfoLayout extends LinearLayout {
     private ReceiveNotifyMemberChangeHandler receiveNotifyMemberChangeHandler = new ReceiveNotifyMemberChangeHandler() {
         @Override
         public void handler(final MemberChangeType memberChangeType) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    userName.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""));
-
-                }
-            });
+            myHandler.post(() -> userName.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "")));
         }
     };
 

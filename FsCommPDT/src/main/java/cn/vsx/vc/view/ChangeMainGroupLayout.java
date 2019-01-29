@@ -27,8 +27,8 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHa
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.SetSweepActivity;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 import skin.support.widget.SkinCompatLinearLayout;
 
 /**
@@ -123,27 +123,24 @@ public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
 //        });
 
         //是否打开组扫描
-        openSweep.setOnBtnClick(new MToggleButton.OnBtnClickListener() {
-            @Override
-            public void onBtnClick(boolean currState) {
-                if(currState) {
-                    setGroupScanBlack();
+        openSweep.setOnBtnClick(currState -> {
+            if(currState) {
+                setGroupScanBlack();
+                setGuardMainGroupBlack();
+            }
+            else {
+                setGroupScanGray();
+                if (TerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) {
                     setGuardMainGroupBlack();
-                }
-                else {
-                    setGroupScanGray();
-                    if (TerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) {
-                        setGuardMainGroupBlack();
-                    } else {
-                        setGuardMainGroupGray();
-                    }
-                }
-                if (MyTerminalFactory.getSDK().hasNetwork()){
-                    MyTerminalFactory.getSDK().getGroupScanManager().groupScan(currState, GroupScanType.GROUP_SCANNING.getCode());
                 } else {
-                    ToastUtil.showToast(context, "网络连接异常，请检查网络！");
-                    openSweep.initToggleState(!currState);
+                    setGuardMainGroupGray();
                 }
+            }
+            if (MyTerminalFactory.getSDK().hasNetwork()){
+                MyTerminalFactory.getSDK().getGroupScanManager().groupScan(currState, GroupScanType.GROUP_SCANNING.getCode());
+            } else {
+                ToastUtil.showToast(context, "网络连接异常，请检查网络！");
+                openSweep.initToggleState(!currState);
             }
         });
 
@@ -185,29 +182,18 @@ public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
     }
 
     /**更新文件夹和组列表数据*/
-    private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = new ReceiveUpdateFoldersAndGroupsHandler(){
-        @Override
-        public void handler() {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
+    private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = () -> myHandler.post(() -> {
 //                    work_group_name.setText(DataUtil.getGroupByGroupId(MyTerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0)).name);
-                }
-            });
-        }
-    };
+    });
 
     /**更新配置信息*/
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
         @Override
         public void handler() {//更新组扫描的开关，主组名字
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    openSweep.initToggleState(MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false));
+            myHandler.post(() -> {
+                openSweep.initToggleState(MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false));
 //                    btnIsOpenWorkGroup.initToggleState(MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false));
 //                    work_group_name.setText(DataUtil.getGroupByGroupId(MyTerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0)).name);
-                }
             });
         }
     };
@@ -216,24 +202,23 @@ public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
     private ReceiveGroupScanResultHandler receiveGroupScanResultHandler = new ReceiveGroupScanResultHandler() {
         @Override
         public void handler(final int  groupScanType, final boolean enable,  final int errorCode, String errorDesc) {
-            myHandler.post(new Runnable() {
-                public void run() {
-                    if (errorCode == BaseCommonCode.SUCCESS_CODE) {
-                        if (groupScanType == GroupScanType.GROUP_SCANNING.getCode()) {
-                            if (enable) {//打开组扫描
-                                MyTerminalFactory.getSDK().putParam(Params.GROUP_SCAN, true);
-                                MyTerminalFactory.getSDK().putParam(Params.GUARD_MAIN_GROUP, true);
-                                openSweep.initToggleState(true);
+            myHandler.post(() -> {
+                if (errorCode == BaseCommonCode.SUCCESS_CODE) {
+                    if (groupScanType == GroupScanType.GROUP_SCANNING.getCode()) {
+                        if (enable) {//打开组扫描
+                            MyTerminalFactory.getSDK().putParam(Params.GROUP_SCAN, true);
+                            MyTerminalFactory.getSDK().putParam(Params.GUARD_MAIN_GROUP, true);
+                            openSweep.initToggleState(true);
 //                                btnIsOpenWorkGroup.initToggleState(true);
 //                                btnIsOpenWorkGroup.setClickable(false);
-                                setGroupScanBlack();
-                            } else {//关闭组扫描
-                                MyTerminalFactory.getSDK().putParam(Params.GROUP_SCAN, false);
-                                openSweep.initToggleState(false);
+                            setGroupScanBlack();
+                        } else {//关闭组扫描
+                            MyTerminalFactory.getSDK().putParam(Params.GROUP_SCAN, false);
+                            openSweep.initToggleState(false);
 //                                btnIsOpenWorkGroup.setClickable(true);
-                                setGroupScanGray();
-                            }
-                        }else if (groupScanType == GroupScanType.GUARD_MAIN_GROUP.getCode()) {//
+                            setGroupScanGray();
+                        }
+                    }else if (groupScanType == GroupScanType.GUARD_MAIN_GROUP.getCode()) {//
 //                            if (mainGroupEnable) {//打开主组值守
 //                                logger.info("打开值守主组了回调！！！！！！！");
 //                                MyTerminalFactory.getSDK().putParam(Params.GROUP_SCAN, false);
@@ -246,7 +231,6 @@ public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
 ////                                btnIsOpenWorkGroup.initToggleState(false);
 //                                setGuardMainGroupGray();
 //                            }
-                        }
                     }
                 }
             });
@@ -273,23 +257,19 @@ public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
     private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
         @Override
         public void handler(final int methodResult, String resultDesc) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (methodResult == 0) {//请求成功，开始组呼
+            myHandler.post(() -> {
+                if (methodResult == 0) {//请求成功，开始组呼
 //                        ll_change_name.setEnabled(false);
 //                        ll_log_upload.setEnabled(false);
 //                        ll_individuation.setEnabled(false);
 //                        ll_ptt_setting.setEnabled(false);
 //						ll_pttfloat_setting.setEnabled(false);
-                        rl_start_group_sweep.setEnabled(false);
+                    rl_start_group_sweep.setEnabled(false);
 //                        rl_work_group.setEnabled(false);
 //                        ll_exit.setEnabled(false);
 //                        btnIsOpenWorkGroup.setEnabled(false);
-                        openSweep.setEnabled(false);
-                    }
+                    openSweep.setEnabled(false);
                 }
-
             });
         }
     };
@@ -298,20 +278,17 @@ public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
 
         @Override
         public void handler(int resultCode, String resultDesc) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
+            myHandler.post(() -> {
 //                    ll_change_name.setEnabled(true);
 //                    ll_log_upload.setEnabled(true);
 //                    ll_individuation.setEnabled(true);
 //                    ll_ptt_setting.setEnabled(true);
 //					ll_pttfloat_setting.setEnabled(true);
-                    rl_start_group_sweep.setEnabled(true);
+                rl_start_group_sweep.setEnabled(true);
 //                    rl_work_group.setEnabled(true);
 //                    ll_exit.setEnabled(true);
 //                    btnIsOpenWorkGroup.setEnabled(true);
-                    openSweep.setEnabled(true);
-                }
+                openSweep.setEnabled(true);
             });
         }
     };

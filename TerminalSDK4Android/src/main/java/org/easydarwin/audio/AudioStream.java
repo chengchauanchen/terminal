@@ -25,17 +25,16 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandle
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class AudioStream{
-    EasyMuxer muxer;
+    private EasyMuxer muxer;
     private int samplingRate = 8000;
     private int bitRate = 16000;
     private int BUFFER_SIZE = 1920;
-    int mSamplingRateIndex = 0;
-    AudioRecord mAudioRecord;
-    MediaCodec mMediaCodec;
+    private int mSamplingRateIndex = 0;
+    private AudioRecord mAudioRecord;
+    private MediaCodec mMediaCodec;
     private Thread mThread = null;
-    String TAG = "AudioStream";
-    Logger logger = Logger.getLogger(getClass());
-    //final String path = Environment.getExternalStorageDirectory() + "/123450001.aac";
+    private String TAG = "AudioStream";
+    private Logger logger = Logger.getLogger(getClass());
 
     protected MediaCodec.BufferInfo mBufferInfo = new MediaCodec.BufferInfo();
     protected ByteBuffer[] mBuffers = null;
@@ -215,10 +214,6 @@ public class AudioStream{
         this.muxer = muxer;
     }
 
-//    public static synchronized AudioStream getInstance() {
-//        if (_this == null) _this = new AudioStream();
-//        return _this;
-//    }
 
     private class WriterThread extends Thread{
 

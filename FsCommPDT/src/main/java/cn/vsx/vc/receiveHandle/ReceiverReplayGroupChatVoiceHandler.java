@@ -9,5 +9,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 
 public interface ReceiverReplayGroupChatVoiceHandler extends ReceiveHandler {
 
-    public void handler (int postion);
+    void handler(int postion);
 }

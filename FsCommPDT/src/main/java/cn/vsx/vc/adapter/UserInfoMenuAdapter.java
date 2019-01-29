@@ -38,12 +38,9 @@ public class UserInfoMenuAdapter  extends RecyclerView.Adapter<UserInfoMenuAdapt
     public void onBindViewHolder(MyViewHolder holder, final int position) {
         holder.ivMenu.setImageResource(mDatas.get(position).getImageId());
         holder.tvMenu.setText(mDatas.get(position).getTitle());
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mItemClickListener!=null){
-                    mItemClickListener.onItemClick(position,mDatas.get(position));
-                }
+        holder.itemView.setOnClickListener(view -> {
+            if (mItemClickListener!=null){
+                mItemClickListener.onItemClick(position,mDatas.get(position));
             }
         });
     }
@@ -67,8 +64,8 @@ public class UserInfoMenuAdapter  extends RecyclerView.Adapter<UserInfoMenuAdapt
 
         public MyViewHolder(View itemView) {
             super(itemView);
-            ivMenu= (ImageView) itemView.findViewById(R.id.iv_menu);
-            tvMenu= (TextView) itemView.findViewById(R.id.tv_menu);
+            ivMenu=  itemView.findViewById(R.id.iv_menu);
+            tvMenu=  itemView.findViewById(R.id.tv_menu);
         }
     }
 

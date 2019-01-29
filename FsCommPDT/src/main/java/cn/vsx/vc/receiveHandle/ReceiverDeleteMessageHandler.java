@@ -7,5 +7,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverDeleteMessageHandler extends ReceiveHandler {
-    public void handler();
+    void handler();
 }

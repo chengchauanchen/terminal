@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
@@ -72,12 +71,8 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
 @SuppressLint("ValidFragment")
 public class SettingFragmentNew extends BaseFragment {
     Activity activity;
-    //    @Bind(R.id.open_hang_btn)
-//    MToggleButton openHangBtn;
     @Bind(R.id.add_icon)
     ImageView add_icon;
-//    @Bind(R.id.tv_version)
-//    TextView tv_version;
     @Bind(R.id.btn_lock_screen_setting)
     MToggleButton btn_lock_screen_setting;
     @Bind(R.id.setting_group_name)
@@ -94,10 +89,6 @@ public class SettingFragmentNew extends BaseFragment {
     ImageView voice_image;
     @Bind(R.id.ll_log_upload)
     LinearLayout ll_log_upload;
-//    @Bind(R.id.ll_individuation)
-//    LinearLayout ll_individuation;
-//    @Bind(R.id.connect_us_phone)
-//    TextView connect_us_phone;
     @Bind(R.id.physicalButtonPTT)
     PhysicalButtonSet4PTT physicalButtonSet4PTT;
     private Handler mHandler = new Handler();
@@ -126,22 +117,18 @@ public class SettingFragmentNew extends BaseFragment {
     public void initView() {
         activity = getActivity();
         setVideoIcon();
-//        tv_version.setText(TerminalFactory.getSDK().getParam(Params.PLACE, "zectec")+" "+"v "+ DataUtil.getVersion(context));
         setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
-        voice_image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!soundOff){
-                    voice_image.setImageResource(R.drawable.volume_off_call);
-                    TerminalFactory.getSDK().getAudioProxy().volumeQuiet();
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true,1);
-                    soundOff =true;
-                }else {
-                    voice_image.setImageResource(R.drawable.horn);
-                    TerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false,1);
-                    soundOff =false;
-                }
+        voice_image.setOnClickListener(view -> {
+            if(!soundOff){
+                voice_image.setImageResource(R.drawable.volume_off_call);
+                TerminalFactory.getSDK().getAudioProxy().volumeQuiet();
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true,1);
+                soundOff =true;
+            }else {
+                voice_image.setImageResource(R.drawable.horn);
+                TerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false,1);
+                soundOff =false;
             }
         });
 
@@ -162,45 +149,32 @@ public class SettingFragmentNew extends BaseFragment {
     @Override
     public void initListener() {
         //是否打开ptt悬浮按钮
-//        openHangBtn.setOnBtnClick(new MToggleButton.OnBtnClickListener() {
-//            @Override
-//            public void onBtnClick(boolean currState) {
-//                sendPttState.sendPttState(currState);
-//            }
-//        });
         ll_video_resolution_setting.setOnClickListener(new OnClickListenerImpVideoResolution());
-        btn_lock_screen_setting.setOnBtnClick(new MToggleButton.OnBtnClickListener() {
-            @Override
-            public void onBtnClick(boolean currState) {
-                // TODO: 2018/6/21 先判断锁屏显示界面权限
-                if(currState){
-                    if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ){
-                        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.DISABLE_KEYGUARD) != PackageManager.PERMISSION_GRANTED) {
-                            requestPermissions(new String[]{Manifest.permission.DISABLE_KEYGUARD},
-                                    DISABLE_KEYGUARD);
-                        }else {
-                            MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 1);
-                        }
+        btn_lock_screen_setting.setOnBtnClick(currState -> {
+            // TODO: 2018/6/21 先判断锁屏显示界面权限
+            if(currState){
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ){
+                    if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.DISABLE_KEYGUARD) != PackageManager.PERMISSION_GRANTED) {
+                        requestPermissions(new String[]{Manifest.permission.DISABLE_KEYGUARD},
+                                DISABLE_KEYGUARD);
                     }else {
                         MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 1);
                     }
-                }else{
-                    MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0);
+                }else {
+                    MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 1);
                 }
+            }else{
+                MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0);
             }
         });
-        btn_daytime_mode.setOnBtnClick(new MToggleButton.OnBtnClickListener(){
-            @Override
-            public void onBtnClick(boolean currState){
-                Log.e("SettingFragmentNew", "currState:" + currState);
-                if(currState){
-                    MyTerminalFactory.getSDK().putParam(Params.DAYTIME_MODE, true);
-                    SkinCompatManager.getInstance().loadSkin("daytime.skin", SkinCompatManager.SKIN_LOADER_STRATEGY_ASSETS);
-//                    SkinCompatManager.getInstance().loadSkin("daytime", SkinCompatManager.SKIN_LOADER_STRATEGY_BUILD_IN); // 后缀加载
-                }else {
-                    MyTerminalFactory.getSDK().putParam(Params.DAYTIME_MODE, false);
-                    SkinCompatManager.getInstance().restoreDefaultTheme();
-                }
+        btn_daytime_mode.setOnBtnClick(currState -> {
+            Log.e("SettingFragmentNew", "currState:" + currState);
+            if(currState){
+                MyTerminalFactory.getSDK().putParam(Params.DAYTIME_MODE, true);
+                SkinCompatManager.getInstance().loadSkin("daytime.skin", SkinCompatManager.SKIN_LOADER_STRATEGY_ASSETS);
+            }else {
+                MyTerminalFactory.getSDK().putParam(Params.DAYTIME_MODE, false);
+                SkinCompatManager.getInstance().restoreDefaultTheme();
             }
         });
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
@@ -214,8 +188,6 @@ public class SettingFragmentNew extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
-
-//        registerPstoreReceiver();
     }
 
     @Override
@@ -238,7 +210,6 @@ public class SettingFragmentNew extends BaseFragment {
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
-        //        intentFilter.addAction(BluetoothLeService.ACTION_STRING_DATA);
         return intentFilter;
     }
 
@@ -265,21 +236,10 @@ public class SettingFragmentNew extends BaseFragment {
         if (physicalButtonSet4PTT !=  null)
             physicalButtonSet4PTT.unregist();
         getActivity().unregisterReceiver(mbtBroadcastReceiver);
-//        unregisterPstoreReceiver();
         super.onDestroyView();
     }
 
-    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
-        @Override
-        public void handler() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setVideoIcon();
-                }
-            });
-        }
-    };
+    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> mHandler.post(() -> setVideoIcon());
     private void setVideoIcon() {
         MyTopRightMenu.offerObject().initview(add_icon,activity );
         add_icon.setVisibility(View.VISIBLE);
@@ -320,50 +280,29 @@ public class SettingFragmentNew extends BaseFragment {
     }
 
     /*** 自己组呼返回的消息 **/
-    private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
-        @Override
-        public void handler(final int methodResult, String resultDesc) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (methodResult == 0) {
-                        showViewWhenGroupCall("我正在说话");
-                        setViewEnable(false);
-                    }
-                }
-            });
+    private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
+        if (methodResult == 0) {
+            showViewWhenGroupCall("我正在说话");
+            setViewEnable(false);
         }
-    };
+    });
 
     /***  自己组呼结束 **/
-    private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = new ReceiveCeaseGroupCallConformationHander() {
-
-        @Override
-        public void handler(int resultCode, String resultDesc) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (MyApplication.instance.getGroupListenenState() == LISTENING) {
-                        return;
-                    }
-                    hideViewWhenStopGroupCall();
-                    setViewEnable(true);
-                }
-            });
-
+    private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = (resultCode, resultDesc) -> mHandler.post(() -> {
+        if (MyApplication.instance.getGroupListenenState() == LISTENING) {
+            return;
         }
-    };
+        hideViewWhenStopGroupCall();
+        setViewEnable(true);
+    });
 
     private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler(){
         @Override
         public void handler(int reasonCode) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    speaking_name.setVisibility(View.GONE);
-                    icon_laba.setVisibility(View.GONE);
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
-                }
+            mHandler.post(() -> {
+                speaking_name.setVisibility(View.GONE);
+                icon_laba.setVisibility(View.GONE);
+                setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
             });
         }
     };
@@ -371,17 +310,14 @@ public class SettingFragmentNew extends BaseFragment {
         @Override
         public void handler(int memberId, String memberName, final int groupId, String groupName, CallMode currentCallMode) {
             if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        logger.info("sjl_设置页面的组呼到来");
-                        speaking_name.setVisibility(View.VISIBLE);
-                        icon_laba.setVisibility(View.VISIBLE);
-                        logger.info("sjl_设置页面的组呼到来"+speaking_name.getVisibility()+",正在说话人的名字："+MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
-                        String speakingName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
-                        speaking_name.setText(speakingName);
-                        setting_group_name.setText(DataUtil.getGroupByGroupNo(groupId).name);
-                    }
+                mHandler.post(() -> {
+                    logger.info("sjl_设置页面的组呼到来");
+                    speaking_name.setVisibility(View.VISIBLE);
+                    icon_laba.setVisibility(View.VISIBLE);
+                    logger.info("sjl_设置页面的组呼到来"+speaking_name.getVisibility()+",正在说话人的名字："+MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
+                    String speakingName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
+                    speaking_name.setText(speakingName);
+                    setting_group_name.setText(DataUtil.getGroupByGroupNo(groupId).name);
                 });
             }
 
@@ -390,12 +326,7 @@ public class SettingFragmentNew extends BaseFragment {
     private ReceiveChangeGroupHandler receiveChangeGroupHandler = new ReceiveChangeGroupHandler() {
         @Override
         public void handler(int errorCode, String errorDesc) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
-                }
-            });
+            mHandler.post(() -> setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name));
         }
     };
 
@@ -405,12 +336,9 @@ public class SettingFragmentNew extends BaseFragment {
     private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = new ReceiveUpdateFoldersAndGroupsHandler() {
         @Override
         public void handler() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
-                }
+            mHandler.post(() -> {
+                int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
             });
         }
     };
@@ -421,12 +349,9 @@ public class SettingFragmentNew extends BaseFragment {
             if(!forceSwitchGroup){
                 return;
             }
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
-                }
+            mHandler.post(() -> {
+                int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
             });
         }
     };
@@ -521,31 +446,22 @@ public class SettingFragmentNew extends BaseFragment {
         final int[] item = {MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0)};
         dialog = new AlertDialog.Builder(context)
                 .setTitle("设置锁屏页面")
-                .setSingleChoiceItems(new String[]{"隐藏", "显示"}, item[0], new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        logger.info("点击锁屏设置选项" + which);
-                        item[0] = which;
+                .setSingleChoiceItems(new String[]{"隐藏", "显示"}, item[0], (dialog, which) -> {
+                    logger.info("点击锁屏设置选项" + which);
+                    item[0] = which;
+                })
+                .setPositiveButton("确定", (dialog, which) -> {
+                    if (item[0] == 0) {
+                        logger.info("点击确定按钮" + item[0]);
+                        MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0);
+                    } else {
+                        logger.info("点击确定按钮" + item[0]);
+                        MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 1);
                     }
                 })
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (item[0] == 0) {
-                            logger.info("点击确定按钮" + item[0]);
-                            MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0);
-                        } else {
-                            logger.info("点击确定按钮" + item[0]);
-                            MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 1);
-                        }
-                    }
-                })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        item[0] = MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0);
-                        logger.info(" 点击取消按钮" + item[0]);
-                    }
+                .setNegativeButton("取消", (dialog, which) -> {
+                    item[0] = MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0);
+                    logger.info(" 点击取消按钮" + item[0]);
                 })
                 .setCancelable(false)
                 .show();
@@ -598,27 +514,18 @@ public class SettingFragmentNew extends BaseFragment {
         public void onClick(View v) {
             dialog = new AlertDialog.Builder(context)
                     .setTitle("设置视频清晰度")
-                    .setSingleChoiceItems(new String[]{"超清 1920x1080", "高清 1280x720", "标清 640x480", "流畅 320x240"}, item, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            item = which;
-                            logger.info("点击视频清晰度设置选项" + which);
-                        }
+                    .setSingleChoiceItems(new String[]{"超清 1920x1080", "高清 1280x720", "标清 640x480", "流畅 320x240"}, item, (dialog, which) -> {
+                        item = which;
+                        logger.info("点击视频清晰度设置选项" + which);
                     })
-                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            logger.info("点击确定按钮" + item);
+                    .setPositiveButton("确定", (dialog, which) -> {
+                        logger.info("点击确定按钮" + item);
 
-                            MyTerminalFactory.getSDK().putParam(Params.VIDEO_RESOLUTION, item);
-                        }
+                        MyTerminalFactory.getSDK().putParam(Params.VIDEO_RESOLUTION, item);
                     })
-                    .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            item = MyTerminalFactory.getSDK().getParam(Params.VIDEO_RESOLUTION, 2);
-                            logger.info(" 点击取消按钮" + item);
-                        }
+                    .setNegativeButton("取消", (dialog, which) -> {
+                        item = MyTerminalFactory.getSDK().getParam(Params.VIDEO_RESOLUTION, 2);
+                        logger.info(" 点击取消按钮" + item);
                     })
                     .setCancelable(false)
                     .show();
@@ -626,33 +533,21 @@ public class SettingFragmentNew extends BaseFragment {
     }
 
     /**日志上传是否成功的消息*/
-    private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = new ReceiveLogFileUploadCompleteHandler() {
-        @Override
-        public void handler(final int resultCode) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-//                    ll_log_upload.setEnabled(true);
-                    if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                        ToastUtil.toast(getActivity(), "日志上传成功，感谢您的支持！");
-                    } else {
-                        ToastUtil.showToast( "日志上传失败，请稍后重试！", getActivity());
-                    }
-                }
-            });
+    private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = resultCode -> mHandler.post(() -> {
+        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+            ToastUtil.toast(getActivity(), "日志上传成功，感谢您的支持！");
+        } else {
+            ToastUtil.showToast( "日志上传失败，请稍后重试！", getActivity());
         }
-    };
+    });
 
     /**收到别人请求我开启直播的通知**/
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler() {
         @Override
         public void handler(final String mainMemberName, final int mainMemberId) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (dialog != null){
-                        dialog.dismiss();
-                    }
+            mHandler.post(() -> {
+                if (dialog != null){
+                    dialog.dismiss();
                 }
             });
         }

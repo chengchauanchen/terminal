@@ -19,7 +19,6 @@ import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -103,33 +102,27 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public void handler(int resultCode, String resultDesc) {
             logger.info("主动方停止组呼的消息ReceiveCeaseGroupCallConformationHander" + "/" + MyApplication.instance.getGroupListenenState());
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
-                        if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
-                            isScanGroupCall = false;
-                            change2Listening();
+            myHandler.post(() -> {
+                if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
+                    if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
+                        isScanGroupCall = false;
+                        change2Listening();
 
-                        } else {
-                            //如果是停止组呼
-                            MyApplication.instance.isPttPress = false;
-                            myHandler.removeMessages(1);
-                            timeProgress = 60;
-                            change2Silence();
-                        }
+                    } else {
+                        //如果是停止组呼
+                        MyApplication.instance.isPttPress = false;
+                        myHandler.removeMessages(1);
+                        timeProgress = 60;
+                        change2Silence();
                     }
-                    setViewEnable(true);
                 }
+                setViewEnable(true);
             });
         }
     };
 
-    private ReceiveUnreadMessageAdd1Handler receiveUnreadMessageAdd1Handler = new ReceiveUnreadMessageAdd1Handler() {
-        @Override
-        public void handler(final boolean isAdd) {
+    private ReceiveUnreadMessageAdd1Handler receiveUnreadMessageAdd1Handler = isAdd -> {
 
-        }
     };
     private boolean soundOff;
 
@@ -148,63 +141,44 @@ public class TalkbackFragment extends BaseFragment {
             if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
 
                 if (methodResult == BaseCommonCode.SUCCESS_CODE) {//请求成功，开始组呼
-                    myHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            myHandler.removeMessages(1);
-                            timeProgress = 60;
-                            talkback_time_progress.setText(String.valueOf(timeProgress));
-                            myHandler.sendEmptyMessageDelayed(1,1000);
+                    myHandler.post(() -> {
+                        myHandler.removeMessages(1);
+                        timeProgress = 60;
+                        talkback_time_progress.setText(String.valueOf(timeProgress));
+                        myHandler.sendEmptyMessageDelayed(1,1000);
 
-                            if (PhoneAdapter.isF25()) {
-                                allViewDefault();
-                                TextViewCompat.setTextAppearance(tv_speak_text_me,R.style.red);
-                            }
-                            if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
-                                ll_pre_speaking.setVisibility(View.GONE);
-                            }
-                            change2Speaking();
-                            MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
-                            setViewEnable(false);
+                        if (PhoneAdapter.isF25()) {
+                            allViewDefault();
+                            TextViewCompat.setTextAppearance(tv_speak_text_me,R.style.red);
                         }
+                        if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
+                            ll_pre_speaking.setVisibility(View.GONE);
+                        }
+                        change2Speaking();
+                        MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
+                        setViewEnable(false);
                     });
                 } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
-                    myHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ToastUtil.showToast(context, "当前组是只听组，不能发起组呼");
-                        }
-                    });
+                    myHandler.post(() -> ToastUtil.showToast(context, "当前组是只听组，不能发起组呼"));
                 } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
-                    myHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            change2Waiting();
-                        }
-                    });
+                    myHandler.post(() -> change2Waiting());
                 }else {
-                    myHandler.post(new Runnable(){
-                        @Override
-                        public void run(){
-                            if (MyApplication.instance.getGroupListenenState() != LISTENING) {
-                                change2Silence();
-                            } else {
-                                isScanGroupCall = false;
-                                change2Listening();
-                            }
+                    myHandler.post(() -> {
+                        if (MyApplication.instance.getGroupListenenState() != LISTENING) {
+                            change2Silence();
+                        } else {
+                            isScanGroupCall = false;
+                            change2Listening();
                         }
                     });
                 }
             } else {
                 ToastUtil.toast((Activity) context, resultDesc);
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (MyApplication.instance.getGroupListenenState() != GroupCallListenState.LISTENING) {
-                            change2Silence();
-                        } else {
-                            change2Listening();
-                        }
+                myHandler.post(() -> {
+                    if (MyApplication.instance.getGroupListenenState() != GroupCallListenState.LISTENING) {
+                        change2Silence();
+                    } else {
+                        change2Listening();
                     }
                 });
 
@@ -226,15 +200,12 @@ public class TalkbackFragment extends BaseFragment {
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
         @Override
         public void handler() {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setCurrentGroupView();//当前的组和文件夹名字重置
-                    setVideoIcon();
-                    setScanGroupIcon();
-                    if (groupScanId != 0 && MyApplication.instance.getGroupListenenState() == LISTENING) {
-                        setCurrentGroupScanView(groupScanId);
-                    }
+            myHandler.post(() -> {
+                setCurrentGroupView();//当前的组和文件夹名字重置
+                setVideoIcon();
+                setScanGroupIcon();
+                if (groupScanId != 0 && MyApplication.instance.getGroupListenenState() == LISTENING) {
+                    setCurrentGroupScanView(groupScanId);
                 }
             });
         }
@@ -251,20 +222,17 @@ public class TalkbackFragment extends BaseFragment {
                 return;
             }
             logger.info("TalkbackFragment收到强制切组： toGroupId：" + toGroupId);
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setCurrentGroupView();
-                    setChangeGroupView();
-                    if (MyTerminalFactory.getSDK().getParam(Params.IS_FORBID_GROUP_CALL, false)) {
-                        change2Forbid();
-                    } else {
-                        if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) || MyApplication.instance.getGroupListenenState() != LISTENING) {
-                            change2Silence();
-
-                        }
+            myHandler.post(() -> {
+                setCurrentGroupView();
+                setChangeGroupView();
+                if (MyTerminalFactory.getSDK().getParam(Params.IS_FORBID_GROUP_CALL, false)) {
+                    change2Forbid();
+                } else {
+                    if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) || MyApplication.instance.getGroupListenenState() != LISTENING) {
+                        change2Silence();
 
                     }
+
                 }
             });
         }
@@ -279,17 +247,14 @@ public class TalkbackFragment extends BaseFragment {
         public void handler(final int errorCode, final String errorDesc) {
             logger.info("转组消息：" + "errorCode:" + errorCode + "/" + errorDesc);
             if (errorCode != 0 && errorCode != SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setChangeGroupView();
-                        if (errorCode == SignalServerErrorCode.RESOURCES_NOT_ENOUGH.getErrorCode()) {
-                            ToastUtil.showToast(MyApplication.instance, "无可用电台资源！");
-                        } else if (errorCode == SignalServerErrorCode.TEMP_GROUP_LOCKED.getErrorCode()) {
-                            ToastUtil.showToast(MyApplication.instance, SignalServerErrorCode.TEMP_GROUP_LOCKED.getErrorDiscribe());
-                        }else {
-                            ToastUtil.showToast(MyApplication.instance,errorDesc+"");
-                        }
+                myHandler.post(() -> {
+                    setChangeGroupView();
+                    if (errorCode == SignalServerErrorCode.RESOURCES_NOT_ENOUGH.getErrorCode()) {
+                        ToastUtil.showToast(MyApplication.instance, "无可用电台资源！");
+                    } else if (errorCode == SignalServerErrorCode.TEMP_GROUP_LOCKED.getErrorCode()) {
+                        ToastUtil.showToast(MyApplication.instance, SignalServerErrorCode.TEMP_GROUP_LOCKED.getErrorDiscribe());
+                    }else {
+                        ToastUtil.showToast(MyApplication.instance,errorDesc+"");
                     }
                 });
                 MyTerminalFactory.getSDK().putParam(Params.IS_CHANGE_GROUP_SUCCEED, false);
@@ -298,25 +263,22 @@ public class TalkbackFragment extends BaseFragment {
 
                 CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
 
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        setCurrentGroupView();
-                        setChangeGroupView();
+                myHandler.post(() -> {
+                    setCurrentGroupView();
+                    setChangeGroupView();
 
-                        if (MyTerminalFactory.getSDK().getParam(Params.IS_FORBID_GROUP_CALL, false)) {
-                            change2Forbid();
-                        } else {
-                            logger.info("GROUP_SCAN--------------" + MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false));
-                            logger.info("GUARD_MAIN_GROUP-------------" + MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false));
-                            if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) || MyApplication.instance.getGroupListenenState() != LISTENING) {
-
-                            }
+                    if (MyTerminalFactory.getSDK().getParam(Params.IS_FORBID_GROUP_CALL, false)) {
+                        change2Forbid();
+                    } else {
+                        logger.info("GROUP_SCAN--------------" + MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false));
+                        logger.info("GUARD_MAIN_GROUP-------------" + MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false));
+                        if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) || MyApplication.instance.getGroupListenenState() != LISTENING) {
 
                         }
 
-                        MyTerminalFactory.getSDK().putParam(Params.IS_CHANGE_GROUP_SUCCEED, true);
                     }
+
+                    MyTerminalFactory.getSDK().putParam(Params.IS_CHANGE_GROUP_SUCCEED, true);
                 });
             }
         }
@@ -328,20 +290,17 @@ public class TalkbackFragment extends BaseFragment {
 
         @Override
         public void handler(int reasonCode) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    groupScanId = 0;
-                    MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
-                    setCurrentGroupView();
-                    logger.info("被动方停止组呼" + "/" + MyApplication.instance.getGroupListenenState() + MyApplication.instance.isPttPress);
-                    if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
-                        if (MyApplication.instance.isPttPress && MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE) {
-                            //别人停止组呼，如果自己还是在按着，重新请求组呼
-                            change2Speaking();
-                        } else {
-                            change2Silence();
-                        }
+            myHandler.post(() -> {
+                groupScanId = 0;
+                MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
+                setCurrentGroupView();
+                logger.info("被动方停止组呼" + "/" + MyApplication.instance.getGroupListenenState() + MyApplication.instance.isPttPress);
+                if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
+                    if (MyApplication.instance.isPttPress && MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE) {
+                        //别人停止组呼，如果自己还是在按着，重新请求组呼
+                        change2Speaking();
+                    } else {
+                        change2Silence();
                     }
                 }
             });
@@ -358,38 +317,32 @@ public class TalkbackFragment extends BaseFragment {
             if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
                 ToastUtil.showToast(activity,"没有组呼听的权限");
             }
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                        //是组扫描的组呼,且当前组没人说话，变文件夹和组名字
-                        if (groupId != MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)) {
-                            isScanGroupCall = true;
-                            groupScanId = groupId;
-                            setCurrentGroupScanView(groupId);
-                        }
-                        //是当前组的组呼,且扫描组有人说话，变文件夹和组名字
-                        if (groupId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0) && MyApplication.instance.getGroupListenenState() == LISTENING) {
-                            isScanGroupCall = false;
-                            setCurrentGroupScanView(groupId);
-                        }
-                        MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, memberName);
-                }
+            myHandler.post(() -> {
+                    //是组扫描的组呼,且当前组没人说话，变文件夹和组名字
+                    if (groupId != MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)) {
+                        isScanGroupCall = true;
+                        groupScanId = groupId;
+                        setCurrentGroupScanView(groupId);
+                    }
+                    //是当前组的组呼,且扫描组有人说话，变文件夹和组名字
+                    if (groupId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0) && MyApplication.instance.getGroupListenenState() == LISTENING) {
+                        isScanGroupCall = false;
+                        setCurrentGroupScanView(groupId);
+                    }
+                    MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, memberName);
             });
 
             speakingId = groupId;
             speakingName = memberName;
 
             if (currentCallMode == CallMode.GENERAL_CALL_MODE) {
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTING || MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING) {
-                            change2Waiting();
-                        } else if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
-                            //什么都不用做
-                        } else {
-                            change2Listening();
-                        }
+                myHandler.post(() -> {
+                    if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTING || MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING) {
+                        change2Waiting();
+                    } else if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
+                        //什么都不用做
+                    } else {
+                        change2Listening();
                     }
                 });
             }
@@ -404,16 +357,13 @@ public class TalkbackFragment extends BaseFragment {
     private ReceiveGroupScanResultHandler receiveGroupScanResultHandler = new ReceiveGroupScanResultHandler() {
         @Override
         public void handler(final int groupScanType, final boolean enable,  int errorCode, String errorDesc) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (groupScanType == GroupScanType.GROUP_SCANNING.getCode()
-                            &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_SCAN.name())) {//组扫描
-                        if (enable) {//打开组扫描Icon
-                            setChangeGroupScan(true);
-                        } else {//关闭组扫描Icon
-                            setChangeGroupScan(false);
-                        }
+            myHandler.post(() -> {
+                if (groupScanType == GroupScanType.GROUP_SCANNING.getCode()
+                        &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_SCAN.name())) {//组扫描
+                    if (enable) {//打开组扫描Icon
+                        setChangeGroupScan(true);
+                    } else {//关闭组扫描Icon
+                        setChangeGroupScan(false);
                     }
                 }
             });
@@ -427,15 +377,12 @@ public class TalkbackFragment extends BaseFragment {
     private ReceiveNotifyEnvironmentMonitorHandler receiveNotifyEnvironmentMonitorHandler = new ReceiveNotifyEnvironmentMonitorHandler() {
         @Override
         public void handler(final boolean enable) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (enable) {
-                        iv_environment_monitor.setVisibility(View.VISIBLE);
+            myHandler.post(() -> {
+                if (enable) {
+                    iv_environment_monitor.setVisibility(View.VISIBLE);
 
-                    } else {
-                        iv_environment_monitor.setVisibility(View.GONE);
-                    }
+                } else {
+                    iv_environment_monitor.setVisibility(View.GONE);
                 }
             });
         }
@@ -449,12 +396,7 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public void handler(final boolean connected) {
             logger.info("主fragment收到服务是否连接的通知----->" + connected);
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setCurrentGroupView();
-                }
-            });
+            myHandler.post(() -> setCurrentGroupView());
         }
     };
 
@@ -484,14 +426,11 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public void handler(int resultCode, String resultDes) {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        //转组数据显示的设置
-                        setChangeGroupView();
-                        //当前文件夹、组数据的显示设置
-                        setCurrentGroupView();
-                    }
+                myHandler.post(() -> {
+                    //转组数据显示的设置
+                    setChangeGroupView();
+                    //当前文件夹、组数据的显示设置
+                    setCurrentGroupView();
                 });
             }
         }
@@ -504,14 +443,11 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public void handler(int errorCode, String errorDesc) {
             if (errorCode == BaseCommonCode.SUCCESS_CODE) {
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        //转组数据显示的设置
-                        setChangeGroupView();
-                        //当前文件夹、组数据的显示设置
-                        setCurrentGroupView();
-                    }
+                myHandler.post(() -> {
+                    //转组数据显示的设置
+                    setChangeGroupView();
+                    //当前文件夹、组数据的显示设置
+                    setCurrentGroupView();
                 });
             }
         }
@@ -523,13 +459,10 @@ public class TalkbackFragment extends BaseFragment {
     private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = new ReceiveUpdateFoldersAndGroupsHandler() {
         @Override
         public void handler() {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    //当前文件夹、组数据的显示设置
-                    setCurrentGroupView();
-                    setChangeGroupView();
-                }
+            myHandler.post(() -> {
+                //当前文件夹、组数据的显示设置
+                setCurrentGroupView();
+                setChangeGroupView();
             });
         }
     };
@@ -555,7 +488,6 @@ public class TalkbackFragment extends BaseFragment {
             return true;
         }
     };
-//    private TalkbackVolumeReceiver talkbackVolumeReceiver;
 
     /**
      * 上下滑动改变音量
@@ -612,12 +544,7 @@ public class TalkbackFragment extends BaseFragment {
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
                     v.performClick();
-                    myHandler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            ll_sliding_chenge_volume.setVisibility(View.GONE);
-                        }
-                    }, 1000);
+                    myHandler.postDelayed(() -> ll_sliding_chenge_volume.setVisibility(View.GONE), 1000);
 
                     break;
                 default:
@@ -631,17 +558,14 @@ public class TalkbackFragment extends BaseFragment {
     private final class OnGroupChangedListenerImplementation implements OnGroupChangedListener {
         @Override
         public void onGroupChanged(final int groupId, String groupName) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (MyApplication.instance.isMiniLive) {
-                        ToastUtil.showToast(getContext(), "小窗口模式中禁止转组");
-                    } else {
-                        int resultCode = MyTerminalFactory.getSDK().getGroupManager().changeGroup(groupId);
-                        setCurrentGroupView();
-                        if (resultCode != BaseCommonCode.SUCCESS_CODE) {
-                            ToastUtil.groupChangedFailToast(context, resultCode);
-                        }
+            myHandler.post(() -> {
+                if (MyApplication.instance.isMiniLive) {
+                    ToastUtil.showToast(getContext(), "小窗口模式中禁止转组");
+                } else {
+                    int resultCode = MyTerminalFactory.getSDK().getGroupManager().changeGroup(groupId);
+                    setCurrentGroupView();
+                    if (resultCode != BaseCommonCode.SUCCESS_CODE) {
+                        ToastUtil.groupChangedFailToast(context, resultCode);
                     }
                 }
             });
@@ -656,14 +580,11 @@ public class TalkbackFragment extends BaseFragment {
 
         @Override
         public void handler(final boolean isCannotCheck) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    logger.info("change_group_show_area被禁了 ？ isCannotCheck：" + isCannotCheck);
-                    change_group_show_area.setEnabled(!isCannotCheck);
-                    if (!isCannotCheck) {
-                        talkback_add_icon.setEnabled(true);
-                    }
+            myHandler.post(() -> {
+                logger.info("change_group_show_area被禁了 ？ isCannotCheck：" + isCannotCheck);
+                change_group_show_area.setEnabled(!isCannotCheck);
+                if (!isCannotCheck) {
+                    talkback_add_icon.setEnabled(true);
                 }
             });
         }
@@ -821,14 +742,10 @@ public class TalkbackFragment extends BaseFragment {
     private int online_number;
 
     // 警情临时组处理完成，终端需要切到主组，刷新通讯录
-    private ReceiveResponseChangeTempGroupProcessingStateHandler receiveResponseChangeTempGroupProcessingStateHandler = new ReceiveResponseChangeTempGroupProcessingStateHandler(){
-
-        @Override
-        public void handler(int resultCode,String resultDesc){
-            if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                int mainGroupId = MyTerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0);
-                MyTerminalFactory.getSDK().getGroupManager().changeGroup(mainGroupId);
-            }
+    private ReceiveResponseChangeTempGroupProcessingStateHandler receiveResponseChangeTempGroupProcessingStateHandler = (resultCode, resultDesc) -> {
+        if(resultCode == BaseCommonCode.SUCCESS_CODE){
+            int mainGroupId = MyTerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0);
+            MyTerminalFactory.getSDK().getGroupManager().changeGroup(mainGroupId);
         }
     };
     /**
@@ -841,27 +758,12 @@ public class TalkbackFragment extends BaseFragment {
             logger.info("触发了receiveNotifyMemberChangeHandler：" + memberChangeType);
             online_number = MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size();
             if (memberChangeType == MemberChangeType.MEMBER_ACTIVE_GROUP_CALL) {
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        change2Silence();
-                    }
-                });
+                myHandler.post(() -> change2Silence());
 
             } else if (memberChangeType == MemberChangeType.MEMBER_PROHIBIT_GROUP_CALL) {
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        change2Forbid();
-                    }
-                });
+                myHandler.post(() -> change2Forbid());
             }
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members),online_number));
-                }
-            });
+            myHandler.post(() -> tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members),online_number)));
 
 
         }
@@ -871,16 +773,13 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public void handler() {
             logger.info("ppt.触发了ReceivePTTUpHandler");
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    MyApplication.instance.isClickVolumeToCall = false;
-                    if (MyApplication.instance.getGroupListenenState() == LISTENING) {
-                        isScanGroupCall = false;
-                        change2Listening();
-                    } else {
-                        change2Silence();
-                    }
+            myHandler.post(() -> {
+                MyApplication.instance.isClickVolumeToCall = false;
+                if (MyApplication.instance.getGroupListenenState() == LISTENING) {
+                    isScanGroupCall = false;
+                    change2Listening();
+                } else {
+                    change2Silence();
                 }
             });
         }
@@ -890,16 +789,13 @@ public class TalkbackFragment extends BaseFragment {
         public void handler(int requestGroupCall) {
             logger.info("ppt.触发了receivePTTDownHandler");
             if (requestGroupCall == BaseCommonCode.SUCCESS_CODE) {
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
-                            CheckMyPermission.permissionPrompt((NewMainActivity) context, Manifest.permission.RECORD_AUDIO);
-                            return;
-                        }
-                        change2PreSpeaking();
-                        MyApplication.instance.isClickVolumeToCall = true;
+                myHandler.post(() -> {
+                    if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
+                        CheckMyPermission.permissionPrompt((NewMainActivity) context, Manifest.permission.RECORD_AUDIO);
+                        return;
                     }
+                    change2PreSpeaking();
+                    MyApplication.instance.isClickVolumeToCall = true;
                 });
             } else if (requestGroupCall == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {
                 change2Waiting();
@@ -929,14 +825,11 @@ public class TalkbackFragment extends BaseFragment {
 
         @Override
         public void onPTTKeyDown() throws RemoteException {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        pttDownDoThing();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            myHandler.post(() -> {
+                try {
+                    pttDownDoThing();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
 
@@ -944,14 +837,11 @@ public class TalkbackFragment extends BaseFragment {
 
         @Override
         public void onPTTKeyUp() throws RemoteException {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        pttUpDoThing();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            myHandler.post(() -> {
+                try {
+                    pttUpDoThing();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         }
@@ -1090,20 +980,17 @@ public class TalkbackFragment extends BaseFragment {
 
         iv_volume_off_call.setVisibility(View.VISIBLE);
         iv_volume_off_call.setImageResource(R.drawable.volume_silence);
-        iv_volume_off_call.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (!soundOff) {
-                    iv_volume_off_call.setImageResource(R.drawable.volume_off_call);
-                    TerminalFactory.getSDK().getAudioProxy().volumeQuiet();
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true, 1);
-                    soundOff = true;
-                } else {
-                    iv_volume_off_call.setImageResource(R.drawable.volume_silence);
-                    TerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false, 1);
-                    soundOff = false;
-                }
+        iv_volume_off_call.setOnClickListener(view -> {
+            if (!soundOff) {
+                iv_volume_off_call.setImageResource(R.drawable.volume_off_call);
+                TerminalFactory.getSDK().getAudioProxy().volumeQuiet();
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true, 1);
+                soundOff = true;
+            } else {
+                iv_volume_off_call.setImageResource(R.drawable.volume_silence);
+                TerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false, 1);
+                soundOff = false;
             }
         });
 
@@ -1146,7 +1033,7 @@ public class TalkbackFragment extends BaseFragment {
             try{
                 gotaKeyHandler = keyMointor.setHandler(new GotaKeHandler());
             }catch (Exception e){
-
+               e.printStackTrace();
             }
         }
 
@@ -1178,23 +1065,15 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUnreadMessageAdd1Handler);
         ptt.setOnTouchListener(new OnPttTouchListenerImplementation());
-        talkback_change_session.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                GroupCallNewsActivity.startCurrentActivity(context, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0), DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name, speakingId, speakingName);
-            }
-        });
-        to_current_group.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (DataUtil.isExistGroup(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0))) {
-                    Intent intent = new Intent(MyApplication.instance, GroupMemberActivity.class);
-                    intent.putExtra("groupId", MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
-                    intent.putExtra("groupName", DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
-                    startActivity(intent);
-                } else {
-                    ToastUtil.showToast(context, "未知错误,成员不在该组中！");
-                }
+        talkback_change_session.setOnClickListener(v -> GroupCallNewsActivity.startCurrentActivity(context, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0), DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name, speakingId, speakingName));
+        to_current_group.setOnClickListener(view -> {
+            if (DataUtil.isExistGroup(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0))) {
+                Intent intent = new Intent(MyApplication.instance, GroupMemberActivity.class);
+                intent.putExtra("groupId", MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
+                intent.putExtra("groupName", DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
+                startActivity(intent);
+            } else {
+                ToastUtil.showToast(context, "未知错误,成员不在该组中！");
             }
         });
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
@@ -1411,12 +1290,7 @@ public class TalkbackFragment extends BaseFragment {
 
     private void waitAndFinish() {
         ToastUtil.showToast(context, "系统异常，程序将在1秒后关闭，请重新启动");
-        myHandler.postDelayed(new Runnable(){
-            @Override
-            public void run(){
-                ((NewMainActivity) context).finish();
-            }
-        },1000);
+        myHandler.postDelayed(() -> ((NewMainActivity) context).finish(),1000);
     }
 
     /**
@@ -1453,14 +1327,11 @@ public class TalkbackFragment extends BaseFragment {
         timerTaskLock = new TimerTask() {
             @Override
             public void run() {
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        change_group_show_area.setVisibility(View.VISIBLE);
-                        logger.info(" open_lock_change_group" + " startTimerToLock" + isFlex + MyApplication.instance.isPttViewPager);
-                        if (!isFlex || MyApplication.instance.isPttViewPager) {
-                            logger.info(" open_lock_change_group " + " startTimerToLock 进入判断");
-                        }
+                myHandler.post(() -> {
+                    change_group_show_area.setVisibility(View.VISIBLE);
+                    logger.info(" open_lock_change_group" + " startTimerToLock" + isFlex + MyApplication.instance.isPttViewPager);
+                    if (!isFlex || MyApplication.instance.isPttViewPager) {
+                        logger.info(" open_lock_change_group " + " startTimerToLock 进入判断");
                     }
                 });
             }
@@ -1475,7 +1346,7 @@ public class TalkbackFragment extends BaseFragment {
         try{
             keyMointor.setHandler(gotaKeyHandler);
         }catch (Exception e){
-
+          e.printStackTrace();
         }
     }
 

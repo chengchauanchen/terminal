@@ -1,11 +1,8 @@
 package cn.vsx.vc.activity;
 
 import android.annotation.SuppressLint;
-import android.media.MediaPlayer;
 import android.os.Handler;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
@@ -14,9 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.terminalsdk.model.CallRecord;
-import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetRtspStreamUrlHandler;
@@ -113,131 +108,116 @@ public class PhoneAssistantManageActivity extends BaseActivity implements View.O
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetRtspStreamUrlHandler);
 
-        pl_phone_assistant.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, final View view, final int position, long id) {
+        pl_phone_assistant.setOnItemClickListener((parent, view, position, id) -> {
 
-                currentTime=System.currentTimeMillis();
-                if(currentTime - lastSearchTime<1000){
-                    return;
-                }
-                lastSearchTime=currentTime;
+            currentTime=System.currentTimeMillis();
+            if(currentTime - lastSearchTime<1000){
+                return;
+            }
+            lastSearchTime=currentTime;
 
-                logger.info("点击了条目 " + position);
-                //找到点击ITEM里的控件
-                downloadProgressBar = view.findViewById(R.id.play_record);
-                status = view.findViewById(R.id.status);
-                playProgressBar = view.findViewById(R.id.progress_bar);
-                //没有录音的条目点击不处理
-                if (callRecords.get(position).getPath() == null || callRecords.get(position).getPath().equals("") ||callRecords.get(position).getCallRecords().equals("1")||callRecords.get(position).getCallRecords().equals("2")) {
-                    return;
-                }
-                //通过path判断是否是网络地址需要下载
-                if (callRecords.get(position).getPath().startsWith("http")) {
-                    callRecords.get(position).setDownLoad(false);
-                } else {
-                    callRecords.get(position).setDownLoad(true);
-                }
+            logger.info("点击了条目 " + position);
+            //找到点击ITEM里的控件
+            downloadProgressBar = view.findViewById(R.id.play_record);
+            status = view.findViewById(R.id.status);
+            playProgressBar = view.findViewById(R.id.progress_bar);
+            //没有录音的条目点击不处理
+            if (callRecords.get(position).getPath() == null || callRecords.get(position).getPath().equals("") ||callRecords.get(position).getCallRecords().equals("1")||callRecords.get(position).getCallRecords().equals("2")) {
+                return;
+            }
+            //通过path判断是否是网络地址需要下载
+            if (callRecords.get(position).getPath().startsWith("http")) {
+                callRecords.get(position).setDownLoad(false);
+            } else {
+                callRecords.get(position).setDownLoad(true);
+            }
 
-                if (callRecords.get(position).isDownLoad()) {//播放
-                    if (lastPosition == position) {//是同一条目
-                        logger.error("点击了同一条目");
-                        if (MediaManager.getMediaPlayer().isPlaying()) {
-                            MediaManager.pause();
-                            callRecords.get(position).setPlaying(false);
-                            //暂停
-                            onThreadPause();
-                            logger.error("播放暂停");
-                            handler.sendEmptyMessage(PAUSE);
-                        } else {
-                            MediaManager.resume();
-                            callRecords.get(position).setPlaying(true);
-                            status.setImageResource(R.drawable.downloading);
-                            onThreadResume();
-                            handler.sendEmptyMessage(PLAY);
-                        }
-
-                    } else {//不同条目
-                        MediaManager.release();
-                        onThreadResume();
-                        onThreadStop();
-                        if (lastPosition >= 0) {
-                            callRecords.get(lastPosition).setPlaying(false);
-                            lastProgressBar.setVisibility(View.GONE);
-                            playProgressBar.setVisibility(View.VISIBLE);
-                            phoneAssistantListAdapter.notifyDataSetChanged();
-                        }
-                        MediaManager.playSound(callRecords.get(position).getPath(), new MediaPlayer.OnCompletionListener() {
-                            @Override
-                            public void onCompletion(MediaPlayer mp) {
-                                callRecords.get(position).setPlaying(false);
-                                playProgressBar.setProgress(MediaManager.getMediaPlayer().getDuration());
-                                lastPosition = -1;//播放完成重置角标
-                                handler.sendEmptyMessage(COMPLETED);
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        playProgressBar.setVisibility(View.GONE);
-                                        phoneAssistantListAdapter.notifyDataSetChanged();
-                                    }
-                                });
-
-                            }
-                        });
+            if (callRecords.get(position).isDownLoad()) {//播放
+                if (lastPosition == position) {//是同一条目
+                    logger.error("点击了同一条目");
+                    if (MediaManager.getMediaPlayer().isPlaying()) {
+                        MediaManager.pause();
+                        callRecords.get(position).setPlaying(false);
+                        //暂停
+                        onThreadPause();
+                        logger.error("播放暂停");
+                        handler.sendEmptyMessage(PAUSE);
+                    } else {
+                        MediaManager.resume();
                         callRecords.get(position).setPlaying(true);
-                        progressUpdateThread = new ProgressUpdateThread(playProgressBar);
-                        progressUpdateThread.start();
-                        playProgressBar.setMax(MediaManager.getMediaPlayer().getDuration());
+                        status.setImageResource(R.drawable.downloading);
+                        onThreadResume();
                         handler.sendEmptyMessage(PLAY);
                     }
-                    lastProgressBar = playProgressBar;
-                    lastPosition = position;//记录上一个条目的角标
 
-                } else {//下载
-                    if(lastPosition!=-1){
-                        if(!callRecords.get(lastPosition).isDownLoad()){
-                            ToastUtil.showToast(PhoneAssistantManageActivity.this,"有正在下载的录音，请等待。。。。");
-                            return;
-                        }
+                } else {//不同条目
+                    MediaManager.release();
+                    onThreadResume();
+                    onThreadStop();
+                    if (lastPosition >= 0) {
+                        callRecords.get(lastPosition).setPlaying(false);
+                        lastProgressBar.setVisibility(View.GONE);
+                        playProgressBar.setVisibility(View.VISIBLE);
+                        phoneAssistantListAdapter.notifyDataSetChanged();
                     }
-                    status.setImageResource(R.drawable.download);
-                    view.setEnabled(false);//下载过程中禁止再次点击
-                    MyTerminalFactory.getSDK().getVoipCallManager().downloadRecordFile(callRecords.get(position), new DownloadCompleteListener() {
-                        @Override
-                        public void succeed(CallRecord callRecord) {
-                            logger.info("电话录音下载成功");
-                            callRecords.get(position).setDownLoad(true);
-                            ToastUtil.showToast(PhoneAssistantManageActivity.this, "录音文件已保存至：" + callRecord.getPath());
-                            handler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    view.setEnabled(true);
-                                    handler.sendEmptyMessage(DOWNLOAD);
-                                }
-                            });
+                    MediaManager.playSound(callRecords.get(position).getPath(), mp -> {
+                        callRecords.get(position).setPlaying(false);
+                        playProgressBar.setProgress(MediaManager.getMediaPlayer().getDuration());
+                        lastPosition = -1;//播放完成重置角标
+                        handler.sendEmptyMessage(COMPLETED);
+                        handler.post(() -> {
+                            playProgressBar.setVisibility(View.GONE);
+                            phoneAssistantListAdapter.notifyDataSetChanged();
+                        });
 
-                        }
-
-                        @Override
-                        public void failure() {
-                            logger.error("电话录音下载失败");
-                            callRecords.get(position).setDownLoad(false);
-                            ToastUtil.showToast(PhoneAssistantManageActivity.this, "录音下载失败");
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    view.setEnabled(true);
-                                    downloadProgressBar.setProgress(0);
-                                    status.setImageResource(R.drawable.undownload);
-                                }
-                            });
-
-                        }
-                    }, true);
-                    MyTerminalFactory.getSDK().getSQLiteDBManager().updateCallRecord(callRecords.get(position));//保存通话记录状态的改变
+                    });
+                    callRecords.get(position).setPlaying(true);
+                    progressUpdateThread = new ProgressUpdateThread(playProgressBar);
+                    progressUpdateThread.start();
+                    playProgressBar.setMax(MediaManager.getMediaPlayer().getDuration());
+                    handler.sendEmptyMessage(PLAY);
                 }
+                lastProgressBar = playProgressBar;
+                lastPosition = position;//记录上一个条目的角标
 
+            } else {//下载
+                if(lastPosition!=-1){
+                    if(!callRecords.get(lastPosition).isDownLoad()){
+                        ToastUtil.showToast(PhoneAssistantManageActivity.this,"有正在下载的录音，请等待。。。。");
+                        return;
+                    }
+                }
+                status.setImageResource(R.drawable.download);
+                view.setEnabled(false);//下载过程中禁止再次点击
+                MyTerminalFactory.getSDK().getVoipCallManager().downloadRecordFile(callRecords.get(position), new DownloadCompleteListener() {
+                    @Override
+                    public void succeed(CallRecord callRecord) {
+                        logger.info("电话录音下载成功");
+                        callRecords.get(position).setDownLoad(true);
+                        ToastUtil.showToast(PhoneAssistantManageActivity.this, "录音文件已保存至：" + callRecord.getPath());
+                        handler.post(() -> {
+                            view.setEnabled(true);
+                            handler.sendEmptyMessage(DOWNLOAD);
+                        });
+
+                    }
+
+                    @Override
+                    public void failure() {
+                        logger.error("电话录音下载失败");
+                        callRecords.get(position).setDownLoad(false);
+                        ToastUtil.showToast(PhoneAssistantManageActivity.this, "录音下载失败");
+                        mHandler.post(() -> {
+                            view.setEnabled(true);
+                            downloadProgressBar.setProgress(0);
+                            status.setImageResource(R.drawable.undownload);
+                        });
+
+                    }
+                }, true);
+                MyTerminalFactory.getSDK().getSQLiteDBManager().updateCallRecord(callRecords.get(position));//保存通话记录状态的改变
             }
+
         });
         ivback.setOnClickListener(this);
 
@@ -259,20 +239,17 @@ public class PhoneAssistantManageActivity extends BaseActivity implements View.O
     protected void onPause() {
         super.onPause();
         logger.info("PhoneAssistantManageActivity.onPause()");
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    if (MediaManager.getMediaPlayer() != null) {
-                        MediaManager.pause();
-                        onThreadPause();
-                        status.setImageResource(R.drawable.downloaded);
-                    }
-                }catch (Exception e){
-                    logger.error(e.toString());
+        handler.post(() -> {
+            try {
+                if (MediaManager.getMediaPlayer() != null) {
+                    MediaManager.pause();
+                    onThreadPause();
+                    status.setImageResource(R.drawable.downloaded);
                 }
-
+            }catch (Exception e){
+                logger.error(e.toString());
             }
+
         });
     }
 
@@ -339,17 +316,14 @@ public class PhoneAssistantManageActivity extends BaseActivity implements View.O
 
         @Override
         public void handler(final float percent, TerminalMessage terminalMessage) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (downloadProgressBar != null) {
-                        int percentInt = (int) (percent * 100);
-                        logger.info("下载进度" + percent);
-                        downloadProgressBar.setProgress(percentInt);
+            mHandler.post(() -> {
+                if (downloadProgressBar != null) {
+                    int percentInt = (int) (percent * 100);
+                    logger.info("下载进度" + percent);
+                    downloadProgressBar.setProgress(percentInt);
 
-                        if (percentInt >= 100) {
-                            status.setImageResource(R.drawable.downloaded);
-                        }
+                    if (percentInt >= 100) {
+                        status.setImageResource(R.drawable.downloaded);
                     }
                 }
             });
@@ -357,72 +331,56 @@ public class PhoneAssistantManageActivity extends BaseActivity implements View.O
     };
 
     //被动方组呼来了
-    private ReceiveGroupCallIncommingHandler mReceiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
+    private ReceiveGroupCallIncommingHandler mReceiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
+        logger.info("被动方组呼来了ReceiveGroupCallIncommingHandler");
 
-        @Override
-        public void handler(int memberId, String memberName, int groupId, String groupName, CallMode currentCallMode) {
-            logger.info("被动方组呼来了ReceiveGroupCallIncommingHandler");
-
-                    if (MediaManager.getMediaPlayer() != null) {
-                        MediaManager.release();
-                        lastPosition=-1;
-                        onThreadResume();
-                        onThreadStop();
-                        handler.sendEmptyMessage(COMPLETED);
-                    }
+                if (MediaManager.getMediaPlayer() != null) {
+                    MediaManager.release();
+                    lastPosition=-1;
+                    onThreadResume();
+                    onThreadStop();
+                    handler.sendEmptyMessage(COMPLETED);
+                }
 
 
-        }
     };
     //被动方个呼来了
-    private ReceiveNotifyIndividualCallIncommingHandler mReceiveNotifyIndividualCallIncommingHandler = new ReceiveNotifyIndividualCallIncommingHandler() {
+    private ReceiveNotifyIndividualCallIncommingHandler mReceiveNotifyIndividualCallIncommingHandler = (mainMemberName, mainMemberId, individualCallType) -> {
+        logger.info("被动方个呼来了ReceiveNotifyIndividualCallIncommingHandler");
 
-        @Override
-        public void handler(String mainMemberName, int mainMemberId, int individualCallType) {
-            logger.info("被动方个呼来了ReceiveNotifyIndividualCallIncommingHandler");
-
-                    if (MediaManager.getMediaPlayer() != null) {
-                        MediaManager.release();
-                        handler.sendEmptyMessage(COMPLETED);
-                        lastPosition=-1;
-                        onThreadResume();
-                        onThreadStop();
-                    }
+                if (MediaManager.getMediaPlayer() != null) {
+                    MediaManager.release();
+                    handler.sendEmptyMessage(COMPLETED);
+                    lastPosition=-1;
+                    onThreadResume();
+                    onThreadStop();
+                }
 
 
-        }
     };
     //被动方请求视频上报
-    private ReceiveNotifyLivingIncommingHandler mReceiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler() {
+    private ReceiveNotifyLivingIncommingHandler mReceiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId) -> {
+        logger.info("被动方请求视频上报");
 
-        @Override
-        public void handler(String mainMemberName, int mainMemberId) {
-            logger.info("被动方请求视频上报");
+                if (MediaManager.getMediaPlayer() != null) {
+                    MediaManager.release();
+                    lastPosition=-1;
+                    onThreadResume();
+                    onThreadStop();
+                    handler.sendEmptyMessage(COMPLETED);
+                }
 
-                    if (MediaManager.getMediaPlayer() != null) {
-                        MediaManager.release();
-                        lastPosition=-1;
-                        onThreadResume();
-                        onThreadStop();
-                        handler.sendEmptyMessage(COMPLETED);
-                    }
-
-        }
     };
 
-    private ReceiveGetRtspStreamUrlHandler receiveGetRtspStreamUrlHandler = new ReceiveGetRtspStreamUrlHandler() {
+    private ReceiveGetRtspStreamUrlHandler receiveGetRtspStreamUrlHandler = (rtspUrl, liveMember, callId) -> {
+        logger.info("被动方观看视频上报");
 
-        @Override
-        public void handler(String rtspUrl, Member liveMember, long callId) {
-            logger.info("被动方观看视频上报");
-
-            if (MediaManager.getMediaPlayer() != null) {
-                MediaManager.release();
-                lastPosition=-1;
-                onThreadResume();
-                onThreadStop();
-                handler.sendEmptyMessage(COMPLETED);
-            }
+        if (MediaManager.getMediaPlayer() != null) {
+            MediaManager.release();
+            lastPosition=-1;
+            onThreadResume();
+            onThreadStop();
+            handler.sendEmptyMessage(COMPLETED);
         }
     };
 

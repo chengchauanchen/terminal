@@ -31,14 +31,13 @@ import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 public class SearchContactsAdapter extends BaseAdapter  {
 
 	private Context context;
 	private List<Member> searchMembersList;
-	private ViewHolder holder;
 	private int searchListPosition;
 	private int activeMode;
 	private int errorCode;
@@ -57,12 +56,7 @@ public class SearchContactsAdapter extends BaseAdapter  {
 		this.searchListPosition = searchListPosition;
 		this.activeMode = activeMode;
 		this.errorCode = errorCode;
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				notifyDataSetChanged();
-			}
-		});
+		handler.post(() -> notifyDataSetChanged());
 	}
 
 	@Override
@@ -82,7 +76,7 @@ public class SearchContactsAdapter extends BaseAdapter  {
 
 	@Override
 	public View getView(final int position, View convertView, final ViewGroup parent) {
-		holder = null;
+		ViewHolder holder = null;
 		if (convertView == null) {
 			convertView = View.inflate(context, R.layout.item_search_contacts, null);
 			holder = new ViewHolder(convertView);
@@ -156,53 +150,29 @@ public class SearchContactsAdapter extends BaseAdapter  {
 		}
 
 
-		holder.iv_search_call.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverIndividualCallForAddressBookHandler.class, 2, position);
-			}
-		});
-		holder.iv_search_msg.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				Intent intent = new Intent(context, IndividualNewsActivity.class);
-				intent.putExtra("isGroup", false);
-				intent.putExtra("userId", searchContactsBean.id);
-				intent.putExtra("userName", searchContactsBean.getName());
-				context.startActivity(intent);
-			}
+		holder.iv_search_call.setOnClickListener(view -> OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverIndividualCallForAddressBookHandler.class, 2, position));
+		holder.iv_search_msg.setOnClickListener(v -> {
+			Intent intent = new Intent(context, IndividualNewsActivity.class);
+			intent.putExtra("isGroup", false);
+			intent.putExtra("userId", searchContactsBean.id);
+			intent.putExtra("userName", searchContactsBean.getName());
+			context.startActivity(intent);
 		});
 
-		holder.llDialTo.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				if (!TextUtils.isEmpty(searchContactsBean.phone)) {
-					CallPhoneUtil.callPhone((Activity) context, searchContactsBean.phone);
-				}else {
-					ToastUtil.showToast(context,"暂无该用户电话号码");
-				}
+		holder.llDialTo.setOnClickListener(view -> {
+			if (!TextUtils.isEmpty(searchContactsBean.phone)) {
+				CallPhoneUtil.callPhone((Activity) context, searchContactsBean.phone);
+			}else {
+				ToastUtil.showToast(context,"暂无该用户电话号码");
 			}
 		});
-		holder.iv_member_portrait.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				Intent intent = new Intent(context, UserInfoActivity.class);
-				intent.putExtra("userId", searchContactsBean.getNo());
-				intent.putExtra("userName", searchContactsBean.getName());
-				context.startActivity(intent);
-			}
+		holder.iv_member_portrait.setOnClickListener(view -> {
+			Intent intent = new Intent(context, UserInfoActivity.class);
+			intent.putExtra("userId", searchContactsBean.getNo());
+			intent.putExtra("userName", searchContactsBean.getName());
+			context.startActivity(intent);
 		});
 
-//		holder. ll_search_add_remove.setOnClickListener(new View.OnClickListener() {
-//			@Override
-//			public void onClick(View v) {
-//				if (!DataUtil.isExistContacts(searchContactsBean)) {//不在个呼通讯录中
-//					MyTerminalFactory.getSDK().getContactsManager().modifyContacts(Operation4PrivateAddressList.ADD.getCode(),searchContactsBean.id);
-//				}else {
-//					MyTerminalFactory.getSDK().getContactsManager().modifyContacts(Operation4PrivateAddressList.REMOVE.getCode(),searchContactsBean.id);
-//				}
-//			}
-//		});
 		return convertView;
 	}
 

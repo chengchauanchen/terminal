@@ -204,16 +204,6 @@ public class CoordTransformUtils {
         result.add(y);
         result.add(x);
         return result;
-        /*
-         if (Math.abs(mercatorLon) < 180 && Math.abs(mercatorLat) < 90)
-         return null;
-         if ((Math.abs(mercatorLon) > 20037508.3427892) || (Math.abs(mercatorLat) > 20037508.3427892))
-         return null;
-         Double a = mercatorLon / 6378137.0 * 57.295779513082323;
-         Double x = a - (Math.floor(((a + 180.0) / 360.0)) * 360.0);
-         Double y = (1.5707963267948966 - (2.0 * Math.atan(Math.exp((-1.0 * mercatorLat) / 6378137.0)))) * 57.295779513082323;
-         return {'lat' : y, 'lon' : x};
-         //*/
     }
 
     //BD-09 to WGS-84

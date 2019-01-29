@@ -46,12 +46,8 @@ public class ImagePreviewItemFragment extends BaseFragment{
     private FrameLayout fragment_contener;
     private Bitmap bitmap;
     private String storrPath;
-//    private ImageView iv_save_picture;
     private Handler myHandler = new Handler();
-    //    private ImageView preview_image;
-    private ViewPager mViewPager;
     private List<ImageBean> mImageList = new ArrayList<>();
-    private MyAdapter adapter;
 
 
     public static ImagePreviewItemFragment getInstance(List<ImageBean> imgs, int postion){
@@ -80,11 +76,10 @@ public class ImagePreviewItemFragment extends BaseFragment{
 
     @Override
     public void initView(){
-        mViewPager = rootView.findViewById(R.id.vp);
-//        iv_save_picture = rootView.findViewById(R.id.iv_save_picture);
+        ViewPager mViewPager = rootView.findViewById(R.id.vp);
         mImageList = getArguments().getParcelableArrayList(DATA);
         int pos = getArguments().getInt(POSITION);
-        adapter = new MyAdapter(mImageList, getActivity());
+        MyAdapter adapter = new MyAdapter(mImageList, getActivity());
         mViewPager.setAdapter(adapter);
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener(){
             @Override
@@ -93,11 +88,6 @@ public class ImagePreviewItemFragment extends BaseFragment{
 
             @Override
             public void onPageSelected(int position){
-//                if(mImageList.get(position).isReceive()){
-//                    iv_save_picture.setVisibility(View.VISIBLE);
-//                }else{
-//                    iv_save_picture.setVisibility(View.GONE);
-//                }
                 storrPath = mImageList.get(position).getPath();
             }
 
@@ -107,45 +97,26 @@ public class ImagePreviewItemFragment extends BaseFragment{
         });
         mViewPager.setCurrentItem(pos);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverSaveImgHandler);
-//        iv_save_picture.setOnClickListener(new View.OnClickListener(){
-//            @RequiresApi(api = Build.VERSION_CODES.M)
-//            @Override
-//            public void onClick(View v){
-//                int curpos = mViewPager.getCurrentItem();
-//                PhotoUtils.savePhotoTo(getActivity(), new File(mImageList.get(curpos).getPath()));
-//            }
-//        });
-        ((ChatBaseActivity) getActivity()).setBackListener(new ChatBaseActivity.OnBackListener(){
-            @Override
-            public void onBack(){
-                if(null !=fragment_contener){
-                    fragment_contener.setVisibility(View.GONE);
-                }
-                if(null != getActivity() && !isDetached()){
-                    getActivity().getSupportFragmentManager().beginTransaction().remove(ImagePreviewItemFragment.this).commit();
-                    getActivity().getSupportFragmentManager().popBackStack();
-                    ((ChatBaseActivity) getActivity()).setBackListener(null);
-                }
+        ((ChatBaseActivity) getActivity()).setBackListener(() -> {
+            if(null !=fragment_contener){
+                fragment_contener.setVisibility(View.GONE);
+            }
+            if(null != getActivity() && !isDetached()){
+                getActivity().getSupportFragmentManager().beginTransaction().remove(ImagePreviewItemFragment.this).commit();
+                getActivity().getSupportFragmentManager().popBackStack();
+                ((ChatBaseActivity) getActivity()).setBackListener(null);
             }
         });
     }
 
-    private ReceiverSaveImgHandler receiverSaveImgHandler = new ReceiverSaveImgHandler(){
-        @Override
-        public void handler(final boolean isSave, final String path){
-            myHandler.post(new Runnable(){
-                @Override
-                public void run(){
-                    if(isSave){
-                        Toast.makeText(getActivity(), "已保存到"+path+"文件夹", Toast.LENGTH_LONG).show();
+    private ReceiverSaveImgHandler receiverSaveImgHandler = (isSave, path) -> myHandler.post(() -> {
+        if(isSave){
+            Toast.makeText(getActivity(), "已保存到"+path+"文件夹", Toast.LENGTH_LONG).show();
 //                        iv_save_picture.setVisibility(View.GONE);
-                    }else{
-                        Toast.makeText(getActivity(), "保存失败", Toast.LENGTH_LONG).show();
-                    }
-                }
-            });
+        }else{
+            Toast.makeText(getActivity(), "保存失败", Toast.LENGTH_LONG).show();
         }
-    };
+    });
 
     private void desBitmap(boolean isPopBack){
         if(bitmap != null && !bitmap.isRecycled()){
@@ -237,12 +208,7 @@ public class ImagePreviewItemFragment extends BaseFragment{
                     .skipMemoryCache(true)
                     .into(view);
             container.addView(view);
-            view.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View view){
-                    desBitmap(true);
-                }
-            });
+            view.setOnClickListener(view1 -> desBitmap(true));
             return view;
         }
 

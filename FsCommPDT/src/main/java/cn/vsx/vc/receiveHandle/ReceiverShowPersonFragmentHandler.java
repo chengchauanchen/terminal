@@ -11,5 +11,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverShowPersonFragmentHandler extends ReceiveHandler {
-    public void handler(List<Member> memberList);
+    void handler(List<Member> memberList);
 }

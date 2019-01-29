@@ -233,12 +233,9 @@ public class CaptureButton extends View{
     //内圆动画
     private void startCaptureAnimation(float inside_start) {
         ValueAnimator inside_anim = ValueAnimator.ofFloat(inside_start, inside_start * 0.75f, inside_start);
-        inside_anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                button_inside_radius = (float) animation.getAnimatedValue();
-                invalidate();
-            }
+        inside_anim.addUpdateListener(animation -> {
+            button_inside_radius = (float) animation.getAnimatedValue();
+            invalidate();
         });
         inside_anim.addListener(new AnimatorListenerAdapter() {
             @Override
@@ -258,20 +255,14 @@ public class CaptureButton extends View{
         ValueAnimator outside_anim = ValueAnimator.ofFloat(outside_start, outside_end);
         ValueAnimator inside_anim = ValueAnimator.ofFloat(inside_start, inside_end);
         //外圆动画监听
-        outside_anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                button_outside_radius = (float) animation.getAnimatedValue();
-                invalidate();
-            }
+        outside_anim.addUpdateListener(animation -> {
+            button_outside_radius = (float) animation.getAnimatedValue();
+            invalidate();
         });
         //内圆动画监听
-        inside_anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                button_inside_radius = (float) animation.getAnimatedValue();
-                invalidate();
-            }
+        inside_anim.addUpdateListener(animation -> {
+            button_inside_radius = (float) animation.getAnimatedValue();
+            invalidate();
         });
         animatorSet = new AnimatorSet();
         //当动画结束后启动录像Runnable并且回调录像开始接口
@@ -386,7 +377,7 @@ public class CaptureButton extends View{
 
     //是否空闲状态
     public boolean isIdle() {
-        return state == STATE_IDLE ? true : false;
+        return state == STATE_IDLE;
     }
 
     //设置状态

@@ -57,12 +57,9 @@ public class GroupScanAddAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if (getItemViewType(position)==Constants.TYPE_FOLDER){
             FolderViewHolder holder= (FolderViewHolder) viewHolder;
             holder.tvFolder.setText(mDatas.get(position).getName());
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if (listener!=null) {
-                        listener.onItemClick(view, position, Constants.TYPE_FOLDER);
-                    }
+            holder.itemView.setOnClickListener(view -> {
+                if (listener!=null) {
+                    listener.onItemClick(view, position, Constants.TYPE_FOLDER);
                 }
             });
         }else {

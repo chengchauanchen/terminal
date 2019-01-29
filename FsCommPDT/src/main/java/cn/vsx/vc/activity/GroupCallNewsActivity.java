@@ -104,8 +104,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     LinearLayout ll_individual_call_come;
     @Bind(R.id.ll_speaker)
     LinearLayout ll_speaker;
-//    @Bind(R.id.rl_include_listview)
-//    RelativeLayout rlIncludeListview;
     @Bind(R.id.group_call_activity_help)
     ImageView group_call_activity_help;
     @Bind(R.id.tv_pre_speak)
@@ -135,7 +133,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     private boolean isCurrentGroup;
     //组Id
     public static int mGroupId;
-//    private int mGroupOnlineNumber;
 
     @SuppressWarnings("HandlerLeak")
     private Handler mHandler = new Handler() {
@@ -187,7 +184,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         super.groupCallNewsEt = groupCallNewsEt;
         super.funcation = funcation;
         super.ptt = ptt;
-//        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false,0);
         setStatusBarColor();
         allViewDefault();
         funcation.setPttOnTouchLitener(new FunctionHidePlus.PttOnTouchLitener() {
@@ -222,7 +218,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         try{
             keyMointor.setHandler(gotaKeyHandler);
         }catch (Exception e){
-
+           e.printStackTrace();
         }
     }
 
@@ -243,7 +239,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             try{
                 gotaKeyHandler = keyMointor.setHandler(new GotaKeHandler());
             }catch (Exception e){
-
+              e.printStackTrace();
             }
         }
 
@@ -310,12 +306,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         }
         super.doOtherDestroy();
     }
-
-
-//    protected void receiveIndividualCall() {
-//        super.receiveIndividualCall();
-//        funcation.hideKeyboard(true);
-//    }
 
     @Override
     public void onClick(View v) {
@@ -593,12 +583,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                         resultCode = MyTerminalFactory.getSDK().getGroupManager().changeGroup(userId);
                         if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                             //转组成功重新请求在线人数
-                            myHandler.postDelayed(new Runnable() {
-                                @Override
-                                public void run() {
-                                    MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false);
-                                }
-                            }, 500);
+                            myHandler.postDelayed(() -> MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false), 500);
                         } else {
                             ToastUtil.groupChangedFailToast(GroupCallNewsActivity.this, resultCode);
                         }
@@ -652,78 +637,42 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     /**
      * 是否禁止组呼
      */
-    private ReceiveNotifyMemberChangeHandler receiveNotifyMemberChangeHandler = new ReceiveNotifyMemberChangeHandler() {
+    private ReceiveNotifyMemberChangeHandler receiveNotifyMemberChangeHandler = memberChangeType -> {
 
-        @Override
-        public void handler(MemberChangeType memberChangeType) {
+        if (memberChangeType == MemberChangeType.MEMBER_ACTIVE_GROUP_CALL) {
+            mHandler.post(() -> change2Silence());
 
-//            setGroupNameAndSize();
-
-            if (memberChangeType == MemberChangeType.MEMBER_ACTIVE_GROUP_CALL) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        change2Silence();
-                    }
-                });
-
-            } else if (memberChangeType == MemberChangeType.MEMBER_PROHIBIT_GROUP_CALL) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        change2Forbid();
-                    }
-                });
-            }
+        } else if (memberChangeType == MemberChangeType.MEMBER_PROHIBIT_GROUP_CALL) {
+            mHandler.post(() -> change2Forbid());
         }
     };
 
     /**
      * 主动方请求组呼的消息
      */
-    private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
-
-        @Override
-        public void handler(int methodResult, String resultDesc) {
-            logger.info("PTTViewPager触发了请求组呼的响应methodResult:" + methodResult);
-            if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
-                logger.error("isPttPress值为" + MyApplication.instance.isPttPress);
-                if (MyApplication.instance.isPttPress) {
-                    if (methodResult == 0) {//请求成功，开始组呼
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                change2Speaking();
-                                MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
-                                setViewEnable(false);
-                            }
-                        });
-                    } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                ToastUtil.showToast(GroupCallNewsActivity.this, "当前组是只听组，不能发起组呼");
-                            }
-                        });
-                    } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                change2Waiting();
-                            }
-                        });
-                    } else {//请求失败
-                        mHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (MyApplication.instance.getGroupListenenState() != GroupCallListenState.LISTENING) {
-                                    change2Silence();
-                                } else {
-                                    change2Listening();
-                                }
-                            }
-                        });
-                    }
+    private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = (methodResult, resultDesc) -> {
+        logger.info("PTTViewPager触发了请求组呼的响应methodResult:" + methodResult);
+        if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
+            logger.error("isPttPress值为" + MyApplication.instance.isPttPress);
+            if (MyApplication.instance.isPttPress) {
+                if (methodResult == 0) {//请求成功，开始组呼
+                    mHandler.post(() -> {
+                        change2Speaking();
+                        MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
+                        setViewEnable(false);
+                    });
+                } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
+                    mHandler.post(() -> ToastUtil.showToast(GroupCallNewsActivity.this, "当前组是只听组，不能发起组呼"));
+                } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
+                    mHandler.post(() -> change2Waiting());
+                } else {//请求失败
+                    mHandler.post(() -> {
+                        if (MyApplication.instance.getGroupListenenState() != GroupCallListenState.LISTENING) {
+                            change2Silence();
+                        } else {
+                            change2Listening();
+                        }
+                    });
                 }
             }
         }
@@ -737,14 +686,11 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         @Override
         public void handler(final boolean connected) {
             logger.info("组会话页面收到服务是否连接的通知" + connected);
-            GroupCallNewsActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!connected) {
-                        noNetWork.setVisibility(View.VISIBLE);
-                    } else {
-                        noNetWork.setVisibility(View.GONE);
-                    }
+            GroupCallNewsActivity.this.runOnUiThread(() -> {
+                if (!connected) {
+                    noNetWork.setVisibility(View.VISIBLE);
+                } else {
+                    noNetWork.setVisibility(View.GONE);
                 }
             });
         }
@@ -753,101 +699,72 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     /**
      * 被动方组呼来了
      */
-    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
+    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, version, currentCallMode) -> {
+        logger.info("触发了被动方组呼来了receiveGroupCallIncommingHandler:" + currentCallMode);
+        speakingId = groupId;
+        speakingName = memberName;
+        if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
+            ToastUtil.showToast(GroupCallNewsActivity.this, "没有组呼听的功能权限");
+        }
 
-        @Override
-        public void handler(int memberId, final String memberName, int groupId,
-                            String version, CallMode currentCallMode) {
-            logger.info("触发了被动方组呼来了receiveGroupCallIncommingHandler:" + currentCallMode);
-            speakingId = groupId;
-            speakingName = memberName;
-            if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
-                ToastUtil.showToast(GroupCallNewsActivity.this, "没有组呼听的功能权限");
-            }
-
-            if (currentCallMode == CallMode.GENERAL_CALL_MODE) {
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTING
-                                || MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING) {
-                            change2Waiting();
-                        } else if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
-                            //什么都不用做
-                        } else {
-                            change2Listening();
-                        }
-                    }
-                });
-            }
+        if (currentCallMode == CallMode.GENERAL_CALL_MODE) {
+            mHandler.post(() -> {
+                if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTING
+                        || MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING) {
+                    change2Waiting();
+                } else if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
+                    //什么都不用做
+                } else {
+                    change2Listening();
+                }
+            });
         }
     };
 
     /**
      * 被动方组呼停止
      */
-    private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler() {
-
-        @Override
-        public void handler(int reasonCode) {
-            logger.info("触发了被动方组呼停止receiveGroupCallCeasedIndicationHandler");
+    private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = reasonCode -> {
+        logger.info("触发了被动方组呼停止receiveGroupCallCeasedIndicationHandler");
 //            groupScanId = 0;
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
-                        if (MyApplication.instance.isPttPress && MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE) {
-                            change2Speaking();
-                        }
-                        if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.WAITING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTED) {
-                            change2Silence();
-                        }
-                    }
+        mHandler.post(() -> {
+            if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
+                if (MyApplication.instance.isPttPress && MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE) {
+                    change2Speaking();
                 }
-            });
-        }
+                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.WAITING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTED) {
+                    change2Silence();
+                }
+            }
+        });
     };
 
     /**
      * 主动方停止组呼的消息
      */
-    private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = new ReceiveCeaseGroupCallConformationHander() {
-        @Override
-        public void handler(final int resultCode, String resultDesc) {
-            logger.info("主动方停止组呼的消息ReceiveCeaseGroupCallConformationHander");
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
-                        if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
-                            change2Listening();
-                        } else {
-                            change2Silence();
-                        }
-                    }
-                    setViewEnable(true);
+    private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = (resultCode, resultDesc) -> {
+        logger.info("主动方停止组呼的消息ReceiveCeaseGroupCallConformationHander");
+        mHandler.post(() -> {
+            if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
+                if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
+                    change2Listening();
+                } else {
+                    change2Silence();
                 }
-            });
-        }
+            }
+            setViewEnable(true);
+        });
     };
 
-    private ReceivePTTUpHandler receivePTTUpHandler = new ReceivePTTUpHandler() {
-        @Override
-        public void handler() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    MyApplication.instance.isClickVolumeToCall = false;
-                    if (MyApplication.instance.getGroupListenenState() == LISTENING) {
-                        change2Listening();
-                    } else {
-                        change2Silence();
-                    }
-
-                }
-            });
+    private ReceivePTTUpHandler receivePTTUpHandler = () -> mHandler.post(() -> {
+        MyApplication.instance.isClickVolumeToCall = false;
+        if (MyApplication.instance.getGroupListenenState() == LISTENING) {
+            change2Listening();
+        } else {
+            change2Silence();
         }
-    };
+
+    });
 
     private int mposition = -1;
     private int lastPosition = -1;
@@ -862,55 +779,47 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         public void handler(int postion) {
             mposition = postion;
 
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (MyApplication.instance.getIndividualState() == IndividualCallState.IDLE &&
-                            MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE &&
-                            MyApplication.instance.getGroupListenenState() == GroupCallListenState.IDLE) {//不是在组呼也不是在个呼中，可以播放录音
+            myHandler.post(() -> {
+                if (MyApplication.instance.getIndividualState() == IndividualCallState.IDLE &&
+                        MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE &&
+                        MyApplication.instance.getGroupListenenState() == GroupCallListenState.IDLE) {//不是在组呼也不是在个呼中，可以播放录音
 
-                        if (lastPosition == mposition) {//点击同一个条目
-                            if (MyApplication.instance.isPlayVoice) {
-                                MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
-                            } else {
-                                executorService.execute(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (mposition < chatMessageList.size() && mposition >= 0) {
-                                            try {
-                                                MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
-                                            } catch (IndexOutOfBoundsException e) {
-                                                logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
-                                            }
-                                        }
-                                    }
-                                });
-                            }
-                        } else {//点击不同条目
-
-                            if (MyApplication.instance.isPlayVoice) {
-                                MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
-
-                            }
-
-                            //播放当前的
-                            executorService.execute(new Runnable() {
-                                public void run() {
-                                    if (mposition < chatMessageList.size() && mposition >= 0) {
-                                        try {
-//                                            logger.error("当前播放的条目是：" + mposition);
-                                            MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
-                                        } catch (IndexOutOfBoundsException e) {
-                                            logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
-                                        }
+                    if (lastPosition == mposition) {//点击同一个条目
+                        if (MyApplication.instance.isPlayVoice) {
+                            MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
+                        } else {
+                            executorService.execute(() -> {
+                                if (mposition < chatMessageList.size() && mposition >= 0) {
+                                    try {
+                                        MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
+                                    } catch (IndexOutOfBoundsException e) {
+                                        logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
                                     }
                                 }
                             });
                         }
+                    } else {//点击不同条目
 
-                    } else {
-                        ToastUtil.showToast(GroupCallNewsActivity.this, "当前不可播放录音");
+                        if (MyApplication.instance.isPlayVoice) {
+                            MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
+
+                        }
+
+                        //播放当前的
+                        executorService.execute(() -> {
+                            if (mposition < chatMessageList.size() && mposition >= 0) {
+                                try {
+//                                            logger.error("当前播放的条目是：" + mposition);
+                                    MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
+                                } catch (IndexOutOfBoundsException e) {
+                                    logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
+                                }
+                            }
+                        });
                     }
+
+                } else {
+                    ToastUtil.showToast(GroupCallNewsActivity.this, "当前不可播放录音");
                 }
             });
         }
@@ -919,27 +828,17 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     /**
      * 录音播放完成的消息
      */
-    private IAudioPlayComplateHandler audioPlayComplateHandler = new IAudioPlayComplateHandler() {
-        @Override
-        public void handle() {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    MyApplication.instance.isPlayVoice = false;
-                    isSameItem = true;
+    private IAudioPlayComplateHandler audioPlayComplateHandler = () -> myHandler.post(() -> {
+        MyApplication.instance.isPlayVoice = false;
+        isSameItem = true;
 //                    logger.error("录音播放完成的消息：" + chatMessageList.get(mposition).toString());
-                    temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-                    setSmoothScrollToPosition(mposition);
-                    temporaryAdapter.notifyDataSetChanged();
+        temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+        setSmoothScrollToPosition(mposition);
+        temporaryAdapter.notifyDataSetChanged();
 
-                    autoPlay(mposition + 1);
+        autoPlay(mposition + 1);
 
-                }
-
-            });
-
-        }
-    };
+    });
 
     //自动播放下一条语音
     private void autoPlay(int index) {
@@ -967,52 +866,43 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     /**
      * 音频播放失败
      **/
-    private ReceiveHistoryMultimediaFailHandler receiveHistoryMultimediaFailHandler = new ReceiveHistoryMultimediaFailHandler() {
-        @Override
-        public void handler(int resultCode) {
-            if (resultCode == TerminalErrorCode.STOP_PLAY_RECORD.getErrorCode()) {
-                MyApplication.instance.isPlayVoice = false;
-                isSameItem = true;
-                temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, false, true);
-                temporaryAdapter.notifyDataSetChanged();
-            } else {
-                logger.info("音频播放失败了！！errorCode=" + resultCode);
-                ToastUtil.showToast(GroupCallNewsActivity.this, "播放失败，未获取到音频数据！请稍后再试");
-            }
+    private ReceiveHistoryMultimediaFailHandler receiveHistoryMultimediaFailHandler = resultCode -> {
+        if (resultCode == TerminalErrorCode.STOP_PLAY_RECORD.getErrorCode()) {
+            MyApplication.instance.isPlayVoice = false;
+            isSameItem = true;
+            temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, false, true);
+            temporaryAdapter.notifyDataSetChanged();
+        } else {
+            logger.info("音频播放失败了！！errorCode=" + resultCode);
+            ToastUtil.showToast(GroupCallNewsActivity.this, "播放失败，未获取到音频数据！请稍后再试");
         }
     };
 
     /**
      * 开始播放或停止播放的回调
      */
-    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = new ReceiveMultimediaMessageCompleteHandler() {
-        @Override
-        public void handler(final int resultCode, final String resultDes) {
-            logger.error("开始播放或者停止播放的回调");
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                        if (lastPosition == mposition) {//点击同一个条目
-                            isSameItem = true;
-                            MyApplication.instance.isPlayVoice = !MyApplication.instance.isPlayVoice;
-                        } else {//点击不同条目
-                            isSameItem = false;
-                            MyApplication.instance.isPlayVoice = true;
-                        }
-                        Collections.sort(chatMessageList);
-                        if (temporaryAdapter != null) {
-                            temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-                            temporaryAdapter.notifyDataSetChanged();
-                        }
-                        lastPosition = mposition;
-                    } else {
-                        logger.info("开始播放或停止播放的回调" + resultDes);
-                        ToastUtil.showToast(GroupCallNewsActivity.this, resultDes);
-                    }
+    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = (resultCode, resultDes) -> {
+        logger.error("开始播放或者停止播放的回调");
+        myHandler.post(() -> {
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                if (lastPosition == mposition) {//点击同一个条目
+                    isSameItem = true;
+                    MyApplication.instance.isPlayVoice = !MyApplication.instance.isPlayVoice;
+                } else {//点击不同条目
+                    isSameItem = false;
+                    MyApplication.instance.isPlayVoice = true;
                 }
-            });
-        }
+                Collections.sort(chatMessageList);
+                if (temporaryAdapter != null) {
+                    temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+                    temporaryAdapter.notifyDataSetChanged();
+                }
+                lastPosition = mposition;
+            } else {
+                logger.info("开始播放或停止播放的回调" + resultDes);
+                ToastUtil.showToast(GroupCallNewsActivity.this, resultDes);
+            }
+        });
     };
 
 
@@ -1023,19 +913,16 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         @Override
         public void handler(final List<Member> memberList, final boolean isAllMember,int groupId) {
             Log.e("GroupCallNewsActivity", "memberList:" + memberList);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (isFinishing() ||isAllMember) {
-                        return;
-                    }
-                    String name = idNameMap.get(userId);
-                    name = name == null ? userName : name;
-                    if (DataUtil.isExistGroup(userId)) {
-                        newsBarGroupName.setText(name + "(" + memberList.size() + ")");
-                    } else {
-                        newsBarGroupName.setText(name);
-                    }
+            mHandler.post(() -> {
+                if (isFinishing() ||isAllMember) {
+                    return;
+                }
+                String name = idNameMap.get(userId);
+                name = name == null ? userName : name;
+                if (DataUtil.isExistGroup(userId)) {
+                    newsBarGroupName.setText(name + "(" + memberList.size() + ")");
+                } else {
+                    newsBarGroupName.setText(name);
                 }
             });
 
@@ -1044,14 +931,11 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     /**
      * 更新文件夹和组列表数据
      */
-    private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = new ReceiveUpdateFoldersAndGroupsHandler() {
-        @Override
-        public void handler() {
-            if (MyTerminalFactory.getSDK().getGroupManager().getErrorCode() == -1) {
-                finish();
-            }
-            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false);
+    private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = () -> {
+        if (MyTerminalFactory.getSDK().getGroupManager().getErrorCode() == -1) {
+            finish();
         }
+        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false);
     };
 
     /***  主动切组成功 ***/
@@ -1059,23 +943,20 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         @Override
         public void handler(final int errorCode, final String errorDesc) {
             logger.info("转组成功回调消息");
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
-                        if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
-                            ptt.setBackgroundResource(R.drawable.shape_news_ptt_listen);
-                            ptt.setText("PTT");
-                        } else {
-                            ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-                            ptt.setText("禁止组呼");
-                        }
-
-                        TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
-                        isCurrentGroup = !isCurrentGroup;
+            handler.post(() -> {
+                if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
+                    if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
+                        ptt.setBackgroundResource(R.drawable.shape_news_ptt_listen);
+                        ptt.setText("PTT");
                     } else {
-                        ToastUtil.showToast(GroupCallNewsActivity.this, errorDesc);
+                        ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
+                        ptt.setText("禁止组呼");
                     }
+
+                    TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
+                    isCurrentGroup = !isCurrentGroup;
+                } else {
+                    ToastUtil.showToast(GroupCallNewsActivity.this, errorDesc);
                 }
             });
         }
@@ -1091,28 +972,22 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             }
             if (memberId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
                 if (toGroupId == userId) {//强制切组是当前会话组
-                    myHandler.post(new Runnable(){
-                        @Override
-                        public void run(){
-                            ptt.setBackgroundResource(R.drawable.shape_news_ptt_listen);
-                            ptt.setText("PTT");
-                            TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
-                            isCurrentGroup = true;
-                        }
+                    myHandler.post(() -> {
+                        ptt.setBackgroundResource(R.drawable.shape_news_ptt_listen);
+                        ptt.setText("PTT");
+                        TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
+                        isCurrentGroup = true;
                     });
 
                 } else {//强制切组不是是当前会话组
-                    myHandler.postDelayed(new Runnable(){
-                        @Override
-                        public void run(){
-                            if(!DataUtil.isExistGroup(userId)){
-                                finish();
-                            }else {
-                                ptt.setText("切到此组 说话");
-                                ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-                                TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
-                                isCurrentGroup = false;
-                            }
+                    myHandler.postDelayed(() -> {
+                        if(!DataUtil.isExistGroup(userId)){
+                            finish();
+                        }else {
+                            ptt.setText("切到此组 说话");
+                            ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
+                            TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
+                            isCurrentGroup = false;
                         }
                     },1000);
                 }
@@ -1122,12 +997,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
         @Override
         public void handler() {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    funcation.setFunction(true, userId);
-                }
-            });
+            myHandler.post(() -> funcation.setFunction(true, userId));
         }
     };
     private ReceiverCloseKeyBoardHandler receiverCloseKeyBoardHandler = new ReceiverCloseKeyBoardHandler() {
@@ -1138,12 +1008,9 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         }
     };
 
-    private ReceiveResponseGroupActiveHandler receiveResponseGroupActiveHandler = new ReceiveResponseGroupActiveHandler(){
-        @Override
-        public void handler(boolean isActive, int responseGroupId){
-            if(userId == responseGroupId && !isActive){
-                finish();
-            }
+    private ReceiveResponseGroupActiveHandler receiveResponseGroupActiveHandler = (isActive, responseGroupId) -> {
+        if(userId == responseGroupId && !isActive){
+            finish();
         }
     };
 
@@ -1152,14 +1019,11 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
         @Override
         public void onPTTKeyDown() throws RemoteException {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        pttDownDoThing();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            myHandler.post(() -> {
+                try {
+                    pttDownDoThing();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
 
@@ -1167,14 +1031,11 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
         @Override
         public void onPTTKeyUp() throws RemoteException {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        pttUpDoThing();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+            myHandler.post(() -> {
+                try {
+                    pttUpDoThing();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             });
         }

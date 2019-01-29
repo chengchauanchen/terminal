@@ -86,7 +86,7 @@
                     android:inputType="date"
                     android:maxLines="1"
                     android:paddingLeft="10dp"
-                    android:paddingRight="10dp"></EditText>
+                    android:paddingRight="10dp"/>
 
                 <View
                     android:layout_width="match_parent"

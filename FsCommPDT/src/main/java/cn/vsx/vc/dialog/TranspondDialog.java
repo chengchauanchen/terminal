@@ -27,24 +27,18 @@ public class TranspondDialog  extends Dialog {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.dialog_transpond, null);
-        LinearLayout tv_linkman_delete = (LinearLayout) view.findViewById(R.id.tv_linkman_delete);
-        LinearLayout tv_copy = (LinearLayout) view.findViewById(R.id.tv_copy);
+        LinearLayout tv_linkman_delete =  view.findViewById(R.id.tv_linkman_delete);
+        LinearLayout tv_copy =  view.findViewById(R.id.tv_copy);
         if(terminalMessage.messageType != MessageType.SHORT_TEXT.getCode() &&terminalMessage.messageType != MessageType.LONG_TEXT.getCode()){
             tv_copy.setVisibility(View.GONE);
         }
-        tv_linkman_delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowTransponPopupHandler.class);
-                dismiss();
-            }
+        tv_linkman_delete.setOnClickListener(view1 -> {
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowTransponPopupHandler.class);
+            dismiss();
         });
-        tv_copy.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowCopyPopupHandler.class,terminalMessage);
-                dismiss();
-            }
+        tv_copy.setOnClickListener(v -> {
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowCopyPopupHandler.class,terminalMessage);
+            dismiss();
         });
         setContentView(view);
     }

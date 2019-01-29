@@ -13,12 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListAdapter;
-import android.widget.ListView;
 import android.widget.ProgressBar;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONArray;
@@ -36,7 +32,6 @@ import com.zectec.imageandfileselector.utils.FileUtil;
 import com.zectec.imageandfileselector.utils.OpenFileUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import com.zectec.imageandfileselector.utils.PhotoUtils;
-import com.zectec.imageandfileselector.view.BubbleImageView;
 
 import org.apache.log4j.Logger;
 
@@ -187,16 +182,6 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private void setProgress(ProgressBar progressBar, int progress) {
         progressBar.setProgress(progress);
     }
-
-//    @Override
-//    public void notifyDataSetChanged() {
-//        handler.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                TemporaryAdapter.super.notifyDataSetChanged();
-//            }
-//        });
-//    }
 
 
     @Override
@@ -451,18 +436,15 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
     public void uploadFileDelay() {
 //        new Thread().start();
-        MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(50L);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                int count = uploadMessages.size();
-                for (int i = 0; i < count; i++) {
-                    uploadNextFile();
-                }
+        MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+            try {
+                Thread.sleep(50L);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            int count = uploadMessages.size();
+            for (int i = 0; i < count; i++) {
+                uploadNextFile();
             }
         });
     }
@@ -529,79 +511,69 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     private void setListener(final int viewType, final ChatViewHolder holder, final TerminalMessage terminalMessage, final int position) {
-        holder.reBubble.setOnLongClickListener(new View.OnLongClickListener() {//长按消息条目
-            @Override
-            public boolean onLongClick(View v) {
-                if (!isEnable)
-                    return false;
-                if(upload){
-                    ToastUtil.showToast(activity,"正在上传中不能转发");
-                    return false;
-                }
-                if (terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
-                        terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
-                        terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
-                        terminalMessage.messageType == MessageType.GROUP_CALL.getCode() ||
-                        terminalMessage.messageType == MessageType.AUDIO.getCode()||
-                        MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                    return false;
-                new TranspondDialog(activity, terminalMessage).show();
-                if (!terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID))
-                    terminalMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
-                transponMessage = (TerminalMessage) terminalMessage.clone();
+        //长按消息条目
+        holder.reBubble.setOnLongClickListener(v -> {
+            if (!isEnable)
+                return false;
+            if(upload){
+                ToastUtil.showToast(activity,"正在上传中不能转发");
                 return false;
             }
+            if (terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
+                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
+                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
+                    terminalMessage.messageType == MessageType.GROUP_CALL.getCode() ||
+                    terminalMessage.messageType == MessageType.AUDIO.getCode()||
+                    MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
+                return false;
+            new TranspondDialog(activity, terminalMessage).show();
+            if (!terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID))
+                terminalMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
+            transponMessage = (TerminalMessage) terminalMessage.clone();
+            return false;
         });
-        holder.reBubble.setOnClickListener(new View.OnClickListener() {//点击消息条目
-            @Override
-            public void onClick(View v) {
-                if (!isEnable)
-                    return;
-                long currentTime = Calendar.getInstance().getTimeInMillis();
+        //点击消息条目
+        holder.reBubble.setOnClickListener(v -> {
+            if (!isEnable)
+                return;
+            long currentTime = Calendar.getInstance().getTimeInMillis();
 
-                if (currentTime - lastClickTime > MIN_CLICK_DELAY_TIME) {//防止频繁点击操作<1秒
-                    lastClickTime = currentTime;
-                    fileItemClick(holder, terminalMessage, viewType);
-                    photoItemClick(holder, terminalMessage, viewType);
-                    videoItemClick(holder, terminalMessage, viewType);
-                    privateCallClick(terminalMessage);
-                    locationItemClick(terminalMessage);
-                    liveItemClick(terminalMessage, viewType);
-                    individualNewsRecordItemClick(terminalMessage, position);
-                    groupCallItemClick(terminalMessage, position);
-                    gb28181ItemClick(terminalMessage, viewType);
-                }
-                InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(holder.reBubble.getWindowToken(), 0);
+            if (currentTime - lastClickTime > MIN_CLICK_DELAY_TIME) {//防止频繁点击操作<1秒
+                lastClickTime = currentTime;
+                fileItemClick(holder, terminalMessage, viewType);
+                photoItemClick(holder, terminalMessage, viewType);
+                videoItemClick(holder, terminalMessage, viewType);
+                privateCallClick(terminalMessage);
+                locationItemClick(terminalMessage);
+                liveItemClick(terminalMessage, viewType);
+                individualNewsRecordItemClick(terminalMessage, position);
+                groupCallItemClick(terminalMessage, position);
+                gb28181ItemClick(terminalMessage, viewType);
             }
+            InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(holder.reBubble.getWindowToken(), 0);
         });
         if (holder.live_bubble != null) {
-            holder.live_bubble.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_REFUSE.getErrorCode() || terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.STOP_ASK_VIDEO_LIVE || terminalMessage.resultCode == SignalServerErrorCode.VIDEO_LIVE_WAITE_TIMEOUT.getErrorCode()) {
-                        if (terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
-                            return;
-                        } else {
-                            IndividualNewsActivity activity = ActivityCollector.getActivity(IndividualNewsActivity.class);
-                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO, true, activity.getChatTargetId());
-                        }
+            holder.live_bubble.setOnClickListener(v -> {
+                if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_REFUSE.getErrorCode() || terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.STOP_ASK_VIDEO_LIVE || terminalMessage.resultCode == SignalServerErrorCode.VIDEO_LIVE_WAITE_TIMEOUT.getErrorCode()) {
+                    if (terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
+                        return;
+                    } else {
+                        IndividualNewsActivity activity = ActivityCollector.getActivity(IndividualNewsActivity.class);
+                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO, true, activity.getChatTargetId());
                     }
                 }
             });
         }
         if (holder.ivAvatar != null) {
-            holder.ivAvatar.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE) {
-                        return;
-                    } else {
-                        Intent intent = new Intent(activity, UserInfoActivity.class);
-                        intent.putExtra("userId", terminalMessage.messageFromId);
-                        intent.putExtra("userName", terminalMessage.messageFromName);
-                        activity.startActivity(intent);
-                    }
+            holder.ivAvatar.setOnClickListener(v -> {
+                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE) {
+                    return;
+                } else {
+                    Intent intent = new Intent(activity, UserInfoActivity.class);
+                    intent.putExtra("userId", terminalMessage.messageFromId);
+                    intent.putExtra("userName", terminalMessage.messageFromName);
+                    activity.startActivity(intent);
                 }
             });
 
@@ -609,65 +581,56 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
         /**  点击失败按钮重新发送  **/
         if (!isReceiver(terminalMessage) && holder.ivMsgStatus != null) {
-            holder.ivMsgStatus.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (!isEnable)
-                        return;
-                    int messageType = terminalMessage.messageType;
-                    terminalMessage.resultCode = -1;
-                    setViewVisibility(holder.ivMsgStatus, View.GONE);
-                    if (messageType == MessageType.SHORT_TEXT.getCode()) {//短文本
-                        sendShortTextMessage(terminalMessage);
-                    } else if (messageType == MessageType.LONG_TEXT.getCode()) {//长文本
-                        uploadLongText(holder, terminalMessage);
-                    } else if (messageType == MessageType.POSITION.getCode()) {//定位
+            holder.ivMsgStatus.setOnClickListener(v -> {
+                if (!isEnable)
+                    return;
+                int messageType = terminalMessage.messageType;
+                terminalMessage.resultCode = -1;
+                setViewVisibility(holder.ivMsgStatus, View.GONE);
+                if (messageType == MessageType.SHORT_TEXT.getCode()) {//短文本
+                    sendShortTextMessage(terminalMessage);
+                } else if (messageType == MessageType.LONG_TEXT.getCode()) {//长文本
+                    uploadLongText(holder, terminalMessage);
+                } else if (messageType == MessageType.POSITION.getCode()) {//定位
 //                        sendLocationMessage(terminalMessage);
-                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.LOCATION);
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.LOCATION);
 
-                    } else if (messageType == MessageType.PICTURE.getCode()
-                            || messageType == MessageType.FILE.getCode()
-                            ||messageType == MessageType.VIDEO_CLIPS.getCode()
-                            ||messageType == MessageType.AUDIO.getCode()) {//图片、文件
-                        terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
-                        progressPercentMap.put(terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID), 0);
-                        setProgress(holder.progressBar, 0);
-                        setText(holder.tv_progress, "0%");
-                        setViewVisibility(holder.progressBar, View.VISIBLE);
-                        setViewVisibility(holder.tv_progress, View.VISIBLE);
-                        uploadMessages.add(terminalMessage);
+                } else if (messageType == MessageType.PICTURE.getCode()
+                        || messageType == MessageType.FILE.getCode()
+                        ||messageType == MessageType.VIDEO_CLIPS.getCode()
+                        ||messageType == MessageType.AUDIO.getCode()) {//图片、文件
+                    terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
+                    progressPercentMap.put(terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID), 0);
+                    setProgress(holder.progressBar, 0);
+                    setText(holder.tv_progress, "0%");
+                    setViewVisibility(holder.progressBar, View.VISIBLE);
+                    setViewVisibility(holder.tv_progress, View.VISIBLE);
+                    uploadMessages.add(terminalMessage);
 
-                        uploadFileDelay();
-                    }
+                    uploadFileDelay();
                 }
             });
         }
         if (viewType == MESSAGE_SHORT_TEXT_RECEIVED || viewType == MESSAGE_SHORT_TEXT_SEND) {
-            holder.tvContent.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
-                        return mIsLongClick;
-                    } else if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
-                        mIsLongClick = false;
-                        return false;
-                    }
+            holder.tvContent.setOnTouchListener((view, motionEvent) -> {
+                if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
+                    return mIsLongClick;
+                } else if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    mIsLongClick = false;
                     return false;
                 }
+                return false;
             });
-            holder.tvContent.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View view) {
-                    if(upload){
-                        ToastUtil.showToast(activity,"正在上传中不能转发");
-                        return false;
-                    }
-                    mIsLongClick = true;
-                    //处理长按事件
-                    transponMessage = (TerminalMessage) terminalMessage.clone();
-                    new TranspondDialog(activity, terminalMessage).show();
-                    return true;
+            holder.tvContent.setOnLongClickListener(view -> {
+                if(upload){
+                    ToastUtil.showToast(activity,"正在上传中不能转发");
+                    return false;
                 }
+                mIsLongClick = true;
+                //处理长按事件
+                transponMessage = (TerminalMessage) terminalMessage.clone();
+                new TranspondDialog(activity, terminalMessage).show();
+                return true;
             });
         }
     }
@@ -684,99 +647,99 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
      * 根据消息类型初始化View
      */
     private void handleViewAndHolder(final int viewType, final View convertView, final ChatViewHolder holder, final TerminalMessage terminalMessage, final int position) {
-        holder.reBubble = (RelativeLayout) convertView.findViewById(R.id.bubble);
-        holder.ivAvatar = (ImageView) convertView.findViewById(R.id.iv_userhead);
-        holder.timeStamp = (TextView) convertView.findViewById(R.id.timestamp);
+        holder.reBubble =  convertView.findViewById(R.id.bubble);
+        holder.ivAvatar =  convertView.findViewById(R.id.iv_userhead);
+        holder.timeStamp =  convertView.findViewById(R.id.timestamp);
         holder.placeHolder = convertView.findViewById(R.id.placeholder);
         if (isReceiver(terminalMessage)) {
-            holder.tvNick = (TextView) convertView.findViewById(R.id.tv_userid);
-            holder.progressBar = (ProgressBar) convertView.findViewById(R.id.progress_bar);
+            holder.tvNick =  convertView.findViewById(R.id.tv_userid);
+            holder.progressBar =  convertView.findViewById(R.id.progress_bar);
         } else {
-            holder.tv_ack_msg = (TextView) convertView.findViewById(R.id.tv_ack_msg);
-            holder.tv_delivered = (TextView) convertView.findViewById(R.id.tv_delivered);
+            holder.tv_ack_msg =  convertView.findViewById(R.id.tv_ack_msg);
+            holder.tv_delivered =  convertView.findViewById(R.id.tv_delivered);
 
-            holder.ivMsgStatus = (ImageView) convertView.findViewById(R.id.msg_status);
-            holder.progressBar = (ProgressBar) convertView.findViewById(R.id.progress_bar);
-            holder.tv_error_delete = (TextView) convertView.findViewById(R.id.tv_error);
+            holder.ivMsgStatus =  convertView.findViewById(R.id.msg_status);
+            holder.progressBar = convertView.findViewById(R.id.progress_bar);
+            holder.tv_error_delete =  convertView.findViewById(R.id.tv_error);
         }
         //文本
         if ((viewType == MESSAGE_SHORT_TEXT_RECEIVED || viewType == MESSAGE_SHORT_TEXT_SEND) ||
                 (viewType == MESSAGE_LONG_TEXT_RECEIVED || viewType == MESSAGE_LONG_TEXT_SEND)) {
-            holder.tvContent = (TextView) convertView.findViewById(R.id.tv_chatcontent);
-            holder.reMain = (RelativeLayout) convertView.findViewById(R.id.re_main);
+            holder.tvContent =  convertView.findViewById(R.id.tv_chatcontent);
+            holder.reMain =  convertView.findViewById(R.id.re_main);
         }
         //图片
         if (viewType == MESSAGE_IMAGE_RECEIVED || viewType == MESSAGE_IMAGE_SEND) {
-            holder.ivContent = (BubbleImageView) convertView.findViewById(R.id.bubbleImage);
-            holder.progressBar = (ProgressBar) convertView.findViewById(R.id.progress_bar);
-            holder.tv_progress = (TextView) convertView.findViewById(R.id.tv_progress);
+            holder.ivContent =  convertView.findViewById(R.id.bubbleImage);
+            holder.progressBar =  convertView.findViewById(R.id.progress_bar);
+            holder.tv_progress =  convertView.findViewById(R.id.tv_progress);
             if (!isReceiver(terminalMessage)) {
-                holder.progress_bar_uploading = (ProgressBar) convertView.findViewById(R.id.progress_bar_uploading);
-                holder.tv_progress_uploading = (TextView) convertView.findViewById(R.id.tv_progress_uploading);
+                holder.progress_bar_uploading =  convertView.findViewById(R.id.progress_bar_uploading);
+                holder.tv_progress_uploading =  convertView.findViewById(R.id.tv_progress_uploading);
             }
         }
         //小视频
         if (viewType == MESSAGE_VEDIO_RECEIVED || viewType == MESSAGE_VEDIO_SEND) {
-            holder.ivContent = (BubbleImageView) convertView.findViewById(R.id.iv_content);
-            holder.progressBar = (ProgressBar) convertView.findViewById(R.id.progress_bar);
-            holder.tv_progress = (TextView) convertView.findViewById(R.id.tv_progress);
-            holder.tvDuration = (TextView) convertView.findViewById(R.id.tv_voice_length);
+            holder.ivContent =  convertView.findViewById(R.id.iv_content);
+            holder.progressBar =  convertView.findViewById(R.id.progress_bar);
+            holder.tv_progress =  convertView.findViewById(R.id.tv_progress);
+            holder.tvDuration =  convertView.findViewById(R.id.tv_voice_length);
         }
         //个呼
         if (viewType == MESSAGE_PRIVATE_CALL_RECEIVED || viewType == MESSAGE_PRIVATE_CALL_SEND) {
-            holder.tvContent = (TextView) convertView.findViewById(R.id.tv_chatcontent);
+            holder.tvContent =  convertView.findViewById(R.id.tv_chatcontent);
         }
         //组呼---录音
         if ((viewType == MESSAGE_GROUP_CALL_RECEIVED || viewType == MESSAGE_GROUP_CALL_SEND) ||
                 (viewType == MESSAGE_VOICE_RECEIVED || viewType == MESSAGE_VOICE_SEND)) {
-            holder.tvDuration = (TextView) convertView.findViewById(R.id.tv_voice_length);
-            holder.ivVoice = (ImageView) convertView.findViewById(R.id.iv_voice);
-            holder.iv_voice_image_anim = (ImageView) convertView.findViewById(R.id.iv_voice_image_anim);
+            holder.tvDuration =  convertView.findViewById(R.id.tv_voice_length);
+            holder.ivVoice =  convertView.findViewById(R.id.iv_voice);
+            holder.iv_voice_image_anim =  convertView.findViewById(R.id.iv_voice_image_anim);
             if (viewType == MESSAGE_GROUP_CALL_RECEIVED || viewType == MESSAGE_VOICE_RECEIVED) {
-                holder.ivUnread = (ImageView) convertView.findViewById(R.id.iv_unread_voice);
+                holder.ivUnread =  convertView.findViewById(R.id.iv_unread_voice);
             }
         }
         //定位
         if (viewType == MESSAGE_LOCATION_RECEIVED || viewType == MESSAGE_LOCATION_SEND) {
-            holder.tvContent = (TextView) convertView.findViewById(R.id.tv_chatcontent);
+            holder.tvContent =  convertView.findViewById(R.id.tv_chatcontent);
         }
         //文件
         if (viewType == MESSAGE_FILE_RECEIVED || viewType == MESSAGE_FILE_SEND) {
-            holder.iv_temp = (ImageView) convertView.findViewById(R.id.iv_temp);
-            holder.progressBar = (ProgressBar) convertView.findViewById(R.id.progress_bar);
-            holder.tvFileSize = (TextView) convertView.findViewById(R.id.tv_file_size);
-            holder.tvContent = (TextView) convertView.findViewById(R.id.tv_chatcontent);
-            holder.tv_progress = (TextView) convertView.findViewById(R.id.tv_progress);
+            holder.iv_temp =  convertView.findViewById(R.id.iv_temp);
+            holder.progressBar =  convertView.findViewById(R.id.progress_bar);
+            holder.tvFileSize =  convertView.findViewById(R.id.tv_file_size);
+            holder.tvContent =  convertView.findViewById(R.id.tv_chatcontent);
+            holder.tv_progress =  convertView.findViewById(R.id.tv_progress);
 
             if (viewType == MESSAGE_FILE_SEND) {
-                holder.progress_bar_uploading = (ProgressBar) convertView.findViewById(R.id.progress_bar_uploading);
-                holder.tv_progress_uploading = (TextView) convertView.findViewById(R.id.tv_progress_uploading);
+                holder.progress_bar_uploading =  convertView.findViewById(R.id.progress_bar_uploading);
+                holder.tv_progress_uploading =  convertView.findViewById(R.id.tv_progress_uploading);
             }
         }
 
         //图像
         if (viewType == MESSAGE_VIDEO_LIVE_RECEIVED || viewType == MESSAGE_VIDEO_LIVE_SEND) {
-            holder.tvContent = (TextView) convertView.findViewById(R.id.tv_chatcontent);
+            holder.tvContent =  convertView.findViewById(R.id.tv_chatcontent);
             if (viewType == MESSAGE_VIDEO_LIVE_RECEIVED) {
-                holder.ll_botoom_to_watch = (LinearLayout) convertView.findViewById(R.id.ll_botoom_to_watch);
-                holder.tv_watch_time = (TextView) convertView.findViewById(R.id.tv_watch_time);
+                holder.ll_botoom_to_watch =  convertView.findViewById(R.id.ll_botoom_to_watch);
+                holder.tv_watch_time =  convertView.findViewById(R.id.tv_watch_time);
             }
-            holder.live_bubble = (RelativeLayout) convertView.findViewById(R.id.live_bubble);
-            holder.live_tv_chatcontent = (TextView) convertView.findViewById(R.id.live_tv_chatcontent);
+            holder.live_bubble =  convertView.findViewById(R.id.live_bubble);
+            holder.live_tv_chatcontent =  convertView.findViewById(R.id.live_tv_chatcontent);
         }
         if (viewType == MESSAGE_GB28181_RECODE_RECEIVED || viewType == MESSAGE_GB28181_RECODE_SEND) {
-            holder.tvContent = (TextView) convertView.findViewById(R.id.tv_chatcontent);
+            holder.tvContent =  convertView.findViewById(R.id.tv_chatcontent);
             if (viewType == MESSAGE_GB28181_RECODE_RECEIVED) {
-                holder.ll_botoom_to_watch = (LinearLayout) convertView.findViewById(R.id.ll_botoom_to_watch);
-                holder.tv_watch_time = (TextView) convertView.findViewById(R.id.tv_watch_time);
+                holder.ll_botoom_to_watch =  convertView.findViewById(R.id.ll_botoom_to_watch);
+                holder.tv_watch_time =  convertView.findViewById(R.id.tv_watch_time);
             }
-            holder.live_bubble = (RelativeLayout) convertView.findViewById(R.id.live_bubble);
-            holder.live_tv_chatcontent = (TextView) convertView.findViewById(R.id.live_tv_chatcontent);
-            holder.iv_image = (ImageView) convertView.findViewById(R.id.iv_image);
+            holder.live_bubble =  convertView.findViewById(R.id.live_bubble);
+            holder.live_tv_chatcontent =  convertView.findViewById(R.id.live_tv_chatcontent);
+            holder.iv_image =  convertView.findViewById(R.id.iv_image);
         }
         if (viewType == MESSAGE_HYPERLINK_RECEIVED || viewType == MESSAGE_HYPERLINK_SEND) {
-            holder.lv_face_pair = (ListView) convertView.findViewById(R.id.lv_face_pair);
-            holder.tv_error_msg = (TextView) convertView.findViewById(R.id.tv_error_msg);
+            holder.lv_face_pair =  convertView.findViewById(R.id.lv_face_pair);
+            holder.tv_error_msg =  convertView.findViewById(R.id.tv_error_msg);
         }
 
         convertView.setTag(holder);
@@ -906,7 +869,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         if (terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode()
                 || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode())
             return;
-        /**  消息是否发送失败 **/;
+        /**  消息是否发送失败 **/
         if (!isReceiver(terminalMessage)) {//发送方
             if (terminalMessage.resultCode != 0) {
                 setViewVisibility(holder.ivMsgStatus, View.VISIBLE);
@@ -1214,7 +1177,6 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         if (terminalMessage.sendTime > 0) {
             long messageTime = terminalMessage.sendTime;
             if (position == 0) {
-//                holder.timeStamp.setText(DateUtils.getTimestampString(new Date(messageTime)));
                 setText(holder.timeStamp, DateUtils.getNewChatTime(messageTime));
                 setViewVisibility(holder.timeStamp, View.VISIBLE);
             } else {
@@ -1232,7 +1194,6 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         } else {
             long currentTime = System.currentTimeMillis();
             if (position == 0) {
-//                holder.timeStamp.setText(DateUtils.getTimestampString(new Date(currentTime)));
                 setText(holder.timeStamp, DateUtils.getNewChatTime(currentTime));
                 setViewVisibility(holder.timeStamp, View.VISIBLE);
             } else {

@@ -30,8 +30,8 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.GroupCatalogBean;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
 import cn.vsx.vc.utils.Constants;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by Administrator on 2017/3/14 0014.
@@ -107,35 +107,26 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             if(allGroupAndDepartment.get(position).getType() == Constants.TYPE_TEMP_TITLE){
                 GroupCatalogAdapter mCatalogAdapter=new GroupCatalogAdapter(context,mTempCatalogList);
                 titleViewHolder.parent_recyclerview.setAdapter(mCatalogAdapter);
-                mCatalogAdapter.setOnItemClick(new GroupCatalogAdapter.ItemClickListener(){
-                    @Override
-                    public void onItemClick(View view, int position){
-                        if(catalogItemClickListener !=null){
-                            catalogItemClickListener.onCatalogItemClick(view,true,position);
-                        }
+                mCatalogAdapter.setOnItemClick((view, position1) -> {
+                    if(catalogItemClickListener !=null){
+                        catalogItemClickListener.onCatalogItemClick(view,true, position1);
                     }
                 });
             }else {
                 GroupCatalogAdapter mCatalogAdapter=new GroupCatalogAdapter(context,mCatalogList);
                 titleViewHolder.parent_recyclerview.setAdapter(mCatalogAdapter);
-                mCatalogAdapter.setOnItemClick(new GroupCatalogAdapter.ItemClickListener(){
-                    @Override
-                    public void onItemClick(View view, int position){
-                        if(catalogItemClickListener !=null){
-                            catalogItemClickListener.onCatalogItemClick(view,false,position);
-                        }
+                mCatalogAdapter.setOnItemClick((view, position12) -> {
+                    if(catalogItemClickListener !=null){
+                        catalogItemClickListener.onCatalogItemClick(view,false, position12);
                     }
                 });
             }
-            titleViewHolder.iv_search.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v){
-                    if(System.currentTimeMillis() - lastSearchTime<1000){
-                        return;
-                    }
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowGroupFragmentHandler.class, null,false);
-                    lastSearchTime = System.currentTimeMillis();
+            titleViewHolder.iv_search.setOnClickListener(v -> {
+                if(System.currentTimeMillis() - lastSearchTime<1000){
+                    return;
                 }
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowGroupFragmentHandler.class, null,false);
+                lastSearchTime = System.currentTimeMillis();
             });
 
         }else if(getItemViewType(position)==Constants.TYPE_FOLDER){
@@ -143,15 +134,12 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             final GroupBean groupBean = (GroupBean) allGroupAndDepartment.get(position).getBean();
             departmentViewHolder.tvFolder.setText(groupBean.getName());
 
-            departmentViewHolder.itemView.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View view){
-                    if(folderClickListener !=null){
-                        if(groupBean.getId() ==-1){
-                            folderClickListener.onFolderClick(view,position,true);
-                        }else {
-                            folderClickListener.onFolderClick(view,position,false);
-                        }
+            departmentViewHolder.itemView.setOnClickListener(view -> {
+                if(folderClickListener !=null){
+                    if(groupBean.getId() ==-1){
+                        folderClickListener.onFolderClick(view,position,true);
+                    }else {
+                        folderClickListener.onFolderClick(view,position,false);
                     }
                 }
             });
@@ -177,29 +165,23 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 groupViewHolder.iv_response_group_icon.setVisibility(View.GONE);
             }
 
-            groupViewHolder.ivMessage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(context, GroupCallNewsActivity.class);
-                    intent.putExtra("isGroup", true);
-                    intent.putExtra("userId", group.getNo());//组id
-                    intent.putExtra("userName", group.getName());
-                    intent.putExtra("speakingId",group.getId());
-                    intent.putExtra("speakingName",group.getName());
-                    context.startActivity(intent);
-                }
+            groupViewHolder.ivMessage.setOnClickListener(view -> {
+                Intent intent = new Intent(context, GroupCallNewsActivity.class);
+                intent.putExtra("isGroup", true);
+                intent.putExtra("userId", group.getNo());//组id
+                intent.putExtra("userName", group.getName());
+                intent.putExtra("speakingId",group.getId());
+                intent.putExtra("speakingName",group.getName());
+                context.startActivity(intent);
             });
 
-            groupViewHolder.tvChangeGroup.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    if(MyApplication.instance.isMiniLive){
-                        ToastUtil.showToast(context, "小窗口模式中禁止转组");
-                    }else {
-                        MyTerminalFactory.getSDK().getGroupManager().changeGroup(group.getNo());
-                    }
-
+            groupViewHolder.tvChangeGroup.setOnClickListener(view -> {
+                if(MyApplication.instance.isMiniLive){
+                    ToastUtil.showToast(context, "小窗口模式中禁止转组");
+                }else {
+                    MyTerminalFactory.getSDK().getGroupManager().changeGroup(group.getNo());
                 }
+
             });
             if(!tempGroup.isEmpty()){
                 if(position == tempGroup.size()){

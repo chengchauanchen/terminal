@@ -38,12 +38,9 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
 
     private View mPopView;
     private EditText phone;
-    private Button delete;
-    private Map<Integer, Integer> map = new HashMap<Integer, Integer>();
+    private Map<Integer, Integer> map = new HashMap<>();
     private SoundPool spool;
     private AudioManager am = null;
-    private ImageView btCall;
-    private ImageView btDiss;
     private String str="";
 
     public DialPopupwindow(Context context) {
@@ -100,49 +97,39 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
             v.setOnClickListener(this);
         }
 
-        delete = (Button) mPopView.findViewById(R.id.delete);
+        Button delete = (Button) mPopView.findViewById(R.id.delete);
         delete.setOnClickListener(this);
-        delete.setOnLongClickListener(new View.OnLongClickListener() {
-            public boolean onLongClick(View v) {
-                phone.setText("");
-                return false;
-            }
+        delete.setOnLongClickListener(v -> {
+            phone.setText("");
+            return false;
         });
 
-        btCall = (ImageView) mPopView.findViewById(R.id.image_call);
-        btDiss = (ImageView) mPopView.findViewById(R.id.image_diss);
-        btCall.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                try {
-                    String inputString = phone.getText().toString().trim();
-                    if(TextUtils.isEmpty(inputString) || inputString.length()>8){
-                        return;
-                    }
-                    if(inputString.length() == 6){
-                        inputString = "88" + inputString;
-                    }
-                    int callId = Integer.parseInt(inputString);
-                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                        ToastUtil.showToast(context,"没有个呼权限");
-                        dismiss();
-                        return;
-                    }
-                    Member member = DataUtil.getMemberByMemberNo(callId);
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
-                } catch (NumberFormatException e) {
-                    e.printStackTrace();
+        ImageView btCall = (ImageView) mPopView.findViewById(R.id.image_call);
+        ImageView btDiss = (ImageView) mPopView.findViewById(R.id.image_diss);
+        btCall.setOnClickListener(view -> {
+            try {
+                String inputString = phone.getText().toString().trim();
+                if(TextUtils.isEmpty(inputString) || inputString.length()>8){
+                    return;
                 }
+                if(inputString.length() == 6){
+                    inputString = "88" + inputString;
+                }
+                int callId = Integer.parseInt(inputString);
+                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                    ToastUtil.showToast(context,"没有个呼权限");
+                    dismiss();
+                    return;
+                }
+                Member member = DataUtil.getMemberByMemberNo(callId);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+            } catch (NumberFormatException e) {
+                e.printStackTrace();
+            }
 //                text.setText("");
-                dismiss();
-            }
+            dismiss();
         });
-        btDiss.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                dismiss();
-            }
-        });
+        btDiss.setOnClickListener(view -> dismiss());
 
     }
 

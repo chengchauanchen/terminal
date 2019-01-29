@@ -11,5 +11,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverRemoveWindowViewHandler extends ReceiveHandler{
-    public void handle(String className);
+    void handle(String className);
 }

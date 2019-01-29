@@ -9,7 +9,7 @@
     <!-- 线的宽度，颜色灰色 -->
     <stroke
         android:width="0dp"
-        android:color="@color/mtoggle_on_button"></stroke>
+        android:color="@color/mtoggle_on_button"/>
 
     <size
         android:width="25dp"

@@ -23,11 +23,8 @@ import cn.vsx.vc.R;
 
 public class XCDropDownListView extends LinearLayout {
     private TextView editText;
-    private ImageView imageView;
     private PopupWindow popupWindow = null;
-    private ArrayList<String> dataList =  new ArrayList<String>();
-    private View mView;
-    private LinearLayout compound;
+    private ArrayList<String> dataList =  new ArrayList<>();
 
     public XCDropDownListView(Context context) {
         this(context,null);
@@ -49,18 +46,14 @@ public class XCDropDownListView extends LinearLayout {
         layoutInflater =  (LayoutInflater) getContext().getSystemService(infServie);
         View view  = layoutInflater.inflate(R.layout.dropdownlist_view, this,true);
         editText= (TextView)findViewById(R.id.text);
-        imageView = (ImageView)findViewById(R.id.btn);
-        compound = (LinearLayout) findViewById(R.id.compound);
-        compound.setOnClickListener(new OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                // TODO Auto-generated method stub
-                if(popupWindow == null ){
-                    showPopWindow();
-                }else{
-                    closePopWindow();
-                }
+        ImageView imageView = (ImageView) findViewById(R.id.btn);
+        LinearLayout compound = (LinearLayout) findViewById(R.id.compound);
+        compound.setOnClickListener(v -> {
+            // TODO Auto-generated method stub
+            if(popupWindow == null ){
+                showPopWindow();
+            }else{
+                closePopWindow();
             }
         });
     }
@@ -165,15 +158,12 @@ public class XCDropDownListView extends LinearLayout {
             }else {
                 listItemView.tv.setTextColor(ContextCompat.getColor(getContext(),R.color.regist_host_name));
             }
-            listItemView.layout.setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    // TODO Auto-generated method stub
-                    editText.setText(text);
-                    closePopWindow();
-                    if(xcDropDownListViewClickListeren != null){
-                        xcDropDownListViewClickListeren.onXCDropDownListViewClickListeren(position);
-                    }
+            listItemView.layout.setOnClickListener(v -> {
+                // TODO Auto-generated method stub
+                editText.setText(text);
+                closePopWindow();
+                if(xcDropDownListViewClickListeren != null){
+                    xcDropDownListViewClickListeren.onXCDropDownListViewClickListeren(position);
                 }
             });
             return convertView;
@@ -186,7 +176,7 @@ public class XCDropDownListView extends LinearLayout {
     }
 
     public interface XCDropDownListViewClickListeren{
-        public void onXCDropDownListViewClickListeren(int position);
+        void onXCDropDownListViewClickListeren(int position);
     }
     private XCDropDownListViewClickListeren xcDropDownListViewClickListeren;
     public void setOnXCDropDownListViewClickListeren(XCDropDownListViewClickListeren xcDropDownListViewClickListeren){

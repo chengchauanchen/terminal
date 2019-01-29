@@ -8,8 +8,6 @@ import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.os.Build;
-import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -30,7 +28,6 @@ import cn.vsx.vc.view.cameralibrary.listener.CaptureListener;
 import cn.vsx.vc.view.cameralibrary.listener.ClickListener;
 import cn.vsx.vc.view.cameralibrary.listener.ErrorListener;
 import cn.vsx.vc.view.cameralibrary.listener.JCameraListener;
-import cn.vsx.vc.view.cameralibrary.listener.ReturnListener;
 import cn.vsx.vc.view.cameralibrary.listener.TypeListener;
 import cn.vsx.vc.view.cameralibrary.state.CameraMachine;
 import cn.vsx.vc.view.cameralibrary.util.FileUtil;
@@ -160,14 +157,11 @@ public class JCameraView extends FrameLayout implements CameraInterface.CameraOp
         mSwitchCamera.setImageResource(iconSrc);
         mFlashLamp = (ImageView) view.findViewById(R.id.image_flash);
         setFlashRes();
-        mFlashLamp.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                type_flash++;
-                if (type_flash > 0x023)
-                    type_flash = TYPE_FLASH_AUTO;
-                setFlashRes();
-            }
+        mFlashLamp.setOnClickListener(v -> {
+            type_flash++;
+            if (type_flash > 0x023)
+                type_flash = TYPE_FLASH_AUTO;
+            setFlashRes();
         });
         mCaptureLayout = (CaptureLayout) view.findViewById(R.id.capture_layout);
         mCaptureLayout.setDuration(duration);
@@ -175,12 +169,7 @@ public class JCameraView extends FrameLayout implements CameraInterface.CameraOp
         mFoucsView = (FoucsView) view.findViewById(R.id.fouce_view);
         mVideoView.getHolder().addCallback(this);
         //切换摄像头
-        mSwitchCamera.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                machine.swtich(mVideoView.getHolder(), screenProp);
-            }
-        });
+        mSwitchCamera.setOnClickListener(v -> machine.swtich(mVideoView.getHolder(), screenProp));
         //拍照 录像
         mCaptureLayout.setCaptureLisenter(new CaptureListener() {
             @Override
@@ -202,12 +191,7 @@ public class JCameraView extends FrameLayout implements CameraInterface.CameraOp
                 mCaptureLayout.setTextWithAnimation("录制时间过短");
                 mSwitchCamera.setVisibility(VISIBLE);
                 mFlashLamp.setVisibility(VISIBLE);
-                postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        machine.stopRecord(true, time);
-                    }
-                }, 1500 - time);
+                postDelayed(() -> machine.stopRecord(true, time), 1500 - time);
             }
 
             @Override
@@ -245,28 +229,19 @@ public class JCameraView extends FrameLayout implements CameraInterface.CameraOp
             }
         });
         //退出
-        mCaptureLayout.setReturnLisenter(new ReturnListener() {
-            @Override
-            public void onReturn() {
-                if (jCameraLisenter != null) {
-                    jCameraLisenter.quit();
-                }
+        mCaptureLayout.setReturnLisenter(() -> {
+            if (jCameraLisenter != null) {
+                jCameraLisenter.quit();
             }
         });
-        mCaptureLayout.setLeftClickListener(new ClickListener() {
-            @Override
-            public void onClick() {
-                if (leftClickListener != null) {
-                    leftClickListener.onClick();
-                }
+        mCaptureLayout.setLeftClickListener(() -> {
+            if (leftClickListener != null) {
+                leftClickListener.onClick();
             }
         });
-        mCaptureLayout.setRightClickListener(new ClickListener() {
-            @Override
-            public void onClick() {
-                if (rightClickListener != null) {
-                    rightClickListener.onClick();
-                }
+        mCaptureLayout.setRightClickListener(() -> {
+            if (rightClickListener != null) {
+                rightClickListener.onClick();
             }
         });
     }
@@ -397,12 +372,7 @@ public class JCameraView extends FrameLayout implements CameraInterface.CameraOp
 
     //对焦框指示器动画
     private void setFocusViewWidthAnimation(float x, float y) {
-        machine.foucs(x, y, new CameraInterface.FocusCallback() {
-            @Override
-            public void focusSuccess() {
-                mFoucsView.setVisibility(INVISIBLE);
-            }
-        });
+        machine.foucs(x, y, () -> mFoucsView.setVisibility(INVISIBLE));
     }
 
     private void updateVideoViewSize(float videoWidth, float videoHeight) {
@@ -516,40 +486,36 @@ public class JCameraView extends FrameLayout implements CameraInterface.CameraOp
     public void playVideo(Bitmap firstFrame, final String url) {
         videoUrl = url;
         JCameraView.this.firstFrame = firstFrame;
-        new Thread(new Runnable() {
-            @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-            @Override
-            public void run() {
-                try {
-                    if (mMediaPlayer == null) {
-                        mMediaPlayer = new MediaPlayer();
-                    } else {
-                        mMediaPlayer.reset();
-                    }
-                    mMediaPlayer.setDataSource(url);
-                    mMediaPlayer.setSurface(mVideoView.getHolder().getSurface());
-                    mMediaPlayer.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
-                    mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mMediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer
-                            .OnVideoSizeChangedListener() {
-                        @Override
-                        public void
-                        onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-                            updateVideoViewSize(mMediaPlayer.getVideoWidth(), mMediaPlayer
-                                    .getVideoHeight());
-                        }
-                    });
-                    mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                        @Override
-                        public void onPrepared(MediaPlayer mp) {
-                            mMediaPlayer.start();
-                        }
-                    });
-                    mMediaPlayer.setLooping(true);
-                    mMediaPlayer.prepare();
-                } catch (IOException e) {
-                    e.printStackTrace();
+        new Thread(() -> {
+            try {
+                if (mMediaPlayer == null) {
+                    mMediaPlayer = new MediaPlayer();
+                } else {
+                    mMediaPlayer.reset();
                 }
+                mMediaPlayer.setDataSource(url);
+                mMediaPlayer.setSurface(mVideoView.getHolder().getSurface());
+                mMediaPlayer.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT);
+                mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mMediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer
+                        .OnVideoSizeChangedListener() {
+                    @Override
+                    public void
+                    onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+                        updateVideoViewSize(mMediaPlayer.getVideoWidth(), mMediaPlayer
+                                .getVideoHeight());
+                    }
+                });
+                mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                    @Override
+                    public void onPrepared(MediaPlayer mp) {
+                        mMediaPlayer.start();
+                    }
+                });
+                mMediaPlayer.setLooping(true);
+                mMediaPlayer.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }).start();
     }
@@ -645,12 +611,9 @@ public class JCameraView extends FrameLayout implements CameraInterface.CameraOp
     private ReceiverRemoveWindowViewHandler mReceiverRemoveWindowViewHandler = new ReceiverRemoveWindowViewHandler(){
         @Override
         public void handle(String className){
-            post(new Runnable(){
-                @Override
-                public void run(){
-                    mVideoView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-                    CameraInterface.getInstance().doOpenCamera(JCameraView.this);
-                }
+            post(() -> {
+                mVideoView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+                CameraInterface.getInstance().doOpenCamera(JCameraView.this);
             });
         }
     };

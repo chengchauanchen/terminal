@@ -23,7 +23,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -105,7 +104,7 @@ public class NewsFragment extends BaseFragment {
     //界面显示的消息列表
     private ArrayList<TerminalMessage> messageList = new ArrayList<>();
     @SuppressLint("UseSparseArrays")
-    private HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<Integer, String>());
+    private HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
     private boolean soundOff;//是否静音
     private boolean isFirstCall;
 
@@ -216,20 +215,17 @@ public class NewsFragment extends BaseFragment {
     public void initView() {
         setVideoIcon();
         setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
-        voice_image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(!soundOff){
-                    voice_image.setImageResource(R.drawable.volume_off_call);
-                    TerminalFactory.getSDK().getAudioProxy().volumeQuiet();
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true,1);
-                    soundOff =true;
-                }else {
-                    voice_image.setImageResource(R.drawable.horn);
-                    TerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false,1);
-                    soundOff =false;
-                }
+        voice_image.setOnClickListener(view -> {
+            if(!soundOff){
+                voice_image.setImageResource(R.drawable.volume_off_call);
+                TerminalFactory.getSDK().getAudioProxy().volumeQuiet();
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true,1);
+                soundOff =true;
+            }else {
+                voice_image.setImageResource(R.drawable.horn);
+                TerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false,1);
+                soundOff =false;
             }
         });
     }
@@ -264,12 +260,7 @@ public class NewsFragment extends BaseFragment {
         loadMessages();
         mMessageListAdapter = new MessageListAdapter(getContext(), messageList, idNameMap);
         newsList.setAdapter(mMessageListAdapter);
-        MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable(){
-            @Override
-            public void run(){
-                MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
-            }
-        });
+        MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord());
     }
 
     @Override
@@ -347,17 +338,7 @@ public class NewsFragment extends BaseFragment {
             }
         }
     };
-    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
-        @Override
-        public void handler() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    setVideoIcon();
-                }
-            });
-        }
-    };
+    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> mHandler.post(() -> setVideoIcon());
 
     private class OnItemLongClickListenerImp implements AdapterView.OnItemLongClickListener {
 
@@ -426,39 +407,21 @@ public class NewsFragment extends BaseFragment {
     }
 
     /*** 自己组呼返回的消息 **/
-    private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
-        @Override
-        public void handler(final int methodResult, String resultDesc) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (methodResult == 0) {
-                        showViewWhenGroupCall("我正在说话");
-                        setViewEnable(false);
-                    }
-                }
-            });
+    private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
+        if (methodResult == 0) {
+            showViewWhenGroupCall("我正在说话");
+            setViewEnable(false);
         }
-    };
+    });
 
     /***  自己组呼结束 **/
-    private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = new ReceiveCeaseGroupCallConformationHander() {
-
-        @Override
-        public void handler(int resultCode, String resultDesc) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (MyApplication.instance.getGroupListenenState() == LISTENING) {
-                        return;
-                    }
-                    hideViewWhenStopGroupCall();
-                    setViewEnable(true);
-                }
-            });
-
+    private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = (resultCode, resultDesc) -> mHandler.post(() -> {
+        if (MyApplication.instance.getGroupListenenState() == LISTENING) {
+            return;
         }
-    };
+        hideViewWhenStopGroupCall();
+        setViewEnable(true);
+    });
 
     private int speakingId;
     private String speakingName;
@@ -466,17 +429,14 @@ public class NewsFragment extends BaseFragment {
         @Override
         public void handler(int memberId, final String memberName, final int groupId, String groupName, CallMode currentCallMode) {
             if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        speakingId = groupId;
-                        speakingName = memberName;
-                        logger.info("sjl_消息页面的组呼到来");
-                        logger.info("sjl_消息页面的组呼到来"+speaking_name.getVisibility()+",正在说话人的名字："+MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
-                        String speakingName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
-                        showViewWhenGroupCall(speakingName);
-                        setting_group_name.setText(DataUtil.getGroupByGroupNo(groupId).name);
-                    }
+                mHandler.post(() -> {
+                    speakingId = groupId;
+                    speakingName = memberName;
+                    logger.info("sjl_消息页面的组呼到来");
+                    logger.info("sjl_消息页面的组呼到来"+speaking_name.getVisibility()+",正在说话人的名字："+MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
+                    String speakingName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
+                    showViewWhenGroupCall(speakingName);
+                    setting_group_name.setText(DataUtil.getGroupByGroupNo(groupId).name);
                 });
             }
 
@@ -486,47 +446,38 @@ public class NewsFragment extends BaseFragment {
 
         @Override
         public void handler(int reasonCode) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    hideViewWhenStopGroupCall();
-                    setViewEnable(true);
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK()
-                            .getParam(Params.CURRENT_GROUP_ID, 0)).name);
-                }
+            mHandler.post(() -> {
+                hideViewWhenStopGroupCall();
+                setViewEnable(true);
+                setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK()
+                        .getParam(Params.CURRENT_GROUP_ID, 0)).name);
             });
         }
     };
 
     /**  接收消息 **/
-    private ReceiveNotifyDataMessageHandler mReceiveNotifyDataMessageHandler = new ReceiveNotifyDataMessageHandler() {
-        @Override
-        public void handler(final TerminalMessage terminalMessage) {
-            synchronized(NewsFragment.this){
-                idNameMap.put(terminalMessage.messageFromId, terminalMessage.messageFromName);
-                idNameMap.put(terminalMessage.messageToId, terminalMessage.messageToName);
-                terminalMessageData.clear();
-                terminalMessageData.addAll(messageList);
-                if (terminalMessage.messageFromId == terminalMessage.messageToId
-                        && terminalMessage.messageToId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//主动播的消息，存入视频助手
-                    if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() &&
-                            (terminalMessage.messageBody.getIntValue("remark") == Remark.ACTIVE_VIDEO_LIVE || terminalMessage.messageBody.getIntValue("remark") == Remark.ASK_VIDEO_LIVE)
-                            && terminalMessage.resultCode==0) {
-                        saveVideoMessage(terminalMessage,false);
-                    }
-                }else {
-                    saveMessageToList(terminalMessage,false);
+    private ReceiveNotifyDataMessageHandler mReceiveNotifyDataMessageHandler = terminalMessage -> {
+        synchronized(NewsFragment.this){
+            idNameMap.put(terminalMessage.messageFromId, terminalMessage.messageFromName);
+            idNameMap.put(terminalMessage.messageToId, terminalMessage.messageToName);
+            terminalMessageData.clear();
+            terminalMessageData.addAll(messageList);
+            if (terminalMessage.messageFromId == terminalMessage.messageToId
+                    && terminalMessage.messageToId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//主动播的消息，存入视频助手
+                if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() &&
+                        (terminalMessage.messageBody.getIntValue("remark") == Remark.ACTIVE_VIDEO_LIVE || terminalMessage.messageBody.getIntValue("remark") == Remark.ASK_VIDEO_LIVE)
+                        && terminalMessage.resultCode==0) {
+                    saveVideoMessage(terminalMessage,false);
                 }
-                mHandler.post(new Runnable(){
-                    @Override
-                    public void run(){
-                        clearData();
-                        addData(terminalMessageData);
-                        sortMessageList();
-                        unReadCountChanged();
-                    }
-                });
+            }else {
+                saveMessageToList(terminalMessage,false);
             }
+            mHandler.post(() -> {
+                clearData();
+                addData(terminalMessageData);
+                sortMessageList();
+                unReadCountChanged();
+            });
         }
     };
 
@@ -536,7 +487,7 @@ public class NewsFragment extends BaseFragment {
      */
     @SuppressLint("UseSparseArrays")
     private void saveMemberMap(TerminalMessage terminalMessage) {
-        idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<Integer, String>()));
+        idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>()));
         if(terminalMessage.messageFromId !=0){
             idNameMap.put(terminalMessage.messageFromId, terminalMessage.messageFromName);
         }
@@ -706,65 +657,51 @@ public class NewsFragment extends BaseFragment {
         @Override
         public void handler(int resultCode, String resultDes){
             if(resultCode ==0){
-                mHandler.post(new Runnable(){
-                    @Override
-                    public void run(){
-                        mMessageListAdapter.notifyDataSetChanged();
-                    }
-                });
+                mHandler.post(() -> mMessageListAdapter.notifyDataSetChanged());
             }
         }
     };
 
-    private GetAllMessageRecordHandler getAllMessageRecordHandler = new GetAllMessageRecordHandler(){
-        @Override
-        public void handle(List<TerminalMessage> messageRecord){
-            //加上同步，防止更新消息时又来新的消息，导致错乱
-            synchronized(NewsFragment.this){
-                //更新未读消息和聊天界面
-                if(messageRecord.isEmpty()){
-                    mHandler.post(new Runnable(){
-                        @Override
-                        public void run(){
-                            sortMessageList();
-                            unReadCountChanged();
+    private GetAllMessageRecordHandler getAllMessageRecordHandler = messageRecord -> {
+        //加上同步，防止更新消息时又来新的消息，导致错乱
+        synchronized(NewsFragment.this){
+            //更新未读消息和聊天界面
+            if(messageRecord.isEmpty()){
+                mHandler.post(() -> {
+                    sortMessageList();
+                    unReadCountChanged();
+                });
+            }else {
+                terminalMessageData.clear();
+                terminalMessageData.addAll(messageList);
+                for(TerminalMessage terminalMessage : messageRecord){
+                    saveMemberMap(terminalMessage);
+                    if (terminalMessage.messageFromId == terminalMessage.messageToId
+                            && terminalMessage.messageToId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//主动播的消息，存入视频助手
+                        if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() &&
+                                (terminalMessage.messageBody.getIntValue("remark") == Remark.ACTIVE_VIDEO_LIVE
+                                        || terminalMessage.messageBody.getIntValue("remark") == Remark.ASK_VIDEO_LIVE)
+                                && terminalMessage.resultCode==0) {
+                            saveVideoMessage(terminalMessage,true);
                         }
-                    });
-                }else {
-                    terminalMessageData.clear();
-                    terminalMessageData.addAll(messageList);
-                    for(TerminalMessage terminalMessage : messageRecord){
-                        saveMemberMap(terminalMessage);
-                        if (terminalMessage.messageFromId == terminalMessage.messageToId
-                                && terminalMessage.messageToId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//主动播的消息，存入视频助手
-                            if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() &&
-                                    (terminalMessage.messageBody.getIntValue("remark") == Remark.ACTIVE_VIDEO_LIVE
-                                            || terminalMessage.messageBody.getIntValue("remark") == Remark.ASK_VIDEO_LIVE)
-                                    && terminalMessage.resultCode==0) {
-                                saveVideoMessage(terminalMessage,true);
-                            }
-                        }else {
-                            saveMessageToList(terminalMessage,true);
+                    }else {
+                        saveMessageToList(terminalMessage,true);
+                    }
+                }
+                mHandler.post(() -> {
+                    clearData();
+                    addData(terminalMessageData);
+                    sortMessageList();
+                    unReadCountChanged();
+                    //通知notification
+                    for(int i = messageList.size()-1; 0 <=i; i--){
+                        TerminalMessage terminalMessage = messageList.get(i);
+                        //如果当前组是new出来的新消息messageFromId默认为0
+                        if(terminalMessage.messageFromId != 0 && terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
+                            generateNotification(terminalMessage,i);
                         }
                     }
-                    mHandler.post(new Runnable(){
-                        @Override
-                        public void run(){
-                            clearData();
-                            addData(terminalMessageData);
-                            sortMessageList();
-                            unReadCountChanged();
-                            //通知notification
-                            for(int i = messageList.size()-1; 0 <=i; i--){
-                                TerminalMessage terminalMessage = messageList.get(i);
-                                //如果当前组是new出来的新消息messageFromId默认为0
-                                if(terminalMessage.messageFromId != 0 && terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
-                                    generateNotification(terminalMessage,i);
-                                }
-                            }
-                        }
-                    });
-                }
+                });
             }
         }
     };
@@ -1011,67 +948,54 @@ public class NewsFragment extends BaseFragment {
         }
     }
 
-    private ReceiveUnreadMessageChangedHandler receiveUnreadMessageChangedHandler = new ReceiveUnreadMessageChangedHandler(){
-        @Override
-        public void handle(TerminalMessage terminalMessage){
-            for(TerminalMessage message : messageList){
-                if(message.messageFromId == terminalMessage.messageFromId  && message.messageToId == terminalMessage.messageToId){
-                    message.unReadCount = 0;
-                    break;
-                }
+    private ReceiveUnreadMessageChangedHandler receiveUnreadMessageChangedHandler = terminalMessage -> {
+        for(TerminalMessage message : messageList){
+            if(message.messageFromId == terminalMessage.messageFromId  && message.messageToId == terminalMessage.messageToId){
+                message.unReadCount = 0;
+                break;
             }
-            saveMessagesToSql();
-            unReadCountChanged();
         }
+        saveMessagesToSql();
+        unReadCountChanged();
     };
     /**
      * 网络状态变化
      */
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler() {
-
-        @Override
-        public void handler(final boolean connected) {
-            if(connected){
-                MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
-            }
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
+        if(connected){
+            MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
         }
     };
 
     /***  删除消息   **/
-    private ReceiverDeleteMessageHandler mReceiverDeleteMessageHandler = new ReceiverDeleteMessageHandler() {
-        @Override
-        public void handler() {
-            TerminalMessage terminalMessage = messageList.get(deletePos);
-            int myId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-            boolean isReceiver = terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-            if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
-                if (isReceiver) {//接收的消息
-                    MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), terminalMessage.messageFromId, myId);
-                } else {//自己发的
-                    MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), terminalMessage.messageToId, myId);
-                }
-            }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
-                MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_GROUP.getCode(), terminalMessage.messageToId, myId);
+    private ReceiverDeleteMessageHandler mReceiverDeleteMessageHandler = () -> {
+        TerminalMessage terminalMessage = messageList.get(deletePos);
+        int myId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+        boolean isReceiver = terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+        if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
+            if (isReceiver) {//接收的消息
+                MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), terminalMessage.messageFromId, myId);
+            } else {//自己发的
+                MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), terminalMessage.messageToId, myId);
             }
-            removeData(deletePos);
-            sortMessageList();
-            unReadCountChanged();
-            deletePos = -1;
+        }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
+            MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_GROUP.getCode(), terminalMessage.messageToId, myId);
         }
+        removeData(deletePos);
+        sortMessageList();
+        unReadCountChanged();
+        deletePos = -1;
     };
 
     /***  切组后的消息 **/
     private ReceiveChangeGroupHandler receiveChangeGroupHandler = new ReceiveChangeGroupHandler() {
         @Override
         public void handler(final int errorCode, String errorDesc) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (errorCode == BaseCommonCode.SUCCESS_CODE) {
-                        int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                        setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
-                        sortMessageList();
-                    }
+            mHandler.post(() -> {
+                if (errorCode == BaseCommonCode.SUCCESS_CODE) {
+                    int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                    setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
+                    sortMessageList();
                 }
             });
         }
@@ -1083,13 +1007,10 @@ public class NewsFragment extends BaseFragment {
             if(!forceSwitchGroup){
                 return;
             }
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
-                    sortMessageList();
-                }
+            mHandler.post(() -> {
+                int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
+                sortMessageList();
             });
         }
     };
@@ -1097,51 +1018,40 @@ public class NewsFragment extends BaseFragment {
     private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
         @Override
         public void handler() {
-            mHandler.post(new Runnable(){
-                @Override
-                public void run(){
-                    clearData();
-                    saveMessagesToSql();
-                    if(mMessageListAdapter != null){
-                        mMessageListAdapter.notifyDataSetChanged();
-                    }
+            mHandler.post(() -> {
+                clearData();
+                saveMessagesToSql();
+                if(mMessageListAdapter != null){
+                    mMessageListAdapter.notifyDataSetChanged();
                 }
             });
         }
     };
 
     /**收到修改名字成功的消息*/
-    private ReceiveChangeNameHandler receiveChangeNameHandler = new ReceiveChangeNameHandler(){
-        @Override
-        public void handler(final int resultCode, final int memberId, final String newMemberName) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    //遍历消息列表，把名字改过来
-                    for (TerminalMessage terminalMessage : messageList){
-                        final boolean isReceiver = terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);//是否为别人发的消息
-                        if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()){
-                            if (isReceiver){//接收的消息
-                                if (terminalMessage.messageFromId == memberId){
-                                    terminalMessage.messageFromName = newMemberName;
-                                }
-                            }else {
-                                if (terminalMessage.messageToId == memberId){
-                                    terminalMessage.messageToName = newMemberName;
-                                }
-                            }
-                        }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
-                            if (terminalMessage.messageFromId == memberId){
-                                terminalMessage.messageFromName = newMemberName;
-                            }
-                        }
-                        saveMemberMap(terminalMessage);
+    private ReceiveChangeNameHandler receiveChangeNameHandler = (resultCode, memberId, newMemberName) -> mHandler.post(() -> {
+        //遍历消息列表，把名字改过来
+        for (TerminalMessage terminalMessage : messageList){
+            final boolean isReceiver = terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);//是否为别人发的消息
+            if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()){
+                if (isReceiver){//接收的消息
+                    if (terminalMessage.messageFromId == memberId){
+                        terminalMessage.messageFromName = newMemberName;
                     }
-                    sortMessageList();
+                }else {
+                    if (terminalMessage.messageToId == memberId){
+                        terminalMessage.messageToName = newMemberName;
+                    }
                 }
-            });
+            }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
+                if (terminalMessage.messageFromId == memberId){
+                    terminalMessage.messageFromName = newMemberName;
+                }
+            }
+            saveMemberMap(terminalMessage);
         }
-    };
+        sortMessageList();
+    });
 
     /**
      * 更新文件夹和组列表数据
@@ -1149,53 +1059,42 @@ public class NewsFragment extends BaseFragment {
     private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = new ReceiveUpdateFoldersAndGroupsHandler() {
         @Override
         public void handler() {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
-                    for (TerminalMessage terminalMessage : messageList) {
-                        if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息
-                            terminalMessage.messageToName = DataUtil.getGroupByGroupNo(terminalMessage.messageToId).name;
-                            saveMemberMap(terminalMessage);
-                        }
+            mHandler.post(() -> {
+                int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
+                for (TerminalMessage terminalMessage : messageList) {
+                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息
+                        terminalMessage.messageToName = DataUtil.getGroupByGroupNo(terminalMessage.messageToId).name;
+                        saveMemberMap(terminalMessage);
                     }
-                    loadMessages();
-                    //判断是否插入一条电话助手消息
-                    SharedPreferences preferences = context.getSharedPreferences("CallRecord", MODE_PRIVATE);
-                    isFirstCall = preferences.getBoolean("isFirstCall", false);
-                    logger.info("loadMessages()====="+"isFirstCall "+isFirstCall);
-                    if(isFirstCall){
-                        TerminalMessage terminalMessage = new TerminalMessage();
-                        terminalMessage.messageType=MessageType.CALL_RECORD.getCode();
-                        terminalMessage.messageCategory=MessageCategory.MESSAGE_TO_PERSONAGE.getCode();
-                        addData(terminalMessage);
-                        SharedPreferences.Editor editor = context.getSharedPreferences("CallRecord",
-                                MODE_PRIVATE).edit();
-                        editor.putBoolean("isFirstCall", false);
-                        editor.commit();
-                    }
-
-                    sortMessageList();
                 }
+                loadMessages();
+                //判断是否插入一条电话助手消息
+                SharedPreferences preferences = context.getSharedPreferences("CallRecord", MODE_PRIVATE);
+                isFirstCall = preferences.getBoolean("isFirstCall", false);
+                logger.info("loadMessages()====="+"isFirstCall "+isFirstCall);
+                if(isFirstCall){
+                    TerminalMessage terminalMessage = new TerminalMessage();
+                    terminalMessage.messageType=MessageType.CALL_RECORD.getCode();
+                    terminalMessage.messageCategory=MessageCategory.MESSAGE_TO_PERSONAGE.getCode();
+                    addData(terminalMessage);
+                    SharedPreferences.Editor editor = context.getSharedPreferences("CallRecord",
+                            MODE_PRIVATE).edit();
+                    editor.putBoolean("isFirstCall", false);
+                    editor.commit();
+                }
+
+                sortMessageList();
             });
         }
     };
 
     /** 文件等下载完成的监听handler */
-    private ReceiveDownloadFinishHandler receiveDownloadFinishHandler = new ReceiveDownloadFinishHandler() {
-        @Override
-        public void handler(final TerminalMessage terminalMessage,boolean success) {
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if(terminalMessage.messageType ==  MessageType.LONG_TEXT.getCode()) {
-                        sortMessageList();
-                    }
-                }
-            });
+    private ReceiveDownloadFinishHandler receiveDownloadFinishHandler = (terminalMessage, success) -> mHandler.post(() -> {
+        if(terminalMessage.messageType ==  MessageType.LONG_TEXT.getCode()) {
+            sortMessageList();
         }
-    };
+    });
 
     /**
      * 去掉在通讯录里不存在的组和响应组
@@ -1247,7 +1146,7 @@ public class NewsFragment extends BaseFragment {
 
     @SuppressLint("UseSparseArrays")
     private void removeMemberMap(int id) {
-        idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<Integer, String>()));
+        idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>()));
         idNameMap.remove(id);
         TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
     }
@@ -1290,12 +1189,7 @@ public class NewsFragment extends BaseFragment {
             setNewGroupList();
 //            setNewMemberList();
             //再按照时间来排序
-            Collections.sort(messageList, new Comparator<TerminalMessage>() {
-                @Override
-                public int compare(TerminalMessage o1, TerminalMessage o2) {
-                    return (o1.sendTime) > (o2.sendTime) ? -1 : 1;
-                }
-            });
+            Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
             //再设置第一条消息，一般是当前组
             setFirstMessage();
             //再保存到数据库

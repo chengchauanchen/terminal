@@ -55,115 +55,109 @@ public class MyTopRightMenu {
 
     public void initview(final ImageView view, final Activity context){
         this.activity = context;
-        view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mTopRightMenu = new TopRightMenu(context);
-                final MenuItem pushItem = new MenuItem(R.drawable.shipin_up, "上报图像");
-                final MenuItem pullItem = new MenuItem(R.drawable.shipin_hc, "请求图像");
-                final MenuItem createItem = new MenuItem(R.drawable.create_temporary_group,"创建临时组");
-                final List<MenuItem> items = new ArrayList<MenuItem>();
-                mTopRightMenu.addMenuItem(pullItem);
-                mTopRightMenu.addMenuItem(pushItem);
-                mTopRightMenu.addMenuItem(createItem);
-                items.add(pullItem);
-                items.add(pushItem);
-                items.add(createItem);
-                if(items.size() == 1) {
-                    mTopRightMenu.setHeight(240);
-                }
-                else if (items.size() == 2){
-                    mTopRightMenu.setHeight(480);
-                }
-                else if (items.size() == 3){
-                    mTopRightMenu.setHeight(720);
-                }
-                mTopRightMenu.setHeight(120)
-                        .setWidth(DensityUtil.dip2px(context,200))      //默认宽度wrap_content
-                        .showIcon(true)     //显示菜单图标，默认为true
-                        .dimBackground(true)           //背景变暗，默认为true
-                        .needAnimationStyle(true)   //显示动画，默认为true
-                        .setAnimationStyle(R.style.TRM_ANIM_STYLE)  //默认为R.style.TRM_ANIM_STYLE
+        view.setOnClickListener(v -> {
+            mTopRightMenu = new TopRightMenu(context);
+            final MenuItem pushItem = new MenuItem(R.drawable.shipin_up, "上报图像");
+            final MenuItem pullItem = new MenuItem(R.drawable.shipin_hc, "请求图像");
+            final MenuItem createItem = new MenuItem(R.drawable.create_temporary_group,"创建临时组");
+            final List<MenuItem> items = new ArrayList<>();
+            mTopRightMenu.addMenuItem(pullItem);
+            mTopRightMenu.addMenuItem(pushItem);
+            mTopRightMenu.addMenuItem(createItem);
+            items.add(pullItem);
+            items.add(pushItem);
+            items.add(createItem);
+            if(items.size() == 1) {
+                mTopRightMenu.setHeight(240);
+            }
+            else if (items.size() == 2){
+                mTopRightMenu.setHeight(480);
+            }
+            else if (items.size() == 3){
+                mTopRightMenu.setHeight(720);
+            }
+            mTopRightMenu.setHeight(120)
+                    .setWidth(DensityUtil.dip2px(context,200))      //默认宽度wrap_content
+                    .showIcon(true)     //显示菜单图标，默认为true
+                    .dimBackground(true)           //背景变暗，默认为true
+                    .needAnimationStyle(true)   //显示动画，默认为true
+                    .setAnimationStyle(R.style.TRM_ANIM_STYLE)  //默认为R.style.TRM_ANIM_STYLE
 //                        .addMenuItem(new MenuItem(R.drawable.onekey_alarm, "一键告警"))
 //                        .addMenuItem(new MenuItem(R.drawable.emergency_call, "紧急呼叫"))
 //                        .addMenuItem(new MenuItem(R.drawable.popupwindow_add_contacts, "添加联系人"))
-                        .setOnMenuItemClickListener(new TopRightMenu.OnMenuItemClickListener() {
-                            @Override
-                            public void onMenuItemClick(int position) {
-                                //判断权限
-                                if(!checkCameraPermission()){
-                                    gotoSetting();
-                                    return;
-                                }
-                                if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.IDLE && MyApplication.instance.getVideoLivePushingState() == VideoLivePushingState.IDLE){
-                                    switch (MyApplication.instance.getIndividualState()){
-                                        case IDLE:
-                                            if (items.get(position) == pushItem){
-                                                if (!MyApplication.instance.isPttPress){
-                                                    if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
-                                                        CheckMyPermission.permissionPrompt(context, Manifest.permission.RECORD_AUDIO);
-                                                        return;
-                                                    }
-                                                    if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.CAMERA)) {//没有相机权限
-                                                        CheckMyPermission.permissionPrompt(context, Manifest.permission.CAMERA);
-                                                        return;
-                                                    }
-
-                                                    if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())) {
-                                                        ToastUtil.showToast(context,"没有图像上报功能权限");
-                                                        return;
-                                                    }
-                                                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,0);
-                                                }
-
-
-                                            }else if (items.get(position) == pullItem){
-                                                if (!MyApplication.instance.isPttPress) {
-                                                    if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
-                                                        CheckMyPermission.permissionPrompt(context, Manifest.permission.RECORD_AUDIO);
-                                                        return;
-                                                    }
-                                                    //判断终端权限
-                                                    if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())) {
-                                                        ToastUtil.showToast(context,"没有图像请求功能权限");
-                                                        return;
-                                                    }
-                                                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member());
-                                                }
-
+                    .setOnMenuItemClickListener(position -> {
+                        //判断权限
+                        if(!checkCameraPermission()){
+                            gotoSetting();
+                            return;
+                        }
+                        if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.IDLE && MyApplication.instance.getVideoLivePushingState() == VideoLivePushingState.IDLE){
+                            switch (MyApplication.instance.getIndividualState()){
+                                case IDLE:
+                                    if (items.get(position) == pushItem){
+                                        if (!MyApplication.instance.isPttPress){
+                                            if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
+                                                CheckMyPermission.permissionPrompt(context, Manifest.permission.RECORD_AUDIO);
+                                                return;
                                             }
-                                            else if(items.get(position) ==createItem){
-                                                if (!MyApplication.instance.isPttPress){
-                                                    if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TEMP_CREATE.name())) {
-                                                        ToastUtil.showToast(context,"没有创建临时组功能权限");
-                                                        return;
-                                                    }
-                                                    Intent intent = new Intent(context, IncreaseTemporaryGroupMemberActivity.class);
-                                                    intent.putExtra("type",0);
-                                                    context.startActivity(intent);
-                                                }
+                                            if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.CAMERA)) {//没有相机权限
+                                                CheckMyPermission.permissionPrompt(context, Manifest.permission.CAMERA);
+                                                return;
                                             }
-                                            break;
-                                        case SPEAKING:
-                                            ToastUtil.showToast(context, "个呼中，不能进行其他业务");
-                                            break;
-                                        case RINGING:
-                                            ToastUtil.showToast(context, "个呼中，不能进行其他业务");
-                                            break;
 
-                                        default:
-                                            break;
+                                            if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())) {
+                                                ToastUtil.showToast(context,"没有图像上报功能权限");
+                                                return;
+                                            }
+                                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,0);
+                                        }
+
+
+                                    }else if (items.get(position) == pullItem){
+                                        if (!MyApplication.instance.isPttPress) {
+                                            if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
+                                                CheckMyPermission.permissionPrompt(context, Manifest.permission.RECORD_AUDIO);
+                                                return;
+                                            }
+                                            //判断终端权限
+                                            if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())) {
+                                                ToastUtil.showToast(context,"没有图像请求功能权限");
+                                                return;
+                                            }
+                                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member());
+                                        }
+
                                     }
+                                    else if(items.get(position) ==createItem){
+                                        if (!MyApplication.instance.isPttPress){
+                                            if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TEMP_CREATE.name())) {
+                                                ToastUtil.showToast(context,"没有创建临时组功能权限");
+                                                return;
+                                            }
+                                            Intent intent = new Intent(context, IncreaseTemporaryGroupMemberActivity.class);
+                                            intent.putExtra("type",0);
+                                            context.startActivity(intent);
+                                        }
+                                    }
+                                    break;
+                                case SPEAKING:
+                                    ToastUtil.showToast(context, "个呼中，不能进行其他业务");
+                                    break;
+                                case RINGING:
+                                    ToastUtil.showToast(context, "个呼中，不能进行其他业务");
+                                    break;
 
-                                }else {
-                                    ToastUtil.showToast(context,"您已处于图像业务中");
-                                }
-
+                                default:
+                                    break;
                             }
-                        })
-                        .showAsDropDown(view, -DensityUtil.px2dip(MyApplication.instance, MyApplication.instance.getResources().getDimension(R.dimen.x150))
-                                , DensityUtil.px2dip(MyApplication.instance, MyApplication.instance.getResources().getDimension(R.dimen.y20)));
-            }
+
+                        }else {
+                            ToastUtil.showToast(context,"您已处于图像业务中");
+                        }
+
+                    })
+                    .showAsDropDown(view, -DensityUtil.px2dip(MyApplication.instance, MyApplication.instance.getResources().getDimension(R.dimen.x150))
+                            , DensityUtil.px2dip(MyApplication.instance, MyApplication.instance.getResources().getDimension(R.dimen.y20)));
         });
     }
 

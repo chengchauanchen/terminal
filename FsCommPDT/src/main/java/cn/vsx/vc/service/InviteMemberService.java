@@ -62,9 +62,6 @@ public class InviteMemberService extends BaseService{
     private Button mBtnLiveSelectmemberStart;
     private LinearLayout mLlLiveSelectmemberTheme;
     private TextView mTvLiveSelectmemberTheme;
-    private LinearLayout mLlNoInfo;
-    private TextView mTvNoUser;
-    private ImageView mIvSearch;
     private RecyclerView mCatalogRecyclerview;
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerview;
@@ -104,11 +101,11 @@ public class InviteMemberService extends BaseService{
         mLlLiveSelectmemberTheme = rootView.findViewById(R.id.ll_live_selectmember_theme);
         mTvLiveSelectmemberTheme = rootView.findViewById(R.id.tv_live_selectmember_theme);
 
-        mLlNoInfo = rootView.findViewById(R.id.ll_no_info);
-        mTvNoUser = rootView.findViewById(R.id.tv_no_user);
+        LinearLayout mLlNoInfo = rootView.findViewById(R.id.ll_no_info);
+        TextView mTvNoUser = rootView.findViewById(R.id.tv_no_user);
 
         mCatalogRecyclerview =  rootView.findViewById(R.id.catalog_recyclerview);
-        mIvSearch =  rootView.findViewById(R.id.iv_search);
+        ImageView mIvSearch = rootView.findViewById(R.id.iv_search);
         mSwipeRefreshLayout =  rootView.findViewById(R.id.swipeRefreshLayout);
         mRecyclerview =  rootView.findViewById(R.id.recyclerview);
     }
@@ -508,23 +505,4 @@ public class InviteMemberService extends BaseService{
         MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("",mTerminalMessage,members);
         removeView();
     }
-
-
-
-
-
-//    private List<Member> searchContent(String content){
-//        List<Member> list = new ArrayList<>();
-//        for(int i = 0; i < memberList.size(); i++){
-//            if(String.valueOf(memberList.get(i).getNo()).contains(content)){
-//                list.add(memberList.get(i));
-//            }else{
-//                String name = memberList.get(i).getName();
-//                if(!Util.isEmpty(name) && !Util.isEmpty(content) && name.toLowerCase().contains(content.toLowerCase())){
-//                    list.add(memberList.get(i));
-//                }
-//            }
-//        }
-//        return list;
-//    }
 }

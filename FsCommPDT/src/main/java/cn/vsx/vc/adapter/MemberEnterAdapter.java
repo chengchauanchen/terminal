@@ -86,7 +86,4 @@ public class MemberEnterAdapter extends BaseAdapter {
         }
     }
 
-    public void refreshMemberEnterAdapter(){
-        notifyDataSetChanged();
-    }
 }

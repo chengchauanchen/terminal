@@ -9,5 +9,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 
 public interface ReceiverKeyboardHeightHandler extends ReceiveHandler {
 
-    public void handler(int keyboardHeight);
+    void handler(int keyboardHeight);
 }

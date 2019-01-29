@@ -90,26 +90,20 @@ public class TemporaryGroupView extends LinearLayout{
                 bottom_diver.setVisibility(GONE);
             }
 
-            ivMessage.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    Intent intent = new Intent(getContext(), GroupCallNewsActivity.class);
-                    intent.putExtra("isGroup", true);
-                    intent.putExtra("userId", group.getNo());//组id
-                    intent.putExtra("userName", group.getName());
-                    intent.putExtra("speakingId",group.getId());
-                    intent.putExtra("speakingName",group.getName());
+            ivMessage.setOnClickListener(view -> {
+                Intent intent = new Intent(getContext(), GroupCallNewsActivity.class);
+                intent.putExtra("isGroup", true);
+                intent.putExtra("userId", group.getNo());//组id
+                intent.putExtra("userName", group.getName());
+                intent.putExtra("speakingId",group.getId());
+                intent.putExtra("speakingName",group.getName());
 
-                    getContext().startActivity(intent);
-                }
+                getContext().startActivity(intent);
             });
 
-            tvChangeGroup.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    MyTerminalFactory.getSDK().getGroupManager().changeGroup(group.getNo());
-                    requestLayout();
-                }
+            tvChangeGroup.setOnClickListener(view -> {
+                MyTerminalFactory.getSDK().getGroupManager().changeGroup(group.getNo());
+                requestLayout();
             });
         }
     }

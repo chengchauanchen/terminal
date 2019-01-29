@@ -8,6 +8,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import cn.vsx.vc.R;
 
 public class ProgressDialog extends Dialog {
@@ -23,9 +24,9 @@ public class ProgressDialog extends Dialog {
 		LayoutInflater inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View view = inflater.inflate(R.layout.progress_dialog, null);
-        iv_loading_bg = (ImageView)view.findViewById(R.id.iv_loading_bg);
-        img = (ImageView) view.findViewById(R.id.progress_dialog_img);
-		txt = (TextView) view.findViewById(R.id.progress_dialog_txt);
+        iv_loading_bg = view.findViewById(R.id.iv_loading_bg);
+        img =  view.findViewById(R.id.progress_dialog_img);
+		txt =  view.findViewById(R.id.progress_dialog_txt);
 		
 		Animation anim = AnimationUtils.loadAnimation(context,
 				R.anim.loading_dialog_progressbar_anim);

@@ -96,12 +96,9 @@ public class LocationFragment extends Fragment{
         if(!TextUtils.isEmpty(name)){
             ll_top_bar.setVisibility(View.VISIBLE);
             tv_name_face.setText(name);
-            iv_back_face.setOnClickListener(new View.OnClickListener(){
-                @Override
-                public void onClick(View v){
-                    frameLayout.setVisibility(View.GONE);
-                    getFragmentManager().popBackStack();
-                }
+            iv_back_face.setOnClickListener(v -> {
+                frameLayout.setVisibility(View.GONE);
+                getFragmentManager().popBackStack();
             });
         }
         WebSettings settings = wv_help.getSettings();
@@ -138,15 +135,12 @@ public class LocationFragment extends Fragment{
             wv_help.setWebViewClient(new WebViewClient(){
                 @Override
                 public void onPageFinished(WebView view, String url){
-                    myHandler.post(new Runnable(){
-                        @Override
-                        public void run(){
-                            try{
-                                ll_pb.setVisibility(View.GONE);
-                                wv_help.setEnabled(true);
-                            }catch(Exception e){
-                                e.printStackTrace();
-                            }
+                    myHandler.post(() -> {
+                        try{
+                            ll_pb.setVisibility(View.GONE);
+                            wv_help.setEnabled(true);
+                        }catch(Exception e){
+                            e.printStackTrace();
                         }
                     });
                 }
@@ -161,17 +155,14 @@ public class LocationFragment extends Fragment{
                 ToastUtil.showToast(getActivity(), "获取人脸识别信息失败！");
             }
         }
-        ((ChatBaseActivity) getActivity()).setBackListener(new ChatBaseActivity.OnBackListener(){
-            @Override
-            public void onBack(){
-                if(null !=fragment_contener){
-                    fragment_contener.setVisibility(View.GONE);
-                }
-                if(null != getActivity() && !isDetached()){
-                    getActivity().getSupportFragmentManager().beginTransaction().remove(LocationFragment.this).commit();
-                    getActivity().getSupportFragmentManager().popBackStack();
-                    ((ChatBaseActivity) getActivity()).setBackListener(null);
-                }
+        ((ChatBaseActivity) getActivity()).setBackListener(() -> {
+            if(null !=fragment_contener){
+                fragment_contener.setVisibility(View.GONE);
+            }
+            if(null != getActivity() && !isDetached()){
+                getActivity().getSupportFragmentManager().beginTransaction().remove(LocationFragment.this).commit();
+                getActivity().getSupportFragmentManager().popBackStack();
+                ((ChatBaseActivity) getActivity()).setBackListener(null);
             }
         });
     }

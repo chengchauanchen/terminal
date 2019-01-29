@@ -76,60 +76,43 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
     private int CREATE_TEMP_GROUP=0;
     private int INCREASE_MEMBER=1;
     //更新警务通成员信息
-    private ReceiveUpdatePhoneMemberHandler receiveUpdatePhoneMemberHandler = new ReceiveUpdatePhoneMemberHandler() {
-        @Override
-        public void handler(List<Member> allMembers) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
-                    List<CatalogBean> catalogBeanList = new ArrayList<>();
-                    CatalogBean bean = new CatalogBean();
-                    bean.setName(memberResponse.getName());
-                    bean.setBean(memberResponse);
-                    catalogBeanList.add(bean);
-                    updateData(memberResponse,catalogBeanList);
-                }
-            });
-        }
-    };
+    private ReceiveUpdatePhoneMemberHandler receiveUpdatePhoneMemberHandler = allMembers -> myHandler.post(() -> {
+        MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
+        List<CatalogBean> catalogBeanList = new ArrayList<>();
+        CatalogBean bean = new CatalogBean();
+        bean.setName(memberResponse.getName());
+        bean.setBean(memberResponse);
+        catalogBeanList.add(bean);
+        updateData(memberResponse,catalogBeanList);
+    });
 
     /**
      * 更新配置信息
      */
-    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler(){
-        @Override
-        public void handler(){//更新当前组
-            CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
-            myHandler.post(new Runnable(){
-                @Override
-                public void run() {
-                    MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
-                    List<CatalogBean> catalogBeanList = new ArrayList<>();
-                    CatalogBean bean = new CatalogBean();
-                    bean.setName(memberResponse.getName());
-                    bean.setBean(memberResponse);
-                    catalogBeanList.add(bean);
-                    updateData(memberResponse,catalogBeanList);
-                }
-            });
-        }
+    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> {//更新当前组
+        CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
+        myHandler.post(() -> {
+            MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
+            List<CatalogBean> catalogBeanList = new ArrayList<>();
+            CatalogBean bean = new CatalogBean();
+            bean.setName(memberResponse.getName());
+            bean.setBean(memberResponse);
+            catalogBeanList.add(bean);
+            updateData(memberResponse,catalogBeanList);
+        });
     };
 
     private ReceiverSelectTempGroupMemberHandler receiverSelectTempGroupMemberHandler=new ReceiverSelectTempGroupMemberHandler(){
 
         @Override
         public void handler(final int memberNo, boolean isAdd) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    List<Integer> selectMember = mIncreaseTemporaryGroupMemberAdapter.getSelectItem();
-                    if(selectMember.contains(memberNo)){
-                        ToastUtil.showToast(IncreaseTemporaryGroupMemberActivity.this,"您已经添加过该成员");
-                        return;
-                    }
-                    mIncreaseTemporaryGroupMemberAdapter.setSelectItem(memberNo);
+            myHandler.post(() -> {
+                List<Integer> selectMember = mIncreaseTemporaryGroupMemberAdapter.getSelectItem();
+                if(selectMember.contains(memberNo)){
+                    ToastUtil.showToast(IncreaseTemporaryGroupMemberActivity.this,"您已经添加过该成员");
+                    return;
                 }
+                mIncreaseTemporaryGroupMemberAdapter.setSelectItem(memberNo);
             });
         }
     };
@@ -174,90 +157,72 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdatePhoneMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiverSelectTempGroupMemberHandler);
-        mCatalogAdapter.setOnItemClick(new CatalogAdapter.ItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                MemberResponse memberResponse = mCatalogList.get(position).getBean();
+        mCatalogAdapter.setOnItemClick((view, position) -> {
+            MemberResponse memberResponse = mCatalogList.get(position).getBean();
 
-                List<CatalogBean> catalogList = new ArrayList<>();
-                catalogList.addAll(mCatalogList.subList(0, position + 1));
-                updateData(memberResponse,catalogList);
-            }
+            List<CatalogBean> catalogList = new ArrayList<>();
+            catalogList.addAll(mCatalogList.subList(0, position + 1));
+            updateData(memberResponse,catalogList);
         });
 
-        mIncreaseTemporaryGroupMemberAdapter.setOnItemClickListener(new IncreaseTemporaryGroupMemberAdapter.ItemClickListener(){
-
-            @Override
-            public void onItemClick(View view, int postion, int itemType) {
-                if (itemType == Constants.TYPE_DEPARTMENT) {
-                    MemberResponse memberResponse = (MemberResponse) mDatas.get(postion).getBean();
-                    if (memberResponse != null) {
-                        CatalogBean catalog = new CatalogBean();
-                        catalog.setName(memberResponse.getName());
-                        catalog.setBean(memberResponse);
-                        mCatalogList.add(catalog);
-                        List<CatalogBean> catalogBeanList = new ArrayList<>();
-                        catalogBeanList.addAll(mCatalogList);
-                        updateData(memberResponse, catalogBeanList);
-                    }
-                } else if(itemType == Constants.TYPE_USER){
-
-                    if(!mIncreaseTemporaryGroupMemberAdapter.getSelectMember().isEmpty()){
-                        okBtn.setText("确定(" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember().size() + ")");
-                        okBtn.setBackgroundResource(R.drawable.live_theme_confirm_bg);
-                        ll_select_member.setVisibility(View.VISIBLE);
-                    }else {
-                        if(type ==CREATE_TEMP_GROUP){
-                            okBtn.setText("下一步");
-                        }else {
-                            okBtn.setText("确定");
-                        }
-                        okBtn.setBackgroundResource(R.drawable.live_theme_confirm_bg);
-                        ll_select_member.setVisibility(View.GONE);
-                    }
-
-
-                    StringBuffer sb = new StringBuffer();
-                    Log.e("OnInvitaListViewItemCli", "selectItem:" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember());
-                    for (Member m : mIncreaseTemporaryGroupMemberAdapter.getSelectMember()) {
-                        sb.append(m.getName() + "  ");
-                    }
-                    tv_checktext.setText(sb);
-                    //获取textview宽度
-                    TextPaint textPaint = new TextPaint();
-                    textPaint = tv_checktext.getPaint();
-                    float textPaintWidth = textPaint.measureText(sb.toString());
-
-                    if (textPaintWidth >= screenWidth - (screenWidth / 4)) {
-                        horizonMenu.setLayoutParams(new LinearLayout.LayoutParams(screenWidth - (screenWidth / 4), ViewGroup.LayoutParams.WRAP_CONTENT));
-                        logger.info("textView的宽度达到了屏幕的五分之四");
-                    } else {
-                        horizonMenu.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
-                    }
-                    //滚动到最右边
-                    horizonMenu.post(new Runnable(){
-                        @Override
-                        public void run(){
-                            horizonMenu.fullScroll(HorizontalScrollView.FOCUS_RIGHT);
-                        }
-                    });
+        mIncreaseTemporaryGroupMemberAdapter.setOnItemClickListener((view, postion, itemType) -> {
+            if (itemType == Constants.TYPE_DEPARTMENT) {
+                MemberResponse memberResponse = (MemberResponse) mDatas.get(postion).getBean();
+                if (memberResponse != null) {
+                    CatalogBean catalog = new CatalogBean();
+                    catalog.setName(memberResponse.getName());
+                    catalog.setBean(memberResponse);
+                    mCatalogList.add(catalog);
+                    List<CatalogBean> catalogBeanList = new ArrayList<>();
+                    catalogBeanList.addAll(mCatalogList);
+                    updateData(memberResponse, catalogBeanList);
                 }
+            } else if(itemType == Constants.TYPE_USER){
+
+                if(!mIncreaseTemporaryGroupMemberAdapter.getSelectMember().isEmpty()){
+                    okBtn.setText("确定(" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember().size() + ")");
+                    okBtn.setBackgroundResource(R.drawable.live_theme_confirm_bg);
+                    ll_select_member.setVisibility(View.VISIBLE);
+                }else {
+                    if(type ==CREATE_TEMP_GROUP){
+                        okBtn.setText("下一步");
+                    }else {
+                        okBtn.setText("确定");
+                    }
+                    okBtn.setBackgroundResource(R.drawable.live_theme_confirm_bg);
+                    ll_select_member.setVisibility(View.GONE);
+                }
+
+
+                StringBuffer sb = new StringBuffer();
+                Log.e("OnInvitaListViewItemCli", "selectItem:" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember());
+                for (Member m : mIncreaseTemporaryGroupMemberAdapter.getSelectMember()) {
+                    sb.append(m.getName() + "  ");
+                }
+                tv_checktext.setText(sb);
+                //获取textview宽度
+                TextPaint textPaint = new TextPaint();
+                textPaint = tv_checktext.getPaint();
+                float textPaintWidth = textPaint.measureText(sb.toString());
+
+                if (textPaintWidth >= screenWidth - (screenWidth / 4)) {
+                    horizonMenu.setLayoutParams(new LinearLayout.LayoutParams(screenWidth - (screenWidth / 4), ViewGroup.LayoutParams.WRAP_CONTENT));
+                    logger.info("textView的宽度达到了屏幕的五分之四");
+                } else {
+                    horizonMenu.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                }
+                //滚动到最右边
+                horizonMenu.post(() -> horizonMenu.fullScroll(HorizontalScrollView.FOCUS_RIGHT));
             }
         });
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                TerminalFactory.getSDK().getConfigManager().updataPhoneMemberInfo();
-                myHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        // 加载完数据设置为不刷新状态，将下拉进度收起来
-                        swipeRefreshLayout.setRefreshing(false);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            TerminalFactory.getSDK().getConfigManager().updataPhoneMemberInfo();
+            myHandler.postDelayed(() -> {
+                // 加载完数据设置为不刷新状态，将下拉进度收起来
+                swipeRefreshLayout.setRefreshing(false);
 
-                    }
-                }, 1200);
-            }
+            }, 1200);
         });
     }
 
@@ -382,14 +347,14 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
         }
     }
     private long lastSearchTime=0;
-    private long currentTime=0;
+
     @OnClick({R.id.news_bar_back,R.id.iv_search,R.id.ok_btn})
     public void onClick(View view) {
-        currentTime=System.currentTimeMillis();
+        long currentTime = System.currentTimeMillis();
         if(currentTime - lastSearchTime<1000){
             return;
         }
-        lastSearchTime=currentTime;
+        lastSearchTime= currentTime;
         switch (view.getId()) {
             case R.id.news_bar_back:
                 finish();

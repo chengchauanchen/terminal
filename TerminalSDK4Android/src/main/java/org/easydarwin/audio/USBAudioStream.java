@@ -30,17 +30,16 @@ import ptt.terminalsdk.context.MyTerminalFactory;
  */
 
 public class USBAudioStream{
-    EasyMuxer muxer;
+    private EasyMuxer muxer;
     private int samplingRate = 8000;
     private int bitRate = 16000;
     private int BUFFER_SIZE = 1920;
-    int mSamplingRateIndex = 0;
-    AudioRecord mAudioRecord;
-    MediaCodec mMediaCodec;
-    Pusher easyPusher;
+    private int mSamplingRateIndex = 0;
+    private AudioRecord mAudioRecord;
+    private MediaCodec mMediaCodec;
+    private Pusher easyPusher;
     private Thread mThread = null;
-    String TAG = "AudioStream";
-    //final String path = Environment.getExternalStorageDirectory() + "/123450001.aac";
+    private String TAG = "AudioStream";
 
     protected MediaCodec.BufferInfo mBufferInfo = new MediaCodec.BufferInfo();
     protected ByteBuffer[] mBuffers = null;

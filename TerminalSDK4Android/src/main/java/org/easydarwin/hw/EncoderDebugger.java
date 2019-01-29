@@ -118,6 +118,7 @@ public class EncoderDebugger {
                             .getDefaultSharedPreferences(context);
                     debug(prefs, width, height);
                 } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }).start();

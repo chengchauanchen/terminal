@@ -44,12 +44,9 @@ public class CatalogAdapter extends RecyclerView.Adapter<CatalogAdapter.MyViewHo
 
         holder.tvCatalog.setText(mCatalogs.get(position).getName());
 
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (mItemClickListener!=null){
-                    mItemClickListener.onItemClick(view,position);
-                }
+        holder.itemView.setOnClickListener(view -> {
+            if (mItemClickListener!=null){
+                mItemClickListener.onItemClick(view,position);
             }
         });
 
@@ -73,8 +70,8 @@ public class CatalogAdapter extends RecyclerView.Adapter<CatalogAdapter.MyViewHo
         TextView tvCatalog;
         public MyViewHolder(View itemView) {
             super(itemView);
-            iv= (ImageView) itemView.findViewById(R.id.iv);
-            tvCatalog= (TextView) itemView.findViewById(R.id.tv_catalog);
+            iv=  itemView.findViewById(R.id.iv);
+            tvCatalog=  itemView.findViewById(R.id.tv_catalog);
         }
     }
 }

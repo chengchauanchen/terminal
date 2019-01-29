@@ -8,5 +8,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverShowPopupwindowHandler extends ReceiveHandler {
-    public void handler(String className);
+    void handler(String className);
 }

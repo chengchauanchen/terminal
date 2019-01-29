@@ -18,7 +18,6 @@ import cn.vsx.vc.receiveHandle.ReceiverRemoveWindowViewHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.cameralibrary.JCameraView;
-import cn.vsx.vc.view.cameralibrary.listener.ClickListener;
 import cn.vsx.vc.view.cameralibrary.listener.ErrorListener;
 import cn.vsx.vc.view.cameralibrary.listener.JCameraListener;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -66,7 +65,7 @@ public class CameraActivity extends BaseActivity {
 
     @Override
     public void initView() {
-        jCameraView = (JCameraView) findViewById(R.id.jcameraview);
+        jCameraView =  findViewById(R.id.jcameraview);
         //设置视频保存路径
         jCameraView.setSaveVideoPath(TerminalFactory.getSDK().getVideoRecordDirectory());
         //设置只能录像或只能拍照或两种都可以（默认两种都可以）
@@ -124,13 +123,10 @@ public class CameraActivity extends BaseActivity {
 
         );
         //左边按钮点击事件
-        jCameraView.setLeftClickListener(new ClickListener() {
-            @Override
-            public void onClick() {
-                Log.d("CJT","左边按钮被点击");
-                CameraActivity.this.setResult(CODE_FAIL);
-                CameraActivity.this.finish();
-            }
+        jCameraView.setLeftClickListener(() -> {
+            Log.d("CJT","左边按钮被点击");
+            CameraActivity.this.setResult(CODE_FAIL);
+            CameraActivity.this.finish();
         });
     }
 
@@ -175,36 +171,16 @@ public class CameraActivity extends BaseActivity {
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler(){
         @Override
         public void handler(String mainMemberName, int mainMemberId){
-            runOnUiThread(new Runnable(){
-                @Override
-                public void run(){
-                    jCameraView.onStop();
-                }
-            });
+            runOnUiThread(() -> jCameraView.onStop());
         }
     };
 
     private ReceiveNotifyIndividualCallIncommingHandler mReceiveNotifyIndividualCallIncommingHandler = new ReceiveNotifyIndividualCallIncommingHandler(){
         @Override
         public void handler(String mainMemberName, int mainMemberId, int individualCallType){
-            runOnUiThread(new Runnable(){
-                @Override
-                public void run(){
-                    jCameraView.onStop();
-                }
-            });
+            runOnUiThread(() -> jCameraView.onStop());
         }
     };
 
-    private ReceiverRemoveWindowViewHandler mReceiverRemoveWindowViewHandler = new ReceiverRemoveWindowViewHandler(){
-        @Override
-        public void handle(String className){
-            runOnUiThread(new Runnable(){
-                @Override
-                public void run(){
-                    hideBottomUIMenu();
-                }
-            });
-        }
-    };
+    private ReceiverRemoveWindowViewHandler mReceiverRemoveWindowViewHandler = className -> runOnUiThread(() -> hideBottomUIMenu());
 }

@@ -8,5 +8,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 
 public interface ReceiverSelectTempGroupMemberHandler extends ReceiveHandler {
 
-    public void handler(int memberNo,boolean isAdd);
+    void handler(int memberNo, boolean isAdd);
 }

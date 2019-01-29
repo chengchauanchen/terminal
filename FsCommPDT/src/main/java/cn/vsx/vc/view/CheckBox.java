@@ -39,7 +39,6 @@ public class CheckBox extends View {
     private StaticLayout textLayout;
     private float textWidth;
     private float textHeight;
-    private float textLeft;
 
     private boolean drawBackground;
 
@@ -276,7 +275,7 @@ public class CheckBox extends View {
                     new StaticLayout(text, textPaint,
                             SystemUtil.dp(100), Layout.Alignment.ALIGN_NORMAL, 1.0f, 0.0f, false);
             if (textLayout.getLineCount() > 0) {
-                textLeft = textLayout.getLineLeft(0);
+                float textLeft = textLayout.getLineLeft(0);
                 textWidth = textLayout.getLineWidth(0);
                 textHeight = textLayout.getLineBottom(0);
                 invalidate();

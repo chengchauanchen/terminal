@@ -1,11 +1,12 @@
 package ptt.terminalsdk.broadcastreceiver;
 
-import org.apache.log4j.Logger;
-
-import ptt.terminalsdk.context.OnlineService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+
+import org.apache.log4j.Logger;
+
+import ptt.terminalsdk.context.OnlineService;
 
 public class AutoStartReceiver extends BroadcastReceiver {
 

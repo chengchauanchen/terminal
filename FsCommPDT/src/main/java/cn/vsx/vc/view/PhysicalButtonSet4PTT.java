@@ -105,69 +105,60 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
 
         //上音量键
-        pptButtonAdd.setOnBtnClick(new MToggleButton.OnBtnClickListener() {
-            @Override
-            public void onBtnClick(boolean currState) {
-                selected[1] = currState;
-                if (currState) {
+        pptButtonAdd.setOnBtnClick(currState -> {
+            selected[1] = currState;
+            if (currState) {
 //                    up_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_black));
-                    MyTerminalFactory.getSDK().putParam(Params.VOLUME_UP, true);
-                } else {
+                MyTerminalFactory.getSDK().putParam(Params.VOLUME_UP, true);
+            } else {
 //                    up_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_gray));
-                    MyTerminalFactory.getSDK().putParam(Params.VOLUME_UP, false);
-                    if(!selected[2]) {
+                MyTerminalFactory.getSDK().putParam(Params.VOLUME_UP, false);
+                if(!selected[2]) {
 //                        tv_pttphysicalset.setTextColor(context.getResources().getColor(R.color.setting_text_gray));
-                        ll_voice.setVisibility(View.GONE);
-                        btn_pttphysicalset.initToggleState(false);
-                        MyTerminalFactory.getSDK().putParam(Params.SHOW_PTT_PHYSICAL_SET, false);
-                    }
+                    ll_voice.setVisibility(View.GONE);
+                    btn_pttphysicalset.initToggleState(false);
+                    MyTerminalFactory.getSDK().putParam(Params.SHOW_PTT_PHYSICAL_SET, false);
                 }
             }
         });
         //下音量键
-        pptButtonCut.setOnBtnClick(new MToggleButton.OnBtnClickListener() {
-            @Override
-            public void onBtnClick(boolean currState) {
-                selected[2] = currState;
-                if (currState) {
+        pptButtonCut.setOnBtnClick(currState -> {
+            selected[2] = currState;
+            if (currState) {
 //                    down_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_black));
-                    MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, true);
-                } else {
+                MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, true);
+            } else {
 //                    down_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_gray));
-                    MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, false);
-                    if(!selected[1]) {
+                MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, false);
+                if(!selected[1]) {
 //                        tv_pttphysicalset.setTextColor(context.getResources().getColor(R.color.setting_text_gray));
-                        ll_voice.setVisibility(View.GONE);
-                        btn_pttphysicalset.initToggleState(false);
-                        MyTerminalFactory.getSDK().putParam(Params.SHOW_PTT_PHYSICAL_SET, false);
-                    }
+                    ll_voice.setVisibility(View.GONE);
+                    btn_pttphysicalset.initToggleState(false);
+                    MyTerminalFactory.getSDK().putParam(Params.SHOW_PTT_PHYSICAL_SET, false);
                 }
             }
         });
 
-        btn_pttphysicalset.setOnBtnClick(new MToggleButton.OnBtnClickListener() {
-            @Override
-            public void onBtnClick(boolean currState) {
-                selected[1] = currState;
-                selected[2] = currState;
-                if(currState) {
+        btn_pttphysicalset.setOnBtnClick(currState -> {
+            selected[1] = currState;
+            selected[2] = currState;
+            if(currState) {
 //                    tv_pttphysicalset.setTextColor(context.getResources().getColor(R.color.setting_text_black));
 //                    down_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_black));
 //                    up_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_black));
-                    ll_voice.setVisibility(View.VISIBLE);
-                    pptButtonAdd.initToggleState(true);
-                    pptButtonCut.initToggleState(true);
-                    MyTerminalFactory.getSDK().putParam(Params.SHOW_PTT_PHYSICAL_SET, true);
-                    MyTerminalFactory.getSDK().putParam(Params.VOLUME_UP, true);
-                    MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, true);
-                }
-                else {
+                ll_voice.setVisibility(View.VISIBLE);
+                pptButtonAdd.initToggleState(true);
+                pptButtonCut.initToggleState(true);
+                MyTerminalFactory.getSDK().putParam(Params.SHOW_PTT_PHYSICAL_SET, true);
+                MyTerminalFactory.getSDK().putParam(Params.VOLUME_UP, true);
+                MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, true);
+            }
+            else {
 //                    tv_pttphysicalset.setTextColor(context.getResources().getColor(R.color.setting_text_gray));
-                    ll_voice.setVisibility(View.GONE);
-                    MyTerminalFactory.getSDK().putParam(Params.SHOW_PTT_PHYSICAL_SET, false);
-                    MyTerminalFactory.getSDK().putParam(Params.VOLUME_UP, false);
-                    MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, false);
-                }
+                ll_voice.setVisibility(View.GONE);
+                MyTerminalFactory.getSDK().putParam(Params.SHOW_PTT_PHYSICAL_SET, false);
+                MyTerminalFactory.getSDK().putParam(Params.VOLUME_UP, false);
+                MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, false);
             }
         });
     }
@@ -175,16 +166,12 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
     private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
         @Override
         public void handler(final int methodResult, String resultDesc) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (methodResult == 0) {//请求成功，开始组呼
-                        pptButtonCut.setEnabled(false);
-                        pptButtonAdd.setEnabled(false);
-                        btn_pttphysicalset.setEnabled(false);
-                    }
+            myHandler.post(() -> {
+                if (methodResult == 0) {//请求成功，开始组呼
+                    pptButtonCut.setEnabled(false);
+                    pptButtonAdd.setEnabled(false);
+                    btn_pttphysicalset.setEnabled(false);
                 }
-
             });
         }
     };
@@ -193,13 +180,10 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
 
         @Override
         public void handler(int resultCode, String resultDesc) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    pptButtonCut.setEnabled(true);
-                    pptButtonAdd.setEnabled(true);
-                    btn_pttphysicalset.setEnabled(true);
-                }
+            myHandler.post(() -> {
+                pptButtonCut.setEnabled(true);
+                pptButtonAdd.setEnabled(true);
+                btn_pttphysicalset.setEnabled(true);
             });
         }
     };

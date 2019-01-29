@@ -25,7 +25,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -86,33 +85,30 @@ public class BleActivity extends BaseActivity{
 
     @Override
     public void initListener(){
-        switch_ble.setOnBtnClick(new MToggleButton.OnBtnClickListener(){
-            @Override
-            public void onBtnClick(boolean currState){
-                if(currState){
-                    //打开蓝牙
-                    if(enableBluetooth(true)){
-                        tv_close_ble.setVisibility(View.GONE);
-                        rl_usable_device.setVisibility(View.VISIBLE);
-                        mHandler.postDelayed(scanDevice,2000);
-                    }else{
-                        switch_ble.initToggleState(false);
-                        ToastUtil.showToast(BleActivity.this,"请打开蓝牙的权限");
-                    }
+        switch_ble.setOnBtnClick(currState -> {
+            if(currState){
+                //打开蓝牙
+                if(enableBluetooth(true)){
+                    tv_close_ble.setVisibility(View.GONE);
+                    rl_usable_device.setVisibility(View.VISIBLE);
+                    mHandler.postDelayed(scanDevice,2000);
                 }else{
-                    //关闭蓝牙
-                    if(enableBluetooth(false)){
-                        if(mScanning){
-                            scanLeDevice(false);
-                        }
-                        mLeDevices.clear();
-                        devices.clear();
-                        mLeDeviceListAdapter.notifyDataSetChanged();
-                        rl_usable_device.setVisibility(View.GONE);
-                        tv_close_ble.setVisibility(View.VISIBLE);
-                    }else{
-                        switch_ble.initToggleState(true);
+                    switch_ble.initToggleState(false);
+                    ToastUtil.showToast(BleActivity.this,"请打开蓝牙的权限");
+                }
+            }else{
+                //关闭蓝牙
+                if(enableBluetooth(false)){
+                    if(mScanning){
+                        scanLeDevice(false);
                     }
+                    mLeDevices.clear();
+                    devices.clear();
+                    mLeDeviceListAdapter.notifyDataSetChanged();
+                    rl_usable_device.setVisibility(View.GONE);
+                    tv_close_ble.setVisibility(View.VISIBLE);
+                }else{
+                    switch_ble.initToggleState(true);
                 }
             }
         });
@@ -142,12 +138,7 @@ public class BleActivity extends BaseActivity{
         registerReceiver(mbtBroadcastReceiver, makeGattUpdateIntentFilter());
         if(mBluetoothAdapter.isEnabled()){
             switch_ble.initToggleState(true);
-            mHandler.postDelayed(new Runnable(){
-                @Override
-                public void run(){
-                    scanLeDevice(true);
-                }
-            },500);
+            mHandler.postDelayed(() -> scanLeDevice(true),500);
             tv_close_ble.setVisibility(View.GONE);
             rl_usable_device.setVisibility(View.VISIBLE);
         }else{
@@ -157,32 +148,29 @@ public class BleActivity extends BaseActivity{
         }
         mLeDeviceListAdapter = new LeDeviceListAdapter(mLeDevices);
         bleList.setAdapter(mLeDeviceListAdapter);
-        bleList.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id){
-                mHandler.removeCallbacksAndMessages(null);
-                //如果正在连接，不用管
-                if(connecting){
-                    return;
-                }
-                final MyBleDevice device = mLeDevices.get(position);
-                if(device.getBluetoothDevice() == null){
-                    return;
-                }
-                if(mScanning){
-                    hideConnectingAnimate();
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                    mBluetoothAdapter.cancelDiscovery();
-                    mScanning = false;
-                }
-                connectingPosition = position;
-                connecting = true;
-                connectingDeviceAddress = device.getBluetoothDevice().getAddress();
-                mLeDevices.get(position).setStatus(2);
-                mLeDeviceListAdapter.notifyDataSetChanged();
-                connectDevice(device);
-
+        bleList.setOnItemClickListener((parent, view, position, id) -> {
+            mHandler.removeCallbacksAndMessages(null);
+            //如果正在连接，不用管
+            if(connecting){
+                return;
             }
+            final MyBleDevice device = mLeDevices.get(position);
+            if(device.getBluetoothDevice() == null){
+                return;
+            }
+            if(mScanning){
+                hideConnectingAnimate();
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                mBluetoothAdapter.cancelDiscovery();
+                mScanning = false;
+            }
+            connectingPosition = position;
+            connecting = true;
+            connectingDeviceAddress = device.getBluetoothDevice().getAddress();
+            mLeDevices.get(position).setStatus(2);
+            mLeDeviceListAdapter.notifyDataSetChanged();
+            connectDevice(device);
+
         });
     }
 
@@ -293,19 +281,16 @@ public class BleActivity extends BaseActivity{
         @Override
         public void onLeScan(final BluetoothDevice device, final int rssi, byte[] scanRecord){
             Log.e("BleActivity", device.getAddress());
-            mHandler.postDelayed(new Runnable(){
-                @Override
-                public void run(){
-                    if(!devices.contains(device) && StringUtil.checkStringIsValid(device.getName())){
-                        MyBleDevice myBleDevice = new MyBleDevice();
-                        myBleDevice.setBluetoothDevice(device);
-                        myBleDevice.setStatus(1);
-                        mLeDevices.add(myBleDevice);
-                        devices.add(device);
-                        mLeDeviceListAdapter.notifyDataSetChanged();
-                    }
-
+            mHandler.postDelayed(() -> {
+                if(!devices.contains(device) && StringUtil.checkStringIsValid(device.getName())){
+                    MyBleDevice myBleDevice = new MyBleDevice();
+                    myBleDevice.setBluetoothDevice(device);
+                    myBleDevice.setStatus(1);
+                    mLeDevices.add(myBleDevice);
+                    devices.add(device);
+                    mLeDeviceListAdapter.notifyDataSetChanged();
                 }
+
             }, SCAN_LIST);
         }
     };
@@ -342,19 +327,9 @@ public class BleActivity extends BaseActivity{
         unregisterReceiver(mbtBroadcastReceiver);
     }
 
-    private Runnable scanDevice = new Runnable(){
-        @Override
-        public void run(){
-            scanLeDevice(true);
-        }
-    };
+    private Runnable scanDevice = () -> scanLeDevice(true);
 
-    private Runnable stopScan = new Runnable(){
-        @Override
-        public void run(){
-            scanLeDevice(false);
-        }
-    };
+    private Runnable stopScan = () -> scanLeDevice(false);
 
     private Runnable afterScan = new Runnable(){
         @Override
@@ -450,9 +425,9 @@ public class BleActivity extends BaseActivity{
             if(view == null){
                 view = mInflator.inflate(R.layout.listitem_ble_device, null);
                 viewHolder = new ViewHolder();
-                viewHolder.deviceName = (TextView) view.findViewById(R.id.tv_device_name);
-                viewHolder.connected = (ImageView) view.findViewById(R.id.iv_connected);
-                viewHolder.connecting = (TextView) view.findViewById(R.id.tv_connecting);
+                viewHolder.deviceName =  view.findViewById(R.id.tv_device_name);
+                viewHolder.connected =  view.findViewById(R.id.iv_connected);
+                viewHolder.connecting =  view.findViewById(R.id.tv_connecting);
                 view.setTag(viewHolder);
             }else{
                 viewHolder = (ViewHolder) view.getTag();

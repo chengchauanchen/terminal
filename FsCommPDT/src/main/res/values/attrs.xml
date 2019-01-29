@@ -4,10 +4,10 @@
     <declare-styleable name="MToggleBtn">
 
         <!-- 声明属性 -->
-        <attr name="mtogglebutton_background_on" format="reference"></attr>
-        <attr name="mtogglebutton_background_off" format="reference"></attr>
-        <attr name="mtogglebutton_button_on" format="reference"></attr>
-        <attr name="mtogglebutton_button_off" format="reference"></attr>
+        <attr name="mtogglebutton_background_on" format="reference"/>
+        <attr name="mtogglebutton_background_off" format="reference"/>
+        <attr name="mtogglebutton_button_on" format="reference"/>
+        <attr name="mtogglebutton_button_off" format="reference"/>
 
     </declare-styleable>
     
@@ -39,12 +39,12 @@
     <declare-styleable name="RoundProgressBar">
         <attr name="roundColor" format="color"/>
         <attr name="roundProgressColor" format="color"/>
-        <attr name="roundWidth" format="dimension"></attr>
-        <attr name="max" format="integer"></attr>
-        <attr name="textIsDisplayable" format="boolean"></attr>
+        <attr name="roundWidth" format="dimension"/>
+        <attr name="max" format="integer"/>
+        <attr name="textIsDisplayable" format="boolean"/>
         <attr name="style">
-            <enum name="STROKE" value="0"></enum>
-            <enum name="FILL" value="1"></enum>
+            <enum name="STROKE" value="0"/>
+            <enum name="FILL" value="1"/>
         </attr>
     </declare-styleable>
     

@@ -26,9 +26,9 @@ public class RealtimeAudio {
     /** 接收与播放线程 */
     private Thread receiveAndPlayThread;
     private int nextSendCookie = 0;
-    private List<Integer> currentSendCookies = new ArrayList<Integer>();
+    private List<Integer> currentSendCookies = new ArrayList<>();
     private int nextReceiverCookie = 0;
-    private List<Integer> currentReceiverCookies = new ArrayList<Integer>();
+    private List<Integer> currentReceiverCookies = new ArrayList<>();
 
     private Logger logger = Logger.getLogger(getClass());
 

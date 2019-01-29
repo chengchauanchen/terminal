@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.ImageFormat;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.os.Build;
@@ -41,7 +40,6 @@ import java.util.List;
 
 import dagger.Module;
 import dagger.Provides;
-import ptt.terminalsdk.BuildConfig;
 
 import static android.graphics.ImageFormat.NV21;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar;
@@ -51,18 +49,15 @@ import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV4
 
 @Module
 public class MediaStream {
-    private static final boolean VERBOSE = BuildConfig.DEBUG;
     private static final int SWITCH_CAMERA = 11;
     private final boolean enanleVideo;
-    Pusher mEasyPusher;
+    private Pusher mEasyPusher;
     static final String TAG = "MediaStream";
-    int width = 640, height = 480;
-    int framerate, bitrate;
-    int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
-    MediaCodec mMediaCodec;
-    WeakReference<SurfaceTexture> mSurfaceHolderRef;
-    Camera mCamera;
-    boolean pushStream = false;//是否要推送数据
+    private int width = 640, height = 480;
+    private int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+    private WeakReference<SurfaceTexture> mSurfaceHolderRef;
+    private Camera mCamera;
+    private boolean pushStream = false;//是否要推送数据
     private AudioStream audioStream ;
     private boolean isCameraBack = true;
     private int mDgree;
@@ -131,7 +126,6 @@ public class MediaStream {
                         txt = "4GPTT " + new SimpleDateFormat("yy-MM-dd HH:mm:ss SSS").format(new Date());
                         //叠加水印
                         //overlay.overlay(data, txt);
-
                     }
                     mVC.onVideo(data, NV21);
                     mCamera.addCallbackBuffer(data);
@@ -228,27 +222,8 @@ public class MediaStream {
                 info.mName = ci.mName;
                 info.mColorFormat = ci.mColorFormat;
             }
-//            List<Camera.Size> sizes = parameters.getSupportedPreviewSizes();
             parameters.setPreviewSize(width, height);
-//            parameters.setPreviewFpsRange(max[0], max[1]);
             parameters.setPreviewFrameRate(20);
-
-//            int maxExposureCompensation = parameters.getMaxExposureCompensation();
-//            parameters.setExposureCompensation(3);
-//
-//            if(parameters.isAutoExposureLockSupported()) {
-//                parameters.setAutoExposureLock(false);
-//            }
-
-//            parameters.setWhiteBalance(Camera.Parameters.WHITE_BALANCE_AUTO);
-//            parameters.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
-//            parameters.setSceneMode(Camera.Parameters.SCENE_MODE_AUTO);
-//            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-//            mCamera.setFaceDetectionListener(new );
-
-//            if (parameters.isAutoWhiteBalanceLockSupported()){
-//                parameters.setAutoExposureLock(false);
-//            }
 
             mCamera.setParameters(parameters);
             Log.i(TAG, "setParameters");
@@ -603,7 +578,7 @@ public class MediaStream {
     }
 
     public void setSurfaceTexture(SurfaceTexture texture) {
-        mSurfaceHolderRef = new WeakReference<SurfaceTexture>(texture);
+        mSurfaceHolderRef = new WeakReference<>(texture);
     }
 
     public void release() {
@@ -638,7 +613,7 @@ public class MediaStream {
 
     public static ArrayList<CodecInfo> listEncoders(String mime) {
         // 可能有多个编码库，都获取一下。。。
-        ArrayList<CodecInfo> codecInfos = new ArrayList<CodecInfo>();
+        ArrayList<CodecInfo> codecInfos = new ArrayList<>();
         int numCodecs = MediaCodecList.getCodecCount();
         // int colorFormat = 0;
         // String name = null;

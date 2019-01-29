@@ -8,5 +8,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 
 public interface ReceiverDialogDimissHandler extends ReceiveHandler {
 
-    public void handler (String dialogName);
+    void handler(String dialogName);
 }

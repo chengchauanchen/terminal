@@ -3,7 +3,6 @@ package cn.vsx.vc.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.widget.GridLayoutManager;
@@ -24,7 +23,6 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.OnClick;
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
@@ -58,8 +56,6 @@ public class UserInfoActivity extends BaseActivity {
     TextView user_Name;
     @Bind(R.id.user_no)
     TextView user_no;
-    //    @Bind(R.id.user_ID_number)
-    //    TextView user_ID_number;
     @Bind(R.id.user_address)
     LinearLayout userAddress;
     @Bind(R.id.user_phone)
@@ -81,11 +77,9 @@ public class UserInfoActivity extends BaseActivity {
 
 
     private List<Picture> mPictures=new ArrayList<>();
-    private UserInfoMenuAdapter mAdapter;
 
     private Member member;
     private String userName;
-    private String avatarUrl;
     private int userId;
     private int VOIP=0;
     private int TELEPHONE=1;
@@ -100,7 +94,6 @@ public class UserInfoActivity extends BaseActivity {
         barTitle.setText("个人信息");
         rightBtn.setVisibility(View.GONE);
         btnOk.setVisibility(View.GONE);
-        //        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true,0);
     }
 
     @Override
@@ -113,7 +106,7 @@ public class UserInfoActivity extends BaseActivity {
     public void initData() {
         userId = getIntent().getIntExtra("userId", 0);
         userName = getIntent().getStringExtra("userName");
-        avatarUrl = getIntent().getStringExtra("avatarUrl");
+        String avatarUrl = getIntent().getStringExtra("avatarUrl");
         member = DataUtil.getMemberByMemberNo(userId);
 
 
@@ -135,7 +128,7 @@ public class UserInfoActivity extends BaseActivity {
 
     private void initBottomMenu() {
         mRecyclerView.setLayoutManager(new GridLayoutManager(UserInfoActivity.this,4));
-        mAdapter=new UserInfoMenuAdapter(UserInfoActivity.this,mPictures);
+        UserInfoMenuAdapter mAdapter = new UserInfoMenuAdapter(UserInfoActivity.this, mPictures);
 
         if (userId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){//如果是自己，则不显示操作菜单
             mRecyclerView.setVisibility(View.GONE);
@@ -154,63 +147,57 @@ public class UserInfoActivity extends BaseActivity {
         }
 
 
-        mAdapter.setOnItemClickListener(new UserInfoMenuAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(int postion, Picture picture) {
-                if (picture.getTitle().equals("发消息")){
-                    IndividualNewsActivity.startCurrentActivity(UserInfoActivity.this, userId, userName);
+        mAdapter.setOnItemClickListener((postion, picture) -> {
+            if (picture.getTitle().equals("发消息")){
+                IndividualNewsActivity.startCurrentActivity(UserInfoActivity.this, userId, userName);
 
-                }else if (picture.getTitle().equals("个呼")){
-                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                        ToastUtil.showToast(UserInfoActivity.this,"没有个呼功能权限");
-                    }else {
-                        activeIndividualCall();
-                    }
+            }else if (picture.getTitle().equals("个呼")){
+                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                    ToastUtil.showToast(UserInfoActivity.this,"没有个呼功能权限");
+                }else {
+                    activeIndividualCall();
+                }
 
 
-                } else if (picture.getTitle().equals("电话")) {
-                    if (!TextUtils.isEmpty(member.phone)) {
-                        ItemAdapter adapter = new ItemAdapter(UserInfoActivity.this, cn.vsx.vc.adapter.ItemAdapter.iniDatas());
-                        AlertDialog.Builder builder = new AlertDialog.Builder(UserInfoActivity.this);
-                        //设置标题
-                        builder.setTitle("拨打电话");
-                        builder.setAdapter(adapter, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialogInterface, int position) {
-                                if (position == VOIP) {//voip电话
-                                    if (MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS, false)) {
-                                        Intent intent = new Intent(UserInfoActivity.this, VoipPhoneActivity.class);
-                                        intent.putExtra("member", member);
-                                        UserInfoActivity.this.startActivity(intent);
-                                    } else {
-                                        ToastUtil.showToast(UserInfoActivity.this, "voip注册失败，请检查服务器配置");
-                                    }
-                                } else if (position == TELEPHONE) {//普通电话
-
-                                    CallPhoneUtil.callPhone(UserInfoActivity.this, member.phone);
-
-                                }
-
+            } else if (picture.getTitle().equals("电话")) {
+                if (!TextUtils.isEmpty(member.phone)) {
+                    ItemAdapter adapter = new ItemAdapter(UserInfoActivity.this, ItemAdapter.iniDatas());
+                    AlertDialog.Builder builder = new AlertDialog.Builder(UserInfoActivity.this);
+                    //设置标题
+                    builder.setTitle("拨打电话");
+                    builder.setAdapter(adapter, (dialogInterface, position) -> {
+                        if (position == VOIP) {//voip电话
+                            if (MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS, false)) {
+                                Intent intent = new Intent(UserInfoActivity.this, VoipPhoneActivity.class);
+                                intent.putExtra("member", member);
+                                UserInfoActivity.this.startActivity(intent);
+                            } else {
+                                ToastUtil.showToast(UserInfoActivity.this, "voip注册失败，请检查服务器配置");
                             }
-                        });
-                        builder.create();
-                        builder.show();
-                    } else {
-                        ToastUtil.showToast(UserInfoActivity.this, "暂无该用户电话号码");
-                    }
-                }else if (picture.getTitle().equals("图像回传")){
-                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
-                        ToastUtil.showToast(UserInfoActivity.this,"没有图像请求功能权限");
-                    }else {
-                        pullVideo();
-                    }
+                        } else if (position == TELEPHONE) {//普通电话
 
-                }else if (picture.getTitle().equals("图像上报")){
-                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
-                        ToastUtil.showToast(UserInfoActivity.this,"没有图像上报功能权限");
-                    }else {
-                        pushVideo();
-                    }
+                            CallPhoneUtil.callPhone(UserInfoActivity.this, member.phone);
+
+                        }
+
+                    });
+                    builder.create();
+                    builder.show();
+                } else {
+                    ToastUtil.showToast(UserInfoActivity.this, "暂无该用户电话号码");
+                }
+            }else if (picture.getTitle().equals("图像回传")){
+                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
+                    ToastUtil.showToast(UserInfoActivity.this,"没有图像请求功能权限");
+                }else {
+                    pullVideo();
+                }
+
+            }else if (picture.getTitle().equals("图像上报")){
+                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
+                    ToastUtil.showToast(UserInfoActivity.this,"没有图像上报功能权限");
+                }else {
+                    pushVideo();
                 }
             }
         });
@@ -275,17 +262,6 @@ public class UserInfoActivity extends BaseActivity {
             case R.id.news_bar_back:
                 finish();
                 break;
-            //            case R.id.add_note:
-            //                if (!DataUtil.isExistContacts(member)) {//不在个呼通讯录中
-            //                    MyTerminalFactory.getSDK().getContactsManager().modifyContacts(Operation4PrivateAddressList.ADD.getCode(),member.id);
-            //                    add_note.setText("从通讯录移除");
-            //                }else {
-            //                    if (member.id != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {//自己不能移除
-            //                        MyTerminalFactory.getSDK().getContactsManager().modifyContacts(Operation4PrivateAddressList.REMOVE.getCode(),member.id);
-            //                        add_note.setText("添加到通讯录 ");
-            //                    }
-            //                }
-            //                break;
         }
     }
 
@@ -306,27 +282,14 @@ public class UserInfoActivity extends BaseActivity {
     }
     private Handler myHandler = new Handler();
     /**更新所有成员列表*/
-    private ReceiveNotifyMemberChangeHandler receiveNotifyMemberChangeHandler = new ReceiveNotifyMemberChangeHandler() {
-        @Override
-        public void handler(final MemberChangeType memberChangeType) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    initBottomMenu();
-                }
-            });
-        }
-    };
+    private ReceiveNotifyMemberChangeHandler receiveNotifyMemberChangeHandler = memberChangeType -> myHandler.post(() -> initBottomMenu());
 
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
         @Override
         public void handler() {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if(null != userPhone){
-                        userPhone.setText(MyTerminalFactory.getSDK().getParam(Params.PHONE_NO, ""));
-                    }
+            myHandler.post(() -> {
+                if(null != userPhone){
+                    userPhone.setText(MyTerminalFactory.getSDK().getParam(Params.PHONE_NO, ""));
                 }
             });
         }

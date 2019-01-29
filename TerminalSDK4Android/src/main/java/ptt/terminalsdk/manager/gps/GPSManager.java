@@ -209,7 +209,7 @@ public class GPSManager {
 		MyTerminalFactory.getSDK().getClientChannel().registMessageReceivedHandler(notifyForceUploadGpsMessageReceivedHandler);
 		MyTerminalFactory.getSDK().getClientChannel().registMessageReceivedHandler(responseMemberConfigMessageHandler);
 		//检查强制上传GPS信息的状态是否依然存在，若存在，则进行强制上传
-		if (System.currentTimeMillis() - MyTerminalFactory.getSDK().getParam(Params.GPS_FORCE_UPLOAD_START_TIME, 0l) < MyTerminalFactory.getSDK().getParam(Params.GPS_FORCE_UPLOAD_HOLD_TIME, 0)) {
+		if (System.currentTimeMillis() - MyTerminalFactory.getSDK().getParam(Params.GPS_FORCE_UPLOAD_START_TIME, 0L) < MyTerminalFactory.getSDK().getParam(Params.GPS_FORCE_UPLOAD_HOLD_TIME, 0)) {
 			forceUpload();//持续时间之内强制上传
 			logger.error("强制上传!");
 			MyTerminalFactory.getSDK().getTimer().schedule(new TimerTask() {
@@ -217,7 +217,7 @@ public class GPSManager {
 				public void run() {
 					commonUpload();
 				}
-			}, MyTerminalFactory.getSDK().getParam(Params.GPS_FORCE_UPLOAD_HOLD_TIME, 0) - (System.currentTimeMillis() - MyTerminalFactory.getSDK().getParam(Params.GPS_FORCE_UPLOAD_START_TIME, 0l)));
+			}, MyTerminalFactory.getSDK().getParam(Params.GPS_FORCE_UPLOAD_HOLD_TIME, 0) - (System.currentTimeMillis() - MyTerminalFactory.getSDK().getParam(Params.GPS_FORCE_UPLOAD_START_TIME, 0L)));
 		}else {
 			mHandler.post(new Runnable(){
 				@Override
@@ -280,27 +280,7 @@ public class GPSManager {
 					MyTerminalFactory.getSDK().getHttpClient().postJson(url,"gps="+json);
 				}
 			});
-
-//			UploadGpsMessage.Builder uploadGpsMessageBuilder = UploadGpsMessage.newBuilder();
-//			uploadGpsMessageBuilder.setMemberId(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
-//			uploadGpsMessageBuilder.setSessionId(MyTerminalFactory.getSDK().getParam(Params.SESSION_ID));
-//			uploadGpsMessageBuilder.setVersion(MyTerminalFactory.getSDK().getParam(Params.VERSION, 0));
-//			uploadGpsMessageBuilder.setLongitude(location.getLongitude());
-//			uploadGpsMessageBuilder.setLatitude(location.getLatitude());
-//			uploadGpsMessageBuilder.setSpeedRate(location.getSpeed());
-//			uploadGpsMessageBuilder.setElevation(location.getAltitude());
-////			uploadGpsMessageBuilder.setDirection(location.getDirection());
-////			uploadGpsMessageBuilder.setLocation(location.getAddrStr());
-//			MyTerminalFactory.getSDK().getClientChannel().sendMessage(uploadGpsMessageBuilder.build(), new PushMessageSendResultHandler() {
-//
-//				@Override
-//				public void handler(boolean sendOK, String uuid) {
-//					logger.info("上传gps数据:" + sendOK);
-//				}
-//			});
 		}
-
-
 	}
 
 	private long getUploadTime() {

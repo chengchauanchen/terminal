@@ -75,6 +75,7 @@ public class ToastUtil {
 				//  调用show方法来显示Toast信息提示框
 				method.invoke(obj, new Object[]{});
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 	}

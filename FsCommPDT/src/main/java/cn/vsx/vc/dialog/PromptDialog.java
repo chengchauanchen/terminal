@@ -14,7 +14,6 @@ import cn.vsx.vc.R;
  */
 
 public class PromptDialog extends Dialog implements View.OnClickListener {
-    private TextView ok, quit, content;
     private String contentStr = "";
     private String titleStr = "";
     private String okStr = "";
@@ -31,9 +30,9 @@ public class PromptDialog extends Dialog implements View.OnClickListener {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_change_group_cancel);
 
-        quit = (TextView) findViewById(R.id.dialog_no);
-        ok = (TextView) findViewById(R.id.dialog_yes);
-        content = (TextView) findViewById(R.id.dialog_title);
+        TextView quit =  findViewById(R.id.dialog_no);
+        TextView ok =  findViewById(R.id.dialog_yes);
+        TextView content =  findViewById(R.id.dialog_title);
         if (!"".equals(contentStr)) {
             content.setText(contentStr);
         }

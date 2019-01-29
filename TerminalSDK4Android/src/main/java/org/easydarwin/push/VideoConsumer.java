@@ -9,11 +9,11 @@ import java.io.IOException;
  */
 
 public interface VideoConsumer {
-    public void onVideoStart(int width, int height) throws IOException;
+     void onVideoStart(int width, int height) throws IOException;
 
-    public int onVideo(byte[] data, int format);
+     int onVideo(byte[] data, int format);
 
-    public void onVideoStop();
+     void onVideoStop();
 
-    public void setMuxer(EasyMuxer muxer);
+     void setMuxer(EasyMuxer muxer);
 }

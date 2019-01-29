@@ -8,6 +8,10 @@ import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.zectec.imageandfileselector.receivehandler.ReceiverIndividualCallForAddressBookHandler;
+import com.zectec.imageandfileselector.receivehandler.ReceiverIndividualMsgForAddressBookHandler;
+import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
+
 import org.apache.http.util.TextUtils;
 import org.apache.log4j.Logger;
 
@@ -16,10 +20,6 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.model.Member;
-import com.zectec.imageandfileselector.receivehandler.ReceiverIndividualCallForAddressBookHandler;
-import com.zectec.imageandfileselector.receivehandler.ReceiverIndividualMsgForAddressBookHandler;
-import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
-
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.HandleIdUtil;
 
@@ -29,7 +29,6 @@ public class PersonContactsAdapter extends BaseAdapter {
 	private List<Member> allMembersExceptMe;
 	private Logger logger = Logger.getLogger(PersonContactsAdapter.class);
     private Member memberExceptMe;// 上一个人
-	private ViewHolder holder;
 	Handler handler = new Handler();
 	private int longClickPos = -1;
     public PersonContactsAdapter(Context context, List<Member> allMembersExceptMe) {
@@ -37,20 +36,6 @@ public class PersonContactsAdapter extends BaseAdapter {
         this.allMembersExceptMe = allMembersExceptMe;
     }
 
-    public void setLongClickPos (int longClickPos) {
-		this.longClickPos = longClickPos;
-		handler.post(new Runnable() {
-			@Override
-			public void run() {
-				notifyDataSetChanged();
-			}
-		});
-	}
-    
-    public void refreshPersonContactsAdapter() {
-        notifyDataSetChanged();
-    }
-    
 	@Override
 	public int getCount() {
 		return allMembersExceptMe.size();
@@ -68,7 +53,7 @@ public class PersonContactsAdapter extends BaseAdapter {
 
 	@Override
 	public View getView(final int position, View convertView, ViewGroup parent) {
-		holder = null;
+		ViewHolder holder = null;
         if (convertView == null) {
             convertView = View.inflate(context, R.layout.fragment_person_item, null);
             holder = new ViewHolder(convertView);
@@ -99,18 +84,8 @@ public class PersonContactsAdapter extends BaseAdapter {
 		holder.tv_pinyin.setText(TextUtils.isEmpty(personContactsBean.pinyin) ? "#" : personContactsBean.pinyin.charAt(0)+"");
 		holder.tv_member_name.setText(personContactsBean.getName());
 		holder.tv_member_id.setText(HandleIdUtil.handleId(personContactsBean.id));
-		holder.iv_individual_call.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View view) {
-				OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverIndividualCallForAddressBookHandler.class, 1, position);
-			}
-		});
-		holder.iv_individual_msg.setOnClickListener(new View.OnClickListener() {
-			@Override
-			public void onClick(View v) {
-				OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverIndividualMsgForAddressBookHandler.class, 1, position);
-			}
-		});
+		holder.iv_individual_call.setOnClickListener(view -> OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverIndividualCallForAddressBookHandler.class, 1, position));
+		holder.iv_individual_msg.setOnClickListener(v -> OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverIndividualMsgForAddressBookHandler.class, 1, position));
 
 		if (longClickPos == position) {
 			holder.ll_person_search_item.setBackgroundResource(R.color.group_person_catagory_gray);

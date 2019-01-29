@@ -17,8 +17,8 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 public class FunctionIntroduceActivity extends FragmentActivity{
 
@@ -79,15 +79,12 @@ public class FunctionIntroduceActivity extends FragmentActivity{
             webView.setEnabled(false);
             ll_pb.setVisibility(View.VISIBLE);
             webView.loadUrl(help_word_url);
-            webView.setOnKeyListener(new View.OnKeyListener(){
-                @Override
-                public boolean onKey(View v, int keyCode, KeyEvent event){
-                    if((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack()){
-                        webView.goBack();
-                        return true;
-                    }
-                    return false;
+            webView.setOnKeyListener((v, keyCode, event) -> {
+                if((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack()){
+                    webView.goBack();
+                    return true;
                 }
+                return false;
             });
             webView.setWebViewClient(new WebViewClient(){
 
@@ -114,12 +111,7 @@ public class FunctionIntroduceActivity extends FragmentActivity{
         //关闭界面
         @JavascriptInterface
         public void closeWebView(){
-            runOnUiThread(new Runnable(){
-                @Override
-                public void run(){
-                    finish();
-                }
-            });
+            runOnUiThread(() -> finish());
         }
     }
 

@@ -117,7 +117,6 @@ public class PlayLiveHistoryActivity extends BaseActivity{
             }
         }
     };
-    private String url;
 
 
     @Override
@@ -136,52 +135,39 @@ public class PlayLiveHistoryActivity extends BaseActivity{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyDataMessageHandler);
-        mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener(){
-
-            @Override
-            public void onPrepared(MediaPlayer mp){
-                mediaPlayer.start();
-                tv_max_time.setText(getTime(maxTime));
-                mHandler.sendEmptyMessage(UPDATE_PROGRESS);
-            }
+        mediaPlayer.setOnPreparedListener(mp -> {
+            mediaPlayer.start();
+            tv_max_time.setText(getTime(maxTime));
+            mHandler.sendEmptyMessage(UPDATE_PROGRESS);
         });
-        mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener(){
-            @Override
-            public void onSeekComplete(MediaPlayer mp){
-                mp.start();
-                iv_pause_continue.setImageResource(R.drawable.continue_play);
-                mHandler.sendEmptyMessage(UPDATE_PROGRESS);
-                mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
-            }
+        mediaPlayer.setOnSeekCompleteListener(mp -> {
+            mp.start();
+            iv_pause_continue.setImageResource(R.drawable.continue_play);
+            mHandler.sendEmptyMessage(UPDATE_PROGRESS);
+            mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
         });
-        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener(){
-            @Override
-            public void onCompletion(MediaPlayer mp){
-                logger.info("onCompletion");
-                iv_pause_continue.setImageResource(R.drawable.on_pause);
-                iv_pause.setVisibility(View.VISIBLE);
-                mHandler.sendEmptyMessage(COMPLETE_PROGRESS);
-                mHandler.removeMessages(UPDATE_PROGRESS);
-                if(mediaPlayer.isPlaying()){
-                    mediaPlayer.stop();
-                    mediaPlayer.reset();
-                }
-            }
-        });
-        mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener(){
-            @Override
-            public boolean onError(MediaPlayer mp, int what, int extra){
-                logger.error("mediaPlayer  onError");
-                iv_pause_continue.setImageResource(R.drawable.on_pause);
-                iv_pause.setVisibility(View.VISIBLE);
-                mHandler.removeMessages(UPDATE_PROGRESS);
-                if(mediaPlayer.isPlaying()){
-                    mediaPlayer.stop();
-                }
+        mediaPlayer.setOnCompletionListener(mp -> {
+            logger.info("onCompletion");
+            iv_pause_continue.setImageResource(R.drawable.on_pause);
+            iv_pause.setVisibility(View.VISIBLE);
+            mHandler.sendEmptyMessage(COMPLETE_PROGRESS);
+            mHandler.removeMessages(UPDATE_PROGRESS);
+            if(mediaPlayer.isPlaying()){
+                mediaPlayer.stop();
                 mediaPlayer.reset();
-                mediaPlayer.release();
-                return false;
             }
+        });
+        mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+            logger.error("mediaPlayer  onError");
+            iv_pause_continue.setImageResource(R.drawable.on_pause);
+            iv_pause.setVisibility(View.VISIBLE);
+            mHandler.removeMessages(UPDATE_PROGRESS);
+            if(mediaPlayer.isPlaying()){
+                mediaPlayer.stop();
+            }
+            mediaPlayer.reset();
+            mediaPlayer.release();
+            return false;
         });
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener(){
             @Override
@@ -208,19 +194,16 @@ public class PlayLiveHistoryActivity extends BaseActivity{
             }
         });
         //设置 surfaceView点击监听
-        textureView.setOnTouchListener(new View.OnTouchListener(){
-            @Override
-            public boolean onTouch(View v, MotionEvent event){
-                switch(event.getAction()){
-                    case MotionEvent.ACTION_DOWN:
-                        ll_seek_bar.setVisibility(View.VISIBLE);
-                        mHandler.removeMessages(HIDE_SEEK_BAR);
-                        mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
-                        break;
-                }
-                //返回True代表事件已经处理了
-                return true;
+        textureView.setOnTouchListener((v, event) -> {
+            switch(event.getAction()){
+                case MotionEvent.ACTION_DOWN:
+                    ll_seek_bar.setVisibility(View.VISIBLE);
+                    mHandler.removeMessages(HIDE_SEEK_BAR);
+                    mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
+                    break;
             }
+            //返回True代表事件已经处理了
+            return true;
         });
         seek_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
             @Override
@@ -287,13 +270,10 @@ public class PlayLiveHistoryActivity extends BaseActivity{
         public void handler(String mainMemberName, int mainMemberId, int individualCallType){
             if(mediaPlayer != null && mediaPlayer.isPlaying()){
                 mediaPlayer.pause();
-                mHandler.post(new Runnable(){
-                    @Override
-                    public void run(){
-                        iv_pause_continue.setImageResource(R.drawable.on_pause);
-                        iv_pause.setVisibility(View.VISIBLE);
-                        mHandler.removeMessages(UPDATE_PROGRESS);
-                    }
+                mHandler.post(() -> {
+                    iv_pause_continue.setImageResource(R.drawable.on_pause);
+                    iv_pause.setVisibility(View.VISIBLE);
+                    mHandler.removeMessages(UPDATE_PROGRESS);
                 });
             }
         }
@@ -316,13 +296,10 @@ public class PlayLiveHistoryActivity extends BaseActivity{
         public void handler(TerminalMessage terminalMessage){
             if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode() || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE){
                 if(mediaPlayer != null && mediaPlayer.isPlaying()){
-                    mHandler.post(new Runnable(){
-                        @Override
-                        public void run(){
-                            mediaPlayer.pause();
-                            iv_pause_continue.setImageResource(R.drawable.on_pause);
-                            iv_pause.setVisibility(View.VISIBLE);
-                        }
+                    mHandler.post(() -> {
+                        mediaPlayer.pause();
+                        iv_pause_continue.setImageResource(R.drawable.on_pause);
+                        iv_pause.setVisibility(View.VISIBLE);
                     });
                 }
             }
@@ -333,24 +310,21 @@ public class PlayLiveHistoryActivity extends BaseActivity{
         @Override
         public void handler(boolean connected){
             isNetConnected = connected;
-            mHandler.post(new Runnable(){
-                @Override
-                public void run(){
-                    if(!isNetConnected){
-                        if(mediaPlayer != null && mediaPlayer.isPlaying()){
-                            mediaPlayer.pause();
-                            iv_pause_continue.setImageResource(R.drawable.on_pause);
-                            iv_pause.setVisibility(View.VISIBLE);
-                            mHandler.removeMessages(UPDATE_PROGRESS);
-                        }
-                    }else{
-                        if(mediaPlayer != null){
-                            iv_pause_continue.setImageResource(R.drawable.continue_play);
-                            iv_pause.setVisibility(View.GONE);
-                            mediaPlayer.start();
-                            mHandler.sendEmptyMessage(UPDATE_PROGRESS);
-                            mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
-                        }
+            mHandler.post(() -> {
+                if(!isNetConnected){
+                    if(mediaPlayer != null && mediaPlayer.isPlaying()){
+                        mediaPlayer.pause();
+                        iv_pause_continue.setImageResource(R.drawable.on_pause);
+                        iv_pause.setVisibility(View.VISIBLE);
+                        mHandler.removeMessages(UPDATE_PROGRESS);
+                    }
+                }else{
+                    if(mediaPlayer != null){
+                        iv_pause_continue.setImageResource(R.drawable.continue_play);
+                        iv_pause.setVisibility(View.GONE);
+                        mediaPlayer.start();
+                        mHandler.sendEmptyMessage(UPDATE_PROGRESS);
+                        mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
                     }
                 }
             });
@@ -360,7 +334,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
     @Override
     public void initData(){
         mediaPlayer = new MediaPlayer();
-        url = getIntent().getStringExtra("URL");
+        String url = getIntent().getStringExtra("URL");
         String liveTheme = getIntent().getStringExtra("liveTheme");
         String duration = getIntent().getStringExtra("DURATION");
         maxTime = ((int) (Float.valueOf(duration) * 1000));

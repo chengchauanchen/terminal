@@ -89,33 +89,27 @@ public class ChangeGroupActivity extends BaseActivity {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
 
         //横向标题栏容器
-        mCatalogAdapter.setOnItemClick(new GroupCatalogAdapter.ItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                topGroup=mCatalogList.get(position).getBean();
+        mCatalogAdapter.setOnItemClick((view, position) -> {
+            topGroup=mCatalogList.get(position).getBean();
 
-                List<GroupCatalogBean> catalogList=new ArrayList<>();
-                catalogList.addAll(mCatalogList.subList(0,position+1));
-                updateData(catalogList);
-            }
+            List<GroupCatalogBean> catalogList=new ArrayList<>();
+            catalogList.addAll(mCatalogList.subList(0,position+1));
+            updateData(catalogList);
         });
 
         //群组条目容器
-        mGroupAdapter.setOnItemClickListener(new GroupScanAddAdapter.ItemClickListener() {
-            @Override
-            public void onItemClick(View view, int postion, int type) {
-                if (type==Constants.TYPE_FOLDER){
+        mGroupAdapter.setOnItemClickListener((view, postion, type) -> {
+            if (type==Constants.TYPE_FOLDER){
 
-                    topGroup= (GroupBean) mDatas.get(postion).getBean();
-                    GroupCatalogBean catalog=new GroupCatalogBean();
-                    catalog.setName(topGroup.getName());
-                    catalog.setBean(topGroup);
-                    mCatalogList.add(catalog);
+                topGroup= (GroupBean) mDatas.get(postion).getBean();
+                GroupCatalogBean catalog=new GroupCatalogBean();
+                catalog.setName(topGroup.getName());
+                catalog.setBean(topGroup);
+                mCatalogList.add(catalog);
 
-                    List<GroupCatalogBean> catalogBeanList=new ArrayList<>();
-                    catalogBeanList.addAll(mCatalogList);
-                    updateData(catalogBeanList);
-                }
+                List<GroupCatalogBean> catalogBeanList=new ArrayList<>();
+                catalogBeanList.addAll(mCatalogList);
+                updateData(catalogBeanList);
             }
         });
     }
@@ -243,19 +237,16 @@ public class ChangeGroupActivity extends BaseActivity {
 
         @Override
         public void handler(final List<Integer> scanGroups, final int errorCode, final String errorDesc) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    logger.info("ReceiveSetScanGroupListResultHandler："+errorDesc+"======="+scanGroups);
-                    if(errorCode==BaseCommonCode.SUCCESS_CODE){
-                        ToastUtil.toast(ChangeGroupActivity.this,"添加扫描组成功");
-                        groupSweeps.clear();
-                        groupSweeps.addAll(scanGroups);
-                        mGroupAdapter.notifyDataSetChanged();
+            myHandler.post(() -> {
+                logger.info("ReceiveSetScanGroupListResultHandler："+errorDesc+"======="+scanGroups);
+                if(errorCode==BaseCommonCode.SUCCESS_CODE){
+                    ToastUtil.toast(ChangeGroupActivity.this,"添加扫描组成功");
+                    groupSweeps.clear();
+                    groupSweeps.addAll(scanGroups);
+                    mGroupAdapter.notifyDataSetChanged();
 
-                    }else {
-                        ToastUtil.toast(ChangeGroupActivity.this,"添加扫描组失败");
-                    }
+                }else {
+                    ToastUtil.toast(ChangeGroupActivity.this,"添加扫描组失败");
                 }
             });
 
@@ -268,22 +259,19 @@ public class ChangeGroupActivity extends BaseActivity {
 
         @Override
         public void handler() {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
-                    if(mGroupResponse == null){
-                        return;
-                    }
-                    initGroupData();
-
-                    mInitGroupCatalogList.clear();
-                    GroupCatalogBean catalog=new GroupCatalogBean();
-                    catalog.setName(topGroup.getName());
-                    catalog.setBean(topGroup);
-                    mInitGroupCatalogList.add(catalog);
-                    updateData(mInitGroupCatalogList);
+            myHandler.post(() -> {
+                mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
+                if(mGroupResponse == null){
+                    return;
                 }
+                initGroupData();
+
+                mInitGroupCatalogList.clear();
+                GroupCatalogBean catalog=new GroupCatalogBean();
+                catalog.setName(topGroup.getName());
+                catalog.setBean(topGroup);
+                mInitGroupCatalogList.add(catalog);
+                updateData(mInitGroupCatalogList);
             });
         }
 

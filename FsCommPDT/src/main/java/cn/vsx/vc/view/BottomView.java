@@ -23,7 +23,6 @@ import cn.vsx.vc.R;
 
 public class BottomView extends LinearLayout{
 
-    private View view;
     private ImageView iv_image;
     private TextView tv_text;
     private boolean selected;
@@ -54,10 +53,10 @@ public class BottomView extends LinearLayout{
     private void initView(){
         String infServie = Context.LAYOUT_INFLATER_SERVICE;
         LayoutInflater layoutInflater =  (LayoutInflater) getContext().getSystemService(infServie);
-        view = layoutInflater.inflate(R.layout.layout_bottom_view,this,true);
-        iv_image = (ImageView) view.findViewById(R.id.iv_image);
-        tv_text = (TextView) view.findViewById(R.id.tv_text);
-        tv_badge = (TextView) view.findViewById(R.id.tv_badge);
+        View view = layoutInflater.inflate(R.layout.layout_bottom_view, this, true);
+        iv_image =  view.findViewById(R.id.iv_image);
+        tv_text =  view.findViewById(R.id.tv_text);
+        tv_badge =  view.findViewById(R.id.tv_badge);
     }
 
     private void initCustomAttrs(Context context, AttributeSet attrs){

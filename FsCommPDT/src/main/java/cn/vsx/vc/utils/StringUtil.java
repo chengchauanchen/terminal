@@ -48,7 +48,7 @@ public class StringUtil{
         }
         int wv_hours = Integer.valueOf(start_hous_min[0]);
         int wv_mins = Integer.valueOf(start_hous_min[1]);
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         if (wv_hours <=9) {
             sb.append("0")
                     .append(wv_hours)

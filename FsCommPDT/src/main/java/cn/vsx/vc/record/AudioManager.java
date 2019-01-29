@@ -54,7 +54,7 @@ public class AudioManager {
         void wellPrepared();
     }
 
-    public AudioStageListener mListener;
+    private AudioStageListener mListener;
 
     public void setOnAudioStageListener(AudioStageListener listener) {
         mListener = listener;
@@ -118,7 +118,7 @@ public class AudioManager {
      * @return
      */
     private String generalFileName() {
-        return String.valueOf(MyTerminalFactory.getSDK().getParam(Params.MESSAGE_VERSION,0l)) + ".amr";
+        return String.valueOf(MyTerminalFactory.getSDK().getParam(Params.MESSAGE_VERSION, 0L)) + ".amr";
     }
 
     // 获得声音的level
@@ -129,7 +129,7 @@ public class AudioManager {
                 // 取证+1，否则去不到7
                 return maxLevel * mRecorder.getMaxAmplitude() / 32768 + 1;
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
 

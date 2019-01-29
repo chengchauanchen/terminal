@@ -24,12 +24,7 @@ public class LinkmanDeleteDialog extends Dialog {
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.dialog_linkmandelete, null);
-        view.findViewById(R.id.tv_linkman_delete).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverLinkManDeleteHandler.class);
-            }
-        });
+        view.findViewById(R.id.tv_linkman_delete).setOnClickListener(view1 -> OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverLinkManDeleteHandler.class));
         setContentView(view);
     }
 

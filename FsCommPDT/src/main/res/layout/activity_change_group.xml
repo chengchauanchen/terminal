@@ -56,5 +56,5 @@
         android:clickable="false"
         android:focusable="false"
         android:background="@color/transparent"
-        android:visibility="gone"></FrameLayout>
+        android:visibility="gone"/>
 </RelativeLayout>

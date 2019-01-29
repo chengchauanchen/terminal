@@ -6,9 +6,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.util.HashMap;
 import java.util.List;
 
 import butterknife.Bind;
@@ -21,9 +19,7 @@ import cn.vsx.vc.R;
 
 public class SweepAdapter extends BaseAdapter {
     private Context context;
-    private ViewHolder holder;
     private List<String> list;
-    private int itemPosition;
 
     public SweepAdapter(Context context, List<String> list) {
         this.context = context;
@@ -47,6 +43,7 @@ public class SweepAdapter extends BaseAdapter {
 
     @Override
     public View getView(final int position, View convertView, ViewGroup parent) {
+        ViewHolder holder;
         if (convertView == null) {
             convertView = View.inflate(context, R.layout.item_sweep, null);
             holder = new ViewHolder(convertView);
@@ -55,14 +52,10 @@ public class SweepAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
         holder.groupName.setText(list.get(position));
-        holder.groupDel.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                list.remove(position);
-                notifyDataSetChanged();
-            }
+        holder.groupDel.setOnClickListener(v -> {
+            list.remove(position);
+            notifyDataSetChanged();
         });
-        itemPosition = position;
         return convertView;
     }
 

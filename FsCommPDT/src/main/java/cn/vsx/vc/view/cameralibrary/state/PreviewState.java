@@ -1,6 +1,5 @@
 package cn.vsx.vc.view.cameralibrary.state;
 
-import android.graphics.Bitmap;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
@@ -57,13 +56,10 @@ class PreviewState implements State{
 
     @Override
     public void capture() {
-        CameraInterface.getInstance().takePicture(new CameraInterface.TakePictureCallback() {
-            @Override
-            public void captureResult(Bitmap bitmap, boolean isVertical) {
-                machine.getView().showPicture(bitmap, isVertical);
-                machine.setState(machine.getBorrowPictureState());
-                LogUtil.i("capture");
-            }
+        CameraInterface.getInstance().takePicture((bitmap, isVertical) -> {
+            machine.getView().showPicture(bitmap, isVertical);
+            machine.setState(machine.getBorrowPictureState());
+            LogUtil.i("capture");
         });
     }
 
@@ -74,16 +70,13 @@ class PreviewState implements State{
 
     @Override
     public void stopRecord(final boolean isShort, long time) {
-        CameraInterface.getInstance().stopRecord(isShort, new CameraInterface.StopRecordCallback() {
-            @Override
-            public void recordResult(String url, Bitmap firstFrame) {
-                if (isShort) {
-                    machine.getView().resetState(JCameraView.TYPE_SHORT);
-                } else {
+        CameraInterface.getInstance().stopRecord(isShort, (url, firstFrame) -> {
+            if (isShort) {
+                machine.getView().resetState(JCameraView.TYPE_SHORT);
+            } else {
 //                    machine.getView().playVideo(firstFrame, url);
-                    machine.getView().recordResult(firstFrame, url,false);
-                    machine.setState(machine.getBorrowVideoState());
-                }
+                machine.getView().recordResult(firstFrame, url,false);
+                machine.setState(machine.getBorrowVideoState());
             }
         });
     }

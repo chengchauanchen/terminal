@@ -33,10 +33,6 @@ import ptt.terminalsdk.tools.ToastUtil;
 public class HandPlatformAdapter extends BaseExpandableListAdapter {
     private List<ShouTaiBean.BuMenBean> list;
     private Activity activity;
-    private ViewHolder viewHolder;
-    private ViewHolderPerson viewHolderPerson;
-    private String phoneNo;
-    private String id;
 
     public HandPlatformAdapter(List<ShouTaiBean.BuMenBean> list, Activity activity) {
         this.list = list;
@@ -80,7 +76,7 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        viewHolder = null;
+        ViewHolder viewHolder = null;
         if (convertView == null) {
             convertView = View.inflate(activity, R.layout.item_shoutai, null);
             viewHolder = new ViewHolder(convertView);
@@ -101,7 +97,7 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
 
     @Override
     public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
-        viewHolderPerson = null;
+        ViewHolderPerson viewHolderPerson = null;
         if (convertView == null) {
             convertView = View.inflate(activity, R.layout.shoutai_item_childview, null);
             viewHolderPerson = new ViewHolderPerson(convertView);
@@ -110,8 +106,8 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
             viewHolderPerson = (ViewHolderPerson) convertView.getTag();
         }
         viewHolderPerson.shoutai_tv_member_name.setText(list.get(groupPosition).memberList.get(childPosition).getName());
-        phoneNo = list.get(groupPosition).memberList.get(childPosition).phone;
-        id = HandleIdUtil.handleId(list.get(groupPosition).memberList.get(childPosition).id);
+        String phoneNo = list.get(groupPosition).memberList.get(childPosition).phone;
+        String id = HandleIdUtil.handleId(list.get(groupPosition).memberList.get(childPosition).id);
         if (TextUtils.isEmpty(phoneNo)) {
             viewHolderPerson.shoutai_tv_member_id.setText(id);
         } else {
@@ -119,24 +115,18 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
         }
 
         viewHolderPerson.shoutai_tv_member_name.setText(list.get(groupPosition).memberList.get(childPosition).getName());
-        viewHolderPerson.shoutai_call_to.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                    ToastUtil.showToast(activity,"没有个呼功能权限");
-                }else {
-                    activeIndividualCall(groupPosition,childPosition);
-                }
-
-
+        viewHolderPerson.shoutai_call_to.setOnClickListener(v -> {
+            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                ToastUtil.showToast(activity,"没有个呼功能权限");
+            }else {
+                activeIndividualCall(groupPosition,childPosition);
             }
+
+
         });
-        viewHolderPerson.shoutai_message_to.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Member member = list.get(groupPosition).memberList.get(childPosition);
-                IndividualNewsActivity.startCurrentActivity(activity, member.id, member.getName());
-            }
+        viewHolderPerson.shoutai_message_to.setOnClickListener(v -> {
+            Member member = list.get(groupPosition).memberList.get(childPosition);
+            IndividualNewsActivity.startCurrentActivity(activity, member.id, member.getName());
         });
 
         return convertView;

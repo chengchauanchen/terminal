@@ -5,7 +5,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Context;
-import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.widget.FrameLayout;
@@ -14,8 +13,6 @@ import android.widget.TextView;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -55,20 +52,11 @@ public class ChangeGroupView extends FrameLayout{
 					int command = commandQueue.take();
 					switch (command) {
 						case LEFT_ONE_COMMAND:
-							ChangeGroupView.this.post(new Runnable() {
-								@Override
-								public void run() {
-									leftOne();
-								}
-							});
+							ChangeGroupView.this.post(() -> leftOne());
 							break;
 
 						case RIGHT_ONE_COMMAND:
-							ChangeGroupView.this.post(new Runnable() {
-								public void run() {
-									rightOne();
-								}
-							});
+							ChangeGroupView.this.post(() -> rightOne());
 							break;
 						default:
 							break;
@@ -79,7 +67,9 @@ public class ChangeGroupView extends FrameLayout{
 					if(commandQueue.size() == 0 && onGroupChangedListener != null){
 						onGroupChangedListener.onGroupChanged(getGroupData(currentDataIndex).id, getGroupData(currentDataIndex).name);
 					}
-				} catch (InterruptedException e) {}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	};
@@ -350,6 +340,6 @@ public class ChangeGroupView extends FrameLayout{
 	}
 
 	public interface OnGroupChangedListener{
-		public void onGroupChanged(int groupId, String groupName);
+		void onGroupChanged(int groupId, String groupName);
 	}
 }

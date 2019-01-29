@@ -61,31 +61,5 @@ public class PTTDownAndUpReceiver extends BroadcastReceiver {
                 });
             }
         }
-
-//        if(intent.getAction().equals("android.intent.action.OPEN_PTT_BUTTON")){
-//            if(intent.getIntExtra(Intent.EXTRA_KEY_EVENT,-1) == KeyEvent.ACTION_DOWN){
-//                TerminalFactory.getSDK().notifyReceiveHandler(PTTDownHandler.class);
-//            }else if(intent.getIntExtra(Intent.EXTRA_KEY_EVENT,-1) == KeyEvent.ACTION_UP){
-//                TerminalFactory.getSDK().notifyReceiveHandler(PTTUpHandler.class);
-//            }
-//        }
-
-//        if(intent.getAction().equals("SpeakerKeyDispatch")){
-//            logger.info("             SpeakerKeyDispatch " + intent.getStringExtra("SpeakerKey"));
-//            TerminalFactory.getSDK().notifyReceiveHandler(PTTDownHandler.class);
-//        }else if(intent.getAction().equals("CameraKeyDispatch")){
-//            logger.info("   CameraKeyDispatch " + intent.getStringExtra("CameraKey"));
-//            if(intent.getStringExtra("CameraKey").equals("down")){
-//                TerminalFactory.getSDK().notifyReceiveHandler(PTTDownHandler.class);
-//            }else {
-//                TerminalFactory.getSDK().notifyReceiveHandler(PTTUpHandler.class);
-//            }
-//        }
-
-//        if(intent.getAction().equals("com.yl.ptt.keydown")){
-//            TerminalFactory.getSDK().notifyReceiveHandler(ReceivePTTDownHandler.class);
-//        }else if(intent.getAction().equals("com.yl.ptt.keyup")){
-//            TerminalFactory.getSDK().notifyReceiveHandler(ReceivePTTUpHandler.class);
-//        }
     }
 }

@@ -7,7 +7,6 @@ import android.support.v4.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -37,8 +36,8 @@ import cn.vsx.vc.adapter.GroupSearchAdapter;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.utils.InputMethodUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  *  通讯录组搜索
@@ -109,8 +108,8 @@ public class GroupSearchFragment extends BaseFragment {
                 if (s.toString().contains(" ")) {
                     String[] str = s.toString().split(" ");
                     String str1 = "";
-                    for (int i = 0; i < str.length; i++) {
-                        str1 += str[i];
+                    for (String aStr : str) {
+                        str1 += aStr;
                     }
 
                     et_search_allcontacts.setText(str1);
@@ -137,25 +136,19 @@ public class GroupSearchFragment extends BaseFragment {
             }
         });
 
-        et_search_allcontacts.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
-                if(i == EditorInfo.IME_ACTION_SEARCH) {
-                    doSearch();
-                }
-                return false;
+        et_search_allcontacts.setOnEditorActionListener((textView, i, keyEvent) -> {
+            if(i == EditorInfo.IME_ACTION_SEARCH) {
+                doSearch();
             }
+            return false;
         });
 
-        groupSearchAdapter.setOnItemBtnClick(new GroupSearchAdapter.OnItemBtnClickListener() {
-            @Override
-            public void onItemBtnClick() {
-                et_search_allcontacts.setText("");
-                InputMethodUtil.hideInputMethod(context, et_search_allcontacts);
+        groupSearchAdapter.setOnItemBtnClick(() -> {
+            et_search_allcontacts.setText("");
+            InputMethodUtil.hideInputMethod(context, et_search_allcontacts);
 
-                searchGroups.clear();
-                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceivePopBackStackHandler.class);
-            }
+            searchGroups.clear();
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceivePopBackStackHandler.class);
         });
     }
 
@@ -174,12 +167,7 @@ public class GroupSearchFragment extends BaseFragment {
         editText.requestFocus();
         final InputMethodManager inputMethodManager = ((InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE));
         if(inputMethodManager!=null){
-            editText.postDelayed(new Runnable(){
-                @Override
-                public void run(){
-                    inputMethodManager.showSoftInput(editText, 0);
-                }
-            },50);
+            editText.postDelayed(() -> inputMethodManager.showSoftInput(editText, 0),50);
         }
     }
 
@@ -218,7 +206,7 @@ public class GroupSearchFragment extends BaseFragment {
             rl_search_result.setVisibility(View.VISIBLE);
 
             if (groupSearchAdapter != null) {
-                groupSearchAdapter.notifyDataSetChanged();;
+                groupSearchAdapter.notifyDataSetChanged();
                 lv_search_allcontacts.setSelection(0);
             }
         }
@@ -267,19 +255,11 @@ public class GroupSearchFragment extends BaseFragment {
     }
 
     /**  切组回调 **/
-    private ReceiveChangeGroupHandler mReceiveChangeGroupHandler = new ReceiveChangeGroupHandler() {
-        @Override
-        public void handler(final int errorCode, String errorDesc) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    searchGroups.clear();
-                    searchMemberFromGroup();
+    private ReceiveChangeGroupHandler mReceiveChangeGroupHandler = (errorCode, errorDesc) -> myHandler.post(() -> {
+        searchGroups.clear();
+        searchMemberFromGroup();
 
-                }
-            });
-        }
-    };
+    });
 
     private ReceiverCloseKeyBoardHandler receiverCloseKeyBoardHandler = new ReceiverCloseKeyBoardHandler() {
         @Override

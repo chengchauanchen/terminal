@@ -26,8 +26,6 @@ import ptt.terminalsdk.service.KeepLiveManager;
 
 @SuppressLint("Wakelock")
 public class OnlineService extends Service {
-//	private WindowManager mWindowManager;
-//	private View view;
 	private WakeLock wakeLock;
 	
 	private Logger logger = Logger.getLogger(getClass());
@@ -87,21 +85,11 @@ public class OnlineService extends Service {
 		IntentFilter netFilter = new IntentFilter();
 		netFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 		registerReceiver(netWorkConnectionChangeReceiver,netFilter);
-//		mWindowManager = (WindowManager) this.getSystemService(Context.WINDOW_SERVICE);
-//		view = new View(this);
-//		WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(1, 1, WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY,
-//				WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH, PixelFormat.TRANSLUCENT);
-//		layoutParams.gravity = Gravity.RIGHT | Gravity.TOP;
-//		mWindowManager.addView(view,layoutParams);
-
-
-
 	}
 	
 	@Override
 	public void onDestroy() {
 		logger.info("OnlineService执行onDestroy");
-//		MyTerminalFactory.getSDK().stop();
 		unregisterReceiver(receiver);
 		unregisterReceiver(pttDownAndUpReceiver);
 		unregisterReceiver(receiverLock);
@@ -110,16 +98,12 @@ public class OnlineService extends Service {
 		Intent intent = new Intent();
 		intent.setAction("RESTART_ONLINESERVICE");
 		sendBroadcast(intent);
-//		startService(new Intent(this, OnlineService.class));
-//		startService(new Intent(this,MessageService.class));
-//		bindService(new Intent(this,MessageService.class), MyTerminalFactory.getSDK().getMessageServiceConn(), Context.BIND_IMPORTANT);
 		super.onDestroy();
 	}
 
 	@Override
 	public int onStartCommand(Intent param, int flags, int startId) {
 		KeepLiveManager.getInstance().setServiceForeground(this);
-//		logger.info("OnlineService执行onStartCommand");
 		try {
 			//如果全部更新完成，没有退出，就发送OnlineService开启的广播
 			if(MyTerminalFactory.getSDK().isAllConfigUpdateComplete() && !MyTerminalFactory.getSDK().isExit()){

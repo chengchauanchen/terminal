@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.os.Build;
@@ -39,7 +38,6 @@ import java.util.concurrent.BlockingQueue;
 
 import dagger.Module;
 import dagger.Provides;
-import ptt.terminalsdk.BuildConfig;
 
 import static android.graphics.ImageFormat.NV21;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar;
@@ -49,17 +47,13 @@ import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV4
 
 @Module
 public class UVCMediaStream{
-    private static final boolean VERBOSE = BuildConfig.DEBUG;
-    private static final int SWITCH_CAMERA = 11;
     Pusher mEasyPusher;
     static final String TAG = "UVCMediaStream";
-    int width = 640, height = 480;
-    int framerate, bitrate;
-    MediaCodec mMediaCodec;
-    WeakReference<SurfaceTexture> mSurfaceHolderRef;
-    UVCCamera uvcCamera;
+    private int width = 640, height = 480;
+    private WeakReference<SurfaceTexture> mSurfaceHolderRef;
+    private UVCCamera uvcCamera;
 
-    USBAudioStream audioStream ;
+    private USBAudioStream audioStream ;
     private int mDgree;
     private Context mApplicationContext;
     private boolean mSWCodec;
@@ -68,7 +62,6 @@ public class UVCMediaStream{
     private EasyMuxer mMuxer;
     private final HandlerThread mCameraThread;
     private final Handler mCameraHandler;
-    //    private int previewFormat;
     private Logger logger = Logger.getLogger(getClass());
     private boolean pushStream = false;//是否要推送数据
     private boolean preView = false;
@@ -110,9 +103,6 @@ public class UVCMediaStream{
                     data = new byte[frame.capacity()];
                 }
                 frame.get(data);
-                //            bufferQueue.offer(data);
-                //
-                //            mCameraHandler.post(dequeueRunnable);
                 onPreviewFrame2(data, uvcCamera);
             }
         };
@@ -153,13 +143,6 @@ public class UVCMediaStream{
     public void updateResolution(final int width, final int height){
         this.width = width;
         this.height = height;
-        //        if(uvcCamera == null)
-        //            return;
-        //        stopPreview();
-        //        destroyCamera();
-        //        createCamera();
-        //        startPreview();
-
     }
 
     public static int[] determineMaximumSupportedFramerate(Camera.Parameters parameters){
@@ -256,7 +239,6 @@ public class UVCMediaStream{
             try{
                 value.setFrameCallback(uvcFrameCallback, UVCCamera.PIXEL_FORMAT_YUV420SP/*UVCCamera.PIXEL_FORMAT_NV21*/);
                 value.startPreview();
-                //                cameraPreviewResolution.postValue(new int[]{width, height});
             }catch(Throwable e){
                 e.printStackTrace();
             }
@@ -459,10 +441,8 @@ public class UVCMediaStream{
 
     private static ArrayList<CodecInfo> listEncoders(String mime){
         // 可能有多个编码库，都获取一下。。。
-        ArrayList<CodecInfo> codecInfos = new ArrayList<CodecInfo>();
+        ArrayList<CodecInfo> codecInfos = new ArrayList<>();
         int numCodecs = MediaCodecList.getCodecCount();
-        // int colorFormat = 0;
-        // String name = null;
         for(int i1 = 0; i1 < numCodecs; i1++){
             MediaCodecInfo codecInfo = MediaCodecList.getCodecInfoAt(i1);
             if(!codecInfo.isEncoder()){

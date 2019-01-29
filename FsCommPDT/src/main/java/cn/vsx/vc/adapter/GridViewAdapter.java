@@ -69,8 +69,8 @@ public class GridViewAdapter extends BaseAdapter {
             convertView = LayoutInflater.from(this.context).inflate(R.layout.item_gridview, null);
             height = convertView.getHeight();
             // 初始化组件
-            viewHolder.image = (ImageView) convertView.findViewById(R.id.image);
-            viewHolder.title = (TextView) convertView.findViewById(R.id.title);
+            viewHolder.image =  convertView.findViewById(R.id.image);
+            viewHolder.title =  convertView.findViewById(R.id.title);
             // 给converHolder附加一个对象
             convertView.setTag(viewHolder);
         } else {

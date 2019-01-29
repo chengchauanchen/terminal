@@ -176,14 +176,6 @@ public class UVCCameraService extends Service{
                     mUVCCamera = null;
                     liveData.postValue(null);
                 }
-
-                //                if (mUSBMonitor != null) {
-                //                    mUSBMonitor.destroy();
-                //                }
-                //
-                //                mUSBMonitor = new USBMonitor(OutterCameraService.this, this);
-                //                mUSBMonitor.setDeviceFilter(DeviceFilter.getDeviceFilters(OutterCameraService.this, R.xml.device_filter));
-                //                mUSBMonitor.register();
             }
 
             @Override
@@ -196,7 +188,6 @@ public class UVCCameraService extends Service{
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUVCCameraConnectChangeHandler.class,false);
                 logger.info("onDettach:");
                 releaseCamera();
-                //                AppContext.getInstance().bus.post(new UVCCameraDisconnect());
             }
         });
 

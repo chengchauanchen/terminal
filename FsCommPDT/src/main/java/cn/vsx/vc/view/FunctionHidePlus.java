@@ -12,7 +12,6 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
@@ -40,9 +39,9 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
 import cn.vsx.vc.record.AudioRecordButton;
 import cn.vsx.vc.utils.DataUtil;
-import ptt.terminalsdk.tools.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.tools.ToastUtil;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -128,69 +127,61 @@ public class FunctionHidePlus extends LinearLayout {
     private void initListener () {
         groupCallNewsEt.addTextChangedListener(mTextWatcher);
         groupCallNewsEt.setOnFocusChangeListener(mOnFocusChangeListener);
-        groupCallNewsEt.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showBottom(false);
-            }
-        });
+        groupCallNewsEt.setOnClickListener(v -> showBottom(false));
 
         setHasVideo();
         gridViewAdapter = new GridViewAdapter(titles, images, context);
         gv_function_bottom.setAdapter(gridViewAdapter);
-        gv_function_bottom.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                String title = titles[position];
-                if (isFastClick()){
-                    if(DataUtil.getMemberByMemberNo(userId).terminalMemberType== TerminalMemberType.TERMINAL_PDT.name()){
-                        ToastUtil.showToast(context,"对方不支持该消息类型");
+        gv_function_bottom.setOnItemClickListener((parent, view, position, id) -> {
+            String title = titles[position];
+            if (isFastClick()){
+                if(DataUtil.getMemberByMemberNo(userId).terminalMemberType== TerminalMemberType.TERMINAL_PDT.name()){
+                    ToastUtil.showToast(context,"对方不支持该消息类型");
+                    return;
+                }
+
+                if (title.equals("相册")
+                        &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.PHOTO_ALBUM, true, userId);
+                }else if (title.equals("拍照")
+                        &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
+                    if(MyApplication.instance.isMiniLive){
+                        ToastUtil.showToast(context,"小窗口模式中，不能执行该操作");
                         return;
                     }
-
-                    if (title.equals("相册")
-                            &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
-                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.PHOTO_ALBUM, true, userId);
-                    }else if (title.equals("拍照")
-                            &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
-                        if(MyApplication.instance.isMiniLive){
-                            ToastUtil.showToast(context,"小窗口模式中，不能执行该操作");
-                            return;
-                        }
-                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.CAMERA, true, userId);
-                    }else if (title.equals("文件")
-                            &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
-                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.FILE, true, userId);
-                    }else if (title.equals("发送位置")
-                            &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
-                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.LOCATION);
-                    }else if (title.equals("上报图像")){
-                        if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
-                            CheckMyPermission.permissionPrompt((Activity) context, Manifest.permission.RECORD_AUDIO);
-                            return;
-                        }
-                        if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.CAMERA)) {//没有相机权限
-                            CheckMyPermission.permissionPrompt((Activity) context, Manifest.permission.CAMERA);
-                            return;
-                        }
-                        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
-                            Toast.makeText(context,"没有图像上报权限",Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.POST_BACK_VIDEO, true, userId);
-                    }else if (title.equals("请求图像")){
-                        if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
-                            CheckMyPermission.permissionPrompt((Activity) context, Manifest.permission.RECORD_AUDIO);
-                            return;
-                        }
-                        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
-                            Toast.makeText(context,"没有图像请求权限",Toast.LENGTH_SHORT).show();
-                            return;
-                        }
-                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO, true, userId);
-                    }else {
-                        ToastUtil.showToast(context,"没有发送消息功能权限");
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.CAMERA, true, userId);
+                }else if (title.equals("文件")
+                        &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.FILE, true, userId);
+                }else if (title.equals("发送位置")
+                        &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.LOCATION);
+                }else if (title.equals("上报图像")){
+                    if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
+                        CheckMyPermission.permissionPrompt((Activity) context, Manifest.permission.RECORD_AUDIO);
+                        return;
                     }
+                    if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.CAMERA)) {//没有相机权限
+                        CheckMyPermission.permissionPrompt((Activity) context, Manifest.permission.CAMERA);
+                        return;
+                    }
+                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
+                        Toast.makeText(context,"没有图像上报权限",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.POST_BACK_VIDEO, true, userId);
+                }else if (title.equals("请求图像")){
+                    if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
+                        CheckMyPermission.permissionPrompt((Activity) context, Manifest.permission.RECORD_AUDIO);
+                        return;
+                    }
+                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
+                        Toast.makeText(context,"没有图像请求权限",Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO, true, userId);
+                }else {
+                    ToastUtil.showToast(context,"没有发送消息功能权限");
                 }
             }
         });
@@ -307,12 +298,9 @@ public class FunctionHidePlus extends LinearLayout {
             hideKeyboard(true);
             groupCallNewsEt.clearFocus();
 
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    ll_function_hide_plus_bottom.setVisibility(View.VISIBLE);
-                    ll_function_hide_plus_bottom.requestFocus();
-                }
+            handler.postDelayed(() -> {
+                ll_function_hide_plus_bottom.setVisibility(View.VISIBLE);
+                ll_function_hide_plus_bottom.requestFocus();
             }, 50L);
         }
         else {
@@ -333,12 +321,7 @@ public class FunctionHidePlus extends LinearLayout {
 
     public void showBottom (boolean show) {
         if(!show) {
-            postDelayed(new Runnable(){
-                @Override
-                public void run(){
-                    ll_function_hide_plus_bottom.setVisibility(View.GONE);
-                }
-            },50);
+            postDelayed(() -> ll_function_hide_plus_bottom.setVisibility(View.GONE),50);
 
 //            ll_function_bottom.setVisibility(GONE);
         }

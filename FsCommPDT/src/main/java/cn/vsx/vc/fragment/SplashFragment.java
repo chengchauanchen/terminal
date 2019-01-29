@@ -35,12 +35,7 @@ public class SplashFragment extends Fragment{
             myProgressDialog.setMsg("正在加载...");
             myProgressDialog.show();
         }
-        mHandler.postDelayed(new Runnable(){
-            @Override
-            public void run(){
-                myProgressDialog.dismiss();
-            }
-        },3000);
+        mHandler.postDelayed(() -> myProgressDialog.dismiss(),3000);
 
     }
 }

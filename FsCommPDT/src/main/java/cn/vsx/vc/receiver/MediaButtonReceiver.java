@@ -20,8 +20,7 @@ public class MediaButtonReceiver extends BroadcastReceiver {
 	public void onReceive(Context context, Intent intent) {
 		String intentAction = intent.getAction();
 		if (Intent.ACTION_MEDIA_BUTTON.equals(intentAction)) {
-			KeyEvent keyEvent = (KeyEvent) intent
-					.getParcelableExtra(Intent.EXTRA_KEY_EVENT); 
+			KeyEvent keyEvent =  intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
 			if (keyEvent.getAction() == KeyEvent.ACTION_DOWN) {
 				if (headSetListener != null) {
 				headSetListener.onClickDown();
