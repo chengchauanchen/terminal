@@ -96,7 +96,7 @@ public class PhotoUtils {
         progressBar.setVisibility(View.GONE);
     }
 
-    public static void loadNetBitmap2 (Context context, String path, ImageView imageView) {
+    public void loadNetBitmap2 (Context context, String path, ImageView imageView) {
         Glide.with(context)
                 .load(path)
                 .asBitmap()

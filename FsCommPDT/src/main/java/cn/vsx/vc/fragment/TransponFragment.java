@@ -105,7 +105,7 @@ public class TransponFragment extends BaseFragment{
         }
         //消息类型不为组呼和录音的时候
         if(messageType != MessageType.GROUP_CALL.getCode() && messageType != MessageType.AUDIO.getCode()) {
-            List<Member> members = MyTerminalFactory.getSDK().getConfigManager().getAllMembers();
+            List<Member> members = MyTerminalFactory.getSDK().getConfigManager().getAllMemberExceptMe();
             for (Member member : members) {
                 if(member.id != userId) {
                     ChatMember chatMember = new ChatMember(member.id, member.getName(), false);

@@ -1,6 +1,5 @@
 package com.zectec.imageandfileselector.adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -88,7 +87,7 @@ public class FaceRecognitionAdapter extends BaseAdapter {
         holder.tv_title_face_pair.setText(faceRecognitionBean.getTitle());
         holder.tv_matched_degree.setText(faceRecognitionBean.getMatcheDegree()+"%");
         holder.tv_content_face_pair.setText(faceRecognitionBean.getContent());
-        PhotoUtils.loadNetBitmap2(context, faceRecognitionBean.getPictureUrl(), holder.iv_photo_face_pair);
+        PhotoUtils.getInstance().loadNetBitmap2(context, faceRecognitionBean.getPictureUrl(), holder.iv_photo_face_pair);
         if(position == 0) {
             holder.tv_matched_degree.setBackgroundDrawable(context.getResources().getDrawable(R.drawable.matched1));
         }

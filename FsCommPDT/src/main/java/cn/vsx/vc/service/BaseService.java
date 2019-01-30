@@ -13,7 +13,6 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -165,7 +164,7 @@ public abstract class BaseService extends Service{
     protected void initHomeBroadCastReceiver(){
         IntentFilter mReceivFilter = new IntentFilter();
         mReceivFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiv, mReceivFilter);
+        registerReceiver(mBroadcastReceiv, mReceivFilter);
     }
 
     protected abstract void setRootView();
@@ -195,6 +194,7 @@ public abstract class BaseService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
+        unregisterReceiver(mBroadcastReceiv);
     }
 
     /**

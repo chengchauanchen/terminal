@@ -32,6 +32,7 @@ import com.zectec.imageandfileselector.utils.FileUtil;
 import com.zectec.imageandfileselector.utils.OpenFileUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import com.zectec.imageandfileselector.utils.PhotoUtils;
+import com.zectec.imageandfileselector.view.LoadingCircleView;
 
 import org.apache.log4j.Logger;
 
@@ -131,6 +132,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     public boolean isDownloadingPicture;
     public boolean isEnable = true;
     public List<TerminalMessage> uploadMessages = new ArrayList<>();
+    public LoadingCircleView loadingView;
     public ProgressBar downloadProgressBar;//正在下载的条目对应的ProgressBar
     public TextView download_tv_progressBars;//正在下载的条目对应的tv_progressBars
     public Map<Integer, Integer> progressPercentMap = new HashMap<>();
@@ -680,10 +682,12 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         }
         //小视频
         if (viewType == MESSAGE_VEDIO_RECEIVED || viewType == MESSAGE_VEDIO_SEND) {
-            holder.ivContent =  convertView.findViewById(R.id.iv_content);
-            holder.progressBar =  convertView.findViewById(R.id.progress_bar);
-            holder.tv_progress =  convertView.findViewById(R.id.tv_progress);
-            holder.tvDuration =  convertView.findViewById(R.id.tv_voice_length);
+            holder.ivContent = convertView.findViewById(R.id.iv_content);
+//            holder.progressBar = convertView.findViewById(R.id.progress_bar);
+//            holder.tv_progress = convertView.findViewById(R.id.tv_progress);
+            holder.tvDuration = convertView.findViewById(R.id.tv_voice_length);
+            holder.loadingView = convertView.findViewById(R.id.loading_view);
+
         }
         //个呼
         if (viewType == MESSAGE_PRIVATE_CALL_RECEIVED || viewType == MESSAGE_PRIVATE_CALL_SEND) {
@@ -802,11 +806,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if(videoTime >0){
                 setText(holder.tvDuration, videoTime/1000 + "''");
             }
-//            openFile(terminalMessage, holder);
             if(terminalMessage.messageBody.containsKey(JsonParam.PICTURE_THUMB_URL)){
                 String pictureThumbUrl = terminalMessage.messageBody.getString(JsonParam.PICTURE_THUMB_URL);
                 if(pictureThumbUrl.startsWith("http")){
-                    PhotoUtils.getInstance().loadNetBitmap(activity, pictureThumbUrl, holder.ivContent, holder.tv_progress, holder.progressBar);
+                    PhotoUtils.getInstance().loadNetBitmap2(activity, pictureThumbUrl, holder.ivContent);
                 }else {
                     PhotoUtils.getInstance().loadLocalBitmap(activity, pictureThumbUrl, holder.ivContent);
                 }
@@ -1529,12 +1532,14 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                     // TODO: 2019/1/17 下载视频
                     isDownloading = true;
                     MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
-                    downloadProgressBar = chatViewHolder.progressBar;
-                    download_tv_progressBars = chatViewHolder.tv_progress;
-                    setProgress(downloadProgressBar, 0);
-                    setText(download_tv_progressBars, "0%");
-                    setViewVisibility(downloadProgressBar, View.VISIBLE);
-                    setViewVisibility(download_tv_progressBars, View.VISIBLE);
+//                    downloadProgressBar = chatViewHolder.progressBar;
+//                    download_tv_progressBars = chatViewHolder.tv_progress;
+//                    setProgress(downloadProgressBar, 0);
+//                    setText(download_tv_progressBars, "0%");
+//                    setViewVisibility(downloadProgressBar, View.VISIBLE);
+//                    setViewVisibility(download_tv_progressBars, View.VISIBLE);
+                    loadingView = chatViewHolder.loadingView;
+                    loadingView.setProgerss(0);
                     MyTerminalFactory.getSDK().download(terminalMessage, true);
                 }else {
                     openVideo(terminalMessage,file);

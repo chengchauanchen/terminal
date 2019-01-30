@@ -10,6 +10,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.zectec.imageandfileselector.view.BubbleImageView;
+import com.zectec.imageandfileselector.view.LoadingCircleView;
 
 import cn.vsx.vc.R;
 
@@ -51,6 +52,8 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
     public TextView tv_ack_msg;
     //送达显示
     public TextView tv_delivered;
+    //小视频
+    public LoadingCircleView loadingView;
 
     /**  图像  ***/
     public LinearLayout ll_botoom_to_watch;//去观看图像
@@ -101,9 +104,10 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
     //小视频
     public void videoFindViewById(View itemView,boolean isReceiver){
         ivContent = (BubbleImageView) itemView.findViewById(R.id.iv_content);
-        progressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar);
-        tv_progress = (TextView) itemView.findViewById(R.id.tv_progress);
+//        progressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar);
+//        tv_progress = (TextView) itemView.findViewById(R.id.tv_progress);
         tvDuration = (TextView) itemView.findViewById(R.id.tv_voice_length);
+        loadingView = (LoadingCircleView) itemView.findViewById(R.id.loading_view);
     }
     //个呼
     public void privateCallFindViewById(View itemView,boolean isReceiver){

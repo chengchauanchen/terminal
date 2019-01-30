@@ -5,6 +5,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
@@ -37,6 +38,7 @@ import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileCheckMessa
 import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileHandler;
 import com.zectec.imageandfileselector.receivehandler.ReceiverToFaceRecognitionHandler;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
+import com.zectec.imageandfileselector.view.LoadingCircleView;
 
 import org.apache.http.util.TextUtils;
 import org.apache.log4j.Logger;
@@ -90,6 +92,7 @@ import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverTransponHandler;
 import cn.vsx.vc.service.PullLivingService;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.FileUtil;
@@ -99,6 +102,7 @@ import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.tools.HttpUtil;
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 
@@ -211,6 +215,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         if (chatMessageList.size() > 0) {
             lastVersion = chatMessageList.get(chatMessageList.size() - 1).messageVersion;
         }
+
         HashMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getSerializable(Params.MESSAGE_SEND_FAIL, new HashMap<>());
         if(sendFailMap != null ) {
             List<TerminalMessage> list = sendFailMap.get(userId + "");
@@ -539,6 +544,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
         jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
         jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
         jsonObject.put(JsonParam.VIDEO_TIME,videoTime);
+        Bitmap bitmap = BitmapUtil.createVideoThumbnail(filePath);
+        String picture = HttpUtil.saveFileByBitmap(MyTerminalFactory.getSDK().getPhotoRecordDirectory(), System.currentTimeMillis()+".jpg", bitmap);
+        jsonObject.put(JsonParam.PICTURE_THUMB_URL,picture);
         TerminalMessage mTerminalMessage = new TerminalMessage();
         mTerminalMessage.messageType = MessageType.VIDEO_CLIPS.getCode();
         mTerminalMessage.sendTime = System.currentTimeMillis();
@@ -1567,33 +1575,64 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
             final int viewPos = getViewPos(position);
             logger.info("上传中viewPos:" + viewPos+"percentInt:"+percentInt);
-            handler.post(() -> {
-                ProgressBar progressBar_pre_upload = null;
-                TextView tv_progress_pre_upload = null;
-                if (viewPos != -1) {
-                    View childView = groupCallList.getChildAt(viewPos);
-                    if (childView != null) {
-                        progressBar_pre_upload = (ProgressBar) childView.findViewById(R.id.progress_bar);
-                        tv_progress_pre_upload = (TextView) childView.findViewById(R.id.tv_progress);
-                    }
-                }
-                if (percentInt >= 100) {
-                    temporaryAdapter.progressPercentMap.remove(tokenId);
-                    /***  文件正在发送更新进度条显示 **/
-                    if (progressBar_pre_upload != null && tv_progress_pre_upload != null) {
-                        progressBar_pre_upload.setVisibility(View.GONE);
-                        tv_progress_pre_upload.setVisibility(View.GONE);
-                    }
-                }
-                else {
-                    if (progressBar_pre_upload != null && tv_progress_pre_upload != null) {
-                        progressBar_pre_upload.setVisibility(View.VISIBLE);
-                        tv_progress_pre_upload.setVisibility(View.VISIBLE);
-                        progressBar_pre_upload.setProgress(percentInt);
-                        setText( tv_progress_pre_upload, percentInt + "%");
-                    }
-                }
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if(terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()){
+                        //上传视频中，上传成功之后messageUrl才有值
+                        if(TextUtils.isEmpty(terminalMessage.messageUrl)){
+                            LoadingCircleView loading_view = null;
+                            if (viewPos != -1) {
+                                View childView = groupCallList.getChildAt(viewPos);
+                                if (childView != null) {
+                                    loading_view = childView.findViewById(R.id.loading_view);
+                                }
+                            }
+                            if (percentInt >= 100) {
+                                temporaryAdapter.progressPercentMap.remove(tokenId);
+                                /***  文件正在发送更新进度条显示 **/
+                                if (loading_view != null ) {
+                                    loading_view.setVisibility(View.GONE);
+                                }
+                            }
+                            else {
+                                if (loading_view != null) {
+                                    loading_view.setVisibility(View.VISIBLE);
+                                    loading_view.setProgerss(percentInt);
+                                }
+                            }
 
+                        }
+                    }else {
+
+                        ProgressBar progressBar_pre_upload = null;
+                        TextView tv_progress_pre_upload = null;
+                        if (viewPos != -1) {
+                            View childView = groupCallList.getChildAt(viewPos);
+                            if (childView != null) {
+                                progressBar_pre_upload = (ProgressBar) childView.findViewById(R.id.progress_bar);
+                                tv_progress_pre_upload = (TextView) childView.findViewById(R.id.tv_progress);
+                            }
+                        }
+                        if (percentInt >= 100) {
+                            temporaryAdapter.progressPercentMap.remove(tokenId);
+                            /***  文件正在发送更新进度条显示 **/
+                            if (progressBar_pre_upload != null && tv_progress_pre_upload != null) {
+                                progressBar_pre_upload.setVisibility(View.GONE);
+                                tv_progress_pre_upload.setVisibility(View.GONE);
+                            }
+                        }
+                        else {
+                            if (progressBar_pre_upload != null && tv_progress_pre_upload != null) {
+                                progressBar_pre_upload.setVisibility(View.VISIBLE);
+                                tv_progress_pre_upload.setVisibility(View.VISIBLE);
+                                progressBar_pre_upload.setProgress(percentInt);
+                                setText( tv_progress_pre_upload, percentInt + "%");
+                            }
+                        }
+                    }
+
+                }
             });
         }
     };
@@ -1603,18 +1642,34 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
         @Override
         public void handler(final float percent, TerminalMessage terminalMessage) {
-            handler.post(() -> {
-                if(temporaryAdapter.downloadProgressBar != null
-                        && temporaryAdapter.download_tv_progressBars != null) {
-                    int percentInt = (int) (percent * 100);
-                    temporaryAdapter.downloadProgressBar.setProgress(percentInt);
-                    setText(temporaryAdapter.download_tv_progressBars, percentInt + "%");
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if(terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()){
+                        if(null != temporaryAdapter.loadingView){
+                            int percentInt = (int) (percent * 100);
+                            if(percentInt >= 100) {
+                                setViewVisibility(temporaryAdapter.loadingView, View.GONE);
+                                temporaryAdapter.loadingView = null;
+                            }else {
+                                setViewVisibility(temporaryAdapter.loadingView, View.VISIBLE);
+                                temporaryAdapter.loadingView.setProgerss(percentInt);
+                            }
+                        }
+                    }else {
+                        if(temporaryAdapter.downloadProgressBar != null
+                                && temporaryAdapter.download_tv_progressBars != null) {
+                            int percentInt = (int) (percent * 100);
+                            temporaryAdapter.downloadProgressBar.setProgress(percentInt);
+                            setText(temporaryAdapter.download_tv_progressBars, percentInt + "%");
 
-                    if(percentInt >= 100) {
-                        setViewVisibility(temporaryAdapter.downloadProgressBar, View.GONE);
-                        setViewVisibility(temporaryAdapter.download_tv_progressBars, View.GONE);
-                        temporaryAdapter.downloadProgressBar = null;
-                        temporaryAdapter.download_tv_progressBars = null;
+                            if(percentInt >= 100) {
+                                setViewVisibility(temporaryAdapter.downloadProgressBar, View.GONE);
+                                setViewVisibility(temporaryAdapter.download_tv_progressBars, View.GONE);
+                                temporaryAdapter.downloadProgressBar = null;
+                                temporaryAdapter.download_tv_progressBars = null;
+                            }
+                        }
                     }
                 }
             });

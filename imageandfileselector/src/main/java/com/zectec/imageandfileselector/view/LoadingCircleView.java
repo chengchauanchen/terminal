@@ -40,12 +40,12 @@ public class LoadingCircleView extends View {
     private void init () {
         paintBgCircle = new Paint();
         paintBgCircle.setAntiAlias(true);
-        paintBgCircle.setColor(Color.WHITE);
+        paintBgCircle.setColor(Color.GRAY);
         paintBgCircle.setStyle(Paint.Style.FILL);
 
         paintProgressCircle = new Paint();
         paintProgressCircle.setAntiAlias(true);
-        paintProgressCircle.setColor(Color.parseColor("#88ffffff"));
+        paintProgressCircle.setColor(Color.parseColor("#ffffff"));
         paintProgressCircle.setStyle(Paint.Style.FILL);
     }
 
@@ -59,13 +59,14 @@ public class LoadingCircleView extends View {
         super.onDraw(canvas);
         canvas.drawCircle(getMeasuredWidth() / 2, getMeasuredWidth() / 2, getMeasuredWidth() / 2, paintBgCircle);
         RectF f = new RectF(progressCirclePadding, progressCirclePadding, getMeasuredWidth() - progressCirclePadding, getMeasuredWidth() - progressCirclePadding);
+//        RectF f = new RectF(10, 10, 100, 100);
         canvas.drawArc(f, startAngle, sweepAngle, true, paintProgressCircle);
 
     }
 
     public void setProgerss(int progerss) {
         sweepAngle = (float) (360 / 100.0 * progerss);
-        invalidate();
+        postInvalidate();
     }
 
 }

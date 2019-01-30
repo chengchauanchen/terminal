@@ -491,7 +491,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 	};
 
 	private void closeAndroidPDialog(){
-		if(Build.VERSION.SDK_INT <Build.VERSION_CODES.O){
+		if(Build.VERSION.SDK_INT >Build.VERSION_CODES.O){
 			try {
 				Class aClass = Class.forName("android.content.pm.PackageParser$Package");
 				Constructor declaredConstructor = aClass.getDeclaredConstructor(String.class);

@@ -215,11 +215,14 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     protected void onPause() {
         super.onPause();
         isForeground = false;
-        try{
-            keyMointor.setHandler(gotaKeyHandler);
-        }catch (Exception e){
-           e.printStackTrace();
+        if(null != keyMointor){
+            try{
+                keyMointor.setHandler(gotaKeyHandler);
+            }catch(RemoteException e){
+                e.printStackTrace();
+            }
         }
+
     }
 
     @Override

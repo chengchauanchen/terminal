@@ -353,16 +353,21 @@ public class BleActivity extends BaseActivity{
             if(BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)){
                 String deviceAddress = intent.getStringExtra("deviceAddress");
                 if(!TextUtils.isEmpty(deviceAddress) && deviceAddress.equals(connectingDeviceAddress)){
-                    mLeDevices.get(connectingPosition).setStatus(3);
-                    mLeDeviceListAdapter.notifyDataSetChanged();
-                    connectingDeviceAddress = null;
+                    if(connectingPosition !=-1 && mLeDevices.size() > connectingPosition && null != mLeDevices.get(connectingPosition)){
+                        mLeDevices.get(connectingPosition).setStatus(3);
+                        mLeDeviceListAdapter.notifyDataSetChanged();
+                        connectingDeviceAddress = null;
+                    }
                 }
             }
             if(BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)){
                 String deviceAddress = intent.getStringExtra("deviceAddress");
                 if(!TextUtils.isEmpty(deviceAddress) && deviceAddress.equals(connectingDeviceAddress)){
-                    mLeDevices.get(connectingPosition).setStatus(1);
-                    mLeDeviceListAdapter.notifyDataSetChanged();
+                    if(connectingPosition !=-1 && !mLeDevices.isEmpty() && mLeDevices.size()>connectingPosition && null != mLeDevices.get(connectingPosition)){
+                        mLeDevices.get(connectingPosition).setStatus(1);
+                        mLeDeviceListAdapter.notifyDataSetChanged();
+                    }
+                    connectingPosition = -1;
                     connectingDeviceAddress = null;
                 }
             }
