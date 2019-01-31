@@ -1342,10 +1342,12 @@ public class TalkbackFragment extends BaseFragment {
     public void onPause(){
         super.onPause();
         myHandler.removeMessages(1);
-        try{
-            keyMointor.setHandler(gotaKeyHandler);
-        }catch (Exception e){
-          e.printStackTrace();
+        if(null != keyMointor){
+            try{
+                keyMointor.setHandler(gotaKeyHandler);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
         }
     }
 

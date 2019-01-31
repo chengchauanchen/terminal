@@ -209,6 +209,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
         ObjectInputStream oin = null;
         try {
             File file = new File(getSerializableDataDirectory(), param);
+			Util.createFileOrDirectoryIfNotExists(file);
             in = new FileInputStream(file);
             oin = new ObjectInputStream(in);
             obj = (T) oin.readObject();

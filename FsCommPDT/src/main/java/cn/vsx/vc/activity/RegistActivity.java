@@ -293,7 +293,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         logger.info("RegistActivity---收到登录的消息---resultCode:" + resultCode + "     resultDesc:" + resultDesc);
         myHandler.post(() -> {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-//                updateData();
+                updateData();
             } else {
                 changeProgressMsg(resultDesc);
                 timer.schedule(new TimerTask() {
