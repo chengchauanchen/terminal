@@ -251,6 +251,14 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                         ll_groupCall_prompt.setVisibility(View.GONE);
                         ICTV_groupCall_time.stop();
                     }
+                } else {
+                    noNetWork.setVisibility(View.GONE);
+                    MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
+                        }
+                    });
                 }
             });
         }
