@@ -88,6 +88,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePopBackStackHandler;
@@ -235,7 +236,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     /**
      * 网络连接状态
      */
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler() {
+    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
         @Override
         public void handler(final boolean connected) {
             logger.info("主界面收到服务是否连接的通知ServerConnectionEstablishedHandler" + connected);
@@ -294,8 +295,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 for (Activity activity : ActivityCollector.getAllActivity().values()) {
                     activity.finish();
                 }
-                TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
-                TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
+//                TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
+//                TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
                 MyApplication.instance.isClickVolumeToCall = false;
                 MyApplication.instance.isPttPress = false;
                 MyApplication.instance.stopIndividualCallService();
@@ -874,7 +875,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceivePopBackStackHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowPersonFragmentHandler);
@@ -1021,6 +1022,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         if(account.startsWith("88")|| account.startsWith("86")){
             account = account.substring(2);
         }
+        account = "1003";
         logger.info("voip账号："+account+",密码："+ account+"，服务器地址："+server);
         MyTerminalFactory.getSDK().getVoipCallManager().clearCache();
         if(!TextUtils.isEmpty(account)){
@@ -1489,7 +1491,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler );
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler );
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateFoldersAndGroupsHandler );

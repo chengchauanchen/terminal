@@ -30,9 +30,9 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandle
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyInviteToWatchHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartIndividualCallHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveStartCeaseGroupCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTalkWillTimeoutHandler;
 import cn.vsx.vc.R;
@@ -68,7 +68,7 @@ public class PromptManager {
 		stopRing();
 	};
 
-	private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
+	private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> {
 		logger.info("PromptManager收到网络状态通知：connected = "+connected);
 		if (!connected) {
 			stopRing();
@@ -287,7 +287,7 @@ public class PromptManager {
 		soundMap.put(R.raw.request_call_wait, soundPool.load(MyApplication.instance, R.raw.request_call_wait, 1));
 		soundMap.put(R.raw.passive_dropped_warning,soundPool.load(MyApplication.instance,R.raw.passive_dropped_warning,1));
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
-		MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+		MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveGetRtspStreamUrlHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
@@ -298,7 +298,7 @@ public class PromptManager {
 	public void stop(){
 		logger.info("----------提示音管理类 stop()------------");
 		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
-		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
 		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartIndividualCallHandler);
 		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetRtspStreamUrlHandler);
 		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);

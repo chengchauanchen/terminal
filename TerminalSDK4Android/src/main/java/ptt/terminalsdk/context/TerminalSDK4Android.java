@@ -45,6 +45,8 @@ import cn.vsx.hamster.terminalsdk.manager.channel.AbsClientChannel;
 import cn.vsx.hamster.terminalsdk.manager.http.IHttpClient;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
 import cn.vsx.hamster.terminalsdk.tools.OperateReceiveHandlerUtil;
@@ -84,6 +86,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private int accessServerPort;
 	private boolean bindService;
     private VoipManager voipManager;
+	//DDpush连接
+	private boolean Established = true;
+	//网络是否连接，只有两个都连接上才是真正的在线，只要有一个为false就是离线
+	private boolean netWorkConnected = true;
 
 	public TerminalSDK4Android (Application mApplication){
 		application = mApplication;
@@ -100,7 +106,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		getBDGPSManager().start();
 		getVideoProxy().start();
 		PromptManager.getInstance().start(application);
-
+		registReceiveHandler(receiveNetworkChangeHandler);
 		//个呼通讯录，请求的是自己的列表，还是所有成员列表
 		putParam(Params.REQUEST_ALL, false);
 		try {
@@ -129,6 +135,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		getVideoProxy().stop();
 		PromptManager.getInstance().stop();
 		disConnectToServer();
+		unregistReceiveHandler(receiveNetworkChangeHandler);
 	}
 
 
@@ -687,7 +694,25 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		@Override
 		public void handler(boolean connected) {
 			logger.info("***********UDPClientBase**************connected = "+connected);
+			Established = connected;
 			notifyReceiveHandler(ReceiveServerConnectionEstablishedHandler.class, connected);
+			if(netWorkConnected && Established){
+				notifyReceiveHandler(ReceiveOnLineStatusChangedHandler.class,true);
+			}else {
+				notifyReceiveHandler(ReceiveOnLineStatusChangedHandler.class,false);
+			}
+		}
+	};
+
+	private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+		@Override
+		public void handler(boolean connected){
+			netWorkConnected = connected;
+			if(netWorkConnected && Established){
+				notifyReceiveHandler(ReceiveOnLineStatusChangedHandler.class,true);
+			}else {
+				notifyReceiveHandler(ReceiveOnLineStatusChangedHandler.class,false);
+			}
 		}
 	};
 

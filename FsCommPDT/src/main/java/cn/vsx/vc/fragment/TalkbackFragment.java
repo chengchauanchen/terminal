@@ -26,7 +26,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.baidu.speechsynthesizer.SpeechSynthesizer;
 import com.baidu.speechsynthesizer.SpeechSynthesizerListener;
@@ -61,11 +60,11 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupScanResultHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEnvironmentMonitorHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
@@ -391,7 +390,7 @@ public class TalkbackFragment extends BaseFragment {
     /**
      * 网络连接状态
      */
-    private ReceiveServerConnectionEstablishedHandler serverConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler() {
+    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
 
         @Override
         public void handler(final boolean connected) {
@@ -1044,7 +1043,7 @@ public class TalkbackFragment extends BaseFragment {
 
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
 
-        MyTerminalFactory.getSDK().registReceiveHandler(serverConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEnvironmentMonitorHandler);
 
@@ -1364,7 +1363,7 @@ public class TalkbackFragment extends BaseFragment {
 
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
 
-        MyTerminalFactory.getSDK().unregistReceiveHandler(serverConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEnvironmentMonitorHandler);
 

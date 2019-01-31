@@ -61,10 +61,10 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.auth.AuthModel;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetNameByOrgHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRegistCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.tools.JudgeWhetherConnect;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -143,7 +143,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     /**
      * 网络连接状态
      */
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> RegistActivity.this.runOnUiThread(() -> {
+    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> RegistActivity.this.runOnUiThread(() -> {
         if (!MyTerminalFactory.getSDK().getParam(Params.IS_FORBID, false)) {
             if (!connected) {
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_network_anomaly));
@@ -182,6 +182,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                                 .setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish())
                                 .create();
                         alerDialog.show();
+                    }
+                    else if(resultCode == TerminalErrorCode.REGISTER_UNKNOWN_ERROR.getErrorCode()){
+                        //发生异常的时候重试几次，因为网络原因经常导致一个io异常
+                        sendUuid(null, null);
                     }
                     else {
                         hideProgressDialog();
@@ -222,16 +226,20 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                                 .create();
                         alerDialog.show();
                     }
-
+                    else if(resultCode == TerminalErrorCode.REGISTER_UNKNOWN_ERROR.getErrorCode()){
+                        //发生异常的时候重试几次，因为网络原因经常导致一个io异常
+                        sendUuid(null, null);
+                    }
                     else {
-                        if (!MyTerminalFactory.getSDK().getParam(Params.IS_FIRST_LOGIN, true)) {
+                        //如果已经注册过了，重新再认证
+                        if(isRegisted){
                             timer.schedule(new TimerTask() {
                                 @Override
                                 public void run() {
                                     sendUuid(null, null);
                                 }
                             }, 5000);
-                        } else {//第一次登录
+                        }else {
                             if (availableIPlist.size() < 1) {
                                 logger.info("第一次登陆App,开始探测ip列表");
                                 //重新探测
@@ -285,22 +293,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         logger.info("RegistActivity---收到登录的消息---resultCode:" + resultCode + "     resultDesc:" + resultDesc);
         myHandler.post(() -> {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                if (!MyTerminalFactory.getSDK().getParam(Params.IS_FIRST_LOGIN, true)
-                        && !MyTerminalFactory.getSDK().getParam(Params.IS_UPDATE_DATA, true)) {
-                    logger.info("不是第一次登录，也不需要更新数据，直接进入主界面");
-                    MyTerminalFactory.getSDK().putParam(Params.FORBID, false);
-                    MyTerminalFactory.getSDK().getConfigManager().updateCurrentGroupOnlineMembers();
-                    goOn();
-                } else {
-                    logger.info("第一次登录，更新所有数据");
-                    updateData();
-                }
-                //登录响应成功，把第一次登录标记置为false；
-                MyTerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, false);
-
+//                updateData();
             } else {
                 changeProgressMsg(resultDesc);
-
                 timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
@@ -332,7 +327,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         if (errorCode == BaseCommonCode.SUCCESS_CODE) {
             logger.info("更新数据成功！");
             goOn();
-            MyTerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, false);//数据更新成功，把是否要更新数据的标记置为false；
         } else {
             changeProgressMsg(String.format(getString(R.string.text_update_data_fail),errorDesc));
             timer.schedule(new TimerTask() {
@@ -931,7 +925,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRegistCompleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetNameByOrgHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReturnAvailableIPHandler);
         userOrg.setOnFocusChangeListener(onFocusChangeListener);
         userOrg.addTextChangedListener(new TextWatcherImpOrg());//监听输入内容的变化
@@ -975,7 +969,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRegistCompleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetNameByOrgHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReturnAvailableIPHandler);
         myHandler.removeCallbacksAndMessages(null);
         if (myProgressDialog != null) {

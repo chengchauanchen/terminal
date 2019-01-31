@@ -23,24 +23,23 @@ public class NetWorkConnectionChangeReceiver extends BroadcastReceiver {
 
 
 
-        boolean success = false;
-        //获得网络连接服务
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(context.CONNECTIVITY_SERVICE);
-        //获取wifi连接状态
-        NetworkInfo.State state = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
-        //判断是否正在使用wifi网络
-        if (state == NetworkInfo.State.CONNECTED) {
-            success = true;
-        }
-        //获取GPRS状态
-        state = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
-        //判断是否在使用GPRS网络
-        if (state == NetworkInfo.State.CONNECTED) {
-            success = true;
-        }
-        Log.i("网络状态", "网络是否连接："+success);
-        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveNetworkChangeHandler.class,success);
+        if (ConnectivityManager.CONNECTIVITY_ACTION.equals(intent.getAction())) {
 
+            // 得到连接管理器对象
+            ConnectivityManager connectivityManager = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+            final boolean success = activeNetworkInfo != null && activeNetworkInfo.isConnected();
+            //获取联网状态的NetworkInfo对象
+            Log.e("收到网络变化的广播", "是否连接："+success);
+            MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable(){
+                @Override
+                public void run(){
+                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveNetworkChangeHandler.class,success);
+                }
+            });
+        }
     }
 
 
