@@ -45,7 +45,7 @@ public class LoadingCircleView extends View {
 
         paintProgressCircle = new Paint();
         paintProgressCircle.setAntiAlias(true);
-        paintProgressCircle.setColor(Color.parseColor("#ffffff"));
+        paintProgressCircle.setColor(Color.WHITE);
         paintProgressCircle.setStyle(Paint.Style.FILL);
     }
 

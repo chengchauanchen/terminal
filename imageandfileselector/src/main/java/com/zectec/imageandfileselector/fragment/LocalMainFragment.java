@@ -81,10 +81,10 @@ public class LocalMainFragment extends BaseFragment implements View.OnClickListe
         tv_all_size.setText(getString(R.string.size, "0B"));
         tv_send.setText(getString(R.string.send, "0"));
         updateSizAndCount();
-        mTitleList.add("影音");
-        mTitleList.add("图片");
-        mTitleList.add("文档");
-        mTitleList.add("其他");
+        mTitleList.add(getString(R.string.text_video_and_sound));
+        mTitleList.add(getString(R.string.text_picture));
+        mTitleList.add(getString(R.string.text_document));
+        mTitleList.add(getString(R.string.text_other));
 
         fragments.add(new AVFragment());
         fragments.add(new PhotoFragment());
@@ -158,7 +158,7 @@ public class LocalMainFragment extends BaseFragment implements View.OnClickListe
                 @Override
                 public void onClick(View v) {
                     if (entries.size() == 0){
-                        Toast.makeText(getActivity(),"请选择至少一个文件",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(),R.string.text_please_select_at_least_one_file,Toast.LENGTH_SHORT).show();
                     }else{
                         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.FILE);
                     }

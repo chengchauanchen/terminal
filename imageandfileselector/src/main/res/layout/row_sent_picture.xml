@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:paddingTop="13dp">
+    android:paddingTop="@dimen/dp_13">
 
     <TextView
         android:id="@+id/timestamp"
@@ -16,14 +16,14 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_chat_activity" >
+        android:layout_marginTop="@dimen/margin_chat_activity">
 
         <ImageView
             android:id="@+id/iv_userhead"
             android:layout_width="@dimen/size_avatar"
             android:layout_height="@dimen/size_avatar"
-            android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
             android:layout_marginRight="@dimen/margin_chat_activity"
             android:background="@drawable/user_photo"
             android:scaleType="fitXY" />
@@ -34,7 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginRight="@dimen/margin_chat_activity"
 
-            android:layout_toLeftOf="@id/iv_userhead" >
+            android:layout_toLeftOf="@id/iv_userhead">
 
             <!--<ImageView-->
             <!--android:id="@+id/image"-->
@@ -48,40 +48,37 @@
             <com.zectec.imageandfileselector.view.BubbleImageView
                 android:id="@+id/bubbleImage"
                 android:layout_width="wrap_content"
-                android:layout_height="150dp"
-                android:maxWidth="240dp"
+                android:layout_height="@dimen/dp_150"
                 android:adjustViewBounds="true"
+                android:maxWidth="@dimen/dp_240"
                 android:scaleType="fitCenter"
+                app:bubble_angle="@dimen/dp_3"
+                app:bubble_arrowHeight="@dimen/dp_10"
                 app:bubble_arrowLocation="1"
-                app:bubble_arrowTop="15dp"
-                app:bubble_angle="3dp"
-                app:bubble_arrowOffset="-5dp"
-                app:bubble_arrowHeight="10dp"
-                app:bubble_arrowWidth="5dp"
-                />
+                app:bubble_arrowOffset="@dimen/_dp_5"
+                app:bubble_arrowTop="@dimen/dp_15"
+                app:bubble_arrowWidth="@dimen/dp_5" />
 
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:gravity="center"
-                android:orientation="vertical"
-                >
+                android:orientation="vertical">
 
                 <ProgressBar
                     android:id="@+id/progress_bar"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
+                    android:layout_width="@dimen/dp_28"
+                    android:layout_height="@dimen/dp_28"
                     android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tv_progress"
+                    style="@style/ShadleStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@android:color/white"
-                    style="@style/ShadleStyle"
-                    android:visibility="gone"
-                    />
+                    android:visibility="gone" />
             </LinearLayout>
 
             <LinearLayout
@@ -89,23 +86,21 @@
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:gravity="center"
-                android:orientation="vertical"
-                >
+                android:orientation="vertical">
 
                 <ProgressBar
                     android:id="@+id/progress_bar_uploading"
-                    android:layout_width="28dp"
-                    android:layout_height="28dp"
+                    android:layout_width="@dimen/dp_28"
+                    android:layout_height="@dimen/dp_28"
                     android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/tv_progress_uploading"
+                    style="@style/ShadleStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@android:color/white"
-                    style="@style/ShadleStyle"
-                    android:visibility="gone"
-                    />
+                    android:visibility="gone" />
             </LinearLayout>
 
         </RelativeLayout>
@@ -115,9 +110,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_5"
             android:layout_toLeftOf="@id/bubble"
             android:clickable="true"
-            android:layout_marginRight="5dp"
             android:src="@drawable/msg_state_failed_resend"
             android:visibility="gone" />
 
@@ -129,7 +124,7 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/bubble"
             android:text="@string/text_ack_msg"
-            android:textSize="12sp"
+            android:textSize="@dimen/sp_12"
             android:visibility="invisible" />
 
         <TextView
@@ -140,7 +135,7 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/bubble"
             android:text="@string/text_delivered_msg"
-            android:textSize="12sp"
+            android:textSize="@dimen/sp_12"
             android:visibility="invisible" />
     </RelativeLayout>
 
@@ -151,8 +146,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_chat_activity"
         android:textColor="@color/chat_msg_error_text"
-        android:visibility="gone"/>
-    
+        android:visibility="gone" />
+
     <View
         android:id="@+id/placeholder"
         android:layout_width="match_parent"

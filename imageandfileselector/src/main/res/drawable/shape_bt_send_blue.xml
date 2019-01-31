@@ -8,5 +8,5 @@
         android:endColor="@color/color_48baf3"
         android:startColor="@color/color_48baf3"/>
     <corners
-        android:radius="5dp"/>
+        android:radius="@dimen/dp_5"/>
 </shape>

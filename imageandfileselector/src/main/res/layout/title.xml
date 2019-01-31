@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="66dp"
-                android:background="@color/color_48baf3"
-                android:gravity="center_vertical"
-                android:paddingTop="20dp">
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dp_66"
+    android:background="@color/color_48baf3"
+    android:gravity="center_vertical"
+    android:paddingTop="@dimen/dp_20">
 
     <ImageView
         android:id="@+id/iv_title_back"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:paddingLeft="10dp"
-        android:paddingRight="10dp"
+        android:paddingLeft="@dimen/dp_10"
+        android:paddingRight="@dimen/dp_10"
         android:scaleType="center"
-        android:src="@drawable/news_bar_return"/>
+        android:src="@drawable/news_bar_return" />
 
     <TextView
         android:id="@+id/tv_title_middle"
@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:textColor="@color/md_white_1000"
-        android:textSize="18dp"/>
+        android:textSize="@dimen/sp_18" />
 
 
 </RelativeLayout>

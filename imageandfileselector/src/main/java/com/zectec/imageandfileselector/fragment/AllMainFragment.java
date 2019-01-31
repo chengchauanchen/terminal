@@ -11,6 +11,8 @@ import com.zectec.imageandfileselector.R;
 import com.zectec.imageandfileselector.base.BaseFragment;
 import com.zectec.imageandfileselector.base.Constant;
 import com.zectec.imageandfileselector.bean.FileInfo;
+import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileHandler;
+import com.zectec.imageandfileselector.receivehandler.ReceiverShowOrHideFragmentHandler;
 import com.zectec.imageandfileselector.utils.FileUtil;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import com.zectec.imageandfileselector.utils.SystemUtil;
@@ -19,8 +21,6 @@ import java.util.Map;
 import java.util.Set;
 
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverCheckFileHandler;
-import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileHandler;
-import com.zectec.imageandfileselector.receivehandler.ReceiverShowOrHideFragmentHandler;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 
@@ -64,7 +64,7 @@ public class AllMainFragment extends BaseFragment implements View.OnClickListene
                 @Override
                 public void onClick(View v) {
                     if (entries.size() == 0){
-                        Toast.makeText(getActivity(),"请选择至少一个文件",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(),R.string.text_please_select_at_least_one_file,Toast.LENGTH_SHORT).show();
                     }else{
                         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.FILE);
                     }
@@ -131,17 +131,17 @@ public class AllMainFragment extends BaseFragment implements View.OnClickListene
     }
 
     void rl_mobile_memory() {
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowOrHideFragmentHandler.class, "手机内存", true);
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowOrHideFragmentHandler.class, getString(R.string.text_mobile_memory), true);
     }
 
 
     void rl_extended_memory() {
         if (checkExtentEnvironment()) {
-           OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowOrHideFragmentHandler.class, "扩展卡内存", true);
+           OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowOrHideFragmentHandler.class, getString(R.string.text_extended_card_memory), true);
         } else {
             Alerter.create(getActivity())
-                    .setTitle("通知")
-                    .setText("您手机没有外置SD卡！")
+                    .setTitle(R.string.text_notice)
+                    .setText(R.string.text_has_no_external_sd_card)
                     .show();
         }
     }
@@ -149,11 +149,11 @@ public class AllMainFragment extends BaseFragment implements View.OnClickListene
     void rl_sd_card() {
 
         if (checkSDEnvironment()) {
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowOrHideFragmentHandler.class, "SD卡", true);
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowOrHideFragmentHandler.class, getString(R.string.text_sd_card), true);
         } else {
             Alerter.create(getActivity())
-                    .setTitle("通知")
-                    .setText("您手机没有内置SD卡！")
+                    .setTitle(R.string.text_notice)
+                    .setText(R.string.text_text_has_no_built_in_sd_card)
                     .show();
         }
 

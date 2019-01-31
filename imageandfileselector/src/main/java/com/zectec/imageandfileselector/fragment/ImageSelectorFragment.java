@@ -70,7 +70,7 @@ public class ImageSelectorFragment extends BaseFragment implements DataCallback<
                 if (Constant.images.size() > 0){
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.PHOTO_ALBUM);
                 }else {
-                    Toast.makeText(getActivity(),"请选择至少一张图片",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(),R.string.text_please_select_at_least_one_picture,Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -88,7 +88,7 @@ public class ImageSelectorFragment extends BaseFragment implements DataCallback<
                     tv_confirm.setBackgroundResource(R.drawable.shape_bt_send_blue_nofile);
 
                 }
-                tv_confirm.setText("发送(" + Constant.images.size() + "/5)");
+                tv_confirm.setText(String.format(getString(R.string.button_send_file_count),Constant.images.size()));
             }
         });
     }

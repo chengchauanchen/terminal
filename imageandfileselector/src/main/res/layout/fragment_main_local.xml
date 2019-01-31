@@ -6,20 +6,20 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#ffffff">
+    android:background="@color/white">
 
     <android.support.design.widget.TabLayout
         android:id="@+id/tl_myfile"
         android:layout_width="match_parent"
-        android:layout_height="45dp"
+        android:layout_height="@dimen/dp_45"
         app:tabIndicatorColor="@color/color_48baf3"
-        app:tabIndicatorHeight="3dp"
+        app:tabIndicatorHeight="@dimen/dp_3"
         app:tabSelectedTextColor="@color/md_black_1000"
         app:tabTextColor="@color/md_blue_grey_600"/>
 
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="1px"
+        android:layout_height="@dimen/dp_half_one"
         android:background="@color/md_grey_400"/>
 
     <android.support.v4.view.ViewPager
@@ -32,9 +32,9 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#e6e5e5"
-        android:paddingBottom="10dp"
-        android:paddingTop="10dp">
+        android:background="@color/grey_e6"
+        android:paddingBottom="@dimen/dp_10"
+        android:paddingTop="@dimen/dp_10">
 
         <TextView
             android:id="@+id/tv_preview"
@@ -42,13 +42,13 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:layout_marginRight="@dimen/dp_10"
             android:background="@drawable/shape_bt_send"
-            android:padding="5dp"
+            android:padding="@dimen/dp_5"
             android:text="预览"
             android:textColor="@color/md_grey_700"
-            android:textSize="14dp"
+            android:textSize="@dimen/sp_14"
             android:visibility="gone"/>
 
         <TextView
@@ -56,10 +56,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="@dimen/dp_10"
             android:text="@string/size"
             android:textColor="@color/md_blue_grey_600"
-            android:textSize="14dp"/>
+            android:textSize="@dimen/sp_14"/>
 
         <TextView
             android:id="@+id/tv_send"
@@ -67,23 +67,23 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/dp_10"
             android:background="@drawable/shape_bt_send"
-            android:padding="5dp"
+            android:padding="@dimen/dp_5"
             android:text="@string/send"
             android:textColor="@color/md_grey_700"
-            android:textSize="14dp"/>
+            android:textSize="@dimen/sp_14"/>
 
         <TextView
             android:id="@+id/tv_cancel"
-            android:layout_width="60dp"
+            android:layout_width="@dimen/dp_60"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:gravity="center"
             android:layout_toLeftOf="@id/tv_send"
-            android:layout_marginRight="20dp"
+            android:layout_marginRight="@dimen/dp_20"
             android:background="@drawable/shape_bt_send_blue"
-            android:padding="5dp"
+            android:padding="@dimen/dp_5"
             android:text="@string/cancel"
             android:textColor="@color/md_white_1000"/>
     </RelativeLayout>

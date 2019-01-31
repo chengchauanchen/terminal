@@ -1,6 +1,5 @@
 package com.zectec.imageandfileselector.fragment;
 
-import android.app.ProgressDialog;
 import android.os.Environment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -10,17 +9,17 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.chad.library.adapter.base.entity.MultiItemEntity;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.zectec.imageandfileselector.R;
 import com.zectec.imageandfileselector.adapter.ExpandableItemAdapter;
 import com.zectec.imageandfileselector.base.BaseFragment;
 import com.zectec.imageandfileselector.bean.FileInfo;
 import com.zectec.imageandfileselector.bean.SubItem;
 import com.zectec.imageandfileselector.utils.FileUtil;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -103,7 +102,7 @@ public class AVFragment extends BaseFragment {
                                     mExpandableItemAdapter.setNewData(mEntityArrayList);
                                     mExpandableItemAdapter.notifyDataSetChanged();
                                 } else {
-                                    Toast.makeText(getActivity(), "sorry,没有读取到文件!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getActivity(), R.string.text_sorry_no_file_read, Toast.LENGTH_LONG).show();
                                 }
                             }
 

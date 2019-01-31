@@ -35,4 +35,23 @@
     <color name="voice_length">#818181</color>
     <color name="chat_name">#818181</color>
     <color name="chat_title">#627f9c</color>
+
+    <color name="green_9e">#9eea6a</color>
+    <color name="grey_d8">#d8d8d8</color>
+    <color name="grey_e2">#e2e2e2</color>
+    <color name="grey_eb">#ebebeb</color>
+    <color name="grey_e6">#e6e5e5</color>
+    <color name="grey_99">#999999</color>
+    <color name="grey_59">#595959</color>
+    <color name="grey_37">#373c3d</color>
+    <color name="grey_35">#353535</color>
+    <color name="grey_27">#272828</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="black_11">#111212</color>
+    <color name="black_01">#010101</color>
+    <color name="black_">#0000</color>
+
+
+
 </resources>

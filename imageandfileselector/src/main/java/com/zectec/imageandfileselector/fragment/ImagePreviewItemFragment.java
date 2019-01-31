@@ -129,10 +129,11 @@ public class ImagePreviewItemFragment extends BaseFragment{
                 @Override
                 public void run(){
                     if(isSave){
-                        Toast.makeText(getActivity(), "已保存到"+filePath+"文件夹", Toast.LENGTH_LONG).show();
+
+                        Toast.makeText(getActivity(), String.format(getString(R.string.text_file_save_path),filePath), Toast.LENGTH_LONG).show();
 //                        iv_save_picture.setVisibility(View.GONE);
                     }else{
-                        Toast.makeText(getActivity(), "保存失败", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), getString(R.string.text_save_fail), Toast.LENGTH_SHORT).show();
                     }
                 }
             });

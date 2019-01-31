@@ -1,56 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/ll_face_pair"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#ffffff">
+    android:background="@color/white"
+    android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="6dp"
+        android:layout_margin="@dimen/dp_6"
         android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="30dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:layout_height="@dimen/dp_30"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/tv_title_face_pair"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="刘五"
-                android:textColor="#000000"
-                android:textSize="15sp"
-                />
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp_15" />
 
             <TextView
                 android:id="@+id/tv_matched_degree"
-                android:layout_width="30dp"
-                android:layout_height="15dp"
+                android:layout_width="@dimen/dp_30"
+                android:layout_height="@dimen/dp_15"
+                android:layout_marginLeft="@dimen/dp_6"
+                android:gravity="center"
                 android:text="99%"
-                android:textSize="11sp"
-                android:textColor="#ffffff"
-                android:layout_marginLeft="6dp"
-                android:gravity="center"/>
+                android:textColor="@color/white"
+                android:textSize="@dimen/sp_11" />
         </LinearLayout>
 
         <ImageView
             android:id="@+id/iv_photo_face_pair"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:src="@drawable/user_photo"/>
+            android:layout_height="@dimen/dp_150"
+            android:src="@drawable/user_photo" />
 
         <TextView
             android:id="@+id/tv_content_face_pair"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_6"
             android:text="男,1992年05月11日"
-            android:textSize="11sp"
-            android:layout_marginTop="6dp"/>
+            android:textSize="@dimen/sp_11" />
 
     </LinearLayout>
 

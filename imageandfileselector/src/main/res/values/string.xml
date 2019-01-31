@@ -5,6 +5,34 @@
     <string name="cancel">取消</string>
     <string name="count">共%1$s个文件</string>
 
+    <string name="text_file_save_path">已保存到%1$s文件夹</string>
+    <string name="button_send_file_count">发送(%1$d/5)</string>
+
+
+
     <string name="text_ack_msg">已读</string>
     <string name="text_delivered_msg">送达</string>
+    <string name="text_please_select_at_least_one_file">请选择至少一个文件</string>
+    <string name="text_please_select_at_least_one_picture">请选择至少一张图片</string>
+    <string name="text_mobile_memory">手机内存</string>
+    <string name="text_extended_card_memory">扩展卡内存</string>
+    <string name="text_extended_memory">扩展内存</string>
+    <string name="text_sd_card">SD卡</string>
+    <string name="text_notice">通知</string>
+    <string name="text_has_no_external_sd_card">您手机没有外置SD卡！</string>
+    <string name="text_text_has_no_built_in_sd_card">您手机没有内置SD卡！</string>
+    <string name="text_sorry_no_file_read">sorry,没有读取到文件!</string>
+    <string name="text_save_fail">保存失败</string>
+    <string name="text_video_and_sound">影音</string>
+    <string name="text_picture">图片</string>
+    <string name="text_document">文档</string>
+    <string name="text_other">其他</string>
+    <string name="text_no_application_for_this_open_file">没有此打开文件的应用</string>
+    <string name="text_current_folder_has_no_file">当前文件夹没有文件</string>
+    <string name="text_data_loading">数据加载中.....</string>
+    <string name="text_all">全部</string>
+    <string name="text_this_machine">本机</string>
+    <string name="text_go_to_watch">前往观看</string>
+
+
 </resources>

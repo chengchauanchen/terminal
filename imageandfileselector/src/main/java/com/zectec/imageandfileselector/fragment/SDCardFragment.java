@@ -66,7 +66,7 @@ public class SDCardFragment extends BaseFragment implements View.OnClickListener
                 @Override
                 public void onClick(View v) {
                     if (entries.size() == 0){
-                        Toast.makeText(getActivity(),"请选择至少一个文件",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(),R.string.text_please_select_at_least_one_file,Toast.LENGTH_SHORT).show();
                     }else{
                         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.FILE);
                     }

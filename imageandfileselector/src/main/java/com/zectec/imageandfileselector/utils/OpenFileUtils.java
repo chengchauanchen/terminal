@@ -8,6 +8,8 @@ import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.zectec.imageandfileselector.R;
+
 import java.io.File;
 
 /**
@@ -47,7 +49,7 @@ public class OpenFileUtils {
             _context.startActivity(intent);     //这里最好try一下，有可能会报错。 //比如说你的MIME类型是打开邮箱，但是你手机里面没装邮箱客户端，就会报错。
         }catch(Exception e){
          Log.d("type--->","报错:"+e.getMessage());
-            Toast.makeText(_context, "没有此打开文件的应用", Toast.LENGTH_SHORT).show();
+            Toast.makeText(_context, R.string.text_no_application_for_this_open_file, Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
     }

@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="13dp" >
+    android:paddingTop="@dimen/dp_13">
 
     <TextView
         android:id="@+id/timestamp"
@@ -16,7 +16,7 @@
         android:id="@+id/re_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_chat_activity" >
+        android:layout_marginTop="@dimen/margin_chat_activity">
 
         <ImageView
             android:id="@+id/iv_userhead"
@@ -35,20 +35,19 @@
             android:layout_below="@+id/tv_userid"
             android:layout_marginLeft="@dimen/margin_chat_activity"
             android:layout_toRightOf="@id/iv_userhead"
-            android:background="@drawable/chatfrom_bg_normal"
-             >
+            android:background="@drawable/chatfrom_bg_normal">
 
             <TextView
                 android:id="@+id/tv_chatcontent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/dp_5"
                 android:autoLink="web"
                 android:gravity="center|left"
                 android:maxWidth="225.0dp"
-                android:layout_centerVertical="true"
-                android:layout_marginLeft="5dp"
-                android:textColor="#ff000000"
-                android:textSize="15sp" />
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp_15" />
         </RelativeLayout>
 
         <TextView
@@ -57,10 +56,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/chat_nick_margin_left"
-            android:textSize="@dimen/chat_nick_text_size"
             android:layout_toRightOf="@id/iv_userhead"
-             />
+            android:textSize="@dimen/chat_nick_text_size" />
     </RelativeLayout>
+
     <View
         android:id="@+id/placeholder"
         android:layout_width="match_parent"

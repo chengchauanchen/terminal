@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:paddingTop="13dp">
+    android:paddingTop="@dimen/dp_13">
 
     <TextView
         android:id="@+id/timestamp"
@@ -22,8 +22,8 @@
             android:id="@+id/iv_userhead"
             android:layout_width="@dimen/size_avatar"
             android:layout_height="@dimen/size_avatar"
-            android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
             android:layout_marginRight="@dimen/margin_chat_activity"
             android:background="@drawable/user_photo"
             android:scaleType="fitXY" />
@@ -32,24 +32,23 @@
             android:id="@+id/bubble"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="@dimen/margin_chat_activity"
             android:layout_marginLeft="@dimen/margin_chat_activity"
+            android:layout_marginRight="@dimen/margin_chat_activity"
             android:layout_toLeftOf="@id/iv_userhead">
 
-            
 
             <com.zectec.imageandfileselector.view.BubbleImageView
                 android:id="@+id/iv_content"
-                android:layout_width="80dp"
-                android:layout_height="150dp"
+                android:layout_width="@dimen/dp_80"
+                android:layout_height="@dimen/dp_150"
                 android:adjustViewBounds="true"
+                android:scaleType="fitCenter"
+                app:bubble_angle="@dimen/dp_3"
+                app:bubble_arrowHeight="@dimen/dp_10"
                 app:bubble_arrowLocation="1"
-                app:bubble_arrowTop="15dp"
-                app:bubble_angle="3dp"
-                app:bubble_arrowOffset="-5dp"
-                app:bubble_arrowHeight="10dp"
-                app:bubble_arrowWidth="5dp"
-                android:scaleType="fitCenter" />
+                app:bubble_arrowOffset="@dimen/_dp_5"
+                app:bubble_arrowTop="@dimen/dp_15"
+                app:bubble_arrowWidth="@dimen/dp_5" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -65,7 +64,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1.0"
                     android:textColor="@android:color/white"
-                    android:textSize="12.0sp"
+                    android:textSize="@dimen/sp_12"
                     android:visibility="visible" />
 
                 <TextView
@@ -74,37 +73,37 @@
                     android:layout_height="wrap_content"
                     android:gravity="right"
                     android:textColor="@android:color/white"
-                    android:textSize="12.0sp" />
+                    android:textSize="@dimen/sp_12" />
             </LinearLayout>
-            
+
 
             <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
+                android:layout_width="@dimen/dp_28"
+                android:layout_height="@dimen/dp_28"
                 android:layout_centerInParent="true"
                 android:clickable="false"
                 android:src="@drawable/video" />
         </RelativeLayout>
-        
+
         <TextView
             android:id="@+id/tv_voice_length"
             style="@style/chat_text_name_style"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@id/bubble"
+            android:layout_marginRight="@dimen/dp_5"
             android:layout_toLeftOf="@id/bubble"
-            android:gravity="center"
-            android:layout_marginRight="5dp"/>
-    
-    
+            android:gravity="center" />
+
+
         <com.zectec.imageandfileselector.view.LoadingCircleView
             android:id="@+id/loading_view"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:layout_toLeftOf="@id/bubble"
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
             android:layout_centerVertical="true"
-            android:visibility="gone"
-            android:layout_marginRight="5dp" />
+            android:layout_marginRight="@dimen/dp_5"
+            android:layout_toLeftOf="@id/bubble"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/msg_status"
@@ -124,10 +123,10 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/bubble"
             android:text="@string/text_ack_msg"
-            android:textSize="12sp"
+            android:textSize="@dimen/sp_12"
             android:visibility="invisible" />
-    
-        
+
+
         <TextView
             android:id="@+id/tv_delivered"
             style="@style/chat_text_name_style"
@@ -136,7 +135,7 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/bubble"
             android:text="@string/text_delivered_msg"
-            android:textSize="12sp"
+            android:textSize="@dimen/sp_12"
             android:visibility="invisible" />
     </RelativeLayout>
 
@@ -147,12 +146,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_chat_activity"
         android:textColor="@color/chat_msg_error_text"
-        android:visibility="gone"/>
-    
+        android:visibility="gone" />
+
     <View
         android:id="@+id/placeholder"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_10"
         android:visibility="gone" />
-    
+
 </LinearLayout>

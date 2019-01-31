@@ -4,27 +4,27 @@
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:paddingTop="13dp" >
+    android:paddingTop="@dimen/dp_13">
 
     <TextView
         android:id="@+id/timestamp"
         style="@style/chat_text_date_style"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:visibility="gone"/>
+        android:visibility="gone" />
 
     <RelativeLayout
         android:id="@+id/re_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_chat_activity" >
+        android:layout_marginTop="@dimen/margin_chat_activity">
 
         <ImageView
             android:id="@+id/iv_userhead"
             android:layout_width="@dimen/size_avatar"
             android:layout_height="@dimen/size_avatar"
-            android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
             android:layout_marginRight="@dimen/margin_chat_activity"
             android:background="@drawable/user_photo"
             android:scaleType="fitXY" />
@@ -33,44 +33,43 @@
             android:id="@+id/bubble"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_userid"
             android:layout_marginRight="@dimen/margin_chat_activity"
             android:layout_toLeftOf="@id/iv_userhead"
-            android:layout_below="@+id/tv_userid"
-             android:background="@drawable/chatto_bg_normal"
-            >
+            android:background="@drawable/chatto_bg_normal">
 
             <TextView
-                 android:id="@+id/tv_chatcontent"
+                android:id="@+id/tv_chatcontent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:autoLink="web"
                 android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/dp_1"
+                android:layout_marginRight="@dimen/dp_5"
+                android:autoLink="web"
                 android:gravity="center|left"
-                android:layout_marginRight="5dp"
-                android:layout_marginLeft="1dp"
-              	android:textColor="#000000"
-                android:maxWidth="225.0dip"
-                android:textSize="15sp" />
+                android:maxWidth="@dimen/dp_225"
+                android:textColor="@color/black"
+                android:textSize="@dimen/sp_15" />
         </RelativeLayout>
-        
-       <!--  <TextView
-            android:id="@+id/tv_userid"
-            android:visibility="gone"
-            style="@style/chat_text_name_style"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginRight="15dp"
-            android:layout_toLeftOf="@id/iv_userhead"
-            android:text="xxx" /> -->
+
+        <!--  <TextView
+             android:id="@+id/tv_userid"
+             android:visibility="gone"
+             style="@style/chat_text_name_style"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_marginRight="15dp"
+             android:layout_toLeftOf="@id/iv_userhead"
+             android:text="xxx" /> -->
 
         <ImageView
             android:id="@+id/msg_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_5"
             android:layout_toLeftOf="@id/bubble"
             android:clickable="true"
-            android:layout_marginRight="5dp"
             android:src="@drawable/msg_state_failed_resend"
             android:visibility="gone" />
 
@@ -82,7 +81,7 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/bubble"
             android:text="@string/text_ack_msg"
-            android:textSize="12sp"
+            android:textSize="@dimen/sp_12"
             android:visibility="invisible" />
 
         <TextView
@@ -93,13 +92,14 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/bubble"
             android:text="@string/text_delivered_msg"
-            android:textSize="12sp"
+            android:textSize="@dimen/sp_12"
             android:visibility="invisible" />
+
         <ProgressBar
             android:id="@+id/progress_bar"
-            android:layout_width="18dp"
-            android:layout_height="18dp"
             style="@style/mProgress_circle"
+            android:layout_width="@dimen/dp_18"
+            android:layout_height="@dimen/dp_18"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/bubble"
             android:visibility="invisible" />
@@ -112,11 +112,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_chat_activity"
         android:textColor="@color/chat_msg_error_text"
-        android:visibility="gone"/>
+        android:visibility="gone" />
+
     <View
         android:id="@+id/placeholder"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_10"
         android:visibility="gone" />
-        
+
 </LinearLayout>

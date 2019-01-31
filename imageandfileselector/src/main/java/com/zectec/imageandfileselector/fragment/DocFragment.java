@@ -139,7 +139,7 @@ public class DocFragment extends BaseFragment {
                                     mExpandableItemAdapter.setNewData(mEntityArrayList);
                                     mExpandableItemAdapter.notifyDataSetChanged();
                                 } else {
-                                    Toast.makeText(getActivity(), "sorry,没有读取到文件!", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(getActivity(), R.string.text_sorry_no_file_read, Toast.LENGTH_LONG).show();
                                 }
                             }
 

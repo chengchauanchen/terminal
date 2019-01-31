@@ -1,67 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <!--<View-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="20dp"-->
-        <!--android:background="#373c3d"/>-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="20dp"-->
+    <!--android:background="#373c3d"/>-->
     <RelativeLayout
         android:id="@+id/rl_top_bar"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="#373c3d"
+        android:layout_height="@dimen/dp_48"
+        android:background="@color/grey_37"
         android:orientation="vertical">
 
         <ImageButton
             android:id="@+id/ib_back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/news_bar_return"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="10dip"
-            />
+            android:layout_marginLeft="@dimen/dp_10"
+            android:background="@drawable/news_bar_return" />
 
         <View
             android:id="@+id/cener_line"
-            android:layout_width="1dp"
+            android:layout_width="@dimen/dp_1"
             android:layout_height="match_parent"
-            android:layout_marginBottom="12dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:layout_marginTop="@dimen/dp_12"
+            android:layout_marginBottom="@dimen/dp_12"
             android:layout_toRightOf="@+id/ib_back"
-            android:background="@android:color/black"
-            android:layout_marginLeft="10dp"/>
+            android:background="@android:color/black" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="@dimen/dp_10"
             android:layout_toRightOf="@+id/cener_line"
-            android:text="图片"
+            android:text="@string/text_picture"
             android:textColor="@android:color/white"
-            android:textSize="18sp" />
+            android:textSize="@dimen/sp_18" />
 
-
-            <TextView
-                android:id="@+id/tv_confirm"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:background="@drawable/shape_bt_send_blue_nofile"
-                android:gravity="center"
-                android:minWidth="50dp"
-                android:paddingBottom="5dp"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp"
-                android:paddingTop="5dp"
-                android:layout_marginRight="5dp"
-                android:text="发送(0/5)"
-                android:textColor="@android:color/white"
-                android:textSize="14sp"
-                android:layout_alignParentRight="true"
-                android:layout_centerVertical="true"/>
-
+        <TextView
+            android:id="@+id/tv_confirm"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_5"
+            android:background="@drawable/shape_bt_send_blue_nofile"
+            android:gravity="center"
+            android:minWidth="@dimen/dp_50"
+            android:paddingLeft="@dimen/dp_5"
+            android:paddingTop="@dimen/dp_5"
+            android:paddingRight="@dimen/dp_5"
+            android:paddingBottom="@dimen/dp_5"
+            android:text="发送(0/5)"
+            android:textColor="@android:color/white"
+            android:textSize="@dimen/sp_14" />
 
     </RelativeLayout>
 
@@ -69,7 +67,7 @@
         android:id="@+id/rv_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#272828"
+        android:background="@color/grey_27"
         android:fadingEdge="none"
         android:fadingEdgeLength="0dp"
         android:overScrollMode="never"

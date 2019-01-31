@@ -3,21 +3,20 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingTop="13dp" >
+    android:paddingTop="@dimen/dp_13">
 
     <TextView
         android:id="@+id/timestamp"
         style="@style/chat_text_date_style"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        />
+        android:layout_gravity="center" />
 
     <RelativeLayout
         android:id="@+id/re_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_chat_activity" >
+        android:layout_marginTop="@dimen/margin_chat_activity">
 
         <ImageView
             android:id="@+id/iv_userhead"
@@ -35,43 +34,41 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/chat_nick_margin_left"
-            android:textSize="@dimen/chat_nick_text_size"
             android:layout_toRightOf="@id/iv_userhead"
+            android:textSize="@dimen/chat_nick_text_size"
             android:visibility="gone" />
+
         <RelativeLayout
             android:id="@+id/bubble"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/tv_userid"
             android:layout_marginLeft="@dimen/margin_chat_activity"
+            android:layout_marginRight="@dimen/dp_25"
             android:layout_toRightOf="@id/iv_userhead"
-            android:background="@drawable/chatfrom_bg_normal"
-            android:layout_marginRight="25dp"
-            >
+            android:background="@drawable/chatfrom_bg_normal">
 
             <ListView
                 android:id="@+id/lv_face_pair"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scrollbars="none"
-                />
+                android:scrollbars="none" />
 
             <TextView
                 android:id="@+id/tv_error_msg"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_centerVertical="true"/>
+                android:layout_centerVertical="true"
+                android:gravity="center" />
 
         </RelativeLayout>
 
-
     </RelativeLayout>
-    
+
     <View
         android:id="@+id/placeholder"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_10"
         android:visibility="gone" />
-    
+
 </LinearLayout>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:fitsSystemWindows="true">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <com.zectec.imageandfileselector.view.CustomViewPager
         android:id="@+id/preview_pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent" />
 
     <LinearLayout
         android:id="@+id/bar_layout"
@@ -17,31 +17,31 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="25dp"
-            android:background="@color/md_black_1000"/>
+            android:layout_height="@dimen/dp_25"
+            android:background="@color/md_black_1000" />
 
         <LinearLayout
             android:id="@+id/ll_top_bar2"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:orientation="horizontal"
-            android:background="@color/md_black_1000">
+            android:layout_height="@dimen/dp_48"
+            android:background="@color/md_black_1000"
+            android:orientation="horizontal">
+
             <ImageButton
                 android:id="@+id/ib_back"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/news_bar_return"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="8dip"
-                />
+                android:layout_marginLeft="@dimen/dp_8"
+                android:background="@drawable/news_bar_return" />
 
             <TextView
                 android:id="@+id/tv_photo_count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:layout_marginLeft="18dip"
-                android:textColor="@color/md_white_1000"/>
+                android:layout_marginLeft="@dimen/dp_18"
+                android:textColor="@color/md_white_1000" />
 
         </LinearLayout>
     </LinearLayout>

@@ -7,6 +7,6 @@
         android:endColor="@color/md_grey_200"
         android:startColor="@color/md_grey_200"
         android:type="linear"/>
-    <size android:height="1px"/>
+    <size android:height="@dimen/dp_half_one"/>
 
 </shape>

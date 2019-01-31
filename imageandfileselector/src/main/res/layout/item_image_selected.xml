@@ -3,14 +3,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:layout_margin="1dp">
+    android:layout_margin="@dimen/dp_1">
 
     <com.zectec.imageandfileselector.view.CustomImageView
         android:id="@+id/iv_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="#010101"
+        android:background="@color/black_01"
         android:scaleType="centerCrop" />
 
     <com.zectec.imageandfileselector.view.CustomImageView
@@ -18,13 +18,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="#111212"/>
+        android:background="@color/black_11" />
 
     <ImageView
         android:id="@+id/iv_select"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
-        android:padding="2dp"
+        android:layout_width="@dimen/dp_20"
+        android:layout_height="@dimen/dp_20"
         android:layout_gravity="right"
+        android:padding="@dimen/dp_2"
         android:src="@drawable/icon_image_un_select" />
 </FrameLayout>

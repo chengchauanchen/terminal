@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:paddingTop="13dp">
+    android:paddingTop="@dimen/dp_13">
 
     <TextView
         android:id="@+id/timestamp"
@@ -21,8 +21,8 @@
             android:id="@+id/iv_userhead"
             android:layout_width="@dimen/size_avatar"
             android:layout_height="@dimen/size_avatar"
-            android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
             android:layout_marginRight="@dimen/margin_chat_activity"
             android:background="@drawable/user_photo"
             android:scaleType="fitXY" />
@@ -31,27 +31,27 @@
             android:id="@+id/bubble"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="8dp"
+            android:layout_marginRight="@dimen/dp_8"
             android:layout_toLeftOf="@id/iv_userhead"
             android:background="@drawable/chatto_bg_normal">
+
             <ImageView
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="10dp"
                 android:id="@+id/img_live"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/dp_8"
+                android:layout_marginRight="@dimen/dp_10"
                 android:src="@drawable/private_call_2" />
+
             <TextView
-                android:layout_toRightOf="@id/img_live"
-                android:text=""
                 android:id="@+id/tv_chatcontent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="8dp" />
-
-
+                android:layout_marginRight="@dimen/dp_8"
+                android:layout_toRightOf="@id/img_live"
+                android:text="" />
 
         </RelativeLayout>
 
@@ -61,9 +61,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_5"
             android:layout_toLeftOf="@id/bubble"
             android:clickable="true"
-            android:layout_marginRight="5dp"
             android:src="@drawable/msg_state_failed_resend"
             android:visibility="gone" />
 
@@ -75,7 +75,7 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/tv_voice_length"
             android:text="@string/text_ack_msg"
-            android:textSize="12sp"
+            android:textSize="@dimen/sp_12"
             android:visibility="invisible" />
 
         <TextView
@@ -86,14 +86,14 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/tv_voice_length"
             android:text="@string/text_delivered_msg"
-            android:textSize="12sp"
+            android:textSize="@dimen/sp_12"
             android:visibility="invisible" />
 
         <ProgressBar
             android:id="@+id/progress_bar"
             style="@style/mProgress_circle"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="@dimen/dp_28"
+            android:layout_height="@dimen/dp_28"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/bubble"
             android:visibility="gone" />
@@ -106,7 +106,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_chat_activity"
         android:textColor="@color/chat_msg_error_text"
-        android:visibility="gone"/>
+        android:visibility="gone" />
+
     <View
         android:id="@+id/placeholder"
         android:layout_width="match_parent"

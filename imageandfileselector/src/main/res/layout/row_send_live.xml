@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    android:paddingTop="13dp" >
+    android:paddingTop="@dimen/dp_13">
 
     <TextView
         android:id="@+id/timestamp"
@@ -15,62 +15,61 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/margin_chat_activity" >
+        android:layout_marginTop="@dimen/margin_chat_activity">
 
         <ImageView
             android:id="@+id/iv_userhead"
             android:layout_width="@dimen/size_avatar"
             android:layout_height="@dimen/size_avatar"
-            android:layout_alignParentRight="true"
             android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
             android:layout_marginRight="@dimen/margin_chat_activity"
             android:background="@drawable/user_photo"
             android:scaleType="fitXY" />
 
         <RelativeLayout
             android:id="@+id/bubble"
-            android:layout_width="180dp"
+            android:layout_width="@dimen/dp_180"
             android:layout_height="wrap_content"
             android:layout_marginRight="@dimen/margin_chat_activity"
-            android:background="@drawable/chatto_bg_normal"
-            android:layout_toLeftOf="@id/iv_userhead" >
+            android:layout_toLeftOf="@id/iv_userhead"
+            android:background="@drawable/chatto_bg_normal">
+
             <TextView
                 android:id="@+id/tv_chatcontent"
                 android:layout_width="match_parent"
-                android:padding="7dp"
-                android:textSize="12sp"
-                android:textColor="#353535"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:padding="@dimen/dp_7"
+                android:textColor="@color/grey_35"
+                android:textSize="@dimen/sp_12" />
 
             <RelativeLayout
                 android:id="@+id/rl_bg"
-                android:layout_below="@id/tv_chatcontent"
-                android:layout_width="180dp"
-                android:layout_height="90dp">
+                android:layout_width="@dimen/dp_180"
+                android:layout_height="@dimen/dp_90"
+                android:layout_below="@id/tv_chatcontent">
 
                 <ImageView
                     android:id="@+id/image"
-                    android:paddingLeft="8dp"
-                    android:paddingRight="8dp"
-                    android:src="@drawable/default_img"
-                    android:layout_width="180dp"
-                    android:layout_height="90dp"
+                    android:layout_width="@dimen/dp_180"
+                    android:layout_height="@dimen/dp_90"
+                    android:paddingLeft="@dimen/dp_8"
+                    android:paddingRight="@dimen/dp_8"
                     android:scaleType="fitXY"
-                    />
+                    android:src="@drawable/default_img" />
 
                 <ImageView
                     android:id="@+id/iv_image"
-                    android:layout_marginTop="10dp"
-                    android:src="@drawable/video_1"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
+                    android:layout_width="@dimen/dp_40"
+                    android:layout_height="@dimen/dp_40"
                     android:layout_centerInParent="true"
-                    />
+                    android:layout_marginTop="@dimen/dp_10"
+                    android:src="@drawable/video_1" />
             </RelativeLayout>
 
 
-
         </RelativeLayout>
+
         <RelativeLayout
 
             android:id="@+id/live_bubble"
@@ -80,35 +79,37 @@
             android:layout_marginRight="@dimen/margin_chat_activity"
             android:layout_toLeftOf="@id/iv_userhead"
             android:background="@drawable/chatto_bg_normal">
+
             <ImageView
-                android:visibility="gone"
-                android:layout_marginLeft="8dp"
                 android:id="@+id/img_live"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginRight="10dp"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="@dimen/dp_8"
+                android:layout_marginRight="@dimen/dp_10"
                 android:src="@drawable/private_video_121"
-                android:layout_centerVertical="true"/>
+                android:visibility="gone" />
+
             <TextView
-                android:layout_toRightOf="@id/img_live"
-                android:text=""
                 android:id="@+id/live_tv_chatcontent"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:layout_marginRight="8dp"/>
-
+                android:layout_marginRight="@dimen/dp_8"
+                android:layout_toRightOf="@id/img_live"
+                android:text="" />
 
 
         </RelativeLayout>
+
         <ImageView
             android:id="@+id/msg_status"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_5"
             android:layout_toLeftOf="@id/bubble"
             android:clickable="true"
-            android:layout_marginRight="5dp"
             android:src="@drawable/msg_state_failed_resend"
             android:visibility="gone" />
 
@@ -120,7 +121,7 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/bubble"
             android:text="@string/text_ack_msg"
-            android:textSize="12sp"
+            android:textSize="@dimen/sp_12"
             android:visibility="invisible" />
 
         <TextView
@@ -131,18 +132,17 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/bubble"
             android:text="@string/text_delivered_msg"
-            android:textSize="12sp"
+            android:textSize="@dimen/sp_12"
             android:visibility="invisible" />
 
         <ProgressBar
             android:id="@+id/progress_bar"
             style="@style/mProgress_circle"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
+            android:layout_width="@dimen/dp_28"
+            android:layout_height="@dimen/dp_28"
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@id/bubble"
-            android:visibility="gone"
-            />
+            android:visibility="gone" />
     </RelativeLayout>
 
     <!--  组或个人被删除了不能发送消息的提示语 -->
@@ -152,12 +152,12 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_chat_activity"
         android:textColor="@color/chat_msg_error_text"
-        android:visibility="gone"/>
-    
+        android:visibility="gone" />
+
     <View
         android:id="@+id/placeholder"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_10"
         android:visibility="gone" />
-    
+
 </LinearLayout>
