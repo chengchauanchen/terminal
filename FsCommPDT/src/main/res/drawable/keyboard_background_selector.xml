@@ -4,9 +4,9 @@
      <item android:state_pressed="true">
          <shape >
                <!-- 边框颜色 -->
-            <stroke android:width="0.5dip" android:color="#EDEDEE" />
+            <stroke android:width="@dimen/dp_half_one" android:color="@color/white_ed" />
              <!-- 背景颜色 -->
-             <solid android:color="#EDEDEE" />
+             <solid android:color="@color/white_ed" />
          </shape>
 
      </item>
@@ -14,9 +14,9 @@
      <item>
          <shape>
              <!-- 边框颜色 -->
-             <stroke android:width="0.5dip" android:color="#0D2040" />
+             <stroke android:width="@dimen/dp_half_one" android:color="@color/blue_0d" />
              <!-- 背景颜色 -->
-             <solid android:color="#1C2E52" />
+             <solid android:color="@color/keyboard_bg" />
          </shape>
      </item>
 </selector>

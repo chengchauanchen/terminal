@@ -97,7 +97,7 @@ public class UpdateManager
 			showNoticeDialog();
 		} else {
 			if(showMsg){
-				ToastUtil.showToast(mContext, "已经是最新版本");
+				ToastUtil.showToast(mContext, mContext.getString(R.string.soft_update_no));
 			}
 		}
 	}
@@ -331,7 +331,7 @@ public class UpdateManager
 				if(install){
 					ActivityCompat.requestPermissions((Activity)mContext, new String[]{Manifest.permission.REQUEST_INSTALL_PACKAGES}, REQUEST_INSTALL_PACKAGES_CODE);
 				}else {
-					ToastUtil.showToast(mContext,"请允许安装未知应用来源，否则无法安装");
+					ToastUtil.showToast(mContext,mContext.getString(R.string.text_allow_unknown_app_sources_otherwise_can_not_install));
 				}
 			}
 		}else {

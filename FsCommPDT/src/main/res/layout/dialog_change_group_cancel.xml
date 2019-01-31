@@ -13,9 +13,9 @@
         android:background="@color/background_blue"
         android:gravity="center_vertical"
         android:paddingLeft="@dimen/x20"
-        android:text="将7B-13T添加到扫描组?"
+        android:text="@string/dialog_change_group_cancel_title"
         android:textColor="@color/white"
-        android:textSize="20sp" />
+        android:textSize="@dimen/sp_20" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -29,9 +29,9 @@
             android:layout_weight="1"
             android:background="@color/white"
             android:gravity="center"
-            android:text="否"
+            android:text="@string/text_no"
             android:textColor="@color/group_text_black"
-            android:textSize="20sp" />
+            android:textSize="@dimen/sp_20" />
 
         <TextView
             android:id="@+id/dialog_yes"
@@ -39,13 +39,13 @@
             android:layout_height="match_parent"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="1dp"
+            android:layout_marginLeft="@dimen/dp_1"
             android:layout_weight="1"
             android:background="@color/white"
             android:gravity="center"
-            android:text="是"
+            android:text="@string/text_yes"
             android:textColor="@color/group_text_black"
-            android:textSize="20sp" />
+            android:textSize="@dimen/sp_20" />
     </LinearLayout>
 
 </LinearLayout>

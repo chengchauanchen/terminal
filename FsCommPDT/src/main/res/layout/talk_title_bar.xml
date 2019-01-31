@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="65dp"
-    android:gravity="center_vertical"
     android:id="@+id/talk_title"
-    android:paddingTop="25dp"
-    >
-
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dp_65"
+    android:gravity="center_vertical"
+    android:paddingTop="@dimen/dp_25">
 
     <LinearLayout
         android:id="@+id/ll_status_bar"
@@ -15,81 +13,64 @@
         android:layout_centerVertical="true"
         android:gravity="center_vertical">
 
-        <!--<ImageView-->
-
-            <!--android:layout_toRightOf="@id/iv_open_maingroup_scan"-->
-            <!--android:id="@+id/iv_goback_miangroup"-->
-            <!--android:layout_width="@dimen/x20"-->
-            <!--android:layout_height="@dimen/x20"-->
-            <!--android:src="@drawable/return_mian_talk" />-->
-
         <ImageView
-            android:layout_marginLeft="@dimen/x20"
             android:id="@+id/iv_open_group_scan"
             style="@style/image_wrap_content_style"
+            android:layout_marginLeft="@dimen/x20"
             android:src="@drawable/open_group_scan"
             android:visibility="visible" />
+
         <TextView
             android:id="@+id/tv_group_scan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="组扫描"
-            android:layout_marginLeft="10dp"
-            android:textSize="15dp"
-            android:textColor="@color/group_scan_text"/>
+            android:layout_marginLeft="@dimen/dp_10"
+            android:text="@string/text_group_scan"
+            android:textColor="@color/group_scan_text"
+            android:textSize="@dimen/sp_15" />
 
         <ImageView
-            android:layout_marginLeft="@dimen/x7"
-            android:layout_toRightOf="@id/iv_open_group_scan"
             android:id="@+id/iv_environment_monitor"
             style="@style/image_wrap_content_style"
+            android:layout_marginLeft="@dimen/x7"
+            android:layout_toRightOf="@id/iv_open_group_scan"
             android:src="@drawable/environment_monitor"
             android:visibility="visible" />
 
         <ImageView
-            android:layout_marginLeft="@dimen/x7"
-            android:layout_toRightOf="@id/iv_environment_monitor"
             android:id="@+id/iv_open_maingroup_scan"
             style="@style/image_wrap_content_style"
+            android:layout_marginLeft="@dimen/x7"
+            android:layout_toRightOf="@id/iv_environment_monitor"
             android:src="@drawable/state_duty_call_group"
             android:visibility="gone" />
+
         <View
-            android:layout_weight="1"
             android:layout_width="wrap_content"
-            android:layout_height="0dp"/>
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
         <ImageView
             android:id="@+id/iv_volume_off_call"
             android:layout_width="@dimen/x22"
             android:layout_height="@dimen/x22"
+            android:layout_marginRight="@dimen/dp_35"
             android:src="@drawable/volume_off_call"
-            android:layout_marginRight="35dp"
             android:visibility="visible" />
 
         <ImageView
-            android:layout_marginRight="15dp"
             android:id="@+id/talkback_add_icon"
             android:layout_width="@dimen/x22"
             android:layout_height="@dimen/x22"
-            android:src="@drawable/blue_menu"
-            />
-
-
-        <!--<ImageView-->
-        <!--android:id="@+id/iv_talkback_help"-->
-        <!--android:layout_width="@dimen/x20"-->
-        <!--android:layout_height="@dimen/x20"-->
-        <!--android:layout_marginRight="@dimen/y12"-->
-        <!--android:visibility="gone"-->
-        <!--android:src="@drawable/help" />-->
+            android:layout_marginRight="@dimen/dp_15"
+            android:src="@drawable/blue_menu" />
 
         <ImageView
             android:id="@+id/iv_goback_miansearch"
             android:layout_width="@dimen/x20"
             android:layout_height="@dimen/x20"
-            android:visibility="gone"
-            android:src="@drawable/search_white" />
-
-
+            android:src="@drawable/search_white"
+            android:visibility="gone" />
 
     </LinearLayout>
 

@@ -70,7 +70,7 @@ public class ChangeGroupActivity extends BaseActivity {
 
     @Override
     public void initView() {
-        barTitle.setText("添加扫描组");
+        barTitle.setText(R.string.text_add_scan_group);
         rightBtn.setVisibility(View.GONE);
         okBtn.setVisibility(View.GONE);
 
@@ -240,13 +240,13 @@ public class ChangeGroupActivity extends BaseActivity {
             myHandler.post(() -> {
                 logger.info("ReceiveSetScanGroupListResultHandler："+errorDesc+"======="+scanGroups);
                 if(errorCode==BaseCommonCode.SUCCESS_CODE){
-                    ToastUtil.toast(ChangeGroupActivity.this,"添加扫描组成功");
+                    ToastUtil.toast(ChangeGroupActivity.this,getString(R.string.text_add_scan_group_success));
                     groupSweeps.clear();
                     groupSweeps.addAll(scanGroups);
                     mGroupAdapter.notifyDataSetChanged();
 
                 }else {
-                    ToastUtil.toast(ChangeGroupActivity.this,"添加扫描组失败");
+                    ToastUtil.toast(ChangeGroupActivity.this,getString(R.string.text_add_scan_group_fail));
                 }
             });
 
@@ -287,7 +287,7 @@ public class ChangeGroupActivity extends BaseActivity {
                 break;
             case R.id.iv_search://搜索
                 if(MyTerminalFactory.getSDK().getConfigManager().getScanGroups().size()>=10){
-                    Toast.makeText(ChangeGroupActivity.this,"已超出扫描组最大添加数量",Toast.LENGTH_SHORT).show();
+                    ToastUtil.toast(ChangeGroupActivity.this,getString(R.string.text_add_scan_group_out_of_max_count));
                     return;
                 }
                 ScanGroupSearchFragment groupSearchFragment = new ScanGroupSearchFragment();

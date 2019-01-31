@@ -35,10 +35,9 @@
             android:layout_toRightOf="@+id/news_bar_line"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="张小妍"
             android:layout_centerVertical="true"
             android:textColor="@color/individual_news_bar_name"
-            android:textSize="21sp"
+            android:textSize="@dimen/sp_21"
             />
 
         <ImageView
@@ -58,33 +57,33 @@
 
         <ImageView
             android:id="@+id/iv_call"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
-            android:padding="5dp"
+            android:layout_width="@dimen/dp_38"
+            android:layout_height="@dimen/dp_38"
+            android:padding="@dimen/dp_5"
             android:layout_alignParentRight="true"
             android:src="@drawable/individual_ic_mobile"
             android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginRight="@dimen/dp_10"/>
 
         <ImageView
             android:id="@+id/individual_news_phone"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
-            android:padding="5dp"
+            android:layout_width="@dimen/dp_38"
+            android:layout_height="@dimen/dp_38"
+            android:padding="@dimen/dp_5"
             android:layout_alignParentRight="true"
             android:src="@drawable/phone"
             android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginRight="@dimen/dp_10"/>
 
         <ImageView
             android:id="@+id/individual_news_info"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
-            android:padding="5dp"
+            android:layout_width="@dimen/dp_38"
+            android:layout_height="@dimen/dp_38"
+            android:padding="@dimen/dp_5"
             android:layout_alignParentRight="true"
             android:src="@drawable/individual_info"
             android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginRight="@dimen/dp_10"/>
     </LinearLayout>
 
     <LinearLayout
@@ -136,8 +135,8 @@
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="13sp"
-            android:text="网络连接断开"/>
+            android:textSize="@dimen/sp_13"
+            android:text="@string/text_disconnection_of_network_connection"/>
     </LinearLayout>
     <FrameLayout
         android:id="@+id/fl_fragment_container"

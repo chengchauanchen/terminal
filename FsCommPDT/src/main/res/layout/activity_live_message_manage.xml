@@ -4,17 +4,10 @@
     android:layout_height="match_parent"
     android:background="@drawable/titel_bar_bg"
     android:fitsSystemWindows="true">
-    
-    <!--<View-->
-        <!--android:id="@+id/top"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="@dimen/y10"-->
-        <!--android:background="@color/group_call_news_bar_bg" />-->
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/top"
         android:orientation="vertical">
         
         <LinearLayout
@@ -34,7 +27,7 @@
             
             <View
                 android:id="@+id/news_bar_line"
-                android:layout_width="1dp"
+                android:layout_width="@dimen/dp_1"
                 android:layout_height="@dimen/y10"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="@dimen/x11"
@@ -47,7 +40,7 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@+id/news_bar_line"
-                android:text="图像助手"
+                android:text="@string/text_image_assistant"
                 android:textColor="@color/group_call_news_group_name"
                 android:textSize="@dimen/x15" />
             

@@ -83,7 +83,7 @@ public class CameraActivity extends BaseActivity {
 
                                          @Override
                                          public void AudioPermissionError() {
-                                             ToastUtil.showToast(CameraActivity.this,"录音机被占用");
+                                             ToastUtil.showToast(CameraActivity.this,getString(R.string.text_the_tape_recorder_is_occupied));
                                              Log.i("CJT", "AudioPermissionError");
                                          }
                                      }

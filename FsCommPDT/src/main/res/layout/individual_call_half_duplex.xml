@@ -3,31 +3,31 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/call_background">
-    
+
     <ImageView
         android:id="@+id/iv_individual_call_retract_half_duplex"
         android:layout_width="@dimen/x40"
         android:layout_height="@dimen/y18"
         android:layout_alignParentRight="true"
-        android:layout_marginRight="@dimen/x20"
         android:layout_marginTop="@dimen/y15"
+        android:layout_marginRight="@dimen/x20"
         android:background="@drawable/new_call_reset_icon" />
-    
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/iv_individual_call_retract_half_duplex"
         android:gravity="center_vertical"
         android:orientation="horizontal">
-        
+
         <ImageView
             android:id="@+id/iv_member_portrait_half_duplex"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
             android:layout_alignParentLeft="true"
-            android:layout_margin="12dp"
+            android:layout_margin="@dimen/dp_12"
             android:background="@drawable/user_photo" />
-        
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
             android:layout_toRightOf="@id/iv_member_portrait_half_duplex"
             android:gravity="left"
             android:orientation="vertical">
-            
+
             <TextView
                 android:id="@+id/tv_member_name_half_duplex"
                 android:layout_width="wrap_content"
@@ -43,8 +43,8 @@
                 android:layout_margin="@dimen/y2"
                 android:text="张星星"
                 android:textColor="@color/white"
-                android:textSize="20sp" />
-            
+                android:textSize="@dimen/sp_20" />
+
             <TextView
                 android:id="@+id/tv_member_id_half_duplex"
                 android:layout_width="wrap_content"
@@ -52,9 +52,9 @@
                 android:layout_marginTop="@dimen/y2"
                 android:text="123456789"
                 android:textColor="@color/white"
-                android:textSize="15sp" />
+                android:textSize="@dimen/sp_15" />
         </LinearLayout>
-        
+
         <ImageView
             android:id="@+id/iv_individual_call_hangup_half_duplex"
             android:layout_width="@dimen/x80"
@@ -65,7 +65,7 @@
             android:background="@drawable/phone_withe_shape1"
             android:src="@drawable/phone_withe" />
     </RelativeLayout>
-    
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -73,22 +73,22 @@
         android:layout_centerVertical="true"
         android:gravity="center"
         android:orientation="vertical">
-        
+
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/hand_white_x" />
-        
+
         <TextView
             android:id="@+id/tv_half_duplex_prompt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/x10"
             android:gravity="center_horizontal"
-            android:text="按住PTT说话"
+            android:text="@string/text_press_ptt_and_speaking"
             android:textColor="@color/white"
-            android:textSize="25sp" />
-        
+            android:textSize="@dimen/sp_25" />
+
         <cn.vsx.vc.view.IndividualCallView
             android:id="@+id/ictv_half_duplex_time_speaking"
             android:layout_width="wrap_content"
@@ -98,17 +98,17 @@
             android:layout_marginLeft="@dimen/x6"
             android:layout_marginTop="@dimen/y5" />
     </LinearLayout>
-    
+
     <Button
         android:id="@+id/btn_individual_call_half_duplex_ptt"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/dp_300"
+        android:layout_height="@dimen/dp_50"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="@dimen/y30"
         android:background="@drawable/rectangle_with_corners_shape_dodgerblue2"
         android:gravity="center"
-        android:text="PTT"
+        android:text="@string/text_ptt"
         android:textColor="@color/white"
-        android:textSize="28sp" />
+        android:textSize="@dimen/sp_28" />
 </RelativeLayout>

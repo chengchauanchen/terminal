@@ -41,8 +41,10 @@ public class StackViewAdapter extends BaseAdapter{
     private LayoutInflater inflater;
     private CloseDialogListener closeDialogListener;
     private GoWatchListener goWatchListener;
+    private Context context;
 
     public StackViewAdapter(Context context){
+        this.context = context;
         inflater = LayoutInflater.from(context);
         data = new ArrayList<>();
     }
@@ -149,18 +151,19 @@ public class StackViewAdapter extends BaseAdapter{
                         String memberName = split[1];
 
                         if(TextUtils.isEmpty(member.getDepartmentName())){
-                            viewHolder.video_member.setText(memberName+" "+ HandleIdUtil.handleId(Integer.valueOf(memberNo))+" 未知部门");
+                            viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),memberName,HandleIdUtil.handleId(Integer.valueOf(memberNo))));
                         }else{
-                            viewHolder.video_member.setText(memberName+" "+ HandleIdUtil.handleId(Integer.valueOf(memberNo))+" "+member.getDepartmentName());
+                            viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),memberName,HandleIdUtil.handleId(Integer.valueOf(memberNo)),member.getDepartmentName()));
                         }
-                        viewHolder.tv_live_theme.setText(memberName+"上报图像");
+
+                        viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),memberName));
                     }else {
                         if(TextUtils.isEmpty(member.getDepartmentName())){
-                            viewHolder.video_member.setText(member.getName()+" "+ HandleIdUtil.handleId(Integer.valueOf(memberNo))+" 未知部门");
+                            viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),member.getName(),HandleIdUtil.handleId(Integer.valueOf(memberNo))));
                         }else{
-                            viewHolder.video_member.setText(member.getName()+" "+ HandleIdUtil.handleId(Integer.valueOf(memberNo))+" "+member.getDepartmentName());
+                            viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),member.getName(),HandleIdUtil.handleId(Integer.valueOf(memberNo)),member.getDepartmentName()));
                         }
-                        viewHolder.tv_live_theme.setText(member.getName()+"上报图像");
+                        viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),member.getName()));
                     }
 
                 }else {
@@ -169,11 +172,12 @@ public class StackViewAdapter extends BaseAdapter{
             }else {
                 Member member = DataUtil.getMemberByMemberNo(data.get(position).messageFromId);
                 if(TextUtils.isEmpty(member.getDepartmentName())){
-                    viewHolder.video_member.setText(data.get(position).messageFromName+" "+ HandleIdUtil.handleId(member.getNo())+" 未知部门");
+                    viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),data.get(position).messageFromName,HandleIdUtil.handleId(member.getNo())));
                 }else {
-                    viewHolder.video_member.setText(data.get(position).messageFromName+" "+ HandleIdUtil.handleId(member.getNo())+" "+member.getDepartmentName());
+                    viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),data.get(position).messageFromName,HandleIdUtil.handleId(member.getNo()),member.getDepartmentName()));
                 }
-                viewHolder.tv_live_theme.setText(member.getName()+"上报图像");
+
+                viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),member.getName()));
             }
 
             //如果有标题就设置标题，这个放在最后设置

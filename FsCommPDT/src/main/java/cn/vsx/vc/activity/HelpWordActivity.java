@@ -121,10 +121,10 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
         }
         RelativeLayout root =  dialog.findViewById(R.id.dialog_root);
         ListView list_dialog =  dialog.findViewById(R.id.list_dialog);
-        problem.add("组呼失败");
-        problem.add("没有消息记录");
-        problem.add("发送消息失败");
-        problem.add("个呼无法接通");
+        problem.add(getString(R.string.text_group_call_fail));
+        problem.add(getString(R.string.text_no_message_history));
+        problem.add(getString(R.string.text_send_message_fail));
+        problem.add(getString(R.string.text_no_call_can_be_connected));
 
         list_dialog.setAdapter(new DialogAdapter(problem,this));
         list_dialog.setOnItemClickListener(this);
@@ -299,7 +299,7 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
             wv_help.loadUrl(help_word_url);
 //            wv_help.loadUrl("file:///android_asset/help/index.html");
         } else {
-            ToastUtil.showToast(this, "获取帮助文档失败，请重新启动app!");
+            ToastUtil.showToast(this, getString(R.string.text_get_help_word_fail_please_restart_app));
         }
 //        /*
 //         * 监听手机返回按键，点击返回H5就返回上一级
@@ -438,10 +438,10 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
             myHandler.post(() -> {
               String result = String.valueOf(resultCode);
               if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                  ToastUtil.toast(HelpWordActivity.this, "日志上传成功，感谢您的支持！");
+                  ToastUtil.toast(HelpWordActivity.this, getString(R.string.text_log_upload_success_thanks));
                   wv_help.loadUrl("javascript: reqSuccess('"+result+ "')");
               } else {
-                  ToastUtil.showToast( "日志上传失败，请稍后重试！", HelpWordActivity.this);
+                  ToastUtil.showToast( getString(R.string.text_log_upload_fail_please_try_later), HelpWordActivity.this);
                   wv_help.loadUrl("javascript: reqSuccess('"+result+ "')");
               }
             });

@@ -183,7 +183,7 @@ public class PhoneAssistantManageActivity extends BaseActivity implements View.O
             } else {//下载
                 if(lastPosition!=-1){
                     if(!callRecords.get(lastPosition).isDownLoad()){
-                        ToastUtil.showToast(PhoneAssistantManageActivity.this,"有正在下载的录音，请等待。。。。");
+                        ToastUtil.showToast(PhoneAssistantManageActivity.this,getString(R.string.text_loading_audio_please_wait));
                         return;
                     }
                 }
@@ -194,7 +194,8 @@ public class PhoneAssistantManageActivity extends BaseActivity implements View.O
                     public void succeed(CallRecord callRecord) {
                         logger.info("电话录音下载成功");
                         callRecords.get(position).setDownLoad(true);
-                        ToastUtil.showToast(PhoneAssistantManageActivity.this, "录音文件已保存至：" + callRecord.getPath());
+
+                        ToastUtil.showToast(PhoneAssistantManageActivity.this, String.format(getString(R.string.text_audio_save_path),callRecord.getPath()));
                         handler.post(() -> {
                             view.setEnabled(true);
                             handler.sendEmptyMessage(DOWNLOAD);
@@ -206,7 +207,7 @@ public class PhoneAssistantManageActivity extends BaseActivity implements View.O
                     public void failure() {
                         logger.error("电话录音下载失败");
                         callRecords.get(position).setDownLoad(false);
-                        ToastUtil.showToast(PhoneAssistantManageActivity.this, "录音下载失败");
+                        ToastUtil.showToast(PhoneAssistantManageActivity.this, getString(R.string.text_load_audio_fail));
                         mHandler.post(() -> {
                             view.setEnabled(true);
                             downloadProgressBar.setProgress(0);

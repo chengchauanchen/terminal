@@ -136,7 +136,7 @@ public class FunctionHidePlus extends LinearLayout {
             String title = titles[position];
             if (isFastClick()){
                 if(DataUtil.getMemberByMemberNo(userId).terminalMemberType== TerminalMemberType.TERMINAL_PDT.name()){
-                    ToastUtil.showToast(context,"对方不支持该消息类型");
+                    ToastUtil.showToast(context,context.getString(R.string.text_the_other_party_not_supported_this_message_type));
                     return;
                 }
 
@@ -146,7 +146,7 @@ public class FunctionHidePlus extends LinearLayout {
                 }else if (title.equals("拍照")
                         &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
                     if(MyApplication.instance.isMiniLive){
-                        ToastUtil.showToast(context,"小窗口模式中，不能执行该操作");
+                        ToastUtil.showToast(context,context.getString(R.string.text_small_window_mode_can_not_do_this));
                         return;
                     }
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.CAMERA, true, userId);
@@ -166,7 +166,7 @@ public class FunctionHidePlus extends LinearLayout {
                         return;
                     }
                     if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
-                        Toast.makeText(context,"没有图像上报权限",Toast.LENGTH_SHORT).show();
+                        ToastUtil.showToast(context,context.getString(R.string.text_has_no_image_report_authority));
                         return;
                     }
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.POST_BACK_VIDEO, true, userId);
@@ -176,12 +176,12 @@ public class FunctionHidePlus extends LinearLayout {
                         return;
                     }
                     if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
-                        Toast.makeText(context,"没有图像请求权限",Toast.LENGTH_SHORT).show();
+                        ToastUtil.showToast(context,context.getString(R.string.no_pull_authority));
                         return;
                     }
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO, true, userId);
                 }else {
-                    ToastUtil.showToast(context,"没有发送消息功能权限");
+                    ToastUtil.showToast(context,context.getString(R.string.text_has_no_send_message_authority));
                 }
             }
         });
@@ -234,7 +234,7 @@ public class FunctionHidePlus extends LinearLayout {
                 break;
             case R.id.bt_send:
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
-                    ToastUtil.showToast(context,"没有发送消息的功能权限");
+                    ToastUtil.showToast(context,context.getString(R.string.text_has_no_send_message_authority));
                     return;
                 }
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.TEXT);
@@ -376,11 +376,11 @@ public class FunctionHidePlus extends LinearLayout {
             //PDT终端不支持录音消息类型
             if(DataUtil.getMemberByMemberNo(userId).terminalMemberType==TerminalMemberType.TERMINAL_PDT.name()){
                 btn_record.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-                btn_record.setText("禁止录音");
+                btn_record.setText(R.string.text_can_not_sound_recorder);
                 btn_record.setEnabled(false);
             }else {
                 btn_record.setBackgroundResource(R.drawable.shape_news_ptt_listen);
-                btn_record.setText("长按录音");
+                btn_record.setText(R.string.text_long_press_to_sound_recorder);
                 btn_record.setEnabled(true);
             }
             canPull=false;

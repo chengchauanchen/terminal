@@ -88,9 +88,9 @@ public class MessageListAdapter extends BaseAdapter {
             if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() &&
                     terminalMessage.messageFromId == terminalMessage.messageToId &&
                     terminalMessage.messageFromId == TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {//自己是直播方
-                viewHolder.tv_user_name.setText("图像助手");
+                viewHolder.tv_user_name.setText(context.getString(R.string.text_image_assistant));
             }else if(terminalMessage.messageType == MessageType.CALL_RECORD.getCode()){//电话助手目前不属于消息
-                viewHolder.tv_user_name.setText("电话助手");
+                viewHolder.tv_user_name.setText(context.getString(R.string.text_telephone_assistant));
             }
             else {
                 if (isReceiver) {//接受消息，显示对方名字
@@ -192,100 +192,100 @@ public class MessageListAdapter extends BaseAdapter {
                 String content = FileUtil.getStringFromFile(file);
                 logger.info("长文本： path:"+path+"    content:"+content);
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+content);
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_text_),terminalMessage.messageFromName,content));
                 } else {
                     viewHolder.tv_last_msg.setText(content);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.PICTURE.getCode()) {
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[图片]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_picture_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[图片]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_picture);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.AUDIO.getCode()) {
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[语音]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_voice_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[语音]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_voice);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.VIDEO_CLIPS.getCode()) {
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[视频]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_video_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[视频]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_video);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.CALL_RECORD.getCode()) {
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[通话记录]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_call_record_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[通话记录]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_call_record);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.FILE.getCode()) {
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[文件]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_file_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[文件]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_file);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.POSITION.getCode()) {
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[位置]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_location_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[位置]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_location);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.AFFICHE.getCode()) {
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[公告]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_notice_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[公告]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_notice);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.WARNING_INSTANCE.getCode()) {
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[警情]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_warning_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[警情]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_warning);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.PRIVATE_CALL.getCode()) {
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[个呼]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_personal_call_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[个呼]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_personal_call);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.VIDEO_LIVE.getCode()) {
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[图像]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_image_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[图像]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_image);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.GROUP_CALL.getCode()) {
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[组呼]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_group_call_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[组呼]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_group_call);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.AUDIO.getCode()) {
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[录音]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_sound_recording_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[录音]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_sound_recording);
                 }
             }
             if(terminalMessage.messageType ==  MessageType.HYPERLINK.getCode()) {//人脸识别
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(terminalMessage.messageFromName+":"+"[人脸识别]");
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_face_recognition_),terminalMessage.messageFromName));
                 } else {
-                    viewHolder.tv_last_msg.setText("[人脸识别]");
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_face_recognition);
                 }
             }
         }

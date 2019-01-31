@@ -10,10 +10,10 @@
         android:id="@+id/tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="7dp"
+        android:padding="@dimen/dp_7"
         android:text="北京市西城分局"
         android:textColor="@color/regist_host_name"
-        android:textSize="18sp"
+        android:textSize="@dimen/sp_18"
         />
     <View
         android:layout_width="wrap_content"

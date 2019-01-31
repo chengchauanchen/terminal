@@ -139,7 +139,7 @@ public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
             if (MyTerminalFactory.getSDK().hasNetwork()){
                 MyTerminalFactory.getSDK().getGroupScanManager().groupScan(currState, GroupScanType.GROUP_SCANNING.getCode());
             } else {
-                ToastUtil.showToast(context, "网络连接异常，请检查网络！");
+                ToastUtil.showToast(context, context.getString(R.string.text_network_connection_abnormal_please_check_the_network));
                 openSweep.initToggleState(!currState);
             }
         });
@@ -169,7 +169,7 @@ public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
 //                break;
             case R.id.rl_group_sweep_setting:
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_SCAN.name())){
-                    ToastUtil.showToast(context,"没有设置扫描组权限");
+                    ToastUtil.showToast(context,context.getString(R.string.text_no_set_sweep_group_authority));
                     return;
                 }
                 context.startActivity(new Intent(context, SetSweepActivity.class));

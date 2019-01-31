@@ -134,7 +134,7 @@ public class PullLivingService extends BaseService{
             liveMember = (Member) intent.getSerializableExtra(Constants.LIVE_MEMBER);
             mLiveVedioName.setText(liveMember.getName());
             mLiveVedioId.setText(HandleIdUtil.handleId(liveMember.getNo()));
-            theme = String.format("%s正在上报视频",liveMember.getName());
+            theme = String.format(getString(R.string.text_pushing_video_name),liveMember.getName());
             showPullView();
         }
     }
@@ -546,7 +546,7 @@ public class PullLivingService extends BaseService{
         }
         //没有组呼权限
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
-            Toast.makeText(this, "没有组呼权限", Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(this,getString(R.string.no_group_call_permission));
             return;
         }
         int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
@@ -609,7 +609,7 @@ public class PullLivingService extends BaseService{
                     if(liver.contains("_")){
                         String[] split = liver.split("_");
                         if(split.length > 0){
-                            theme = String.format("%s正在上报图像", split[1]);
+                            theme = String.format(getString(R.string.text_pushing_video_name), split[1]);
                         }
                     }
                 }

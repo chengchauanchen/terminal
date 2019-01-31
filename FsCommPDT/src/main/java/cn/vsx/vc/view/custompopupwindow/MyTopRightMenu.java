@@ -57,9 +57,9 @@ public class MyTopRightMenu {
         this.activity = context;
         view.setOnClickListener(v -> {
             mTopRightMenu = new TopRightMenu(context);
-            final MenuItem pushItem = new MenuItem(R.drawable.shipin_up, "上报图像");
-            final MenuItem pullItem = new MenuItem(R.drawable.shipin_hc, "请求图像");
-            final MenuItem createItem = new MenuItem(R.drawable.create_temporary_group,"创建临时组");
+            final MenuItem pushItem = new MenuItem(R.drawable.shipin_up, activity.getString(R.string.text_push));
+            final MenuItem pullItem = new MenuItem(R.drawable.shipin_hc, activity.getString(R.string.text_pull));
+            final MenuItem createItem = new MenuItem(R.drawable.create_temporary_group,activity.getString(R.string.text_create_temporary_groups));
             final List<MenuItem> items = new ArrayList<>();
             mTopRightMenu.addMenuItem(pullItem);
             mTopRightMenu.addMenuItem(pushItem);
@@ -106,7 +106,7 @@ public class MyTopRightMenu {
                                             }
 
                                             if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())) {
-                                                ToastUtil.showToast(context,"没有图像上报功能权限");
+                                                ToastUtil.showToast(context,activity.getString(R.string.text_has_no_image_report_authority));
                                                 return;
                                             }
                                             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,0);
@@ -121,7 +121,7 @@ public class MyTopRightMenu {
                                             }
                                             //判断终端权限
                                             if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())) {
-                                                ToastUtil.showToast(context,"没有图像请求功能权限");
+                                                ToastUtil.showToast(context,activity.getString(R.string.text_has_no_image_request_authority));
                                                 return;
                                             }
                                             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member());
@@ -131,7 +131,7 @@ public class MyTopRightMenu {
                                     else if(items.get(position) ==createItem){
                                         if (!MyApplication.instance.isPttPress){
                                             if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TEMP_CREATE.name())) {
-                                                ToastUtil.showToast(context,"没有创建临时组功能权限");
+                                                ToastUtil.showToast(context,activity.getString(R.string.text_has_no_create_temp_group_authority));
                                                 return;
                                             }
                                             Intent intent = new Intent(context, IncreaseTemporaryGroupMemberActivity.class);
@@ -141,10 +141,10 @@ public class MyTopRightMenu {
                                     }
                                     break;
                                 case SPEAKING:
-                                    ToastUtil.showToast(context, "个呼中，不能进行其他业务");
+                                    ToastUtil.showToast(context, activity.getString(R.string.text_personal_calling_can_not_do_others));
                                     break;
                                 case RINGING:
-                                    ToastUtil.showToast(context, "个呼中，不能进行其他业务");
+                                    ToastUtil.showToast(context, activity.getString(R.string.text_personal_calling_can_not_do_others));
                                     break;
 
                                 default:
@@ -152,7 +152,7 @@ public class MyTopRightMenu {
                             }
 
                         }else {
-                            ToastUtil.showToast(context,"您已处于图像业务中");
+                            ToastUtil.showToast(context,activity.getString(R.string.text_in_video_function));
                         }
 
                     })
@@ -185,7 +185,7 @@ public class MyTopRightMenu {
 
             @Override
             public void doCancelThings() {
-                ToastUtil.showToast(activity,"请前往设置打开相机权限");
+                ToastUtil.showToast(activity,activity.getString(R.string.text_go_to_setting_open_camera_authority));
             }
         }.showDialog();
     }

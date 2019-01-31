@@ -259,7 +259,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
             }else if(status == 1){
                 ll_volume.setVisibility(View.VISIBLE);
             }
-            tv_volume.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "%");
+            tv_volume.setText(String.format(getString(R.string.text_percent_sign_volume),MyTerminalFactory.getSDK().getAudioProxy().getVolume()));
             mHandler.sendEmptyMessageDelayed(RECEIVEVOICECHANGED, 2000);
         }
     };
@@ -388,7 +388,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
                     mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
                 }
             }else{
-                ToastUtil.showToast(PlayLiveHistoryActivity.this, "网络连接已断开");
+                ToastUtil.showToast(PlayLiveHistoryActivity.this, getString(R.string.net_work_disconnect));
             }
         }catch(IllegalStateException e){
             e.printStackTrace();

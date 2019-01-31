@@ -143,12 +143,12 @@ public class ScanGroupSearchFragment extends BaseFragment{
         scanGroupSearchAdapter.setFilterKeyWords(keyWord);
 
         tv_search_nothing.setVisibility(View.VISIBLE);
-        tv_search_nothing.setText("搜索组");
+        tv_search_nothing.setText(R.string.text_search_group);
         rl_search_result.setVisibility(View.GONE);
         searchGroups.clear();
 
         if (TextUtils.isEmpty(keyWord)) {
-            ToastUtil.showToast(context, "搜索的内容不能为空");
+            ToastUtil.showToast(context, getString(R.string.text_search_content_can_not_empty));
         }else {
             searchMemberFromGroup();
         }
@@ -163,7 +163,7 @@ public class ScanGroupSearchFragment extends BaseFragment{
             }
         }
         if (searchGroups.size() == 0) {
-            tv_search_nothing.setText("组不存在");
+            tv_search_nothing.setText(R.string.text_group_is_not_exist);
             rl_search_result.setVisibility(View.GONE);
         } else {
             tv_search_nothing.setVisibility(View.GONE);
@@ -222,10 +222,10 @@ public class ScanGroupSearchFragment extends BaseFragment{
         public void handler(final List<Integer> scanGroups, final int errorCode, final String errorDesc) {
             myHandler.post(() -> {
                 if(errorCode== BaseCommonCode.SUCCESS_CODE){
-                    ToastUtil.toast(getActivity(),"添加扫描组成功");
+                    ToastUtil.toast(getActivity(),getString(R.string.text_add_scan_group_success));
                     scanGroupSearchAdapter.notifyDataSetChanged();
                 }else {
-                    ToastUtil.toast(getActivity(),"添加扫描组失败");
+                    ToastUtil.toast(getActivity(),getString(R.string.text_add_scan_group_fail));
                 }
             });
         }

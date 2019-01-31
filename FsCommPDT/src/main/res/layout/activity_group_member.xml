@@ -30,7 +30,7 @@
                 android:layout_marginLeft="@dimen/x14"
                 android:gravity="center_vertical"
                 android:textColor="@color/member_num_text"
-                android:textSize="12sp" />
+                android:textSize="@dimen/sp_12" />
 
         </LinearLayout>
 

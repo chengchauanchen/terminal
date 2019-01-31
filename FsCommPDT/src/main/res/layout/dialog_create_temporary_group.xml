@@ -19,8 +19,8 @@
         android:id="@+id/text_context"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="正在创建..."
-        android:textSize="25dp"
+        android:text="@string/text_temporary_group_creatting"
+        android:textSize="@dimen/sp_25"
         android:layout_marginTop="@dimen/x5"
         android:layout_marginBottom="@dimen/x5"
         android:layout_centerHorizontal="true"
@@ -32,8 +32,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/text_context"
         android:layout_centerHorizontal="true"
-        android:text="正在跳转...."
-        android:textSize="14sp"
-        android:textColor="#EFB152"
+        android:text="@string/text_temporary_group_jumping"
+        android:textSize="@dimen/sp_14"
+        android:textColor="@color/yellow_ef"
         android:visibility="invisible"/>
 </RelativeLayout>

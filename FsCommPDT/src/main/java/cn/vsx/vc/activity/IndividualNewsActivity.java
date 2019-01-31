@@ -257,10 +257,10 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
             if(member!=null){
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
             }else {
-                ToastUtil.showToast(IndividualNewsActivity.this,"获取成员信息失败");
+                ToastUtil.showToast(IndividualNewsActivity.this,getString(R.string.text_get_member_info_fail));
             }
         } else {
-            ToastUtil.showToast(this, "网络连接异常，请检查网络！");
+            ToastUtil.showToast(this, getString(R.string.text_network_connection_abnormal_please_check_the_network));
         }
     }
 
@@ -310,12 +310,12 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                             logger.info("获得音频文件为：file=" + outFile.length() + "---文件的路径---" + outFile.getAbsolutePath());
                             if (outFile.exists() && outFile.length() > 0) {
                                 resultCode[0] = BaseCommonCode.SUCCESS_CODE;
-                                resultDes[0] = "获取音频成功，准备播放";
+                                resultDes[0] = getString(R.string.text_get_audio_success_ready_to_play);
                                 logger.info("URL获得音频文件，播放录音");
                                 MediaManager.playSound(terminalMessage.messagePath, onCompletionListener);
                             } else {
                                 resultCode[0] = TerminalErrorCode.SERVER_NOT_RESPONSE.getErrorCode();
-                                resultDes[0] = "历史音频未找到，或服务器无响应！";
+                                resultDes[0] = getString(R.string.text_audio_history_not_find_or_server_no_response);
                                 logger.error("历史音频未找到，或服务器无响应！");
                             }
                             TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0]);
@@ -323,19 +323,19 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                     });
                 } else {
                     resultCode[0] = BaseCommonCode.SUCCESS_CODE;
-                    resultDes[0] = "从本地获取音频成功，准备播放";
+                    resultDes[0] = getString(R.string.text_get_audio_success_from_local_ready_to_play);
                     logger.info("从本地音频文件，播放录音");
                     MediaManager.playSound(terminalMessage.messagePath, onCompletionListener);
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0]);
                 }
             } else {
                 resultCode[0] = TerminalErrorCode.PARAMETER_ERROR.getErrorCode();
-                resultDes[0] = "获取历史音频参数不合法！";
+                resultDes[0] = getString(R.string.text_get_audio_history_paramter_wrongful);
                 logger.error("获取历史音频参数不合法！");
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0]);
             }
         } catch (Exception e) {
-            resultDes[0] = "获得语音消息失败！";
+            resultDes[0] = getString(R.string.text_get_audio_messge_fail);
             resultCode[0] = TerminalErrorCode.PARAMETER_ERROR.getErrorCode();
             logger.error("获得语音消息失败！", e);
             TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0]);
@@ -355,7 +355,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
                 hideKey();
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                    ToastUtil.showToast(this,"没有个呼功能权限");
+                    ToastUtil.showToast(this,getString(R.string.text_no_call_permission));
                 }else {
                     activeIndividualCall();
                 }
@@ -379,7 +379,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                     ItemAdapter adapter = new ItemAdapter(IndividualNewsActivity.this,ItemAdapter.iniDatas());
                     AlertDialog.Builder builder = new AlertDialog.Builder(IndividualNewsActivity.this);
                     //设置标题
-                    builder.setTitle("拨打电话");
+                    builder.setTitle(R.string.text_call_up);
                     builder.setAdapter(adapter, (dialogInterface, position) -> {
                         if(position==VOIP){//voip电话
 
@@ -389,7 +389,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                                 intent1.putExtra("member",member);
                                 IndividualNewsActivity.this.startActivity(intent1);
                             }else {
-                                ToastUtil.showToast(IndividualNewsActivity.this,"voip注册失败，请检查服务器配置");
+                                ToastUtil.showToast(IndividualNewsActivity.this,getString(R.string.text_voip_regist_fail_please_check_server_configure));
                             }
                         }
                         else if(position==TELEPHONE){//普通电话
@@ -402,7 +402,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                     builder.create();
                     builder.show();
                 }else {
-                    ToastUtil.showToast(IndividualNewsActivity.this,"暂无该用户电话号码");
+                    ToastUtil.showToast(IndividualNewsActivity.this,getString(R.string.text_has_no_member_phone_number));
                 }
                 break;
         }
@@ -470,7 +470,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                     }
 
                 } else {
-                    ToastUtil.showToast(IndividualNewsActivity.this, "当前不可播放录音");
+                    ToastUtil.showToast(IndividualNewsActivity.this, getString(R.string.text_can_not_play_audio_now));
                 }
             });
         }
@@ -573,7 +573,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         speakingId = groupId;
         speakingName = memberName;
         if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
-            ToastUtil.showToast(IndividualNewsActivity.this, "没有组呼听的功能权限");
+            ToastUtil.showToast(IndividualNewsActivity.this, getString(R.string.text_has_no_group_call_listener_authority));
         }
     };
 

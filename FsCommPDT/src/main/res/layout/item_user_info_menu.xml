@@ -1,26 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:background="@color/fun_bg"
     android:gravity="center"
-    android:paddingTop="15dp"
-    android:paddingBottom="15dp"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
+    android:orientation="vertical"
+    android:paddingTop="@dimen/dp_15"
+    android:paddingBottom="@dimen/dp_15">
 
 
     <ImageView
         android:id="@+id/iv_menu"
-        android:layout_width="34dp"
-        android:layout_height="34dp" />
+        android:layout_width="@dimen/dp_34"
+        android:layout_height="@dimen/dp_34" />
 
     <TextView
         android:id="@+id/tv_menu"
-        android:textColor="@color/user_info_text_gray"
-        android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_10"
+        android:textColor="@color/user_info_text_gray" />
 
 </LinearLayout>

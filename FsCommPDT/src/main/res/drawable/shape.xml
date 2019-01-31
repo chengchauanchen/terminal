@@ -4,6 +4,6 @@
     android:useLevel="false">
     <solid android:color="@color/white"/>  <!-- 颜色-->
     <size
-        android:width="8dp"
-        android:height="8dp"/>
+        android:width="@dimen/dp_8"
+        android:height="@dimen/dp_8"/>
 </shape>

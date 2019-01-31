@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:myattrs="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/sweep_group"
@@ -13,9 +13,9 @@
         android:background="@color/setting_background_white"
         android:gravity="center_vertical"
         android:paddingLeft="@dimen/x30"
-        android:text="组扫描"
+        android:text="@string/text_group_scan"
         android:textColor="@color/setting_text_black"
-        android:textSize="17sp" />
+        android:textSize="@dimen/sp_16" />
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -28,14 +28,14 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/x30"
-            android:text="开启组扫描"
+            android:text="@string/text_start_group_scan"
             android:textColor="@color/setting_text_gray"
-            android:textSize="17sp" />
+            android:textSize="@dimen/sp_16" />
 
         <cn.vsx.vc.view.MToggleButton
             android:id="@+id/open_sweep"
-            android:layout_width="80dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/dp_80"
+            android:layout_height="@dimen/dp_30"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/x20"
@@ -58,9 +58,9 @@
             android:layout_centerVertical="true"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/x30"
-            android:text="设置组扫描"
+            android:text="@string/text_set_group_scan"
             android:textColor="@color/setting_text_gray"
-            android:textSize="17sp" />
+            android:textSize="@dimen/sp_16" />
 
         <ImageView
             android:layout_width="@dimen/x15"

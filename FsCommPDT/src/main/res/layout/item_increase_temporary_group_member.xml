@@ -14,16 +14,16 @@
 
         <ImageView
             android:id="@+id/shoutai_user_logo"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:padding="8dp"
-            android:layout_marginLeft="10dp"
+            android:layout_width="@dimen/dp_50"
+            android:layout_height="@dimen/dp_50"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:padding="@dimen/dp_8"
             android:src="@drawable/user_photo" />
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="2dp"
+            android:layout_marginLeft="@dimen/dp_2"
             android:gravity="center_vertical"
             android:orientation="vertical">
 
@@ -35,7 +35,7 @@
                 android:maxLength="8"
                 android:text=""
                 android:textColor="@color/group_text_gray"
-                android:textSize="16sp"
+                android:textSize="@dimen/sp_16"
                 android:textStyle="normal" />
 
             <TextView
@@ -44,7 +44,7 @@
                 android:layout_height="wrap_content"
                 android:text=""
                 android:textColor="@color/group_text_gray_two"
-                android:textSize="13sp"
+                android:textSize="@dimen/sp_13"
                 android:textStyle="normal" />
         </LinearLayout>
 
@@ -56,64 +56,60 @@
 
         <LinearLayout
             android:id="@+id/shoutai_dial_to"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_marginRight="10dp"
+            android:layout_width="@dimen/dp_45"
+            android:layout_height="@dimen/dp_45"
+            android:layout_marginRight="@dimen/dp_10"
             android:gravity="center">
 
             <ImageView
-                android:visibility="invisible"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="@drawable/tel" />
+                android:layout_width="@dimen/dp_30"
+                android:layout_height="@dimen/dp_30"
+                android:background="@drawable/tel"
+                android:visibility="invisible" />
 
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/shoutai_message_to"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_marginRight="10dp"
+            android:layout_width="@dimen/dp_45"
+            android:layout_height="@dimen/dp_45"
+            android:layout_marginRight="@dimen/dp_10"
             android:gravity="center">
 
             <ImageView
-                android:visibility="invisible"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="@drawable/new_message_icon" />
+                android:layout_width="@dimen/dp_30"
+                android:layout_height="@dimen/dp_30"
+                android:background="@drawable/new_message_icon"
+                android:visibility="invisible" />
 
         </LinearLayout>
 
 
         <LinearLayout
             android:id="@+id/shoutai_call_to"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:layout_marginRight="12.5dp"
+            android:layout_width="@dimen/dp_45"
+            android:layout_height="@dimen/dp_45"
+            android:layout_marginRight="@dimen/dp_12"
             android:gravity="center">
 
-            <!--<ImageView-->
-                <!--android:layout_width="30dp"-->
-                <!--android:layout_height="30dp"-->
-                <!--android:background="@drawable/new_call_icon" />-->
             <CheckBox
-                android:layout_gravity="center_vertical"
                 android:id="@+id/cb_selectmember"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="@dimen/dp_30"
+                android:layout_height="@dimen/dp_30"
+                android:layout_gravity="center_vertical"
                 android:layout_marginRight="@dimen/x5"
-                android:focusable="false"
-                android:clickable="false"
-                android:button="@drawable/checkbox"
                 android:background="@android:color/transparent"
-                />
+                android:button="@drawable/checkbox"
+                android:clickable="false"
+                android:focusable="false" />
 
         </LinearLayout>
     </LinearLayout>
+
     <View
-        android:layout_marginLeft="65dp"
-        android:layout_marginRight="10dp"
-        android:background="@color/diver_bg"
         android:layout_width="match_parent"
-        android:layout_height="0.5dp"/>
+        android:layout_height="@dimen/dp_half_one"
+        android:layout_marginLeft="@dimen/dp_65"
+        android:layout_marginRight="@dimen/dp_10"
+        android:background="@color/diver_bg" />
 </LinearLayout>

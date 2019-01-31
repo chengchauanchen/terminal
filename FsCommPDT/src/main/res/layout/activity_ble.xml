@@ -33,7 +33,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:layout_marginLeft="@dimen/x20"
-            android:text="蓝牙PTT"
+            android:text="@string/activity_ble_blue_tooth_ptt"
             android:textColor="@color/white"
             android:textSize="@dimen/x15"/>
     </LinearLayout>
@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:textColor="@color/open_ble_tv"
-            android:text="开启"
+            android:text="@string/activity_ble_start"
             android:id="@+id/textView" />
     
         <cn.vsx.vc.view.MToggleButton
@@ -72,13 +72,13 @@
             style="@style/setting_text_style_left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="可用设备"
+            android:layout_marginTop="@dimen/dp_16"
+            android:text="@string/activity_ble_enable_devices"
             android:textColor="@color/useb_device_tv"
-            android:textSize="14sp" />
+            android:textSize="@dimen/sp_14" />
         <LinearLayout
             android:id="@+id/ll_connecting"
-            android:layout_width="48dp"
+            android:layout_width="@dimen/dp_48"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_marginRight="@dimen/x21"
@@ -105,9 +105,9 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/rl_usable_device"
         android:layout_marginTop="@dimen/x20"
-        android:layout_marginRight="10dp"
+        android:layout_marginRight="@dimen/dp_10"
         style="@style/setting_text_style_left"
         android:textColor="@color/close_ble"
-        android:text="开启蓝牙后,您的设备可以与附近的其他蓝牙PTT设备通信"
+        android:text="@string/activity_ble_tempt_text"
         android:visibility="gone"/>
 </RelativeLayout>

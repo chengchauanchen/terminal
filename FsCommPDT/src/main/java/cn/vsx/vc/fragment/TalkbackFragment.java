@@ -159,7 +159,7 @@ public class TalkbackFragment extends BaseFragment {
                         setViewEnable(false);
                     });
                 } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
-                    myHandler.post(() -> ToastUtil.showToast(context, "当前组是只听组，不能发起组呼"));
+                    myHandler.post(() -> ToastUtil.showToast(context, getString(R.string.cannot_talk)));
                 } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
                     myHandler.post(() -> change2Waiting());
                 }else {
@@ -250,7 +250,7 @@ public class TalkbackFragment extends BaseFragment {
                 myHandler.post(() -> {
                     setChangeGroupView();
                     if (errorCode == SignalServerErrorCode.RESOURCES_NOT_ENOUGH.getErrorCode()) {
-                        ToastUtil.showToast(MyApplication.instance, "无可用电台资源！");
+                        ToastUtil.showToast(MyApplication.instance, getString(R.string.text_no_radio_resources_available));
                     } else if (errorCode == SignalServerErrorCode.TEMP_GROUP_LOCKED.getErrorCode()) {
                         ToastUtil.showToast(MyApplication.instance, SignalServerErrorCode.TEMP_GROUP_LOCKED.getErrorDiscribe());
                     }else {
@@ -315,7 +315,7 @@ public class TalkbackFragment extends BaseFragment {
         public void handler(int memberId, final String memberName, final int groupId, String version, CallMode currentCallMode) {
             logger.info("触发了被动方组呼来了receiveGroupCallIncommingHandler:" + "curreneCallMode " + currentCallMode + "-----" + MyApplication.instance.getGroupSpeakState());
             if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-                ToastUtil.showToast(activity,"没有组呼听的权限");
+                ToastUtil.showToast(activity,getString(R.string.text_has_no_group_call_listener_authority));
             }
             myHandler.post(() -> {
                     //是组扫描的组呼,且当前组没人说话，变文件夹和组名字
@@ -560,7 +560,7 @@ public class TalkbackFragment extends BaseFragment {
         public void onGroupChanged(final int groupId, String groupName) {
             myHandler.post(() -> {
                 if (MyApplication.instance.isMiniLive) {
-                    ToastUtil.showToast(getContext(), "小窗口模式中禁止转组");
+                    ToastUtil.showToast(getContext(), getString(R.string.text_small_window_mode_can_not_change_group));
                 } else {
                     int resultCode = MyTerminalFactory.getSDK().getGroupManager().changeGroup(groupId);
                     setCurrentGroupView();
@@ -1073,7 +1073,7 @@ public class TalkbackFragment extends BaseFragment {
                 intent.putExtra("groupName", DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
                 startActivity(intent);
             } else {
-                ToastUtil.showToast(context, "未知错误,成员不在该组中！");
+                ToastUtil.showToast(context, getString(R.string.text_unkown_error_member_not_in_this_group));
             }
         });
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
@@ -1166,7 +1166,7 @@ public class TalkbackFragment extends BaseFragment {
         tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members),online_number));
         change_group_show_area.setVisibility(View.VISIBLE);
         talkback_time_progress.setVisibility(View.GONE);
-        ptt.setText("按住 说话");
+        ptt.setText(R.string.press_blank_space_talk_text);
         TextViewCompat.setTextAppearance(ptt,R.style.pttSilenceText);
         ptt.setBackgroundResource(R.drawable.ptt_silence);
         ptt.setEnabled(true);
@@ -1181,7 +1181,7 @@ public class TalkbackFragment extends BaseFragment {
         logger.info("ptt.change2Waiting准备说话");
         ll_pre_speaking.setVisibility(View.VISIBLE);
         ptt.setBackgroundResource(R.drawable.ptt_pre_speaking);
-        ptt.setText("准备说话");
+        ptt.setText(R.string.text_ready_to_speak);
         TextViewCompat.setTextAppearance(ptt,R.style.pttPreSpeakText);
         ptt.setEnabled(true);
     }
@@ -1203,7 +1203,7 @@ public class TalkbackFragment extends BaseFragment {
         }
 
         ptt.setBackgroundResource(R.drawable.ptt_pre_speaking);
-        ptt.setText("准备说话");
+        ptt.setText(R.string.text_ready_to_speak);
         TextViewCompat.setTextAppearance(ptt,R.style.pttPreSpeakText);
         ptt.setEnabled(true);
     }
@@ -1221,7 +1221,7 @@ public class TalkbackFragment extends BaseFragment {
         change_group_show_area.setVisibility(View.GONE);
         talkback_time_progress.setVisibility(View.VISIBLE);
         ptt.setBackgroundResource(R.drawable.ptt_speaking);
-        ptt.setText("松开结束");
+        ptt.setText(R.string.button_release_end);
         TextViewCompat.setTextAppearance(ptt,R.style.pttSpeakingText);
         logger.info("主界面，ptt被禁 ？  isClickVolumeToCall：" + MyApplication.instance.isClickVolumeToCall);
         ptt.setEnabled(!MyApplication.instance.isClickVolumeToCall);
@@ -1234,7 +1234,7 @@ public class TalkbackFragment extends BaseFragment {
         allViewDefault();
         ll_forbid.setVisibility(View.VISIBLE);
         tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members),online_number));
-        ptt.setText("按住 排队");
+        ptt.setText(R.string.button_press_to_line_up);
         TextViewCompat.setTextAppearance(ptt,R.style.pttWaitingText);
         ptt.setBackgroundResource(R.drawable.ptt_listening);
         logger.info("主界面，ptt被禁了  isPttPress：" + MyApplication.instance.isPttPress);
@@ -1258,11 +1258,11 @@ public class TalkbackFragment extends BaseFragment {
 
         if(isScanGroupCall){
             logger.info("扫描组在组呼");
-            ptt.setText("按住 说话");
+            ptt.setText(R.string.press_blank_space_talk_text);
             TextViewCompat.setTextAppearance(ptt,R.style.pttSilenceText);
             ptt.setBackgroundResource(R.drawable.ptt_silence);
         }else {
-            ptt.setText("按住 排队");
+            ptt.setText(R.string.button_press_to_line_up);
             TextViewCompat.setTextAppearance(ptt,R.style.pttWaitingText);
             ptt.setBackgroundResource(R.drawable.ptt_listening);
             logger.info("主界面，ptt被禁了  isPttPress：" + MyApplication.instance.isPttPress);
@@ -1289,7 +1289,7 @@ public class TalkbackFragment extends BaseFragment {
     }
 
     private void waitAndFinish() {
-        ToastUtil.showToast(context, "系统异常，程序将在1秒后关闭，请重新启动");
+        ToastUtil.showToast(context, getString(R.string.text_system_exception_wait_one_seconds_closed_please_restart));
         myHandler.postDelayed(() -> ((NewMainActivity) context).finish(),1000);
     }
 
@@ -1542,7 +1542,7 @@ public class TalkbackFragment extends BaseFragment {
         }
         //没有组呼权限
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
-            Toast.makeText(context,"没有组呼权限",Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(context,getString(R.string.text_has_no_group_call_authority));
             return;
         }
 

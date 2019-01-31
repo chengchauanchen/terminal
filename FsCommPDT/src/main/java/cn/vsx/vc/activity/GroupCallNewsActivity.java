@@ -275,7 +275,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         isCurrentGroup = (userId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
 
         if (!isCurrentGroup) {
-            ptt.setText("切到此组 说话");
+            ptt.setText(R.string.button_change_to_this_group_and_speak);
             ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
             TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
         }
@@ -324,7 +324,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                     intent.putExtra("groupName", userName);
                     startActivity(intent);
                 } else {
-                    ToastUtil.showToast(this, "成员对目标组无权限！");
+                    ToastUtil.showToast(this, getString(R.string.text_member_has_no_authority_in_this_group));
                 }
                 break;
             case R.id.group_call_activity_help:
@@ -372,7 +372,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         }
         //没有组呼权限
         if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
-            Toast.makeText(this, "没有组呼权限", Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(this, getString(R.string.text_has_no_group_call_authority));
             return;
         }
 
@@ -470,7 +470,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         if (ptt != null) {
             if (isCurrentGroup) {
                 ptt.setBackgroundResource(R.drawable.shape_news_ptt_listen);
-                ptt.setText("PTT");
+                ptt.setText(R.string.text_ptt);
                 TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
             }
             ptt.setEnabled(true);
@@ -491,7 +491,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
         if (isCurrentGroup) {
             ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-            ptt.setText("按住 排队");
+            ptt.setText(R.string.button_press_to_line_up);
             TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
         }
         logger.info("主界面，ptt被禁了  isPttPress：" + MyApplication.instance.isPttPress);
@@ -509,7 +509,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 img_scan.setVisibility(View.VISIBLE);
                 tv_speaker.setText(speakingName + "");
                 ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-                ptt.setText("切到此组 说话");
+                ptt.setText(R.string.button_change_to_this_group_and_speak);
                 TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
 
             } else {
@@ -519,7 +519,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 img_scan.setVisibility(View.GONE);
                 tv_speaker.setText(speakingName + "");
                 ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-                ptt.setText("按住 排队");
+                ptt.setText(R.string.button_press_to_line_up);
                 TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
             }
         }
@@ -530,7 +530,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     private void change2Forbid() {//禁止组呼，不是遥毙
         if (isCurrentGroup) {
             ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-            ptt.setText("按住 说话");
+            ptt.setText(R.string.button_press_to_speak);
             TextViewCompat.setTextAppearance(ptt, R.style.function_wait_text);
             logger.info("主界面，ptt被禁了  isPttPress：" + MyApplication.instance.isPttPress);
         }
@@ -579,7 +579,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         public boolean onTouch(View v, MotionEvent event) {
             if (!isCurrentGroup) {
                 if (MyApplication.instance.isMiniLive) {
-                    ToastUtil.showToast(GroupCallNewsActivity.this, "小窗口模式不能进行其他业务");
+                    ToastUtil.showToast(GroupCallNewsActivity.this, getString(R.string.text_small_window_mode_can_not_do_other_business));
                 } else {
                     int resultCode = -1;
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -665,7 +665,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                         setViewEnable(false);
                     });
                 } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
-                    mHandler.post(() -> ToastUtil.showToast(GroupCallNewsActivity.this, "当前组是只听组，不能发起组呼"));
+                    mHandler.post(() -> ToastUtil.showToast(GroupCallNewsActivity.this, getString(R.string.text_current_group_only_listener_can_not_speak)));
                 } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
                     mHandler.post(() -> change2Waiting());
                 } else {//请求失败
@@ -707,7 +707,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         speakingId = groupId;
         speakingName = memberName;
         if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
-            ToastUtil.showToast(GroupCallNewsActivity.this, "没有组呼听的功能权限");
+            ToastUtil.showToast(GroupCallNewsActivity.this, getString(R.string.text_has_no_group_call_listener_authority));
         }
 
         if (currentCallMode == CallMode.GENERAL_CALL_MODE) {
@@ -822,7 +822,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                     }
 
                 } else {
-                    ToastUtil.showToast(GroupCallNewsActivity.this, "当前不可播放录音");
+                    ToastUtil.showToast(GroupCallNewsActivity.this, getString(R.string.text_can_not_play_recording_now));
                 }
             });
         }
@@ -877,7 +877,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             temporaryAdapter.notifyDataSetChanged();
         } else {
             logger.info("音频播放失败了！！errorCode=" + resultCode);
-            ToastUtil.showToast(GroupCallNewsActivity.this, "播放失败，未获取到音频数据！请稍后再试");
+            ToastUtil.showToast(GroupCallNewsActivity.this, getString(R.string.text_play_recorder_fail_has_no_get_recorder_data_please_try_later));
         }
     };
 
@@ -950,10 +950,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
                     if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
                         ptt.setBackgroundResource(R.drawable.shape_news_ptt_listen);
-                        ptt.setText("PTT");
+                        ptt.setText(R.string.text_ptt);
                     } else {
                         ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-                        ptt.setText("禁止组呼");
+                        ptt.setText(R.string.text_no_group_calls);
                     }
 
                     TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
@@ -987,7 +987,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                         if(!DataUtil.isExistGroup(userId)){
                             finish();
                         }else {
-                            ptt.setText("切到此组 说话");
+                            ptt.setText(R.string.button_change_to_this_group_and_speak);
                             ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
                             TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
                             isCurrentGroup = false;

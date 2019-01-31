@@ -101,7 +101,7 @@ public class ScanGroupSearchAdapter extends BaseAdapter{
         //设置扫描组点击事件
         viewHolder.tvAddScanGroup.setOnClickListener(view -> {
             if(MyTerminalFactory.getSDK().getConfigManager().getScanGroups().size()>=10){
-                ToastUtil.showToast(context,"扫描组不能超过10个");
+                ToastUtil.showToast(context,context.getString(R.string.text_sweep_group_count_out_of_bound));
                 return;
             }
             MemberIds.clear();

@@ -16,10 +16,10 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:paddingRight="10dp"
-            android:paddingLeft="18dp"
+            android:paddingRight="@dimen/dp_10"
+            android:paddingLeft="@dimen/dp_18"
             android:gravity="center_vertical"
-            android:layout_height="46dp"
+            android:layout_height="@dimen/dp_46"
             android:background="@color/itemblue">
 
             <android.support.v7.widget.RecyclerView
@@ -31,18 +31,18 @@
 
             <ImageView
                 android:id="@+id/iv_search"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="@dimen/dp_10"
                 android:src="@drawable/search"
-                android:padding="16dp"
-                android:layout_width="50dp"
-                android:layout_height="50dp" />
+                android:padding="@dimen/dp_16"
+                android:layout_width="@dimen/dp_50"
+                android:layout_height="@dimen/dp_50" />
 
         </LinearLayout>
 
         <View
             android:background="@color/diver_bg"
             android:layout_width="match_parent"
-            android:layout_height="0.5dp"/>
+            android:layout_height="@dimen/dp_half_one"/>
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/recyclerview"

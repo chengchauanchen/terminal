@@ -74,7 +74,7 @@ public class FunctionIntroduceActivity extends FragmentActivity{
             help_word_url = nightIntroduceUrl;
         }
         if(TextUtils.isEmpty(help_word_url)){
-            ToastUtil.showToast(this,"获取功能介绍连接失败");
+            ToastUtil.showToast(this,getString(R.string.text_access_function_introduction_connection_failure));
         }else {
             webView.setEnabled(false);
             ll_pb.setVisibility(View.VISIBLE);

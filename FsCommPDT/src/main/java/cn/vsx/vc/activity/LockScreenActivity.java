@@ -242,12 +242,12 @@ public class LockScreenActivity extends BaseActivity {
 
     private void lockPttDownDoThing() {
         if (!CheckMyPermission.selfPermissionGranted(this, permission.RECORD_AUDIO)){
-            ToastUtil.showToast(this, "录制音频权限未打开，语音功能将不能使用。");
+            ToastUtil.showToast(this, getString(R.string.text_audio_frequency_is_not_open_audio_is_not_used));
             logger.error("录制音频权限未打开，语音功能将不能使用。");
             return;
         }
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
-            ToastUtil.showToast(this,"没有组呼说的权限");
+            ToastUtil.showToast(this,getString(R.string.text_has_no_group_call_speak_authority));
             return;
         }
         logger.info("锁屏界面PTT按下");
@@ -461,49 +461,50 @@ public class LockScreenActivity extends BaseActivity {
     }
 
     private void change2Speaking() {
-        tv_current_online.setText(online_number+"人在线");
+
+        tv_current_online.setText(String.format(getString(R.string.text_online_member_number),online_number));
         allViewDefault();
         ll_speaking_time.setVisibility(View.VISIBLE);
         talk_time.start(Color.GREEN);
-        ptt.setText("松开结束");
+        ptt.setText(R.string.button_release_end);
         ptt.setBackgroundResource(R.drawable.ptt_speaking);
     }
 
     private void change2PreSpeaking() {
-        tv_current_online.setText(online_number+"人在线");
+        tv_current_online.setText(String.format(getString(R.string.text_online_member_number),online_number));
         allViewDefault();
-        ptt.setText("准备说话");
+        ptt.setText(R.string.text_ready_to_speak);
         ptt.setBackgroundResource(R.drawable.ptt_pre_speaking);
         ll_pre_speaking.setVisibility(View.VISIBLE);
     }
 
     private void change2Silence() {
-        tv_current_online.setText(online_number+"人在线");
+        tv_current_online.setText(String.format(getString(R.string.text_online_member_number),online_number));
         allViewDefault();
-        ptt.setText("按住 说话");
+        ptt.setText(R.string.press_blank_space_talk_text);
         ptt.setBackgroundResource(R.drawable.ptt_silence);
         ll_silence.setVisibility(View.VISIBLE);
     }
 
     private void change2Waiting() {
-        tv_current_online.setText(online_number+"人在线");
+        tv_current_online.setText(String.format(getString(R.string.text_online_member_number),online_number));
         allViewDefault();
         ll_pre_speaking.setVisibility(View.VISIBLE);
-        ptt.setText("准备说话");
+        ptt.setText(R.string.text_ready_to_speak);
         ptt.setBackgroundResource(R.drawable.ptt_pre_speaking);
     }
 
     private void change2Listening() {
         String speakMemberName = MyTerminalFactory.getSDK().getGroupCallManager().getSpeakingMemberName();
-        tv_current_online.setText(online_number+"人在线");
+        tv_current_online.setText(String.format(getString(R.string.text_online_member_number),online_number));
         allViewDefault();
         if (!TextUtils.isEmpty(speakMemberName)) {
             ll_listening.setVisibility(View.VISIBLE);
             incomming_call_current_speaker.setText(speakMemberName);
         }
 //        ptt.setBackgroundResource(R.drawable.ptt_listening3);
-        ptt.setText("按住 排队");
-        ptt.setTextColor(Color.parseColor("#a9a9a9"));
+        ptt.setText(R.string.button_press_to_line_up);
+        ptt.setTextColor(getResources().getColor(R.color.darkgray));
         ptt.setBackgroundResource(R.drawable.ptt_listening);
     }
 
@@ -527,7 +528,7 @@ public class LockScreenActivity extends BaseActivity {
 
         tv_lockscreen_time.setText(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(date));
         tv_lockscreen_date.setText(new SimpleDateFormat("MM月dd日", Locale.getDefault()).format(date));
-        tv_lockscreen_week.setText("星期" + mWeek + "    " + mAP);
+        tv_lockscreen_week.setText(String.format(getString(R.string.text_week_content),mWeek,mAP));
 
     }
 
@@ -613,9 +614,9 @@ public class LockScreenActivity extends BaseActivity {
         ll_forbid.setVisibility(View.VISIBLE);
         //12.25
         logger.info("ptt.change2Forbid()按住排队");
-        tv_current_online.setText(online_number+"人在线");
-        ptt.setText("按住 排队");
-        ptt.setTextColor(Color.parseColor("#a9a9a9"));
+        tv_current_online.setText(String.format(getString(R.string.text_online_member_number),online_number));
+        ptt.setText(R.string.button_press_to_line_up);
+        ptt.setTextColor(getResources().getColor(R.color.darkgray));
         ptt.setBackgroundResource(R.drawable.ptt_listening);
         logger.info("主界面，ptt被禁了  isPttPress："+MyApplication.instance.isPttPress);
         ptt.setEnabled(false);

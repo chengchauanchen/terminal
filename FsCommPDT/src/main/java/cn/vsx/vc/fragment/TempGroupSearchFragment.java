@@ -102,7 +102,7 @@ public class TempGroupSearchFragment extends BaseFragment{
     public void setInterGroup(boolean interGroup) {
         isInterGroup = interGroup;
         if(tv_search_nothing != null)
-            tv_search_nothing.setText("搜索联系人");
+            tv_search_nothing.setText(R.string.text_search_contact);
         if(tempGroupSearchAdapter != null)
             tempGroupSearchAdapter.setInterGroup(isInterGroup);
     }
@@ -113,7 +113,7 @@ public class TempGroupSearchFragment extends BaseFragment{
 
     @Override
     public void initView() {
-        tv_search_nothing.setText("搜索联系人");
+        tv_search_nothing.setText(R.string.text_search_contact);
         rl_search_result.setVisibility(View.GONE);
 
         tempGroupSearchAdapter = new TempGroupSearchAdapter(context, searchMemberListExceptMe,-1);
@@ -234,14 +234,14 @@ public class TempGroupSearchFragment extends BaseFragment{
         tempGroupSearchAdapter.setFilterKeyWords(keyWord);
 
         tv_search_nothing.setVisibility(View.VISIBLE);
-        tv_search_nothing.setText("搜索联系人");
+        tv_search_nothing.setText(R.string.text_search_contact);
         rl_search_result.setVisibility(View.GONE);
         searchMemberListExceptMe.clear();
         pageIndex = 0;
         tv_search_notdata.setVisibility(View.GONE);
 
         if (TextUtils.isEmpty(keyWord)) {
-            ToastUtil.showToast(context, "搜索的内容不能为空");
+            ToastUtil.showToast(context, getString(R.string.text_search_content_can_not_empty));
         }else {
             if(!isLocal) {
                 MyTerminalFactory.getSDK().getContactsManager().searchContacts(keyWord, 1);
@@ -266,7 +266,7 @@ public class TempGroupSearchFragment extends BaseFragment{
             }
         }
         if (searchMemberListExceptMe.size() == 0) {
-            tv_search_nothing.setText("联系人不存在");
+            tv_search_nothing.setText(R.string.text_contact_is_not_exist);
             rl_search_result.setVisibility(View.GONE);
         } else {
             tv_search_nothing.setVisibility(View.GONE);
@@ -290,7 +290,7 @@ public class TempGroupSearchFragment extends BaseFragment{
                 if (pageIndex < totalPages) {//没加载完，加载数据
                     tv_search_notdata.setVisibility(View.GONE);
                     if (TextUtils.isEmpty(keyWord)) {
-                        ToastUtil.showToast(context, "搜索的内容不能为空");
+                        ToastUtil.showToast(context, getString(R.string.text_search_content_can_not_empty));
                     }else if( !isLocal ){
                         MyTerminalFactory.getSDK().getContactsManager().searchContacts(keyWord, pageIndex+1);
                     }
@@ -318,7 +318,7 @@ public class TempGroupSearchFragment extends BaseFragment{
                 if (errorCode == BaseCommonCode.SUCCESS_CODE) {//请求成功
                     if (searchMemberList == null || searchMemberList.size() == 0) {
                         if (searchMemberListExceptMe.size() == 0) {
-                            tv_search_nothing.setText("用户不存在");
+                            tv_search_nothing.setText(R.string.text_user_does_not_exist);
                         }
                         return;
                     }
@@ -329,7 +329,7 @@ public class TempGroupSearchFragment extends BaseFragment{
                     TempGroupSearchFragment.this.totalPages = totalPages;
 
                     if (searchMemberListExceptMe.size() == 0) {
-                        tv_search_nothing.setText("用户不存在");
+                        tv_search_nothing.setText(R.string.text_user_does_not_exist);
                         rl_search_result.setVisibility(View.GONE);
                     } else {
                         tv_search_nothing.setVisibility(View.GONE);

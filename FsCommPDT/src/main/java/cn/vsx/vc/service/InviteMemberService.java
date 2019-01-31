@@ -425,7 +425,7 @@ public class InviteMemberService extends BaseService{
     private void inviteToWatchLive(){
         logger.info("通知别人来观看的列表：" + mContactAdapter.getSelectMember());
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
-            ToastUtil.showToast(MyApplication.instance, "没有图像推送权限");
+            ToastUtil.showToast(MyApplication.instance, getString(R.string.no_push_authority));
             return;
         }
         if(!mContactAdapter.getSelectMember().isEmpty()){

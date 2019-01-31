@@ -6,5 +6,5 @@
 
     <!-- 矩形的圆角半径 -->
     <corners
-       android:radius="10dp" />
+       android:radius="@dimen/dp_10" />
 </shape>

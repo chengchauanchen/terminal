@@ -14,9 +14,9 @@
             android:id="@+id/ll_select_member"
             android:visibility="gone"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="@dimen/dp_50"
             android:orientation="horizontal"
-            android:paddingBottom="5dp">
+            android:paddingBottom="@dimen/dp_5">
             <HorizontalScrollView
                 android:layout_gravity="center"
                 android:id="@+id/horizonMenu"
@@ -36,7 +36,7 @@
                     android:text=""
                     android:textColor="@color/setting_text_gray"
                     android:layout_marginRight="@dimen/x15"
-                    android:textSize="18dp" />
+                    android:textSize="@dimen/dp_18" />
             </HorizontalScrollView>
 
             <TextView
@@ -44,18 +44,18 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginLeft="@dimen/x5"
-                android:text="已选中"
+                android:text="@string/text_selected"
                 android:textColor="@color/about_text_gray"/>
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="46dp"
+            android:layout_height="@dimen/dp_46"
             android:gravity="center_vertical"
             android:orientation="horizontal"
-            android:paddingLeft="18dp"
-            android:paddingRight="10dp">
+            android:paddingLeft="@dimen/dp_18"
+            android:paddingRight="@dimen/dp_10">
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/catalog_recyclerview"
@@ -64,17 +64,17 @@
                 android:layout_weight="1" />
             <ImageView
                 android:id="@+id/iv_search"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginLeft="10dp"
-                android:padding="16dp"
+                android:layout_width="@dimen/dp_50"
+                android:layout_height="@dimen/dp_50"
+                android:layout_marginLeft="@dimen/dp_10"
+                android:padding="@dimen/dp_16"
                 android:src="@drawable/search" />
 
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="0.5dp"
+            android:layout_height="@dimen/dp_half_one"
             android:background="@color/diver_bg" />
 
         <android.support.v4.widget.SwipeRefreshLayout
@@ -89,7 +89,6 @@
         </android.support.v4.widget.SwipeRefreshLayout>
 
     </LinearLayout>
-
 
     <FrameLayout
         android:id="@+id/fl_fragment_container_temp_group_member"

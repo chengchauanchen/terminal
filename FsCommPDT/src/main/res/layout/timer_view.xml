@@ -8,7 +8,7 @@
         android:id="@+id/timer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="#FF0000"
+        android:textColor="@color/red"
         android:text="01:00"/>
     
 </LinearLayout>

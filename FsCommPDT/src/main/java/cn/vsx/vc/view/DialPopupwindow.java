@@ -117,7 +117,7 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                 }
                 int callId = Integer.parseInt(inputString);
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                    ToastUtil.showToast(context,"没有个呼权限");
+                    ToastUtil.showToast(context,context.getString(R.string.text_has_no_personal_call_authority));
                     dismiss();
                     return;
                 }

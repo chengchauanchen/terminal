@@ -94,7 +94,7 @@ public class BleActivity extends BaseActivity{
                     mHandler.postDelayed(scanDevice,2000);
                 }else{
                     switch_ble.initToggleState(false);
-                    ToastUtil.showToast(BleActivity.this,"请打开蓝牙的权限");
+                    ToastUtil.showToast(BleActivity.this,getString(R.string.text_please_open_bluetooth_privileges));
                 }
             }else{
                 //关闭蓝牙
@@ -117,7 +117,7 @@ public class BleActivity extends BaseActivity{
     @Override
     public void initData(){
         if(!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
-            ToastUtil.showToast(this, "该设备不支持Ble");
+            ToastUtil.showToast(this, getString(R.string.text_the_device_does_not_support_ble));
         }
         //Android6.0以上连接蓝牙需要获得位置权限
         if(Build.VERSION.SDK_INT >= 23){
@@ -129,7 +129,7 @@ public class BleActivity extends BaseActivity{
         mBluetoothAdapter = bluetoothManager.getAdapter();
         // 检查设备上是否支持蓝牙
         if(mBluetoothAdapter == null){
-            ToastUtil.showToast(this, "没有发现本机Ble设备");
+            ToastUtil.showToast(this, getString(R.string.text_no_local_ble_device_was_found));
             return;
         }
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
@@ -220,7 +220,7 @@ public class BleActivity extends BaseActivity{
         if(mBluetoothAdapter.isEnabled()){
             mBluetoothLeService.connect(device.getBluetoothDevice().getAddress());
         }else {
-            ToastUtil.showToast(this,"请打开蓝牙");
+            ToastUtil.showToast(this,getString(R.string.text_please_turn_on_bluetooth));
         }
     }
 
@@ -247,7 +247,7 @@ public class BleActivity extends BaseActivity{
         @Override
         public void onServiceDisconnected(ComponentName componentName){
             mBluetoothLeService = null;
-            Toast.makeText(BleActivity.this, "蓝牙服务断开", Toast.LENGTH_SHORT).show();
+            ToastUtil.showToast(BleActivity.this,getString(R.string.text_bluetooth_service_disconnection));
         }
     };
 
@@ -339,7 +339,7 @@ public class BleActivity extends BaseActivity{
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
             //搜索设备
             if(mLeDeviceListAdapter.getCount() == 0){
-                ToastUtil.showToast(BleActivity.this, "没有搜索到蓝牙设备");
+                ToastUtil.showToast(BleActivity.this, getString(R.string.text_no_bluetooth_device_was_found));
             }
         }
     };
@@ -390,7 +390,7 @@ public class BleActivity extends BaseActivity{
                     }
                 } else {
                     logger.info("拒绝定位服务的申请");
-                    ToastUtil.showToast(this, "位置信息权限未打开，蓝牙搜索功能将不能使用。");
+                    ToastUtil.showToast(this, getString(R.string.text_location_not_open_bluetooth_is_unenabled));
                 }
                 return;
             }

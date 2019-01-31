@@ -9,13 +9,13 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="150dp">
+        android:layout_height="@dimen/dp_150">
 
         <ImageView
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="@dimen/dp_30"
             android:background="@drawable/new_logo_icon" />
 
         <TextView
@@ -23,22 +23,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|bottom"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="@dimen/dp_20"
             android:textColor="@color/about_text_gray"
-            android:textSize="20sp" />
+            android:textSize="@dimen/sp_20" />
     </FrameLayout>
-
-   <!-- <TextView
-        android:id="@+id/notice"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/y30"
-        android:layout_marginTop="@dimen/y1"
-        android:background="@color/about_item_background"
-        android:gravity="center_vertical"
-        android:paddingLeft="@dimen/x30"
-        android:text="系统通知"
-        android:textColor="@color/about_text_black"
-        android:textSize="17sp" /> -->
 
     <TextView
         android:id="@+id/help"
@@ -48,9 +36,9 @@
         android:background="@color/about_item_background"
         android:gravity="center_vertical"
         android:paddingLeft="@dimen/x30"
-        android:text="功能介绍"
+        android:text="@string/activity_about_function_introduction"
         android:textColor="@color/about_text_black"
-        android:textSize="17sp" />
+        android:textSize="@dimen/sp_17" />
 
     <TextView
         android:id="@+id/tv_update"
@@ -60,7 +48,7 @@
         android:background="@color/about_item_background"
         android:gravity="center_vertical"
         android:paddingLeft="@dimen/x30"
-        android:text="检查新版本"
+        android:text="@string/activity_about_check_the_new_version"
         android:textColor="@color/about_text_black"
         android:textSize="17sp" />
 

@@ -141,7 +141,7 @@ public class SettingFragmentNew extends BaseFragment {
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 logger.info("锁屏显示界面权限已申请");
             }else{
-                ToastUtil.showToast(getContext(),"请打开锁屏显示界面权限，否则锁屏界面无法使用");
+                ToastUtil.showToast(getContext(),getString(R.string.text_please_open_lock_screen_permission_otherwise_lock_screen_can_not_be_used));
             }
         }
     }
@@ -282,7 +282,7 @@ public class SettingFragmentNew extends BaseFragment {
     /*** 自己组呼返回的消息 **/
     private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
         if (methodResult == 0) {
-            showViewWhenGroupCall("我正在说话");
+            showViewWhenGroupCall(getString(R.string.text_I_am_talking));
             setViewEnable(false);
         }
     });
@@ -383,7 +383,7 @@ public class SettingFragmentNew extends BaseFragment {
         dialog = new DialogUtil() {
             @Override
             public CharSequence getMessage() {
-                return "确定拨打客服电话吗?";
+                return getString(R.string.text_are_you_sure_call_customer_service);
             }
 
             @Override
@@ -405,7 +405,7 @@ public class SettingFragmentNew extends BaseFragment {
         dialog = new DialogUtil() {
             @Override
             public CharSequence getMessage() {
-                return "确定退出吗?";
+                return getString(R.string.text_text_are_you_sure_exit);
             }
 
             @Override
@@ -445,12 +445,12 @@ public class SettingFragmentNew extends BaseFragment {
     public void lockScreen () {
         final int[] item = {MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0)};
         dialog = new AlertDialog.Builder(context)
-                .setTitle("设置锁屏页面")
+                .setTitle(R.string.text_set_lock_screen)
                 .setSingleChoiceItems(new String[]{"隐藏", "显示"}, item[0], (dialog, which) -> {
                     logger.info("点击锁屏设置选项" + which);
                     item[0] = which;
                 })
-                .setPositiveButton("确定", (dialog, which) -> {
+                .setPositiveButton(getString(R.string.text_sure), (dialog, which) -> {
                     if (item[0] == 0) {
                         logger.info("点击确定按钮" + item[0]);
                         MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0);
@@ -459,7 +459,7 @@ public class SettingFragmentNew extends BaseFragment {
                         MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 1);
                     }
                 })
-                .setNegativeButton("取消", (dialog, which) -> {
+                .setNegativeButton(getString(R.string.text_cancel), (dialog, which) -> {
                     item[0] = MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0);
                     logger.info(" 点击取消按钮" + item[0]);
                 })
@@ -471,7 +471,7 @@ public class SettingFragmentNew extends BaseFragment {
         dialog = new DialogUtil() {
             @Override
             public CharSequence getMessage() {
-                return "确定上传日志?";
+                return getString(R.string.text_are_you_sure_upload_log);
             }
 
             @Override
@@ -488,7 +488,7 @@ public class SettingFragmentNew extends BaseFragment {
                             MyTerminalFactory.getSDK().getLogFileManager().uploadAllLogFile();
                             currentTime = System.currentTimeMillis();
                         }else {
-                            ToastUtil.showToast("您已经上传过日志了，请稍后再上传",getActivity());
+                            ToastUtil.showToast(getString(R.string.text_uploaded_log_try_again_later),getActivity());
                         }
                     }
                 }, 0);
@@ -513,17 +513,17 @@ public class SettingFragmentNew extends BaseFragment {
         @Override
         public void onClick(View v) {
             dialog = new AlertDialog.Builder(context)
-                    .setTitle("设置视频清晰度")
+                    .setTitle(R.string.text_set_video_definition)
                     .setSingleChoiceItems(new String[]{"超清 1920x1080", "高清 1280x720", "标清 640x480", "流畅 320x240"}, item, (dialog, which) -> {
                         item = which;
                         logger.info("点击视频清晰度设置选项" + which);
                     })
-                    .setPositiveButton("确定", (dialog, which) -> {
+                    .setPositiveButton(getString(R.string.text_sure), (dialog, which) -> {
                         logger.info("点击确定按钮" + item);
 
                         MyTerminalFactory.getSDK().putParam(Params.VIDEO_RESOLUTION, item);
                     })
-                    .setNegativeButton("取消", (dialog, which) -> {
+                    .setNegativeButton(getString(R.string.text_cancel), (dialog, which) -> {
                         item = MyTerminalFactory.getSDK().getParam(Params.VIDEO_RESOLUTION, 2);
                         logger.info(" 点击取消按钮" + item);
                     })
@@ -535,9 +535,9 @@ public class SettingFragmentNew extends BaseFragment {
     /**日志上传是否成功的消息*/
     private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = resultCode -> mHandler.post(() -> {
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-            ToastUtil.toast(getActivity(), "日志上传成功，感谢您的支持！");
+            ToastUtil.toast(getActivity(), getString(R.string.text_log_upload_success_thanks));
         } else {
-            ToastUtil.showToast( "日志上传失败，请稍后重试！", getActivity());
+            ToastUtil.showToast( getString(R.string.text_log_upload_fail_try_again_later), getActivity());
         }
     });
 
@@ -585,7 +585,7 @@ public class SettingFragmentNew extends BaseFragment {
                 String deviceName = intent.getStringExtra("deviceName");
                 tv_ble_name.setText(deviceName);
             }else if(BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)){
-                tv_ble_name.setText("关闭");
+                tv_ble_name.setText(R.string.text_close);
             }
         }
     };

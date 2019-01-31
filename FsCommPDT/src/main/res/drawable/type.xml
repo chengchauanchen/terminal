@@ -6,7 +6,7 @@
         </shape>
     </item>
 
-    <item android:top="1dp" android:left="1dp" android:right="1dp" android:bottom="1dp">
+    <item android:top="@dimen/dp_1" android:left="@dimen/dp_1" android:right="@dimen/dp_1" android:bottom="@dimen/dp_1">
         <shape>
             <solid android:color="@color/regist_item_bg" />
         </shape>

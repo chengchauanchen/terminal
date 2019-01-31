@@ -85,7 +85,7 @@ public class HandPlatformSimpleExpandableListViewAdapter extends BaseExpandableL
             if (b.memberList != null)
                 memberNumber += b.memberList.size();
         }
-        viewHolderShiJu.shoutai_group_size.setText("("+memberNumber+")");
+        viewHolderShiJu.shoutai_group_size.setText(String.format(activity.getString(R.string.text_group_size),memberNumber));
         if (isExpanded) {
             viewHolderShiJu.is_shoutai_shiju.setBackgroundResource(R.drawable.new_folder_open);
 

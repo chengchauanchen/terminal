@@ -91,7 +91,7 @@ public class UserInfoActivity extends BaseActivity {
 
     @Override
     public void initView() {
-        barTitle.setText("个人信息");
+        barTitle.setText(R.string.text_personal_information);
         rightBtn.setVisibility(View.GONE);
         btnOk.setVisibility(View.GONE);
     }
@@ -153,7 +153,7 @@ public class UserInfoActivity extends BaseActivity {
 
             }else if (picture.getTitle().equals("个呼")){
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                    ToastUtil.showToast(UserInfoActivity.this,"没有个呼功能权限");
+                    ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_no_call_permission));
                 }else {
                     activeIndividualCall();
                 }
@@ -172,7 +172,7 @@ public class UserInfoActivity extends BaseActivity {
                                 intent.putExtra("member", member);
                                 UserInfoActivity.this.startActivity(intent);
                             } else {
-                                ToastUtil.showToast(UserInfoActivity.this, "voip注册失败，请检查服务器配置");
+                                ToastUtil.showToast(UserInfoActivity.this, getString(R.string.text_voip_regist_fail_please_check_server_configure));
                             }
                         } else if (position == TELEPHONE) {//普通电话
 
@@ -184,18 +184,18 @@ public class UserInfoActivity extends BaseActivity {
                     builder.create();
                     builder.show();
                 } else {
-                    ToastUtil.showToast(UserInfoActivity.this, "暂无该用户电话号码");
+                    ToastUtil.showToast(UserInfoActivity.this, getString(R.string.text_has_no_member_phone_number));
                 }
             }else if (picture.getTitle().equals("图像回传")){
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
-                    ToastUtil.showToast(UserInfoActivity.this,"没有图像请求功能权限");
+                    ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_has_no_image_request_authority));
                 }else {
                     pullVideo();
                 }
 
             }else if (picture.getTitle().equals("图像上报")){
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
-                    ToastUtil.showToast(UserInfoActivity.this,"没有图像上报功能权限");
+                    ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_has_no_image_report_authority));
                 }else {
                     pushVideo();
                 }
@@ -248,11 +248,11 @@ public class UserInfoActivity extends BaseActivity {
             if(member!=null){
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
             }else {
-                ToastUtil.showToast(UserInfoActivity.this,"获取人员信息失败");
+                ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_get_personal_info_fail));
             }
 
         } else {
-            ToastUtil.showToast(this, "网络连接异常，请检查网络！");
+            ToastUtil.showToast(this, getString(R.string.text_network_connection_abnormal_please_check_the_network));
         }
     }
 
@@ -267,18 +267,18 @@ public class UserInfoActivity extends BaseActivity {
 
     private void setNoVideo(){
         mPictures.clear();
-        mPictures.add(new Picture("发消息",R.drawable.ic_message));
-        mPictures.add(new Picture("电话",R.drawable.ic_mobile));
-        mPictures.add(new Picture("个呼",R.drawable.ic_call));
+        mPictures.add(new Picture(getString(R.string.text_send_message),R.drawable.ic_message));
+        mPictures.add(new Picture(getString(R.string.text_phone),R.drawable.ic_mobile));
+        mPictures.add(new Picture(getString(R.string.text_personal_call),R.drawable.ic_call));
     }
 
     private void setHasVideo(){
         mPictures.clear();
-        mPictures.add(new Picture("发消息",R.drawable.ic_message));
-        mPictures.add(new Picture("个呼",R.drawable.ic_call));
-        mPictures.add(new Picture("电话",R.drawable.ic_mobile));
-        mPictures.add(new Picture("图像上报",R.drawable.ic_picture_up));
-        mPictures.add(new Picture("图像回传",R.drawable.ic_picture_back));
+        mPictures.add(new Picture(getString(R.string.text_send_message),R.drawable.ic_message));
+        mPictures.add(new Picture(getString(R.string.text_personal_call),R.drawable.ic_call));
+        mPictures.add(new Picture(getString(R.string.text_phone),R.drawable.ic_mobile));
+        mPictures.add(new Picture(getString(R.string.text_image_report),R.drawable.ic_picture_up));
+        mPictures.add(new Picture(getString(R.string.image_request),R.drawable.ic_picture_back));
     }
     private Handler myHandler = new Handler();
     /**更新所有成员列表*/

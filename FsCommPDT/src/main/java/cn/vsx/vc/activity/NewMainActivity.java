@@ -459,7 +459,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                         emergencyGroup = DataUtil.getGroupByGroupNo(emergencyGroupId);
                         //弹出紧急组呼的呼叫界面
                         ll_emergency_prompt.setVisibility(View.VISIBLE);
-                        tv_emergency_member.setText("正在紧急呼叫组：" + emergencyGroup.name + " ··· ···");
+                        tv_emergency_member.setText(String.format(getString(R.string.text_in_emergency_group_now),emergencyGroup.name));
                         ICTV_emergency_time.onStart();
                         if (timerTask != null) {
                             timerTask.cancel();
@@ -476,12 +476,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                         }
                     }
                 } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
-                    myHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            ToastUtil.showToast(NewMainActivity.this, "当前组是只听组，不能发起组呼");
-                        }
-                    });
+                    myHandler.post(() -> ToastUtil.showToast(NewMainActivity.this, getString(R.string.text_current_group_only_listener_can_not_speak)));
                 } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
                 } else {
                 }
@@ -590,7 +585,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
                                     //弹出个呼的呼叫请求界面
                                     ll_emergency_prompt.setVisibility(View.VISIBLE);
-                                    tv_emergency_member.setText("正在紧急呼叫：" + calleeMember.getName() + " ··· ···");
+                                    tv_emergency_member.setText(String.format(getString(R.string.text_in_emergency_call_now),calleeMember.getName()));
                                     ICTV_emergency_time.setVisibility(View.GONE);
 
                                     if (timerTask != null) {
@@ -603,10 +598,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                             }
                         }
                     } else {
-                        cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this, "手势不匹配");
+                        cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this, getString(R.string.text_gesture_mismatch));
                     }
                 } else {
-                    cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this, "手势库加载失败");
+                    cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this, getString(R.string.text_load_gesture_lib_fail));
                 }
             }
         }
@@ -954,7 +949,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         if(!checkFloatPermission(this)){
             Log.e("NewMainActivity", "未开启悬浮窗权限");
             // SYSTEM_ALERT_WINDOW permission not granted...
-            ToastUtil.showToast(NewMainActivity.this, "请打开悬浮窗权限，否则私密呼叫和图像功能无法使用！");
+            ToastUtil.showToast(NewMainActivity.this, getString(R.string.open_overlay_permisson));
             exitApp();
             return;
         }
@@ -1340,7 +1335,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (!Settings.canDrawOverlays(this)) {
                     // SYSTEM_ALERT_WINDOW permission not granted...
-                    cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this, "请打开悬浮窗权限，否则图像上报功能无法使用！");
+                    cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this, getString(R.string.open_overlay_permisson));
                 } else {
                     // 创建直播服务
                     startLiveService();
@@ -1394,11 +1389,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
     private void permissionDenied(int requestCode){
         if(requestCode == CheckMyPermission.REQUEST_RECORD_AUDIO){
-            cn.vsx.vc.utils.ToastUtil.showToast(this, "录制音频权限未打开，语音功能将不能使用。");
+            cn.vsx.vc.utils.ToastUtil.showToast(this, getString(R.string.text_audio_frequency_is_not_open_audio_is_not_used));
         }else if(requestCode ==CheckMyPermission.REQUEST_CAMERA){
-            cn.vsx.vc.utils.ToastUtil.showToast(this, "相机未打开，图像上报功能将不能使用。");
+            cn.vsx.vc.utils.ToastUtil.showToast(this, getString(R.string.text_camera_not_open_audio_is_not_used));
         }else if(requestCode ==CheckMyPermission.REQUEST_LOCATION){
-            cn.vsx.vc.utils.ToastUtil.showToast(this, "位置信息权限未打开，定位功能将不能使用。");
+            cn.vsx.vc.utils.ToastUtil.showToast(this, getString(R.string.text_location_not_open_locat_is_not_used));
         }
         //        judgePermission();
     }
@@ -1577,7 +1572,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 secondTime = System.currentTimeMillis();
                 if (secondTime - firstTime > 2000) {
                     // 第一次点击
-                    cn.vsx.vc.utils.ToastUtil.showToast(this, "再点一次退出");
+                    cn.vsx.vc.utils.ToastUtil.showToast(this, getString(R.string.text_click_again_to_exit));
                     isPressedBackOnce = true;
                     firstTime = System.currentTimeMillis();
                 } else {
@@ -1592,7 +1587,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 }
             } else {
                 // 第一次点击
-                cn.vsx.vc.utils.ToastUtil.showToast(this, "再点一次退出");
+                cn.vsx.vc.utils.ToastUtil.showToast(this, getString(R.string.text_click_again_to_exit));
                 isPressedBackOnce = true;
                 firstTime = System.currentTimeMillis();
             }

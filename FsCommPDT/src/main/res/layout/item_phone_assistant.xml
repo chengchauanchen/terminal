@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:android_custom="http://schemas.android.com/tools"
-    android:orientation="vertical"
-    android:descendantFocusability="blocksDescendants"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:descendantFocusability="blocksDescendants"
+    android:orientation="vertical">
+
     <LinearLayout
         android:id="@+id/ll_call_record_item"
         android:layout_width="match_parent"
@@ -14,10 +15,10 @@
 
         <ImageView
             android:id="@+id/icon"
-            android:visibility="gone"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:scaleType="centerCrop"/>
+            android:layout_width="@dimen/dp_10"
+            android:layout_height="@dimen/dp_10"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/shoutai_user_logo"
@@ -30,12 +31,14 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/x15"
-            android:orientation="vertical"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
+
                 <TextView
                     android:id="@+id/member_name"
                     android:layout_width="wrap_content"
@@ -49,8 +52,8 @@
                     android:id="@+id/call_records"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_15"
                     android:text="呼叫10秒"
-                    android:layout_marginLeft="15dp"
                     android:textColor="@color/group_text_gray_two"
                     android:textSize="@dimen/x11"
                     android:textStyle="normal" />
@@ -60,18 +63,20 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center">
+
                 <ImageView
                     android:layout_width="@dimen/x10"
                     android:layout_height="@dimen/x10"
                     android:padding="@dimen/x1"
-                    android:src="@drawable/outgoing"/>
+                    android:src="@drawable/outgoing" />
+
                 <TextView
                     android:id="@+id/phone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_5"
                     android:text="13388564859"
                     android:textColor="@color/group_text_gray_two"
-                    android:layout_marginLeft="5dp"
                     android:textSize="@dimen/x11"
                     android:textStyle="normal" />
 
@@ -79,11 +84,11 @@
                     android:id="@+id/time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_5"
+                    android:text="昨天17:30"
                     android:textColor="@color/group_text_gray_two"
-                    android:layout_marginLeft="5dp"
                     android:textSize="@dimen/x11"
-                    android:textStyle="normal"
-                    android:text="昨天17:30"/>
+                    android:textStyle="normal" />
             </LinearLayout>
 
 
@@ -92,31 +97,33 @@
         <View
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
+
             <cn.vsx.vc.view.RoundProgressBar
                 android:id="@+id/play_record"
                 android:layout_width="@dimen/x25"
                 android:layout_height="@dimen/x25"
-                android:layout_centerVertical="true"
                 android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
                 android:layout_marginRight="@dimen/x12"
-                android_custom:roundColor="#DADADA"
-                android_custom:roundProgressColor="#0091FF"
-                android_custom:roundWidth="@dimen/s_2dp"
-                />
+                android_custom:roundColor="@color/white_da"
+                android_custom:roundProgressColor="@color/regist_add_host_name"
+                android_custom:roundWidth="@dimen/s_2dp" />
+
             <ImageView
                 android:id="@+id/status"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
                 android:layout_width="@dimen/x10"
                 android:layout_height="@dimen/x10"
-                android:src="@drawable/download"/>
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:src="@drawable/download" />
         </RelativeLayout>
 
     </LinearLayout>
+
     <include layout="@layout/universal_line" />
 </LinearLayout>

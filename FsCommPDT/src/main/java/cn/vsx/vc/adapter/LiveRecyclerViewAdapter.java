@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -102,9 +103,9 @@ public class LiveRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
                 notifyDataSetChanged();
             });
             if(member.isChecked()){
-                userViewHolder.iv_select.setSelected(true);
+                userViewHolder.iv_select.setChecked(true);
             }else{
-                userViewHolder.iv_select.setSelected(false);
+                userViewHolder.iv_select.setChecked(false);
             }
         }
     }
@@ -152,7 +153,7 @@ public class LiveRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         @Bind(R.id.shoutai_tv_member_id)
         TextView tvId;
         @Bind(R.id.iv_select)
-        ImageView iv_select;
+        CheckBox iv_select;
 
         public UserViewHolder(View itemView){
             super(itemView);

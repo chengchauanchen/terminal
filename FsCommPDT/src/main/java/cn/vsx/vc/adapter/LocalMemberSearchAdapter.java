@@ -174,7 +174,7 @@ public class LocalMemberSearchAdapter extends BaseAdapter {
                 ItemAdapter adapter = new ItemAdapter(context,ItemAdapter.iniDatas());
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 //设置标题
-                builder.setTitle("拨打电话");
+                builder.setTitle(context.getString(R.string.text_call_up));
                 builder.setAdapter(adapter, (dialogInterface, position1) -> {
                     if(position1 ==VOIP){//voip电话
                         if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
@@ -182,7 +182,7 @@ public class LocalMemberSearchAdapter extends BaseAdapter {
                             intent.putExtra("member",searchContactsBean);
                             context.startActivity(intent);
                         }else {
-                            ToastUtil.showToast(context,"voip注册失败，请检查服务器配置");
+                            ToastUtil.showToast(context,context.getString(R.string.text_voip_regist_fail_please_check_server_configure));
                         }
                     }
                     else if(position1 ==TELEPHONE){//普通电话
@@ -195,7 +195,7 @@ public class LocalMemberSearchAdapter extends BaseAdapter {
                 builder.create();
                 builder.show();
             }else {
-                ToastUtil.showToast(context,"暂无该用户电话号码");
+                ToastUtil.showToast(context,context.getString(R.string.text_has_no_member_phone_number));
             }
         });
         holder.ivUserLogo.setOnClickListener(view -> {

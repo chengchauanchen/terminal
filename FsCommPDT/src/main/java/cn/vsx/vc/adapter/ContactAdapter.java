@@ -98,7 +98,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                 intent.putExtra("member",member);
                                 mContext.startActivity(intent);
                             }else {
-                                ToastUtil.showToast(mContext,"voip注册失败，请检查服务器配置");
+                                ToastUtil.showToast(mContext,mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
                             }
                         }
                         else if(position1 ==TELEPHONE){//普通电话
@@ -111,14 +111,14 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     builder.create();
                     builder.show();
                 }else {
-                    ToastUtil.showToast(mContext,"暂无该用户电话号码");
+                    ToastUtil.showToast(mContext,mContext.getString(R.string.text_has_no_member_phone_number));
                 }
             });
             userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName()));
 
             userViewHolder.llCallTo.setOnClickListener(view -> {
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                    ToastUtil.showToast(mContext,"没有个呼功能权限");
+                    ToastUtil.showToast(mContext,mContext.getString(R.string.text_no_call_permission));
                 }else {
                     activeIndividualCall(member);
                 }
@@ -175,7 +175,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (network) {
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
         } else {
-            ToastUtil.showToast(mContext, "网络连接异常，请检查网络！");
+            ToastUtil.showToast(mContext, mContext.getString(R.string.text_network_connection_abnormal_please_check_the_network));
         }
     }
 

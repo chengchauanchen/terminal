@@ -2,9 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
     android:background="@color/itemblue"
-    >
+    android:orientation="vertical">
 
     <LinearLayout
         android:id="@+id/catagory"
@@ -19,7 +18,7 @@
             android:gravity="center_vertical"
             android:text="A"
             android:textColor="@color/group_person_text_gray"
-            android:textSize="12sp" />
+            android:textSize="@dimen/sp_12" />
     </LinearLayout>
 
     <LinearLayout
@@ -40,20 +39,20 @@
             android:layout_width="wrap_content"
             android:layout_height="@dimen/y30"
             android:layout_marginLeft="@dimen/x12"
-            android:orientation="vertical"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/tv_member_name"
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:text="张星星"
-                android:maxLength="12"
                 android:ellipsize="end"
-                android:textColor="@color/setting_text_gray"
-                android:textSize="14sp"
                 android:gravity="center_vertical"
+                android:maxLength="12"
+                android:text="张星星"
+                android:textColor="@color/setting_text_gray"
+                android:textSize="@dimen/sp_14"
                 android:textStyle="normal" />
 
             <TextView
@@ -61,43 +60,44 @@
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_weight="1"
+                android:gravity="center_vertical"
                 android:text="ID:123456"
                 android:textColor="@color/setting_text_gray_two"
-                android:textSize="12sp"
-                android:gravity="center_vertical"
+                android:textSize="@dimen/sp_12"
                 android:textStyle="normal" />
         </LinearLayout>
 
         <Space
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
         <LinearLayout
-        android:id="@+id/shoutai_dial_to"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:gravity="center"
-        android:layout_marginRight="10dp">
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:background="@drawable/tel"/>
+            android:id="@+id/shoutai_dial_to"
+            android:layout_width="@dimen/dp_45"
+            android:layout_height="@dimen/dp_45"
+            android:layout_marginRight="@dimen/dp_10"
+            android:gravity="center">
 
-    </LinearLayout>
+            <ImageView
+                android:layout_width="@dimen/dp_30"
+                android:layout_height="@dimen/dp_30"
+                android:background="@drawable/tel" />
 
+        </LinearLayout>
 
 
         <LinearLayout
             android:id="@+id/message_to"
-            android:layout_width="45dp"
-            android:layout_height="45dp"
-            android:gravity="center"
-            android:layout_marginRight="10dp">
+            android:layout_width="@dimen/dp_45"
+            android:layout_height="@dimen/dp_45"
+            android:layout_marginRight="@dimen/dp_10"
+            android:gravity="center">
+
             <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="@drawable/new_message_icon"/>
+                android:layout_width="@dimen/dp_30"
+                android:layout_height="@dimen/dp_30"
+                android:background="@drawable/new_message_icon" />
 
         </LinearLayout>
 
@@ -107,38 +107,38 @@
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="12dp">
+            android:layout_marginRight="@dimen/dp_12">
 
             <LinearLayout
                 android:id="@+id/call_to"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
+                android:layout_width="@dimen/dp_45"
+                android:layout_height="@dimen/dp_45"
                 android:gravity="center">
 
                 <ImageView
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="@dimen/dp_30"
+                    android:layout_height="@dimen/dp_30"
                     android:background="@drawable/new_call_icon" />
 
             </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/select_delete"
-                android:layout_width="45dp"
-                android:layout_height="45dp"
+                android:layout_width="@dimen/dp_45"
+                android:layout_height="@dimen/dp_45"
+                android:layout_marginRight="@dimen/dp_10"
                 android:gravity="center"
-                android:visibility="gone"
-                android:layout_marginRight="10dp">
+                android:visibility="gone">
+
                 <CheckBox
-                    android:layout_gravity="center_vertical"
                     android:id="@+id/cb_selectmember"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
+                    android:layout_width="@dimen/dp_30"
+                    android:layout_height="@dimen/dp_30"
+                    android:layout_gravity="center_vertical"
                     android:layout_marginRight="@dimen/x5"
-                    android:focusable="false"
-                    android:clickable="false"
                     android:button="@drawable/checkbox"
-                    />
+                    android:clickable="false"
+                    android:focusable="false" />
 
             </LinearLayout>
 
@@ -146,18 +146,18 @@
                 android:id="@+id/me"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="我"
+                android:text="@string/text_me"
                 android:textSize="@dimen/x16"
-                android:visibility="gone"/>
+                android:visibility="gone" />
         </RelativeLayout>
 
     </LinearLayout>
+
     <View
         android:id="@+id/lay_line"
         android:layout_width="match_parent"
-        android:layout_height="0.5dp"
+        android:layout_height="@dimen/dp_half_one"
         android:background="@color/diver_bg"
         android:orientation="vertical" />
-
 
 </LinearLayout>

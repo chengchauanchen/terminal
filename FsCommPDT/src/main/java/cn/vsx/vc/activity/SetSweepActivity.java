@@ -72,7 +72,7 @@ public class SetSweepActivity extends BaseActivity {
                 break;
             case R.id.right_add:
                 if(groupSweeps.size()>=10){
-                    ToastUtil.showToast(SetSweepActivity.this,"扫描组不能超过10个");
+                    ToastUtil.showToast(SetSweepActivity.this,getString(R.string.text_sweep_group_count_out_of_bound));
                     return;
                 }
                 Intent intent = new Intent(this, ChangeGroupActivity.class);
@@ -94,9 +94,9 @@ public class SetSweepActivity extends BaseActivity {
                     groupSweeps.clear();
                     groupSweeps.addAll(scanGroups);
                     adapter.notifyDataSetChanged();
-                    ToastUtil.toast(SetSweepActivity.this,"扫描组删除成功");
+                    ToastUtil.toast(SetSweepActivity.this,getString(R.string.text_sweep_group_delete_success));
                 }else {
-                    ToastUtil.toast(SetSweepActivity.this,"删除失败,"+errorDesc);
+                    ToastUtil.toast(SetSweepActivity.this,getString(R.string.text_delete_fail)+errorDesc);
                 }
             });
 

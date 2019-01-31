@@ -362,7 +362,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     startActivityForResult(new Intent(ChatBaseActivity.this,CameraActivity.class),CODE_CAMERA_REQUEST);
                 } else {
-                    ToastUtil.showToast(this, "需要相机的权限");
+                    ToastUtil.showToast(this, getString(R.string.text_need_camera_privileges));
                 }
             }    break;
         }
@@ -1035,7 +1035,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     sendLocation(longitude, latitude, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
                 }else {//获取位置失败
                     sendLocation(longitude, latitude, TEMP_TOKEN_ID, false, true);
-                    ToastUtil.showToast(ChatBaseActivity.this, "GPS定位失败！");
+                    ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_gps_positioning_failed));
                 }
                 MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveGetGPSLocationHandler);
             });
@@ -1095,9 +1095,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
                         && terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID) == temporaryAdapter.transponMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
                     temporaryAdapter.transponMessage = null;
                     if (terminalMessage.resultCode == 0)
-                        ToastUtil.showToast(ChatBaseActivity.this, "转发成功");
+                        ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_forward_success));
                     else
-                        ToastUtil.showToast(ChatBaseActivity.this, "转发失败");
+                        ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_forward_fail));
                     return;
                 }
 
@@ -1291,7 +1291,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     //http://192.168.1.96:7007/mapLocationl.html?lng=117.68&lat=39.456
                     String url = TerminalFactory.getSDK().getParam(Params.LOCATION_URL,"")+"?lng=" + longitude + "&lat=" + altitude;
                     if(TextUtils.isEmpty(TerminalFactory.getSDK().getParam(Params.LOCATION_URL,""))){
-                        ToastUtil.showToast(ChatBaseActivity.this,"请去管理后台配置定位url");
+                        ToastUtil.showToast(ChatBaseActivity.this,getString(R.string.text_please_go_to_the_management_background_configuration_location_url));
                     }else {
                         LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
                         locationFragment.setFragment_contener(fl_fragment_container);
@@ -1301,7 +1301,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     setViewVisibility(fl_fragment_container, View.VISIBLE);
                     String url = TerminalFactory.getSDK().getParam(Params.LOCATION_URL,"");
                     if(TextUtils.isEmpty(TerminalFactory.getSDK().getParam(Params.LOCATION_URL,""))){
-                        ToastUtil.showToast(ChatBaseActivity.this,"请去管理后台配置定位url");
+                        ToastUtil.showToast(ChatBaseActivity.this,getString(R.string.text_please_go_to_the_management_background_configuration_location_url));
                     }else {
                         LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
                         locationFragment.setFragment_contener(fl_fragment_container);
@@ -1394,7 +1394,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     String content = com.zectec.imageandfileselector.utils.FileUtil.getStringFromFile(file);
                     cmb.setText(content);
                 }
-                ToastUtil.showToast("复制成功",ChatBaseActivity.this);
+                ToastUtil.showToast(getString(R.string.text_replication_success),ChatBaseActivity.this);
             });
         }
     };
@@ -1465,7 +1465,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         // 下拉刷新操作
         if (chatMessageList.size() <= 0) {
             refreshing = false;
-            stopRefreshAndToast("没有更多消息了！");
+            stopRefreshAndToast(getString(R.string.text_no_more_data));
             return;
         }
         List<TerminalMessage> groupMessageRecord1 = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupMessageRecord(
@@ -1479,7 +1479,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
             groupMessageRecord2.addAll(chatMessageList);
             stopRefresh(groupMessageRecord1,groupMessageRecord2,groupMessageRecord1.size());
         }else {
-            stopRefreshAndToast("没有更多消息了！");
+            stopRefreshAndToast(getString(R.string.text_no_more_data));
         }
         refreshing = false;
     }
@@ -1720,7 +1720,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         public void onPTTVolumeBtnStatusChange(GroupCallSpeakState groupCallSpeakState) {
             if (groupCallSpeakState == IDLE) {
                 if (!CheckMyPermission.selfPermissionGranted(ChatBaseActivity.this, Manifest.permission.RECORD_AUDIO)){
-                    ToastUtil.showToast(ChatBaseActivity.this, "录制音频权限未打开，语音功能将不能使用。");
+                    ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_audio_frequency_is_not_open_audio_is_not_used));
                     logger.error("录制音频权限未打开，语音功能将不能使用。");
                     return;
                 }
@@ -1784,7 +1784,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     && terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID)
                     && terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID) == temporaryAdapter.transponMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
                 temporaryAdapter.transponMessage = null;
-                ToastUtil.showToast(ChatBaseActivity.this, "转发失败");
+                ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_forward_fail));
                 return;
             }
             int tokenId =  terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID);

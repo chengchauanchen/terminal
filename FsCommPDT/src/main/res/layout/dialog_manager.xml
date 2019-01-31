@@ -1,15 +1,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:orientation="vertical"
-                android:padding="20dp"
-    >
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="@dimen/dp_20">
 
     <RelativeLayout
         android:id="@+id/dm_rl_bg"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="@dimen/dp_150"
+        android:layout_height="@dimen/dp_150"
         android:background="@drawable/yuyin_voice_1">
 
         <TextView
@@ -19,20 +18,20 @@
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="12dp"
+            android:paddingLeft="@dimen/dp_8"
+            android:paddingTop="@dimen/dp_4"
+            android:paddingRight="@dimen/dp_8"
+            android:paddingBottom="@dimen/dp_4"
             android:text="@string/up_for_cancel"
-            android:textColor="#ffffffff"
-            android:textSize="14dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"/>
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_14" />
     </RelativeLayout>
 
 
     <RelativeLayout
         android:id="@+id/dm_rl_bg2"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
+        android:layout_width="@dimen/dp_150"
+        android:layout_height="@dimen/dp_150"
         android:background="@drawable/yuyin_cancel"
         android:visibility="gone">
 
@@ -42,14 +41,14 @@
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="@dimen/dp_12"
+            android:paddingLeft="@dimen/dp_8"
+            android:paddingTop="@dimen/dp_4"
+            android:paddingRight="@dimen/dp_8"
+            android:paddingBottom="@dimen/dp_4"
             android:text="@string/up_for_cancel"
-            android:textColor="#ffffffff"
-            android:textSize="14dp"
-            android:paddingLeft="8dp"
-            android:paddingRight="8dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"/>
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_14" />
     </RelativeLayout>
 
 </RelativeLayout>

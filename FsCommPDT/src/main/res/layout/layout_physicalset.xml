@@ -7,16 +7,16 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/y29"
-        android:layout_marginTop="0.5dp"
+        android:layout_marginTop="@dimen/dp_half_one"
         android:background="@color/itemblue">
 
         <TextView
             android:id="@+id/tv_pttphysicalset"
-            android:text="PTT快捷键"
+            style="@style/setting_text_style_left"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            style="@style/setting_text_style_left" />
+            android:text="@string/text_ptt_shortcut_keys" />
 
         <cn.vsx.vc.view.MToggleButton
             android:id="@+id/btn_pttphysicalset"
@@ -24,10 +24,10 @@
     </RelativeLayout>
 
     <LinearLayout
-        android:layout_marginTop="0.5dp"
         android:id="@+id/ll_voice"
         android:layout_width="match_parent"
         android:layout_height="@dimen/y62"
+        android:layout_marginTop="@dimen/dp_half_one"
         android:orientation="vertical">
 
         <RelativeLayout
@@ -37,35 +37,35 @@
 
             <TextView
                 android:id="@+id/up_ptt"
+                style="@style/setting_text_style_left"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="上音量键"
                 android:layout_centerVertical="true"
-                style="@style/setting_text_style_left"/>
+                android:text="@string/text_up_volume_key" />
 
             <cn.vsx.vc.view.MToggleButton
                 android:id="@+id/ppt_button_add"
-                style="@style/setting_MToggleButton"/>
+                style="@style/setting_MToggleButton" />
         </RelativeLayout>
 
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/y29"
-            android:layout_marginTop="0.5dp"
+            android:layout_marginTop="@dimen/dp_half_one"
             android:background="@color/itemblue">
 
             <TextView
                 android:id="@+id/down_ptt"
+                style="@style/setting_text_style_left"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
-                android:text="下音量键"
-                style="@style/setting_text_style_left" />
+                android:text="@string/text_lower_volume_key" />
 
             <cn.vsx.vc.view.MToggleButton
                 android:id="@+id/ppt_button_cut"
-                style="@style/setting_MToggleButton"/>
+                style="@style/setting_MToggleButton" />
         </RelativeLayout>
 
     </LinearLayout>

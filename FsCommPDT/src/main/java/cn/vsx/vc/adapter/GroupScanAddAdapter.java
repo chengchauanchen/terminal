@@ -19,6 +19,7 @@ import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.GroupItemBean;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 import static cn.vsx.vc.utils.Constants.TYPE_GROUP;
@@ -84,7 +85,7 @@ public class GroupScanAddAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 public void onClick(View view) {
                     if(cTime-lastTime>MIN_CLICK_TIME){
                         if(MyTerminalFactory.getSDK().getConfigManager().getScanGroups().size()>=10){
-                            Toast.makeText(mContext,"已超出扫描组最大添加数量",Toast.LENGTH_SHORT).show();
+                            ToastUtil.showToast(mContext,mContext.getString(R.string.text_add_scan_group_out_of_max_count));
                             return;
                         }
                         memberIds.clear();

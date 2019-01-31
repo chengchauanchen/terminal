@@ -190,12 +190,12 @@ public class LocalMemberSearchFragment extends BaseFragment{
         personContactsAdapter.setFilterKeyWords(keyWord);
 
         tv_search_nothing.setVisibility(View.VISIBLE);
-        tv_search_nothing.setText("搜索联系人");
+        tv_search_nothing.setText(R.string.text_search_contact);
         rl_search_result.setVisibility(View.GONE);
         searchList.clear();
 
         if (TextUtils.isEmpty(keyWord)) {
-            ToastUtil.showToast(context, "搜索的内容不能为空");
+            ToastUtil.showToast(context, getString(R.string.text_search_content_can_not_empty));
         }else {
             searchMemberFromGroup();
         }
@@ -215,7 +215,7 @@ public class LocalMemberSearchFragment extends BaseFragment{
             }
         }
         if (searchList.size() == 0) {
-            tv_search_nothing.setText("联系人不存在");
+            tv_search_nothing.setText(R.string.text_contact_is_not_exist);
             rl_search_result.setVisibility(View.GONE);
         } else {
             tv_search_nothing.setVisibility(View.GONE);
@@ -239,7 +239,7 @@ public class LocalMemberSearchFragment extends BaseFragment{
 
             }
         } else {
-            ToastUtil.showToast(context, "网络连接异常，请检查网络！");
+            ToastUtil.showToast(context, getString(R.string.text_network_connection_abnormal_please_check_the_network));
         }
     }
 
@@ -247,7 +247,7 @@ public class LocalMemberSearchFragment extends BaseFragment{
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             if ( s.length() > 0 && !DataUtil.isLegalSearch(s)) {
-                ToastUtil.showToast(context, "搜索的内容不合法！");
+                ToastUtil.showToast(context, getString(R.string.text_search_content_is_illegal));
             }
             if(TextUtils.isEmpty(s.toString())){
                 iv_delete_edittext.setVisibility(View.GONE);
@@ -361,7 +361,7 @@ public class LocalMemberSearchFragment extends BaseFragment{
                 if (mposition >= 0) {
                     searchList.remove(mposition);
                     if (searchList.size() == 0) {
-                        tv_search_nothing.setText("联系人不存在");
+                        tv_search_nothing.setText(R.string.text_contact_is_not_exist);
                         rl_search_result.setVisibility(View.GONE);
                     } else {
                         tv_search_nothing.setVisibility(View.GONE);

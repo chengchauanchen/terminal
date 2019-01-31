@@ -102,12 +102,12 @@ public class VoipPhoneActivity extends BaseActivity{
     @Override
     public void initListener(){
         llHangupRequest.setOnClickListener(v -> {
-            ToastUtil.showToast(VoipPhoneActivity.this, "通话已结束");
+            ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
             status = HANG_UP_SELF + "";
             MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
         });
         llHangupSpreaking.setOnClickListener(v -> {
-            ToastUtil.showToast(VoipPhoneActivity.this, "通话已结束");
+            ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
             status = CALL_END + "";
             MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
         });
@@ -207,7 +207,7 @@ public class VoipPhoneActivity extends BaseActivity{
                 callRecords.add(callRecord);
                 MyTerminalFactory.getSDK().getSQLiteDBManager().addCallRecord(callRecords);
                 ictVspeakingTimeSpeaking.onStop();
-                ToastUtil.showToast(VoipPhoneActivity.this,"对方已挂断");
+                ToastUtil.showToast(VoipPhoneActivity.this,getString(R.string.other_stop_call));
                 SystemClock.sleep(2000);
                 try{
                     finish();
@@ -228,11 +228,11 @@ public class VoipPhoneActivity extends BaseActivity{
 
         memberNameRequest.setText(userName + "");
         memberPhoneRequest.setText(phone);
-        requestCall.setText("呼叫中...");
+        requestCall.setText(R.string.text_in_call);
 
         memberNameSpeaking.setText(userName+"");
         memberPhoneSpeaking.setText(phone);
-        SpeakingPrompt.setText("通话中...");
+        SpeakingPrompt.setText(R.string.text_in_the_call);
 
 
 

@@ -5,6 +5,7 @@
     <color name="bottom_textcolor1">#9900a4ff</color>
     <color name="bottom_textcolor2">#0094ff</color>
     <color name="white">#FFFFFF</color><!--白色 -->
+    <color name="white_53">#88FFFFFF</color><!--白色 -->
     <color name="backgroudblue">#0d182b</color><!--背景蓝 -->
     <color name="itemblue">#13223f</color>
     <color name="ivory">#FFFFF0</color><!--象牙色 -->
@@ -154,6 +155,7 @@
     <color name="black">#000000</color><!--黑色 -->
     <color name="liantong">#13223f</color>
     <color name="folder_name">#535353</color>
+    <color name="folder_name_60">#99535353</color>
     <color name="folder_number">#BFBFBF</color>
     <color name="group_name">#7d7d7d</color>
     <color name="group_name_selected">#FF5555</color>
@@ -533,4 +535,45 @@
     <color name="confirm_create">#cc0091ff</color>
     <color name="textview_checked">#34B4FF</color>
     <color name="textview_unchecked">#637e9e</color>
+
+
+    <color name="transparent_40">#66000000</color>
+    <color name="transparent_60">#99000000</color>
+    <color name="transparent_82">#51000000</color>
+
+    <color name="grey_66">#666666</color>
+    <color name="grey_b5">#b5b5b5</color>
+    <color name="grey_89">#898989</color>
+    <color name="grey_8d">#8ddd</color>
+    <color name="grey_aa">#aaa</color>
+    <color name="grey_48_90">#e6484848</color>
+    <color name="grey_7f">#7f7f7f</color>
+    <color name="white_ed">#EDEDEE</color>
+    <color name="blue_0191">#0191ff</color>
+    <color name="blue_1a79">#1A79C3</color>
+    <color name="blue_00">#0087ff</color>
+    <color name="blue_00a">#00A4FF</color>
+    <color name="blue_16">#161127</color>
+    <color name="blue_0d">#0D2040</color>
+    <color name="blue_35">#354552</color>
+    <color name="yellow_ef">#EFB152</color>
+    <color name="yellow_ff">#fff799</color>
+    <color name="yellow_fc">#FCF596</color>
+    <color name="yellow_f9">#F9B552</color>
+    <color name="yellow_f1">#F1924C</color>
+    <color name="yellow_eb">#EB6100</color>
+    <color name="red_fd">#FD5757</color>
+    <color name="red_fe">#FE5051</color>
+    <color name="red_e4">#E45750</color>
+    <color name="black_1b">#1b1b1b</color>
+    <color name="white_da">#DADADA</color>
+    <color name="white_c9">#C9C7C7</color>
+    <color name="white_d8">#d8d8d8</color>
+    <color name="white_e2">#e2e2e2</color>
+    <color name="green_cc">#CCEED0</color>
+    <color name="green_27">#27CA91</color>
+    <color name="green_27b">#27B382</color>
+    <color name="green_32">#32B16C</color>
+    <color name="green_47">#47B347</color>
+
 </resources>

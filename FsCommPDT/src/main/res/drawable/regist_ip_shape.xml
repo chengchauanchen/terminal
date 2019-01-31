@@ -4,10 +4,9 @@
     <corners />
     <solid android:color="@color/regist_org_bg" />
     <corners
-        android:bottomLeftRadius="25dp"
-        android:bottomRightRadius="25dp"
-        android:topLeftRadius="25dp"
-        android:topRightRadius="25dp"
-        />
+        android:bottomLeftRadius="@dimen/dp_25"
+        android:bottomRightRadius="@dimen/dp_25"
+        android:topLeftRadius="@dimen/dp_25"
+        android:topRightRadius="@dimen/dp_25" />
 
 </shape>

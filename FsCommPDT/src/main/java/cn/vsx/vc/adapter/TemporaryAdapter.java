@@ -468,25 +468,25 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         //        File file1 = new File(terminalMessage1.messageBody.getString("pictureUrl"));
         if (terminalMessage1.messageType == MessageType.PICTURE.getCode()) {
             if(file.length()<=0){
-                ToastUtil.showToast(activity,"图片为空，不能发送");
+                ToastUtil.showToast(activity,activity.getString(R.string.text_image_is_empty_can_not_send));
                 return;
             }
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, ""), file, terminalMessage1, true);
         } else if (terminalMessage1.messageType == MessageType.FILE.getCode()) {
             if(file.length()<=0){
-                ToastUtil.showToast(activity,"文件为空，不能发送");
+                ToastUtil.showToast(activity,activity.getString(R.string.text_file_is_empty_can_not_send));
                 return;
             }
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, ""), file, terminalMessage1, true);
         } else if (terminalMessage1.messageType == MessageType.AUDIO.getCode()) {
             if(file.length()<=0){
-                ToastUtil.showToast(activity,"录音时间过短");
+                ToastUtil.showToast(activity,activity.getString(R.string.text_audio_is_too_short));
                 return;
             }
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, ""), file, terminalMessage1, true);
         } else if (terminalMessage1.messageType == MessageType.VIDEO_CLIPS.getCode()) {
             if(file.length()<=0){
-                ToastUtil.showToast(activity,"录制时间过短");
+                ToastUtil.showToast(activity,activity.getString(R.string.text_video_is_too_short));
                 return;
             }
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, ""), file, terminalMessage1, true);
@@ -518,7 +518,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if (!isEnable)
                 return false;
             if(upload){
-                ToastUtil.showToast(activity,"正在上传中不能转发");
+                ToastUtil.showToast(activity,activity.getString(R.string.text_in_upload_can_not_forward));
                 return false;
             }
             if (terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
@@ -625,7 +625,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             });
             holder.tvContent.setOnLongClickListener(view -> {
                 if(upload){
-                    ToastUtil.showToast(activity,"正在上传中不能转发");
+                    ToastUtil.showToast(activity,activity.getString(R.string.text_in_upload_can_not_forward));
                     return false;
                 }
                 mIsLongClick = true;
@@ -887,10 +887,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         if (position == chatMessageList.size() - 1 && !isReceiver(terminalMessage)) {
             if (terminalMessage.resultCode == SignalServerErrorCode.NO_GROUP_AUTHORITY.getErrorCode()) {//组被删除
                 setViewVisibility(holder.tv_error_delete, View.VISIBLE);
-                setText(holder.tv_error_delete, "成员对目标组无权限！！！");
+                setText(holder.tv_error_delete, activity.getString(R.string.text_member_has_no_authority_in_this_group));
             } else if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_NOT_HAVE_THIS_MEMBER.getErrorCode()) {//用户被删除
                 setViewVisibility(holder.tv_error_delete, View.VISIBLE);
-                setText(holder.tv_error_delete, "该用户不存在！！！");
+                setText(holder.tv_error_delete, activity.getString(R.string.text_the_user_does_not_exist));
             } else {
                 setViewVisibility(holder.tv_error_delete, View.GONE);
             }
@@ -949,7 +949,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             } else {
                 setViewVisibility(holder.lv_face_pair, View.GONE);
                 setViewVisibility(holder.tv_error_msg, View.VISIBLE);
-                setText(holder.tv_error_msg, "未识别到人脸");
+                setText(holder.tv_error_msg, activity.getString(R.string.text_unrecognized_face));
             }
 
         } else {
@@ -1006,10 +1006,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         if(TextUtils.isEmpty(liveTheme)){
             if(split.length>1){
                 String memberName = split[1];
-                liveTheme = memberName+"上报图像";
+                liveTheme = String.format(activity.getString(R.string.current_push_member),memberName);
             }else {
                 Member member = DataUtil.getMemberByMemberNo(memberNo);
-                liveTheme = member.getName()+"上报图像";
+                liveTheme = String.format(activity.getString(R.string.current_push_member),member.getName());
             }
         }
         setText(holder.tvContent, liveTheme);
@@ -1028,7 +1028,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             setViewVisibility(holder.live_bubble, View.VISIBLE);
 
             if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_REFUSE.getErrorCode()) {//拒绝
-                setText(holder.live_tv_chatcontent, "已拒绝");
+                setText(holder.live_tv_chatcontent, activity.getString(R.string.refused));
             } else if (terminalMessage.resultCode == 0) {
                 setViewVisibility(holder.reBubble, View.VISIBLE);
                 setViewVisibility(holder.ll_botoom_to_watch, View.GONE);
@@ -1037,9 +1037,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 if (messageBody.containsKey(JsonParam.END_WATCH_TIME) && messageBody.containsKey(JsonParam.START_WATCH_TIME)) {
                     long watchTime = (messageBody.getLong(JsonParam.END_WATCH_TIME) - messageBody.getLong(JsonParam.START_WATCH_TIME)) / 1000;
                     watchTime = watchTime < 1 ? 1 : watchTime;
-                    setText(holder.tv_watch_time, "结束观看    观看时长：" + getCallLength(watchTime));
+                    setText(holder.tv_watch_time, String.format(activity.getString(R.string.text_finish_watching_time),getCallLength(watchTime)));
                 } else {
-                    setText(holder.tv_watch_time, "结束观看");
+                    setText(holder.tv_watch_time, activity.getString(R.string.text_finish_watching));
                 }
             }
         } else if (messageBody.getInteger(JsonParam.REMARK) == Remark.ASK_VIDEO_LIVE) {
@@ -1051,56 +1051,56 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 if (terminalMessage.resultCode == SignalServerErrorCode.VIDEO_LIVE_WAITE_TIMEOUT.getErrorCode()) {//超时
 
                     if (memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
-                        setText(holder.live_tv_chatcontent, "未接受");
+                        setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
-                        setText(holder.live_tv_chatcontent, "对方无应答");
+                        setText(holder.live_tv_chatcontent, activity.getString(R.string.other_no_answer));
                     }
 
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.SLAVE_BUSY.getErrorCode()) {
                     if ((memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
-                        setText(holder.live_tv_chatcontent, "未接受");
+                        setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
-                        setText(holder.live_tv_chatcontent, "对方繁忙");
+                        setText(holder.live_tv_chatcontent, activity.getString(R.string.text_busy_party));
                     }
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_IS_KILLED.getErrorCode()) {//主叫或被叫被遥弊
                     if ((memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
-                        setText(holder.live_tv_chatcontent, "未接受");
+                        setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
-                        setText(holder.live_tv_chatcontent, "对方无应答");
+                        setText(holder.live_tv_chatcontent, activity.getString(R.string.other_no_answer));
                     }
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.CALLED_MEMBER_OFFLINE.getErrorCode()) {
                     if ((memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
-                        setText(holder.live_tv_chatcontent, "未接受");
+                        setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
                         setText(holder.live_tv_chatcontent, SignalServerErrorCode.CALLED_MEMBER_OFFLINE.getErrorDiscribe());
                     }
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.TERMINAL_OFFLINE_LOGOUT.getErrorCode()) {
                     if ((memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
-                        setText(holder.live_tv_chatcontent, "未接受");
+                        setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
-                        setText(holder.live_tv_chatcontent, "对方不在线");
+                        setText(holder.live_tv_chatcontent, activity.getString(R.string.text_the_other_party_is_not_online));
                     }
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_REFUSE.getErrorCode()) {
                     if (memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
-                        setText(holder.live_tv_chatcontent, "已拒绝");
+                        setText(holder.live_tv_chatcontent, activity.getString(R.string.refused));
                     } else {
-                        setText(holder.live_tv_chatcontent, "对方拒绝");
+                        setText(holder.live_tv_chatcontent, activity.getString(R.string.text_the_other_party_has_refus));
                     }
 
                 } else if (memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
-                    setText(holder.live_tv_chatcontent, "未接受");
+                    setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                 }
             } else {
-                setText(holder.live_tv_chatcontent, "已拒绝");
+                setText(holder.live_tv_chatcontent, activity.getString(R.string.refused));
             }
         } else if (messageBody.getInteger(JsonParam.REMARK) == Remark.STOP_ASK_VIDEO_LIVE) {
             setViewVisibility(holder.reBubble, View.GONE);
             setViewVisibility(holder.live_bubble, View.VISIBLE);
             if (terminalMessage.resultCode == SignalServerErrorCode.STOP_ASK_VIDEO_LIVE.getErrorCode()) {
                 if ((memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
-                    setText(holder.live_tv_chatcontent, "未接受");
+                    setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                 } else {
-                    setText(holder.live_tv_chatcontent, "已取消");
+                    setText(holder.live_tv_chatcontent, activity.getString(R.string.canceled));
                 }
             }
         }
@@ -1113,50 +1113,50 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         if (terminalMessage.resultCode == 0) {
             if (!messageBody.containsKey(JsonParam.CALLID) || messageBody.getLong(JsonParam.CALLID) == 0) {//主叫接通前挂断
                 if (isReceiver(terminalMessage)) {
-                    setText(holder.tvContent, "对方已取消");
+                    setText(holder.tvContent, activity.getString(R.string.other_cancel));
                 } else {
-                    setText(holder.tvContent, "已取消");
+                    setText(holder.tvContent, activity.getString(R.string.canceled));
                 }
             } else {//正常通话
                 long callLength = (messageBody.getLong(JsonParam.END_TIME) - messageBody.getLong(JsonParam.START_TIME)) / 1000;
                 callLength = callLength < 1 ? 1 : callLength;
-                setText(holder.tvContent, "通话时长：" + getCallLength(callLength));
+                setText(holder.tvContent, String.format(activity.getString(R.string.text_call_time),getCallLength(callLength)));
             }
         } else if (terminalMessage.resultCode == SignalServerErrorCode.INDIVIDUAL_CALL_WAITE_TIMEOUT.getErrorCode()) {//请求个呼超时
             if (isReceiver(terminalMessage)) {
-                setText(holder.tvContent, "未接听");
+                setText(holder.tvContent, activity.getString(R.string.no_answer));
             } else {
-                setText(holder.tvContent, "对方无应答");
+                setText(holder.tvContent, activity.getString(R.string.other_no_answer));
             }
         } else if (terminalMessage.resultCode == SignalServerErrorCode.SLAVE_BUSY.getErrorCode()) {//被叫繁忙
             if (isReceiver(terminalMessage)) {
-                setText(holder.tvContent, "未接听");
+                setText(holder.tvContent, activity.getString(R.string.no_answer));
             } else {
-                setText(holder.tvContent, "对方繁忙");
+                setText(holder.tvContent, activity.getString(R.string.text_busy_party));
             }
         } else if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_REFUSE.getErrorCode()) {//被叫拒绝
             if (isReceiver(terminalMessage)) {
-                setText(holder.tvContent, "已拒绝");
+                setText(holder.tvContent, activity.getString(R.string.refused));
             } else {
-                setText(holder.tvContent, "对方拒绝");
+                setText(holder.tvContent, activity.getString(R.string.text_the_other_party_has_refus));
             }
         } else if (terminalMessage.resultCode == SignalServerErrorCode.TERMINAL_OFFLINE_LOGOUT.getErrorCode()) {//主叫掉线
             if (isReceiver(terminalMessage)) {
-                setText(holder.tvContent, "未接听");
+                setText(holder.tvContent, activity.getString(R.string.no_answer));
             } else {
-                setText(holder.tvContent, "已取消");
+                setText(holder.tvContent, activity.getString(R.string.canceled));
             }
         } else if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_IS_KILLED.getErrorCode()) {//主叫或被叫被遥弊
             if (isReceiver(terminalMessage)) {
-                setText(holder.tvContent, "对方已取消");
+                setText(holder.tvContent, activity.getString(R.string.other_cancel));
             } else {
-                setText(holder.tvContent, "已取消");
+                setText(holder.tvContent, activity.getString(R.string.canceled));
             }
         } else {//被呼叫方不在线
             if (isReceiver(terminalMessage)) {
-                setText(holder.tvContent, "未接听");
+                setText(holder.tvContent, activity.getString(R.string.no_answer));
             } else {
-                setText(holder.tvContent, "对方不在线");
+                setText(holder.tvContent, activity.getString(R.string.text_the_other_party_is_not_online));
             }
         }
     }
@@ -1271,7 +1271,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         }
         String content = FileUtil.getStringFromFile(file);
         if (TextUtils.isEmpty(content))
-            content = "暂获取不到文本！";
+            content = activity.getString(R.string.text_get_no_content);
         setText(holder.tvContent, content);
     }
 
@@ -1545,7 +1545,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                     openVideo(terminalMessage,file);
                 }
             }else {
-                ToastUtil.showToast(activity,"没有图像观看功能权限");
+                ToastUtil.showToast(activity,activity.getString(R.string.text_has_no_image_watch_authority));
             }
         }
 
@@ -1563,7 +1563,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
                 }
             } else {
-                ToastUtil.showToast(activity, "没有个呼功能权限");
+                ToastUtil.showToast(activity, activity.getString(R.string.text_no_call_permission));
             }
         }
 
@@ -1588,7 +1588,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                     MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGoWatchRTSPHandler.class,terminalMessage);
                 }
             }else {
-                ToastUtil.showToast(activity, "没有图像接收功能权限");
+                ToastUtil.showToast(activity, activity.getString(R.string.text_has_no_image_receiver_authority));
             }
         }
     }
@@ -1607,7 +1607,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
                 }
             } else {
-                ToastUtil.showToast(activity, "没有图像接收功能权限");
+                ToastUtil.showToast(activity, activity.getString(R.string.text_has_no_image_receiver_authority));
             }
         }
 
@@ -1624,7 +1624,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 }
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupChatVoiceHandler.class, position);
             } else {
-                ToastUtil.showToast(activity, "没有组呼听权限");
+                ToastUtil.showToast(activity, activity.getString(R.string.text_has_no_group_call_listener_authority));
             }
         }
 
@@ -1730,7 +1730,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         if (!TextUtils.isEmpty(terminalMessage.messagePath)) {
             file = new File(terminalMessage.messagePath);
         } else {
-            ToastUtil.showToast(activity, "文件路径为空！无法打开");
+            ToastUtil.showToast(activity, activity.getString(R.string.text_file_path_is_empty_can_not_opened));
             return;
         }
         /**  如果文件不存在就下载 **/
@@ -1795,7 +1795,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 videoPreviewItemFragment.setFragment_contener(fragment_contener);
                 activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, videoPreviewItemFragment).commit();
             }else {
-                ToastUtil.showToast(activity,"下载视频失败");
+                ToastUtil.showToast(activity,activity.getString(R.string.text_down_load_video_fail));
             }
         }
     }

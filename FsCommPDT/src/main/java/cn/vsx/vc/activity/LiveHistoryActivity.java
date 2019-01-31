@@ -114,10 +114,10 @@ public class LiveHistoryActivity extends BaseActivity{
         if(TextUtils.isEmpty(liveTheme)){
             if(split.length>1){
                 String memberName = split[1];
-                liveTheme = memberName+"上报图像";
+                liveTheme = String.format(getString(R.string.text_living_theme_member_name),memberName);
             }else {
                 Member member = DataUtil.getMemberByMemberNo(memberNo);
-                liveTheme = member.getName()+"上报图像";
+                liveTheme = String.format(getString(R.string.text_living_theme_member_name),member.getName());
             }
         }
         tv_theme.setText(liveTheme);
@@ -144,7 +144,7 @@ public class LiveHistoryActivity extends BaseActivity{
                     JSONObject data = jsonResult.getJSONObject("data");
                     JSONArray list = data.getJSONArray("list");
                     if(list.isEmpty()){
-                        ToastUtil.showToast(LiveHistoryActivity.this,"获取视频信息失败");
+                        ToastUtil.showToast(LiveHistoryActivity.this,getString(R.string.text_get_video_info_fail));
                         return;
                     }
                     JSONObject jsonObject = list.getJSONObject(0);
@@ -175,7 +175,7 @@ public class LiveHistoryActivity extends BaseActivity{
     @OnClick(R.id.iv_play)
     public void play(){
         if(liveUrl==null){
-            ToastUtil.showToast(LiveHistoryActivity.this,"无法找到该视频，视频已失效");
+            ToastUtil.showToast(LiveHistoryActivity.this,getString(R.string.text_can_not_find_video_invalided));
             return;
         }
         Intent intent = new Intent(this,PlayLiveHistoryActivity.class);
@@ -194,7 +194,7 @@ public class LiveHistoryActivity extends BaseActivity{
             }else if (status ==1){
                 ll_volume.setVisibility(View.VISIBLE);
             }
-            tv_volume.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "%");
+            tv_volume.setText(String.format(getString(R.string.text_percent_sign_volume),MyTerminalFactory.getSDK().getAudioProxy().getVolume()));
             mHandler.sendEmptyMessageDelayed(RECEIVEVOICECHANGED,2000);
         }
     };

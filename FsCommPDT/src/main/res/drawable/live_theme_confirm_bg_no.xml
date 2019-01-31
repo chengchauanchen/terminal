@@ -7,14 +7,14 @@
 
     <!-- 矩形的圆角半径 -->
     <corners
-        android:bottomLeftRadius="1dp"
-        android:bottomRightRadius="1dp"
-        android:topLeftRadius="1dp"
-        android:topRightRadius="1dp" />
+        android:bottomLeftRadius="@dimen/dp_1"
+        android:bottomRightRadius="@dimen/dp_1"
+        android:topLeftRadius="@dimen/dp_1"
+        android:topRightRadius="@dimen/dp_1" />
     <!-- 线的宽度，颜色灰色 -->
     <stroke
         android:width="0dp"
-        android:color="#FFFFFF" >
+        android:color="@color/white" >
     </stroke>
 
 </shape>

@@ -16,11 +16,11 @@
         android:padding="@dimen/x15">
         
         <TextView
-            android:layout_width="80dp"
+            android:layout_width="@dimen/dp_80"
             android:layout_height="wrap_content"
-            android:text="名称"
+            android:text="@string/text_name"
             android:textColor="@color/textview_color"
-            android:textSize="15sp" />
+            android:textSize="@dimen/sp_15" />
         
         <EditText
             android:id="@+id/create_temporary_group_name"
@@ -28,10 +28,10 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@null"
-            android:text="临时组"
+            android:text="@string/text_temporary_group"
             android:textColor="@color/edittext_textcolor"
             android:textCursorDrawable="@drawable/edittext_cursor"
-            android:textSize="18sp"/>
+            android:textSize="@dimen/sp_18"/>
     </LinearLayout>
     
     <RelativeLayout
@@ -42,19 +42,19 @@
         
         <TextView
             android:id="@+id/tv_time"
-            android:layout_width="80dp"
+            android:layout_width="@dimen/dp_80"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/x15"
-            android:layout_marginTop="10dp"
-            android:text="存活时间"
+            android:layout_marginTop="@dimen/dp_10"
+            android:text="@string/text_survival_time"
             android:textColor="@color/textview_color"
-            android:textSize="15sp" />
+            android:textSize="@dimen/sp_15" />
         
         <TextView
             android:id="@+id/exist_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="@dimen/dp_10"
             android:layout_toRightOf="@+id/tv_time"
             android:text="23时59分59秒"
             android:textColor="@color/edittext_textcolor"
@@ -64,9 +64,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="@dimen/dp_12"
             android:layout_marginLeft="@dimen/x14"
-            android:text="( 临时组存在的时间 )"
+            android:text="@string/text_survival_time_tempt"
             android:textColor="@color/textview_color" />
     </RelativeLayout>
     
@@ -78,19 +78,19 @@
         
         <TextView
             android:id="@+id/tv_lock_time"
-            android:layout_width="80dp"
+            android:layout_width="@dimen/dp_80"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/x15"
-            android:layout_marginTop="10dp"
-            android:text="是否锁定"
+            android:layout_marginTop="@dimen/dp_10"
+            android:text="@string/text_is_it_locked"
             android:textColor="@color/textview_color"
-            android:textSize="15sp" />
+            android:textSize="@dimen/sp_15" />
         
         <LinearLayout
             android:id="@+id/ll_locked"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="@dimen/dp_10"
             android:layout_toRightOf="@+id/tv_lock_time"
             android:gravity="center"
             android:orientation="horizontal">
@@ -106,8 +106,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/x10"
-                android:text="是"
-                android:textSize="18sp"
+                android:text="@string/text_yes"
+                android:textSize="@dimen/sp_18"
                 android:textColor="@color/about_text_gray"/>
         </LinearLayout>
         
@@ -115,7 +115,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/x40"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="@dimen/dp_10"
             android:layout_toRightOf="@+id/ll_locked"
             android:gravity="center"
             android:orientation="horizontal">
@@ -131,8 +131,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/x10"
-                android:text="否"
-                android:textSize="18sp"
+                android:text="@string/text_no"
+                android:textSize="@dimen/sp_18"
                 android:textColor="@color/edittext_textcolor"/>
         </LinearLayout>
         
@@ -140,20 +140,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="@dimen/dp_12"
             android:layout_marginLeft="@dimen/x14"
-            android:text="( 锁定后，不允许临时组内成员切组 )"
+            android:text="@string/text_locked_tempt"
             android:textColor="@color/textview_color" />
     </RelativeLayout>
     
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="1dp"
+        android:layout_height="@dimen/dp_1"
         android:background="@color/about_item_background"
-        android:paddingLeft="20dp">
+        android:paddingLeft="@dimen/dp_20">
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
+            android:layout_height="@dimen/dp_1"
             android:background="@color/temp_group_bg"
              />
     </FrameLayout>
@@ -168,12 +168,12 @@
         android:orientation="horizontal">
         
         <TextView
-            android:layout_width="80dp"
+            android:layout_width="@dimen/dp_80"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/x15"
-            android:text="锁定时间"
+            android:text="@string/text_locked_time"
             android:textColor="@color/textview_color"
-            android:textSize="15sp" />
+            android:textSize="@dimen/sp_15" />
         
         <TextView
             android:id="@+id/locked_time"
@@ -181,7 +181,7 @@
             android:layout_height="wrap_content"
             android:text="00时10分00秒"
             android:textColor="@color/edittext_textcolor"
-            android:textSize="18sp" />
+            android:textSize="@dimen/sp_18" />
     </LinearLayout>
     
     <RelativeLayout
@@ -192,19 +192,19 @@
         
         <TextView
             android:id="@+id/tv_change_group"
-            android:layout_width="80dp"
+            android:layout_width="@dimen/dp_80"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/x15"
-            android:layout_marginTop="10dp"
-            android:text="自动切组"
+            android:layout_marginTop="@dimen/dp_10"
+            android:text="@string/text_change_group_auto"
             android:textColor="@color/textview_color"
-            android:textSize="15sp" />
+            android:textSize="@dimen/sp_15" />
         
         <LinearLayout
             android:id="@+id/ll_change"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="@dimen/dp_10"
             android:layout_toRightOf="@+id/tv_change_group"
             android:gravity="center"
             android:orientation="horizontal">
@@ -220,8 +220,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/x10"
-                android:text="是"
-                android:textSize="18sp"
+                android:text="@string/text_yes"
+                android:textSize="@dimen/sp_18"
                 android:textColor="@color/edittext_textcolor"
                 />
         </LinearLayout>
@@ -230,7 +230,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/x40"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="@dimen/dp_10"
             android:layout_toRightOf="@+id/ll_change"
             android:gravity="center"
             android:orientation="horizontal">
@@ -246,8 +246,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/x10"
-                android:text="否"
-                android:textSize="18sp"
+                android:text="@string/text_no"
+                android:textSize="@dimen/sp_18"
                 android:textColor="@color/about_text_gray" />
         </LinearLayout>
         
@@ -255,9 +255,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="@dimen/dp_12"
             android:layout_marginLeft="@dimen/x14"
-            android:text="( 将组员自动切换到所创建的组 )"
+            android:text="@string/text_change_group_auto_tempt"
             android:textColor="@color/textview_color" />
     </RelativeLayout>
     
@@ -276,8 +276,8 @@
             android:paddingLeft="@dimen/x10"
             android:paddingRight="@dimen/x10"
             android:paddingTop="@dimen/x5"
-            android:text="确定创建"
-            android:textSize="18sp"
+            android:text="@string/text_sure_to_create_group"
+            android:textSize="@dimen/sp_18"
             android:textColor="@color/white" />
     </FrameLayout>
 

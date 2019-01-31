@@ -274,7 +274,7 @@ public class CallingService extends BaseService{
             mHandler.post(() -> {
                 logger.info("半双工个呼时来组呼，对方正在说话");
                 mBtnIndividualCallHalfDuplexPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_gray);
-                mTvHalfDuplexPrompt.setText("对方正在说话");
+                mTvHalfDuplexPrompt.setText(getResources().getString(R.string.other_speaking));
                 mTvHalfDuplexPrompt.setTextColor(Color.YELLOW);
                 mBtnIndividualCallHalfDuplexPtt.setEnabled(false);
                 cancelAutoHangUpTimer();//对方按下开始说话，取消时间检测

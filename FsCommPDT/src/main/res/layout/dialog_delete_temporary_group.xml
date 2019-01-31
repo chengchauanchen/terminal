@@ -23,8 +23,8 @@
             android:id="@+id/text_context"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="解散成功"
-            android:textSize="25dp"
+            android:text="@string/text_disbanded_successfully"
+            android:textSize="@dimen/sp_25"
             android:layout_marginTop="@dimen/x5"
             android:layout_marginBottom="@dimen/x5"
             android:layout_centerHorizontal="true"
@@ -36,9 +36,9 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/text_context"
             android:layout_centerHorizontal="true"
-            android:text="正在跳转...."
-            android:textSize="12sp"
-            android:textColor="#EFB152"/>
+            android:text="@string/text_temporary_group_jumping"
+            android:textSize="@dimen/sp_12"
+            android:textColor="@color/yellow_ef"/>
     </LinearLayout>
 
     <LinearLayout
@@ -50,10 +50,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="确定解散 临时组1-011？"
+            android:text="@string/dialog_delete_temporary_group_title"
             android:textColor="@color/black"/>
         <LinearLayout
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="@dimen/dp_20"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/x30"
             android:orientation="horizontal">
@@ -63,9 +63,9 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:background="@drawable/live_theme_confirm_bg"
-                android:text="确定"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:text="@string/text_sure"
+                android:layout_marginLeft="@dimen/dp_5"
+                android:layout_marginRight="@dimen/dp_5"
                 android:textColor="@color/white"/>
 
             <Button
@@ -74,9 +74,9 @@
                 android:layout_weight="1"
                 android:layout_height="match_parent"
                 android:background="@drawable/live_theme_confirm_bg"
-                android:text="取消"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
+                android:text="@string/text_cancel"
+                android:layout_marginLeft="@dimen/dp_5"
+                android:layout_marginRight="@dimen/dp_5"
                 android:textColor="@color/white"/>
         </LinearLayout>
     </LinearLayout>

@@ -69,7 +69,7 @@
                             android:id="@+id/tv_lockscreen_week"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="5dp"
+                            android:layout_marginTop="@dimen/dp_5"
                             android:gravity="center_vertical"
                             android:text="星期"
                             android:textColor="@color/lock_time"
@@ -162,7 +162,7 @@
                         android:layout_marginBottom="@dimen/y19"
                         android:layout_marginRight="@dimen/x9"
                         android:gravity="center"
-                        android:text="上划解锁"
+                        android:text="@string/text_upper_row_unlock"
                         android:textColor="@color/lock_slid_tv"
                         android:textSize="@dimen/x14" />
                 </cn.vsx.vc.view.MyRelativeLayout>
@@ -175,7 +175,7 @@
                     android:layout_marginBottom="@dimen/y28"
                     android:text="按住说话"
                     android:textColor="@color/lock_silence_tv"
-                    android:textSize="20sp" />
+                    android:textSize="@dimen/sp_20" />
             
                 <LinearLayout
                     android:id="@+id/ll_speaking_time"

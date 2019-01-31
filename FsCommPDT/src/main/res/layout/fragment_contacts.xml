@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:focusable="true"
-                android:clickable="true">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clickable="true"
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,8 +12,8 @@
         android:orientation="vertical">
 
         <!--<include layout="@layout/title_bar" />-->
-        <include
-            layout="@layout/title_bar" />
+        <include layout="@layout/title_bar" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="@dimen/y30"
@@ -24,8 +24,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:background="@color/itemblue">
+                android:background="@color/itemblue"
+                android:gravity="center">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -37,26 +37,25 @@
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
                         android:layout_gravity="center"
-                        android:text="组群"
-                        android:textSize="17sp" />
+                        android:text="@string/text_group"
+                        android:textSize="@dimen/sp_17" />
                 </LinearLayout>
+
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="4dp"
+                    android:layout_height="@dimen/dp_4"
                     android:layout_alignParentBottom="true"
-                    android:background="@color/contract_line_bg"
-                    />
+                    android:background="@color/contract_line_bg" />
 
                 <View
                     android:id="@+id/group_line"
                     android:layout_width="match_parent"
-                    android:layout_height="4dp"
-                    android:background="@color/contacts_line_blue"
+                    android:layout_height="@dimen/dp_4"
                     android:layout_alignParentBottom="true"
-                    android:visibility="visible"
-                    android:layout_marginLeft="18dp"
-                    android:layout_marginRight="18dp"
-                    />
+                    android:layout_marginLeft="@dimen/dp_18"
+                    android:layout_marginRight="@dimen/dp_18"
+                    android:background="@color/contacts_line_blue"
+                    android:visibility="visible" />
 
             </RelativeLayout>
 
@@ -65,8 +64,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:background="@color/itemblue">
+                android:background="@color/itemblue"
+                android:gravity="center">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -78,35 +77,36 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="电台"
-                        android:textSize="17sp" />
+                        android:text="@string/text_radio_station"
+                        android:textSize="@dimen/sp_17" />
                 </LinearLayout>
 
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="4dp"
+                    android:layout_height="@dimen/dp_4"
                     android:layout_alignParentBottom="true"
-                    android:background="@color/contract_line_bg"
-                    />
+                    android:background="@color/contract_line_bg" />
+
                 <View
                     android:id="@+id/shoutai_line"
                     android:layout_width="match_parent"
-                    android:layout_height="4dp"
+                    android:layout_height="@dimen/dp_4"
                     android:layout_alignParentBottom="true"
+                    android:layout_marginLeft="@dimen/dp_18"
+                    android:layout_marginRight="@dimen/dp_18"
                     android:background="@color/contacts_line_blue"
-                    android:visibility="invisible"
-                    android:layout_marginLeft="18dp"
-                    android:layout_marginRight="18dp"/>
+                    android:visibility="invisible" />
 
             </RelativeLayout>
+
             <RelativeLayout
                 android:id="@+id/is_jingwutong"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="center"
-                android:background="@color/itemblue">
+                android:background="@color/itemblue"
+                android:gravity="center">
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -118,26 +118,26 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="警务通"
-                        android:textSize="17sp" />
+                        android:text="@string/text_police_service"
+                        android:textSize="@dimen/sp_17" />
                 </LinearLayout>
 
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="4dp"
+                    android:layout_height="@dimen/dp_4"
                     android:layout_alignParentBottom="true"
-                    android:background="@color/contract_line_bg"
-                    />
+                    android:background="@color/contract_line_bg" />
+
                 <View
                     android:id="@+id/jingwutong_line"
                     android:layout_width="match_parent"
-                    android:layout_height="4dp"
+                    android:layout_height="@dimen/dp_4"
                     android:layout_alignParentBottom="true"
+                    android:layout_marginLeft="@dimen/dp_18"
+                    android:layout_marginRight="@dimen/dp_18"
                     android:background="@color/contacts_line_blue"
-                    android:visibility="invisible"
-                    android:layout_marginLeft="18dp"
-                    android:layout_marginRight="18dp"/>
+                    android:visibility="invisible" />
 
             </RelativeLayout>
 
@@ -146,19 +146,18 @@
         <FrameLayout
             android:id="@+id/contacts_viewPager"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            />
+            android:layout_height="match_parent" />
 
     </LinearLayout>
+
     <ImageButton
         android:id="@+id/imgbtn_dial"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
+        android:layout_width="@dimen/dp_50"
+        android:layout_height="@dimen/dp_50"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
-        android:layout_marginBottom="30dp"
-        android:layout_marginRight="30dp"
+        android:layout_marginRight="@dimen/dp_30"
+        android:layout_marginBottom="@dimen/dp_30"
         android:background="@drawable/dial"
-        android:visibility="visible"
-        />
+        android:visibility="visible" />
 </RelativeLayout>

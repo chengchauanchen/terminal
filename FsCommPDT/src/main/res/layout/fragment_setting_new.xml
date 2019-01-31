@@ -6,25 +6,25 @@
     android:clickable="true"
     android:focusable="true"
     android:orientation="vertical">
-    
+
     <include layout="@layout/title_bar" />
-    
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
-            
+
             <!--个人信息-->
             <cn.vsx.vc.view.view4modularization.PersonInfoLayout
                 android:id="@+id/personinfolayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/y5"/>
-            
+                android:layout_marginTop="@dimen/y5" />
+
             <RelativeLayout
                 android:id="@+id/rl_ble"
                 android:layout_width="match_parent"
@@ -32,203 +32,206 @@
                 android:layout_marginTop="@dimen/y5"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical">
-                
+
                 <TextView
                     style="@style/setting_text_style_left"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:text="蓝牙PTT" />
-                
+                    android:text="@string/activity_ble_blue_tooth_ptt" />
+
                 <TextView
                     android:id="@+id/tv_ble_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_toLeftOf="@id/iv_ble"
                     android:layout_centerVertical="true"
-                    android:text="关闭"
                     android:layout_marginRight="@dimen/x16"
-                    android:textColor="@color/setting_text_gray_two"/>
+                    android:layout_toLeftOf="@id/iv_ble"
+                    android:text="@string/text_close"
+                    android:textColor="@color/setting_text_gray_two" />
+
                 <ImageView
                     android:id="@+id/iv_ble"
-                    android:layout_width="8dp"
-                    android:layout_height="16dp"
+                    android:layout_width="@dimen/dp_8"
+                    android:layout_height="@dimen/dp_16"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginRight="30dp"
+                    android:layout_marginRight="@dimen/dp_30"
                     android:background="@drawable/new_next_icon" />
             </RelativeLayout>
-            
+
             <!--ptt物理按键-->
             <cn.vsx.vc.view.PhysicalButtonSet4PTT
                 android:id="@+id/physicalButtonPTT"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-            
-            
+
+
             <!--扫描组设置-->
             <cn.vsx.vc.view.ChangeMainGroupLayout
                 android:id="@+id/changemaingrouplayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-            
+
             <!--音量设置和静音-->
             <cn.vsx.vc.view.VolumeChangLayout
                 android:id="@+id/VolumeChangLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-            
-            
+
+
             <LinearLayout
                 android:id="@+id/ll_video_resolution_setting"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/y30"
-                android:layout_marginTop="0.5dp"
+                android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
+
                 <TextView
                     style="@style/setting_text_style_left"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="视频分辨率设置" />
-            
+                    android:text="@string/text_settings_video_resolution" />
+
             </LinearLayout>
             <!-- 日志上传-->
             <LinearLayout
                 android:id="@+id/ll_log_upload"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/y30"
-                android:layout_marginTop="0.5dp"
+                android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:visibility="visible">
-                
+
                 <TextView
                     style="@style/setting_text_style_left"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="日志上传" />
-            
+                    android:text="@string/text_log_uploading" />
+
             </LinearLayout>
-            
+
             <!--锁屏设置-->
             <RelativeLayout
                 android:id="@+id/ll_lock_screen_setting"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/y30"
-                android:layout_marginTop="0.5dp"
-                android:gravity="center_vertical"
+                android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:visibility="visible">
-                
+
                 <TextView
                     style="@style/setting_text_style_left"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:text="锁屏设置" />
-                
+                    android:text="@string/text_settings_lock_screen" />
+
                 <cn.vsx.vc.view.MToggleButton
                     android:id="@+id/btn_lock_screen_setting"
                     style="@style/setting_MToggleButton" />
-            
+
             </RelativeLayout>
-            
+
             <RelativeLayout
                 android:id="@+id/rl_daytime_mode"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/y30"
-                android:layout_marginTop="0.5dp"
-                android:gravity="center_vertical"
+                android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:visibility="visible">
-                
+
                 <TextView
                     style="@style/setting_text_style_left"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:text="白天模式" />
-                
+                    android:text="@string/text_daytime_mode" />
+
                 <cn.vsx.vc.view.MToggleButton
                     android:id="@+id/btn_daytime_mode"
                     style="@style/setting_MToggleButton" />
-            
-            
+
+
             </RelativeLayout>
+
             <LinearLayout
                 android:id="@+id/ll_helpAndfeedback"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/y30"
-                android:layout_marginTop="0.5dp"
+                android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:visibility="visible">
-                
-                
+
+
                 <TextView
                     style="@style/setting_text_style_left"
                     android:layout_width="0dp"
-                    android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:text="帮助与反馈" />
-                
+                    android:layout_weight="1"
+                    android:text="@string/text_help_and_feedback" />
+
                 <ImageView
-                    android:layout_width="8dp"
-                    android:layout_height="16dp"
+                    android:layout_width="@dimen/dp_8"
+                    android:layout_height="@dimen/dp_16"
                     android:layout_centerVertical="true"
-                    android:layout_marginRight="30dp"
-                    android:background="@drawable/new_next_icon"/>
-            
+                    android:layout_marginRight="@dimen/dp_30"
+                    android:background="@drawable/new_next_icon" />
+
             </LinearLayout>
-            
+
             <RelativeLayout
                 android:id="@+id/about"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/y30"
-                android:layout_marginTop="0.5dp"
+                android:layout_marginTop="@dimen/dp_half_one"
                 android:background="@color/itemblue"
                 android:gravity="center_vertical">
-                
+
                 <TextView
                     style="@style/setting_text_style_left"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerVertical="true"
-                    android:text="关于融合通信APP" />
-                
+                    android:text="@string/text_about_app" />
+
                 <ImageView
-                    android:layout_width="8dp"
-                    android:layout_height="16dp"
+                    android:layout_width="@dimen/dp_8"
+                    android:layout_height="@dimen/dp_16"
                     android:layout_alignParentRight="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginRight="30dp"
+                    android:layout_marginRight="@dimen/dp_30"
                     android:background="@drawable/new_next_icon" />
             </RelativeLayout>
-            
-            
+
+
             <!--退出应用-->
             <LinearLayout
                 android:id="@+id/ll_exit"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/y29"
-                android:layout_marginTop="0.5dp"
-                android:background="#FD5757"
+                android:layout_marginTop="@dimen/dp_half_one"
+                android:background="@color/red_fd"
                 android:gravity="center"
                 android:orientation="horizontal"
                 android:visibility="visible">
-                
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/exit"
-                    android:textSize="16sp"
-                    android:textColor="@color/white" />
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/sp_16" />
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

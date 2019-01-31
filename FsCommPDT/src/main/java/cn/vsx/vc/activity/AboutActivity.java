@@ -32,10 +32,10 @@ public class AboutActivity extends BaseActivity {
 
     @Override
     public void initView() {
-        barTitle.setText("关于融合通信APP");
+        barTitle.setText(getResources().getString(R.string.text_about_app));
         rightBtn.setVisibility(View.INVISIBLE);
         ok_btn.setVisibility(View.GONE);
-        tv_version.setText("融合通信 " + getVersionName());
+        tv_version.setText(String.format(getResources().getString(R.string.activity_about_version),getVersionName()));
     }
 
     @Override
@@ -64,7 +64,7 @@ public class AboutActivity extends BaseActivity {
             case R.id.tv_update:
 //                UpdateManager manager = new UpdateManager(this);
 //                manager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL,""),true);
-                Toast.makeText(this, "当前已经是最新版本", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getResources().getString(R.string.text_is_the_latest_version), Toast.LENGTH_SHORT).show();
                 break;
             case R.id.news_bar_back:
                 finish();

@@ -14,12 +14,10 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.zectec.imageandfileselector.R;
 import com.zectec.imageandfileselector.base.BaseFragment;
 import com.zectec.imageandfileselector.bean.ImageBean;
 import com.zectec.imageandfileselector.receivehandler.ReceiverSaveImgHandler;
@@ -30,7 +28,9 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.vsx.vc.R;
 import cn.vsx.vc.activity.ChatBaseActivity;
+import cn.vsx.vc.utils.ToastUtil;
 
 /**
  * Created by CWJ on 2017/3/28.
@@ -111,10 +111,9 @@ public class ImagePreviewItemFragment extends BaseFragment{
 
     private ReceiverSaveImgHandler receiverSaveImgHandler = (isSave, path) -> myHandler.post(() -> {
         if(isSave){
-            Toast.makeText(getActivity(), "已保存到"+path+"文件夹", Toast.LENGTH_LONG).show();
-//                        iv_save_picture.setVisibility(View.GONE);
+            ToastUtil.showToast(getActivity(),String.format(getString(R.string.text_file_save_path),path));
         }else{
-            Toast.makeText(getActivity(), "保存失败", Toast.LENGTH_LONG).show();
+            ToastUtil.showToast(getActivity(),getString(R.string.text_save_fail));
         }
     });
 

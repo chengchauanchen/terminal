@@ -146,7 +146,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> RegistActivity.this.runOnUiThread(() -> {
         if (!MyTerminalFactory.getSDK().getParam(Params.IS_FORBID, false)) {
             if (!connected) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "网络异常");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_network_anomaly));
             } else {
                 ToastUtil.closeToast();
                 if (TextUtils.isEmpty(MyTerminalFactory.getSDK().getParam(Params.REGIST_URL, ""))) {
@@ -170,16 +170,16 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     }
                     else if(resultCode ==TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()){
                         AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this)
-                                .setTitle("提示")
-                                .setMessage(resultCode + ":暂时未开通权限")
-                                .setPositiveButton("确定", (dialogInterface, i) -> finish())
+                                .setTitle(R.string.text_prompt)
+                                .setMessage(resultCode + getString(R.string.text_temporarily_unavailable_permissions))
+                                .setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish())
                                 .create();
                         alerDialog.show();
                     }else if (resultCode==TerminalErrorCode.DEPT_EXPIRED.getErrorCode()){
                         AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this)
-                                .setTitle("提示")
-                                .setMessage(resultCode + ":部门授权过期")
-                                .setPositiveButton("确定", (dialogInterface, i) -> finish())
+                                .setTitle(R.string.text_prompt)
+                                .setMessage(resultCode + getString(R.string.text_departmental_delegation_expires))
+                                .setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish())
                                 .create();
                         alerDialog.show();
                     }
@@ -199,7 +199,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                             if (availableIPlist.size() < 1) {
                                 //重新探测
                                 againReAuth();
-                                changeProgressMsg("正在找服务器");
+                                changeProgressMsg(getString(R.string.text_looking_for_server));
                             } else {
                                 ll_regist.setVisibility(View.VISIBLE);
                                 btn_confirm.setVisibility(View.VISIBLE);
@@ -209,16 +209,16 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     }
                     else if(resultCode ==TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()){
                         AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this)
-                                .setTitle("提示")
-                                .setMessage(resultCode + ":暂时未开通权限")
-                                .setPositiveButton("确定", (dialogInterface, i) -> finish())
+                                .setTitle(R.string.text_prompt)
+                                .setMessage(resultCode + getString(R.string.text_temporarily_unavailable_permissions))
+                                .setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish())
                                 .create();
                         alerDialog.show();
                     }else if (resultCode==TerminalErrorCode.DEPT_EXPIRED.getErrorCode()){
                         AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this)
-                                .setTitle("提示")
-                                .setMessage(resultCode + ":部门授权过期")
-                                .setPositiveButton("确定", (dialogInterface, i) -> finish())
+                                .setTitle(R.string.text_prompt)
+                                .setMessage(resultCode + getString(R.string.text_departmental_delegation_expires))
+                                .setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish())
                                 .create();
                         alerDialog.show();
                     }
@@ -236,7 +236,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                                 logger.info("第一次登陆App,开始探测ip列表");
                                 //重新探测
                                 againReAuth();
-                                changeProgressMsg("正在找服务器");
+                                changeProgressMsg(getString(R.string.text_looking_for_server));
                             } else {
                                 ll_regist.setVisibility(View.VISIBLE);
                                 btn_confirm.setVisibility(View.VISIBLE);
@@ -247,7 +247,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 }
                 //版本的文字提示：内网、西城、东城
                 logger.info("地点是：" + TerminalFactory.getSDK().getParam(Params.PLACE));
-                tvVersionPrompt.setText(TerminalFactory.getSDK().getParam(Params.PLACE, "zectec") + " " + DataUtil.getVersion(RegistActivity.this));
+                tvVersionPrompt.setText(String.format(getString(R.string.text_place_and_version),TerminalFactory.getSDK().getParam(Params.PLACE, "zectec"),DataUtil.getVersion(RegistActivity.this)));
             });
 
         }
@@ -262,11 +262,11 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             login();
         } else {//注册失败，提示并关界面
             if (errorCode == TerminalErrorCode.REGISTER_PARAMETER_ERROR.getErrorCode()) {
-                changeProgressMsg("邀请码错误，请重新注册！");
+                changeProgressMsg(getString(R.string.text_invitation_code_wrong_please_regist_again));
             } else if (errorCode == TerminalErrorCode.REGISTER_UNKNOWN_ERROR.getErrorCode()) {
-                changeProgressMsg(errorCode + "注册失败，请检查各项信息是否正确！");
+                changeProgressMsg(errorCode + getString(R.string.text_regist_fail_please_check_all_info_is_correct));
             }else {
-                ToastUtil.showToast(RegistActivity.this,"errorDesc");
+                ToastUtil.showToast(RegistActivity.this,getString(R.string.text_error_desc));
             }
             timer.schedule(new TimerTask() {
                 @Override
@@ -334,7 +334,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             goOn();
             MyTerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, false);//数据更新成功，把是否要更新数据的标记置为false；
         } else {
-            changeProgressMsg("更新数据时：" + errorDesc);
+            changeProgressMsg(String.format(getString(R.string.text_update_data_fail),errorDesc));
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -357,12 +357,12 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 availableIPlist.clear();
                 if (availableIP.size() > 0) {
                     availableIPMap = availableIP;
-                    availableIPlist.add("选择单位");
+                    availableIPlist.add(getString(R.string.text_selection_unit));
                     availableIPlist.addAll(SetToListUtil.setToArrayList(availableIP));
                     availableIPlist.add(company);
                     xcd_available_ip.setItemsData(availableIPlist);
                 } else {
-                    availableIPlist.add("选择单位");
+                    availableIPlist.add(getString(R.string.text_selection_unit));
                     availableIPlist.add(company);
                     xcd_available_ip.setItemsData(availableIPlist);
                 }
@@ -396,7 +396,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         public void onClick(View v) {
             String itemsData = xcd_available_ip.getItemsData();
             if(company.equals(itemsData)){
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请选择单位");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_select_unit));
                 return;
             }
 
@@ -404,17 +404,17 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             String useName = userName.getText().toString().trim();
 
             if (TextUtils.isEmpty(useOrg)) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入邀请码");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_invitation_code));
                 return;
             } else if (!DataUtil.isLegalOrg(useOrg) || useOrg.length() != 6) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入六位数字邀请码；");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_invitation_code_by_six_number));
                 return;
             } else if (TextUtils.isEmpty(useName)) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入姓名");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_name));
                 return;
             }
             else if (!DataUtil.isLegalName(useName) || useName.length() > 12 || useName.length() < 2) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入合法的姓名；\n2-7个字符，支持中英文，数字；\n首位不能是数字");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_correct_name));
                 return;
             }
 
@@ -433,14 +433,14 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 llreAuthInfo.setVisibility(View.VISIBLE);
                 btn_reAuth.setVisibility(View.VISIBLE);
 
-                btnAddMember.setText("邀请码注册");
+                btnAddMember.setText(R.string.text_invitation_code_regist);
             }else {
                 userOrg.setVisibility(View.VISIBLE);
                 userName.setVisibility(View.VISIBLE);
                 btn_confirm.setVisibility(View.VISIBLE);
                 llreAuthInfo.setVisibility(View.GONE);
                 btn_reAuth.setVisibility(View.GONE);
-                btnAddMember.setText("模拟警员");
+                btnAddMember.setText(R.string.text_simulated_police_officer);
             }
         }
     }
@@ -477,13 +477,13 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     ((TextView) v).setHint(nameHint);
                 }
                 if (v.getId() == R.id.userUnit) {
-                    ((TextView) v).setHint("请输入所在单位名称");
+                    ((TextView) v).setHint(getString(R.string.text_add_unit_hint_name));
                 }
                 if (v.getId() == R.id.userIP) {
-                    ((TextView) v).setHint("请输入IP地址");
+                    ((TextView) v).setHint(getString(R.string.text_add_unit_hint_ip));
                 }
                 if (v.getId() == R.id.userPort) {
-                    ((TextView) v).setHint("请输入端口号");
+                    ((TextView) v).setHint(getString(R.string.text_add_unit_hint_port));
                 }
             } else {
                 ((TextView) v).setHint("");
@@ -497,7 +497,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             if (!TextUtils.isEmpty(s)) {//邀请码不为空
                 if (!DataUtil.isLegalOrg(s)) {//邀请码不合法
-                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "邀请码不合法；\n请输入六位数字");
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_invitation_code_not_correct));
                 } else {
                     if (s.length() == 6) {//长度是六的时候，请求名字
                         logger.info("邀请码输入六位完成；开始到服务器拿名字");
@@ -556,7 +556,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     } else if (position != 0) {
                         String name = availableIPlist.get(position);
                         availableIPlist.remove(name);
-                        availableIPlist.remove("选择单位");
+                        availableIPlist.remove(getString(R.string.text_selection_unit));
                         availableIPlist.add(0, name);
                         xcd_available_ip.setItemsData(availableIPlist);
                         selectIp = availableIPMap.get(name).getIp();
@@ -589,19 +589,19 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         public void onClick(View v) {
             //原连通校验逻辑
             if (TextUtils.isEmpty(viewHolder.userUnit.getText())) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入所在单位名称");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_add_unit_hint_name));
             } else {
                 String text = viewHolder.userUnit.getText().toString().trim();
                 if (!DataUtil.isLegalName(text) || text.length() < 2) {
-                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入单位名称；\n2-10个字符，支持中英文，数字；\n首位不能是数字");
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_unit_name_is_not_correct));
                     return;
                 }
 
                 if (TextUtils.isEmpty(viewHolder.userIP.getText())) {
-                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入IP地址");
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_add_unit_hint_ip));
                 } else {
                     if (TextUtils.isEmpty(viewHolder.userPort.getText())) {
-                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入端口号");
+                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_add_unit_hint_port));
                     } else {
                         if (!isCheckFinished) {
                             MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
@@ -621,7 +621,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                                     isCheckFinished = true;
                                     myHandler.post(() -> {
                                         isCheckFinished = false;
-                                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "连通失败，请输入正确的IP和端口号");
+                                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_connect_fail_please_input_corrent_ip_and_port));
                                     });
                                 }
                             });
@@ -659,19 +659,19 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         @Override
         public void onClick(View v) {
             if (TextUtils.isEmpty(viewHolder.userUnit.getText())) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入所在单位名称");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_add_unit_hint_name));
             } else {
                 String text = viewHolder.userUnit.getText().toString().trim();
                 if (!DataUtil.isLegalName(text) || text.length() < 2) {
-                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入单位名称；\n2-10个字符，支持中英文，数字；\n首位不能是数字");
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(),  getString(R.string.text_unit_name_is_not_correct));
                     return;
                 }
 
                 if (TextUtils.isEmpty(viewHolder.userIP.getText())) {
-                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入IP地址");
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_add_unit_hint_ip));
                 } else {
                     if (TextUtils.isEmpty(viewHolder.userPort.getText())) {
-                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入端口号");
+                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_add_unit_hint_port));
                     } else {
                         MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
                             isCheckFinished = false;
@@ -686,7 +686,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
                             } else {
                                 isCheckFinished = true;
-                                myHandler.post(() -> ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "输入的IP和端口号不可用"));
+                                myHandler.post(() -> ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_input_ip_and_port_is_not_used)));
                             }
                         });
                     }
@@ -708,10 +708,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
             if (s.length() > 0) {
                 if (DataUtil.isLegalOrg(s)) {
-                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "单位名称不合法；\n首位不能是数字");
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_unit_name_is_not_correct_one));
                 }
                 if (!DataUtil.isLegalSearch(s)) {
-                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "单位名称不合法；\n支持中英文，数字");
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_unit_name_is_not_correct_two));
                 }
             }
 
@@ -780,13 +780,13 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     private void initDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("网络没有连接，是否打开网络？");
-        builder.setPositiveButton("确定", (dialogInterface, i) -> {
+        builder.setTitle(R.string.text_network_is_not_connected_check_network_is_open);
+        builder.setPositiveButton(getString(R.string.text_sure), (dialogInterface, i) -> {
             dialogInterface.dismiss();
             Intent intent = new Intent(Settings.ACTION_SETTINGS);
             startActivityForResult(intent, OPEN_NET_CODE);
         });
-        builder.setNegativeButton("取消", (dialogInterface, i) -> {
+        builder.setNegativeButton(getString(R.string.text_cancel), (dialogInterface, i) -> {
             dialogInterface.dismiss();
             RegistActivity.this.finish();
         });
@@ -845,7 +845,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             if (netWorkDialog != null) {
                 netWorkDialog.dismiss();
             }
-            changeProgressMsg("正在获取信息");
+            changeProgressMsg(getString(R.string.text_get_info_now));
             authorize();//认证并获取user信息
             requestDrawOverLays();
         } else {
@@ -1000,7 +1000,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     private void regist(final String memberName, final String orgBlockCode) {
         if (!Util.isEmpty(memberName)) {
-            changeProgressMsg("正在注册...");
+            changeProgressMsg(getString(R.string.text_registing));
         }
         timer.schedule(new TimerTask() {
             @Override
@@ -1012,7 +1012,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     private void updateData() {
-        changeProgressMsg("正在更新数据...");
+        changeProgressMsg(getString(R.string.text_updating_data));
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -1022,7 +1022,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     private void login() {
-        changeProgressMsg("正在登入...");
+        changeProgressMsg(getString(R.string.text_logining));
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -1036,10 +1036,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private void sendUuid(final String ip, final String port) {
         reAuthCount++;
         if (reAuthCount > 3) {
-            changeProgressMsg("登录失败，请检查网络是否连接");
+            changeProgressMsg(getString(R.string.text_login_fail_please_check_network));
             myHandler.postDelayed(() -> exit(), 500);
         } else {
-            changeProgressMsg("正在尝试第" + reAuthCount + "次连接");
+            changeProgressMsg(String.format(getString(R.string.text_connect_server_count),reAuthCount));
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
@@ -1056,7 +1056,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     private void goOn() {
-        changeProgressMsg("启动成功...");
+        changeProgressMsg(getString(R.string.text_start_success));
         myHandler.removeCallbacksAndMessages(null);
         startActivity(new Intent(RegistActivity.this, NewMainActivity.class));
         overridePendingTransition(0, R.anim.alpha_hide);
@@ -1127,7 +1127,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     public void requestDrawOverLays() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(RegistActivity.this)) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请打开悬浮窗权限，否则私密呼叫和图像功能无法使用！");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.open_overlay_permisson));
                 Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                         Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
@@ -1189,7 +1189,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             
         } else {
             TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK,false);
-            ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请先打开武汉移动警务！");
+            ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_open_wuhan_police_work_first));
             
         }
     }
@@ -1225,18 +1225,18 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 switch (e.getErrorCode()) {
                     // client_id 为空
                     case PstoreAuthException.ERROR_CLIENTID_NULL:
-                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "client_id 为空！");
+                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_client_id_is_empty));
                         break;
                     // client_id 非法
                     case PstoreAuthException.ERROR_CLIENTID_ILLEGAL:
-                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "client_id 非法！");
+                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_client_id_is_illegal));
                         break;
                     // 授权码非法
                     case PstoreAuthException.ERROR_GRANT_CODE_ILLEGAL:
-                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "授权码 非法！");
+                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_authorization_code_illegal));
                         break;
                     default:
-                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "未知错误！");
+                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_unknown_error));
                         break;
                 }
                 logger.error("AuthPstoreAuthException：" + pstoreException.getMessage());
@@ -1291,16 +1291,16 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 switch (e1.getErrorCode()) {
                     // access_token过期
                     case PstoreUserException.ERROR_ACCESS_TOKEN_EXPIRED:
-                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "access_token过期！");
+                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_access_token_expire));
                         reauthorize();
                         break;
                     // 资源未授权
                     case PstoreUserException.ERROR_RES_UNAUTHORIZED:
-                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "资源未授权！");
+                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_unauthorized_resources));
                         break;
                     // 未知错误
                     case PstoreUserException.ERROR_UNKONWN:
-                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "未知错误！");
+                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(),  getString(R.string.text_unknown_error));
                         break;
                     default:
                         break;

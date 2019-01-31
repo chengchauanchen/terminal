@@ -86,9 +86,9 @@ public class ChangeNamePopupwindow extends PopupWindow {
             case R.id.tv_save:
                 String newName = et_change_name.getText().toString();
                 if (Util.isEmpty(newName)) {
-                    ToastUtil.showToast(context, "请输入姓名");
+                    ToastUtil.showToast(context, context.getString(R.string.text_please_input_name));
                 }else if (!DataUtil.isLegalName(newName) || newName.length() >7  || newName.length() < 2) {
-                    ToastUtil.showToast(context, "请输入2-7位中英文字符，首位不可为数字");
+                    ToastUtil.showToast(context, context.getString(R.string.text_please_input_correct_name));
                 }
                 else {
                     //上传名字

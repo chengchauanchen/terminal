@@ -2,23 +2,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <!--<LinearLayout-->
-        <!--android:id="@+id/jignwutong_catagory"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:background="@color/group_person_catagory_gray"-->
-        <!--&gt;-->
-
-        <!--<TextView-->
-            <!--android:id="@+id/jignwutong_tv_catagory"-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="@dimen/y13"-->
-            <!--android:layout_marginLeft="@dimen/x20"-->
-            <!--android:gravity="center_vertical"-->
-            <!--android:text="A"-->
-            <!--android:textColor="@color/group_person_text_gray"-->
-            <!--android:textSize="12sp" />-->
-    <!--</LinearLayout>-->
 
     <LinearLayout
         android:id="@+id/jignwutong_ll_person_search_item"

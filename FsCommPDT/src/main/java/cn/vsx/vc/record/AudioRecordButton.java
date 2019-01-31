@@ -179,7 +179,8 @@ public class AudioRecordButton extends android.support.v7.widget.AppCompatButton
                 isShcok = true;
                 doShock();
             }
-            mDialogManager.getTipsTxt().setText("还可以说" + remainTime + "秒  ");
+
+            mDialogManager.getTipsTxt().setText(String.format(mContext.getString(R.string.text_can_speak_time),remainTime));
         }
 
     }
@@ -210,19 +211,19 @@ public class AudioRecordButton extends android.support.v7.widget.AppCompatButton
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
-                    ToastUtil.showToast(mContext,"没有发送消息功能权限");
+                    ToastUtil.showToast(mContext,mContext.getString(R.string.text_has_no_send_message_authority));
                     reset();
                     return super.onTouchEvent(event);
                 }
                 if(MyApplication.instance.isMiniLive){
-                    ToastUtil.showToast(mContext,"小窗口模式中，不能执行该操作");
+                    ToastUtil.showToast(mContext,mContext.getString(R.string.text_small_window_mode_can_not_do_this));
                     return super.onTouchEvent(event);
                 }
                 if(System.currentTimeMillis()-lastDownTime<1000){
                     return super.onTouchEvent(event);
                 }
                 if(!isEnabled()){
-                    ToastUtil.showToast(this.mContext,"对方不支持该消息类型");
+                    ToastUtil.showToast(this.mContext,mContext.getString(R.string.text_the_other_party_not_supported_this_message_type));
                     reset();
                     return super.onTouchEvent(event);
                 }

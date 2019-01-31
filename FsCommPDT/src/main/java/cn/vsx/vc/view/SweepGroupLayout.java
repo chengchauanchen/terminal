@@ -59,7 +59,7 @@ public class SweepGroupLayout extends LinearLayout {
             if (MyTerminalFactory.getSDK().hasNetwork()){
                 MyTerminalFactory.getSDK().getGroupScanManager().groupScan(currState, GroupScanType.GROUP_SCANNING.getCode());
             } else {
-                ToastUtil.showToast(context, "网络连接异常，请检查网络！");
+                ToastUtil.showToast(context, context.getString(R.string.text_network_connection_abnormal_please_check_the_network));
             }
         });
     }

@@ -23,7 +23,7 @@
 
         <View
             android:id="@+id/news_bar_line"
-            android:layout_width="1dp"
+            android:layout_width="@dimen/dp_1"
             android:layout_height="@dimen/y10"
             android:layout_centerVertical="true"
             android:layout_marginLeft="@dimen/x11"
@@ -39,9 +39,8 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_toRightOf="@+id/news_bar_line"
-            android:text="扫描组"
             android:textColor="@color/bar_text_white"
-            android:textSize="20sp" />
+            android:textSize="@dimen/sp_20" />
 
         <TextView
             android:id="@+id/right_add"
@@ -50,9 +49,9 @@
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
             android:layout_marginRight="@dimen/x20"
-            android:text="添加"
+            android:text="@string/add"
             android:textColor="@color/bar_background_blue"
-            android:textSize="18sp" />
+            android:textSize="@dimen/sp_18" />
     </RelativeLayout>
 
 
@@ -61,15 +60,15 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/y20"
         android:gravity="center"
-        android:text="最多可添加10个扫描组(包含主通话组)"
+        android:text="@string/activity_set_sweep_tempt"
         android:textColor="@color/sweep_text_gray"
-        android:textSize="10sp" />
+        android:textSize="@dimen/sp_10" />
 
     <ListView
         android:id="@+id/group_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:dividerHeight="0.5dp"
+        android:dividerHeight="@dimen/dp_half_one"
         android:divider="@color/scan_diver" />
 
 </LinearLayout>

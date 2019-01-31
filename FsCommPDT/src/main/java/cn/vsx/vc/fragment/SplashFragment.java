@@ -32,7 +32,7 @@ public class SplashFragment extends Fragment{
 //            myProgressDialog.setLoadingBgRes(R.drawable.loading_bg2);
 //            myProgressDialog.setTextColor(R.color.dialog_text);
             myProgressDialog.setCancelable(false);
-            myProgressDialog.setMsg("正在加载...");
+            myProgressDialog.setMsg(getString(R.string.loading_label));
             myProgressDialog.show();
         }
         mHandler.postDelayed(() -> myProgressDialog.dismiss(),3000);

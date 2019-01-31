@@ -25,8 +25,8 @@
         android:weightSum="10">
 
         <ImageView
-            android:layout_width="40dp"
-            android:layout_height="60dp"
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_60"
             android:layout_gravity="center"
             android:paddingLeft="@dimen/x5"
             android:layout_marginBottom="@dimen/x10"
@@ -38,9 +38,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginBottom="@dimen/x5"
-            android:text="融合通信"
+            android:text="@string/app_name"
             android:textColor="@color/regist_title"
-            android:textSize="20sp" />
+            android:textSize="@dimen/sp_20" />
 
         <LinearLayout
 
@@ -109,7 +109,7 @@
                     android:layout_marginTop="8.4px"
                     android:layout_weight="8"
                     android:background="@drawable/regist_org_shape_a"
-                    android:hint="请输入名字"
+                    android:hint="@string/regist_name_hint"
                     android:inputType="text"
                     android:maxLines="1"
                     android:paddingLeft="@dimen/x10"
@@ -140,7 +140,7 @@
                     android:layout_marginTop="@dimen/y3"
                     android:layout_weight="8"
                     android:background="@drawable/regist_org_shape_a"
-                    android:hint="请输入警号"
+                    android:hint="@string/regist_police_no_hint"
                     android:inputType="text"
                     android:maxLines="1"
                     android:paddingLeft="@dimen/x10"
@@ -155,7 +155,7 @@
                     android:layout_height="@dimen/y20"
                     android:layout_marginTop="@dimen/y3"
                     android:background="@drawable/regist_org_shape_a"
-                    android:hint="请输入警员名称"
+                    android:hint="@string/regist_police_name_hint"
                     android:inputType="text"
                     android:maxLines="1"
                     android:paddingLeft="@dimen/x10"
@@ -171,7 +171,7 @@
                     android:layout_marginTop="@dimen/y3"
                     android:layout_weight="8"
                     android:background="@drawable/regist_org_shape_a"
-                    android:hint="请输入部门编号"
+                    android:hint="@string/regist_department_number_hint"
                     android:inputType="text"
                     android:maxLines="1"
                     android:paddingLeft="@dimen/x10"
@@ -186,7 +186,7 @@
                     android:layout_marginTop="@dimen/y3"
                     android:layout_weight="8"
                     android:background="@drawable/regist_org_shape_a"
-                    android:hint="请输入部门名称"
+                    android:hint="@string/regist_department_name_hint"
                     android:inputType="text"
                     android:maxLines="1"
                     android:paddingLeft="@dimen/x10"
@@ -210,8 +210,8 @@
                     android:layout_height="@dimen/y32"
                     android:layout_weight="3"
                     android:background="@drawable/regist_button_shape"
-                    android:text="模拟警员"
-                    android:textSize="18sp"
+                    android:text="@string/simulated_police_officer"
+                    android:textSize="@dimen/sp_18"
                     android:textColor="@color/regist_button" />
 
             </LinearLayout>
@@ -230,7 +230,7 @@
                     android:layout_weight="8"
                     android:background="@drawable/regist_button_shape"
                     android:text="@string/regist_button"
-                    android:textSize="18sp"
+                    android:textSize="@dimen/sp_18"
                     android:textColor="@color/regist_button" />
 
             </LinearLayout>
@@ -251,7 +251,7 @@
                     android:layout_weight="8"
                     android:background="@drawable/regist_button_shape"
                     android:text="@string/reauth_button"
-                    android:textSize="18sp"
+                    android:textSize="@dimen/sp_18"
                     android:textColor="@color/regist_button" />
 
             </LinearLayout>
@@ -295,8 +295,6 @@
             android:layout_height="@dimen/y125"
             android:layout_alignParentBottom="true" />
 
-
     </RelativeLayout>
-
 
 </RelativeLayout>

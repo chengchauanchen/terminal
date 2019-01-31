@@ -255,7 +255,7 @@ public class UVCPushService extends BaseService{
 
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-            ToastUtil.showToast(getApplicationContext(),"没有组呼听的权限");
+            ToastUtil.showToast(getApplicationContext(),getString(R.string.text_has_no_group_call_listener_authority));
         }else{
             mHandler.post(() -> {
                 mLlUvcSpeakState.setVisibility(View.VISIBLE);

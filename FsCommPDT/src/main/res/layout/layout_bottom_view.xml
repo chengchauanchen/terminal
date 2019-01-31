@@ -2,9 +2,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    
-    >
+    android:layout_height="wrap_content">
     
     <LinearLayout
         android:id="@+id/ll_root"
@@ -35,10 +33,10 @@
         android:background="@drawable/badge_shape"
         android:textColor="@color/white"
         android:layout_toRightOf="@id/ll_root"
-        android:textSize="9sp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginBottom="5dp"
+        android:textSize="@dimen/sp_9"
+        android:layout_marginLeft="@dimen/dp_5"
+        android:layout_marginRight="@dimen/dp_5"
+        android:layout_marginBottom="@dimen/dp_5"
         android:gravity="center"
         android:visibility="gone"
         android:text="99+"/>

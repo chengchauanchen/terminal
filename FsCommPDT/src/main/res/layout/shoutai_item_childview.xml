@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
     <LinearLayout
         android:id="@+id/jignwutong_ll_person_search_item"
         android:layout_width="match_parent"
@@ -11,10 +13,10 @@
 
         <ImageView
             android:id="@+id/icon"
-            android:visibility="gone"
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            android:scaleType="centerCrop"/>
+            android:layout_width="@dimen/dp_10"
+            android:layout_height="@dimen/dp_10"
+            android:scaleType="centerCrop"
+            android:visibility="gone" />
 
         <ImageView
             android:id="@+id/shoutai_user_logo"
@@ -27,8 +29,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/x15"
-            android:orientation="vertical"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/shoutai_tv_member_name"
@@ -52,18 +54,19 @@
         <View
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
         <LinearLayout
             android:id="@+id/shoutai_message_to"
             android:layout_width="@dimen/x20"
             android:layout_height="@dimen/x20"
-            android:gravity="center"
-            android:layout_marginRight="@dimen/x25">
-        <ImageView
-            android:layout_width="@dimen/x16"
-            android:layout_height="@dimen/x16"
-            android:background="@drawable/new_message_icon"/>
+            android:layout_marginRight="@dimen/x25"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="@dimen/x16"
+                android:layout_height="@dimen/x16"
+                android:background="@drawable/new_message_icon" />
 
         </LinearLayout>
 
@@ -89,5 +92,6 @@
             </LinearLayout>
         </RelativeLayout>
     </LinearLayout>
+
     <include layout="@layout/universal_line" />
 </LinearLayout>

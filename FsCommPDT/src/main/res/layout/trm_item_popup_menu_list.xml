@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="45dp"
+    android:layout_height="@dimen/dp_45"
     android:orientation="vertical">
 
-
     <LinearLayout
-        android:gravity="center_vertical"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
         android:background="@color/video_pop_bg"
-        >
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
 
         <ImageView
             android:id="@+id/trm_menu_item_icon"
@@ -26,13 +24,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="@dimen/x20"
-            android:textSize="15sp"
-            android:textColor="@color/video_text_color"/>
+            android:textColor="@color/video_text_color"
+            android:textSize="@dimen/sp_15" />
+
     </LinearLayout>
+
     <View
         android:id="@+id/view_divider"
         android:layout_width="match_parent"
-        android:layout_height="1px"
+        android:layout_height="@dimen/dp_half_one"
         android:background="@color/divider_black_line" />
 
 

@@ -177,7 +177,7 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
             groupViewHolder.tvChangeGroup.setOnClickListener(view -> {
                 if(MyApplication.instance.isMiniLive){
-                    ToastUtil.showToast(context, "小窗口模式中禁止转组");
+                    ToastUtil.showToast(context, context.getString(R.string.text_small_window_mode_can_not_change_group));
                 }else {
                     MyTerminalFactory.getSDK().getGroupManager().changeGroup(group.getNo());
                 }

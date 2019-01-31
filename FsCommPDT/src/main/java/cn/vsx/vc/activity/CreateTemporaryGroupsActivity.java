@@ -92,7 +92,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
     @Override
     public void initView() {
-        bar_title.setText("创建临时组");
+        bar_title.setText(R.string.text_create_temporary_groups);
         right_btn.setVisibility(View.GONE);
         left_btn.setVisibility(View.GONE);
         ok_btn.setVisibility(View.GONE);
@@ -114,9 +114,10 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
             existSec=options3;
 
             logger.info("存在时间"+options1+"时"+options2+"分"+options3+"秒");
-            myHandler.post(() -> exist_time.setText(options1+"时"+options2+"分"+options3+"秒"));
-        }).setLabels("时", "分", "秒").setSubmitText("确定")//确定按钮文字
-                .setCancelText("取消")//取消按钮文字
+            myHandler.post(() -> exist_time.setText(String.format(getResources().getString(R.string.activity_create_temporary_groups_time),options1,options2,options3)));
+        }).setLabels(getResources().getString(R.string.text_hour), getResources().getString(R.string.text_minute), getResources().getString(R.string.text_second))
+                .setSubmitText(getResources().getString(R.string.text_sure))//确定按钮文字
+                .setCancelText(getResources().getString(R.string.text_cancel))//取消按钮文字
                 .setTitleText("")//标题
                 .setSubCalSize(15)//确定和取消文字大小
                 .setSubmitColor(Color.BLACK)//确定按钮文字颜色
@@ -144,10 +145,11 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
             lockedSec=options3;
 
             logger.info("锁定时间"+options1+"时"+options2+"分"+options3+"秒");
-            myHandler.post(() -> locked_time.setText(options1+"时"+options2+"分"+options3+"秒"));
+            myHandler.post(() -> locked_time.setText(String.format(getResources().getString(R.string.activity_create_temporary_groups_time),options1,options2,options3)));
 
-        }).setLabels("时", "分", "秒").setSubmitText("确定")//确定按钮文字
-                .setCancelText("取消")//取消按钮文字
+        }).setLabels(getResources().getString(R.string.text_hour), getResources().getString(R.string.text_minute), getResources().getString(R.string.text_second))
+                .setSubmitText(getResources().getString(R.string.text_sure))//确定按钮文字
+                .setCancelText(getResources().getString(R.string.text_cancel))//取消按钮文字
                 .setTitleText("")//标题
                 .setSubCalSize(15)//确定和取消文字大小
                 .setSubmitColor(Color.BLACK)//确定按钮文字颜色
@@ -249,7 +251,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                     TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
                     TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
                     TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
-                    ToastUtil.showToast(CreateTemporaryGroupsActivity.this,"锁定状态下自动将组员切换到所创建的临时组");
+                    ToastUtil.showToast(CreateTemporaryGroupsActivity.this,getString(R.string.activity_create_temporary_groups_tempts_one));
                 }else {
                     iv_change.setSelected(false);
                     iv_unchange.setSelected(true);
@@ -311,9 +313,9 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         int sign = getSign(1);
         int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0);
         String s = String.valueOf(memberId);
-        create_temporary_group_name.setText("临时组"+ sign +"-"+s.substring(s.length()-4));
-        exist_time.setText("23时59分59秒");
-        locked_time.setText("0时10分0秒");
+        create_temporary_group_name.setText(String.format(getResources().getString(R.string.activity_create_temporary_groups_name),sign,s.substring(s.length()-4)));
+        exist_time.setText(R.string.activity_create_temporary_groups_tempts_exist_time);
+        locked_time.setText(R.string.activity_create_temporary_groups_tempts_locked_time);
         ivUnlocked.setSelected(true);
         ivLocked.setSelected(false);
     }
@@ -394,31 +396,31 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
             forceSwitchGroup = iv_change.isSelected();
             final boolean finalIslock = ivLocked.isSelected();
             if(TextUtils.isEmpty(temporaryGroupsName)){
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),"临时组名称不可为空");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.activity_create_temporary_groups_check_data_name_one));
                 return;
             }
             if(existTime<2*60){
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),"存活时间不能低于2分钟");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.activity_create_temporary_groups_check_data_time_one));
                 return;
             }
             if(existTime>24*60*60-1){
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),"存活时间不能大于23时59分59秒");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.activity_create_temporary_groups_check_data_time_two));
                 return;
             }
             if(lockedTime>24*60*60-1){
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),"锁定时间不能大于23时59分59秒");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.activity_create_temporary_groups_check_data_lock_time_one));
                 return;
             }
             if(finalIslock && lockedTime>existTime){
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),"锁定时间不能大于存活时间");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.activity_create_temporary_groups_check_data_lock_time_two));
                 return;
             }
             if(StringUtil.isEmoji(temporaryGroupsName)){
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入合法的临时组名称");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.activity_create_temporary_groups_check_data_name_two));
                 return;
             }
             if (temporaryGroupsName.length() > 17 || temporaryGroupsName.length() < 3) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "名称不合法");
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.activity_create_temporary_groups_check_data_name_three));
                 return;
             }
            //显示提示框

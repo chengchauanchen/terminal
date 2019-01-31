@@ -180,12 +180,12 @@ public class GroupSearchFragment extends BaseFragment {
         groupSearchAdapter.setFilterKeyWords(keyWord);
 
         tv_search_nothing.setVisibility(View.VISIBLE);
-        tv_search_nothing.setText("搜索组");
+        tv_search_nothing.setText(R.string.text_search_group);
         rl_search_result.setVisibility(View.GONE);
         searchGroups.clear();
 
         if (TextUtils.isEmpty(keyWord)) {
-            ToastUtil.showToast(context, "搜索的内容不能为空");
+            ToastUtil.showToast(context, getString(R.string.text_search_content_can_not_empty));
         }else {
             searchMemberFromGroup();
         }
@@ -199,7 +199,7 @@ public class GroupSearchFragment extends BaseFragment {
             }
         }
         if (searchGroups.size() == 0) {
-            tv_search_nothing.setText("组不存在");
+            tv_search_nothing.setText(R.string.text_group_is_not_exist);
             rl_search_result.setVisibility(View.GONE);
         } else {
             tv_search_nothing.setVisibility(View.GONE);

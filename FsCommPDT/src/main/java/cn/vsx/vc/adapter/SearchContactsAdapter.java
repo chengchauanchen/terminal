@@ -163,7 +163,7 @@ public class SearchContactsAdapter extends BaseAdapter  {
 			if (!TextUtils.isEmpty(searchContactsBean.phone)) {
 				CallPhoneUtil.callPhone((Activity) context, searchContactsBean.phone);
 			}else {
-				ToastUtil.showToast(context,"暂无该用户电话号码");
+				ToastUtil.showToast(context,context.getString(R.string.text_has_no_member_phone_number));
 			}
 		});
 		holder.iv_member_portrait.setOnClickListener(view -> {

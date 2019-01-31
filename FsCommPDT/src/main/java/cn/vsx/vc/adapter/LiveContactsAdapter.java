@@ -6,6 +6,7 @@ import android.text.Spanned;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -149,9 +150,9 @@ public class LiveContactsAdapter extends BaseAdapter {
         }
 
         if(data.get(position).isChecked){
-            viewHolder.iv_select.setSelected(true);
+            viewHolder.iv_select.setChecked(true);
         }else {
-            viewHolder.iv_select.setSelected(false);
+            viewHolder.iv_select.setChecked(false);
         }
 
         convertView.setOnClickListener(v -> {
@@ -160,7 +161,7 @@ public class LiveContactsAdapter extends BaseAdapter {
             if(isPush){
                 //判断有没有推送的权限
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
-                    ToastUtil.showToast(context,"您没有推送权限，点“开始”按钮直接上报");
+                    ToastUtil.showToast(context,context.getString(R.string.text_you_have_no_push_authority_click_button_to_report));
                     return;
                 }else {
                     if(member.isChecked){
@@ -232,7 +233,7 @@ public class LiveContactsAdapter extends BaseAdapter {
         @Bind(R.id.tv_selectmember_name)
         TextView tvSelectmemberName;
         @Bind(R.id.iv_select)
-        ImageView iv_select;
+        CheckBox iv_select;
         @Bind(R.id.img_terminalMemberType)
         ImageView img_terminalMemberType;
 

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -7,41 +6,42 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:gravity="center_vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal">
 
 
         <ImageView
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_marginLeft="10dp"
-            android:padding="10dp"
+            android:layout_width="@dimen/dp_50"
+            android:layout_height="@dimen/dp_50"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:padding="@dimen/dp_10"
             android:src="@drawable/ic_folder" />
 
 
         <TextView
             android:id="@+id/tv_department"
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
+            android:layout_weight="1"
             android:gravity="center_vertical"
             android:singleLine="true"
             android:textColor="@color/group_text_gray"
-            android:textSize="16sp" />
+            android:textSize="@dimen/sp_16" />
+
         <ImageView
-            android:layout_width="8dp"
-            android:layout_height="15dp"
-            android:layout_marginRight="28dp"
-            android:src="@drawable/arrow_right"/>
+            android:layout_width="@dimen/dp_8"
+            android:layout_height="@dimen/dp_15"
+            android:layout_marginRight="@dimen/dp_28"
+            android:src="@drawable/arrow_right" />
     </LinearLayout>
 
     <View
-        android:layout_marginLeft="65dp"
-        android:layout_marginRight="10dp"
-        android:background="@color/diver_bg"
         android:layout_width="match_parent"
-        android:layout_height="0.5dp"/>
+        android:layout_height="@dimen/dp_half_one"
+        android:layout_marginLeft="@dimen/dp_65"
+        android:layout_marginRight="@dimen/dp_10"
+        android:background="@color/diver_bg" />
 
 </LinearLayout>

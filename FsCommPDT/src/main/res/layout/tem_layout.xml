@@ -1,27 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:padding="5dp"
+    android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:layout_height="wrap_content">
+    android:padding="@dimen/dp_5">
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:padding="5dp"
-        >
+        android:padding="@dimen/dp_5">
+
         <ImageView
             android:id="@+id/imageview"
-            android:src="@drawable/tel"
             android:layout_width="@dimen/x30"
-            android:layout_height="@dimen/x30" />
+            android:layout_height="@dimen/x30"
+            android:src="@drawable/tel" />
+
         <TextView
             android:id="@+id/textview"
-            android:text="录音电话"
-            android:textSize="20dp"
-            android:layout_marginLeft="10dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:text="@string/text_recording_telephone"
+            android:textSize="@dimen/sp_20" />
     </LinearLayout>
 
 </LinearLayout>

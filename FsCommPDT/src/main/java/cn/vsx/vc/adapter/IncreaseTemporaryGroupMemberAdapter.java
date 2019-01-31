@@ -179,7 +179,7 @@ public class IncreaseTemporaryGroupMemberAdapter extends RecyclerView.Adapter<Re
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
 
         } else {
-            ToastUtil.showToast(mContext, "网络连接异常，请检查网络！");
+            ToastUtil.showToast(mContext, mContext.getString(R.string.text_network_connection_abnormal_please_check_the_network));
         }
     }
 

@@ -12,10 +12,10 @@
         <gradient
             android:type="sweep"
             android:useLevel="false"
-            android:startColor="#DADADA"
-            android:centerColor="#00A4FF"
+            android:startColor="@color/white_da"
+            android:centerColor="@color/blue_00a"
             android:centerY="0.50"
-            android:endColor="#0091FF" />
+            android:endColor="@color/edittext_cursor" />
 
     </shape>
 </animated-rotate>

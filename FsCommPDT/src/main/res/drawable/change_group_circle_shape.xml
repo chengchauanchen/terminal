@@ -5,6 +5,6 @@
     android:useLevel="false">
  
     <solid android:color="@color/change_group_gray"/>
-    <size android:width="8dp"
-          android:height="8dp"/>
+    <size android:width="@dimen/dp_8"
+          android:height="@dimen/dp_8"/>
 </shape>

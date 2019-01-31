@@ -64,7 +64,7 @@ public class PhoneAssistantListAdapter extends BaseAdapter {
             holder.playRecord.setVisibility(View.GONE);
             holder.progressBar.setVisibility(View.GONE);
             holder.status.setVisibility(View.GONE);
-            holder.callRecords.setText("未接通");
+            holder.callRecords.setText(R.string.text_unconnected);
         }else {
             holder.playRecord.setVisibility(View.VISIBLE);
             holder.status.setVisibility(View.VISIBLE);

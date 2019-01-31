@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-             android:layout_width="match_parent"
-             android:layout_height="match_parent"
-             android:background="#000000"
-             android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    android:orientation="vertical">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -12,14 +12,14 @@
         <VideoView
             android:id="@+id/video_preview"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent" />
 
         <ImageView
             android:id="@+id/image_photo"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#000"
-            android:visibility="invisible"/>
+            android:background="@color/black"
+            android:visibility="invisible" />
     </FrameLayout>
 
 
@@ -33,15 +33,15 @@
             android:id="@+id/image_flash"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:src="@drawable/ic_flash_on"/>
+            android:layout_margin="@dimen/dp_16"
+            android:src="@drawable/ic_flash_on" />
 
         <ImageView
             android:id="@+id/image_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="16dp"
-            android:src="@drawable/ic_camera"/>
+            android:layout_margin="@dimen/dp_16"
+            android:src="@drawable/ic_camera" />
 
     </LinearLayout>
 
@@ -50,12 +50,12 @@
         android:id="@+id/capture_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"/>
+        android:layout_gravity="bottom" />
 
     <cn.vsx.vc.view.cameralibrary.FoucsView
         android:id="@+id/fouce_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:visibility="invisible"/>
+        android:visibility="invisible" />
 </FrameLayout>

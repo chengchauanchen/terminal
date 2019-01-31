@@ -3,18 +3,18 @@
     android:shape="rectangle" >
 
     <!-- 填充颜色 -->
-    <solid android:color="#F9B552" />
+    <solid android:color="@color/yellow_f9" />
 
     <!-- 矩形的圆角半径 -->
     <corners
-        android:bottomLeftRadius="5dp"
-        android:bottomRightRadius="5dp"
-        android:topLeftRadius="5dp"
-        android:topRightRadius="5dp" />
+        android:bottomLeftRadius="@dimen/dp_5"
+        android:bottomRightRadius="@dimen/dp_5"
+        android:topLeftRadius="@dimen/dp_5"
+        android:topRightRadius="@dimen/dp_5" />
     <!-- 线的宽度，颜色灰色 -->
     <stroke
-        android:width="1dp"
-        android:color="#F9B552" >
+        android:width="@dimen/dp_1"
+        android:color="@color/yellow_f9" >
     </stroke>
 
 </shape>

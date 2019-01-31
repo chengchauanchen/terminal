@@ -117,7 +117,7 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
         viewHolderPerson.shoutai_tv_member_name.setText(list.get(groupPosition).memberList.get(childPosition).getName());
         viewHolderPerson.shoutai_call_to.setOnClickListener(v -> {
             if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                ToastUtil.showToast(activity,"没有个呼功能权限");
+                ToastUtil.showToast(activity,activity.getString(R.string.text_no_call_permission));
             }else {
                 activeIndividualCall(groupPosition,childPosition);
             }
@@ -177,7 +177,7 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, list.get(groupPosition).memberList.get(childPosition));
 
         } else {
-            ToastUtil.showToast(activity, "网络连接异常，请检查网络！");
+            ToastUtil.showToast(activity, activity.getString(R.string.text_network_connection_abnormal_please_check_the_network));
         }
     }
 

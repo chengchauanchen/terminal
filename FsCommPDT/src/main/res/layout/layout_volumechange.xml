@@ -8,14 +8,14 @@
         android:id="@+id/voice_add_cut"
         android:layout_width="match_parent"
         android:layout_height="@dimen/y29"
-        android:layout_marginTop="0.5dp"
+        android:layout_marginTop="@dimen/dp_half_one"
         android:background="@color/itemblue">
 
         <TextView
             android:id="@+id/voice_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="音量"
+            android:text="@string/text_volume"
             android:layout_centerVertical="true"
             style="@style/setting_text_style_left" />
 
@@ -49,7 +49,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_marginRight="@dimen/x5"
-                android:text="%"
+                android:text="@string/text_percent_sign"
                 android:textColor="@color/setting_text_gray_two"
                 android:textSize="@dimen/x12" />
 
@@ -67,7 +67,7 @@
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="@dimen/y29"
-        android:layout_marginTop="0.5dp"
+        android:layout_marginTop="@dimen/dp_half_one"
         android:background="@color/itemblue">
 
         <TextView
@@ -75,7 +75,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:text="静音"
+            android:text="@string/text_mute"
             android:textColor="@color/setting_text_gray"
             style="@style/setting_text_style_left" />
 

@@ -2,80 +2,80 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <RelativeLayout
+        android:id="@+id/re_video_root"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/re_video_root"
         android:background="@color/black">
+
         <TextureView
             android:id="@+id/sv_gb28181"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:keepScreenOn="true"
             android:layout_centerInParent="true"
+            android:keepScreenOn="true"
             android:visibility="visible" />
-    
+
         <View
             android:layout_width="match_parent"
-            android:layout_height="55dp"
+            android:layout_height="@dimen/dp_55"
             android:alpha="0.6"
             android:background="@color/black" />
-    
+
         <TextView
             android:id="@+id/tv_gb28181_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="25dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginLeft="@dimen/dp_25"
+            android:layout_marginTop="@dimen/dp_20"
             android:text="20:00"
-            android:visibility="gone"
             android:textColor="@color/white"
-            android:textSize="14sp" />
+            android:textSize="@dimen/sp_14"
+            android:visibility="gone" />
+
         <TextView
             android:id="@+id/tv_device_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
             android:layout_centerHorizontal="true"
-            android:textColor="@color/white"/>
-    
+            android:layout_marginTop="@dimen/dp_20"
+            android:textColor="@color/white" />
+
         <ImageView
             android:id="@+id/iv_close"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="20dp"
-            android:layout_marginTop="20dp"
-            android:src="@drawable/close"/>
-    
+            android:layout_marginTop="@dimen/dp_20"
+            android:layout_marginRight="@dimen/dp_20"
+            android:src="@drawable/close" />
+
         <LinearLayout
             android:id="@+id/ll_invite_member"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerVertical="true"
             android:layout_alignParentRight="true"
-            android:layout_marginRight="20dp"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_20"
             android:orientation="vertical">
-        
+
             <ImageView
                 android:id="@+id/iv_live_look_addmember"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="@dimen/dp_60"
+                android:layout_height="@dimen/dp_60"
                 android:background="@drawable/push_live" />
-        
+
             <TextView
                 android:id="@+id/textView6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="@dimen/dp_10"
                 android:text="推送图像"
                 android:textColor="@color/white"
-                android:textSize="16dp"
+                android:textSize="@dimen/sp_16"
                 android:visibility="visible" />
         </LinearLayout>
     </RelativeLayout>
-    
-    
-    
 </RelativeLayout>

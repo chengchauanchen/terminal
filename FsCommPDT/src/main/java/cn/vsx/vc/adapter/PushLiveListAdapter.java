@@ -75,20 +75,21 @@ public class PushLiveListAdapter extends BaseAdapter {
             holder.ll_watch_success.setVisibility(View.VISIBLE);
             holder.ll_push_fail.setVisibility(View.GONE);
             if(messageBody.getInteger(JsonParam.REMARK) == Remark.ACTIVE_VIDEO_LIVE) {//自己主动上报图像
-                holder.tv_push_type.setText("个人上报图像");
+                holder.tv_push_type.setText(R.string.text_personal_image_reporting);
                 String title = messageBody.getString(JsonParam.TITLE);
                 if(TextUtils.isEmpty(title)) {
-                    holder.tv_title.setText("个人上报图像");
+                    holder.tv_title.setText(R.string.text_personal_image_reporting);
                 }
                 else {
                     holder.tv_title.setText(title);
                 }
             }
             else if(messageBody.getInteger(JsonParam.REMARK) == Remark.ASK_VIDEO_LIVE) {//别人邀请我上报图像
-                holder.tv_push_type.setText(messageBody.getString(JsonParam.QUERY_MEMBER_NAME)+"请求上报图像");
+
+                holder.tv_push_type.setText(String.format(context.getString(R.string.text_people_request_report_name),messageBody.getString(JsonParam.QUERY_MEMBER_NAME)));
                 String title = messageBody.getString(JsonParam.TITLE);
                 if(TextUtils.isEmpty(title)) {
-                    holder.tv_title.setText(messageBody.getString(JsonParam.QUERY_MEMBER_NAME)+"请求上报图像");
+                    holder.tv_title.setText(String.format(context.getString(R.string.text_people_request_report_name),messageBody.getString(JsonParam.QUERY_MEMBER_NAME)));
                 }
                 else {
                     holder.tv_title.setText(title);

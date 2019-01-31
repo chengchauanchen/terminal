@@ -58,9 +58,9 @@ public class MemberEnterAdapter extends BaseAdapter {
             name = name.substring(0, 4)+"...";
         }
         if (watchMember.joinOrExit) {
-            viewHolder.tvLiveMemberEnter.setText(name + "加入");
+            viewHolder.tvLiveMemberEnter.setText(String.format(context.getString(R.string.text_watch_live_enter_name),name));
         }else {
-            viewHolder.tvLiveMemberEnter.setText(name + "离开");
+            viewHolder.tvLiveMemberEnter.setText(String.format(context.getString(R.string.text_watch_live_leave_name),name));
         }
         if(position % 4 == 0){
             viewHolder.llLiveMemberEnterBg.setBackground(context.getResources().getDrawable(R.drawable.live_member_enter_blue_shape));

@@ -217,9 +217,9 @@ public class GroupMemberActivity extends BaseActivity {
                         total--;
                     }
                     if(total>0){
-                        delete_text.setText("删除(" + total + ")");
+                        delete_text.setText(String.format(getString(R.string.button_delete_number),total));
                     }else {
-                        delete_text.setText("删除");
+                        delete_text.setText(R.string.text_delete);
                     }
                 });
                 memberList.setAdapter(sortAdapter);
@@ -305,14 +305,14 @@ public class GroupMemberActivity extends BaseActivity {
                 if(isTemporaryGroup){
                     in_title_bar.setVisibility(View.GONE);
                     temp_title_bar.setVisibility(View.VISIBLE);
-                    barTitle.setText("组内成员");
-                    memberNum.setText("组内成员" + (currentGroupMembers.size()) + "人");
+                    barTitle.setText(R.string.text_group_members);
+                    memberNum.setText(String.format(getString(R.string.text_group_members_number),currentGroupMembers.size()));
                     logger.info("组内成员：" + currentGroupMembers.size());
                 }else {
                     in_title_bar.setVisibility(View.VISIBLE);
                     temp_title_bar.setVisibility(View.GONE);
-                    barTitle.setText("组内在线成员");
-                    memberNum.setText("组内在线成员" + (currentGroupMembers.size()) + "人");
+                    barTitle.setText(R.string.text_intra_group_line_members);
+                    memberNum.setText(String.format(getString(R.string.text_intra_group_line_members_number),currentGroupMembers.size()));
                     logger.info("组内在线成员：" + currentGroupMembers.size());
                 }
             });
@@ -326,7 +326,7 @@ public class GroupMemberActivity extends BaseActivity {
                 if(tempGroupNo == groupId && canAdd){
                     myHandler.postDelayed(() -> {
                         MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
-                        ToastUtil.showToast(GroupMemberActivity.this,"删除成功");
+                        ToastUtil.showToast(GroupMemberActivity.this,getString(R.string.text_delete_success));
                     },2000);
 
                 }
@@ -341,7 +341,7 @@ public class GroupMemberActivity extends BaseActivity {
                 if(tempGroupNo == groupId && canAdd){
                     myHandler.postDelayed(() -> {
                         MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
-                        ToastUtil.showToast(GroupMemberActivity.this,"添加成功");
+                        ToastUtil.showToast(GroupMemberActivity.this,getString(R.string.text_add_success));
                     },2000);
                 }
             }

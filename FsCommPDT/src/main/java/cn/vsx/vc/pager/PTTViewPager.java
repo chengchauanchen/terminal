@@ -146,7 +146,7 @@ public class PTTViewPager extends BaseViewPager {
                             setViewEnable(false);
                         });
                     } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
-                        myHandler.post(() -> ToastUtil.showToast(context, "当前组是只听组，不能发起组呼"));
+                        myHandler.post(() -> ToastUtil.showToast(context, context.getString(R.string.cannot_talk)));
                     } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
                         myHandler.post(() -> change2Waiting());
                     } else {//请求失败
@@ -482,8 +482,8 @@ public class PTTViewPager extends BaseViewPager {
     private void change2Silence() {
         currentPttStatus = GroupCallSpeakState.IDLE;
         allViewDefault();
-        tv_ptt.setText("按住 说话");
-        tv_ptt.setTextColor(Color.parseColor("#a9a9a9"));
+        tv_ptt.setText(R.string.press_blank_space_talk_text);
+        tv_ptt.setTextColor(getResources().getColor(R.color.darkgrey));
         ptt.setBackgroundResource(R.drawable.ptt_silence1);
         ptt.setEnabled(true);
     }
@@ -493,8 +493,8 @@ public class PTTViewPager extends BaseViewPager {
         allViewDefault();
 
         ptt.setBackgroundResource(R.drawable.ptt_pre_speaking);
-        tv_ptt.setText("准备说话");
-        tv_ptt.setTextColor(Color.parseColor("#fdb852"));
+        tv_ptt.setText(R.string.text_ready_to_speak);
+        tv_ptt.setTextColor(getResources().getColor(R.color.ptt_pre_speak_text));
         ptt.setEnabled(true);
     }
 
@@ -503,8 +503,8 @@ public class PTTViewPager extends BaseViewPager {
         allViewDefault();
 
         ptt.setBackgroundResource(R.drawable.ptt_pre_speaking);
-        tv_ptt.setText("准备说话");
-        tv_ptt.setTextColor(Color.parseColor("#fdb852"));
+        tv_ptt.setText(R.string.text_ready_to_speak);
+        tv_ptt.setTextColor(getResources().getColor(R.color.ptt_pre_speak_text));
 
         ptt.setEnabled(true);
     }
@@ -514,8 +514,8 @@ public class PTTViewPager extends BaseViewPager {
         allViewDefault();
 
         ptt.setBackgroundResource(R.drawable.ptt_speaking);
-        tv_ptt.setText("松开结束");
-        tv_ptt.setTextColor(Color.parseColor("#a9a9a9"));
+        tv_ptt.setText(R.string.button_release_end);
+        tv_ptt.setTextColor(getResources().getColor(R.color.darkgrey));
         logger.info("主界面，ptt被禁 ？  isClickVolumeToCall："+MyApplication.instance.isClickVolumeToCall);
         ptt.setEnabled(!MyApplication.instance.isClickVolumeToCall);
     }
@@ -528,8 +528,8 @@ public class PTTViewPager extends BaseViewPager {
 
     private void change2Listening() {
         allViewDefault();
-        tv_ptt.setText("按住 排队");
-        tv_ptt.setTextColor(Color.parseColor("#a9a9a9"));
+        tv_ptt.setText(R.string.button_press_to_line_up);
+        tv_ptt.setTextColor(getResources().getColor(R.color.darkgrey));
         ptt.setBackgroundResource(R.drawable.ptt_listening3);
         logger.info("主界面，ptt被禁了  isPttPress："+MyApplication.instance.isPttPress);
         if(MyApplication.instance.isPttPress){
@@ -540,8 +540,8 @@ public class PTTViewPager extends BaseViewPager {
     private void change2Forbid() {//禁止组呼，不是遥毙
         allViewDefault();
 
-        tv_ptt.setText("按住 排队");
-        tv_ptt.setTextColor(Color.parseColor("#a9a9a9"));
+        tv_ptt.setText(R.string.button_press_to_line_up);
+        tv_ptt.setTextColor(getResources().getColor(R.color.darkgrey));
         ptt.setBackgroundResource(R.drawable.ptt_listening3);
         logger.info("主界面，ptt被禁了  isPttPress："+MyApplication.instance.isPttPress);
         ptt.setEnabled(false);

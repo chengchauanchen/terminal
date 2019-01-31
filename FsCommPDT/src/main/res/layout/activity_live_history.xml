@@ -5,57 +5,56 @@
     android:layout_height="match_parent"
     android:background="@color/black"
     tools:context="cn.vsx.vc.activity.LiveHistoryActivity">
-    
-    
+
     <ImageView
         android:id="@+id/iv_close"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="@dimen/dp_20"
+        android:layout_height="@dimen/dp_20"
         android:layout_alignTop="@id/tv_theme"
         android:src="@drawable/live_exit"
-        android:layout_marginLeft="20dp"/>
+        android:layout_marginLeft="@dimen/dp_20"/>
     <TextView
         android:id="@+id/tv_theme"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:gravity="center"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="@dimen/dp_40"
         android:textColor="@color/white"
-        android:textSize="20sp"
+        android:textSize="@dimen/sp_20"
         android:maxLines="1"
         android:maxEms="8"
         android:ellipsize="end"
-        android:text="关山大道出现大面积裂缝"/>
+        android:text=""/>
     
     <TextView
         android:id="@+id/tv_live_finished"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="已结束上报"
+        android:text="@string/closed_report"
         android:textColor="@color/pttyellow"
         android:layout_below="@id/tv_theme"
-        android:layout_marginTop="40dp"
-        android:layout_marginLeft="30dp"
-        android:textSize="22sp" />
+        android:layout_marginTop="@dimen/dp_40"
+        android:layout_marginLeft="@dimen/dp_30"
+        android:textSize="@dimen/sp_22" />
     
     <TextView
         android:id="@+id/tv_live_start_time"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/white"
-        android:textSize="18sp"
+        android:textSize="@dimen/sp_18"
         android:layout_below="@id/tv_live_finished"
         android:layout_alignLeft="@id/tv_live_finished"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="@dimen/dp_20"/>
     
     <RelativeLayout
         android:id="@+id/rl_live_image"
         android:layout_width="match_parent"
-        android:layout_height="240dp"
+        android:layout_height="@dimen/dp_240"
         android:layout_below="@id/tv_live_start_time"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp">
+        android:layout_marginLeft="@dimen/dp_20"
+        android:layout_marginRight="@dimen/dp_20">
         
         <ImageView
             android:id="@+id/iv_live_image"
@@ -74,46 +73,45 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="@color/white"
-            android:textSize="15sp"
+            android:textSize="@dimen/sp_15"
             android:layout_alignParentBottom="true"
             android:layout_alignParentRight="true"
-            android:layout_marginBottom="20dp"
-            android:layout_marginRight="20dp"/>
+            android:layout_marginBottom="@dimen/dp_20"
+            android:layout_marginRight="@dimen/dp_20"/>
         
     </RelativeLayout>
     
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="观看本次录像"
+        android:text="@string/text_watch_this_video"
         android:textColor="@color/white"
-        android:textSize="18sp"
+        android:textSize="@dimen/sp_18"
         android:layout_below="@id/rl_live_image"
-        android:layout_marginTop="20dp"
-        android:layout_marginLeft="40dp"/>
+        android:layout_marginTop="@dimen/dp_20"
+        android:layout_marginLeft="@dimen/dp_40"/>
     
     <LinearLayout
         android:id="@+id/ll_volume"
-        android:layout_width="80dp"
-        android:layout_height="40dp"
+        android:layout_width="@dimen/dp_80"
+        android:layout_height="@dimen/dp_40"
         android:layout_centerInParent="true"
-        android:background="#66000000"
+        android:background="@color/transparent_40"
         android:visibility="gone"
         android:gravity="center">
         <ImageView
             android:id="@+id/iv_volume"
-            android:layout_width="14dp"
-            android:layout_height="24dp"
+            android:layout_width="@dimen/dp_14"
+            android:layout_height="@dimen/dp_24"
             android:background="@drawable/volume_adjust" />
         
         <TextView
             android:id="@+id/tv_volume"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="100%"
-            android:textColor="#fff"
-            android:textSize="14dp"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_14"
             android:textStyle="normal" />
     </LinearLayout>
 </RelativeLayout>

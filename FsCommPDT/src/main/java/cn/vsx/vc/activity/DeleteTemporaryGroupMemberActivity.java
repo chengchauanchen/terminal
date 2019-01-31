@@ -83,9 +83,9 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
         windowManager.getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
         if(type==CREATE_TEMPORARY_GROUP_MEMBER){
-            txt_create_temporary_selectmember_title.setText("创建临时组");
+            txt_create_temporary_selectmember_title.setText(R.string.text_create_temporary_groups);
         }else if(type==CURRENT_TEMPORARY_GROUP_MEMBER){
-            txt_create_temporary_selectmember_title.setText("添加成员");
+            txt_create_temporary_selectmember_title.setText(R.string.text_add_member);
         }
 
 
@@ -130,7 +130,7 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
         memberList.clear();
         tv_checktext.setText("");
         et_search_allcontacts.setText("");
-        btn_create_temporary_selectmember_start.setText("下一步");
+        btn_create_temporary_selectmember_start.setText(R.string.text_next);
         btn_create_temporary_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg);
     }
 
@@ -160,7 +160,7 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
                     intent.putIntegerArrayListExtra("list",list);
                     startActivity(intent);
                 }else {
-                    ToastUtil.showToast(DeleteTemporaryGroupMemberActivity.this,"跳转界面失败");
+                    ToastUtil.showToast(DeleteTemporaryGroupMemberActivity.this,getString(R.string.text_jump_fail));
                 }
 
 
@@ -244,20 +244,20 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
                     sb.append(m.getName()).append("  ");
                 }
                 if(!pushMembers.isEmpty()){
-                    btn_create_temporary_selectmember_start.setText(String.format("开始(%s)",pushMembers.size()));
+                    btn_create_temporary_selectmember_start.setText(String.format(getString(R.string.button_start_number),pushMembers.size()));
                     btn_create_temporary_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg);
                 }else{
-                    btn_create_temporary_selectmember_start.setText("开始");
+                    btn_create_temporary_selectmember_start.setText(R.string.text_start);
                     btn_create_temporary_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg);
                 }
             }else{
 
                 if(null != liveMember){
                     sb.append(liveMember.getName());
-                    btn_create_temporary_selectmember_start.setText(String.format("开始(%s)",1));
+                    btn_create_temporary_selectmember_start.setText(String.format(getString(R.string.button_start_number),1));
                     btn_create_temporary_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg);
                 }else{
-                    btn_create_temporary_selectmember_start.setText("开始");
+                    btn_create_temporary_selectmember_start.setText(R.string.text_start);
                     btn_create_temporary_selectmember_start.setBackgroundResource(R.drawable.live_theme_confirm_bg_no);
                 }
             }

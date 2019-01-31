@@ -20,7 +20,7 @@
             android:layout_marginLeft="@dimen/x70"
             android:text="7B-10T"
             android:textColor="@color/setting_text_gray"
-            android:textSize="12sp" />
+            android:textSize="@dimen/sp_12" />
 
 
         <ImageView

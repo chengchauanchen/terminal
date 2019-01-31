@@ -409,7 +409,7 @@ public class NewsFragment extends BaseFragment {
     /*** 自己组呼返回的消息 **/
     private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
         if (methodResult == 0) {
-            showViewWhenGroupCall("我正在说话");
+            showViewWhenGroupCall(getString(R.string.text_I_am_talking));
             setViewEnable(false);
         }
     });
@@ -827,7 +827,7 @@ public class NewsFragment extends BaseFragment {
             String content = FileUtil.getStringFromFile(file);
             logger.info("长文本： path:"+path+"    content:"+content);
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+content;
+                noticeContent=String.format(getString(R.string.text_message_list_text_),terminalMessage.messageFromName,content);
             } else {
                 noticeContent=content;
             }
@@ -835,86 +835,86 @@ public class NewsFragment extends BaseFragment {
 
         if(terminalMessage.messageType ==  MessageType.PICTURE.getCode()) {
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+"[图片]";
+                noticeContent=String.format(getString(R.string.text_message_list_picture_),terminalMessage.messageFromName);
             } else {
-                noticeContent="[图片]";
+                noticeContent=getString(R.string.text_message_list_picture);
             }
         }
         if(terminalMessage.messageType ==  MessageType.AUDIO.getCode()) {
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+"[语音]";
+                noticeContent=String.format(getString(R.string.text_message_list_voice_),terminalMessage.messageFromName);
             } else {
-                noticeContent="[语音]";
+                noticeContent=getString(R.string.text_message_list_voice);
             }
         }
         if(terminalMessage.messageType ==  MessageType.VIDEO_CLIPS.getCode()) {
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+"[视频]";
+                noticeContent=String.format(getString(R.string.text_message_list_video_),terminalMessage.messageFromName);
             } else {
-                noticeContent="[视频]";
+                noticeContent=getString(R.string.text_message_list_video);
             }
         }
         if(terminalMessage.messageType ==  MessageType.FILE.getCode()) {
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+"[文件]";
+                noticeContent=String.format(getString(R.string.text_message_list_file_),terminalMessage.messageFromName);
             } else {
-                noticeContent="[文件]";
+                noticeContent=getString(R.string.text_message_list_file);
             }
         }
         if(terminalMessage.messageType ==  MessageType.POSITION.getCode()) {
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+"[位置]";
+                noticeContent=String.format(getString(R.string.text_message_list_location_),terminalMessage.messageFromName);
             } else {
-                noticeContent="[位置]";
+                noticeContent=getString(R.string.text_message_list_location);
             }
         }
         if(terminalMessage.messageType ==  MessageType.AFFICHE.getCode()) {
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+"[公告]";
+                noticeContent=String.format(getString(R.string.text_message_list_notice_),terminalMessage.messageFromName);
             } else {
-                noticeContent="[公告]";
+                noticeContent=getString(R.string.text_message_list_notice);
             }
         }
         if(terminalMessage.messageType ==  MessageType.WARNING_INSTANCE.getCode()) {
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+"[警情]";
+                noticeContent=String.format(getString(R.string.text_message_list_warning_),terminalMessage.messageFromName);
             } else {
-                noticeContent="[警情]";
+                noticeContent=getString(R.string.text_message_list_warning);
             }
         }
         if(terminalMessage.messageType ==  MessageType.PRIVATE_CALL.getCode()) {
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+"[个呼]";
+                noticeContent=String.format(getString(R.string.text_message_list_personal_call_),terminalMessage.messageFromName);
             } else {
-                noticeContent="[个呼]";
+                noticeContent=getString(R.string.text_message_list_personal_call);
             }
         }
         if(terminalMessage.messageType ==  MessageType.VIDEO_LIVE.getCode()) {
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+"[图像]";
+                noticeContent=String.format(getString(R.string.text_message_list_image_),terminalMessage.messageFromName);
             } else {
-                noticeContent="[图像]";
+                noticeContent=getString(R.string.text_message_list_image);
             }
         }
         if(terminalMessage.messageType ==  MessageType.GROUP_CALL.getCode()) {
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+"[组呼]";
+                noticeContent=String.format(getString(R.string.text_message_list_group_call_),terminalMessage.messageFromName);
             } else {
-                noticeContent="[组呼]";
+                noticeContent=getString(R.string.text_message_list_group_call);
             }
         }
         if(terminalMessage.messageType ==  MessageType.AUDIO.getCode()) {
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+"[录音]";
+                noticeContent=String.format(getString(R.string.text_message_list_sound_recording_),terminalMessage.messageFromName);
             } else {
-                noticeContent="[录音]";
+                noticeContent=getString(R.string.text_message_list_sound_recording);
             }
         }
         if(terminalMessage.messageType ==  MessageType.HYPERLINK.getCode()) {//人脸识别
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                noticeContent=terminalMessage.messageFromName+":"+"[人脸识别]";
+                noticeContent=String.format(getString(R.string.text_message_list_face_recognition_),terminalMessage.messageFromName);
             } else {
-                noticeContent="[人脸识别]";
+                noticeContent=getString(R.string.text_message_list_face_recognition);
             }
         }
 
@@ -927,7 +927,7 @@ public class NewsFragment extends BaseFragment {
         Notification.Builder myBuilder = new Notification.Builder(MyApplication.instance.getApplicationContext());
         myBuilder.setContentTitle(noticeTitle)//设置通知标题
                 .setContentText(unReadCountText+noticeContent)//设置通知内容
-                .setTicker("您有一条新消息！")//设置状态栏提示消息
+                .setTicker(getString(R.string.text_you_has_a_new_message))//设置状态栏提示消息
                 .setSmallIcon(R.drawable.pttpdt)//设置通知图标
                 .setAutoCancel(true)//点击后取消
                 .setWhen(System.currentTimeMillis())//设置通知时间

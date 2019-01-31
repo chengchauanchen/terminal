@@ -70,7 +70,7 @@ public class TransponFragment extends BaseFragment{
         lv_chat_member.setOnItemClickListener((parent, view, position, id) -> new DialogUtil() {
             @Override
             public CharSequence getMessage() {
-                return "确定转发消息?";
+                return getString(R.string.text_are_you_sure_forward_this_message);
             }
 
             @Override

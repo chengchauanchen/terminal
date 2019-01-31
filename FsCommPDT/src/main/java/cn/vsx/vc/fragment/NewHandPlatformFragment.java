@@ -237,7 +237,7 @@ public class NewHandPlatformFragment extends BaseFragment {
         if (memberList != null) {
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class, memberList);
         } else {
-            ToastUtil.showToast(getActivity(), "暂无电台用户");
+            ToastUtil.showToast(getActivity(), getString(R.string.text_no_radio_users));
         }
         lastSearchTime = System.currentTimeMillis();
     }

@@ -167,7 +167,7 @@ public class GroupMemberAdapter extends BaseAdapter {
             if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
                 activeIndividualCall(position);
         }else {
-                ToastUtil.showToast(mContext,"没有个呼功能权限");
+                ToastUtil.showToast(mContext,mContext.getString(R.string.text_no_call_permission));
             }
 
         });
@@ -183,7 +183,7 @@ public class GroupMemberAdapter extends BaseAdapter {
                 ItemAdapter adapter = new ItemAdapter(mContext,ItemAdapter.iniDatas());
                 AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
                 //设置标题
-                builder.setTitle("拨打电话");
+                builder.setTitle(mContext.getString(R.string.text_call_up));
                 builder.setAdapter(adapter, (dialogInterface, position1) -> {
                     if(position1 ==VOIP){//voip电话
                         if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
@@ -191,7 +191,7 @@ public class GroupMemberAdapter extends BaseAdapter {
                             intent.putExtra("member",member);
                             mContext.startActivity(intent);
                         }else {
-                            ToastUtil.showToast(mContext,"voip注册失败，请检查服务器配置");
+                            ToastUtil.showToast(mContext,mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
                         }
                     }
                     else if(position1 ==TELEPHONE){//普通电话
@@ -204,7 +204,7 @@ public class GroupMemberAdapter extends BaseAdapter {
                 builder.create();
                 builder.show();
             }else {
-                ToastUtil.showToast(mContext,"暂无该用户电话号码");
+                ToastUtil.showToast(mContext,mContext.getString(R.string.text_has_no_member_phone_number));
             }
         });
         return view;
@@ -240,7 +240,7 @@ public class GroupMemberAdapter extends BaseAdapter {
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, currentGroupMembers.get(position));
             }
         } else {
-            ToastUtil.showToast(mContext, "网络连接异常，请检查网络！");
+            ToastUtil.showToast(mContext, mContext.getString(R.string.text_network_connection_abnormal_please_check_the_network));
         }
     }
 

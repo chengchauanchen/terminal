@@ -9,10 +9,10 @@
         android:id="@+id/tv_item"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#1b1b1b"
+        android:textColor="@color/black_1b"
         android:text="111111111"
-        android:layout_marginTop="15dp"
-        android:layout_marginBottom="15dp"
-        android:textSize="20dp"/>
+        android:layout_marginTop="@dimen/dp_15"
+        android:layout_marginBottom="@dimen/dp_15"
+        android:textSize="@dimen/sp_20"/>
     
 </LinearLayout>

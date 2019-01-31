@@ -13,12 +13,12 @@
         <ImageView
             android:id="@+id/iv_group_logo"
             android:src="@drawable/group_photo"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginLeft="18dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp" />
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_40"
+            android:layout_marginLeft="@dimen/dp_18"
+            android:layout_marginRight="@dimen/dp_8"
+            android:layout_marginTop="@dimen/dp_8"
+            android:layout_marginBottom="@dimen/dp_8" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -27,76 +27,76 @@
             android:layout_centerVertical="true"
             android:layout_toRightOf="@id/iv_group_logo"
             android:layout_toLeftOf="@id/iv_message"
-            android:layout_marginRight="5dp"
+            android:layout_marginRight="@dimen/dp_5"
             android:gravity="center_vertical">
     
             <TextView
                 android:id="@+id/tv_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="2dp"
+                android:layout_marginLeft="@dimen/dp_2"
                 android:maxLines="1"
                 android:maxEms="10"
                 android:ellipsize="end"
                 android:text="响应组11111"
                 android:textColor="@color/group_text_gray"
-                android:textSize="16sp" />
+                android:textSize="@dimen/sp_16" />
     
             <ImageView
                 android:id="@+id/iv_response_group_icon"
-                android:layout_width="20dp"
+                android:layout_width="@dimen/dp_20"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="@dimen/dp_5"
                 android:src="@drawable/response_group_icon"/>
         </LinearLayout>
         
         <TextView
             android:id="@+id/tv_change_group"
             android:layout_width="wrap_content"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp"
-            android:layout_height="30dp"
+            android:paddingLeft="@dimen/dp_15"
+            android:paddingRight="@dimen/dp_15"
+            android:layout_height="@dimen/dp_30"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="@dimen/dp_10"
             android:background="@drawable/change_group_button_shape"
             android:gravity="center"
-            android:text="切组"
+            android:text="@string/text_change_group"
             android:textColor="@color/change_group_text_bg"
-            android:textSize="14sp"
+            android:textSize="@dimen/sp_14"
             android:textStyle="normal" />
 
         <ImageView
             android:id="@+id/iv_current_group"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
             android:layout_alignParentRight="true"
             android:layout_centerVertical="true"
-            android:layout_marginRight="30dp"
+            android:layout_marginRight="@dimen/dp_30"
             android:src="@drawable/new_current_icon"
             android:visibility="invisible" />
 
         <ImageView
             android:id="@+id/iv_message"
             android:layout_toLeftOf="@id/tv_change_group"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:layout_marginRight="20dp"
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_marginRight="@dimen/dp_20"
             android:layout_centerVertical="true"
             android:src="@drawable/new_message_icon"/>
 
     </RelativeLayout>
     <View
-        android:layout_marginLeft="70dp"
-        android:layout_marginRight="15dp"
+        android:layout_marginLeft="@dimen/dp_70"
+        android:layout_marginRight="@dimen/dp_15"
         android:background="@color/diver_bg"
         android:layout_width="match_parent"
-        android:layout_height="0.5dp"/>
+        android:layout_height="@dimen/dp_half_one"/>
     
     <View
         android:id="@+id/placeholder"
         android:layout_width="match_parent"
-        android:layout_height="4dp"
+        android:layout_height="@dimen/dp_4"
         android:background="@color/contract_line_bg"
         android:visibility="gone"/>
 

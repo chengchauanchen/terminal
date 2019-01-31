@@ -66,16 +66,16 @@ public class CreateTemporaryGroupsDialog extends Dialog {
             case CREATE_GROUP_STATE_CREATTING:
                 //创建临时组-创建中
                 icon.setImageResource(R.drawable.dialog_icon_creatting);
-                content.setText("正在创建...");
+                content.setText(R.string.text_temporary_group_creatting);
                 toJump.setVisibility(View.INVISIBLE);
                 break;
             case CREATE_GROUP_STATE_SUCCESS:
                 //创建临时组-创建成功
                 icon.setImageResource(R.drawable.dialog_icon);
-                content.setText("创建成功!");
+                content.setText(R.string.text_temporary_group_create_success);
                 if(forceSwitchGroup){
                     toJump.setVisibility(View.VISIBLE);
-                    toJump.setText("正在跳转....");
+                    toJump.setText(R.string.text_temporary_group_jumping);
                 }else {
                     toJump.setVisibility(View.INVISIBLE);
                 }
@@ -83,7 +83,7 @@ public class CreateTemporaryGroupsDialog extends Dialog {
             case CREATE_GROUP_STATE_FAIL:
                 //创建临时组-创建失败
                 icon.setImageResource(R.drawable.dialog_icon_fail);
-                content.setText("创建失败!");
+                content.setText(R.string.text_temporary_group_create_fail);
                 failMessage = TextUtils.isEmpty(failMessage)?"":failMessage;
                 toJump.setText(failMessage);
                 toJump.setVisibility(View.VISIBLE);

@@ -1,50 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:id="@+id/dialog_root"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialog_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#51000000">
-    
+    android:background="@color/transparent_82">
+
     <LinearLayout
         android:id="@+id/dialog_content"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:layout_margin="20dp"
-        android:orientation="vertical"
-        android:background="@drawable/ip_shape">
-        
+        android:layout_margin="@dimen/dp_20"
+        android:background="@drawable/ip_shape"
+        android:orientation="vertical">
+
         <TextView
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginLeft="@dimen/dp_20"
+            android:layout_marginTop="@dimen/dp_20"
             android:enabled="false"
-            android:text="选择问题"
+            android:text="@string/text_choice_problem"
             android:textColor="@color/black"
-            android:textSize="20dp" />
-        
+            android:textSize="@dimen/sp_20" />
+
         <View
             android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:background="#898989"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
-            android:layout_marginTop="15dp"/>
-    
+            android:layout_height="@dimen/dp_half_one"
+            android:layout_marginLeft="@dimen/dp_20"
+            android:layout_marginTop="@dimen/dp_15"
+            android:layout_marginRight="@dimen/dp_20"
+            android:background="@color/grey_89" />
+
         <View
             android:layout_width="match_parent"
-            android:layout_height="15dp"/>
+            android:layout_height="@dimen/dp_15" />
+
         <ListView
             android:id="@+id/list_dialog"
             android:layout_width="match_parent"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="20dp"
             android:layout_height="wrap_content"
-            android:divider="@null"/>
+            android:layout_marginLeft="@dimen/dp_20"
+            android:layout_marginRight="@dimen/dp_20"
+            android:divider="@null" />
+
         <View
             android:layout_width="match_parent"
-            android:layout_height="15dp"/>
+            android:layout_height="@dimen/dp_15" />
     </LinearLayout>
 </RelativeLayout>

@@ -12,7 +12,7 @@
         android:color="@color/mtoggle_off_button"/>
 
     <size
-        android:width="25dp"
-        android:height="25dp" />
+        android:width="@dimen/dp_25"
+        android:height="@dimen/dp_25" />
 
 </shape>

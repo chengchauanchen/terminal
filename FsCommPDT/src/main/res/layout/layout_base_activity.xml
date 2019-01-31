@@ -3,38 +3,35 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
-    <!--<View-->
-    <!--android:id="@+id/my_view"-->
-    <!--android:layout_width="wrap_content"-->
-    <!--android:layout_height="0px"/>-->
+
     <LinearLayout
         android:id="@+id/ll_speaking_prompt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:layout_marginRight="@dimen/x30"
+        android:layout_alignParentRight="true"
         android:layout_marginTop="@dimen/x40"
+        android:layout_marginRight="@dimen/x30"
         android:background="@drawable/individual_call_button_off_shape"
         android:orientation="vertical"
         android:visibility="gone">
-        
+
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="@dimen/x10"
             android:src="@drawable/phone" />
-        
+
         <cn.vsx.vc.view.IndividualCallTimerView
             android:id="@+id/ICTV_speaking_time"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginBottom="@dimen/x10"
             android:layout_marginLeft="@dimen/x10"
-            android:layout_marginRight="@dimen/x10"
             android:layout_marginTop="@dimen/x10"
+            android:layout_marginRight="@dimen/x10"
+            android:layout_marginBottom="@dimen/x10"
             android:gravity="center_vertical" />
     </LinearLayout>
 </RelativeLayout>

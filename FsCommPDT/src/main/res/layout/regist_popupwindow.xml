@@ -4,36 +4,36 @@
     android:layout_height="match_parent"
     android:background="@drawable/background"
     android:orientation="vertical">
+
     <LinearLayout
         android:id="@+id/ll_regist_return"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/x20"
         android:layout_gravity="center_vertical"
+        android:layout_marginTop="@dimen/x20"
         android:orientation="horizontal">
 
         <ImageView
-            android:layout_gravity="center_vertical"
             android:id="@+id/iv_regist_return"
-            android:layout_width="15dp"
-            android:layout_height="18dp"
-            android:layout_marginLeft="50dp"
+            android:layout_width="@dimen/dp_15"
+            android:layout_height="@dimen/dp_18"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/dp_50"
             android:background="@drawable/back" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="返回"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:text="@string/text_back"
             android:textColor="@color/white"
-            android:textSize="18sp" />
+            android:textSize="@dimen/sp_18" />
     </LinearLayout>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
-
-
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -43,26 +43,26 @@
         android:focusable="true"
         android:focusableInTouchMode="true"
         android:orientation="vertical"
-        android:paddingLeft="50dp"
-        android:paddingRight="50dp">
+        android:paddingLeft="@dimen/dp_50"
+        android:paddingRight="@dimen/dp_50">
 
         <EditText
             android:id="@+id/userUnit"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="@dimen/dp_50"
             android:background="@drawable/regist_org_shape"
-            android:hint="请输入所在单位名称"
-            android:textColorHint="@color/regist_edit"
-            android:textColor="@color/regist_edit"
+            android:hint="@string/text_add_unit_hint_name"
             android:inputType="text"
             android:maxLength="10"
             android:maxLines="1"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"/>
+            android:paddingLeft="@dimen/dp_10"
+            android:paddingRight="@dimen/dp_10"
+            android:textColor="@color/regist_edit"
+            android:textColorHint="@color/regist_edit" />
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="10dp" />
+            android:layout_height="@dimen/dp_10" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -71,64 +71,63 @@
 
             <LinearLayout
                 android:layout_width="0dp"
-                android:layout_height="120dp"
+                android:layout_height="@dimen/dp_120"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
                 <EditText
                     android:id="@+id/userIP"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
+                    android:layout_height="@dimen/dp_50"
                     android:background="@drawable/regist_ip_shape"
-                    android:hint="请输入IP地址"
-                    android:textColorHint="@color/regist_edit"
-                    android:textColor="@color/regist_edit"
+                    android:hint="@string/text_add_unit_hint_ip"
                     android:inputType="date"
                     android:maxLines="1"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"/>
+                    android:paddingLeft="@dimen/dp_10"
+                    android:paddingRight="@dimen/dp_10"
+                    android:textColor="@color/regist_edit"
+                    android:textColorHint="@color/regist_edit" />
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="10dp"
-                    />
+                    android:layout_height="@dimen/dp_10" />
 
                 <EditText
                     android:id="@+id/userPort"
                     android:layout_width="match_parent"
-                    android:layout_height="50dp"
+                    android:layout_height="@dimen/dp_50"
                     android:background="@drawable/regist_port_shape"
-                    android:hint="请输入端口号"
-                    android:textColorHint="@color/regist_edit"
+                    android:hint="@string/text_add_unit_hint_port"
                     android:inputType="date"
                     android:maxLines="1"
-                    android:paddingLeft="10dp"
-                    android:paddingRight="10dp"
-                    android:textColor="@color/regist_edit"/>
+                    android:paddingLeft="@dimen/dp_10"
+                    android:paddingRight="@dimen/dp_10"
+                    android:textColor="@color/regist_edit"
+                    android:textColorHint="@color/regist_edit" />
 
             </LinearLayout>
 
             <RelativeLayout
-                android:visibility="gone"
                 android:id="@+id/rl_regist_connect_efficacy"
-                android:layout_width="100dp"
-                android:layout_height="101dp"
+                android:layout_width="@dimen/dp_100"
+                android:layout_height="@dimen/dp_100"
                 android:layout_alignParentRight="true"
-                android:background="@drawable/liantong_shape">
+                android:background="@drawable/liantong_shape"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/tv_regist_connect_efficacy"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:text="连通效验"
-                    android:textColor="#71a3e0"
-                    android:textSize="17sp" />
+                    android:text="@string/text_connectivity_test"
+                    android:textColor="@color/about_text_black"
+                    android:textSize="@dimen/sp_17" />
 
                 <ImageView
                     android:id="@+id/iv_regist_connect_efficacy_ok"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
+                    android:layout_width="@dimen/dp_50"
+                    android:layout_height="@dimen/dp_50"
                     android:layout_centerInParent="true"
                     android:background="@drawable/connect_efficacy_ok"
                     android:visibility="gone" />
@@ -136,25 +135,19 @@
 
         </LinearLayout>
 
-
-
-
         <Button
-            android:layout_marginTop="@dimen/x30"
             android:id="@+id/btn_custom_ip_ok"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="@dimen/dp_50"
+            android:layout_marginTop="@dimen/x30"
             android:background="@drawable/ok_button_shape"
             android:maxLines="1"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="确定"
+            android:paddingLeft="@dimen/dp_10"
+            android:paddingRight="@dimen/dp_10"
+            android:text="@string/text_sure"
             android:textColor="@color/white">
 
         </Button>
-
-
-
     </LinearLayout>
 
 </LinearLayout>

@@ -99,7 +99,7 @@ public class PersonSearchFragment  extends BaseFragment{
     public void setInterGroup(boolean interGroup) {
         isInterGroup = interGroup;
         if(tv_search_nothing != null)
-            tv_search_nothing.setText("输入姓名/编号 在组内搜索");
+            tv_search_nothing.setText(R.string.text_input_name_or_number_in_group_to_search);
         if(searchContactsAdapter != null)
             searchContactsAdapter.setInterGroup(isInterGroup);
     }
@@ -111,10 +111,10 @@ public class PersonSearchFragment  extends BaseFragment{
     @Override
     public void initView() {
         if (isInterGroup) {
-            tv_search_nothing.setText("输入姓名/编号 在组内搜索");
+            tv_search_nothing.setText(R.string.text_input_name_or_number_in_group_to_search);
         }
         else {
-            tv_search_nothing.setText("输入姓名/编号 在服务器上搜索");
+            tv_search_nothing.setText(R.string.text_input_name_or_number_in_server_to_search);
         }
         rl_search_result.setVisibility(View.GONE);
 
@@ -217,14 +217,14 @@ public class PersonSearchFragment  extends BaseFragment{
         searchContactsAdapter.setFilterKeyWords(keyWord);
 
         tv_search_nothing.setVisibility(View.VISIBLE);
-        tv_search_nothing.setText("搜索联系人");
+        tv_search_nothing.setText(R.string.text_search_contact);
         rl_search_result.setVisibility(View.GONE);
         searchMemberListExceptMe.clear();
         pageIndex = 0;
         tv_search_notdata.setVisibility(View.GONE);
 
         if (TextUtils.isEmpty(keyWord)) {
-            ToastUtil.showToast(context, "搜索的内容不能为空");
+            ToastUtil.showToast(context, getString(R.string.text_search_content_can_not_empty));
         }else {
             if(!isLocal) {
                 MyTerminalFactory.getSDK().getContactsManager().searchContacts(keyWord, 1);
@@ -250,10 +250,10 @@ public class PersonSearchFragment  extends BaseFragment{
         }
         if (searchMemberListExceptMe.size() == 0) {
             if (isInterGroup) {
-                tv_search_nothing.setText("当前组不存在该用户");
+                tv_search_nothing.setText(R.string.text_current_group_has_no_this_person);
             }
             else {
-                tv_search_nothing.setText("联系人不存在");
+                tv_search_nothing.setText(R.string.text_contact_is_not_exist);
             }
             rl_search_result.setVisibility(View.GONE);
         } else {
@@ -278,7 +278,7 @@ public class PersonSearchFragment  extends BaseFragment{
                 if (pageIndex < totalPages) {//没加载完，加载数据
                     tv_search_notdata.setVisibility(View.GONE);
                     if (TextUtils.isEmpty(keyWord)) {
-                        ToastUtil.showToast(context, "搜索的内容不能为空");
+                        ToastUtil.showToast(context, getString(R.string.text_search_content_can_not_empty));
                     }else if( !isLocal ){
                         MyTerminalFactory.getSDK().getContactsManager().searchContacts(keyWord, pageIndex+1);
                     }
@@ -306,7 +306,7 @@ public class PersonSearchFragment  extends BaseFragment{
                 if (errorCode == BaseCommonCode.SUCCESS_CODE) {//请求成功
                     if (searchMemberList == null || searchMemberList.size() == 0) {
                         if (searchMemberListExceptMe.size() == 0) {
-                            tv_search_nothing.setText("用户不存在");
+                            tv_search_nothing.setText(R.string.text_user_does_not_exist);
                         }
                         return;
                     }
@@ -317,7 +317,7 @@ public class PersonSearchFragment  extends BaseFragment{
                     PersonSearchFragment.this.totalPages = totalPages;
 
                     if (searchMemberListExceptMe.size() == 0) {
-                        tv_search_nothing.setText("用户不存在");
+                        tv_search_nothing.setText(R.string.text_user_does_not_exist);
                         rl_search_result.setVisibility(View.GONE);
                     } else {
                         tv_search_nothing.setVisibility(View.GONE);
@@ -348,9 +348,9 @@ public class PersonSearchFragment  extends BaseFragment{
                 et_search_allcontacts.setSelection(start);
 
             }else if ( s.length() > 0 && !DataUtil.isLegalSearch(s)) {
-                ToastUtil.showToast(context, "搜索的内容不合法！");
+                ToastUtil.showToast(context, getString(R.string.text_search_content_is_illegal));
             }
-            tv_search_nothing.setText("搜索联系人");
+            tv_search_nothing.setText(R.string.text_search_contact);
         }
 
         @Override

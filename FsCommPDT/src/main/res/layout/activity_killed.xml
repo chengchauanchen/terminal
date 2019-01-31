@@ -12,7 +12,7 @@
         android:layout_height="@dimen/x80"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="37dp"
+        android:layout_marginTop="@dimen/dp_37"
         android:background="@drawable/icon_kill" />
     <TextView
         android:layout_width="wrap_content"
@@ -21,7 +21,7 @@
         android:textSize="@dimen/sp_14"
         android:textColor="@color/icon_text"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
+        android:layout_marginTop="@dimen/dp_15"
         android:text="@string/app_name"/>
 
     <TextView
@@ -30,16 +30,16 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:textColor="@color/forbid_text"
-        android:text="您已被禁止使用!"
+        android:text="@string/activity_killed_text_one"
         android:textSize="25sp"/>
     <TextView
         android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/text"
-        android:text="如有疑问请联系管理员"
+        android:text="@string/activity_killed_text_two"
         android:textColor="@color/message"
-        android:textSize="14sp"
+        android:textSize="@dimen/sp_14"
         android:layout_centerHorizontal="true"/>
     <LinearLayout
         android:layout_width="match_parent"
@@ -50,7 +50,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="武汉惟实信技术有限公司"
+            android:text="@string/corporate_name"
             android:gravity="center"
             android:textColor="@color/company_text"/>
         <TextView

@@ -109,7 +109,7 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
             myHandler.post(() -> {
                 List<Integer> selectMember = mIncreaseTemporaryGroupMemberAdapter.getSelectItem();
                 if(selectMember.contains(memberNo)){
-                    ToastUtil.showToast(IncreaseTemporaryGroupMemberActivity.this,"您已经添加过该成员");
+                    ToastUtil.showToast(IncreaseTemporaryGroupMemberActivity.this,getString(R.string.text_you_have_added_this_member));
                     return;
                 }
                 mIncreaseTemporaryGroupMemberAdapter.setSelectItem(memberNo);
@@ -142,11 +142,11 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
         type = getIntent().getIntExtra("type", 1);
         //titlebar初始化
         if(type ==CREATE_TEMP_GROUP){
-            barTitle.setText("创建临时组");
-            okBtn.setText("下一步");
+            barTitle.setText(R.string.text_create_temporary_groups);
+            okBtn.setText(R.string.text_next);
         }else if(type ==INCREASE_MEMBER){
-            barTitle.setText("添加组员");
-            okBtn.setText("确定");
+            barTitle.setText(R.string.text_add_group_member);
+            okBtn.setText(R.string.text_sure);
         }
         rightBtn.setVisibility(View.GONE);
 
@@ -180,14 +180,14 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
             } else if(itemType == Constants.TYPE_USER){
 
                 if(!mIncreaseTemporaryGroupMemberAdapter.getSelectMember().isEmpty()){
-                    okBtn.setText("确定(" + mIncreaseTemporaryGroupMemberAdapter.getSelectMember().size() + ")");
+                    okBtn.setText(String.format(getString(R.string.button_sure_number),mIncreaseTemporaryGroupMemberAdapter.getSelectMember().size()));
                     okBtn.setBackgroundResource(R.drawable.live_theme_confirm_bg);
                     ll_select_member.setVisibility(View.VISIBLE);
                 }else {
                     if(type ==CREATE_TEMP_GROUP){
-                        okBtn.setText("下一步");
+                        okBtn.setText(R.string.text_next);
                     }else {
-                        okBtn.setText("确定");
+                        okBtn.setText(R.string.text_sure);
                     }
                     okBtn.setBackgroundResource(R.drawable.live_theme_confirm_bg);
                     ll_select_member.setVisibility(View.GONE);
@@ -367,7 +367,7 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
                 break;
             case R.id.ok_btn:
                 if(mIncreaseTemporaryGroupMemberAdapter.getSelectMember().isEmpty()){
-                    ToastUtil.showToast(IncreaseTemporaryGroupMemberActivity.this,"至少添加一名成员");
+                    ToastUtil.showToast(IncreaseTemporaryGroupMemberActivity.this,getString(R.string.text_add_at_least_one_member));
                     return;
                 }
                 if(type ==CREATE_TEMP_GROUP){

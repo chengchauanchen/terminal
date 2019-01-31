@@ -3,28 +3,28 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black">
-    
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="19dp"
+        android:layout_marginTop="@dimen/dp_20"
         android:gravity="center_vertical"
         android:orientation="horizontal">
-        
+
         <ImageView
             android:id="@+id/iv_avatar_report"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginLeft="20dp"
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
+            android:layout_marginLeft="@dimen/dp_20"
             android:src="@drawable/user_photo" />
-        
+
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="@dimen/dp_10"
             android:layout_weight="1"
             android:orientation="vertical">
-            
+
             <TextView
                 android:id="@+id/tv_live_report_name"
                 android:layout_width="wrap_content"
@@ -32,7 +32,7 @@
                 android:text="pad"
                 android:textColor="@color/white"
                 android:textSize="@dimen/tv_live_request_name_textsize" />
-            
+
             <TextView
                 android:id="@+id/tv_live_report_id"
                 android:layout_width="wrap_content"
@@ -41,67 +41,67 @@
                 android:textColor="@color/white"
                 android:textSize="@dimen/tv_live_request_id_textsize" />
         </LinearLayout>
-        
+
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_marginRight="20dp"
+            android:layout_marginRight="@dimen/dp_20"
             android:layout_weight="1"
             android:gravity="right"
-            android:text="请求中..."
+            android:text="@string/text_in_requesting"
             android:textColor="@color/white" />
     </LinearLayout>
-    
+
     <LinearLayout
         android:id="@+id/ll_live_respond_refuse_total"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/dp_50"
         android:layout_marginBottom="@dimen/live_request_hangup_bottom"
-        android:layout_marginLeft="50dp"
         android:orientation="vertical">
-        
+
         <ImageView
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:layout_width="@dimen/dp_70"
+            android:layout_height="@dimen/dp_70"
             android:background="@drawable/individual_call_refuse_button" />
-        
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="20dp"
-            android:text="挂断"
+            android:layout_marginTop="@dimen/dp_20"
+            android:text="@string/text_call_hang_up"
             android:textColor="@color/white"
-            android:textSize="16dp" />
+            android:textSize="@dimen/sp_16" />
     </LinearLayout>
-    
+
     <LinearLayout
         android:id="@+id/ll_live_respond_accept_total"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginRight="@dimen/dp_50"
         android:layout_marginBottom="@dimen/live_request_answer_bottom"
-        android:layout_marginRight="50dp"
         android:orientation="vertical">
-        
+
         <ImageView
-            android:layout_width="70dp"
-            android:layout_height="70dp"
+            android:layout_width="@dimen/dp_70"
+            android:layout_height="@dimen/dp_70"
             android:background="@drawable/individual_call_accept_button" />
-        
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="20dp"
-            android:text="接受"
+            android:layout_marginTop="@dimen/dp_20"
+            android:text="@string/text_accepted"
             android:textColor="@color/white"
-            android:textSize="16dp" />
+            android:textSize="@dimen/sp_16" />
     </LinearLayout>
-    
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -109,12 +109,12 @@
         android:layout_centerVertical="true"
         android:orientation="vertical"
         android:visibility="visible">
-        
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="请求您上报图像"
-            android:textColor="#fff799"
-            android:textSize="30sp" />
+            android:text="@string/text_request_you_to_report_the_image"
+            android:textColor="@color/yellow_ff"
+            android:textSize="@dimen/sp_30" />
     </LinearLayout>
 </RelativeLayout>

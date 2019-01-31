@@ -150,9 +150,9 @@ public class LocationFragment extends Fragment{
             wv_help.loadUrl(url);
         }else{
             if(isLocation){
-                ToastUtil.showToast(getActivity(), "定位失败！");
+                ToastUtil.showToast(getActivity(), getString(R.string.text_positioning_failed));
             }else{
-                ToastUtil.showToast(getActivity(), "获取人脸识别信息失败！");
+                ToastUtil.showToast(getActivity(), getString(R.string.text_get_face_recognition_info_fail));
             }
         }
         ((ChatBaseActivity) getActivity()).setBackListener(() -> {

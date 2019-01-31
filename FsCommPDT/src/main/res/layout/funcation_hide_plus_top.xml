@@ -4,94 +4,99 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/y34"
     android:background="@color/function_bg">
+
     <View
         android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:background="@color/function_line"/>
+        android:layout_height="@dimen/dp_half_one"
+        android:background="@color/function_line" />
+
     <ImageView
         android:id="@+id/group_call_news_keyboard"
         android:layout_width="@dimen/x35"
         android:layout_height="@dimen/x35"
         android:layout_centerVertical="true"
         android:layout_marginLeft="@dimen/x12"
-        android:background="@drawable/recording"/>
+        android:background="@drawable/recording" />
 
     <!--隐藏功能键-->
     <RelativeLayout
         android:id="@+id/tl_send_function"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_alignParentRight="true">
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true">
+
         <ImageView
             android:id="@+id/hide_function"
             android:layout_width="@dimen/x35"
             android:layout_height="@dimen/x35"
             android:layout_marginRight="@dimen/x12"
             android:background="@drawable/hide_function"
-            android:visibility="visible"/>
+            android:visibility="visible" />
+
         <Button
             android:id="@+id/bt_send"
             android:layout_width="@dimen/x45"
             android:layout_height="@dimen/y25"
             android:layout_marginRight="@dimen/x12"
-            android:text="发送"
-            android:textSize="12sp"
-            android:textColor="@color/send_text_color"
             android:background="@drawable/btn_send_shape"
-            android:visibility="gone"/>
+            android:text="@string/text_send"
+            android:textColor="@color/send_text_color"
+            android:textSize="@dimen/sp_12"
+            android:visibility="gone" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/y34"
-        android:layout_toRightOf="@+id/group_call_news_keyboard"
+        android:layout_marginLeft="@dimen/dp_17"
+        android:layout_marginRight="@dimen/dp_17"
         android:layout_toLeftOf="@+id/tl_send_function"
-        android:layout_marginRight="17dp"
-        android:layout_marginLeft="17dp"
-        >
+        android:layout_toRightOf="@+id/group_call_news_keyboard">
+
         <Button
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/y29"
-            android:background="@drawable/news_butten_ptt_shape"
-            android:text="PTT"
-            android:textColor="@color/funcation_top_btn_text"
-            android:textSize="20sp"
             android:id="@+id/btn_ptt"
             style="?android:attr/borderlessButtonStyle"
-            android:layout_centerInParent="true"/>
-        <cn.vsx.vc.record.AudioRecordButton
             android:layout_width="match_parent"
             android:layout_height="@dimen/y29"
+            android:layout_centerInParent="true"
+            android:background="@drawable/news_butten_ptt_shape"
+            android:text="@string/text_ptt"
+            android:textColor="@color/funcation_top_btn_text"
+            android:textSize="@dimen/sp_20" />
+
+        <cn.vsx.vc.record.AudioRecordButton
+            android:id="@+id/btn_record"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/y29"
+            android:layout_centerInParent="true"
             android:background="@drawable/news_butten_ptt_shape"
             android:text="@string/long_click_record"
             android:textColor="@color/funcation_top_btn_text"
             android:textSize="@dimen/x20"
-            android:id="@+id/btn_record"
-            android:visibility="gone"
-            android:layout_centerInParent="true"/>
+            android:visibility="gone" />
+
         <EditText
             android:id="@+id/group_call_news_et"
             android:layout_width="match_parent"
             android:layout_height="@dimen/y29"
-            android:visibility="gone"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/y4"
+            android:background="@null"
             android:textColor="@color/edittext_text"
             android:textCursorDrawable="@drawable/edittext_cursor"
-            android:background="@null"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="@dimen/y4"
-            />
+            android:visibility="gone" />
+
         <View
             android:id="@+id/v_edit_line"
             android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:background="@color/funcation_top_et_underline"
+            android:layout_height="@dimen/dp_half_one"
             android:layout_alignParentBottom="true"
             android:layout_marginTop="@dimen/y3"
             android:layout_marginBottom="@dimen/y3"
-            android:visibility="gone"
-            />
+            android:background="@color/funcation_top_et_underline"
+            android:visibility="gone" />
 
     </RelativeLayout>
 </RelativeLayout>

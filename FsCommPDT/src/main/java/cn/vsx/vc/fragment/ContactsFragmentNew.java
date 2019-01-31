@@ -159,7 +159,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     /*** 自己组呼返回的消息 **/
     private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
         if (methodResult == 0) {
-            showViewWhenGroupCall("我正在说话");
+            showViewWhenGroupCall(getString(R.string.text_I_am_talking));
             setViewEnable(false);
         }
     });
