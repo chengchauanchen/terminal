@@ -1,15 +1,26 @@
 package cn.vsx.vc.fragment;
 
+import android.graphics.SurfaceTexture;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.Surface;
+import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.io.File;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -22,7 +33,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallInco
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.ChatBaseActivity;
-import cn.vsx.vc.view.CustomerVideoView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 import static cn.vsx.vc.utils.DataUtil.getTime;
@@ -30,10 +40,12 @@ import static cn.vsx.vc.utils.DataUtil.getTime;
 /**
  * 看小视频fragment
  */
-public class VideoPreviewItemFragment extends BaseFragment{
+public class VideoPreviewItemFragment extends BaseFragment implements TextureView.SurfaceTextureListener{
 
-    @Bind(R.id.videoView)
-    CustomerVideoView videoView;
+    @Bind(R.id.rl_live_general_view)
+    RelativeLayout rl_live_general_view;
+    @Bind(R.id.texture_view)
+    TextureView mTextureView;
     @Bind(R.id.tv_current_time)
     TextView tv_current_time;
     @Bind(R.id.seek_bar)
@@ -47,6 +59,8 @@ public class VideoPreviewItemFragment extends BaseFragment{
     @Bind(R.id.iv_pause_continue)
     ImageView iv_pause_continue;
 
+    private MediaPlayer mMediaPlayer;
+    private Surface mSurface;
     private static final int UPDATE_PROGRESS = 0;
     private static final int HIDE_SEEK_BAR = 1;
     private FrameLayout fragment_contener;
@@ -59,7 +73,7 @@ public class VideoPreviewItemFragment extends BaseFragment{
             switch(msg.what){
                 case UPDATE_PROGRESS:
                     mHandler.removeMessages(UPDATE_PROGRESS);
-                    float currentPosition = videoView.getCurrentPosition();
+                    float currentPosition = mMediaPlayer.getCurrentPosition();
 
                     if(currentPosition<0){
                         return;
@@ -81,7 +95,7 @@ public class VideoPreviewItemFragment extends BaseFragment{
             }
         }
     };
-
+    private String filePath;
 
     public VideoPreviewItemFragment(){
         // Required empty public constructor
@@ -102,12 +116,15 @@ public class VideoPreviewItemFragment extends BaseFragment{
 
     @Override
     public void initView(){
-        ((ChatBaseActivity) getActivity()).setBackListener(() -> {
-            if(null !=getActivity() && !isDetached()){
-                if(null != videoView && videoView.isPlaying()){
-                    videoView.stopPlayback();
+        ((ChatBaseActivity) getActivity()).setBackListener(new ChatBaseActivity.OnBackListener(){
+            @Override
+            public void onBack(){
+                if(null !=getActivity() && !isDetached()){
+                    if(null != mMediaPlayer && mMediaPlayer.isPlaying()){
+                        mMediaPlayer.stop();
+                    }
+                    popBack();
                 }
-                popBack();
             }
         });
     }
@@ -127,15 +144,15 @@ public class VideoPreviewItemFragment extends BaseFragment{
     @OnClick({R.id.iv_pause_continue,R.id.iv_pause})
     public void playOrContinue(){
         try{
-            if(videoView.isPlaying()){
-                videoView.pause();
+            if(mMediaPlayer.isPlaying()){
+                mMediaPlayer.pause();
                 iv_pause_continue.setImageResource(R.drawable.on_pause);
                 iv_pause.setVisibility(View.VISIBLE);
                 mHandler.removeMessages(UPDATE_PROGRESS);
             }else{
                 iv_pause_continue.setImageResource(R.drawable.continue_play);
                 iv_pause.setVisibility(View.GONE);
-                videoView.start();
+                mMediaPlayer.start();
                 mHandler.sendEmptyMessage(UPDATE_PROGRESS);
                 mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
             }
@@ -146,23 +163,19 @@ public class VideoPreviewItemFragment extends BaseFragment{
 
     @Override
     public void initData(){
-        String filePath = getArguments().getString("filePath");
+        filePath = getArguments().getString("filePath");
         Log.e("文件路径：", filePath);
-        videoView.setVideoPath(filePath);
-        videoView.start();
-        videoView.setOnPreparedListener(mp -> {
-            duration = videoView.getDuration();
-            tv_max_time.setText(getTime(duration));
-            mHandler.sendEmptyMessage(UPDATE_PROGRESS);
-        });
+        mTextureView.setSurfaceTextureListener(this);
 
-        videoView.setOnCompletionListener(mp -> popBack());
 
-        videoView.setOnTouchListener((v, event) -> {
-            mHandler.removeMessages(HIDE_SEEK_BAR);
-            ll_seek_bar.setVisibility(View.VISIBLE);
-            mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR,2000);
-            return false;
+        rl_live_general_view.setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event){
+                mHandler.removeMessages(HIDE_SEEK_BAR);
+                ll_seek_bar.setVisibility(View.VISIBLE);
+                mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR,2000);
+                return false;
+            }
         });
 
         seek_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
@@ -182,7 +195,7 @@ public class VideoPreviewItemFragment extends BaseFragment{
                 float progress = seekBar.getProgress();
                 //seekBar进度比例
                 float percent = (progress / sMax);
-                videoView.seekTo((int) (duration * percent));
+                mMediaPlayer.seekTo((int) (duration * percent));
             }
         });
     }
@@ -190,9 +203,7 @@ public class VideoPreviewItemFragment extends BaseFragment{
     @Override
     public void onDestroyView(){
         super.onDestroyView();
-        if (videoView != null) {
-            videoView.suspend();
-        }
+
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyDataMessageHandler);
@@ -201,7 +212,9 @@ public class VideoPreviewItemFragment extends BaseFragment{
     }
 
     public void popBack(){
-        videoView.stopPlayback();
+        if(null != mMediaPlayer && mMediaPlayer.isPlaying()){
+            mMediaPlayer.stop();
+        }
         mHandler.removeCallbacksAndMessages(null);
         if(null !=fragment_contener){
             fragment_contener.setVisibility(View.GONE);
@@ -221,12 +234,15 @@ public class VideoPreviewItemFragment extends BaseFragment{
     private ReceiveNotifyIndividualCallIncommingHandler receiveNotifyIndividualCallIncommingHandler = new ReceiveNotifyIndividualCallIncommingHandler(){
         @Override
         public void handler(String mainMemberName, int mainMemberId, int individualCallType){
-            if(videoView.isPlaying()){
-                videoView.pause();
-                mHandler.post(() -> {
-                    iv_pause_continue.setImageResource(R.drawable.on_pause);
-                    iv_pause.setVisibility(View.VISIBLE);
-                    mHandler.removeMessages(UPDATE_PROGRESS);
+            if(mMediaPlayer.isPlaying()){
+                mMediaPlayer.pause();
+                mHandler.post(new Runnable(){
+                    @Override
+                    public void run(){
+                        iv_pause_continue.setImageResource(R.drawable.on_pause);
+                        iv_pause.setVisibility(View.VISIBLE);
+                        mHandler.removeMessages(UPDATE_PROGRESS);
+                    }
                 });
             }
         }
@@ -235,8 +251,8 @@ public class VideoPreviewItemFragment extends BaseFragment{
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler(){
         @Override
         public void handler(String mainMemberName, int mainMemberId){
-            if(videoView != null && videoView.isPlaying()){
-                videoView.pause();
+            if(mMediaPlayer != null && mMediaPlayer.isPlaying()){
+                mMediaPlayer.pause();
                 iv_pause_continue.setImageResource(R.drawable.on_pause);
                 iv_pause.setVisibility(View.VISIBLE);
                 mHandler.removeMessages(UPDATE_PROGRESS);
@@ -248,12 +264,86 @@ public class VideoPreviewItemFragment extends BaseFragment{
         @Override
         public void handler(TerminalMessage terminalMessage){
             if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode() || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE){
-                if(videoView != null && videoView.isPlaying()){
-                    videoView.pause();
+                if(mMediaPlayer != null && mMediaPlayer.isPlaying()){
+                    mMediaPlayer.pause();
                     iv_pause_continue.setImageResource(R.drawable.on_pause);
                     iv_pause.setVisibility(View.VISIBLE);
                 }
             }
         }
     };
+
+    private void openMediaPlayer(){
+        try {
+            File file = new File(filePath);
+            if (!file.exists()) {//文件不存在
+                Toast.makeText(getActivity(), "文件路径错误", Toast.LENGTH_SHORT).show();
+                popBack();
+                return;
+            }
+            mMediaPlayer = new MediaPlayer();
+            mMediaPlayer.setDataSource(file.getAbsolutePath());
+            mMediaPlayer.setSurface(mSurface);
+            mMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mMediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mp) {
+                    int videoWidth = mMediaPlayer.getVideoWidth();
+                    int videoHeight = mMediaPlayer.getVideoHeight();
+                    float ratio = videoWidth * 1.0f/videoHeight;
+                    float ratioView = rl_live_general_view.getWidth() * 1.0f/rl_live_general_view.getHeight();
+                    // 屏幕比视频的宽高比更小.表示视频是过于宽屏了.
+                    if (ratioView - ratio < 0){
+                        // 宽为基准.
+                        mTextureView.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+                        mTextureView.getLayoutParams().height = (int) (rl_live_general_view.getWidth() / ratio + 0.5f);
+
+                    }
+                    // 视频是竖屏了.
+                    else{
+                        mTextureView.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+                        mTextureView.getLayoutParams().width = (int) (rl_live_general_view.getHeight() * ratio + 0.5f);
+                    }
+
+                    mMediaPlayer.start();
+                    duration = mMediaPlayer.getDuration();
+                    tv_max_time.setText(getTime(duration));
+                    mHandler.sendEmptyMessage(UPDATE_PROGRESS);
+                }
+            });
+            mMediaPlayer.prepare();
+            mMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    popBack();
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height){
+        mSurface = new Surface(surfaceTexture);
+        openMediaPlayer();
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height){
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surface){
+        mSurface = null;
+        if (mMediaPlayer != null) {
+            mMediaPlayer.stop();
+            mMediaPlayer.release();
+        }
+        return true;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surface){
+    }
 }
