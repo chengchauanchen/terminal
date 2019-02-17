@@ -27,7 +27,6 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.vc.R;
@@ -88,7 +87,6 @@ public abstract class BaseService extends Service{
         initHomeBroadCastReceiver();
         initBroadCastReceiver();
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
@@ -108,9 +106,11 @@ public abstract class BaseService extends Service{
     }
 
     @SuppressLint("InvalidWakeLockTag")
+
     protected void initWakeLock(){
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         if(null != powerManager){
+            //noinspection deprecation
             wakeLock = powerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP |
                     PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakeLock");
         }
@@ -190,7 +190,6 @@ public abstract class BaseService extends Service{
     public void onDestroy(){
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
@@ -256,16 +255,6 @@ public abstract class BaseService extends Service{
     };
 
     /**
-     * 手机端网络变化
-     */
-    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = connected -> {
-        if(!connected){
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
-        }
-        onNetworkChanged(connected);
-    };
-
-    /**
      * 服务端通知强制重新认证登陆
      */
     private ReceiveForceReloginHandler receiveForceReloginHandler = version -> {
@@ -274,7 +263,7 @@ public abstract class BaseService extends Service{
     };
 
     /**
-     * 跟信令的连接状态
+     * 在线状态
      */
     private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> {
         if(!connected){

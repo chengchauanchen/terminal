@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
+import cn.vsx.vc.application.MyApplication;
 
 public class ToastUtil {
 	
@@ -31,8 +32,7 @@ public class ToastUtil {
 	 */
     public static void showToast(final Context context, final String text) {
 		handler.post(() -> {
-			if (toast == null)
-				toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+			toast = Toast.makeText(MyApplication.instance.getApplicationContext(), text, Toast.LENGTH_SHORT);
 			toast.setText(text);
 			toast.show();
 		});

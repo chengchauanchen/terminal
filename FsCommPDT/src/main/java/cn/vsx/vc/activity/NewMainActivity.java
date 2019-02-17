@@ -1,7 +1,6 @@
 package cn.vsx.vc.activity;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
@@ -16,11 +15,7 @@ import android.gesture.GestureLibraries;
 import android.gesture.GestureLibrary;
 import android.gesture.GestureOverlayView;
 import android.gesture.Prediction;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.AudioManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,7 +24,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerManager;
 import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -94,7 +88,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePopBackStackHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
@@ -117,11 +110,11 @@ import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowPopupwindowHandler;
-import cn.vsx.vc.receiver.HeadsetPlugReceiver;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
+import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.view.BottomView;
 import cn.vsx.vc.view.IndividualCallTimerView;
@@ -240,27 +233,30 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler(final boolean connected) {
             logger.info("主界面收到服务是否连接的通知ServerConnectionEstablishedHandler" + connected);
-            NewMainActivity.this.runOnUiThread(() -> {
-                if (!connected) {
-                    noNetWork.setVisibility(View.VISIBLE);
-                    if (ll_emergency_prompt != null && ll_emergency_prompt.getVisibility() == View.VISIBLE) {
-                        ll_emergency_prompt.setVisibility(View.GONE);
-                        ICTV_emergency_time.onStop();
-                    }
-                    if (ll_groupCall_prompt != null && ll_groupCall_prompt.getVisibility() == View.VISIBLE) {
-                        ll_groupCall_prompt.setVisibility(View.GONE);
-                        ICTV_groupCall_time.stop();
-                    }
-                } else {
-                    noNetWork.setVisibility(View.GONE);
-                    MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
+            if (!connected) {
+                myHandler.post(new Runnable(){
+                    @Override
+                    public void run(){
+                        noNetWork.setVisibility(View.VISIBLE);
+                        if (ll_emergency_prompt != null && ll_emergency_prompt.getVisibility() == View.VISIBLE) {
+                            ll_emergency_prompt.setVisibility(View.GONE);
+                            ICTV_emergency_time.onStop();
                         }
-                    });
-                }
-            });
+                        if (ll_groupCall_prompt != null && ll_groupCall_prompt.getVisibility() == View.VISIBLE) {
+                            ll_groupCall_prompt.setVisibility(View.GONE);
+                            ICTV_groupCall_time.stop();
+                        }
+                    }
+                });
+            } else {
+                myHandler.postDelayed(new Runnable(){
+                    @Override
+                    public void run(){
+                        noNetWork.setVisibility(View.GONE);
+                    }
+                },1000);
+
+            }
         }
     };
 
@@ -806,8 +802,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private boolean isPressedBackOnce = false;
     private long firstTime = 0;
     private long secondTime = 0;
-    private HeadsetPlugReceiver headsetPlugReceiver;
-    private PowerManager.WakeLock wakeLock;
     private SensorManager sensorManager;// 传感器管理对象,调用距离传感器，控制屏幕
     private Timer timer = new Timer();
 
@@ -845,19 +839,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     @Override
     public void initView() {
 
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        // 电源管理对象,屏幕开关
-        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         // 设置底部导航图片的大小
         initBottomImage();
         //        initBadgeView();
         fragmentManager = getSupportFragmentManager();
-        //距离感应器的电源锁
-        wakeLock = powerManager.newWakeLock(32, "wakeLock");
-        //正常情况下的电源锁
-        PowerManager.WakeLock wakeLockActivity = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakeLock");
-        wakeLockActivity.acquire(2 * 60 * 1000);
+
         // 先初始化界面加载第一个Fragment
         initFragment();
 
@@ -1261,36 +1247,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     }
 
     /**
-     * 距离感应器
-     */
-    @SuppressLint("Wakelock")
-    private SensorEventListener sensorEventListener = new SensorEventListener() {
-
-        @Override
-        public void onSensorChanged(SensorEvent event) {
-            float[] its = event.values;
-            if (its != null && event.sensor.getType() == Sensor.TYPE_PROXIMITY) {
-                // 经过测试，当手贴近距离感应器的时候its[0]返回值为0.0，当手离开时返回1.0
-                if (its[0] == 0.0) {// 贴近手机
-                    logger.info("hands up in calling activity贴近手机");
-                    if (!wakeLock.isHeld()) {
-                        wakeLock.acquire();// 申请设备电源锁
-                    }
-                } else {// 远离手机
-                    logger.info("hands moved in calling activity远离手机");
-                    if (wakeLock.isHeld()) {
-                        wakeLock.release(); // 释放设备电源锁
-                    }
-                }
-            }
-        }
-
-        @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
-        }
-    };
-
-    /**
      * 紧急组呼时，主动挂断
      */
     private final class OnClickListenerImplementationEmergencyGroupHangup implements
@@ -1469,14 +1425,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             startLiveService();
         }
     }
-    /**
-     * 注销耳机插入拔出的监听
-     */
-    private void unregisterHeadsetPlugReceiver() {
-        if (headsetPlugReceiver != null) {
-            unregisterReceiver(headsetPlugReceiver);
-        }
-    }
+
 
     @Override
     public void doOtherDestroy() {
@@ -1484,13 +1433,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             callManager.cancelInterceptPtt();
         }
         HeadSetUtil.getInstance().close(this);// 关闭耳机线控监听
-        if (wakeLock != null && sensorManager != null && wakeLock.isHeld()) {// 注销距离监听
-            wakeLock.release();// 释放电源锁，如果不释放finish这个acitivity后仍然会有自动锁屏的效果
-            sensorManager.unregisterListener(sensorEventListener);// 注销传感器监听
-        }
-
-        unregisterHeadsetPlugReceiver();
-
+        SensorUtil.getInstance().unregistSensor();
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveCallingCannotClickHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
@@ -1522,7 +1465,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             timerTask = null;
         }
         myHandler.removeCallbacksAndMessages(null);
-
         PromptManager.getInstance().stopRing();
 
         stopService(new Intent(NewMainActivity.this, LockScreenService.class));

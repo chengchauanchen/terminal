@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.AssetManager;
@@ -58,6 +59,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import ptt.terminalsdk.IMessageService;
 import ptt.terminalsdk.IMessageService.Stub;
+import ptt.terminalsdk.broadcastreceiver.NetWorkConnectionChangeReceiver;
 import ptt.terminalsdk.manager.Prompt.PromptManager;
 import ptt.terminalsdk.manager.audio.AudioProxy;
 import ptt.terminalsdk.manager.channel.ClientChannel;
@@ -90,6 +92,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private boolean Established = true;
 	//网络是否连接，只有两个都连接上才是真正的在线，只要有一个为false就是离线
 	private boolean netWorkConnected = true;
+	private NetWorkConnectionChangeReceiver netWorkConnectionChangeReceiver;
 
 	public TerminalSDK4Android (Application mApplication){
 		application = mApplication;
@@ -106,6 +109,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		getBDGPSManager().start();
 		getVideoProxy().start();
 		PromptManager.getInstance().start(application);
+		netWorkConnectionChangeReceiver = new NetWorkConnectionChangeReceiver();
+		IntentFilter netFilter = new IntentFilter();
+		netFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+		application.registerReceiver(netWorkConnectionChangeReceiver,netFilter);
 		registReceiveHandler(receiveNetworkChangeHandler);
 		//个呼通讯录，请求的是自己的列表，还是所有成员列表
 		putParam(Params.REQUEST_ALL, false);
@@ -136,6 +143,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		PromptManager.getInstance().stop();
 		disConnectToServer();
 		unregistReceiveHandler(receiveNetworkChangeHandler);
+		application.unregisterReceiver(netWorkConnectionChangeReceiver);
 	}
 
 

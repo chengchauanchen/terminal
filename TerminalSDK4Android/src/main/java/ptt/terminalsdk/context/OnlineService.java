@@ -8,7 +8,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.ConnectivityManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.PowerManager.WakeLock;
@@ -18,7 +17,6 @@ import android.widget.Toast;
 import org.apache.log4j.Logger;
 
 import ptt.terminalsdk.R;
-import ptt.terminalsdk.broadcastreceiver.NetWorkConnectionChangeReceiver;
 import ptt.terminalsdk.broadcastreceiver.PTTDownAndUpReceiver;
 import ptt.terminalsdk.broadcastreceiver.PhoneBroadcastReceiver;
 import ptt.terminalsdk.broadcastreceiver.TickAlarmReceiver;
@@ -34,7 +32,6 @@ public class OnlineService extends Service {
 
 	private PhoneBroadcastReceiver receiver;
 	private PTTDownAndUpReceiver pttDownAndUpReceiver;
-	private NetWorkConnectionChangeReceiver netWorkConnectionChangeReceiver;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -81,10 +78,6 @@ public class OnlineService extends Service {
 		intentFilter.addAction("com.ntdj.ptt_down");
 		intentFilter.addAction("com.ntdj.ptt_up");
 		registerReceiver(pttDownAndUpReceiver,intentFilter);
-		netWorkConnectionChangeReceiver = new NetWorkConnectionChangeReceiver();
-		IntentFilter netFilter = new IntentFilter();
-		netFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-		registerReceiver(netWorkConnectionChangeReceiver,netFilter);
 	}
 	
 	@Override
@@ -93,7 +86,6 @@ public class OnlineService extends Service {
 		unregisterReceiver(receiver);
 		unregisterReceiver(pttDownAndUpReceiver);
 		unregisterReceiver(receiverLock);
-		unregisterReceiver(netWorkConnectionChangeReceiver);
 		Log.e("OnlineService", "OnlineService被杀了，要重新启动");
 		Intent intent = new Intent();
 		intent.setAction("RESTART_ONLINESERVICE");
