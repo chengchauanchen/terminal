@@ -289,7 +289,13 @@ public class GroupMemberActivity extends BaseActivity {
                 if(isFinishing()){
                     return;
                 }
-
+                GroupMemberActivity.this.groupId = groupId;
+                Group group = DataUtil.getGroupByGroupNo(groupId);
+                isTemporaryGroup = group.getDepartmentId() == -1;
+                //只有自己创建的临时组才能添加和删除人
+                if(group.getCreatedMemberNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,-1) && isTemporaryGroup){
+                    canAdd = true;
+                }
                 currentGroupMembers.clear();
                 currentGroupMembers.addAll(memberList);
                 for(Member member : currentGroupMembers){
@@ -301,10 +307,14 @@ public class GroupMemberActivity extends BaseActivity {
                 if (sortAdapter != null) {
                     sortAdapter.notifyDataSetChanged();
                 }
-
+                rightBtn.setVisibility(View.GONE);
+                ok_btn.setVisibility(View.GONE);
                 if(isTemporaryGroup){
                     in_title_bar.setVisibility(View.GONE);
                     temp_title_bar.setVisibility(View.VISIBLE);
+                    rightBtn.setVisibility(View.GONE);
+                    ok_btn.setVisibility(View.GONE);
+                    add_btn.setVisibility(canAdd?View.VISIBLE:View.GONE);
                     barTitle.setText(R.string.text_group_members);
                     memberNum.setText(String.format(getString(R.string.text_group_members_number),currentGroupMembers.size()));
                     logger.info("组内成员：" + currentGroupMembers.size());
