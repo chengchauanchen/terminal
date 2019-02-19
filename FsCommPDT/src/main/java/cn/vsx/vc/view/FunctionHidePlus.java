@@ -271,6 +271,16 @@ public class FunctionHidePlus extends LinearLayout {
             btn_ptt.setVisibility(GONE);
             btn_record.setVisibility(View.GONE);
             groupCallNewsEt.requestFocus();
+            //判读之前是否有输入文字
+            if(TextUtils.isEmpty(groupCallNewsEt.getText().toString().trim())){
+                //没有输入文字，不显示发送按钮，显示+号
+                send.setVisibility(GONE);
+                hideFunction.setVisibility(VISIBLE);
+            }else{
+                //输入有文字，显示发送按钮，不显示+号
+                send.setVisibility(VISIBLE);
+                hideFunction.setVisibility(GONE);
+            }
             //切换软键盘的显示与隐藏
             hideKeyboard(false);
         }else {
