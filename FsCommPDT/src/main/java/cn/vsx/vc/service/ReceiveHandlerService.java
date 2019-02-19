@@ -230,7 +230,6 @@ public class ReceiveHandlerService extends Service{
             data.clear();
             windowManager.removeView(view);
             dialogAdded = false;
-            MyApplication.instance.isMiniLive = false;
             PromptManager.getInstance().stopRing();
         }
     }

@@ -108,7 +108,8 @@
             android:layout_marginTop="@dimen/x70"
             android:background="@drawable/speaking_live_shape"
             android:orientation="horizontal"
-            android:padding="@dimen/x10">
+            android:padding="@dimen/x10"
+            android:visibility="gone">
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

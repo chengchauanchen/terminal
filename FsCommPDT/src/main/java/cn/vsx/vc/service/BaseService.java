@@ -37,6 +37,7 @@ import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.service.KeepLiveManager;
 
 /**
  * 作者：xuxiaolong
@@ -77,6 +78,7 @@ public abstract class BaseService extends Service{
 
     @Override
     public void onCreate(){
+        logger.info("onCreate");
         super.onCreate();
         initWakeLock();
         setRootView();
@@ -94,6 +96,8 @@ public abstract class BaseService extends Service{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
+        KeepLiveManager.getInstance().setServiceForeground(this);
+        logger.info(TAG+"---onStartCommand--"+dialogAdd);
         if(!dialogAdd){
             windowManager.addView(rootView, layoutParams1);
             MyApplication.instance.viewAdded = true;
@@ -189,6 +193,7 @@ public abstract class BaseService extends Service{
     @Override
     public void onDestroy(){
         super.onDestroy();
+        logger.info(TAG+"onDestroy");
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
@@ -224,6 +229,7 @@ public abstract class BaseService extends Service{
             dialogAdd = false;
             MyApplication.instance.viewAdded = false;
         }
+        MyApplication.instance.isMiniLive = false;
         PromptManager.getInstance().stopRing();
         MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverRemoveWindowViewHandler.class,this.getClass().getSimpleName());
         stopSelf();

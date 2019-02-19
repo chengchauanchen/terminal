@@ -40,6 +40,7 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetRtspStreamUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
@@ -47,6 +48,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberNotLivingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
@@ -110,6 +112,8 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         mPopupMiniLive.setOnTouchListener(miniPopOnTouchListener);
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
@@ -249,7 +253,45 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetRtspStreamUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
     }
+    /**
+     * 主动方请求组呼的消息
+     */
+    private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
+        if(methodResult == BaseCommonCode.SUCCESS_CODE){
+            mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_speaking);
+            if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
+                MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(true);
+            }
+            MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
+        }else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
+            ToastUtil.showToast(getApplicationContext(), "当前组是只听组，不能发起组呼");
+        } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
+            mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_yellow);
+        } else {//请求失败
+            if (MyApplication.instance.getGroupListenenState() != LISTENING) {
+                mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_dodgerblue2);
+            } else {
+                mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_gray);
+            }
+        }
+    });
+    /**
+     * 主动方停止组呼
+     */
+
+    private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = new ReceiveCeaseGroupCallConformationHander() {
+        @Override
+        public void handler(int resultCode, String resultDesc) {
+            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+            mHandler.post(() -> {
+                mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_dodgerblue2);
+                mLlLiveGroupCall.setVisibility(View.GONE);
+            });
+        }
+    };
 
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
@@ -330,7 +372,7 @@ public class PullLivingService extends BaseService{
      **/
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (methodResult, resultDesc) -> {
         ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
-        mHandler.post(this::stopBusiness);
+        mHandler.post(this::finishVideoLive);
     };
 
     private IGotaKeyHandler.Stub gotaKeHandler = new IGotaKeyHandler.Stub(){
@@ -392,8 +434,8 @@ public class PullLivingService extends BaseService{
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverCloseKeyBoardHandler.class);
                     windowManager.removeView(rootView);
                     windowManager.addView(rootView, layoutParams1);
-                    mRlPullLive.setVisibility(View.GONE);
-                    mPopupMiniLive.setVisibility(View.VISIBLE);
+                    mRlPullLive.setVisibility(View.VISIBLE);
+                    mPopupMiniLive.setVisibility(View.GONE);
                     MyApplication.instance.isMiniLive = false;
                 }
                 break;
@@ -404,6 +446,7 @@ public class PullLivingService extends BaseService{
     private TextureView.SurfaceTextureListener surfaceTextureListener = new TextureView.SurfaceTextureListener(){
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height){
+            logger.info("onSurfaceTextureAvailable--"+surface+"-----"+url);
             if(TextUtils.isEmpty(url)){
                 return;
             }
@@ -428,7 +471,12 @@ public class PullLivingService extends BaseService{
         }
     };
 
-    private View.OnClickListener hangUpOnClickListener = v-> stopBusiness();
+    private View.OnClickListener hangUpOnClickListener = v-> finishVideoLive();
+
+    private void finishVideoLive(){
+        stopPull();
+        stopBusiness();
+    }
 
     private View.OnClickListener retractOnClickListener = v -> showPopMiniView();
 
@@ -475,21 +523,25 @@ public class PullLivingService extends BaseService{
             //rtmp播放
             //测试url
             url = "rtmp://202.69.69.180:443/webcast/bshdlive-pc";
-            rtmpClient = new RTMPEasyPlayerClient(this, RTMPPLAYKEY, surface, null, null);
-            rtmpClient.play(url);
+            if(null != surface.getSurfaceTexture()){
+                rtmpClient = new RTMPEasyPlayerClient(this, RTMPPLAYKEY, surface, null, null);
+                rtmpClient.play(url);
+            }
         }else{
             //rtsp 播放
             if(null == mResultReceiver){
                 mResultReceiver = new RtspReceiver(new Handler());
             }
-            mStreamRender = new EasyRTSPClient(this, PLAYKEY, surface.getSurfaceTexture(), mResultReceiver);
-            try{
-                if(url != null){
-                    mStreamRender.start(url, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
+            if(null != surface.getSurfaceTexture()){
+                mStreamRender = new EasyRTSPClient(this, PLAYKEY, surface.getSurfaceTexture(), mResultReceiver);
+                try{
+                    if(!android.text.TextUtils.isEmpty(url)){
+                        mStreamRender.start(url, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
+                    }
+                }catch(Exception e){
+                    e.printStackTrace();
+                    logger.error("PullLivingService :" + e.toString());
                 }
-            }catch(Exception e){
-                e.printStackTrace();
-                logger.error("IndividualCallService :" + e.toString());
             }
         }
     }
