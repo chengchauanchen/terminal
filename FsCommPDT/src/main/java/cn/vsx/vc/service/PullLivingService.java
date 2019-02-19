@@ -21,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
@@ -37,10 +36,13 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetRtspStreamUrlHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberNotLivingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
@@ -51,6 +53,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -76,6 +79,10 @@ public class PullLivingService extends BaseService{
     private LinearLayout mLlLiveLookHangup;
     private LinearLayout mLlLiveLookInviteMember;
     private Button mBtnLiveLookPtt;
+    private LinearLayout mLlLiveGroupCall;
+    private TextView mTvLiveSpeakingName;
+    private TextView mTvLiveGroupName;
+    private TextView mTvLiveSpeakingId;
     private boolean rtspPlay = true;
     private String url;
     private RTMPEasyPlayerClient rtmpClient;
@@ -101,6 +108,8 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberNotLivingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         mPopupMiniLive.setOnTouchListener(miniPopOnTouchListener);
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
@@ -215,6 +224,10 @@ public class PullLivingService extends BaseService{
         mLlLiveLookHangup = rootView.findViewById(R.id.ll_live_look_hangup);
         mLlLiveLookInviteMember = rootView.findViewById(R.id.ll_live_look_invite_member);
         mBtnLiveLookPtt = rootView.findViewById(R.id.btn_live_look_ptt);
+        mLlLiveGroupCall = rootView.findViewById(R.id.ll_live_group_call);
+        mTvLiveSpeakingName = rootView.findViewById(R.id.tv_live_speakingName);
+        mTvLiveGroupName = rootView.findViewById(R.id.tv_live_groupName);
+        mTvLiveSpeakingId = rootView.findViewById(R.id.tv_live_speakingId);
     }
 
     @Override
@@ -234,7 +247,27 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberNotLivingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetRtspStreamUrlHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
     }
+
+    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
+        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
+            ptt.terminalsdk.tools.ToastUtil.showToast(getApplicationContext(),getString(R.string.text_has_no_group_call_listener_authority));
+        }else{
+            mHandler.post(() -> {
+                mLlLiveGroupCall.setVisibility(View.VISIBLE);
+                mTvLiveGroupName.setText(DataUtil.getGroupByGroupNo(groupId).name);
+                mTvLiveSpeakingName.setText(memberName);
+                mTvLiveSpeakingId.setText(HandleIdUtil.handleId(memberId));
+            });
+        }
+    };
+
+    private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = (reasonCode) -> {
+        logger.info("收到组呼停止");
+        mHandler.post(() -> mLlLiveGroupCall.setVisibility(View.GONE));
+    };
 
     private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setAuthorityView);
 
@@ -626,6 +659,16 @@ public class PullLivingService extends BaseService{
         mLiveVedioTheme.setText(theme);
         mLiveVedioName.setText(liveMember.getName());
         mLiveVedioId.setText(HandleIdUtil.handleId(liveMember.getNo()));
+        if(MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING){
+            if(null != MyApplication.instance.groupCallMember){
+                mLlLiveGroupCall.setVisibility(View.VISIBLE);
+                mTvLiveSpeakingName.setText(MyApplication.instance.groupCallMember.getName());
+                mTvLiveSpeakingId.setText(HandleIdUtil.handleId(MyApplication.instance.groupCallMember.getId()));
+            }
+            if(MyApplication.instance.currentCallGroupId !=-1){
+                mTvLiveGroupName.setText(DataUtil.getGroupByGroupNo(MyApplication.instance.currentCallGroupId).name);
+            }
+        }
     }
     private void onVideoSizeChange(){
         if(mLiveWidth == 0 || mLiveHeight == 0){

@@ -420,7 +420,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler() {
         @Override
         public void handler(int reasonCode) {
-
+            MyApplication.instance.groupCallMember = null;
+            MyApplication.instance.currentCallGroupId = -1;
             if (reasonCode == StopGroupCallReason.TIMEOUT_STOP_GROUP_CALL.getCode()) {
                 //				MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
             }
@@ -437,6 +438,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         public void handler(final int memberId, final String memberName, final int groupId,
                             String version, final CallMode currentCallMode) {
             if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
+                MyApplication.instance.groupCallMember = new Member(memberId,memberName);
+                MyApplication.instance.currentCallGroupId = groupId;
                 NewMainActivity.this.currentCallMode = currentCallMode;
                 logger.info("组呼时，被动方接收组呼类型：" + currentCallMode);
                 myHandler.post(() -> {

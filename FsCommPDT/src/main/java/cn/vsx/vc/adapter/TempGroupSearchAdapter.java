@@ -26,25 +26,17 @@ public class TempGroupSearchAdapter extends BaseAdapter {
 
 	private Context context;
 	private List<Member> searchMembersList;
-	private int searchListPosition;
-	private int activeMode;
-	private int errorCode;
-	private boolean interGroup;
 	private String keyWords;
 
 	private Handler handler = new Handler();
 
-	public TempGroupSearchAdapter(Context context, List<Member> searchMembersList, int searchListPosition) {
+	public TempGroupSearchAdapter(Context context, List<Member> searchMembersList) {
 		this.context = context;
 		this.searchMembersList = searchMembersList;
-		this.searchListPosition = searchListPosition;
 	}
 
-	public void refreshSearchContactsAdapter(int activeMode, int searchListPosition, int errorCode) {
-		this.searchListPosition = searchListPosition;
-		this.activeMode = activeMode;
-		this.errorCode = errorCode;
-		handler.post(() -> notifyDataSetChanged());
+	public void refreshSearchContactsAdapter() {
+		handler.post(this::notifyDataSetChanged);
 	}
 
 	@Override
@@ -116,10 +108,6 @@ public class TempGroupSearchAdapter extends BaseAdapter {
 
 	public void setFilterKeyWords(String keyWords) {
 		this.keyWords = keyWords;
-	}
-
-	public void setInterGroup(boolean interGroup) {
-		this.interGroup = interGroup;
 	}
 
 	public static class ViewHolder {

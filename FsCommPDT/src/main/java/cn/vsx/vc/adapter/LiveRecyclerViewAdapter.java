@@ -10,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import butterknife.Bind;
@@ -67,7 +68,7 @@ public class LiveRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
             });
         }else{
             LiveRecyclerViewAdapter.UserViewHolder userViewHolder = (LiveRecyclerViewAdapter.UserViewHolder) holder;
-            final Member member = (Member) mDatas.get(position).getBean();
+            final Member member =(Member) mDatas.get(position).getBean();
             userViewHolder.tvName.setText(member.getName() + "");
             userViewHolder.tvId.setText(member.getNo() + "");
             userViewHolder.itemView.setOnClickListener(view -> {
@@ -112,6 +113,43 @@ public class LiveRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
 
     public ArrayList<Integer> getSelectMember(){
         return selectMember;
+    }
+
+    public void setSelectMember(int memberNo){
+        boolean added = false;
+        for(ContactItemBean next : mDatas){
+            if(next.getBean() instanceof Member){
+                Member bean = (Member) next.getBean();
+                if(bean.getNo() == memberNo){
+                    bean.setChecked(true);
+                    removeExistMember(memberNo);
+                    selectMember.add(memberNo);
+                    added = true;
+                    break;
+                }
+            }
+        }
+        if(!added){
+            //如果当前不在当前部门，就去子部门查询
+            Member member = (Member) cn.vsx.hamster.terminalsdk.tools.DataUtil.getMemberByMemberNo(memberNo).clone();
+            member.setChecked(true);
+            removeExistMember(memberNo);
+            selectMember.add(memberNo);
+        }
+        listener.onItemClick(-1,TYPE_USER);
+        notifyDataSetChanged();
+    }
+
+    //删除掉之前的人
+    private void removeExistMember(int memberNo){
+        Iterator<Integer> iterator = selectMember.iterator();
+        while(iterator.hasNext()){
+            Integer next = iterator.next();
+            if(next == memberNo){
+                iterator.remove();
+                break;
+            }
+        }
     }
 
     public Member getLiveMember(){
