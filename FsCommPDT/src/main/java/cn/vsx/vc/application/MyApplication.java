@@ -31,6 +31,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
+import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.utils.CommonGroupUtil;
@@ -44,11 +45,7 @@ public class MyApplication extends Application {
 	public int mAppStatus = Constants.FORCE_KILL;//App运行状态，是否被强杀
 	public boolean isBinded=false;
 	public boolean isPttFlowPress = false;
-	public boolean isIndibvidualCalling = false;
-	public boolean isGroupCalling = false;
-	public static boolean isNight = true;
 	public boolean isContactsIndividual = false;
-	public boolean helpIsFirstClick = false;
 	public boolean isUpdatingAPP  = false;
 	public boolean isChanging  = false;
 	public boolean isScreenOff  = false;
@@ -73,7 +70,8 @@ public class MyApplication extends Application {
 	public boolean isMiniLive;//直播视频缩到小窗口
 	public boolean headset;//耳机是否插入
 	public LinphoneCall linphoneCall;//当前来电
-
+	public Member groupCallMember;//正在组呼的人
+	public int currentCallGroupId = -1;//正在组呼的组id
 	/**标记个呼来或者请求图形来，是否做了接受或拒绝的操作，默认是false*/
 	public boolean isPrivateCallOrVideoLiveHand = false;
 

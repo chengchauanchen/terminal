@@ -4,16 +4,23 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Message;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONObject;
@@ -28,6 +35,7 @@ import java.util.List;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -40,14 +48,17 @@ import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdatePhoneMemberHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.CatalogAdapter;
 import cn.vsx.vc.adapter.LiveRecyclerViewAdapter;
+import cn.vsx.vc.adapter.TempGroupSearchAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSwitchCameraViewHandler;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -80,7 +91,19 @@ public class InviteMemberService extends BaseService{
     private int livingMemberId;
     private boolean gb28181Pull;
     private TerminalMessage oldTerminalMessage;
-
+    private ImageView mIvSearch;
+    private LinearLayout mLlSearchMember;
+    private ImageView mIvBack;
+    private EditText mEtSearchAllcontacts;
+    private ImageView mIvDeleteEdittext;
+    private Button mBtnSearchAllcontacts;
+    private TextView mTvSearchNothing;
+    private RelativeLayout mRlSearchResult;
+    private ListView mLvSearchAllcontacts;
+    private String keyWord;
+    private List<Member> searchList = new ArrayList<>();
+    private TempGroupSearchAdapter tempGroupSearchAdapter;
+    private List<Member> searchMemberListExceptMe = new ArrayList<>();/**搜索到的结果集合*/
     public InviteMemberService(){}
 
     @SuppressLint("InflateParams")
@@ -105,9 +128,19 @@ public class InviteMemberService extends BaseService{
         TextView mTvNoUser = rootView.findViewById(R.id.tv_no_user);
 
         mCatalogRecyclerview =  rootView.findViewById(R.id.catalog_recyclerview);
-        ImageView mIvSearch = rootView.findViewById(R.id.iv_search);
+        mIvSearch = rootView.findViewById(R.id.iv_search);
         mSwipeRefreshLayout =  rootView.findViewById(R.id.swipeRefreshLayout);
         mRecyclerview =  rootView.findViewById(R.id.recyclerview);
+        mLlSearchMember = rootView.findViewById(R.id.ll_search_member);
+
+        mIvBack = rootView.findViewById(R.id.iv_back);
+        mEtSearchAllcontacts = rootView.findViewById(R.id.et_search_allcontacts);
+        mIvDeleteEdittext = rootView.findViewById(R.id.iv_delete_edittext);
+        mBtnSearchAllcontacts = rootView.findViewById(R.id.btn_search_allcontacts);
+        mTvSearchNothing = rootView.findViewById(R.id.tv_search_nothing);
+        mRlSearchResult = rootView.findViewById(R.id.rl_search_result);
+        mLvSearchAllcontacts = rootView.findViewById(R.id.lv_search_allcontacts);
+
     }
 
     protected void initListener(){
@@ -123,6 +156,14 @@ public class InviteMemberService extends BaseService{
         mCatalogAdapter.setOnItemClick(catalogItemClickListener);
         mContactAdapter.setOnItemClickListener(contractItemClickListener);
         mSwipeRefreshLayout.setOnRefreshListener(onRefreshListener);
+        mIvSearch.setOnClickListener(searchOnClickListener);
+
+        mIvBack.setOnClickListener(searchBackOnClickListener);
+        mIvDeleteEdittext.setOnClickListener(deleteEditTextOnClickListener);
+        mBtnSearchAllcontacts.setOnClickListener(doSearchOnClickListener);
+        mEtSearchAllcontacts.addTextChangedListener(editTextChangedListener);
+        mEtSearchAllcontacts.setOnEditorActionListener(onEditorActionListener);
+        mLvSearchAllcontacts.setOnItemClickListener(searchItemclickListener);
     }
 
     @Override
@@ -160,6 +201,10 @@ public class InviteMemberService extends BaseService{
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         mContactAdapter=new LiveRecyclerViewAdapter(getApplicationContext(),mDatas,type);
         mRecyclerview.setAdapter(mContactAdapter);
+
+        searchMemberListExceptMe.addAll(TerminalFactory.getSDK().getConfigManager().getPhoneMemberExceptMe());
+        tempGroupSearchAdapter = new TempGroupSearchAdapter(getApplicationContext(),searchList);
+        mLvSearchAllcontacts.setAdapter(tempGroupSearchAdapter);
     }
 
     @Override
@@ -202,12 +247,14 @@ public class InviteMemberService extends BaseService{
 
     private View.OnClickListener editThemeOnClickListener = v->{
         mLlEditTheme.setVisibility(View.VISIBLE);
+        mLlSearchMember.setVisibility(View.GONE);
         mLlSelectMember.setVisibility(View.GONE);
     };
 
     private View.OnClickListener editThemeConfirmOnClickListener = v->{
         if(!TextUtils.isEmpty(mEtLiveEditImportTheme.getText().toString().trim())){
             mLlEditTheme.setVisibility(View.GONE);
+            mLlSearchMember.setVisibility(View.GONE);
             mLlSelectMember.setVisibility(View.VISIBLE);
             mTvLiveSelectmemberTheme.setText(mEtLiveEditImportTheme.getText().toString().trim());
             InputMethodUtil.hideInputMethod(InviteMemberService.this, mEtLiveEditImportTheme);
@@ -219,8 +266,8 @@ public class InviteMemberService extends BaseService{
     private View.OnClickListener returnOnClickListener = v-> removeView();
 
     private View.OnClickListener editThemeReturnOnClickListener = v->{
-        windowManager.updateViewLayout(rootView,layoutParams);
         mLlEditTheme.setVisibility(View.GONE);
+        mLlSearchMember.setVisibility(View.GONE);
         mLlSelectMember.setVisibility(View.VISIBLE);
     };
 
@@ -277,6 +324,83 @@ public class InviteMemberService extends BaseService{
         }
     };
 
+    private AdapterView.OnItemClickListener searchItemclickListener = (parent, view, position, id) -> {
+        List<Integer> selectMember = mContactAdapter.getSelectMember();
+        if(!selectMember.isEmpty() && selectMember.contains(searchList.get(position).getNo())){
+            ToastUtil.showToast(getApplicationContext(),getString(R.string.text_you_have_added_this_member));
+            return;
+        }
+        mContactAdapter.setSelectMember(searchList.get(position).getNo());
+
+        mEtSearchAllcontacts.setText("");
+        InputMethodUtil.hideInputMethod(getApplicationContext(), mEtSearchAllcontacts);
+        searchMemberListExceptMe.clear();
+        searchList.clear();
+        mTvSearchNothing.setVisibility(View.VISIBLE);
+        mRlSearchResult.setVisibility(View.GONE);
+
+        mLlEditTheme.setVisibility(View.GONE);
+        mLlSelectMember.setVisibility(View.VISIBLE);
+        mLlSearchMember.setVisibility(View.GONE);
+    };
+
+    private TextView.OnEditorActionListener onEditorActionListener = (v, actionId, event) -> {
+        if(actionId == EditorInfo.IME_ACTION_SEARCH) {
+            doSearch();
+        }
+        return false;
+    };
+
+    private TextWatcher editTextChangedListener = new TextWatcher(){
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after){
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count){
+            if ( s.length() > 0 && !DataUtil.isLegalSearch(s)) {
+                ToastUtil.showToast(getApplicationContext(), getString(R.string.text_search_content_is_illegal));
+            }
+            if(android.text.TextUtils.isEmpty(s.toString())){
+
+                mIvDeleteEdittext.setVisibility(View.GONE);
+                mBtnSearchAllcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
+                mBtnSearchAllcontacts.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.search_button_text_color1));
+                mBtnSearchAllcontacts.setEnabled(false);
+            }else {
+                mIvDeleteEdittext.setVisibility(View.VISIBLE);
+                mBtnSearchAllcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape2);
+                mBtnSearchAllcontacts.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.white));
+                mBtnSearchAllcontacts.setEnabled(true);
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s){
+        }
+    };
+
+    private View.OnClickListener doSearchOnClickListener = v->{
+        doSearch();
+    };
+
+    private View.OnClickListener deleteEditTextOnClickListener = v->{
+        mEtSearchAllcontacts.setText("");
+    };
+
+    private View.OnClickListener searchBackOnClickListener = v->{
+        mLlEditTheme.setVisibility(View.GONE);
+        mLlSearchMember.setVisibility(View.GONE);
+        InputMethodUtil.hideInputMethod(getApplicationContext(), mEtSearchAllcontacts);
+        mLlSelectMember.setVisibility(View.VISIBLE);
+    };
+
+    private View.OnClickListener searchOnClickListener = v->{
+        mLlEditTheme.setVisibility(View.GONE);
+        mLlSelectMember.setVisibility(View.GONE);
+        mLlSearchMember.setVisibility(View.VISIBLE);
+    };
+
     private SwipeRefreshLayout.OnRefreshListener onRefreshListener = () -> {
         TerminalFactory.getSDK().getConfigManager().updataPhoneMemberInfo();
         mHandler.postDelayed(() -> {
@@ -287,6 +411,52 @@ public class InviteMemberService extends BaseService{
         }, 1200);
     };
 
+    /**
+     * 搜索
+     */
+    private void doSearch(){
+        InputMethodUtil.hideInputMethod(getApplicationContext(), mEtSearchAllcontacts);
+        keyWord = mEtSearchAllcontacts.getText().toString();
+        tempGroupSearchAdapter.setFilterKeyWords(keyWord);
+
+        mTvSearchNothing.setVisibility(View.VISIBLE);
+        mTvSearchNothing.setText(R.string.text_search_contact);
+        mRlSearchResult.setVisibility(View.GONE);
+        searchList.clear();
+
+        if (android.text.TextUtils.isEmpty(keyWord)) {
+            ToastUtil.showToast(getApplicationContext(), getString(R.string.text_search_content_can_not_empty));
+        }else {
+            searchMemberFromGroup();
+        }
+    }
+
+    /**  搜索 **/
+    private void searchMemberFromGroup () {
+        searchList.clear();
+        for(Member member : searchMemberListExceptMe) {
+            String name = member.getName();
+            String id = String.valueOf(member.getNo());
+            if(!Util.isEmpty(name) && !Util.isEmpty(keyWord) && name.toLowerCase().contains(keyWord.toLowerCase())) {
+                searchList.add(member);
+            }
+            else if(!Util.isEmpty(id) && !Util.isEmpty(keyWord) && id.contains(keyWord)) {
+                searchList.add(member);
+            }
+        }
+        if (searchList.size() == 0) {
+            mTvSearchNothing.setText(R.string.text_contact_is_not_exist);
+            mRlSearchResult.setVisibility(View.GONE);
+        } else {
+            mTvSearchNothing.setVisibility(View.GONE);
+            mRlSearchResult.setVisibility(View.VISIBLE);
+
+            if (tempGroupSearchAdapter != null) {
+                tempGroupSearchAdapter.notifyDataSetChanged();
+                mLvSearchAllcontacts.setSelection(0);
+            }
+        }
+    }
 
     /**
      * 设置数据
@@ -315,7 +485,24 @@ public class InviteMemberService extends BaseService{
     @SuppressWarnings("unchecked")
     private void addItemMember(MemberResponse memberResponse){
         //子成员
-        List<Member> memberList = new ArrayList<>(memberResponse.getMembers());
+        List<Member> memberList = new ArrayList<>();
+        List<Member> members = memberResponse.getMembers();
+        for(Member member : members){
+            Member cloneMember = new Member();
+            //如果没有名字显示No
+            if(member.getName() == null || member.getName().equals("")){
+                cloneMember.setName(String.valueOf(member.getNo()));
+            }else {
+                cloneMember.setName(member.getName());
+            }
+            //memberId终端用不上，代码里的id都是指No
+            cloneMember.setId(member.getNo());
+            cloneMember.setNo(member.getNo());
+            cloneMember.setTerminalMemberTypeEnum(TerminalMemberType.getInstanceByCode(member.type));
+            cloneMember.setPhone(member.getPhone());
+            cloneMember.setDepartmentName(memberResponse.getName());
+            memberList.add(cloneMember);
+        }
         if(!memberList.isEmpty()){
             List<ContactItemBean> itemMemberList = new ArrayList<>();
             if(Constants.PUSH.equals(type)){

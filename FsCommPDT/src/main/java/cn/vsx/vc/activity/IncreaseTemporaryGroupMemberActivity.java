@@ -24,6 +24,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.OnClick;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.MemberResponse;
@@ -268,9 +269,25 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
     @SuppressWarnings("unchecked")
     private void addItemMember(MemberResponse memberResponse){
         //子成员
-        List<Member> memberList = memberResponse.getMembers();
-
-        if(null != memberList && !memberList.isEmpty()){
+        List<Member> memberList = new ArrayList<>();
+        List<Member> members = memberResponse.getMembers();
+        for(Member member : members){
+            Member cloneMember = new Member();
+            //如果没有名字显示No
+            if(member.getName() == null || member.getName().equals("")){
+                cloneMember.setName(String.valueOf(member.getNo()));
+            }else {
+                cloneMember.setName(member.getName());
+            }
+            //memberId终端用不上，代码里的id都是指No
+            cloneMember.setId(member.getNo());
+            cloneMember.setNo(member.getNo());
+            cloneMember.setTerminalMemberTypeEnum(TerminalMemberType.getInstanceByCode(member.type));
+            cloneMember.setPhone(member.getPhone());
+            cloneMember.setDepartmentName(memberResponse.getName());
+            memberList.add(cloneMember);
+        }
+        if(!memberList.isEmpty()){
             List<ContactItemBean> itemMemberList = new ArrayList<>();
             Iterator<Member> iterator = memberList.iterator();
             while(iterator.hasNext()){

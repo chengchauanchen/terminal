@@ -1224,6 +1224,10 @@ public class TalkbackFragment extends BaseFragment {
         TextViewCompat.setTextAppearance(ptt,R.style.pttSpeakingText);
         logger.info("主界面，ptt被禁 ？  isClickVolumeToCall：" + MyApplication.instance.isClickVolumeToCall);
         ptt.setEnabled(!MyApplication.instance.isClickVolumeToCall);
+        MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
+        if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
+            MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(true);
+        }
     }
 
     private void change2Forbid() {
@@ -1247,6 +1251,7 @@ public class TalkbackFragment extends BaseFragment {
         layoutDefault();
         ll_show_area.setVisibility(View.VISIBLE);
         allViewDefault();
+        MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
         String speakMemberName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
         if (!TextUtils.isEmpty(speakMemberName)) {
             //设置说话人名字,在组呼来的handler中设置
@@ -1550,9 +1555,6 @@ public class TalkbackFragment extends BaseFragment {
         int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
         logger.info("PTT按下以后resultCode:" + resultCode);
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {//允许组呼了
-            if(!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()){
-                MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(true);
-            }
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);
             change2PreSpeaking();
         } else if (resultCode == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {

@@ -35,6 +35,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
@@ -605,6 +606,17 @@ public class UVCPushService extends BaseService{
         mTvUvcLiveTime.setVisibility(View.VISIBLE);
         mIvUvcLiveRetract.setVisibility(View.VISIBLE);
         mLlFunction.setVisibility(View.VISIBLE);
+        setAuthorityView();
+        if(MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING){
+            if(null != MyApplication.instance.groupCallMember){
+                mLlUvcSpeakState.setVisibility(View.VISIBLE);
+                mTvUvcLiveSpeakingName.setText(MyApplication.instance.groupCallMember.getName());
+                mTvUvcLiveSpeakingId.setText(HandleIdUtil.handleId(MyApplication.instance.groupCallMember.getId()));
+            }
+            if(MyApplication.instance.currentCallGroupId !=-1){
+                mTvUvcLiveGroupName.setText(DataUtil.getGroupByGroupNo(MyApplication.instance.currentCallGroupId).name);
+            }
+        }
     }
 
     private void setAuthorityView(){

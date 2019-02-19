@@ -103,8 +103,6 @@ public class TempGroupSearchFragment extends BaseFragment{
         isInterGroup = interGroup;
         if(tv_search_nothing != null)
             tv_search_nothing.setText(R.string.text_search_contact);
-        if(tempGroupSearchAdapter != null)
-            tempGroupSearchAdapter.setInterGroup(isInterGroup);
     }
     @Override
     public int getContentViewId() {
@@ -116,8 +114,7 @@ public class TempGroupSearchFragment extends BaseFragment{
         tv_search_nothing.setText(R.string.text_search_contact);
         rl_search_result.setVisibility(View.GONE);
 
-        tempGroupSearchAdapter = new TempGroupSearchAdapter(context, searchMemberListExceptMe,-1);
-        tempGroupSearchAdapter.setInterGroup(isInterGroup);
+        tempGroupSearchAdapter = new TempGroupSearchAdapter(context, searchMemberListExceptMe);
         lv_search_allcontacts.setAdapter(tempGroupSearchAdapter);
         btn_search_allcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
         btn_search_allcontacts.setTextColor(ContextCompat.getColor(getContext(),R.color.search_button_text_color1));
@@ -273,7 +270,7 @@ public class TempGroupSearchFragment extends BaseFragment{
             rl_search_result.setVisibility(View.VISIBLE);
 
             if (tempGroupSearchAdapter != null) {
-                tempGroupSearchAdapter.refreshSearchContactsAdapter(0, -1, 0);
+                tempGroupSearchAdapter.refreshSearchContactsAdapter();
                 lv_search_allcontacts.setSelection(0);
             }
         }
@@ -336,7 +333,7 @@ public class TempGroupSearchFragment extends BaseFragment{
                         rl_search_result.setVisibility(View.VISIBLE);
 
                         if (tempGroupSearchAdapter != null) {
-                            tempGroupSearchAdapter.refreshSearchContactsAdapter(0, -1, 0);
+                            tempGroupSearchAdapter.refreshSearchContactsAdapter();
                         }
                     }
                 } else {

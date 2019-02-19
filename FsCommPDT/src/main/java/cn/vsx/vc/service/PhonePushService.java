@@ -35,6 +35,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
@@ -627,5 +628,15 @@ public class PhonePushService extends BaseService{
         mLlLiveChageCamera.setVisibility(View.VISIBLE);
         mLlLiveHangupTotal.setVisibility(View.VISIBLE);
         mLlLiveInviteMember.setVisibility(View.VISIBLE);
+        if(MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING){
+            if(null != MyApplication.instance.groupCallMember){
+                mLlLiveGroupCall.setVisibility(View.VISIBLE);
+                mTvLiveSpeakingName.setText(MyApplication.instance.groupCallMember.getName());
+                mTvLiveSpeakingId.setText(HandleIdUtil.handleId(MyApplication.instance.groupCallMember.getId()));
+            }
+            if(MyApplication.instance.currentCallGroupId !=-1){
+                mTvLiveGroupName.setText(DataUtil.getGroupByGroupNo(MyApplication.instance.currentCallGroupId).name);
+            }
+        }
     }
 }

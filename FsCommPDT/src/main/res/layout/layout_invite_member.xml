@@ -7,6 +7,8 @@
     <include layout="@layout/live_edit_theme"
         android:id="@+id/ll_live_edit_theme"/>
     
+    <include layout="@layout/layout_search_member"
+        android:id="@+id/ll_search_member"/>
     <!--上报选择 -->
     <include layout="@layout/live_select_member"
         android:id="@+id/live_select_member"/>
