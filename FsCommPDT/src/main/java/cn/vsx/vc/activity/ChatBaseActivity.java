@@ -1790,6 +1790,20 @@ public abstract class ChatBaseActivity extends BaseActivity{
             int tokenId =  terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID);
             temporaryAdapter.progressPercentMap.remove(tokenId);
             sendMessageFail(terminalMessage, -1);
+            if(terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()){
+                handler.post(() -> {
+                    final int position = getPosByTokenId(tokenId, chatMessageList);
+                    final int viewPos = getViewPos(position);
+                    if (viewPos != -1) {
+                        View childView = groupCallList.getChildAt(viewPos);
+                        if (childView != null) {
+                            LoadingCircleView loading_view = childView.findViewById(R.id.loading_view);
+                            loading_view.setVisibility(View.GONE);
+                        }
+                    }
+                });
+
+            }
         }
     };
 

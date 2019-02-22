@@ -78,7 +78,7 @@ public abstract class BaseService extends Service{
 
     @Override
     public void onCreate(){
-        logger.info("onCreate");
+        logger.info(TAG+":onCreate");
         super.onCreate();
         initWakeLock();
         setRootView();
@@ -193,7 +193,7 @@ public abstract class BaseService extends Service{
     @Override
     public void onDestroy(){
         super.onDestroy();
-        logger.info(TAG+"onDestroy");
+        logger.info(TAG+":onDestroy");
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
