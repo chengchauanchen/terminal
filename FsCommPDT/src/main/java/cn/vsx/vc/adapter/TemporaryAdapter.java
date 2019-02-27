@@ -837,16 +837,6 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 } else {
                     setViewVisibility(holder.ivUnread, View.INVISIBLE);
                 }
-
-                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())&&terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){
-                    setViewVisibility(holder.iv_voice_image_anim, View.GONE);
-                    setViewVisibility(holder.ivVoice, View.VISIBLE);
-                    holder.ivVoice.setImageResource(R.drawable.iv_voice_image_off);
-                }else {
-                    setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
-                    setViewVisibility(holder.ivVoice, View.VISIBLE);
-                    holder.ivVoice.setImageResource(R.drawable.sound_item);
-                }
             }
         }
         /**  个呼条目  */
@@ -1276,40 +1266,43 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     /***  播放组呼录音相关改变 **/
-    private void playGroupVoice(int position, ChatViewHolder holder,TerminalMessage terminalMessage) {
-
-        if (holder.iv_voice_image_anim != null
-                &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
-            AnimationDrawable animationDrawable = (AnimationDrawable) holder.iv_voice_image_anim.getBackground();
-            if (mposition == position) {
-                setUnread(position);
-                if (isSameItem) {
-                    if (isPlaying) {
+    private void playGroupVoice(int position, ChatViewHolder holder, TerminalMessage terminalMessage) {
+        if(holder.iv_voice_image_anim != null){
+            if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
+                AnimationDrawable animationDrawable = (AnimationDrawable) holder.iv_voice_image_anim.getBackground();
+                if (mposition == position) {
+                    setUnread(position);
+                    if (isSameItem) {
+                        if (isPlaying) {
+                            setViewVisibility(holder.ivVoice, View.GONE);
+                            setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
+                            animationDrawable.start();
+                        } else {
+                            animationDrawable.stop();
+                            setViewVisibility(holder.ivVoice, View.VISIBLE);
+                            setViewVisibility(holder.iv_voice_image_anim, View.GONE);
+                        }
+                    } else {//不同条目
                         setViewVisibility(holder.ivVoice, View.GONE);
                         setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
                         animationDrawable.start();
-                    } else {
-                        animationDrawable.stop();
-                        setViewVisibility(holder.iv_voice_image_anim, View.GONE);
-                        setViewVisibility(holder.ivVoice, View.VISIBLE);
                     }
-                } else {//不同条目
-                    setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
-                    setViewVisibility(holder.ivVoice, View.GONE);
-                    animationDrawable.start();
+                } else {
+                    animationDrawable.stop();
+                    setViewVisibility(holder.ivVoice, View.VISIBLE);
+                    setViewVisibility(holder.iv_voice_image_anim, View.GONE);
                 }
-            } else {
-                animationDrawable.stop();
-                setViewVisibility(holder.iv_voice_image_anim, View.GONE);
-                setViewVisibility(holder.ivVoice, View.VISIBLE);
+            }else {
+                if(terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){
+                    setViewVisibility(holder.iv_voice_image_anim, View.GONE);
+                    setViewVisibility(holder.ivVoice, View.VISIBLE);
+                    if (isReceiver(terminalMessage)) {
+                        holder.ivVoice.setImageResource(R.drawable.iv_voice_image_off);
+                    }else{
+                        holder.ivVoice.setImageResource(R.drawable.iv_voice_image_off_self);
+                    }
+                }
             }
-        }else {
-            if(terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){
-                setViewVisibility(holder.iv_voice_image_anim, View.GONE);
-                setViewVisibility(holder.ivVoice, View.VISIBLE);
-                holder.ivVoice.setImageResource(R.drawable.iv_voice_image_off_self);
-            }
-
         }
     }
 

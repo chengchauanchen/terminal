@@ -528,7 +528,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                 Collections.sort(chatMessageList);
                 if (temporaryAdapter != null) {
                     temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-                    //                            temporaryAdapter.notifyDataSetChanged();
+                    temporaryAdapter.notifyDataSetChanged();
                 }
                 lastPosition = mposition;
             } else {
