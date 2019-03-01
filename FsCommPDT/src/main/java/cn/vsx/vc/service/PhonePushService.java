@@ -438,11 +438,15 @@ public class PhonePushService extends BaseService{
     };
 
     private View.OnClickListener inviteMemberOnClickListener = v -> {
-        Intent intent = new Intent(PhonePushService.this, InviteMemberService.class);
-        intent.putExtra(Constants.TYPE, Constants.PUSH);
-        intent.putExtra(Constants.PUSHING, true);
-        intent.putExtra(Constants.WATCHING_MEMBERS, watchMembers);
-        startService(intent);
+        if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())) {
+            Intent intent = new Intent(PhonePushService.this, InviteMemberService.class);
+            intent.putExtra(Constants.TYPE, Constants.PUSH);
+            intent.putExtra(Constants.PUSHING, true);
+            intent.putExtra(Constants.WATCHING_MEMBERS, watchMembers);
+            startService(intent);
+        }else{
+            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.text_no_video_push_authority));
+        }
     };
 
     private TextureView.SurfaceTextureListener surfaceTextureListener = new TextureView.SurfaceTextureListener(){

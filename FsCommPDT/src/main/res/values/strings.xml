@@ -512,4 +512,5 @@
     <string name="text_has_no_personal_call_authority">没有个呼权限</string>
     <string name="text_can_not_sound_recorder">禁止录音</string>
     <string name="text_long_press_to_sound_recorder">长按录音</string>
+    <string name="text_no_video_push_authority">没有图像推送的权限</string>
 </resources>

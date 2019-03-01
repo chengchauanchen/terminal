@@ -481,11 +481,15 @@ public class PullLivingService extends BaseService{
     private View.OnClickListener retractOnClickListener = v -> showPopMiniView();
 
     private View.OnClickListener inviteMemberOnClickListener = v -> {
-        Intent intent = new Intent(PullLivingService.this, InviteMemberService.class);
-        intent.putExtra(Constants.TYPE, Constants.PULL);
-        intent.putExtra(Constants.PULLING, true);
-        intent.putExtra(Constants.LIVING_MEMBER_ID,liveMember.getNo());
-        startService(intent);
+        if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())) {
+            Intent intent = new Intent(PullLivingService.this, InviteMemberService.class);
+            intent.putExtra(Constants.TYPE, Constants.PULL);
+            intent.putExtra(Constants.PULLING, true);
+            intent.putExtra(Constants.LIVING_MEMBER_ID,liveMember.getNo());
+            startService(intent);
+        }else{
+            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.text_no_video_push_authority));
+        }
     };
 
     @SuppressLint("ClickableViewAccessibility")

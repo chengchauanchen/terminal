@@ -146,9 +146,13 @@ public class PullGB28181Service extends BaseService{
     private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setPushAuthority);
 
     private View.OnClickListener inviteOnClickListener = v->{
-        Intent intent = new Intent(PullGB28181Service.this,InviteMemberService.class);
-        intent.putExtra(Constants.TYPE,Constants.PULL);
-        intent.putExtra(Constants.PULLING,true);
+        if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())) {
+            Intent intent = new Intent(PullGB28181Service.this,InviteMemberService.class);
+            intent.putExtra(Constants.TYPE,Constants.PULL);
+            intent.putExtra(Constants.PULLING,true);
+        }else{
+            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.text_no_video_push_authority));
+        }
     };
 
     private View.OnClickListener inviteMemberOnClickListener = v -> {
