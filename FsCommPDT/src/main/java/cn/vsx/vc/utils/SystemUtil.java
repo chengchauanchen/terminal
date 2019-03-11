@@ -1,5 +1,7 @@
 package cn.vsx.vc.utils;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Point;
@@ -16,6 +18,7 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 
 import java.io.File;
+import java.util.List;
 
 
 public class SystemUtil {
@@ -161,5 +164,23 @@ public class SystemUtil {
             }
         }
         return isCanUse;
+    }
+
+    /**
+     * 判断activity是否在前台
+     * @param context
+     * @return
+     */
+    public static boolean  isForeground(Context context) {
+
+        ActivityManager am = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        List<ActivityManager.RunningTaskInfo> list = am.getRunningTasks(1);
+        if (list != null && list.size() > 0) {
+            ComponentName cpn = list.get(0).topActivity;
+            if (context.getClass().getName().equals(cpn.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -46,6 +46,7 @@ import cn.vsx.vc.receiver.HeadsetPlugReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.PhoneAdapter;
+import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -522,12 +523,14 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 	private ReceiveForceReloginHandler receiveForceReloginHandler = new ReceiveForceReloginHandler() {
 		@Override
 		public void handler(String version) {
-			myHandler.post(new Runnable() {
-				@Override
-				public void run() {
-					ToastUtil.showToast(BaseActivity.this,"正在强制重新登录");
-				}
-			});
+            if(SystemUtil.isForeground(BaseActivity.this)){
+                myHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        ToastUtil.showToast(BaseActivity.this,"正在强制重新登录");
+                    }
+                });
+            }
 		}
 	};
 }
