@@ -836,7 +836,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 //                    logger.error("录音播放完成的消息：" + chatMessageList.get(mposition).toString());
         temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
         setSmoothScrollToPosition(mposition);
-        temporaryAdapter.notifyDataSetChanged();
+//        temporaryAdapter.notifyDataSetChanged();
 
         autoPlay(mposition + 1);
 
@@ -873,7 +873,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             MyApplication.instance.isPlayVoice = false;
             isSameItem = true;
             temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, false, true);
-            temporaryAdapter.notifyDataSetChanged();
+//            temporaryAdapter.notifyDataSetChanged();
         } else {
             logger.info("音频播放失败了！！errorCode=" + resultCode);
             ToastUtil.showToast(GroupCallNewsActivity.this, getString(R.string.text_play_recorder_fail_has_no_get_recorder_data_please_try_later));
@@ -897,7 +897,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 Collections.sort(chatMessageList);
                 if (temporaryAdapter != null) {
                     temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-                    temporaryAdapter.notifyDataSetChanged();
+//                    temporaryAdapter.notifyDataSetChanged();
                 }
                 lastPosition = mposition;
             } else {

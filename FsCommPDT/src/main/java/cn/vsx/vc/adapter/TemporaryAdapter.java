@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -71,6 +72,7 @@ import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
 import cn.vsx.vc.utils.ActivityCollector;
+import cn.vsx.vc.utils.AnimationsContainer;
 import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -1269,31 +1271,35 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private void playGroupVoice(int position, ChatViewHolder holder, TerminalMessage terminalMessage) {
         if(holder.iv_voice_image_anim != null){
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
-                AnimationDrawable animationDrawable = (AnimationDrawable) holder.iv_voice_image_anim.getBackground();
                 if (mposition == position) {
                     setUnread(position);
                     if (isSameItem) {
                         if (isPlaying) {
+                             AnimationsContainer.FramesSequenceAnimation animation = getVoiceAnimation(terminalMessage,holder.iv_voice_image_anim);
                             setViewVisibility(holder.ivVoice, View.GONE);
                             setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
-                            animationDrawable.start();
+                            animation.stop();
+                            animation.start();
                         } else {
-                            animationDrawable.stop();
+                            holder.iv_voice_image_anim.setImageResource(R.drawable.sound_blank);
                             setViewVisibility(holder.ivVoice, View.VISIBLE);
                             setViewVisibility(holder.iv_voice_image_anim, View.GONE);
                         }
                     } else {//不同条目
+                        AnimationsContainer.FramesSequenceAnimation animation = getVoiceAnimation(terminalMessage,holder.iv_voice_image_anim);
                         setViewVisibility(holder.ivVoice, View.GONE);
                         setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
-                        animationDrawable.start();
+                        animation.stop();
+                        animation.start();
                     }
                 } else {
-                    animationDrawable.stop();
+                    holder.iv_voice_image_anim.setImageResource(R.drawable.sound_blank);
                     setViewVisibility(holder.ivVoice, View.VISIBLE);
                     setViewVisibility(holder.iv_voice_image_anim, View.GONE);
                 }
             }else {
                 if(terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){
+                    holder.iv_voice_image_anim.setImageResource(R.drawable.sound_blank);
                     setViewVisibility(holder.iv_voice_image_anim, View.GONE);
                     setViewVisibility(holder.ivVoice, View.VISIBLE);
                     if (isReceiver(terminalMessage)) {
@@ -1304,6 +1310,17 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 }
             }
         }
+    }
+
+    /**
+     * 获取播放音频的动画
+     * @param terminalMessage
+     * @param imageView
+     * @return
+     */
+    private  AnimationsContainer.FramesSequenceAnimation getVoiceAnimation(TerminalMessage terminalMessage, ImageView imageView){
+        return AnimationsContainer.getInstance(activity,isReceiver(terminalMessage) ?
+                R.array.received_voice_anim :R.array.sent_voice_anim, 3).createProgressDialogAnim(imageView);
     }
 
     /**

@@ -439,7 +439,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                             MyApplication.instance.isPlayVoice = false;
                             isSameItem = true;
                             temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-                            temporaryAdapter.notifyDataSetChanged();
+//                            temporaryAdapter.notifyDataSetChanged();
                         } else {
                             executorService.execute(new Runnable() {
                                 @Override
@@ -485,7 +485,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
             isSameItem = true;
             chatMessageList.get(mposition).messageBody.put(JsonParam.UNREAD, false);
             temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-            temporaryAdapter.notifyDataSetChanged();
+//            temporaryAdapter.notifyDataSetChanged();
         });
         autoPlay(mposition+1);
     };
@@ -528,7 +528,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                 Collections.sort(chatMessageList);
                 if (temporaryAdapter != null) {
                     temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-                    temporaryAdapter.notifyDataSetChanged();
+//                    temporaryAdapter.notifyDataSetChanged();
                 }
                 lastPosition = mposition;
             } else {
