@@ -21,6 +21,7 @@ import java.util.TimerTask;
 import butterknife.Bind;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginForUIOperationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseCreateTempGroup4PCHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
@@ -174,6 +175,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     @Override
     public void initListener() {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseCreateTempGroup4PCHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginForUIOperationHandler);
 
         //创建临时组
         news_bar_back.setOnClickListener(this);
@@ -333,6 +335,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     @Override
     public void doOtherDestroy() {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseCreateTempGroup4PCHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginForUIOperationHandler);
     }
 
 
@@ -363,6 +366,24 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         });
     }
 };
+
+    /**
+     * 强制重新注册的消息
+     */
+    private ReceiveForceReloginForUIOperationHandler receiveForceReloginForUIOperationHandler = new ReceiveForceReloginForUIOperationHandler() {
+        @Override
+        public void handler(String version) {
+            myHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    //如果正在弹窗，取消弹窗
+                    if(createTemporaryGroupsDialog!=null&&createTemporaryGroupsDialog.isShowing()){
+                        createTemporaryGroupsDialog.dismiss();
+                    }
+                }
+            });
+        }
+    };
 
     /**
      * =================================================================================================Listener======================================================================================================================

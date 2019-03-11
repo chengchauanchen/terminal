@@ -53,6 +53,8 @@ public class CreateTemporaryGroupsDialog extends Dialog {
         layoutParams.width=width/2;
         layoutParams.height=heigth/2;
         window.setAttributes(layoutParams);
+        setCanceledOnTouchOutside(true);
+        setCancelable(true);
     }
 
     /**

@@ -33,6 +33,7 @@ import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
@@ -45,6 +46,7 @@ import cn.vsx.vc.receiver.HeadsetPlugReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.PhoneAdapter;
+import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack,Actions {
@@ -218,6 +220,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         super.onResume();
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
+		MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
         registerHeadsetPlugReceiver();
         setPttVolumeChangedListener();
     }
@@ -237,7 +240,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
 			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
 			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
-
+			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
 			if (mBroadcastReceiv != null) {
 				LocalBroadcastManager.getInstance(BaseActivity.this).unregisterReceiver(
 						mBroadcastReceiv);
@@ -512,4 +515,19 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 			}
 		}
 	}
+
+	/**
+	 * 强制重新注册的消息
+	 */
+	private ReceiveForceReloginHandler receiveForceReloginHandler = new ReceiveForceReloginHandler() {
+		@Override
+		public void handler(String version) {
+			myHandler.post(new Runnable() {
+				@Override
+				public void run() {
+					ToastUtil.showToast(BaseActivity.this,"正在强制重新登录");
+				}
+			});
+		}
+	};
 }
