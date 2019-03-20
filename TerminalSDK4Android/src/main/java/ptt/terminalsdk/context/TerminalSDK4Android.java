@@ -75,7 +75,6 @@ import ptt.terminalsdk.manager.channel.ClientChannel;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.manager.gps.BDGPSManager;
 import ptt.terminalsdk.manager.gps.GPSManager;
-import ptt.terminalsdk.manager.gps.LocationManager;
 import ptt.terminalsdk.manager.http.MyHttpClient;
 import ptt.terminalsdk.manager.http.ProgressHelper;
 import ptt.terminalsdk.manager.http.ProgressUIListener;
@@ -117,7 +116,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		OperateReceiveHandlerUtil.getInstance().start();
 		putParam(Params.NETWORK_JITTER_CHECK_INTERVAL, 60 * 1000);//网络抖动检测间隔，60秒
 		putParam(Params.GPS_UPLOAD_INTERVAL, 5 * 60 * 1000);//GPS上传时间间隔，5分钟
-		getLocationManager().start();
+		getBDGPSManager().start();
+		getGpsManager().start();
 		getVideoProxy().start();
 		PromptManager.getInstance().start(application);
 		getFileTransferOperation().start();
@@ -150,7 +150,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	@Override
 	protected void onStop() {
 		getFileTransferOperation().stop();
-		getLocationManager().stop();
+		getGpsManager().stop();
+		getBDGPSManager().stop();
 		getVideoProxy().stop();
 		PromptManager.getInstance().stop();
 		disConnectToServer();
@@ -581,13 +582,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 		return videoProxy;
 	}
-	private LocationManager locationManager;
-	public LocationManager getLocationManager(){
-		if(locationManager == null){
-			locationManager = new LocationManager(application);
-		}
-		return locationManager;
-	}
+
 	private GPSManager gpsManager;
 	public GPSManager getGpsManager(){
 		if(gpsManager == null){
