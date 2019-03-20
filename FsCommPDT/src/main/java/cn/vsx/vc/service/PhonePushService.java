@@ -285,7 +285,7 @@ public class PhonePushService extends BaseService{
     /**
      * 通知直播停止 通知界面关闭视频页
      **/
-    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (methodResult, resultDesc) -> {
+    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> {
         ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
         finishVideoLive();
     };

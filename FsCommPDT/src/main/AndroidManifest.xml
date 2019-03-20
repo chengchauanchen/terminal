@@ -64,6 +64,12 @@
     <uses-permission android:name="cybertech.permission.WRITE_PSTORE_OPERATIONLOG" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-permission android:name="android.permission.NFC" />
+    <!-- 声明需要硬件支持nfc -->
+    <uses-feature
+        android:name="android.hardware.nfc.hce"
+        android:required="true" />
     
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature
@@ -302,5 +308,20 @@
             android:name=".service.MultipartyCallService"
             android:enabled="true"
             android:exported="false"/>
+        <!--仿真卡服务-->
+        <service
+            android:name=".service.CardService"
+            android:exported="true"
+            android:permission="android.permission.BIND_NFC_SERVICE">
+
+            <intent-filter>
+                <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.nfc.cardemulation.host_apdu_service"
+                android:resource="@xml/aid_list" />
+        </service>
     </application>
 </manifest>

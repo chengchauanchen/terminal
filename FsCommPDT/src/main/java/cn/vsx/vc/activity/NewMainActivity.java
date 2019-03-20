@@ -114,6 +114,7 @@ import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
+import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.view.BottomView;
@@ -1006,6 +1007,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
 
         judgePermission();
+        NfcUtil.nfcCheck(this);
     }
 
     private void initVoip(){

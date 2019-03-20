@@ -513,4 +513,9 @@
     <string name="text_can_not_sound_recorder">禁止录音</string>
     <string name="text_long_press_to_sound_recorder">长按录音</string>
     <string name="text_no_video_push_authority">没有图像推送的权限</string>
+
+    <string name="aid">f22eca0ca7eb9ed0022a64e4fff5c34b</string>
+    <string name="header">00A40400</string>
+    <string name="service_name">service_name</string>
+    <string name="card_title">card_title</string>
 </resources>
