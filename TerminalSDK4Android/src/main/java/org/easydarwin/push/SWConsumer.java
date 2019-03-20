@@ -3,6 +3,7 @@ package org.easydarwin.push;
 import android.content.Context;
 import android.util.Log;
 
+import org.easydarwin.muxer.BaseEasyMuxer;
 import org.easydarwin.muxer.EasyMuxer;
 import org.easydarwin.sw.JNIUtil;
 import org.easydarwin.sw.X264Encoder;
@@ -123,7 +124,7 @@ public class SWConsumer extends Thread implements VideoConsumer{
     }
 
     @Override
-    public void setMuxer(EasyMuxer muxer) {
+    public void setMuxer(BaseEasyMuxer muxer) {
 
     }
 }

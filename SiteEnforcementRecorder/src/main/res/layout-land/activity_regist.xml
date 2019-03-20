@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/regist"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_register"
+    android:orientation="vertical"
+    android:weightSum="10"
+    tools:ignore="MissingDefaultResource">
+
+    <!--<ImageView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:background="@drawable/bg_register"/>-->
+
+    <View
+        android:id="@+id/view_pop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/ll_regist"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="10">
+
+        <ImageView
+            android:layout_width="480dp"
+            android:layout_height="101dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="@dimen/dp_10"
+            android:layout_marginBottom="@dimen/dp_5"
+            android:src="@drawable/iv_register_top" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical">
+
+            <!--<LinearLayout-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:gravity="center_horizontal"-->
+            <!--android:weightSum="10">-->
+
+            <!--<cn.vsx.vc.view.XCDropDownListView-->
+            <!--android:id="@+id/xcd_available_ip"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_weight="8"-->
+            <!--android:gravity="center_vertical"/>-->
+            <!--</LinearLayout>-->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/x7"
+                android:gravity="center_horizontal"
+                android:weightSum="10">
+
+                <EditText
+                    android:id="@+id/userOrg"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="8"
+                    android:background="@drawable/bg_register_input"
+                    android:gravity="center"
+                    android:hint="@string/regist_org_hint"
+                    android:inputType="date"
+                    android:maxLines="1"
+                    android:padding="@dimen/dp_10"
+                    android:textSize="@dimen/sp_22"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white_40"
+                    android:cursorVisible="true"
+                    android:textCursorDrawable="@null"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_5"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal"
+                android:weightSum="10">
+
+                <EditText
+                    android:id="@+id/userName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="8"
+                    android:background="@drawable/bg_register_input"
+                    android:gravity="center"
+                    android:hint="@string/regist_name_hint"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:padding="@dimen/dp_10"
+                    android:textSize="@dimen/sp_22"
+                    android:textColor="@color/white"
+                    android:textColorHint="@color/white_40"
+                    android:cursorVisible="true"
+                    android:textCursorDrawable="@null"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_10"
+                android:gravity="center_horizontal"
+                android:weightSum="10">
+                <Button
+                    android:id="@+id/btn_confirm"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="8"
+                    android:textStyle="bold"
+                    android:padding="@dimen/dp_10"
+                    android:background="@drawable/regist_button_shape"
+                    android:text="@string/regist_button"
+                    android:textColor="@drawable/regist_button_text_color"
+                    android:textSize="@dimen/sp_22"
+                    android:enabled="false"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</RelativeLayout>

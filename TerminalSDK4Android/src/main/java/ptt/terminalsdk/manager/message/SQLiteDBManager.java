@@ -21,6 +21,7 @@ import cn.vsx.hamster.common.GroupType;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.message.ISQLiteDBManager;
+import cn.vsx.hamster.terminalsdk.model.BitStarFileRecord;
 import cn.vsx.hamster.terminalsdk.model.CallRecord;
 import cn.vsx.hamster.terminalsdk.model.Folder;
 import cn.vsx.hamster.terminalsdk.model.Group;
@@ -43,6 +44,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     private final static String FOLDER_GROUP = "folderGroup";
     private final static String GROUP_DATA = "groupData";
     private final static String CALL_RECORD = "callRecord";
+    private final static String BIT_STAR_FILE_RECORD = "bitStarFileRecord";
 
     private SQLiteDBManager(Context context) {
         this.context = context;
@@ -612,5 +614,182 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         logger.info("查询本地数据库CallRecord结果：" + callRecordList);
         return callRecordList;
     }
+    /**
+     * 添加比特星生成的本地文件
+     * @param record
+     */
+    @Override
+    public void addBitStarFileRecord(BitStarFileRecord record) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("file_name", record.getFileName());
+        values.put("file_path",record.getFilePath());
+        values.put("file_type", record.getFileType());
+        values.put("file_time", record.getFileTime());
+        values.put("file_state", record.getFileState());
+        db.replace(BIT_STAR_FILE_RECORD, null, values);
+    }
+
+    /**
+     * 根据文件名字删除本地文件
+     * @param name
+     */
+    @Override
+    public void deleteBitStarFileRecord(String name) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        String sql = "DELETE FROM bitStarFileRecord WHERE file_name = ?";
+        db.execSQL(sql, new String[]{""+name});
+    }
+
+    /**
+     * 一次删除多条数据
+     * @param names
+     */
+    @Override
+    public void deleteBitStarFileRecords(String[] names) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        String placeHolder = getPlaceHolder(names.length);
+        String sql = "DELETE FROM bitStarFileRecord WHERE file_name in ("+placeHolder+")";
+        db.execSQL(sql, names);
+    }
+
+    /**
+     * 更新文件的上传状态
+     * @param name
+     * @param fileState
+     */
+    @Override
+    public void updateBitStarFileRecordState(String name, int fileState) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("file_state", fileState);
+        db.update(BIT_STAR_FILE_RECORD, values, "file_name = ?", new String[]{name});
+    }
+
+    /**
+     * 根据文件名字获取文件信息
+     * @param name
+     * @return
+     */
+    @Override
+    public BitStarFileRecord getBitStarFileRecord(String name) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        Cursor cursor = db.query(BIT_STAR_FILE_RECORD, null, "file_name=?", new String[] { name }, null, null, null);
+        BitStarFileRecord record =null;
+        while (cursor.moveToNext()) {
+            record = getBitStarFileRecord(cursor);
+        }
+        cursor.close();
+        logger.info("查询本地数据库getBitStarFileRecord结果：" + record);
+        return record;
+    }
+
+    /**
+     * 根据多个文件名字获取多个文件信息
+     * @param names
+     * @return
+     */
+    @Override
+    public CopyOnWriteArrayList<BitStarFileRecord> getBitStarFileRecords(String[] names) {
+        CopyOnWriteArrayList<BitStarFileRecord> list = new CopyOnWriteArrayList<>();
+        SQLiteDatabase db = helper.getWritableDatabase();
+        String placeHolder = getPlaceHolder(names.length);
+        String sql = "SELECT * FROM bitStarFileRecord WHERE file_name in ("+placeHolder+")";
+        Cursor cursor = db.rawQuery(sql, names);
+        while (cursor.moveToNext()) {
+            list.add(getBitStarFileRecord(cursor));
+        }
+        cursor.close();
+        logger.info("查询本地数据库getBitStarFileRecords结果：" + list);
+        return list;
+    }
+
+    /**
+     * 根据文件的状态获取文件的信息列表
+     * @return
+     */
+    @Override
+    public CopyOnWriteArrayList<BitStarFileRecord> getBitStarFileRecordByState(int fileState) {
+        CopyOnWriteArrayList<BitStarFileRecord> list = new CopyOnWriteArrayList<>();
+        SQLiteDatabase db = helper.getReadableDatabase();
+        Cursor cursor = db.query(BIT_STAR_FILE_RECORD, null, "file_state=?", new String[] { fileState+"" }, null, null, "file_time ASC");
+        if (cursor != null && cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                list.add(getBitStarFileRecord(cursor));
+            }
+            cursor.close();
+        }
+        logger.info("查询本地数据库getBitStarFileRecordByState结果：fileState："+fileState+"--list--" + list);
+        return list;
+    }
+
+    /**
+     * 根据文件的状态获取最早的一条数据
+     * @param fileState
+     * @return
+     */
+    @Override
+    public BitStarFileRecord getBitStarFileRecordByStateAndFirst(int fileState) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        String sql = "SELECT * FROM bitStarFileRecord WHERE file_state = ?  ORDER BY file_time ASC LIMIT 1";
+        Cursor cursor = db.rawQuery(sql, new String[]{fileState+""});
+        BitStarFileRecord record =null;
+        while (cursor.moveToNext()) {
+            record = getBitStarFileRecord(cursor);
+        }
+        cursor.close();
+        logger.info("查询本地数据库getBitStarFileRecordByStateAndFirst结果：" + record);
+        return record;
+    }
+
+    @Override
+    public CopyOnWriteArrayList<BitStarFileRecord> getBitStarFileRecordByAll() {
+        CopyOnWriteArrayList<BitStarFileRecord> list = new CopyOnWriteArrayList<>();
+        SQLiteDatabase db = helper.getReadableDatabase();
+        Cursor cursor = db.query(BIT_STAR_FILE_RECORD, null, null, null, null, null, null);
+        if (cursor != null && cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                list.add(getBitStarFileRecord(cursor));
+            }
+            cursor.close();
+        }
+        logger.info("查询本地数据库getBitStarFileRecordByAll结果：" + list);
+        return list;
+    }
+
+    /**
+     *获取单个BitStarFileRecord
+     * @param cursor
+     * @return
+     */
+    public  BitStarFileRecord getBitStarFileRecord(Cursor cursor){
+        BitStarFileRecord record = new BitStarFileRecord();
+        record.setFileName(cursor.getString(cursor.getColumnIndex("file_name")));
+        record.setFilePath(cursor.getString(cursor.getColumnIndex("file_path")));
+        record.setFileType(cursor.getString(cursor.getColumnIndex("file_type")));
+        record.setFileTime(cursor.getLong(cursor.getColumnIndex("file_time")));
+        record.setFileState(cursor.getInt(cursor.getColumnIndex("file_state")));
+        return record;
+    }
+
+    /**
+     * 获取占位符
+     * @param size
+     * @return
+     */
+    private String getPlaceHolder(int size){
+        if (size < 1) {
+            return "";
+        } else {
+            StringBuilder sb = new StringBuilder(size * 2 - 1);
+            sb.append("?");
+            for (int i = 1; i < size; i++) {
+                sb.append(",?");
+            }
+            return sb.toString();
+        }
+
+    }
+
 
 }

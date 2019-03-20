@@ -16,7 +16,7 @@ import ptt.terminalsdk.BuildConfig;
  * Created by John on 2017/1/10.
  */
 
-public class EasyMuxer{
+public class EasyMuxer implements BaseEasyMuxer {
 
     private static final boolean VERBOSE = BuildConfig.DEBUG;
     private static final String TAG = EasyMuxer.class.getSimpleName();
@@ -44,7 +44,7 @@ public class EasyMuxer{
             mMuxer = (MediaMuxer) mux;
         }
     }
-
+    @Override
     public synchronized void addTrack(MediaFormat format, boolean isVideo) {
         // now that we have the Magic Goodies, start the muxer
         if (mAudioTrackIndex != -1 && mVideoTrackIndex != -1)

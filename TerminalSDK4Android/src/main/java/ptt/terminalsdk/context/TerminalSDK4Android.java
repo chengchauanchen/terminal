@@ -13,13 +13,18 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
+import android.os.StatFs;
+import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -37,6 +42,9 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -44,6 +52,7 @@ import cn.vsx.hamster.terminalsdk.TerminalSDKBaseImpl;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
 import cn.vsx.hamster.terminalsdk.manager.channel.AbsClientChannel;
 import cn.vsx.hamster.terminalsdk.manager.http.IHttpClient;
+import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
@@ -63,12 +72,15 @@ import ptt.terminalsdk.broadcastreceiver.NetWorkConnectionChangeReceiver;
 import ptt.terminalsdk.manager.Prompt.PromptManager;
 import ptt.terminalsdk.manager.audio.AudioProxy;
 import ptt.terminalsdk.manager.channel.ClientChannel;
+import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.manager.gps.BDGPSManager;
 import ptt.terminalsdk.manager.gps.GPSManager;
+import ptt.terminalsdk.manager.gps.LocationManager;
 import ptt.terminalsdk.manager.http.MyHttpClient;
 import ptt.terminalsdk.manager.http.ProgressHelper;
 import ptt.terminalsdk.manager.http.ProgressUIListener;
 import ptt.terminalsdk.manager.message.SQLiteDBManager;
+import ptt.terminalsdk.manager.recordingAudio.RecordingAudioManager;
 import ptt.terminalsdk.manager.video.VideoProxy;
 import ptt.terminalsdk.manager.voip.VoipManager;
 import ptt.terminalsdk.service.BluetoothLeService;
@@ -105,10 +117,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		OperateReceiveHandlerUtil.getInstance().start();
 		putParam(Params.NETWORK_JITTER_CHECK_INTERVAL, 60 * 1000);//网络抖动检测间隔，60秒
 		putParam(Params.GPS_UPLOAD_INTERVAL, 5 * 60 * 1000);//GPS上传时间间隔，5分钟
-		getGpsManager().start();
-		getBDGPSManager().start();
+		getLocationManager().start();
 		getVideoProxy().start();
 		PromptManager.getInstance().start(application);
+		getFileTransferOperation().start();
 		netWorkConnectionChangeReceiver = new NetWorkConnectionChangeReceiver();
 		IntentFilter netFilter = new IntentFilter();
 		netFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
@@ -137,8 +149,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	}
 	@Override
 	protected void onStop() {
-		getGpsManager().stop();
-		getBDGPSManager().stop();
+		getFileTransferOperation().stop();
+		getLocationManager().stop();
 		getVideoProxy().stop();
 		PromptManager.getInstance().stop();
 		disConnectToServer();
@@ -406,6 +418,117 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 					+ File.separator;
 	}
 
+	/**得到保存视频的位置*/
+	public String getVideoDirectoty(){
+		if(TextUtils.isEmpty(getParam(Params.VIDOE_STORE_PATH))){
+			putParam(Params.VIDOE_STORE_PATH , Environment.getExternalStorageDirectory()
+					+ File.separator + application.getApplicationInfo().loadLabel(application.getPackageManager())+ File.separator + "VideoRecord"
+					+ File.separator);
+		}
+		return getParam(Params.VIDOE_STORE_PATH)
+				+ File.separator;
+	}
+
+
+	/**得到存放录制视频和照片的文件目录*/
+	public String getBITRecordesDirectoty(int code){
+		return getBITDirectoryByCode(code) + File.separator + "Android/data/" + application.getPackageName()+ File.separator;
+	}
+
+	/**得到存放录制视频文件的目录*/
+	public String getBITVideoRecordesDirectoty(int code){
+		return getBITDirectoryByCode(code) + File.separator + "Android/data/" + application.getPackageName() + "/VideoRecord"+ File.separator;
+	}
+
+	/**得到存放照片文件的目录*/
+	public String getBITPhotoRecordedDirectoty(int code){
+		return getBITDirectoryByCode(code) + File.separator + "Android/data/" + application.getPackageName() + "/PhotoRecord"+ File.separator;
+	}
+
+	/**得到存放录音文件的目录*/
+	public String getBITAudioRecordedDirectoty(int code){
+		return getBITDirectoryByCode(code) + File.separator + "Android/data/" + application.getPackageName() + "/AudioRecord"+ File.separator;
+	}
+	/**判断外部存储可用*/
+	public boolean checkeExternalStorageIsAvailable(int code) {
+		if(code == BitStarFileDirectory.USB.getCode()){
+			return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
+		}else if(code == BitStarFileDirectory.SDCARD.getCode()){
+			String sdcardDir = getBITSDCardDirectory();
+			return !TextUtils.isEmpty(sdcardDir);
+		}
+		return false;
+	}
+	/**获取外部存储可用空间的大小*/
+	public long getExternalUsableSize(int code) {
+		String sdcardDir = null;
+		if(code == BitStarFileDirectory.USB.getCode()){
+			if(checkeExternalStorageIsAvailable(code)){
+				sdcardDir = Environment.getExternalStorageDirectory().getPath();
+			}else{
+				return 0;
+			}
+		}else if(code == BitStarFileDirectory.SDCARD.getCode()){
+			sdcardDir = getBITSDCardDirectory();
+		}
+		if(!TextUtils.isEmpty(sdcardDir)){
+			StatFs sf = new StatFs(sdcardDir);
+			long blockSize = sf.getBlockSize();
+			long availCount = sf.getAvailableBlocks();
+			return availCount * blockSize;
+		}else{
+			return 0;
+		}
+	}
+	/**
+	 * 根据code获取存储空间的目录
+	 * @return
+	 */
+	public  String getBITDirectoryByCode(int code){
+		String sdcardDir = "";
+		if(code == BitStarFileDirectory.USB.getCode()){
+			sdcardDir = Environment.getExternalStorageDirectory().getPath();
+		}else if(code == BitStarFileDirectory.SDCARD.getCode()){
+			sdcardDir = getBITSDCardDirectory();
+		}
+		return sdcardDir;
+	}
+	/**获取比特星sdcard的根目录*/
+	@Override
+	public String getBITSDCardDirectory() {
+		application.getExternalFilesDir(null);
+		StorageManager mStorageManager = (StorageManager) application.getSystemService(Context.STORAGE_SERVICE);
+		Class<?> storageVolumeClazz = null;
+		try {
+			storageVolumeClazz = Class.forName("android.os.storage.StorageVolume");
+			Method getVolumeList = mStorageManager.getClass().getMethod("getVolumeList");
+			Method getPath = storageVolumeClazz.getMethod("getPath");
+			Method isRemovable = storageVolumeClazz.getMethod("isRemovable");
+			Method stateMethod = storageVolumeClazz.getMethod("getState");
+			Object result = getVolumeList.invoke(mStorageManager);
+			final int length = Array.getLength(result);
+			for (int i = 0; i < length; i++) {
+				Object storageVolumeElement = Array.get(result, i);
+				String path = (String) getPath.invoke(storageVolumeElement);
+				boolean removable = (Boolean) isRemovable.invoke(storageVolumeElement);
+				String state = (String) stateMethod.invoke(storageVolumeElement);
+				if (removable && state.equals(Environment.MEDIA_MOUNTED)) {
+					logger.info("外置内存卡路径=====" + path );
+					return path;
+				}
+			}
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	public VoipManager getVoipCallManager() {
 		if(voipManager==null){
 			voipManager = new VoipManager();
@@ -458,6 +581,13 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 		return videoProxy;
 	}
+	private LocationManager locationManager;
+	public LocationManager getLocationManager(){
+		if(locationManager == null){
+			locationManager = new LocationManager(application);
+		}
+		return locationManager;
+	}
 	private GPSManager gpsManager;
 	public GPSManager getGpsManager(){
 		if(gpsManager == null){
@@ -491,6 +621,20 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	        return true;
 	    }
 	    return false;
+	}
+	private FileTransferOperation fileTransferOperation;
+	public FileTransferOperation getFileTransferOperation(){
+		if(fileTransferOperation == null){
+			fileTransferOperation = new FileTransferOperation(application);
+		}
+		return fileTransferOperation;
+	}
+	private RecordingAudioManager recordingAudioManager;
+	public RecordingAudioManager getRecordingAudioManager(){
+		if(recordingAudioManager == null){
+			recordingAudioManager = new RecordingAudioManager(application);
+		}
+		return recordingAudioManager;
 	}
 	public boolean isCalling() {
 		return calling;
@@ -747,6 +891,25 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 		logger.info(" TerminalSDK4Android--------> account = "+account);
 		return account;
+	}
+
+	public void renovateVideoRecord(String videRecordPath){
+
+		try{
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+				Intent mediaScanIntent = new Intent(
+						Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+				Uri contentUri = Uri.fromFile(new File(videRecordPath+ "-0.mp4"));
+				mediaScanIntent.setData(contentUri);
+				application.sendBroadcast(mediaScanIntent);
+			} else {
+				Intent scanIntent = new Intent(Intent.ACTION_MEDIA_MOUNTED);
+				scanIntent.setData(Uri.fromFile(new File(getVideoDirectoty())));
+				application.sendBroadcast(scanIntent);
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 
 }

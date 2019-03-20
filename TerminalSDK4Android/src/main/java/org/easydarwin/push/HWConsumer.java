@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
+import org.easydarwin.muxer.BaseEasyMuxer;
 import org.easydarwin.muxer.EasyMuxer;
 import org.easydarwin.sw.JNIUtil;
 
@@ -201,12 +202,12 @@ public class HWConsumer extends Thread implements VideoConsumer{
     }
 
     @Override
-    public synchronized void setMuxer(EasyMuxer muxer) {
+    public synchronized void setMuxer(BaseEasyMuxer muxer) {
         if (muxer != null) {
             if (newFormat != null)
                 muxer.addTrack(newFormat, true);
         }
-        mMuxer = muxer;
+        mMuxer = (EasyMuxer) muxer;
     }
 
 

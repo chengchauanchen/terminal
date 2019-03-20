@@ -119,12 +119,20 @@
                 <action android:name="android.intent.action.BATTERY_CHANGED" />
             </intent-filter>
         </receiver>
-    
+        <receiver android:name=".broadcastreceiver.FileExpireReceiver"
+            android:process=":fileexpire">
+            <intent-filter >
+                <action android:name="vsxin.action.fileexpiretime" />
+            </intent-filter>
+        </receiver>
         <service
             android:name="org.easydarwin.push.UVCCameraService"
             android:enabled="true" />
         
         <service android:name=".service.BluetoothLeService"
+            android:enabled="true"/>
+        <service android:name=".service.FileExpireService"
+            android:process=":fileexpire"
             android:enabled="true"/>
     </application>
 

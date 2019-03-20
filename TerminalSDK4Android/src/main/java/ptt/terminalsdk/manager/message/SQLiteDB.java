@@ -12,7 +12,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
 
     public SQLiteDB(Context context) {
-        super(context, "4gptt.db", null, 9);
+        super(context, "4gptt.db", null, 10);
     }
 
     @Override
@@ -44,6 +44,9 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
         //通话记录列表
         db.execSQL("CREATE TABLE IF NOT EXISTS callRecord (_id INTEGER primary key autoincrement, call_id varchar,member_name varchar ,call_phone varchar,call_records varchar,call_time varchar,call_path varchar,call_download varchar,call_playing varchar, unique(call_id))");
+
+        //比特星本地文件
+        db.execSQL("CREATE TABLE IF NOT EXISTS bitStarFileRecord (_id INTEGER primary key autoincrement, file_name varchar,file_path varchar ,file_type varchar,file_time LONG,file_state INTEGER, unique(file_name))");
     }
 
     @Override
@@ -56,6 +59,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS folderGroup");
         db.execSQL("DROP TABLE IF EXISTS groupData");
         db.execSQL("DROP TABLE IF EXISTS callRecord");
+        db.execSQL("DROP TABLE IF EXISTS bitStarFileRecord");
         onCreate(db);
     }
 }

@@ -1,6 +1,6 @@
 package org.easydarwin.push;
 
-import org.easydarwin.muxer.EasyMuxer;
+import org.easydarwin.muxer.BaseEasyMuxer;
 
 import java.io.IOException;
 
@@ -15,5 +15,5 @@ public interface VideoConsumer {
 
      void onVideoStop();
 
-     void setMuxer(EasyMuxer muxer);
+     void setMuxer(BaseEasyMuxer muxer);
 }

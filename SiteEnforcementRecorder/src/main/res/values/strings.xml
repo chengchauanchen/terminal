@@ -1,0 +1,70 @@
+<resources>
+    <string name="app_name">执法记录仪</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="regist_org_hint">邀请码</string>
+    <string name="regist_name_hint">姓名</string>
+    <string name="regist_button">注册</string>
+    <string name="reauth_button">认证</string>
+    <string name="bottom_navigation_talkback">对讲</string>
+    <string name="bottom_navigation_person_contacts">消息</string>
+    <string name="bottom_navigation_group_contacts">通讯录</string>
+    <string name="bottom_navigation_setting">我</string>
+    <string name="i_am_speaking">我</string>
+    <string name="pre_speaking">准备说话...</string>
+    <string name="change_group_promp">滑动换组</string>
+    <string name="press_to_talk_text">按住说话</string>
+    <string name="silence_text">空闲</string>
+    <string name="other_is_talking_text">其它人正在说话</string>
+    <string name="wait_in_line_text">排队中&#8230;</string>
+    <string name="not_listen">您已被禁听</string>
+    <string name="not_speak">您已被禁言</string>
+    <string name="not_listen_and_speak">您已被禁言和禁听</string>
+    <!-- 自动更新 -->
+    <string name="soft_update_no">已经是最新版本</string>
+    <string name="soft_update_title">软件更新</string>
+    <string name="soft_update_info">检测到新版本，立即更新吗</string>
+    <string name="soft_update_updatebtn">更新</string>
+    <string name="soft_update_later">稍后更新</string>
+    <string name="soft_updating">正在更新</string>
+    <string name="soft_update_cancel">取消</string>
+    <!-- 设置界面 -->
+    <string name="log_upload">日志上传</string>
+    <string name="individuation">个性装扮</string>
+    <string name="group_scan">组扫描</string>
+    <string name="volume_setting">音量</string>
+    <string name="volume_setting_size_pro">提示音量</string>
+    <string name="volume_setting_size_call">通话音量</string>
+    <string name="volume_number_setting">60%</string>
+    <string name="exit">退出系统</string>
+    <string name="ptt_setting">PTT设置</string>
+    <string name="pttfloat_setting">悬浮按钮设置</string>
+    <!-- 下拉刷新 -->
+    <string name="pull_to_refresh_pull_label">下拉刷新...</string>
+    <string name="pull_to_refresh_release_label">释放以刷新...</string>
+    <string name="pull_to_refresh_refreshing_label">加载中...</string>
+    <string name="pull_to_refresh_tap_label">加载之前数据</string>
+    <string name="pull_to_refresh_updated_at_label">更新于: </string>
+    <string name="loadmore_label">加载更多</string>
+    <string name="loading_label">正在加载....</string>
+    <string name="pull_to_refresh">下拉刷新</string>
+    <string name="release_to_refresh">释放立即刷新</string>
+    <string name="refreshing">正在刷新...</string>
+    <string name="refresh_succeed">刷新成功</string>
+    <string name="refresh_fail">刷新失败</string>
+    <string name="tv_linkman_delete">删除联系人</string>
+    <string name="connect_us_phone">18301003647</string>
+    <!--文件发送-->
+    <string name="size">已选%1$s</string>
+    <string name="send">发送(%1$s)</string>
+    <string name="count">共%1$s个文件</string>
+    <!--录音-->
+    <string name="up_for_cancel">手指上滑，取消发送</string>
+    <string name="want_to_cancle">松开手指，取消发送</string>
+    <string name="time_too_short">录音时间过短</string>
+    <string name="long_click_record">长按 录音</string>
+    <string name="hang_up_finsh">松开 结束</string>
+    <string name="release_cancel">松开 取消</string>
+    <string name="current_group_members">%1$d人在线</string>
+    <string name="current_push_member">%1$s上报图像</string>
+</resources>
