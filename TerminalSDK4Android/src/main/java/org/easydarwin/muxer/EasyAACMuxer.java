@@ -1,11 +1,9 @@
-package org.easydarwin.audio;
+package org.easydarwin.muxer;
 
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.util.Log;
-
-import org.easydarwin.video.EasyMuxer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -96,4 +94,10 @@ public class EasyAACMuxer extends EasyMuxer {
         mMediaCodec = null;
         super.release();
     }
+    public synchronized void stop() {
+        if (mMediaCodec != null) mMediaCodec.stop();
+        mMediaCodec = null;
+        super.stop();
+    }
+
 }

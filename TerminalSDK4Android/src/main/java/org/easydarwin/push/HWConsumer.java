@@ -141,10 +141,7 @@ public class HWConsumer extends Thread implements VideoConsumer{
                 }
                 outputBuffer.position(bufferInfo.offset);
                 outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
-                EasyMuxer muxer = mMuxer;
-                if (muxer != null) {
-                    muxer.pumpStream(outputBuffer, bufferInfo, true);
-                }
+
 
                 boolean sync = false;
                 if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {// sps
@@ -176,9 +173,11 @@ public class HWConsumer extends Thread implements VideoConsumer{
                     if (BuildConfig.DEBUG)
                         Log.i(TAG, String.format("push video stamp:%d", bufferInfo.presentationTimeUs / 1000));
                 }
-
-
                 mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
+                EasyMuxer muxer = mMuxer;
+                if (muxer != null) {
+                    muxer.pumpStream(outputBuffer, bufferInfo, true);
+                }
             }
         }
         while (mVideoStarted);
@@ -236,6 +235,17 @@ Video bitrate 384 Kbps 2 Mbps 4 Mbps 10 Mbps
         if (mWidth >= 1920 || mHeight >= 1920) bitrate *= 0.3;
         else if (mWidth >= 1280 || mHeight >= 1280) bitrate *= 0.4;
         else if (mWidth >= 720 || mHeight >= 720) bitrate *= 0.6;
+        else if(mWidth>=640 ||mHeight>=640) bitrate *=1.8;
+        // 1.2延时1秒左右  737280
+        // 1.5延时3秒左右  921600
+        // 1.8延时4秒左右，卡顿  1105920
+
+        //海能达分辨率848*480
+
+
+        //固定码率2M，1920*1080延迟大概1s，1080*720 3s，640*480  2s  320*240 2s
+
+
         mMediaCodec = MediaCodec.createByCodecName(info.mName);
         MediaFormat mediaFormat = MediaFormat.createVideoFormat("video/avc", mWidth, mHeight);
         mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);

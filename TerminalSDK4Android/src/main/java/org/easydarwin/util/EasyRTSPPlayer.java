@@ -22,11 +22,10 @@ import android.util.Pair;
 import android.view.Surface;
 
 import org.easydarwin.audio.AudioCodec;
-import org.easydarwin.audio.EasyAACMuxer;
+import org.easydarwin.muxer.EasyAACMuxer;
 import org.easydarwin.push.EasyPusher;
 import org.easydarwin.push.InitCallback;
 import org.easydarwin.push.Pusher;
-import org.easydarwin.video.EasyMuxer;
 import org.easydarwin.video.RTSPClient;
 import org.easydarwin.video.VideoCodec;
 
@@ -35,14 +34,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
+
+import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.FileTransgerUtil;
 
 import static android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
 import static org.easydarwin.util.CodecSpecificDataUtil.AUDIO_SPECIFIC_CONFIG_SAMPLING_RATE_TABLE;
@@ -109,7 +113,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
     private final SurfaceTexture mTexture;
     private Surface mSurface;
     private volatile Thread mThread, mAudioThread;
-    private final ResultReceiver mRR;
+    private  ResultReceiver mRR;
     private RTSPClient mClient;
     private boolean mAudioEnable = true;
     private volatile long mReceivedDataLength;
@@ -121,6 +125,8 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
     private short mWidth = 0;
     private ByteBuffer mCSD0;
     private ByteBuffer mCSD1;
+    private long millis;
+    private String dataStr;
 
 //    private RtmpClient mRTMPClient = new RtmpClient();
 
@@ -285,12 +291,12 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
      * @param key     SDK key
      * @param surface 显示视频用的surface
      */
-    public EasyRTSPPlayer(Context context, String key, SurfaceTexture surface, ResultReceiver receiver) {
+    public EasyRTSPPlayer(Context context, String key, SurfaceTexture surface) {
         mTexture = surface;
         mSurface = new Surface(surface);
         mContext = context;
         mKey = key;
-        mRR = receiver;
+
     }
 
 
@@ -304,8 +310,8 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
      * @param pwd
      * @return
      */
-    public int start(final String url, int type, int mediaType, String user, String pwd) {
-        return start(url, type, mediaType, user, pwd, null);
+    public void start(final String url, int type, int mediaType, String user, String pwd) {
+         start(url, type, mediaType, user, pwd, null,Integer.MAX_VALUE,new SimpleDateFormat("yyyyMMddHHmmss").format(new Date()));
     }
 
     /**
@@ -318,7 +324,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
      * @param pwd
      * @return
      */
-    public int start(final String url, int type, int mediaType, String user, String pwd, String recordPath) {
+    public void start(final String url, int type, int mediaType, String user, String pwd, String recordPath,long millis,String dataStr) {
         if (url == null) {
             throw new NullPointerException("url is null");
         }
@@ -333,11 +339,17 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
         mTimeout = false;
         mNotSupportedVideoCB = mNotSupportedAudioCB = false;
         mReceivedDataLength = 0;
-        mClient = new RTSPClient(mContext, mKey);
-        int channel = mClient.registerCallback(this);
+
         mRecordingPath = recordPath;
+        this.millis = millis;
+        this.dataStr = dataStr;
         Log.i(TAG, String.format("playing url:\n%s\n", url));
-        return mClient.openStream(channel, url, type, mediaType, user, pwd);
+
+        if(mClient == null){
+            mClient = new RTSPClient(mContext, mKey);
+            int channel = mClient.registerCallback(this);
+            mClient.openStream(channel, url, type, mediaType, user, pwd);
+        }
     }
 
     public boolean isAudioEnable() {
@@ -390,7 +402,6 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
         }
 
         stopRecord();
-
 
         mQueue.clear();
 
@@ -812,7 +823,9 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
         if (mMediaInfo == null || mWidth == 0 || mHeight == 0 || mCSD0 == null || mCSD1 == null)
             return;
         mRecordingPath = path;
-        mObject = new EasyAACMuxer(path, Integer.MAX_VALUE);
+        mObject = new EasyAACMuxer(path, millis);
+        mObject.setmContext(MyTerminalFactory.getSDK().application);
+        mObject.setDateStr(dataStr, FileTransgerUtil.getRecodeFileIndex(1));
         MediaFormat format = new MediaFormat();
         format.setInteger(MediaFormat.KEY_WIDTH, mWidth);
         format.setInteger(MediaFormat.KEY_HEIGHT, mHeight);
@@ -858,7 +871,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
     }
 
     private void pumpAACSample(RTSPClient.FrameInfo frameInfo) {
-        EasyMuxer muxer = mObject;
+        EasyAACMuxer muxer = mObject;
         if (muxer == null) return;
         MediaCodec.BufferInfo bi = new MediaCodec.BufferInfo();
         bi.offset = frameInfo.offset;
@@ -894,7 +907,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
 
 
     private void pumpVideoSample(RTSPClient.FrameInfo frameInfo) {
-        EasyMuxer muxer = mObject;
+        EasyAACMuxer muxer = mObject;
         if (muxer == null) return;
         MediaCodec.BufferInfo bi = new MediaCodec.BufferInfo();
         bi.offset = frameInfo.offset;
@@ -916,9 +929,19 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
         }
     }
 
-    public synchronized void stopRecord() {
-        mRecordingPath = null;
+    public synchronized void pauseRecord() {
         if (mObject == null) return;
+        mObject.stop();
+//        mObject.release();
+        ResultReceiver rr = mRR;
+        if (rr != null) {
+            rr.send(RESULT_RECORD_END, null);
+        }
+    }
+
+    public synchronized void stopRecord() {
+        if (mObject == null) return;
+        mRecordingPath = null;
         mObject.release();
         mObject = null;
         ResultReceiver rr = mRR;
@@ -1137,11 +1160,12 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
         if (rr != null) rr.send(RESULT_EVENT, resultData);
     }
 
-    public void setRTSPInfo(Pusher pusher,String ip,String port,String id, InitCallback callBack){
+    public void setRTSPInfo(Pusher pusher,String ip,String port,String id, ResultReceiver receiver, InitCallback callBack){
         mPusher = pusher;
         this.ip = ip;
         this.port = port;
         this.id = id;
+        mRR = receiver;
         mRtspCallBack = callBack;
     }
 

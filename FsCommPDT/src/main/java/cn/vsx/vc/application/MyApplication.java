@@ -95,7 +95,8 @@ public class MyApplication extends Application {
 		MyTerminalFactory.getSDK().getAuthManagerTwo().initIp();
 		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_PHONE.toString());
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
-
+		//保存录像，录音，照片的存储路径
+		MyTerminalFactory.getSDK().getFileTransferOperation().initExternalUsableStorage();
 		SkinCompatManager.withoutActivity(this)                         // 基础控件换肤初始化
 				.addInflater(new SkinMaterialViewInflater())            // material design 控件换肤初始化[可选]
 				//				.setSkinStatusBarColorEnable(false)                     // 关闭状态栏换肤，默认打开[可选]

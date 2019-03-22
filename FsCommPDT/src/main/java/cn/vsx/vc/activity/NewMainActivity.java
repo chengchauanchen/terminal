@@ -88,6 +88,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePopBackStackHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
@@ -123,6 +124,7 @@ import cn.vsx.vc.view.TimerView;
 import cn.vsx.vc.view.custompopupwindow.ChangeNamePopupwindow;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.tools.PhoneAdapter;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -723,6 +725,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     }
 
 
+    private ReceiveUVCCameraConnectChangeHandler receiveUVCCameraConnectChangeHandler = connected -> {
+        MyApplication.instance.usbAttached = connected;
+    };
+
 
     //其他页面组呼圆形按钮
     @Bind(R.id.main_page)
@@ -887,6 +893,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveUnReadCountChangedHandler);
 
+        //外置摄像头是否连接通知
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUVCCameraConnectChangeHandler);
+
         bv_talk_back.setOnClickListener(new BottomViewClickListener());
         bv_person_contacts.setOnClickListener(new BottomViewClickListener());
         bv_group_contacts.setOnClickListener(new BottomViewClickListener());
@@ -1008,6 +1017,13 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         judgePermission();
         NfcUtil.nfcCheck(this);
+
+        //清理数据库
+        FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
+        //48小时未上传的文件上传
+        manager.checkStartExpireFileAlarm();
+        //上传没有上传的文件信息
+        manager.uploadFileTreeBean(null);
     }
 
     private void initVoip(){
@@ -1457,6 +1473,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceivePopBackStackHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
+        //外置摄像头是否连接通知
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUVCCameraConnectChangeHandler);
 
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveUnReadCountChangedHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowPopupwindowHandler);

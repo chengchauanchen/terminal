@@ -139,10 +139,6 @@ public class USBHWConsumer extends Thread implements USBVideoConsumer{
                 }
                 outputBuffer.position(bufferInfo.offset);
                 outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
-                EasyMuxer muxer = mMuxer;
-                if (muxer != null) {
-                    muxer.pumpStream(outputBuffer, bufferInfo, true);
-                }
 
                 boolean sync = false;
                 if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {// sps
@@ -177,6 +173,11 @@ public class USBHWConsumer extends Thread implements USBVideoConsumer{
 
 
                 mMediaCodec.releaseOutputBuffer(outputBufferIndex, false);
+
+                EasyMuxer muxer = mMuxer;
+                if (muxer != null) {
+                    muxer.pumpStream(outputBuffer, bufferInfo, true);
+                }
             }
         }
         while (mVideoStarted);
@@ -234,6 +235,7 @@ Video bitrate 384 Kbps 2 Mbps 4 Mbps 10 Mbps
         if (mWidth >= 1920 || mHeight >= 1920) bitrate *= 0.3;
         else if (mWidth >= 1280 || mHeight >= 1280) bitrate *= 0.4;
         else if (mWidth >= 720 || mHeight >= 720) bitrate *= 0.6;
+        else if(mWidth>=640 ||mHeight>=640) bitrate *=1.8;
         mMediaCodec = MediaCodec.createByCodecName(UVCMediaStream.info.mName);
         MediaFormat mediaFormat = MediaFormat.createVideoFormat("video/avc", mWidth, mHeight);
         mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);

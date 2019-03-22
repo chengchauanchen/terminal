@@ -220,6 +220,7 @@ public class SwitchCameraService extends BaseService{
                     hideConnectingAnimate();
                     Intent intent = new Intent(SwitchCameraService.this,RecoderPushService.class);
                     intent.putExtra(Constants.TYPE,type);
+                    intent.putExtra(Constants.THEME,theme);
                     intent.putExtra(Constants.PUSH_MEMBERS,pushMembers);
                     startService(intent);
                     mHandler.removeMessages(CANCELLIVE);

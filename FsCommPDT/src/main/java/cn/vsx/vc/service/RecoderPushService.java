@@ -11,6 +11,7 @@ import android.os.ResultReceiver;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +20,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.easydarwin.push.EasyPusher;
 import org.easydarwin.push.InitCallback;
@@ -38,17 +41,21 @@ import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExternStorageSizeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MemberEnterAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -91,6 +98,11 @@ public class RecoderPushService extends BaseService{
     private LinearLayout mLlLiveInviteMember;
     private LinearLayout mLlLiveHangupTotal;
 
+    private float downX = 0;
+    private float downY = 0;
+    private int oddOffsetX = 0;
+    private int oddOffsetY = 0;
+
     public RecoderPushService(){}
 
     @Override
@@ -102,6 +114,8 @@ public class RecoderPushService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveExternStorageSizeHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUVCCameraConnectChangeHandler);
 
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
@@ -109,6 +123,7 @@ public class RecoderPushService extends BaseService{
         mIvLiveRetract.setOnClickListener(retractOnClickListener);
         mSvLive.setOnClickListener(svOnClickListener);
         mIvLiveAddmember.setOnClickListener(inviteMemberOnClickListener);
+        mPopupMiniLive.setOnTouchListener(miniPopOnTouchListener);
 
     }
 
@@ -131,7 +146,7 @@ public class RecoderPushService extends BaseService{
             }
             int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMyselfLive(theme, "");
             if(requestCode != BaseCommonCode.SUCCESS_CODE){
-                ptt.terminalsdk.tools.ToastUtil.livingFailToast(this, requestCode, TerminalErrorCode.LIVING_PUSHING.getErrorCode());
+                ToastUtil.livingFailToast(this, requestCode, TerminalErrorCode.LIVING_PUSHING.getErrorCode());
                 finishVideoLive();
             }
         }else if(Constants.RECEIVE_PUSH.equals(type)){
@@ -141,11 +156,11 @@ public class RecoderPushService extends BaseService{
 
     @Override
     protected void showPopMiniView(){
-        MyApplication.instance.isMiniLive = true;
-        windowManager.removeView(rootView);
-        windowManager.addView(rootView, layoutParams);
         mRlRecoderView.setVisibility(View.GONE);
         mPopupMiniLive.setVisibility(View.VISIBLE);
+        windowManager.removeView(rootView);
+        windowManager.addView(rootView, layoutParams);
+        MyApplication.instance.isMiniLive = true;
     }
 
     @Override
@@ -195,6 +210,9 @@ public class RecoderPushService extends BaseService{
 
     @Override
     public void onDestroy(){
+        if(pushRTSPClient != null){
+            pushRTSPClient.stop();
+        }
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
@@ -203,6 +221,8 @@ public class RecoderPushService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUVCCameraConnectChangeHandler);
     }
 
     @SuppressLint("InflateParams")
@@ -234,7 +254,12 @@ public class RecoderPushService extends BaseService{
 
     private View.OnClickListener hangUpOnClickListener = v-> finishVideoLive();
 
-    private View.OnClickListener retractOnClickListener = v -> showPopMiniView();
+    private View.OnClickListener retractOnClickListener = v -> {
+        if(pushRTSPClient != null){
+            pushRTSPClient.stop();
+        }
+        showPopMiniView();
+    };
 
 
     private View.OnClickListener svOnClickListener = v->{
@@ -265,6 +290,9 @@ public class RecoderPushService extends BaseService{
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surface){
+//            if(pushRTSPClient!=null){
+//                pushRTSPClient.stop();
+//            }
             return true;
         }
 
@@ -356,6 +384,30 @@ public class RecoderPushService extends BaseService{
             mLvLiveMemberInfo.smoothScrollToPosition(watchOrExitMembers.size() - 1);
         }
     });
+
+    /**
+     *通知存储空间不足
+     */
+    private ReceiveExternStorageSizeHandler mReceiveExternStorageSizeHandler = memorySize -> mHandler.post(() -> {
+        if (memorySize < 100) {
+            ptt.terminalsdk.tools.ToastUtil.showToast(RecoderPushService.this, getString(R.string.toast_tempt_insufficient_storage_space));
+            PromptManager.getInstance().startExternNoStorage();
+            if(pushRTSPClient != null){
+                pushRTSPClient.stop();
+            }
+            //上传没有上传的文件，删除已经上传的文件
+            MyTerminalFactory.getSDK().getFileTransferOperation().externNoStorageOperation();
+        } else if (memorySize < 200){
+            PromptManager.getInstance().startExternStorageNotEnough();
+            ptt.terminalsdk.tools.ToastUtil.showToast(RecoderPushService.this, getString(R.string.toast_tempt_storage_space_is_in_urgent_need));
+        }
+    });
+
+    private ReceiveUVCCameraConnectChangeHandler receiveUVCCameraConnectChangeHandler = connected -> {
+        if(!connected){
+            finishVideoLive();
+        }
+    };
 
     private RtspReceiver mResultReceiver;
 
@@ -452,11 +504,11 @@ public class RecoderPushService extends BaseService{
                             Thread.sleep(300);
                             logger.error("请求第" + pullcount + "次");
                             if(mSvLive != null && mSvLive.getVisibility() == View.VISIBLE && mSvLive.getSurfaceTexture() != null){
-                                pushLawRecorder(mSvLive.getSurfaceTexture());
+//                                pushLawRecorder(mSvLive.getSurfaceTexture());
                                 pullcount++;
 
                             }else if(mSvLivePop != null && mSvLivePop.getVisibility() == View.VISIBLE && mSvLivePop.getSurfaceTexture() != null){
-                                pushLawRecorder(mSvLivePop.getSurfaceTexture());
+//                                pushLawRecorder(mSvLivePop.getSurfaceTexture());
                                 pullcount++;
                             }else{
                                 TerminalFactory.getSDK().getLiveManager().ceaseWatching();
@@ -480,6 +532,8 @@ public class RecoderPushService extends BaseService{
 
     private void finishVideoLive(){
         stopPull();
+        mRlRecoderView.setVisibility(View.GONE);
+        mPopupMiniLive.setVisibility(View.GONE);
         stopBusiness();
     }
 
@@ -521,9 +575,10 @@ public class RecoderPushService extends BaseService{
         if(null == pushCallback){
             pushCallback = new PushCallback();
         }
-        pushRTSPClient = new PushRTSPClient(this, PLAYKEY,surface, mResultReceiver);
-        pushRTSPClient.setRTSPInfo(ip,port,id, pushCallback);
-        pushRTSPClient.start(Constants.LAWRECODER, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
+        pushRTSPClient = new PushRTSPClient(this, PLAYKEY,surface);
+        pushRTSPClient.setRTSPInfo(ip,port,id,mResultReceiver, pushCallback);
+        pushRTSPClient.setSurfaceTexture(surface);
+        pushRTSPClient.start(Constants.LAWRECODER, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "");
     }
 
     @SuppressLint("SimpleDateFormat")
@@ -568,4 +623,47 @@ public class RecoderPushService extends BaseService{
             mLlLiveInviteMember.setVisibility(View.VISIBLE);
         }
     }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private View.OnTouchListener miniPopOnTouchListener = (v,event)->{
+        //触摸点到边界屏幕的距离
+        int x = (int) event.getRawX();
+        int y = (int) event.getRawY();
+        switch(event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                //触摸点到自身边界的距离
+                downX = event.getX();
+                downY = event.getY();
+                oddOffsetX = layoutParams.x;
+                oddOffsetY = layoutParams.y;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                float moveX = event.getX();
+                float moveY = event.getY();
+                //不除以3，拖动的view抖动的有点厉害
+                if(Math.abs(downX - moveX) > 5 || Math.abs(downY - moveY) > 5){
+                    // 更新浮动窗口位置参数
+                    layoutParams.x = (int) (screenWidth - (x + downX));
+                    layoutParams.y = (int) (y - downY);
+                    windowManager.updateViewLayout(rootView, layoutParams);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                int newOffsetX = layoutParams.x;
+                int newOffsetY = layoutParams.y;
+                if(Math.abs(newOffsetX - oddOffsetX) <= 30 && Math.abs(newOffsetY - oddOffsetY) <= 30){
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverCloseKeyBoardHandler.class);
+                    if(pushRTSPClient != null){
+                        pushRTSPClient.stop();
+                    }
+                    mRlRecoderView.setVisibility(View.VISIBLE);
+                    mPopupMiniLive.setVisibility(View.GONE);
+                    windowManager.removeView(rootView);
+                    windowManager.addView(rootView,layoutParams1);
+                    MyApplication.instance.isMiniLive = false;
+                }
+                break;
+        }
+        return true;
+    };
 }

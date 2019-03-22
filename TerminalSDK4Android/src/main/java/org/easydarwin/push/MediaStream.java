@@ -15,6 +15,7 @@ import android.os.Message;
 import android.os.Process;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.log4j.Logger;
@@ -38,8 +39,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSupportResolutionHandler;
 import dagger.Module;
 import dagger.Provides;
+import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
+import ptt.terminalsdk.tools.FileTransgerUtil;
 
 import static android.graphics.ImageFormat.NV21;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar;
@@ -54,11 +60,13 @@ public class MediaStream {
     private Pusher mEasyPusher;
     static final String TAG = "MediaStream";
     private int width = 640, height = 480;
+    //录制每个视频片段的时间
+    private static final int VIDEO_RECODE_PER_TIME = 5 * 60 * 1000;
     private int mCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     private WeakReference<SurfaceTexture> mSurfaceHolderRef;
     private Camera mCamera;
     private boolean pushStream = false;//是否要推送数据
-    private AudioStream audioStream ;
+    private AudioStream audioStream;
     private boolean isCameraBack = true;
     private int mDgree;
     private Context mApplicationContext;
@@ -71,6 +79,7 @@ public class MediaStream {
     //    private int previewFormat;
     public static CodecInfo info = new CodecInfo();
     public Logger logger = Logger.getLogger(getClass());
+
     public MediaStream(Context context, SurfaceTexture texture) {
         this(context, texture, true);
     }
@@ -84,10 +93,12 @@ public class MediaStream {
                 try {
                     super.run();
                 } catch (Throwable e) {
+                    logger.debug("mCameraThread---e:" + e.toString());
                     Intent intent = new Intent(mApplicationContext, BackgroundCameraService.class);
                     mApplicationContext.stopService(intent);
                 } finally {
                     logger.info("HandlerThread---执行finally");
+                    stopRecord();
                     stopStream();
                     stopPreview();
                     destroyCamera();
@@ -140,7 +151,7 @@ public class MediaStream {
     }
 
     public void startStream(String ip, String port, String id, InitCallback callback) {
-        mEasyPusher.initPush( mApplicationContext, callback);
+        mEasyPusher.initPush(mApplicationContext, callback);
         mEasyPusher.setMediaInfo(Pusher.Codec.EASY_SDK_VIDEO_CODEC_H264, 25, Pusher.Codec.EASY_SDK_AUDIO_CODEC_AAC, 1, 8000, 16);
         mEasyPusher.start(ip, port, String.format("%s.sdp", id), Pusher.TransType.EASY_RTP_OVER_TCP);
         pushStream = true;
@@ -276,6 +287,11 @@ public class MediaStream {
         return length;
     }
 
+    private String tempFile;
+    private String dataStr;
+    private long millis;
+    private String fileIndex;
+
     public synchronized void startRecord() {
         if (Thread.currentThread() != mCameraThread) {
             mCameraHandler.post(new Runnable() {
@@ -286,13 +302,31 @@ public class MediaStream {
             });
             return;
         }
-        long millis = PreferenceManager.getDefaultSharedPreferences(mApplicationContext).getInt("record_interval", 300000);
-        mMuxer = new EasyMuxer(new File(recordPath, new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date())).toString(), millis);
-        if (mVC == null || audioStream == null) {
-            throw new IllegalStateException("you need to start preview before startRecord!");
+        logger.info(TAG + "---startRecord");
+        //检测内存卡的size
+        if (TextUtils.isEmpty(tempFile)) {
+            FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
+            operation.checkExternalUsableSize();
+            dataStr = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+            millis = PreferenceManager.getDefaultSharedPreferences(mApplicationContext).getInt("record_interval", VIDEO_RECODE_PER_TIME);
+            fileIndex = FileTransgerUtil.getRecodeFileIndex(1);
+            String fileName = FileTransgerUtil.getVideoRecodeFileName(dataStr, fileIndex);
+            File videoRecord = new File(MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory()), fileName);
+            if (!videoRecord.exists()) {
+                videoRecord.getParentFile().mkdirs();
+            }
+            tempFile = videoRecord.toString();
+            mMuxer = new EasyMuxer(tempFile, millis);
+            mMuxer.setmContext(mApplicationContext);
+            mMuxer.setDateStr(dataStr, fileIndex);
+
+            if (mVC == null || audioStream == null) {
+                throw new IllegalStateException("you need to start preview before startRecord!");
+            }
+
+            mVC.setMuxer(mMuxer);
+            audioStream.setMuxer(mMuxer);
         }
-        mVC.setMuxer(mMuxer);
-        audioStream.setMuxer(mMuxer);
     }
 
 
@@ -312,8 +346,10 @@ public class MediaStream {
             mVC.setMuxer(null);
             audioStream.setMuxer(null);
         }
+        MyTerminalFactory.getSDK().renovateVideoRecord(tempFile);
         if (mMuxer != null) mMuxer.release();
         mMuxer = null;
+        tempFile = null;
     }
 
     /**
@@ -329,7 +365,9 @@ public class MediaStream {
             });
             return;
         }
-        audioStream = new AudioStream();
+        if(audioStream == null){
+            audioStream = new AudioStream();
+        }
         if (mCamera != null) {
             int previewFormat = mCamera.getParameters().getPreviewFormat();
             Camera.Size previewSize = mCamera.getParameters().getPreviewSize();
@@ -348,6 +386,7 @@ public class MediaStream {
                     stringBuilder.append(str.width + "x" + str.height).append(";");
                 }
                 Util.saveSupportResolution(mApplicationContext, stringBuilder.toString());
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveSupportResolutionHandler.class);
             }
 
             try {
@@ -384,17 +423,20 @@ public class MediaStream {
 
             overlay = new TxtOverlay(mApplicationContext);
             try {
-                if (mSWCodec) {
-                    mVC = new SWConsumer(mApplicationContext, mEasyPusher);
-                } else {
-                    mVC = new HWConsumer(mApplicationContext, mEasyPusher);
-                }
-                if (!rotate) {
-                    mVC.onVideoStart(previewSize.width, previewSize.height);
-                    overlay.init(previewSize.width, previewSize.height, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath());
-                } else {
-                    mVC.onVideoStart(previewSize.height, previewSize.width);
-                    overlay.init(previewSize.height, previewSize.width, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath());
+                if(mVC == null){
+                    if (mSWCodec) {
+                        mVC = new SWConsumer(mApplicationContext, mEasyPusher);
+                    } else {
+                        mVC = new HWConsumer(mApplicationContext, mEasyPusher);
+                    }
+
+                    if (!rotate) {
+                        mVC.onVideoStart(previewSize.width, previewSize.height);
+                        overlay.init(previewSize.width, previewSize.height, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath());
+                    } else {
+                        mVC.onVideoStart(previewSize.height, previewSize.width);
+                        overlay.init(previewSize.height, previewSize.width, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath());
+                    }
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -443,7 +485,7 @@ public class MediaStream {
      * 停止预览
      */
     public synchronized void stopPreview() {
-        logger.info(Thread.currentThread().getName()+"--StopPreview");
+        logger.info(Thread.currentThread().getName() + "--StopPreview");
         if (Thread.currentThread() != mCameraThread) {
             mCameraHandler.post(new Runnable() {
                 @Override
@@ -453,7 +495,7 @@ public class MediaStream {
             });
             return;
         }
-        try{
+        try {
             if (mCamera != null) {
                 mCamera.stopPreview();
                 mCamera.setPreviewCallbackWithBuffer(null);
@@ -466,16 +508,15 @@ public class MediaStream {
             }
             if (mVC != null) {
                 mVC.onVideoStop();
-
-                logger.info( "Stop VC");
+                logger.info("Stop VC");
             }
             if (overlay != null)
                 overlay.release();
             if (mMuxer != null) {
-                mMuxer.release();
-                mMuxer = null;
+//                mMuxer.release();
+//                mMuxer = null;
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             logger.info(e.getMessage());
             e.printStackTrace();
         }
@@ -508,7 +549,7 @@ public class MediaStream {
             cameraCount = Camera.getNumberOfCameras();//得到摄像头的个数
             for (int i = 0; i < cameraCount; i++) {
                 Camera.getCameraInfo(i, cameraInfo);//得到每一个摄像头的信息
-                stopPreview();
+//                stopPreview();
                 destroyCamera();
                 if (mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                     //现在是后置，变更为前置
@@ -562,8 +603,8 @@ public class MediaStream {
             mCamera = null;
         }
         if (mMuxer != null) {
-            mMuxer.release();
-            mMuxer = null;
+//            mMuxer.release();
+//            mMuxer = null;
         }
     }
 

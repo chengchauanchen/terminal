@@ -20,6 +20,7 @@ import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
+import org.easydarwin.push.BITMediaStream;
 import org.easydarwin.push.EasyPusher;
 import org.easydarwin.push.InitCallback;
 import org.easydarwin.push.MediaStream;
@@ -37,6 +38,7 @@ import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExternStorageSizeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
@@ -137,6 +139,8 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveExternStorageSizeHandler);
+
 
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLive.setOnClickListener(svOnClickListener);
@@ -232,6 +236,10 @@ public class PhonePushService extends BaseService{
 
     @Override
     public void onDestroy(){
+        //处理当正在录像的时候，异常退出处理
+        if(mMediaStream!=null){
+            mMediaStream.stopRecord();
+        }
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
@@ -240,6 +248,7 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);
     }
 
     private void hideAllView(){
@@ -299,6 +308,7 @@ public class PhonePushService extends BaseService{
         port = String.valueOf(streamMediaServerPort);
         id = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "_" + callId;
         startPush();
+//        startRecord();
     }, 1000);
 
     /**
@@ -326,6 +336,25 @@ public class PhonePushService extends BaseService{
         }
         if(!watchOrExitMembers.isEmpty()){
             mLvLiveMemberInfo.smoothScrollToPosition(watchOrExitMembers.size() - 1);
+        }
+    });
+
+    /**
+     *通知存储空间不足
+     */
+    private ReceiveExternStorageSizeHandler mReceiveExternStorageSizeHandler = memorySize -> mHandler.post(() -> {
+        if (memorySize < 100) {
+            ToastUtil.showToast(PhonePushService.this, getString(R.string.toast_tempt_insufficient_storage_space));
+            PromptManager.getInstance().startExternNoStorage();
+            if(mMediaStream!=null&&mMediaStream.isRecording()){
+                //停止录像
+                mMediaStream.stopRecord();
+            }
+            //上传没有上传的文件，删除已经上传的文件
+            MyTerminalFactory.getSDK().getFileTransferOperation().externNoStorageOperation();
+        } else if (memorySize < 200){
+            PromptManager.getInstance().startExternStorageNotEnough();
+            ToastUtil.showToast(PhonePushService.this, getString(R.string.toast_tempt_storage_space_is_in_urgent_need));
         }
     });
 
@@ -363,6 +392,19 @@ public class PhonePushService extends BaseService{
         mMediaStream.startStream(ip, port, id, pushCallback);
         String url = String.format("rtsp://%s:%s/%s.sdp", ip, port, id);
         logger.info("推送地址：" + url);
+
+    }
+
+    /**
+     * 开始录像
+     */
+    private void startRecord(){
+        //开始录像
+        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(MyTerminalFactory.getSDK().getFileTransferOperation().getExternalUsableStorageDirectory())) {
+//            if(!mMediaStream.isRecording()){
+                mMediaStream.startRecord();
+//            }
+        }
     }
 
     private class PushCallback implements InitCallback{
@@ -396,7 +438,7 @@ public class PhonePushService extends BaseService{
                     resultData.putString("event-msg", "EasyRTSP 连接异常中断");
                     if(pushcount <= 10){
                         pushcount++;
-                        startPush();
+//                        startPush();
                     }else{
                         finishVideoLive();
                     }
@@ -501,7 +543,7 @@ public class PhonePushService extends BaseService{
                 if(Math.abs(newOffsetX - oddOffsetX) <= 30 && Math.abs(newOffsetY - oddOffsetY) <= 30){
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverCloseKeyBoardHandler.class);
                     windowManager.removeView(rootView);
-                    windowManager.addView(rootView, layoutParams1);
+                    windowManager.addView(rootView,layoutParams1);
                     hideAllView();
                     MyApplication.instance.isMiniLive = false;
                     mRlPhonePushLive.setVisibility(View.VISIBLE);
@@ -546,9 +588,10 @@ public class PhonePushService extends BaseService{
 
     private void pushStream(SurfaceTexture surface){
         if(mMediaStream != null){    // switch from background to front
-            mMediaStream.stopPreview();
+//            mMediaStream.stopPreview();
             mMediaStream.setSurfaceTexture(surface);
             mMediaStream.startPreview();
+            startRecord();
             if(mMediaStream.isStreaming()){
                 ToastUtil.showToast(PhonePushService.this, getResources().getString(R.string.pushing_stream));
             }
@@ -564,6 +607,7 @@ public class PhonePushService extends BaseService{
         if(mMediaStream != null){
             mMediaStream.stopPreview();
             mMediaStream.stopStream();
+            mMediaStream.stopRecord();
             mMediaStream.release();
             mMediaStream = null;
             logger.info("---->>>>页面关闭，停止推送视频");
@@ -583,6 +627,7 @@ public class PhonePushService extends BaseService{
         mMediaStream.createCamera();
         mMediaStream.startPreview();
         logger.info("------>>>>startCamera");
+        startRecord();
         if(mMediaStream.isStreaming()){
             ToastUtil.showToast(PhonePushService.this, getResources().getString(R.string.pushing_stream));
         }

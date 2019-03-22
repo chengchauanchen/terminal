@@ -37,6 +37,7 @@ import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExternStorageSizeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
@@ -44,6 +45,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
@@ -128,10 +130,12 @@ public class UVCPushService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveExternStorageSizeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUVCCameraConnectChangeHandler);
 
         mSvUvcLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvUvcLive.setOnClickListener(svOnClickListener);
@@ -176,7 +180,11 @@ public class UVCPushService extends BaseService{
 
     @Override
     protected void showPopMiniView(){
-
+        windowManager.removeView(rootView);
+        windowManager.addView(rootView, layoutParams);
+        hideAllView();
+        MyApplication.instance.isMiniLive = true;
+        mPopMiniLive.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -214,15 +222,21 @@ public class UVCPushService extends BaseService{
 
     @Override
     public void onDestroy(){
+        //处理当正在录像的时候，异常退出处理
+        if(mUvcMediaStream!=null){
+            mUvcMediaStream.stopRecord();
+        }
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUVCCameraConnectChangeHandler);
     }
 
     @Override
@@ -322,6 +336,31 @@ public class UVCPushService extends BaseService{
         }
     });
 
+    /**
+     *通知存储空间不足
+     */
+    private ReceiveExternStorageSizeHandler mReceiveExternStorageSizeHandler = memorySize -> mHandler.post(() -> {
+        if (memorySize < 100) {
+            ToastUtil.showToast(UVCPushService.this, getString(R.string.toast_tempt_insufficient_storage_space));
+            PromptManager.getInstance().startExternNoStorage();
+//            if(mUvcMediaStream!=null&&mUvcMediaStream.isRecording()){
+//                //停止录像
+//                mUvcMediaStream.stopRecord();
+//            }
+            //上传没有上传的文件，删除已经上传的文件
+            MyTerminalFactory.getSDK().getFileTransferOperation().externNoStorageOperation();
+        } else if (memorySize < 200){
+            PromptManager.getInstance().startExternStorageNotEnough();
+            ToastUtil.showToast(UVCPushService.this, getString(R.string.toast_tempt_storage_space_is_in_urgent_need));
+        }
+    });
+
+    private ReceiveUVCCameraConnectChangeHandler receiveUVCCameraConnectChangeHandler = connected -> {
+        if(!connected){
+            finishVideoLive();
+        }
+    };
+
     private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
         if(!connected){
             ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
@@ -332,7 +371,7 @@ public class UVCPushService extends BaseService{
 
     private View.OnClickListener hangUpOnClickListener = v-> finishVideoLive();
 
-    private View.OnClickListener retractOnClickListener = v -> showPopView();
+    private View.OnClickListener retractOnClickListener = v -> showPopMiniView();
 
     private View.OnClickListener inviteMemberOnClickListener = v -> {
         Intent intent = new Intent(UVCPushService.this, InviteMemberService.class);
@@ -440,7 +479,7 @@ public class UVCPushService extends BaseService{
                     resultData.putString("event-msg", "EasyRTSP 连接异常中断");
                     if(pushcount <= 10){
                         pushcount++;
-                        startPush();
+//                        startPush();
                     }else{
                         finishVideoLive();
                     }
@@ -491,6 +530,16 @@ public class UVCPushService extends BaseService{
         logger.info("推送地址：" + url);
     }
 
+    /**
+     * 开始录像
+     */
+    private void startRecord(){
+        //开始录像
+        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(MyTerminalFactory.getSDK().getFileTransferOperation().getExternalUsableStorageDirectory())) {
+            mUvcMediaStream.startRecord();
+        }
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private View.OnTouchListener listViewOnTouchListener = (v,event)->{
         switch(event.getAction()){
@@ -507,14 +556,6 @@ public class UVCPushService extends BaseService{
         return false;
     };
 
-    private void showPopView(){
-        MyApplication.instance.isMiniLive = true;
-        windowManager.removeView(rootView);
-        windowManager.addView(rootView, layoutParams);
-        hideAllView();
-        mPopMiniLive.setVisibility(View.VISIBLE);
-    }
-
     private void finishVideoLive(){
         mHandler.removeCallbacksAndMessages(null);
         stopPush();
@@ -524,9 +565,10 @@ public class UVCPushService extends BaseService{
 
     private void pushStream(SurfaceTexture surface){
         if(mUvcMediaStream != null){    // switch from background to front
-            mUvcMediaStream.stopPreview();
+//            mUvcMediaStream.stopPreview();
             mUvcMediaStream.setSurfaceTexture(surface);
             mUvcMediaStream.startPreview();
+            startRecord();
             if(mUvcMediaStream.isStreaming()){
                 ToastUtil.showToast(this, getResources().getString(R.string.pushing_stream));
             }
@@ -560,6 +602,7 @@ public class UVCPushService extends BaseService{
         mUvcMediaStream.setDgree(getDgree());
         mUvcMediaStream.createCamera();
         mUvcMediaStream.startPreview();
+        startRecord();
         logger.info("------>>>>startCamera");
         if(mUvcMediaStream.isStreaming()){
             ToastUtil.showToast(this, getResources().getString(R.string.pushing_stream));

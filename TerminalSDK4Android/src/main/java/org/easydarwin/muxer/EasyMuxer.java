@@ -1,34 +1,43 @@
 package org.easydarwin.muxer;
 
+import android.content.Context;
 import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.os.Build;
-import android.util.Log;
+
+import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
-import ptt.terminalsdk.BuildConfig;
+import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
+import ptt.terminalsdk.tools.FileTransgerUtil;
 
 /**
  * Created by John on 2017/1/10.
  */
 
 public class EasyMuxer implements BaseEasyMuxer {
-
-    private static final boolean VERBOSE = BuildConfig.DEBUG;
+    public Logger logger = Logger.getLogger(getClass());
+//    private static final boolean VERBOSE = BuildConfig.DEBUG;
     private static final String TAG = EasyMuxer.class.getSimpleName();
-    private final String mFilePath;
+    private String mFilePath;
     private MediaMuxer mMuxer;
     private final long durationMillis;
-    private int index = 0;
+    //    private int index = 1;
+    private String dateStr = "";
+    private String fileIndex = "1";
     private int mVideoTrackIndex = -1;
     private int mAudioTrackIndex = -1;
     private long mBeginMillis;
     private MediaFormat mVideoFormat;
     private MediaFormat mAudioFormat;
+    private Context mContext;
 
     public EasyMuxer(String path, long durationMillis) {
         mFilePath = path;
@@ -36,7 +45,7 @@ public class EasyMuxer implements BaseEasyMuxer {
         Object mux = null;
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                mux = new MediaMuxer(path + "-" + index++ + ".mp4", MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+                mux = new MediaMuxer(path + ".mp4", MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -44,6 +53,7 @@ public class EasyMuxer implements BaseEasyMuxer {
             mMuxer = (MediaMuxer) mux;
         }
     }
+
     @Override
     public synchronized void addTrack(MediaFormat format, boolean isVideo) {
         // now that we have the Magic Goodies, start the muxer
@@ -52,14 +62,14 @@ public class EasyMuxer implements BaseEasyMuxer {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             int track = mMuxer.addTrack(format);
-            if (VERBOSE)
-                Log.i(TAG, String.format("addTrack %s result %d", isVideo ? "video" : "audio", track));
+//            if (VERBOSE)
+//                Log.i(TAG, String.format("addTrack %s result %d", isVideo ? "video" : "audio", track));
             if (isVideo) {
                 mVideoFormat = format;
                 mVideoTrackIndex = track;
                 if (mAudioTrackIndex != -1) {
-                    if (VERBOSE)
-                        Log.i(TAG, "both audio and video added,and muxer is started");
+//                    if (VERBOSE)
+//                        Log.i(TAG, "both audio and video added,and muxer is started");
                     mMuxer.start();
                     mBeginMillis = System.currentTimeMillis();
                 }
@@ -76,7 +86,7 @@ public class EasyMuxer implements BaseEasyMuxer {
 
     public synchronized void pumpStream(ByteBuffer outputBuffer, MediaCodec.BufferInfo bufferInfo, boolean isVideo) {
         if (mAudioTrackIndex == -1 || mVideoTrackIndex == -1) {
-            Log.i(TAG, String.format("pumpStream [%s] but muxer is not start.ignore..", isVideo ? "video" : "audio"));
+            logger.info(TAG + String.format("pumpStream [%s] but muxer is not start.ignore..", isVideo ? "video" : "audio"));
             return;
         }
         if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_CODEC_CONFIG) != 0) {
@@ -94,25 +104,38 @@ public class EasyMuxer implements BaseEasyMuxer {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 mMuxer.writeSampleData(isVideo ? mVideoTrackIndex : mAudioTrackIndex, outputBuffer, bufferInfo);
             }
-            if (VERBOSE)
-                Log.d(TAG, String.format("sent %s [" + bufferInfo.size + "] with timestamp:[%d] to muxer", isVideo ? "video" : "audio", bufferInfo.presentationTimeUs / 1000));
+//            if (VERBOSE)
+//            logger.info(TAG+String.format("sent %s [" + bufferInfo.size + "] with timestamp:[%d] to muxer", isVideo ? "video" : "audio", bufferInfo.presentationTimeUs / 1000));
         }
 
         if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-            if (VERBOSE)
-                Log.i(TAG, "BUFFER_FLAG_END_OF_STREAM received");
+//            if (VERBOSE)
+            logger.info(TAG + "BUFFER_FLAG_END_OF_STREAM received");
         }
 
         if (System.currentTimeMillis() - mBeginMillis >= durationMillis) {
+            logger.info(TAG + "超过每段视频的时间，重新创建视频片段的文件");
+            //录制过程中检测内存卡的size
+            FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
+            operation.checkExternalUsableSize();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                if (VERBOSE)
-                    Log.i(TAG, String.format("record file reach expiration.create new file:" + index));
+//                if (VERBOSE)
+                logger.info(TAG + String.format("record file reach expiration.create new file:" + fileIndex));
                 mMuxer.stop();
                 mMuxer.release();
                 mMuxer = null;
                 mVideoTrackIndex = mAudioTrackIndex = -1;
+                String directoty = MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory());
+                //生成文件
+                operation.generateFileComplete(directoty, mFilePath + FileTransgerUtil._TYPE_VIDEO_SUFFIX);
                 try {
-                    mMuxer = new MediaMuxer(mFilePath + "-" + ++index + ".mp4", MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
+                    checkIndexOutOfBounds();
+                    logger.info(TAG + "5分钟后生成新的退图像文件，之前的 mFilePath====" + mFilePath);
+                    String fileName = FileTransgerUtil.getVideoRecodeFileName(dateStr, fileIndex);
+                    File videoRecord = new File(directoty, fileName);
+                    mFilePath = videoRecord.toString();
+                    logger.info(TAG + "5分钟后生成新的退图像文件， mFilePath====" + mFilePath);
+                    mMuxer = new MediaMuxer(mFilePath + ".mp4", MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
                     addTrack(mVideoFormat, true);
                     addTrack(mAudioFormat, false);
                 } catch (IOException e) {
@@ -122,25 +145,69 @@ public class EasyMuxer implements BaseEasyMuxer {
         }
     }
 
+    public void setmContext(Context mContext) {
+        this.mContext = mContext;
+    }
+
+
+    public void setDateStr(String dateStr, String fileIndex) {
+        this.dateStr = dateStr;
+        this.fileIndex = fileIndex;
+    }
+
     public synchronized void release() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             if (mMuxer != null) {
                 if (mAudioTrackIndex != -1 && mVideoTrackIndex != -1) {
-                    if (VERBOSE)
-                        Log.i(TAG, String.format("muxer is started. now it will be stoped."));
+//                    if (VERBOSE)
+                    logger.info(TAG + String.format("muxer is started. now it will be stoped."));
                     try {
                         mMuxer.stop();
                         mMuxer.release();
                     } catch (IllegalStateException ex) {
                         ex.printStackTrace();
                     }
-
-                    if (System.currentTimeMillis() - mBeginMillis <= 1500){
-                        new File(mFilePath + "-" + index + ".mp4").delete();
+                    File file = new File(mFilePath + ".mp4");
+                    if (System.currentTimeMillis() - mBeginMillis <= 1000 || file.length() < 10) {
+                        file.delete();
+                    } else {
+                        //生成文件
+                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
+                        operation.generateFileComplete(
+                                MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory()),
+                                mFilePath + FileTransgerUtil._TYPE_VIDEO_SUFFIX);
                     }
+
                     mAudioTrackIndex = mVideoTrackIndex = -1;
                 }
             }
         }
+    }
+    public synchronized void stop() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            if (mMuxer != null) {
+                if (mAudioTrackIndex != -1 && mVideoTrackIndex != -1) {
+//                    if (VERBOSE)
+                    logger.info(TAG + String.format("muxer is started. now it will be stoped."));
+                    try {
+                        mMuxer.stop();
+                    } catch (IllegalStateException ex) {
+                        ex.printStackTrace();
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 判断文件序号是否超出4位边界
+     */
+    private void checkIndexOutOfBounds() {
+        int index = FileTransgerUtil.stringToInt(fileIndex);
+        if (index >= 9999) {
+            index = 0;
+            dateStr = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        }
+        fileIndex = FileTransgerUtil.getRecodeFileIndex(++index);
     }
 }
