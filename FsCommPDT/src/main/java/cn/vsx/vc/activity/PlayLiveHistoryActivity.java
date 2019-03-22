@@ -2,9 +2,11 @@ package cn.vsx.vc.activity;
 
 import android.annotation.SuppressLint;
 import android.graphics.SurfaceTexture;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -16,8 +18,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
-
-import java.io.IOException;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -91,6 +91,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
                         float sMax = seek_bar.getMax();
                         //播放比例
                         float percent = position / maxTime;
+                        Log.e("PlayLiveHistoryActivity", "position:" + position+"--percent:"+percent);
                         if(percent < 1){
                             seek_bar.setProgress((int) (sMax * percent));
                             tv_current_time.setText(getTime((int) position));
@@ -101,7 +102,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
                 case COMPLETE_PROGRESS:
                     seek_bar.setProgress(seek_bar.getMax());
                     tv_current_time.setText(getTime(maxTime));
-                    if(mediaPlayer.isPlaying()){
+                    if(null != mediaPlayer && mediaPlayer.isPlaying()){
                         mediaPlayer.pause();
                     }
                     iv_pause_continue.setImageResource(R.drawable.on_pause);
@@ -117,7 +118,8 @@ public class PlayLiveHistoryActivity extends BaseActivity{
             }
         }
     };
-
+    private String url;
+    private boolean playFinish;
 
     @Override
     public int getLayoutResId(){
@@ -135,40 +137,6 @@ public class PlayLiveHistoryActivity extends BaseActivity{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyDataMessageHandler);
-        mediaPlayer.setOnPreparedListener(mp -> {
-            mediaPlayer.start();
-            tv_max_time.setText(getTime(maxTime));
-            mHandler.sendEmptyMessage(UPDATE_PROGRESS);
-        });
-        mediaPlayer.setOnSeekCompleteListener(mp -> {
-            mp.start();
-            iv_pause_continue.setImageResource(R.drawable.continue_play);
-            mHandler.sendEmptyMessage(UPDATE_PROGRESS);
-            mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
-        });
-        mediaPlayer.setOnCompletionListener(mp -> {
-            logger.info("onCompletion");
-            iv_pause_continue.setImageResource(R.drawable.on_pause);
-            iv_pause.setVisibility(View.VISIBLE);
-            mHandler.sendEmptyMessage(COMPLETE_PROGRESS);
-            mHandler.removeMessages(UPDATE_PROGRESS);
-            if(mediaPlayer.isPlaying()){
-                mediaPlayer.stop();
-                mediaPlayer.reset();
-            }
-        });
-        mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-            logger.error("mediaPlayer  onError");
-            iv_pause_continue.setImageResource(R.drawable.on_pause);
-            iv_pause.setVisibility(View.VISIBLE);
-            mHandler.removeMessages(UPDATE_PROGRESS);
-            if(mediaPlayer.isPlaying()){
-                mediaPlayer.stop();
-            }
-            mediaPlayer.reset();
-            mediaPlayer.release();
-            return false;
-        });
         textureView.setSurfaceTextureListener(new TextureView.SurfaceTextureListener(){
             @Override
             public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height){
@@ -176,7 +144,6 @@ public class PlayLiveHistoryActivity extends BaseActivity{
                 //设置视屏文件图像的显示参数
                 Surface face = new Surface(surface);
                 mediaPlayer.setSurface(face);
-
             }
 
             @Override
@@ -185,7 +152,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
 
             @Override
             public boolean onSurfaceTextureDestroyed(SurfaceTexture surface){
-
+                Log.e("PlayLiveHistoryActivity", "onSurfaceTextureDestroyed");
                 return true;
             }
 
@@ -194,16 +161,19 @@ public class PlayLiveHistoryActivity extends BaseActivity{
             }
         });
         //设置 surfaceView点击监听
-        textureView.setOnTouchListener((v, event) -> {
-            switch(event.getAction()){
-                case MotionEvent.ACTION_DOWN:
-                    ll_seek_bar.setVisibility(View.VISIBLE);
-                    mHandler.removeMessages(HIDE_SEEK_BAR);
-                    mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
-                    break;
+        textureView.setOnTouchListener(new View.OnTouchListener(){
+            @Override
+            public boolean onTouch(View v, MotionEvent event){
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        ll_seek_bar.setVisibility(View.VISIBLE);
+                        mHandler.removeMessages(HIDE_SEEK_BAR);
+                        mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
+                        break;
+                }
+                //返回True代表事件已经处理了
+                return true;
             }
-            //返回True代表事件已经处理了
-            return true;
         });
         seek_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
             @Override
@@ -218,17 +188,16 @@ public class PlayLiveHistoryActivity extends BaseActivity{
             //拖动条停止拖动的时候调用
             @Override
             public void onStopTrackingTouch(SeekBar seekBar){
-                try {
+                try{
                     float sMax = seek_bar.getMax();
                     float progress = seekBar.getProgress();
                     //seekBar进度比例
                     float percent = (progress / sMax);
                     mediaPlayer.seekTo((int) (maxTime * percent));
                     iv_pause.setVisibility(View.GONE);
-                }catch (Exception e){
+                }catch(Exception e){
                     logger.error(e.toString());
                 }
-
             }
         });
     }
@@ -259,7 +228,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
             }else if(status == 1){
                 ll_volume.setVisibility(View.VISIBLE);
             }
-            tv_volume.setText(String.format(getString(R.string.text_percent_sign_volume),MyTerminalFactory.getSDK().getAudioProxy().getVolume()));
+            tv_volume.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "%");
             mHandler.sendEmptyMessageDelayed(RECEIVEVOICECHANGED, 2000);
         }
     };
@@ -270,10 +239,13 @@ public class PlayLiveHistoryActivity extends BaseActivity{
         public void handler(String mainMemberName, int mainMemberId, int individualCallType){
             if(mediaPlayer != null && mediaPlayer.isPlaying()){
                 mediaPlayer.pause();
-                mHandler.post(() -> {
-                    iv_pause_continue.setImageResource(R.drawable.on_pause);
-                    iv_pause.setVisibility(View.VISIBLE);
-                    mHandler.removeMessages(UPDATE_PROGRESS);
+                mHandler.post(new Runnable(){
+                    @Override
+                    public void run(){
+                        iv_pause_continue.setImageResource(R.drawable.on_pause);
+                        iv_pause.setVisibility(View.VISIBLE);
+                        mHandler.removeMessages(UPDATE_PROGRESS);
+                    }
                 });
             }
         }
@@ -296,10 +268,13 @@ public class PlayLiveHistoryActivity extends BaseActivity{
         public void handler(TerminalMessage terminalMessage){
             if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode() || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE){
                 if(mediaPlayer != null && mediaPlayer.isPlaying()){
-                    mHandler.post(() -> {
-                        mediaPlayer.pause();
-                        iv_pause_continue.setImageResource(R.drawable.on_pause);
-                        iv_pause.setVisibility(View.VISIBLE);
+                    mHandler.post(new Runnable(){
+                        @Override
+                        public void run(){
+                            mediaPlayer.pause();
+                            iv_pause_continue.setImageResource(R.drawable.on_pause);
+                            iv_pause.setVisibility(View.VISIBLE);
+                        }
                     });
                 }
             }
@@ -310,21 +285,24 @@ public class PlayLiveHistoryActivity extends BaseActivity{
         @Override
         public void handler(boolean connected){
             isNetConnected = connected;
-            mHandler.post(() -> {
-                if(!isNetConnected){
-                    if(mediaPlayer != null && mediaPlayer.isPlaying()){
-                        mediaPlayer.pause();
-                        iv_pause_continue.setImageResource(R.drawable.on_pause);
-                        iv_pause.setVisibility(View.VISIBLE);
-                        mHandler.removeMessages(UPDATE_PROGRESS);
-                    }
-                }else{
-                    if(mediaPlayer != null){
-                        iv_pause_continue.setImageResource(R.drawable.continue_play);
-                        iv_pause.setVisibility(View.GONE);
-                        mediaPlayer.start();
-                        mHandler.sendEmptyMessage(UPDATE_PROGRESS);
-                        mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
+            mHandler.post(new Runnable(){
+                @Override
+                public void run(){
+                    if(!isNetConnected){
+                        if(mediaPlayer != null && mediaPlayer.isPlaying()){
+                            mediaPlayer.pause();
+                            iv_pause_continue.setImageResource(R.drawable.on_pause);
+                            iv_pause.setVisibility(View.VISIBLE);
+                            mHandler.removeMessages(UPDATE_PROGRESS);
+                        }
+                    }else{
+                        if(mediaPlayer != null){
+                            iv_pause_continue.setImageResource(R.drawable.continue_play);
+                            iv_pause.setVisibility(View.GONE);
+                            mediaPlayer.start();
+                            mHandler.sendEmptyMessage(UPDATE_PROGRESS);
+                            mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
+                        }
                     }
                 }
             });
@@ -333,24 +311,17 @@ public class PlayLiveHistoryActivity extends BaseActivity{
 
     @Override
     public void initData(){
-        mediaPlayer = new MediaPlayer();
-        String url = getIntent().getStringExtra("URL");
+        url = getIntent().getStringExtra("URL");
         String liveTheme = getIntent().getStringExtra("liveTheme");
         String duration = getIntent().getStringExtra("DURATION");
         maxTime = ((int) (Float.valueOf(duration) * 1000));
         tv_theme.setText(liveTheme);
-        //uri 网络视频
-        try{
-            mediaPlayer.setDataSource(url);
-            //异步准备 准备工作在子线程中进行 当播放网络视频时候一般采用此方法
-            mediaPlayer.prepareAsync();
-        }catch(IOException e){
-            e.printStackTrace();
-        }
+        play(0);
     }
 
     @Override
     public void doOtherDestroy(){
+        Log.e("PlayLiveHistoryActivity", "doOtherDestroy");
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallIncommingHandler);
@@ -375,20 +346,26 @@ public class PlayLiveHistoryActivity extends BaseActivity{
     public void pauseOrContinue(){
         try{
             if(isNetConnected){
-                if(mediaPlayer.isPlaying()){
+                if(null != mediaPlayer && mediaPlayer.isPlaying()){
                     mediaPlayer.pause();
                     iv_pause_continue.setImageResource(R.drawable.on_pause);
                     iv_pause.setVisibility(View.VISIBLE);
                     mHandler.removeMessages(UPDATE_PROGRESS);
                 }else{
+                    if(playFinish){
+                        play(0);
+                    }else {
+                        if(null != mediaPlayer){
+                            mediaPlayer.start();
+                        }
+                    }
                     iv_pause_continue.setImageResource(R.drawable.continue_play);
                     iv_pause.setVisibility(View.GONE);
-                    mediaPlayer.start();
                     mHandler.sendEmptyMessage(UPDATE_PROGRESS);
                     mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
                 }
             }else{
-                ToastUtil.showToast(PlayLiveHistoryActivity.this, getString(R.string.net_work_disconnect));
+                ToastUtil.showToast(PlayLiveHistoryActivity.this, "网络连接已断开");
             }
         }catch(IllegalStateException e){
             e.printStackTrace();
@@ -398,14 +375,88 @@ public class PlayLiveHistoryActivity extends BaseActivity{
     @OnClick(R.id.iv_close)
     public void close(){
         mHandler.removeCallbacksAndMessages(null);
-        if(mediaPlayer.isPlaying()){
-            mediaPlayer.stop();
-        }
-        mediaPlayer.reset();
-        mediaPlayer.release();
-        if(mediaPlayer != null){
-            mediaPlayer = null;
+        try{
+            if(mediaPlayer != null){
+                mediaPlayer.stop();
+                mediaPlayer.release();
+                mediaPlayer = null;
+            }
+        }catch(IllegalStateException e){
+            e.printStackTrace();
         }
         finish();
+    }
+
+    private void play(final int msec){
+        if(TextUtils.isEmpty(url)){
+            ToastUtil.showToast(this, "url为空，不能播放");
+        }else{
+            try{
+                if(mediaPlayer == null){
+                    mediaPlayer = new MediaPlayer();
+                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                    mediaPlayer.setDataSource(url);
+                    mediaPlayer.prepareAsync();
+                }
+                mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener(){
+
+                    @Override
+                    public void onPrepared(MediaPlayer mp){
+                        if(null != textureView.getSurfaceTexture()){
+                            Surface face = new Surface(textureView.getSurfaceTexture());
+                            mediaPlayer.setSurface(face);
+                        }
+                        playFinish = false;
+                        mediaPlayer.start();
+                        //                        mediaPlayer.seekTo(msec);
+                        tv_max_time.setText(getTime(maxTime));
+                        mHandler.sendEmptyMessage(UPDATE_PROGRESS);
+                    }
+                });
+                mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener(){
+                    @Override
+                    public void onSeekComplete(MediaPlayer mp){
+                        mp.start();
+                        iv_pause_continue.setImageResource(R.drawable.continue_play);
+                        mHandler.sendEmptyMessage(UPDATE_PROGRESS);
+                        mHandler.sendEmptyMessageDelayed(HIDE_SEEK_BAR, 2000);
+                    }
+                });
+                mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener(){
+                    @Override
+                    public void onCompletion(MediaPlayer mp){
+                        logger.info("onCompletion");
+                        iv_pause_continue.setImageResource(R.drawable.on_pause);
+                        iv_pause.setVisibility(View.VISIBLE);
+                        mHandler.sendEmptyMessage(COMPLETE_PROGRESS);
+                        mHandler.removeMessages(UPDATE_PROGRESS);
+                        playFinish = true;
+                        //重新播放
+                        mediaPlayer.reset();
+                        mediaPlayer.release();
+                        mediaPlayer = null;
+                    }
+                });
+                mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener(){
+                    @Override
+                    public boolean onError(MediaPlayer mp, int what, int extra){
+                        logger.error("mediaPlayer  onError");
+                        iv_pause_continue.setImageResource(R.drawable.on_pause);
+                        iv_pause.setVisibility(View.VISIBLE);
+                        mHandler.removeMessages(UPDATE_PROGRESS);
+                        if(mediaPlayer.isPlaying()){
+                            mediaPlayer.stop();
+                        }
+                        mediaPlayer.reset();
+                        mediaPlayer.release();
+                        mediaPlayer = null;
+
+                        return false;
+                    }
+                });
+            }catch(Exception e){
+                logger.error(e);
+            }
+        }
     }
 }

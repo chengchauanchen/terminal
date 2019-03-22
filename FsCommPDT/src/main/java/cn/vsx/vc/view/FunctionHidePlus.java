@@ -18,7 +18,6 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
 
 import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileCheckMessageHandler;
 import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileHandler;
@@ -30,8 +29,12 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.common.UserType;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GridViewAdapter;
@@ -198,11 +201,23 @@ public class FunctionHidePlus extends LinearLayout {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.hide_function:
+                //如果是普通用户并且是响应组，不能点击
+                if(isGroupFunction && TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_NORMAL.toString()) &&
+                    null != DataUtil.getGroupByGroupNo(userId).getResponseGroupType() &&
+                        DataUtil.getGroupByGroupNo(userId).getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
+                    return;
+                }
                 showOrHideBottom();
                 break;
 
             case R.id.group_call_news_keyboard:
                     if(isGroupFunction){
+                        //如果是普通用户并且是响应组，不能点击
+                        if(TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_NORMAL.toString()) &&
+                                null != DataUtil.getGroupByGroupNo(userId).getResponseGroupType() &&
+                                DataUtil.getGroupByGroupNo(userId).getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
+                            return;
+                        }
                         btn_record.setVisibility(View.GONE);
                         if(groupCallNewsEt.getVisibility() == View.VISIBLE) {
                             showVoiceView(true);

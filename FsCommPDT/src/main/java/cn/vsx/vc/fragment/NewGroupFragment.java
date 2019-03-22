@@ -11,7 +11,8 @@ import java.util.Iterator;
 import java.util.List;
 
 import butterknife.Bind;
-import cn.vsx.hamster.common.GroupType;
+import cn.vsx.hamster.common.ResponseGroupType;
+import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -61,44 +62,68 @@ public class NewGroupFragment extends BaseFragment{
     private List<GroupCatalogBean> mTempCatalogList = new ArrayList<>();
     private List<GroupCatalogBean> mCatalogList = new ArrayList<>();
     private HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
-    //响应组在列表中的位置
-    private int responseGroupPosition;
     /**
      * 响应组是否显示
      */
     private ReceiveResponseGroupActiveHandler receiveResponseGroupActiveHandler = new ReceiveResponseGroupActiveHandler(){
         @Override
         public void handler(boolean isActive,int responseGroupId){
-            logger.info("ReceiveResponseGroupActiveHandler" + "isActive:"+isActive+",responseGroupPosition:"+responseGroupPosition);
+            logger.info("ReceiveResponseGroupActiveHandler---" + "isActive:"+isActive);
+
+            if(TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_HIGH.toString())){
+                return;
+            }
             if(isActive){
-                //显示响应组
-                Group responseGroup = DataUtil.getGroupByGroupNo(responseGroupId);
-                idNameMap.put(responseGroup.getNo(),responseGroup.getName());
-                idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>()));
-                TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
-                final GroupAndDepartment<Group> groupAndDepartment = new GroupAndDepartment<>();
-                groupAndDepartment.setType(Constants.TYPE_GROUP);
-                groupAndDepartment.setBean(responseGroup);
-                myHandler.post(() -> {
-                    allGroupAndDepartment.add(responseGroupPosition,groupAndDepartment);
-                    groupAdapter.notifyDataSetChanged();
-                });
+                boolean hasResponseGroup = false;
+                for(GroupAndDepartment groupAndDepartment : allGroupAndDepartment){
+                    if(groupAndDepartment.getType() == Constants.TYPE_GROUP){
+                        if(((Group) groupAndDepartment.getBean()).getNo() == responseGroupId){
+                            //已经显示了，不用再显示
+                            hasResponseGroup = true;
+                            break;
+                        }
+                    }
 
-
+                }
+                if(!hasResponseGroup){
+                    //显示响应组
+                    Group responseGroup = DataUtil.getGroupByGroupNo(responseGroupId);
+                    idNameMap.put(responseGroup.getNo(),responseGroup.getName());
+                    idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>()));
+                    TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
+                    final GroupAndDepartment<Group> groupAndDepartment = new GroupAndDepartment<>();
+                    groupAndDepartment.setType(Constants.TYPE_GROUP);
+                    groupAndDepartment.setBean(responseGroup);
+                    myHandler.post(() -> {
+                        allGroupAndDepartment.add(groupAndDepartment);
+                        groupAdapter.notifyDataSetChanged();
+                    });
+                }
             }else{
-                //隐藏响应组
-                if(allGroupAndDepartment.get(responseGroupPosition).getType() == Constants.TYPE_GROUP){
-                    Group responseGroup = (Group) allGroupAndDepartment.get(responseGroupPosition).getBean();
-                    if(responseGroup.getId() == responseGroupId){
-                        idNameMap.remove(responseGroupId);
-                        TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
-                        myHandler.post(() -> {
-                            allGroupAndDepartment.remove(responseGroupPosition);
-                            groupAdapter.notifyDataSetChanged();
-                        });
-
+                //普通用户响应组时间到了，并且当前组是响应组，需要切换到之前的组
+                if(TerminalFactory.getSDK().getParam(Params.USER_TYPE).equals(UserType.USER_NORMAL.toString()) &&
+                        TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == responseGroupId){
+                    if(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID,0) != 0){
+                        TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID,0));
+                    }else {
+                        TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
                     }
                 }
+                //隐藏响应组
+                Iterator<GroupAndDepartment> iterator = allGroupAndDepartment.iterator();
+                while(iterator.hasNext()){
+                    GroupAndDepartment groupAndDepartment = iterator.next();
+                    if(groupAndDepartment.getType() == Constants.TYPE_GROUP){
+                        if(((Group) groupAndDepartment.getBean()).getId() == responseGroupId){
+                            idNameMap.remove(responseGroupId);
+                            TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
+                            iterator.remove();
+                        }
+                    }
+                }
+                myHandler.post(() -> {
+                    groupAdapter.notifyDataSetChanged();
+                });
             }
         }
     };
@@ -197,7 +222,6 @@ public class NewGroupFragment extends BaseFragment{
     }
 
     public void updateData(){
-        responseGroupPosition = 0;
         allGroupAndDepartment.clear();
         tempGroup.clear();
         //先添加临时组
@@ -208,7 +232,6 @@ public class NewGroupFragment extends BaseFragment{
                 groupAndDepartment.setType(Constants.TYPE_TEMP_TITLE);
                 groupAndDepartment.setBean(groupBean);
                 allGroupAndDepartment.add(groupAndDepartment);
-                responseGroupPosition++;
                 //上面标题添加数据
                 GroupCatalogBean catalog = new GroupCatalogBean();
                 catalog.setName(groupBean.getName());
@@ -222,11 +245,9 @@ public class NewGroupFragment extends BaseFragment{
                     tempGroup.setType(Constants.TYPE_GROUP);
                     tempGroup.setBean(group);
                     allGroupAndDepartment.add(tempGroup);
-                    responseGroupPosition++;
                 }
                 if(tempGroup.isEmpty()){
                     allGroupAndDepartment.remove(0);
-                    responseGroupPosition = 0;
                 }
                 break;
             }
@@ -241,7 +262,6 @@ public class NewGroupFragment extends BaseFragment{
                 groupAndDepartment.setType(Constants.TYPE_TITLE);
                 groupAndDepartment.setBean(groupBean);
                 allGroupAndDepartment.add(groupAndDepartment);
-                responseGroupPosition++;
                 //上面标题添加数据
                 GroupCatalogBean catalog = new GroupCatalogBean();
                 catalog.setName(groupBean.getName());
@@ -250,12 +270,27 @@ public class NewGroupFragment extends BaseFragment{
                 List<Group> groups = groupBean.getGroups();
                 //再添加组
                 for(Group group : groups){
-                    //响应组不显示
-                    if(group.getGroupType()!= GroupType.RESPONSE){
+                    //高级用户所有的组都显示
+                    if(TerminalFactory.getSDK().getParam(Params.USER_TYPE, "").equals(UserType.USER_HIGH.toString())){
                         GroupAndDepartment<Group> tempGroup = new GroupAndDepartment<>();
                         tempGroup.setType(Constants.TYPE_GROUP);
                         tempGroup.setBean(group);
                         allGroupAndDepartment.add(tempGroup);
+
+                    }else {
+                        //低级用户不显示响应组
+                        if(group.getResponseGroupType() == null){
+                            GroupAndDepartment<Group> tempGroup = new GroupAndDepartment<>();
+                            tempGroup.setType(Constants.TYPE_GROUP);
+                            tempGroup.setBean(group);
+                            allGroupAndDepartment.add(tempGroup);
+                        }else if(group.getResponseGroupType().equals(ResponseGroupType.RESPONSE_FALSE.toString())){
+                            GroupAndDepartment<Group> tempGroup = new GroupAndDepartment<>();
+                            tempGroup.setType(Constants.TYPE_GROUP);
+                            tempGroup.setBean(group);
+                            allGroupAndDepartment.add(tempGroup);
+                        }
+
                     }
                 }
                 //最后添加子部门

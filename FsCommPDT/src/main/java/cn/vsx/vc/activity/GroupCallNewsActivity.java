@@ -38,6 +38,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
@@ -919,12 +920,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 if (isFinishing() ||isAllMember) {
                     return;
                 }
-                String name = idNameMap.get(userId);
-                name = name == null ? userName : name;
                 if (DataUtil.isExistGroup(userId)) {
-                    newsBarGroupName.setText(name + "(" + memberList.size() + ")");
+                    newsBarGroupName.setText(userName + "(" + memberList.size() + ")");
                 } else {
-                    newsBarGroupName.setText(name);
+                    newsBarGroupName.setText(userName);
                 }
             });
 
@@ -1011,6 +1010,9 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     };
 
     private ReceiveResponseGroupActiveHandler receiveResponseGroupActiveHandler = (isActive, responseGroupId) -> {
+        if(TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_HIGH.toString())){
+            return;
+        }
         if(userId == responseGroupId && !isActive){
             finish();
         }

@@ -28,6 +28,7 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
+import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -101,7 +102,7 @@ public class MessageListAdapter extends BaseAdapter {
             }
             viewHolder.tv_current_group.setVisibility(View.GONE);
         } else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息，显示组名
-            viewHolder.tv_user_name.setText(idNameMap.get(terminalMessage.messageToId));
+            viewHolder.tv_user_name.setText(DataUtil.getGroupByGroupNo(terminalMessage.messageToId).getName());
             if (terminalMessage.messageToId == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)) {
                 viewHolder.tv_current_group.setVisibility(View.VISIBLE);
             } else {

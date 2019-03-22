@@ -31,10 +31,11 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
-import cn.vsx.hamster.common.GroupType;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
+import cn.vsx.hamster.common.ResponseGroupType;
+import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
@@ -55,6 +56,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePersonMessageNotifyDateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
@@ -120,8 +122,25 @@ public class NewsFragment extends BaseFragment {
             terminalMessageData.clear();
             clearData();
             List<TerminalMessage> messageList = TerminalFactory.getSDK().getTerminalMessageManager().getMessageList();
+            removeResponseGroupMessage();
             logger.info("从数据库取出消息列表："+messageList);
             addData(messageList);
+        }
+    }
+
+    private void removeResponseGroupMessage(){
+        if(TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_NORMAL.toString())){
+            //普通用户不显示响应组消息
+            Iterator<TerminalMessage> iterator = messageList.iterator();
+            while(iterator.hasNext()){
+                TerminalMessage next = iterator.next();
+                if(next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
+                    Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
+                    if(groupInfo.getResponseGroupType()!=null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
+                        iterator.remove();
+                    }
+                }
+            }
         }
     }
 
@@ -129,7 +148,6 @@ public class NewsFragment extends BaseFragment {
      * 保证第一条消息是当前组消息
      */
     private void setFirstMessage() {
-
         if(messageList.size() == 0){//无列表，添加当前组
             addCurrentGroupMessage();
         }else{//有列表
@@ -140,6 +158,76 @@ public class NewsFragment extends BaseFragment {
                 addCurrentGroupMessage();
             }
         }
+    }
+
+    /**
+     * 将当前响应组消息置顶
+     * @param groupId
+     */
+    private void setFirstResponseMessage(int groupId){
+        if(haveCurrentResponseGroupMessage(groupId)){
+            stickCurrentResponseGroupMessage(groupId);
+        }else {
+            addCurrentResponseGroupMessage(groupId);
+        }
+    }
+
+    private void addCurrentResponseGroupMessage(int groupId){
+        //查看当前响应组的全部消息
+        List<TerminalMessage> groupMessageRecord = TerminalFactory.getSDK().getTerminalMessageManager().getGroupMessageRecord(
+                MessageCategory.MESSAGE_TO_GROUP.getCode(), groupId,
+                0, 0);
+        TerminalMessage terminalMessage;
+        if (groupMessageRecord.size() == 0) {
+            terminalMessage = new TerminalMessage();
+            terminalMessage.messageToId = groupId;
+            terminalMessage.messageToName = DataUtil.getGroupByGroupNo(terminalMessage.messageToId).name;
+            terminalMessage.messageCategory = MessageCategory.MESSAGE_TO_GROUP.getCode();
+            saveMemberMap(terminalMessage);
+        } else {
+            //最后一条消息
+            terminalMessage = groupMessageRecord.get(groupMessageRecord.size()-1);
+        }
+        addData(0,terminalMessage);
+        if(mMessageListAdapter != null){
+            mMessageListAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private void stickCurrentResponseGroupMessage(int groupId){
+        synchronized(NewsFragment.this){
+
+            List<TerminalMessage> temporaryList = new ArrayList<>();
+            TerminalMessage currentResponseGroupMessage = null;
+            for (TerminalMessage terminalMessage : messageList) {
+                //当前组的消息
+                if(terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && terminalMessage.messageToId == groupId) {
+                    currentResponseGroupMessage = terminalMessage;
+                }else {
+                    temporaryList.add(terminalMessage);
+                }
+            }
+
+            if(currentResponseGroupMessage != null) {
+                clearData();
+                addData(currentResponseGroupMessage);
+                addData(temporaryList);
+                saveMemberMap(currentResponseGroupMessage);
+            }
+        }
+
+        if(mMessageListAdapter != null){
+            mMessageListAdapter.notifyDataSetChanged();
+        }
+    }
+
+    private boolean haveCurrentResponseGroupMessage(int groupId){
+        for(TerminalMessage terminalMessage : messageList) {
+            if(terminalMessage.messageToId == groupId){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -234,6 +322,7 @@ public class NewsFragment extends BaseFragment {
     public void initListener() {
         newsList.setOnItemClickListener(new OnItemClickListenerImp());
 //        newsList.setOnItemLongClickListener(new OnItemLongClickListenerImp());
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getAllMessageRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUnreadMessageChangedHandler);
@@ -281,6 +370,7 @@ public class NewsFragment extends BaseFragment {
     public void onDestroyView() {
         ButterKnife.unbind(this);
         mHandler.removeCallbacksAndMessages(null);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(getAllMessageRecordHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUnreadMessageChangedHandler);
@@ -338,7 +428,10 @@ public class NewsFragment extends BaseFragment {
             }
         }
     };
-    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> mHandler.post(() -> setVideoIcon());
+    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> mHandler.post(() -> {
+        sortFirstMessageList();
+        setVideoIcon();
+    });
 
     private class OnItemLongClickListenerImp implements AdapterView.OnItemLongClickListener {
 
@@ -390,7 +483,7 @@ public class NewsFragment extends BaseFragment {
                 Intent intent = new Intent(context, GroupCallNewsActivity.class);
                 intent.putExtra("isGroup", true);
                 intent.putExtra("userId", terminalMessage.messageToId);//组id
-                intent.putExtra("userName", idNameMap.get(terminalMessage.messageToId));
+                intent.putExtra("userName", DataUtil.getGroupByGroupNo(terminalMessage.messageToId).getName());
                 intent.putExtra("speakingId",speakingId);
                 intent.putExtra("speakingName",speakingName);
                 context.startActivity(intent);
@@ -475,7 +568,9 @@ public class NewsFragment extends BaseFragment {
             mHandler.post(() -> {
                 clearData();
                 addData(terminalMessageData);
+                //来一条消息的时候不用删除响应组
                 sortMessageList();
+//                sortFirstMessageList();
                 unReadCountChanged();
             });
         }
@@ -653,6 +748,39 @@ public class NewsFragment extends BaseFragment {
         }
     }
 
+    private ReceiveResponseGroupActiveHandler receiveResponseGroupActiveHandler = new ReceiveResponseGroupActiveHandler(){
+        @Override
+        public void handler(boolean isActive, int responseGroupId){
+            mHandler.post(() -> {
+                if(isActive){
+                    idNameMap.put(responseGroupId, DataUtil.getGroupByGroupNo(responseGroupId).getName());
+                    //将当前相应组置顶
+//                    setFirstResponseMessage(responseGroupId);
+                }else {
+                    //普通用户将当前响应组从列表移除
+                    if(TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_NORMAL.toString())){
+                        removeCurrentResponseMessage(responseGroupId);
+                    }
+                }
+            });
+        }
+    };
+
+    private void removeCurrentResponseMessage(int responseGroupId){
+        synchronized(NewsFragment.this){
+            Iterator<TerminalMessage> iterator = messageList.iterator();
+            while(iterator.hasNext()){
+                TerminalMessage next = iterator.next();
+                if(next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
+                    if(responseGroupId == next.messageToId){
+                        iterator.remove();
+                    }
+                }
+            }
+            mMessageListAdapter.notifyDataSetChanged();
+        }
+    }
+
     private ReceivePersonMessageNotifyDateHandler receivePersonMessageNotifyDateHandler = new ReceivePersonMessageNotifyDateHandler(){
         @Override
         public void handler(int resultCode, String resultDes){
@@ -668,7 +796,8 @@ public class NewsFragment extends BaseFragment {
             //更新未读消息和聊天界面
             if(messageRecord.isEmpty()){
                 mHandler.post(() -> {
-                    sortMessageList();
+                    sortFirstMessageList();
+//                    sortMessageList();
                     unReadCountChanged();
                 });
             }else {
@@ -691,7 +820,8 @@ public class NewsFragment extends BaseFragment {
                 mHandler.post(() -> {
                     clearData();
                     addData(terminalMessageData);
-                    sortMessageList();
+//                    sortMessageList();
+                    sortFirstMessageList();
                     unReadCountChanged();
                     //通知notification
                     for(int i = messageList.size()-1; 0 <=i; i--){
@@ -982,7 +1112,8 @@ public class NewsFragment extends BaseFragment {
             MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_GROUP.getCode(), terminalMessage.messageToId, myId);
         }
         removeData(deletePos);
-        sortMessageList();
+//        sortMessageList();
+        sortFirstMessageList();
         unReadCountChanged();
         deletePos = -1;
     };
@@ -993,9 +1124,13 @@ public class NewsFragment extends BaseFragment {
         public void handler(final int errorCode, String errorDesc) {
             mHandler.post(() -> {
                 if (errorCode == BaseCommonCode.SUCCESS_CODE) {
-                    int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
-                    sortMessageList();
+                    int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                    Group targetGroup = DataUtil.getGroupByGroupNo(currentGroupId);
+                    idNameMap.put(currentGroupId,targetGroup.getName());
+                    TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
+                    setting_group_name.setText(targetGroup.getName());
+//                    sortMessageList();
+                    sortFirstMessageList();
                 }
             });
         }
@@ -1010,7 +1145,8 @@ public class NewsFragment extends BaseFragment {
             mHandler.post(() -> {
                 int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
                 setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
-                sortMessageList();
+//                sortMessageList();
+                sortFirstMessageList();
             });
         }
     };
@@ -1050,7 +1186,8 @@ public class NewsFragment extends BaseFragment {
             }
             saveMemberMap(terminalMessage);
         }
-        sortMessageList();
+//        sortMessageList();
+        sortFirstMessageList();
     });
 
     /**
@@ -1084,7 +1221,8 @@ public class NewsFragment extends BaseFragment {
                     editor.commit();
                 }
 
-                sortMessageList();
+//                sortMessageList();
+                sortFirstMessageList();
             });
         }
     };
@@ -1092,12 +1230,13 @@ public class NewsFragment extends BaseFragment {
     /** 文件等下载完成的监听handler */
     private ReceiveDownloadFinishHandler receiveDownloadFinishHandler = (terminalMessage, success) -> mHandler.post(() -> {
         if(terminalMessage.messageType ==  MessageType.LONG_TEXT.getCode()) {
-            sortMessageList();
+//            sortMessageList();
+            sortFirstMessageList();
         }
     });
 
     /**
-     * 去掉在通讯录里不存在的组和响应组
+     * 去掉在通讯录里不存在的组
      */
     @SuppressWarnings("unused")
     private void setNewGroupList() {
@@ -1109,15 +1248,10 @@ public class NewsFragment extends BaseFragment {
                     //说明组列表中没有这个组了
                     iterator.remove();//消息列表中移除
                     removeMemberMap(next.messageToId);
-                    continue;
                 }else {
                     Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
                     next.messageToName = groupInfo.name;
                     saveMemberMap(next);
-                }
-                //去掉响应组
-                if( DataUtil.getGroupByGroupNo(next.messageToId).getGroupType() == GroupType.RESPONSE){
-                    iterator.remove();//消息列表中移除
                 }
             }
         }
@@ -1180,17 +1314,78 @@ public class NewsFragment extends BaseFragment {
         }
     }
 
+    private void setResponseGroupList(){
+        synchronized(NewsFragment.this){
+            //普通用户不显示响应组
+            if(TerminalFactory.getSDK().getParam(Params.USER_TYPE, "").equals(UserType.USER_NORMAL.toString())){
+                Iterator<TerminalMessage> iterator = messageList.iterator();
+                while(iterator.hasNext()){
+                    TerminalMessage next = iterator.next();
+                    if(!DataUtil.isExistGroup(next.messageToId)){
+                        //说明组列表中没有这个组了
+                        iterator.remove();//消息列表中移除
+                        removeMemberMap(next.messageToId);
+                        continue;
+                    }
+                    if(next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
+                        Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
+                        if(groupInfo.getResponseGroupType() != null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
+                            iterator.remove();
+                        }
+                    }
+                }
+                Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
+            }else{
+                Iterator<TerminalMessage> iterator = messageList.iterator();
+                while(iterator.hasNext()){
+                    TerminalMessage next = iterator.next();
+                    if(!DataUtil.isExistGroup(next.messageToId)){
+                        //说明组列表中没有这个组了
+                        iterator.remove();//消息列表中移除
+                        removeMemberMap(next.messageToId);
+                    }
+                    //sortResponseGroup();
+                }
+            }
+        }
+
+    }
 
     /**
-     * 对聊天列表排序
+     * 给响应组排序
      */
-    private void sortMessageList() {
+    private void sortResponseGroup(){
+        List<TerminalMessage> tempList = new ArrayList<>();
+        Iterator<TerminalMessage> iterator = messageList.iterator();
+        while(iterator.hasNext()){
+            TerminalMessage next = iterator.next();
+            if(!DataUtil.isExistGroup(next.messageToId)){
+                //说明组列表中没有这个组了
+                iterator.remove();//消息列表中移除
+                removeMemberMap(next.messageToId);
+                continue;
+            }
+            if(next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
+                Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
+                if(groupInfo.getResponseGroupType()!=null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
+                    tempList.add(next);
+                }else {
+                    iterator.remove();
+                }
+            }
+        }
+        Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
+        Collections.sort(tempList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
+        addData(tempList);
+    }
+
+    /**
+     * 刚进入应用时低级用户不显示响应组，高级用户将响应组放在当前组前面
+     */
+    private void sortFirstMessageList(){
         if(!messageList.isEmpty()){
-            setNewGroupList();
-//            setNewMemberList();
-            //再按照时间来排序
-            Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
-            //再设置第一条消息，一般是当前组
+            setResponseGroupList();
+//            Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
             setFirstMessage();
             //再保存到数据库
             saveMessagesToSql();
@@ -1199,6 +1394,29 @@ public class NewsFragment extends BaseFragment {
             }
         }else {
             addCurrentGroupMessage();
+        }
+    }
+
+    /**
+     * 对聊天列表排序
+     */
+    private void sortMessageList(){
+        synchronized(NewsFragment.this){
+            if(!messageList.isEmpty()){
+                setNewGroupList();
+                //            setNewMemberList();
+                //再按照时间来排序
+                Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
+                //再设置第一条消息，一般是当前组
+                setFirstMessage();
+                //再保存到数据库
+                saveMessagesToSql();
+                if(mMessageListAdapter !=null){
+                    mMessageListAdapter.notifyDataSetChanged();
+                }
+            }else {
+                addCurrentGroupMessage();
+            }
         }
     }
 }

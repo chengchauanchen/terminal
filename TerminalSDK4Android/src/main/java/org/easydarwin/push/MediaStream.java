@@ -46,6 +46,7 @@ import dagger.Provides;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.tools.FileTransgerUtil;
+import ptt.terminalsdk.tools.ToastUtil;
 
 import static android.graphics.ImageFormat.NV21;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar;
@@ -646,6 +647,22 @@ public class MediaStream {
         return mMuxer != null;
     }
 
+    public void ZoomOrReduceVideo(boolean isScale){
+        Camera.Parameters parameters = mCamera.getParameters();
+        if(parameters.isZoomSupported()){
+            int maxZoom = parameters.getMaxZoom();
+            int currentZoom = parameters.getZoom();
+            if(isScale && currentZoom < maxZoom-2){
+                currentZoom+=2;
+            }else if(currentZoom >1 && !isScale){
+                currentZoom-=2;
+            }
+            parameters.setZoom(currentZoom);
+            mCamera.setParameters(parameters);
+        }else {
+            ToastUtil.showToast(mApplicationContext,"摄像头不支持放大");
+        }
+    }
 
     public static class CodecInfo {
         public String mName;

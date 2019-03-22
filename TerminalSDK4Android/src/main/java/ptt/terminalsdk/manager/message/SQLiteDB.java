@@ -40,7 +40,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
                 "block_id INTEGER, block_name varchar, unique(group_id))");
 
         //组列表
-        db.execSQL("CREATE TABLE IF NOT EXISTS groupData (_id INTEGER primary key autoincrement, group_id INTEGER, group_no INTEGER,group_name varchar,department_name varchar,group_type INTEGER, unique(group_id))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS groupData (_id INTEGER primary key autoincrement, group_id INTEGER, group_no INTEGER,group_name varchar,department_name varchar,group_type INTEGER,response_group_type varchar, unique(group_id))");
 
         //通话记录列表
         db.execSQL("CREATE TABLE IF NOT EXISTS callRecord (_id INTEGER primary key autoincrement, call_id varchar,member_name varchar ,call_phone varchar,call_records varchar,call_time varchar,call_path varchar,call_download varchar,call_playing varchar, unique(call_id))");

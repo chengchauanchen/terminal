@@ -43,6 +43,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.GroupScanType;
 import cn.vsx.hamster.common.MemberChangeType;
+import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -139,24 +140,40 @@ public class TalkbackFragment extends BaseFragment {
 
             if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
 
-                if (methodResult == BaseCommonCode.SUCCESS_CODE) {//请求成功，开始组呼
+                if (methodResult == BaseCommonCode.SUCCESS_CODE){//请求成功，开始组呼
                     myHandler.post(() -> {
                         myHandler.removeMessages(1);
                         timeProgress = 60;
                         talkback_time_progress.setText(String.valueOf(timeProgress));
-                        myHandler.sendEmptyMessageDelayed(1,1000);
-
-                        if (PhoneAdapter.isF25()) {
+                        myHandler.sendEmptyMessageDelayed(1, 1000);
+                        if(PhoneAdapter.isF25()){
                             allViewDefault();
-                            TextViewCompat.setTextAppearance(tv_speak_text_me,R.style.red);
+                            TextViewCompat.setTextAppearance(tv_speak_text_me, R.style.red);
                         }
-                        if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
+                        if(MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED){
                             ll_pre_speaking.setVisibility(View.GONE);
                         }
                         change2Speaking();
                         MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
                         setViewEnable(false);
                     });
+                }else if(methodResult == SignalServerErrorCode.RESPONSE_GROUP_IS_DISABLED.getErrorCode()){
+                    //切到主组或之前的组
+                    ToastUtil.showToast(getContext(),resultDesc);
+
+                    myHandler.postDelayed(new Runnable(){
+                        @Override
+                        public void run(){
+                            change2Silence();
+                            if(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID,0) != 0){
+                                TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID,0));
+                            }else {
+                                TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
+                            }
+                        }
+                    },100);
+
+
                 } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
                     myHandler.post(() -> ToastUtil.showToast(context, getString(R.string.cannot_talk)));
                 } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
@@ -1141,9 +1158,14 @@ public class TalkbackFragment extends BaseFragment {
     }
 
     private void setChangeGroupView() {
-        List<Group> groupList =  TerminalFactory.getSDK().getConfigManager().getAllGroups();
+        List<Group> groupList;
+        if(TerminalFactory.getSDK().getParam(Params.USER_TYPE, "").equals(UserType.USER_HIGH.toString())){
+            groupList =  TerminalFactory.getSDK().getConfigManager().getAllGroups();
+        }else {
+            groupList =  TerminalFactory.getSDK().getConfigManager().getAllCommonGroup();
+        }
         if (groupList.size() > 0) {
-            change_group_view.setData(TerminalFactory.getSDK().getConfigManager().getAllGroups(), MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
+            change_group_view.setData(groupList, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
         }
     }
 

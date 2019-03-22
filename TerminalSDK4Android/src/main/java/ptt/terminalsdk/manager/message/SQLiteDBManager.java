@@ -454,6 +454,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             values.put("group_name", group.getName());
             values.put("department_name",group.getDepartmentName());
             values.put("group_type",group.getGroupType().getCode());
+            values.put("response_group_type",group.getResponseGroupType());
             db.replace(GROUP_DATA, null, values);
         }
     }
@@ -472,6 +473,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         values.put("group_no", group.getNo());
         values.put("department_name",group.getDepartmentName());
         values.put("group_type",group.getGroupType().getCode());
+        values.put("response_group_type",group.getResponseGroupType());
         db.update(GROUP_DATA, values, "group_id = ?", new String[]{group.id + ""});
     }
 
@@ -493,6 +495,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 group.setName(cursor.getString(cursor.getColumnIndex("group_name")));
                 group.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
                 group.setGroupType(GroupType.getInstanceByCode(cursor.getInt(cursor.getColumnIndex("group_type"))));
+                group.setResponseGroupType(cursor.getString(cursor.getColumnIndex("response_group_type")));
                 groupList.add(group);
             }
             cursor.close();

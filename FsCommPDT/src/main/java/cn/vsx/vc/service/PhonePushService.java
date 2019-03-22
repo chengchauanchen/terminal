@@ -3,8 +3,10 @@ package cn.vsx.vc.service;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.SurfaceTexture;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Message;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -144,6 +146,7 @@ public class PhonePushService extends BaseService{
 
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLive.setOnClickListener(svOnClickListener);
+//        mSvLive.setOnTouchListener(svOnTouchListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
         mIvLiveAddmember.setOnClickListener(inviteMemberOnClickListener);
         mLlLiveHangupTotal.setOnClickListener(hangUpOnClickListener);
@@ -479,6 +482,33 @@ public class PhonePushService extends BaseService{
         mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
     };
 
+    private float oldDist;
+    @SuppressLint("ClickableViewAccessibility")
+    private View.OnTouchListener svOnTouchListener = (v,event)->{
+
+        if (event.getPointerCount() == 1) {
+            handleFocus(mMediaStream.getCamera());
+        } else {
+            switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                case MotionEvent.ACTION_POINTER_DOWN:
+                    oldDist = getFingerSpacing(event);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    float newDist = getFingerSpacing(event);
+                    if(Math.abs(newDist-oldDist) > 5f){
+                        if (newDist > oldDist) {
+                            handleZoom(true);
+                        } else if (newDist < oldDist) {
+                            handleZoom(false);
+                        }
+                        oldDist = newDist;
+                    }
+                    break;
+            }
+        }
+        return true;
+    };
+
     private View.OnClickListener inviteMemberOnClickListener = v -> {
         if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())) {
             Intent intent = new Intent(PhonePushService.this, InviteMemberService.class);
@@ -569,6 +599,21 @@ public class PhonePushService extends BaseService{
         return false;
     };
 
+    private void handleFocus(Camera camera){
+        if(null != mMediaStream && mMediaStream.isStreaming()){
+            camera.autoFocus(null);//屏幕聚焦
+        }
+    }
+
+    private void handleZoom(boolean isScale){
+        if(null !=mMediaStream && mMediaStream.isStreaming()){
+            mMediaStream.ZoomOrReduceVideo(isScale);
+        }
+    }
+
+    private float getFingerSpacing(MotionEvent event){
+        return (float)Math.sqrt(event.getX(0)*event.getX(1)+event.getY(0)*event.getY(1));
+    }
 
     private void changeCamera(){
         logger.info("开始转换摄像头");
