@@ -123,6 +123,7 @@
 
 -keep class cn.vsx.hamster.errcode.** { *; }
 -keep class cn.vsx.hamster.common.** { *; }
+-keep class cn.vsx.hamster.terminalsdk.model.** { *; }
 
 -keep class cn.vsx.hamster.terminalsdk.manager.channel** { *; }
 -keep class cn.vsx.hamster.protolbuf.** { *; }
