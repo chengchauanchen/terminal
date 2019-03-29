@@ -43,7 +43,7 @@ public class ReceiveLiveCommingService extends BaseService{
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_receive_live, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_receive_live, null);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class ReceiveLiveCommingService extends BaseService{
 
     //收到没人请求我开视频的消息，关闭界面和响铃
     private ReceiveNobodyRequestVideoLiveHandler receiveNobodyRequestVideoLiveHandler = () -> {
-        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.other_cancel));
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.other_cancel));
         MyTerminalFactory.getSDK().getLiveManager().ceaseLiving();
         mHandler.post(this::stopBusiness);
     };
@@ -129,7 +129,7 @@ public class ReceiveLiveCommingService extends BaseService{
      **/
     private ReceiveAnswerLiveTimeoutHandler receiveAnswerLiveTimeoutHandler = () -> {
         PromptManager.getInstance().stopRing();//停止响铃
-        ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.other_cancel));
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.other_cancel));
         stopBusiness();
     };
 
@@ -139,12 +139,14 @@ public class ReceiveLiveCommingService extends BaseService{
             Intent intent = new Intent(ReceiveLiveCommingService.this,SwitchCameraService.class);
             intent.putExtra(Constants.TYPE,Constants.RECEIVE_PUSH);
             intent.putExtra(Constants.CAMERA_TYPE,Constants.UVC_CAMERA);
+            intent.putExtra(Constants.THEME,"");
             startService(intent);
         }else{
             if(Constants.HYTERA.equals(Build.MODEL)){
                 Intent intent = new Intent(ReceiveLiveCommingService.this,SwitchCameraService.class);
                 intent.putExtra(Constants.TYPE,Constants.RECEIVE_PUSH);
                 intent.putExtra(Constants.CAMERA_TYPE,Constants.RECODER_CAMERA);
+                intent.putExtra(Constants.THEME,"");
                 startService(intent);
             }else{
                 startPhonePushService();
@@ -153,7 +155,7 @@ public class ReceiveLiveCommingService extends BaseService{
     };
 
     private View.OnClickListener refuseOnClickListener = v -> {
-        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.refused));
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.refused));
         MyTerminalFactory.getSDK().getLiveManager().responseLiving(false);
         PromptManager.getInstance().stopRing();
         MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
@@ -163,10 +165,11 @@ public class ReceiveLiveCommingService extends BaseService{
 
     private void startPhonePushService(){
         MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
-        Intent intent = new Intent(getApplicationContext(), PhonePushService.class);
+        Intent intent = new Intent(MyTerminalFactory.getSDK().application, PhonePushService.class);
         intent.putExtra(Constants.TYPE,Constants.RECEIVE_PUSH);
         intent.putExtra(Constants.MEMBER_NAME, memberName);
         intent.putExtra(Constants.MEMBER_ID, memberId);
+        intent.putExtra(Constants.THEME,"");
         startService(intent);
         mHandler.postDelayed(this::removeView,2000);
     }

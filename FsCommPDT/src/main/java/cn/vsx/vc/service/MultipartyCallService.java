@@ -36,7 +36,7 @@ public class MultipartyCallService extends BaseService{
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_multiparty_call, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_multiparty_call, null);
     }
 
     @Override

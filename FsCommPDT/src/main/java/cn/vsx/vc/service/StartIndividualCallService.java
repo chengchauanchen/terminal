@@ -55,7 +55,7 @@ public class StartIndividualCallService extends BaseService{
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_start_individual_call, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_start_individual_call, null);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class StartIndividualCallService extends BaseService{
             mTvMemberIdRequest.setText(HandleIdUtil.handleId(memberId));
         }else {
             stopBusiness();
-            ToastUtil.individualCallFailToast(getApplicationContext(), resultCode);
+            ToastUtil.individualCallFailToast(MyTerminalFactory.getSDK().application, resultCode);
         }
 
     }
@@ -122,7 +122,7 @@ public class StartIndividualCallService extends BaseService{
     protected void handleMesage(Message msg){
         switch(msg.what){
             case OFF_LINE:
-                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
                 mTimerView.onStop();
                 stopBusiness();
             break;
@@ -216,7 +216,7 @@ public class StartIndividualCallService extends BaseService{
      **/
     private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc) -> {
         mTimerView.onStop();
-        ToastUtil.showToast(getApplicationContext(),resultDesc);
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDesc);
         PromptManager.getInstance().IndividualHangUpRing();
         PromptManager.getInstance().delayedStopRing();
         stopBusiness();

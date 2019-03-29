@@ -53,7 +53,7 @@ public class SwitchCameraService extends BaseService{
     @Override
     @SuppressLint("InflateParams")
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_switch_camera_service, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_switch_camera_service, null);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class SwitchCameraService extends BaseService{
     protected void initData(){
         if(Constants.HYTERA.equals(Build.MODEL)){
             try{
-                CommonManager mCommonManager = SDKManager.getCommonManager(getApplicationContext());
+                CommonManager mCommonManager = SDKManager.getCommonManager(MyTerminalFactory.getSDK().application);
                 mAccessoryManager = mCommonManager.getAccessoryManager();
             }catch(Exception e){
                 e.printStackTrace();

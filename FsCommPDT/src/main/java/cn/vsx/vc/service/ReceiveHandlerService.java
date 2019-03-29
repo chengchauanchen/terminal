@@ -187,7 +187,7 @@ public class ReceiveHandlerService extends Service{
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoHandler);//请求视频
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
         //开启voip电话服务
-        MyTerminalFactory.getSDK().getVoipCallManager().startService(getApplicationContext());
+        MyTerminalFactory.getSDK().getVoipCallManager().startService(MyTerminalFactory.getSDK().application);
         //监听voip来电
         MyTerminalFactory.getSDK().getVoipCallManager().addCallback(voipRegistrationCallback,voipPhoneCallback);
     }
@@ -201,7 +201,7 @@ public class ReceiveHandlerService extends Service{
 
     @SuppressWarnings("ClickableViewAccessibility,InflateParams")
     public void createFloatView(){
-        view = (FrameLayout) LayoutInflater.from(MyApplication.instance.getApplicationContext()).inflate(R.layout.layout_receive_handler, null);
+        view = (FrameLayout) LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_receive_handler, null);
         video_dialog = view.findViewById(R.id.video_dialog);
         ButterKnife.bind(this, view);
         windowManager = (WindowManager) this.getSystemService(WINDOW_SERVICE);
@@ -313,7 +313,7 @@ public class ReceiveHandlerService extends Service{
         public void onGoWatchClick(final int position){
             //判断是否有接受图像功能权限
             if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())){
-                ToastUtil.showToast(getApplicationContext(), getString(R.string.text_has_no_video_receiver_authority));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application, getString(R.string.text_has_no_video_receiver_authority));
                 removeView();
                 return;
             }
@@ -344,7 +344,7 @@ public class ReceiveHandlerService extends Service{
                             myHandler.sendMessage(msg);
                         }else{
                             removeView();
-                            Intent intent = new Intent(getApplicationContext(), LiveHistoryActivity.class);
+                            Intent intent = new Intent(MyTerminalFactory.getSDK().application, LiveHistoryActivity.class);
                             intent.putExtra("terminalMessage", terminalMessage);
                             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             //                                intent.putExtra("endChatTime",endChatTime);
@@ -417,6 +417,7 @@ public class ReceiveHandlerService extends Service{
         Intent intent = new Intent();
         intent.putExtra(Constants.MEMBER_NAME, mainMemberName);
         intent.putExtra(Constants.MEMBER_ID, mainMemberId);
+        intent.putExtra(Constants.THEME,"");
         if(Constants.HYTERA.equals(Build.MODEL)){
             logger.info("usbAttached ：" + MyApplication.instance.usbAttached);
             if(MyApplication.instance.usbAttached){
@@ -632,15 +633,15 @@ public class ReceiveHandlerService extends Service{
                 noticeContent = getString(R.string.text_message_list_face_recognition);
             }
         }
-        Intent intent = new Intent(getApplicationContext(), NotificationClickReceiver.class);
+        Intent intent = new Intent(MyTerminalFactory.getSDK().application, NotificationClickReceiver.class);
         Bundle bundle = new Bundle();
         bundle.putSerializable("TerminalMessage", terminalMessage);
         intent.putExtra("bundle", bundle);
         Log.e("IndividualCallService", "通知栏消息:" + terminalMessage);
         //            intent.putExtra("TerminalMessage",terminalMessage);
-        PendingIntent pIntent = PendingIntent.getBroadcast(getApplicationContext(), noticeId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pIntent = PendingIntent.getBroadcast(MyTerminalFactory.getSDK().application, noticeId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Notification.Builder myBuilder = new Notification.Builder(getApplicationContext());
+        Notification.Builder myBuilder = new Notification.Builder(MyTerminalFactory.getSDK().application);
         myBuilder.setContentTitle(noticeTitle)//设置通知标题
                 .setContentText(unReadCountText + noticeContent)//设置通知内容
                 .setTicker(getString(R.string.text_you_has_a_new_message))//设置状态栏提示消息
@@ -677,7 +678,7 @@ public class ReceiveHandlerService extends Service{
             windowManager.addView(view, layoutParams2);
             video_dialog.setVisibility(View.VISIBLE);
             dialogAdded = true;
-            stackViewAdapter = new StackViewAdapter(getApplicationContext());
+            stackViewAdapter = new StackViewAdapter(MyTerminalFactory.getSDK().application);
             stackViewAdapter.setData(data);
             swipeFlingAdapterView.setFlingListener(new FlingListener());
             stackViewAdapter.setCloseDialogListener(new OnClickListenerCloseDialog());
@@ -690,12 +691,12 @@ public class ReceiveHandlerService extends Service{
     //接收到上报视频的回调
     private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = memberId -> {
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
-            ToastUtil.showToast(getApplicationContext(),getString(R.string.text_watching_can_not_report));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_report));
             return;
         }
         logger.error("上报给：" + memberId);
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.no_push_authority));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_push_authority));
             return;
         }
         if(memberId == 0){//要弹出选择成员页
@@ -707,28 +708,26 @@ public class ReceiveHandlerService extends Service{
             if(MyApplication.instance.usbAttached){
                 Intent intent = new Intent(ReceiveHandlerService.this,SwitchCameraService.class);
                 intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
+                intent.putExtra(Constants.THEME,"");
                 intent.putExtra(Constants.CAMERA_TYPE,Constants.UVC_CAMERA);
                 startService(intent);
             }else{
                 if(Constants.HYTERA.equals(Build.MODEL)){
                     Intent intent = new Intent(ReceiveHandlerService.this,SwitchCameraService.class);
                     intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
+                    intent.putExtra(Constants.THEME,"");
                     intent.putExtra(Constants.CAMERA_TYPE,Constants.RECODER_CAMERA);
                     startService(intent);
                 }else{
-                    int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMyselfLive("", "");
-                    if(requestCode == BaseCommonCode.SUCCESS_CODE){
                         //请求成功,直接开始推送视频
                         Intent intent = new Intent();
                         intent.putExtra(Constants.TYPE, Constants.ACTIVE_PUSH);
+                        intent.putExtra(Constants.THEME,"");
                         intent.setClass(ReceiveHandlerService.this, PhonePushService.class);
                         ArrayList<Integer> memberIds = new ArrayList<>();
                         memberIds.add(memberId);
                         intent.putIntegerArrayListExtra(Constants.PUSH_MEMBERS, memberIds);
                         startService(intent);
-                    }else{
-                        ToastUtil.livingFailToast(ReceiveHandlerService.this, requestCode, TerminalErrorCode.LIVING_PUSHING.getErrorCode());
-                    }
                 }
             }
         }
@@ -739,11 +738,11 @@ public class ReceiveHandlerService extends Service{
      */
     private ReceiverRequestVideoHandler receiverRequestVideoHandler = member -> {
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
-            ToastUtil.showToast(getApplicationContext(),getString(R.string.text_watching_can_not_request_report));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_request_report));
             return;
         }
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.no_pull_authority));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_pull_authority));
             return;
         }
         logger.error("请求的直播人：" + member);

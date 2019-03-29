@@ -61,7 +61,7 @@ public class ReceiveCallComingService extends BaseService{
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_receive_call_service, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_receive_call_service, null);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class ReceiveCallComingService extends BaseService{
         memberId = intent.getIntExtra(Constants.MEMBER_ID, 0);
         wakeLock.acquire(10 * 1000);
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        if(null != imm && InputMethodUtil.inputMethodSate(getApplicationContext())){
+        if(null != imm && InputMethodUtil.inputMethodSate(MyTerminalFactory.getSDK().application)){
             imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
         }
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverCloseKeyBoardHandler.class);
@@ -161,7 +161,7 @@ public class ReceiveCallComingService extends BaseService{
      * 被动方收到个呼答复超时，关闭界面
      */
     private ReceiveAnswerIndividualCallTimeoutHandler receiveAnswerIndividualCallTimeoutHandler = () -> mHandler.post(() -> {
-        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.no_answer));
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.no_answer));
         mHandler.post(this::individualCallStopped);
     });
 
@@ -170,9 +170,9 @@ public class ReceiveCallComingService extends BaseService{
      */
     private ReceiveNotifyIndividualCallStoppedHandler receiveNotifyIndividualCallStoppedHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
         if(SignalServerErrorCode.getInstanceByCode(methodResult) != null){
-            ToastUtil.showToast(getApplicationContext(), SignalServerErrorCode.getInstanceByCode(methodResult).getErrorDiscribe());
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application, SignalServerErrorCode.getInstanceByCode(methodResult).getErrorDiscribe());
         }else{
-            ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.other_cancel));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.other_cancel));
         }
         mHandler.post(this::individualCallStopped);
     });

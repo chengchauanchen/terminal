@@ -101,7 +101,7 @@ public class UVCPushService extends BaseService{
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_uvc_push, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_uvc_push, null);
     }
 
     @Override
@@ -198,7 +198,7 @@ public class UVCPushService extends BaseService{
                 hideLivingView();
                 break;
             case OFF_LINE:
-                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_push));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_push));
                 stopBusiness();
                 break;
         }
@@ -244,7 +244,7 @@ public class UVCPushService extends BaseService{
         listResolution = new ArrayList<>(Arrays.asList("1920x1080", "1280x720", "640x480", "320x240"));
         watchOrExitMembers = new ArrayList<>();
         watchMembers = new ArrayList<>();
-        enterOrExitMemberAdapter = new MemberEnterAdapter(getApplicationContext(), watchOrExitMembers);
+        enterOrExitMemberAdapter = new MemberEnterAdapter(MyTerminalFactory.getSDK().application, watchOrExitMembers);
         mLvUvcLiveMemberInfo.setAdapter(enterOrExitMemberAdapter);
     }
 
@@ -263,14 +263,14 @@ public class UVCPushService extends BaseService{
                 MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(pushMemberList, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
             }
         }else{
-            ToastUtil.showToast(getApplicationContext(), resultDesc);
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application, resultDesc);
             finishVideoLive();
         }
     });
 
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-            ToastUtil.showToast(getApplicationContext(),getString(R.string.text_has_no_group_call_listener_authority));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_has_no_group_call_listener_authority));
         }else{
             mHandler.post(() -> {
                 mLlUvcSpeakState.setVisibility(View.VISIBLE);
@@ -290,7 +290,7 @@ public class UVCPushService extends BaseService{
      * 通知直播停止 通知界面关闭视频页
      **/
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> {
-        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_stoped));
         mHandler.post(this::finishVideoLive);
     };
 
@@ -363,7 +363,7 @@ public class UVCPushService extends BaseService{
 
     private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
         if(!connected){
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
             mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
         }
     };
@@ -517,7 +517,7 @@ public class UVCPushService extends BaseService{
             if(mSvUvcLive.getSurfaceTexture() != null){
                 pushStream(mSvUvcLive.getSurfaceTexture());
             }else{
-                ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_failed));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_failed));
                 finishVideoLive();
                 return;
             }
@@ -573,7 +573,7 @@ public class UVCPushService extends BaseService{
                 ToastUtil.showToast(this, getResources().getString(R.string.pushing_stream));
             }
         }else{
-            mUvcMediaStream = new UVCMediaStream(getApplicationContext(), surface);
+            mUvcMediaStream = new UVCMediaStream(MyTerminalFactory.getSDK().application, surface);
             startCamera();
         }
         pushcount = 0;

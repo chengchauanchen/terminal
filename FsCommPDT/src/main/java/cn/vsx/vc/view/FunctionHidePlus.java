@@ -201,8 +201,8 @@ public class FunctionHidePlus extends LinearLayout {
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.hide_function:
-                //如果是普通用户并且是响应组，不能点击
-                if(isGroupFunction && TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_NORMAL.toString()) &&
+                //如果是响应组，不能点击
+                if(isGroupFunction  &&
                     null != DataUtil.getGroupByGroupNo(userId).getResponseGroupType() &&
                         DataUtil.getGroupByGroupNo(userId).getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
                     return;
@@ -212,9 +212,8 @@ public class FunctionHidePlus extends LinearLayout {
 
             case R.id.group_call_news_keyboard:
                     if(isGroupFunction){
-                        //如果是普通用户并且是响应组，不能点击
-                        if(TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_NORMAL.toString()) &&
-                                null != DataUtil.getGroupByGroupNo(userId).getResponseGroupType() &&
+                        //如果是响应组，不能点击
+                        if(null != DataUtil.getGroupByGroupNo(userId).getResponseGroupType() &&
                                 DataUtil.getGroupByGroupNo(userId).getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
                             return;
                         }

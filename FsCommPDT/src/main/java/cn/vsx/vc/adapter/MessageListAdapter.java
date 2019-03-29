@@ -22,8 +22,10 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -125,7 +127,12 @@ public class MessageListAdapter extends BaseAdapter {
             viewHolder.iv_user_photo.setBackgroundResource(R.drawable.call_photo);
         }
         else if(terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-            viewHolder.iv_user_photo.setBackgroundResource(R.drawable.group_photo);
+            Group groupInfo = DataUtil.getGroupByGroupNo(terminalMessage.messageToId);
+            if(groupInfo.getResponseGroupType()!=null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
+                viewHolder.iv_user_photo.setBackgroundResource(R.drawable.response_group_photo);
+            }else{
+                viewHolder.iv_user_photo.setBackgroundResource(R.drawable.group_photo);
+            }
         }else {
             if (terminalMessage.messageType == MessageType.HYPERLINK.getCode()) {
                 viewHolder.iv_user_photo.setBackgroundResource(R.drawable.face_recognition_photo);

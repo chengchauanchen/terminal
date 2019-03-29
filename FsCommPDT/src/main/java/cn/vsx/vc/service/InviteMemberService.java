@@ -109,7 +109,7 @@ public class InviteMemberService extends BaseService{
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_invite_member, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_invite_member, null);
     }
 
     @Override
@@ -195,15 +195,15 @@ public class InviteMemberService extends BaseService{
 
     @Override
     protected void initData(){
-        mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(getApplicationContext(), OrientationHelper.HORIZONTAL,false));
-        mCatalogAdapter=new CatalogAdapter(getApplicationContext(),mCatalogList);
+        mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(MyTerminalFactory.getSDK().application, OrientationHelper.HORIZONTAL,false));
+        mCatalogAdapter=new CatalogAdapter(MyTerminalFactory.getSDK().application,mCatalogList);
         mCatalogRecyclerview.setAdapter(mCatalogAdapter);
-        mRecyclerview.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        mContactAdapter=new LiveRecyclerViewAdapter(getApplicationContext(),mDatas,type);
+        mRecyclerview.setLayoutManager(new LinearLayoutManager(MyTerminalFactory.getSDK().application));
+        mContactAdapter=new LiveRecyclerViewAdapter(MyTerminalFactory.getSDK().application,mDatas,type);
         mRecyclerview.setAdapter(mContactAdapter);
 
         searchMemberListExceptMe.addAll(TerminalFactory.getSDK().getConfigManager().getPhoneMemberExceptMe());
-        tempGroupSearchAdapter = new TempGroupSearchAdapter(getApplicationContext(),searchList);
+        tempGroupSearchAdapter = new TempGroupSearchAdapter(MyTerminalFactory.getSDK().application,searchList);
         mLvSearchAllcontacts.setAdapter(tempGroupSearchAdapter);
     }
 
@@ -241,7 +241,7 @@ public class InviteMemberService extends BaseService{
      * 通知直播停止 通知界面关闭视频页
      **/
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> {
-        ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
         stopBusiness();
     };
 
@@ -259,7 +259,7 @@ public class InviteMemberService extends BaseService{
             mTvLiveSelectmemberTheme.setText(mEtLiveEditImportTheme.getText().toString().trim());
             InputMethodUtil.hideInputMethod(InviteMemberService.this, mEtLiveEditImportTheme);
         }else{
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.theme_cannot_empty));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.theme_cannot_empty));
         }
     };
 
@@ -327,14 +327,14 @@ public class InviteMemberService extends BaseService{
     private AdapterView.OnItemClickListener searchItemclickListener = (parent, view, position, id) -> {
         List<Integer> selectMember = mContactAdapter.getSelectMember();
         if(!selectMember.isEmpty() && selectMember.contains(searchList.get(position).getNo())){
-            ToastUtil.showToast(getApplicationContext(),getString(R.string.text_you_have_added_this_member));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_you_have_added_this_member));
             return;
         }
         mContactAdapter.setSelectMember(searchList.get(position).getNo());
 
         mEtSearchAllcontacts.setText("");
-        InputMethodUtil.hideInputMethod(getApplicationContext(), mEtSearchAllcontacts);
-        searchMemberListExceptMe.clear();
+        InputMethodUtil.hideInputMethod(MyTerminalFactory.getSDK().application, mEtSearchAllcontacts);
+//        searchMemberListExceptMe.clear();
         searchList.clear();
         mTvSearchNothing.setVisibility(View.VISIBLE);
         mRlSearchResult.setVisibility(View.GONE);
@@ -359,18 +359,18 @@ public class InviteMemberService extends BaseService{
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count){
             if ( s.length() > 0 && !DataUtil.isLegalSearch(s)) {
-                ToastUtil.showToast(getApplicationContext(), getString(R.string.text_search_content_is_illegal));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application, getString(R.string.text_search_content_is_illegal));
             }
             if(android.text.TextUtils.isEmpty(s.toString())){
 
                 mIvDeleteEdittext.setVisibility(View.GONE);
                 mBtnSearchAllcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
-                mBtnSearchAllcontacts.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.search_button_text_color1));
+                mBtnSearchAllcontacts.setTextColor(ContextCompat.getColor(MyTerminalFactory.getSDK().application,R.color.search_button_text_color1));
                 mBtnSearchAllcontacts.setEnabled(false);
             }else {
                 mIvDeleteEdittext.setVisibility(View.VISIBLE);
                 mBtnSearchAllcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape2);
-                mBtnSearchAllcontacts.setTextColor(ContextCompat.getColor(getApplicationContext(),R.color.white));
+                mBtnSearchAllcontacts.setTextColor(ContextCompat.getColor(MyTerminalFactory.getSDK().application,R.color.white));
                 mBtnSearchAllcontacts.setEnabled(true);
             }
         }
@@ -389,9 +389,12 @@ public class InviteMemberService extends BaseService{
     };
 
     private View.OnClickListener searchBackOnClickListener = v->{
+        searchList.clear();
+        mEtSearchAllcontacts.setText("");
+        tempGroupSearchAdapter.notifyDataSetChanged();
         mLlEditTheme.setVisibility(View.GONE);
         mLlSearchMember.setVisibility(View.GONE);
-        InputMethodUtil.hideInputMethod(getApplicationContext(), mEtSearchAllcontacts);
+        InputMethodUtil.hideInputMethod(MyTerminalFactory.getSDK().application, mEtSearchAllcontacts);
         mLlSelectMember.setVisibility(View.VISIBLE);
     };
 
@@ -415,7 +418,7 @@ public class InviteMemberService extends BaseService{
      * 搜索
      */
     private void doSearch(){
-        InputMethodUtil.hideInputMethod(getApplicationContext(), mEtSearchAllcontacts);
+        InputMethodUtil.hideInputMethod(MyTerminalFactory.getSDK().application, mEtSearchAllcontacts);
         keyWord = mEtSearchAllcontacts.getText().toString();
         tempGroupSearchAdapter.setFilterKeyWords(keyWord);
 
@@ -425,7 +428,7 @@ public class InviteMemberService extends BaseService{
         searchList.clear();
 
         if (android.text.TextUtils.isEmpty(keyWord)) {
-            ToastUtil.showToast(getApplicationContext(), getString(R.string.text_search_content_can_not_empty));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application, getString(R.string.text_search_content_can_not_empty));
         }else {
             searchMemberFromGroup();
         }
@@ -593,7 +596,7 @@ public class InviteMemberService extends BaseService{
 
         MemberResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
         if(mMemberResponse ==null){
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.no_members_data));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_members_data));
             return;
         }
         CatalogBean catalog=new CatalogBean();
@@ -668,7 +671,7 @@ public class InviteMemberService extends BaseService{
                 ToastUtil.livingFailToast(InviteMemberService.this, requestCode, TerminalErrorCode.LIVING_REQUEST.getErrorCode());
             }
         }else{
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.please_select_live_member));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.please_select_live_member));
         }
     }
 

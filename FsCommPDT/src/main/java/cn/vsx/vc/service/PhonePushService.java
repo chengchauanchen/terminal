@@ -105,7 +105,7 @@ public class PhonePushService extends BaseService{
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_phone_push, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_phone_push, null);
     }
 
     @Override
@@ -205,7 +205,7 @@ public class PhonePushService extends BaseService{
                 hideLivingView();
                 break;
             case OFF_LINE:
-                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_push));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_push));
                 stopBusiness();
                 break;
         }
@@ -233,7 +233,7 @@ public class PhonePushService extends BaseService{
         listResolution = new ArrayList<>(Arrays.asList("1920x1080", "1280x720", "640x480", "320x240"));
         watchOrExitMembers = new ArrayList<>();
         watchMembers = new ArrayList<>();
-        enterOrExitMemberAdapter = new MemberEnterAdapter(getApplicationContext(), watchOrExitMembers);
+        enterOrExitMemberAdapter = new MemberEnterAdapter(MyTerminalFactory.getSDK().application, watchOrExitMembers);
         mLvLiveMemberInfo.setAdapter(enterOrExitMemberAdapter);
     }
 
@@ -269,14 +269,14 @@ public class PhonePushService extends BaseService{
                 MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(pushMemberList, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
             }
         }else{
-            ToastUtil.showToast(getApplicationContext(), resultDesc);
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application, resultDesc);
             finishVideoLive();
         }
     });
 
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-            ToastUtil.showToast(getApplicationContext(),getString(R.string.text_has_no_group_call_listener_authority));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_has_no_group_call_listener_authority));
         }else{
             mHandler.post(() -> {
                 mLlLiveGroupCall.setVisibility(View.VISIBLE);
@@ -297,10 +297,10 @@ public class PhonePushService extends BaseService{
     /**
      * 通知直播停止 通知界面关闭视频页
      **/
-    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> {
-        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
+    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> mHandler.post(() -> {
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_stoped));
         finishVideoLive();
-    };
+    });
 
     /**
      * 自己发起直播的响应
@@ -384,7 +384,7 @@ public class PhonePushService extends BaseService{
             if(mSvLive.getSurfaceTexture() != null){
                 pushStream(mSvLive.getSurfaceTexture());
             }else{
-                ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_failed));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_failed));
                 finishVideoLive();
                 return;
             }
@@ -517,7 +517,7 @@ public class PhonePushService extends BaseService{
             intent.putExtra(Constants.WATCHING_MEMBERS, watchMembers);
             startService(intent);
         }else{
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.text_no_video_push_authority));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.text_no_video_push_authority));
         }
     };
 
@@ -641,7 +641,7 @@ public class PhonePushService extends BaseService{
                 ToastUtil.showToast(PhonePushService.this, getResources().getString(R.string.pushing_stream));
             }
         }else{
-            mMediaStream = new MediaStream(getApplicationContext(), surface, true);
+            mMediaStream = new MediaStream(MyTerminalFactory.getSDK().application, surface, true);
             startCamera();
         }
         pushcount = 0;

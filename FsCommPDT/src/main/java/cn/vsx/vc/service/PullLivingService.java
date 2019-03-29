@@ -181,7 +181,7 @@ public class PullLivingService extends BaseService{
     protected void handleMesage(Message msg){
         switch(msg.what){
             case OFF_LINE:
-                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_pull));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_pull));
                 stopBusiness();
                 break;
         }
@@ -210,7 +210,7 @@ public class PullLivingService extends BaseService{
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_pull_stream, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_pull_stream, null);
     }
 
     @Override
@@ -267,7 +267,7 @@ public class PullLivingService extends BaseService{
             }
             MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
         }else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
-            ToastUtil.showToast(getApplicationContext(), "当前组是只听组，不能发起组呼");
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application, "当前组是只听组，不能发起组呼");
         } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
             mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_yellow);
         } else {//请求失败
@@ -295,7 +295,7 @@ public class PullLivingService extends BaseService{
 
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-            ptt.terminalsdk.tools.ToastUtil.showToast(getApplicationContext(),getString(R.string.text_has_no_group_call_listener_authority));
+            ptt.terminalsdk.tools.ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_has_no_group_call_listener_authority));
         }else{
             mHandler.post(() -> {
                 mLlLiveGroupCall.setVisibility(View.VISIBLE);
@@ -346,7 +346,7 @@ public class PullLivingService extends BaseService{
      */
     private ReceiveGetRtspStreamUrlHandler receiveGetRtspStreamUrlHandler = (final String rtspUrl, final Member liveMember, long callId)-> mHandler.post(() -> {
         if (Util.isEmpty(rtspUrl)) {
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.no_rtsp_data));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_rtsp_data));
             stopBusiness();
         }else {
             logger.info("rtspUrl ----> " + rtspUrl);
@@ -363,7 +363,7 @@ public class PullLivingService extends BaseService{
      * 去观看时，发现没有在直播，关闭界面吧
      */
     private ReceiveMemberNotLivingHandler receiveMemberNotLivingHandler = callId -> {
-        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_stoped));
         stopBusiness();
     };
 
@@ -371,7 +371,7 @@ public class PullLivingService extends BaseService{
      * 通知直播停止 通知界面关闭视频页
      **/
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> {
-        ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
         mHandler.post(this::finishVideoLive);
     };
 
@@ -488,7 +488,7 @@ public class PullLivingService extends BaseService{
             intent.putExtra(Constants.LIVING_MEMBER_ID,liveMember.getNo());
             startService(intent);
         }else{
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.text_no_video_push_authority));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.text_no_video_push_authority));
         }
     };
 
@@ -570,11 +570,11 @@ public class PullLivingService extends BaseService{
                 mLiveHeight = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_HEIGHT);
                 onVideoSizeChange();
             }else if(resultCode == EasyRTSPClient.RESULT_TIMEOUT){
-                ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.time_up));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.time_up));
             }else if(resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_AUDIO){
-                ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.voice_not_support));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.voice_not_support));
             }else if(resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_VIDEO){
-                ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.video_not_support));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.video_not_support));
             }else if(resultCode == EasyRTSPClient.RESULT_EVENT){
                 int errorcode = resultData.getInt("errorcode");
                 String resultDataString = resultData.getString("event-msg");
@@ -594,18 +594,18 @@ public class PullLivingService extends BaseService{
                                 startPull(mSvLivePop);
                                 pullcount++;
                             }else{
-                                ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
+                                ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_stoped));
                                 stopBusiness();
                             }
                         }catch(Exception e){
                             e.printStackTrace();
                         }
                     }else{
-                        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
+                        ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_stoped));
                         stopBusiness();
                     }
                 }else if(errorcode != 0){
-                    ToastUtil.showToast(getApplicationContext(), resultDataString);
+                    ToastUtil.showToast(MyTerminalFactory.getSDK().application, resultDataString);
                     stopBusiness();
                 }
             }

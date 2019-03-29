@@ -98,7 +98,7 @@ public class CallingService extends BaseService{
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_individual_call, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_individual_call, null);
     }
 
     @Override
@@ -377,10 +377,10 @@ public class CallingService extends BaseService{
     private ReceiveNotifyIndividualCallStoppedHandler receiveNotifyIndividualCallStoppedHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
         if(SignalServerErrorCode.getInstanceByCode(methodResult) != null){
             mTvSpeakingToast.setText(resultDesc);
-            ToastUtil.showToast(getApplicationContext(), resultDesc);
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application, resultDesc);
         }else{
             mTvSpeakingToast.setText(getResources().getString(R.string.other_stop_call));
-            ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.other_stop_call));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.other_stop_call));
         }
         individualCallStopped();
     });
@@ -504,7 +504,7 @@ public class CallingService extends BaseService{
     private void halfPttDownDothing(){
         logger.info("pttDownDoThing执行了 isPttPress：" + MyApplication.instance.isPttPress);
         if(!CheckMyPermission.selfPermissionGranted(CallingService.this, Manifest.permission.RECORD_AUDIO)){//没有录音权限
-            ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.no_recorde_permisson));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.no_recorde_permisson));
             return;
         }
         cancelAutoHangUpTimer();

@@ -222,7 +222,7 @@ public abstract class BaseService extends Service{
      * 移除view并停止service
      */
     protected void removeView(){
-        logger.info(TAG+"--removeView--dialogAdd:"+dialogAdd);
+        logger.info(TAG+"--ReceiverRemoveWindowViewHandler:"+dialogAdd);
         mHandler.removeCallbacksAndMessages(null);
         if(dialogAdd){
             windowManager.removeView(rootView);
@@ -264,7 +264,7 @@ public abstract class BaseService extends Service{
      * 服务端通知强制重新认证登陆
      */
     private ReceiveForceReloginHandler receiveForceReloginHandler = version -> {
-        ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
         removeView();
     };
 
@@ -273,7 +273,7 @@ public abstract class BaseService extends Service{
      */
     private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> {
         if(!connected){
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.net_work_disconnect));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
         }
         mHandler.post(()-> onNetworkChanged(connected));
     };

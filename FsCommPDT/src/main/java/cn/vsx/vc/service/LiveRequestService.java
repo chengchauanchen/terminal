@@ -35,7 +35,7 @@ public class LiveRequestService extends BaseService{
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.live_request, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.live_request, null);
     }
 
     @Override
@@ -100,7 +100,7 @@ public class LiveRequestService extends BaseService{
     }
 
     private View.OnClickListener cancelOnClickListener = v ->{
-        ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.canceled));
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.canceled));
         MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId);
         stopBusiness();
     };
@@ -109,32 +109,32 @@ public class LiveRequestService extends BaseService{
      * 对方拒绝直播，通知界面关闭响铃页
      **/
     private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc)-> mHandler.post(() -> {
-        ToastUtil.showToast(getApplicationContext(),resultDesc);
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDesc);
         stopBusiness();
     });
 
     /**
      * 超时未回复answer 通知界面关闭
      **/
-    private ReceiveAnswerLiveTimeoutHandler receiveAnswerLiveTimeoutHandler = () -> {
-        ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.other_no_answer));
+    private ReceiveAnswerLiveTimeoutHandler receiveAnswerLiveTimeoutHandler = () ->  mHandler.post(() -> {
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.other_no_answer));
         stopBusiness();
-    };
+    });
 
     /**
      * 通知直播停止 通知界面关闭视频页
      **/
-    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> {
-        ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
+    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> mHandler.post(() -> {
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
         stopBusiness();
-    };
+    });
 
     /**
      * 获取到rtsp地址，开始播放视频
      */
     private ReceiveGetRtspStreamUrlHandler receiveGetRtspStreamUrlHandler = (final String rtspUrl, final Member liveMember, long callId)-> mHandler.post(() -> {
         if (Util.isEmpty(rtspUrl)) {
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.no_rtsp_data));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_rtsp_data));
             stopBusiness();
         }else {
             logger.info("rtspUrl ----> " + rtspUrl);

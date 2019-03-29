@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TimerTask;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -130,13 +132,16 @@ public class NewsFragment extends BaseFragment {
 
     private void removeResponseGroupMessage(){
         if(TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_NORMAL.toString())){
+            //查看定时任务中有没有对应的响应组倒计时，如果有说明该组还在激活状态，不能删除，如果没有就删除掉。
+            Map<Integer,TimerTask> timerTaskMap  = TerminalFactory.getSDK().getGroupCallManager().getTimerTaskMap();
             //普通用户不显示响应组消息
             Iterator<TerminalMessage> iterator = messageList.iterator();
             while(iterator.hasNext()){
                 TerminalMessage next = iterator.next();
                 if(next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
                     Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
-                    if(groupInfo.getResponseGroupType()!=null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
+                    if(groupInfo.getResponseGroupType()!=null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())
+                    &&!timerTaskMap.containsKey(groupInfo.id)){
                         iterator.remove();
                     }
                 }
@@ -1319,6 +1324,8 @@ public class NewsFragment extends BaseFragment {
             //普通用户不显示响应组
             if(TerminalFactory.getSDK().getParam(Params.USER_TYPE, "").equals(UserType.USER_NORMAL.toString())){
                 Iterator<TerminalMessage> iterator = messageList.iterator();
+                //查看定时任务中有没有对应的响应组倒计时，如果有说明该组还在激活状态，不能删除，如果没有就删除掉。
+                Map<Integer,TimerTask> timerTaskMap  = TerminalFactory.getSDK().getGroupCallManager().getTimerTaskMap();
                 while(iterator.hasNext()){
                     TerminalMessage next = iterator.next();
                     if(!DataUtil.isExistGroup(next.messageToId)){
@@ -1329,7 +1336,8 @@ public class NewsFragment extends BaseFragment {
                     }
                     if(next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
                         Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
-                        if(groupInfo.getResponseGroupType() != null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
+                        if(groupInfo.getResponseGroupType() != null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())
+                           &&!timerTaskMap.containsKey(groupInfo.id)){
                             iterator.remove();
                         }
                     }

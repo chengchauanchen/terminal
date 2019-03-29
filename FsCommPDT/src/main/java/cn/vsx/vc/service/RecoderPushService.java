@@ -175,7 +175,7 @@ public class RecoderPushService extends BaseService{
                 break;
             case OFF_LINE:
                 mHandler.removeMessages(OFF_LINE);
-                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_push));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_push));
                 stopBusiness();
                 break;
         }
@@ -200,7 +200,7 @@ public class RecoderPushService extends BaseService{
     protected void initData(){
         watchOrExitMembers = new ArrayList<>();
         watchMembers = new ArrayList<>();
-        enterOrExitMemberAdapter = new MemberEnterAdapter(getApplicationContext(), watchOrExitMembers);
+        enterOrExitMemberAdapter = new MemberEnterAdapter(MyTerminalFactory.getSDK().application, watchOrExitMembers);
         mLvLiveMemberInfo.setAdapter(enterOrExitMemberAdapter);
     }
 
@@ -228,7 +228,7 @@ public class RecoderPushService extends BaseService{
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_recoder_push, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_recoder_push, null);
     }
 
     @Override
@@ -303,7 +303,7 @@ public class RecoderPushService extends BaseService{
 
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-            ptt.terminalsdk.tools.ToastUtil.showToast(getApplicationContext(),getString(R.string.text_has_no_group_call_listener_authority));
+            ptt.terminalsdk.tools.ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_has_no_group_call_listener_authority));
         }else{
             mHandler.post(() -> {
                 mLlLiveGroupCall.setVisibility(View.VISIBLE);
@@ -322,10 +322,10 @@ public class RecoderPushService extends BaseService{
     /**
      * 通知直播停止 通知界面关闭视频页
      **/
-    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> {
-        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.push_stoped));
+    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> mHandler.post(() -> {
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_stoped));
         mHandler.post(this::finishVideoLive);
-    };
+    });
 
     /**
      * 自己发起直播的响应
@@ -337,7 +337,7 @@ public class RecoderPushService extends BaseService{
                 MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(pushMemberList, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
             }
         }else{
-            ptt.terminalsdk.tools.ToastUtil.showToast(getApplicationContext(), resultDesc);
+            ptt.terminalsdk.tools.ToastUtil.showToast(MyTerminalFactory.getSDK().application, resultDesc);
             finishVideoLive();
         }
     });
@@ -484,12 +484,12 @@ public class RecoderPushService extends BaseService{
                 mLiveHeight = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_HEIGHT);
                 onVideoSizeChange();
             }else if(resultCode == EasyRTSPClient.RESULT_TIMEOUT){
-                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.time_up));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.time_up));
 
             }else if(resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_AUDIO){
-                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.voice_not_support));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.voice_not_support));
             }else if(resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_VIDEO){
-                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.video_not_support));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.video_not_support));
             }else if(resultCode == EasyRTSPClient.RESULT_EVENT){
                 int errorcode = resultData.getInt("errorcode");
                 String resultDataString = resultData.getString("event-msg");
@@ -517,12 +517,12 @@ public class RecoderPushService extends BaseService{
                             e.printStackTrace();
                         }
                     }else{
-                        ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
+                        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
                         TerminalFactory.getSDK().getLiveManager().ceaseWatching();
                         finishVideoLive();
                     }
                 }else if(errorcode != 0){
-                    ToastUtil.showToast(getApplicationContext(),resultDataString);
+                    ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDataString);
                     finishVideoLive();
                 }
             }

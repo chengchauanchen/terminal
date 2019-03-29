@@ -60,7 +60,7 @@ public class PullGB28181Service extends BaseService{
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(getApplicationContext()).inflate(R.layout.layout_gb28181_view, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_gb28181_view, null);
     }
 
     @Override
@@ -117,7 +117,7 @@ public class PullGB28181Service extends BaseService{
                 setCurrentTime();
                 break;
             case OFF_LINE:
-                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.exit_pull));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_pull));
                 stopBusiness();
                 break;
         }
@@ -151,7 +151,7 @@ public class PullGB28181Service extends BaseService{
             intent.putExtra(Constants.TYPE,Constants.PULL);
             intent.putExtra(Constants.PULLING,true);
         }else{
-            ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.text_no_video_push_authority));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.text_no_video_push_authority));
         }
     };
 
@@ -165,7 +165,7 @@ public class PullGB28181Service extends BaseService{
     };
 
     private View.OnClickListener closeOnClickListener = v -> {
-        ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.watch_finished));
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.watch_finished));
         stopBusiness();
     };
 
@@ -238,13 +238,13 @@ public class PullGB28181Service extends BaseService{
                 mLiveHeight = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_HEIGHT);
                 onVideoSizeChange();
             } else if (resultCode == EasyRTSPClient.RESULT_TIMEOUT) {
-                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.time_up));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.time_up));
                 stopBusiness();
             } else if (resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_AUDIO) {
-                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.voice_not_support));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.voice_not_support));
                 stopBusiness();
             } else if (resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_VIDEO) {
-                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.video_not_support));
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.video_not_support));
                 stopBusiness();
             } else if (resultCode == EasyRTSPClient.RESULT_EVENT) {
 
@@ -265,7 +265,7 @@ public class PullGB28181Service extends BaseService{
                                 pullcount++;
 
                             }else{
-                                ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
+                                ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
                                 stopBusiness();
                             }
 
@@ -273,11 +273,11 @@ public class PullGB28181Service extends BaseService{
                             e.printStackTrace();
                         }
                     } else {
-                        ToastUtil.showToast(getApplicationContext(),getResources().getString(R.string.push_stoped));
+                        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
                         stopBusiness();
                     }
                 } else if(errorcode !=0){
-                    ToastUtil.showToast(getApplicationContext(),resultDataString);
+                    ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDataString);
                     stopBusiness();
                 }
             }
