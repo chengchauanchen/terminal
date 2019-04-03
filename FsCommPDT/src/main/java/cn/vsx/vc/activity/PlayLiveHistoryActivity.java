@@ -253,7 +253,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
 
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler(){
         @Override
-        public void handler(String mainMemberName, int mainMemberId){
+        public void handler(String mainMemberName, int mainMemberId,boolean emergencyType){
             if(mediaPlayer != null && mediaPlayer.isPlaying()){
                 mediaPlayer.pause();
                 iv_pause_continue.setImageResource(R.drawable.on_pause);

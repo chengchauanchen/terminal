@@ -71,7 +71,7 @@ public class PromptManager {
 
 	private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler() {
 		@Override
-		public void handler(String mainMemberName, int mainMemberId) {
+		public void handler(String mainMemberName, int mainMemberId,boolean emergencyType) {
 			logger.info("直播来了，通知界面，打开应用");
 			if(!TerminalFactory.getSDK().getParam(Params.IS_EXIT,false)){
 				Intent intent = new Intent("android.intent.action.OPEN_APP");

@@ -170,7 +170,7 @@ public class CameraActivity extends BaseActivity {
 
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler(){
         @Override
-        public void handler(String mainMemberName, int mainMemberId){
+        public void handler(String mainMemberName, int mainMemberId,boolean emergencyType){
             runOnUiThread(() -> jCameraView.onStop());
         }
     };

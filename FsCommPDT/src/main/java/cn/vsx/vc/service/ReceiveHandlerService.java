@@ -58,6 +58,7 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
@@ -186,6 +187,7 @@ public class ReceiveHandlerService extends Service{
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverActivePushVideoHandler);//上报视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoHandler);//请求视频
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         //开启voip电话服务
         MyTerminalFactory.getSDK().getVoipCallManager().startService(MyTerminalFactory.getSDK().application);
         //监听voip来电
@@ -401,6 +403,7 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGoWatchRTSPHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveNotifyDataMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoHandler);
 
@@ -413,7 +416,7 @@ public class ReceiveHandlerService extends Service{
     /**
      * 收到别人请求我开启直播的通知
      **/
-    private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId) -> myHandler.post(() -> {
+    private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId ,emergencyType) -> myHandler.post(() -> {
         Intent intent = new Intent();
         intent.putExtra(Constants.MEMBER_NAME, mainMemberName);
         intent.putExtra(Constants.MEMBER_ID, mainMemberId);
@@ -434,7 +437,14 @@ public class ReceiveHandlerService extends Service{
                 startService(intent);
             }
         }else{
-            intent.setClass(ReceiveHandlerService.this, ReceiveLiveCommingService.class);
+            if(emergencyType){
+                //强制上报图像
+                MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
+                intent.setClass(ReceiveHandlerService.this, PhonePushService.class);
+                intent.putExtra(Constants.TYPE,Constants.RECEIVE_PUSH);
+            }else{
+                intent.setClass(ReceiveHandlerService.this, ReceiveLiveCommingService.class);
+            }
             startService(intent);
         }
     });
@@ -659,6 +669,17 @@ public class ReceiveHandlerService extends Service{
         notificationManager.notify(noticeId, notification);
         lastNotifyTime = System.currentTimeMillis();
     };
+
+    /**
+     * 收到强制上报的通知
+     */
+    private ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler receiveNotifyEmergencyVideoLiveIncommingMessageHandler = message -> myHandler.post(() -> {
+        //紧急模式（先把上报视频的状态机清空）
+
+
+    });
+
+
 
     private void showDialogView(){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){

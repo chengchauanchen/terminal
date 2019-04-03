@@ -27,6 +27,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.vc.R;
@@ -92,6 +93,8 @@ public abstract class BaseService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);
+
     }
 
     @Override
@@ -198,6 +201,7 @@ public abstract class BaseService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
 
@@ -300,6 +304,24 @@ public abstract class BaseService extends Service{
                     showPopMiniView();
                 }
             }
+        }
+    };
+    /**
+     * 收到上报图像的通知
+     */
+    private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId, emergencyType) -> {
+        //强制上报
+        if(emergencyType){
+            SensorUtil.getInstance().unregistSensor();
+
+            if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+                MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
+            }
+            Log.d("BaseService", "MyApplication.instance.getIndividualState():" + MyApplication.instance.getIndividualState());
+            if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
+                MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
+            }
+            removeView();
         }
     };
 }

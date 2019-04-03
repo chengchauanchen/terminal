@@ -543,7 +543,7 @@ public class SettingFragmentNew extends BaseFragment {
     /**收到别人请求我开启直播的通知**/
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler() {
         @Override
-        public void handler(final String mainMemberName, final int mainMemberId) {
+        public void handler(final String mainMemberName, final int mainMemberId,boolean emergencyType) {
             mHandler.post(() -> {
                 if (dialog != null){
                     dialog.dismiss();

@@ -354,7 +354,7 @@ public class NewsFragment extends BaseFragment {
         loadMessages();
         mMessageListAdapter = new MessageListAdapter(getContext(), messageList, idNameMap);
         newsList.setAdapter(mMessageListAdapter);
-        MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord());
+        MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(messageList));
     }
 
     @Override
@@ -609,7 +609,7 @@ public class NewsFragment extends BaseFragment {
      * @param unReadCount 原来未读条数
      * @param terminalMessage 新消息
      */
-    private void whetherUnReadAdd(int unReadCount, TerminalMessage terminalMessage,boolean clearUnread) {
+    private void whetherUnReadAdd(int unReadCount, TerminalMessage terminalMessage,boolean clearUnread,long tempGroupMessageVersion) {
         //如果是自己发的消息，如果是请求过来的消息就清空未读，如果是个呼的消息，就用原来的未读
         if(terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
             if(clearUnread){
@@ -656,10 +656,10 @@ public class NewsFragment extends BaseFragment {
                             }
                         }
                     }else {//不是当前打开的会话组，通知
-                        setGroupMessageUnReadCount(unReadCount, terminalMessage);
+                        setGroupMessageUnReadCount(unReadCount, terminalMessage,tempGroupMessageVersion);
                     }
                 }else {//组会话页关闭， 通知
-                    setGroupMessageUnReadCount(unReadCount, terminalMessage);
+                    setGroupMessageUnReadCount(unReadCount, terminalMessage,tempGroupMessageVersion);
                 }
             }
         }
@@ -713,17 +713,17 @@ public class NewsFragment extends BaseFragment {
         }
     }
 
-    private void setGroupMessageUnReadCount(int unReadCount, TerminalMessage terminalMessage) {
+    private void setGroupMessageUnReadCount(int unReadCount, TerminalMessage terminalMessage,long tempGroupMessageVersion) {
         int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
         List<Integer> scanGroups = MyTerminalFactory.getSDK().getConfigManager().loadScanGroup();//组扫描列表
         boolean groupScanTog = MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false);//组扫描开关
         if (terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){//组呼消息
             if (terminalMessage.isOffLineMessage) {//离线的组呼也是未读
-                terminalMessage.unReadCount = unReadCount + 1;
+//                terminalMessage.unReadCount = unReadCount + 1;
                 terminalMessage.messageBody.put(JsonParam.UNREAD, true);
             } else {
                 if(terminalMessage.messageToId == currentGroupId){//是当前值
-                    terminalMessage.unReadCount = unReadCount;
+//                    terminalMessage.unReadCount = unReadCount;
                     terminalMessage.messageBody.put(JsonParam.UNREAD, false);
                 }else{//不是当前值
                     if (groupScanTog){//组扫描开着
@@ -735,21 +735,41 @@ public class NewsFragment extends BaseFragment {
                             }
                         }
                         if (isScanGroup){//在组扫描列表中
-                            terminalMessage.unReadCount = unReadCount;
+//                            terminalMessage.unReadCount = unReadCount;
                             terminalMessage.messageBody.put(JsonParam.UNREAD, false);
                         }else {
-                            terminalMessage.unReadCount = unReadCount + 1;
+//                            terminalMessage.unReadCount = unReadCount + 1;
                             terminalMessage.messageBody.put(JsonParam.UNREAD, true);
                         }
                     }else {//组扫描关着，判断主组状态
-                        terminalMessage.unReadCount = unReadCount + 1;
+//                        terminalMessage.unReadCount = unReadCount + 1;
                         terminalMessage.messageBody.put(JsonParam.UNREAD, true);
                     }
                 }
             }
 
         }else {//其它类型的消息
-            terminalMessage.unReadCount = unReadCount + 1;
+//            terminalMessage.unReadCount = unReadCount + 1;
+        }
+        terminalMessage.unReadCount = getGroupMessageUnreadCount(unReadCount,terminalMessage,tempGroupMessageVersion);
+    }
+
+    /**
+     * 获取组消息的未读数量
+     * @param unReadCount
+     * @param terminalMessage
+     * @param tempGroupMessageVersion
+     * @return
+     */
+    private int getGroupMessageUnreadCount(int unReadCount, TerminalMessage terminalMessage,long tempGroupMessageVersion){
+        if(tempGroupMessageVersion == 0){
+            return (unReadCount + 1);
+        }else{
+            if(terminalMessage.messageVersion>tempGroupMessageVersion){
+                return (int) (terminalMessage.messageVersion-tempGroupMessageVersion);
+            }else{
+                return 0;
+            }
         }
     }
 
@@ -857,6 +877,7 @@ public class NewsFragment extends BaseFragment {
             terminalMessageData.add(terminalMessage);
         }else {
             int unReadCount = 0;
+            long tempGroupMessageVersion = 0;
             Iterator<TerminalMessage> iterator = terminalMessageData.iterator();
             while (iterator.hasNext()){
                 TerminalMessage next = iterator.next();
@@ -880,6 +901,7 @@ public class NewsFragment extends BaseFragment {
                 else if(terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() &&
                         next.messageToId == terminalMessage.messageToId){
                     isRemove = true;
+                    tempGroupMessageVersion = next.messageVersion;
                 }
                 if(isRemove){
                     unReadCount = next.unReadCount;
@@ -887,7 +909,7 @@ public class NewsFragment extends BaseFragment {
                 }
             }
             //未读消息条目是否+1
-            whetherUnReadAdd(unReadCount, terminalMessage,clearUnread);
+            whetherUnReadAdd(unReadCount, terminalMessage,clearUnread,tempGroupMessageVersion);
             terminalMessageData.add(terminalMessage);
         }
     }
@@ -905,7 +927,7 @@ public class NewsFragment extends BaseFragment {
             }
         }
         terminalMessageData.add(terminalMessage);
-        whetherUnReadAdd(unReadCount, terminalMessage,clearUnread);
+        whetherUnReadAdd(unReadCount, terminalMessage,clearUnread,0);
     }
 
     private void generateNotification(TerminalMessage terminalMessage,int position){
@@ -1098,7 +1120,7 @@ public class NewsFragment extends BaseFragment {
      */
     private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> {
         if(connected){
-            MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
+            MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(messageList);
         }
     };
 

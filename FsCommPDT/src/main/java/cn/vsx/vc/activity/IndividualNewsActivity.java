@@ -595,7 +595,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     };
 
     /**收到别人请求我开启直播的通知**/
-    private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId) -> {
+    private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId, emergencyType) -> {
         logger.info("ReceiveNotifyLivingIncommingHandler:"+mainMemberName+"/"+mainMemberId);
         handler.post(() -> {
             isReject=true;

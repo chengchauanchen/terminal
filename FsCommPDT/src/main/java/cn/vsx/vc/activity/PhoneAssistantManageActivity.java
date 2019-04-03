@@ -360,7 +360,7 @@ public class PhoneAssistantManageActivity extends BaseActivity implements View.O
 
     };
     //被动方请求视频上报
-    private ReceiveNotifyLivingIncommingHandler mReceiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId) -> {
+    private ReceiveNotifyLivingIncommingHandler mReceiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId, emergencyType) -> {
         logger.info("被动方请求视频上报");
 
                 if (MediaManager.getMediaPlayer() != null) {

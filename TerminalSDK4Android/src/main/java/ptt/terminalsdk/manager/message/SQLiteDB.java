@@ -12,7 +12,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
 
     public SQLiteDB(Context context) {
-        super(context, "4gptt.db", null, 11);
+        super(context, "4gptt.db", null, 12);
     }
 
     @Override
@@ -29,18 +29,18 @@ public class SQLiteDB extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE IF NOT EXISTS member (_id INTEGER primary key autoincrement, member_id INTEGER, member_name varchar, member_nick_name varchar, " +
                 "member_pinyin varchar, member_phone varchar, member_type INTEGER, unit_name varchar, department_name varchar, is_contacts varchar, unique(member_id))");
         //PDT成员列表
-        db.execSQL("CREATE TABLE IF NOT EXISTS pdtMember (_id INTEGER primary key autoincrement, member_id INTEGER, member_no INTEGER, member_name varchar, member_nick_name varchar, " +
+        db.execSQL("CREATE TABLE IF NOT EXISTS pdtMember (_id INTEGER primary key autoincrement, member_id INTEGER, member_no INTEGER,unique_no INTEGER, member_name varchar, member_nick_name varchar, " +
                 "member_pinyin varchar, member_phone varchar, member_type INTEGER, unit_name varchar, department_name varchar, is_contacts varchar, unique(member_id))");
 
         //警务通成员列表
-        db.execSQL("CREATE TABLE IF NOT EXISTS phoneMember (_id INTEGER primary key autoincrement, member_id INTEGER, member_no INTEGER, member_name varchar, member_nick_name varchar, " +
+        db.execSQL("CREATE TABLE IF NOT EXISTS phoneMember (_id INTEGER primary key autoincrement, member_id INTEGER, member_no INTEGER,unique_no INTEGER, member_name varchar, member_nick_name varchar, " +
                 "member_pinyin varchar, member_phone varchar, member_type INTEGER, unit_name varchar, department_name varchar, is_contacts varchar, unique(member_id))");
         //组列表
         db.execSQL("CREATE TABLE IF NOT EXISTS folderGroup (_id INTEGER primary key autoincrement, group_id INTEGER, group_no INTEGER, group_name varchar,department_name varchar, folder_id INTEGER, folder_name varchar, " +
                 "block_id INTEGER, block_name varchar, unique(group_id))");
 
         //组列表
-        db.execSQL("CREATE TABLE IF NOT EXISTS groupData (_id INTEGER primary key autoincrement, group_id INTEGER, group_no INTEGER,group_name varchar,department_name varchar,group_type INTEGER,response_group_type varchar, unique(group_id))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS groupData (_id INTEGER primary key autoincrement, group_id INTEGER, group_no INTEGER, group_unique_no INTEGER,group_name varchar,department_name varchar,group_type INTEGER,response_group_type varchar, unique(group_id))");
 
         //通话记录列表
         db.execSQL("CREATE TABLE IF NOT EXISTS callRecord (_id INTEGER primary key autoincrement, call_id varchar,member_name varchar ,call_phone varchar,call_records varchar,call_time varchar,call_path varchar,call_download varchar,call_playing varchar, unique(call_id))");

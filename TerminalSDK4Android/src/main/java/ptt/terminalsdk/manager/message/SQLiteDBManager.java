@@ -186,6 +186,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             values.put("unit_name", member.unitName);
             values.put("department_name", member.departmentName);
             values.put("is_contacts", member.isContacts ? "true" : "false");
+            values.put("unique_no",member.getUniqueNo());
             db.replace(PDT_MEMBER, null, values);
         }
     }
@@ -203,6 +204,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         values.put("unit_name", member.unitName);
         values.put("department_name", member.departmentName);
         values.put("is_contacts", member.isContacts);
+        values.put("unique_no",member.getUniqueNo());
         db.update(PDT_MEMBER, values, "member_id = ?", new String[]{member.id + ""});
     }
 
@@ -242,6 +244,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             values.put("unit_name", member.unitName);
             values.put("department_name", member.departmentName);
             values.put("is_contacts", member.isContacts ? "true" : "false");
+            values.put("unique_no",member.getUniqueNo());
             db.replace(PHONE_MEMBER, null, values);
         }
     }
@@ -259,6 +262,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         values.put("unit_name", member.unitName);
         values.put("department_name", member.departmentName);
         values.put("is_contacts", member.isContacts);
+        values.put("unique_no",member.getUniqueNo());
         db.update(PHONE_MEMBER, values, "member_id = ?", new String[]{member.id + ""});
     }
 
@@ -385,7 +389,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 member.unitName = cursor.getString(cursor.getColumnIndex("unit_name"));
                 member.departmentName = cursor.getString(cursor.getColumnIndex("department_name"));
                 member.isContacts = Boolean.valueOf(cursor.getString(cursor.getColumnIndex("is_contacts")));
-
+                member.setUniqueNo(cursor.getLong(cursor.getColumnIndex("unique_no")));
                 memberList.add(member);
             }
             cursor.close();
@@ -455,6 +459,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             values.put("department_name",group.getDepartmentName());
             values.put("group_type",group.getGroupType().getCode());
             values.put("response_group_type",group.getResponseGroupType());
+            values.put("group_unique_no",group.getUniqueNo());
             db.replace(GROUP_DATA, null, values);
         }
     }
@@ -474,6 +479,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         values.put("department_name",group.getDepartmentName());
         values.put("group_type",group.getGroupType().getCode());
         values.put("response_group_type",group.getResponseGroupType());
+        values.put("group_unique_no",group.getUniqueNo());
         db.update(GROUP_DATA, values, "group_id = ?", new String[]{group.id + ""});
     }
 
@@ -496,6 +502,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 group.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
                 group.setGroupType(GroupType.getInstanceByCode(cursor.getInt(cursor.getColumnIndex("group_type"))));
                 group.setResponseGroupType(cursor.getString(cursor.getColumnIndex("response_group_type")));
+                group.setUniqueNo(cursor.getLong(cursor.getColumnIndex("group_unique_no")));
                 groupList.add(group);
             }
             cursor.close();

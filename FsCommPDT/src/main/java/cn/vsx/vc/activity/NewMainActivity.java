@@ -184,7 +184,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 if (isRegisted) {//注册过，在后台登录，session超时也走这
                     TerminalFactory.getSDK().getAuthManagerTwo().login();
                     logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity中登录了");
-//                    MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
+                    MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
                 } else {//没注册过，关掉主界面，去注册界面
                     startActivity(new Intent(NewMainActivity.this, RegistActivity.class));
                     NewMainActivity.this.finish();
@@ -224,7 +224,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         public void handler(int resultCode, String resultDesc){
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
                 myHandler.post(() -> noNetWork.setVisibility(View.GONE));
-                MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
+                MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
             }
         }
     };

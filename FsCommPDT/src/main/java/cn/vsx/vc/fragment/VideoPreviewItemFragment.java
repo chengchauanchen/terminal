@@ -250,7 +250,7 @@ public class VideoPreviewItemFragment extends BaseFragment implements TextureVie
 
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler(){
         @Override
-        public void handler(String mainMemberName, int mainMemberId){
+        public void handler(String mainMemberName, int mainMemberId,boolean emergencyType){
             if(mMediaPlayer != null && mMediaPlayer.isPlaying()){
                 mMediaPlayer.pause();
                 iv_pause_continue.setImageResource(R.drawable.on_pause);
