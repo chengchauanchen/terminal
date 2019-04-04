@@ -4,13 +4,17 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.IGotaKeyHandler;
 import android.app.IGotaKeyMonitor;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ResultReceiver;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.TextureView;
@@ -46,6 +50,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicatio
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberNotLivingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberStopWatchMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
@@ -62,6 +67,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
+import static cn.vsx.vc.receive.Actions.KILL_LIVE_WATCH;
 import static org.easydarwin.config.Config.PLAYKEY;
 import static org.easydarwin.config.Config.RTMPPLAYKEY;
 
@@ -114,6 +120,7 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
         mPopupMiniLive.setOnTouchListener(miniPopOnTouchListener);
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
@@ -240,6 +247,9 @@ public class PullLivingService extends BaseService{
 
     @Override
     protected void initBroadCastReceiver(){
+        IntentFilter mReceivFilter = new IntentFilter();
+        mReceivFilter.addAction(KILL_LIVE_WATCH);
+        registerReceiver(mBroadcastReceiv, mReceivFilter);
     }
 
     @Override
@@ -255,6 +265,7 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
     }
     /**
      * 主动方请求组呼的消息
@@ -374,6 +385,32 @@ public class PullLivingService extends BaseService{
         ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
         mHandler.post(this::finishVideoLive);
     };
+
+    /**
+     * 通知终端停止观看直播
+     **/
+    private ReceiveNotifyMemberStopWatchMessageHandler receiveNotifyMemberStopWatchMessageHandler = message -> {
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.force_stop_watch));
+        mHandler.post(this::finishVideoLive);
+    };
+    /**
+     * 停止观看
+     */
+    private BroadcastReceiver mBroadcastReceiv = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent){
+            String action = intent.getAction();
+            if(null == action){
+                return;
+            }
+            if(KILL_LIVE_WATCH.equals(intent.getAction())){
+                stopBusiness();
+            }
+        }
+    };
+
+
+
 
     private IGotaKeyHandler.Stub gotaKeHandler = new IGotaKeyHandler.Stub(){
         @Override

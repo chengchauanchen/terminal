@@ -13,6 +13,7 @@ public interface Actions {
     String CALL_STOPPED = "call_stopped";
     String STOP_INDIVDUALCALL_SERVEIC = "stop_indivdualcall_service";
     String KILL_ACT_CALL = "kill_act_call";
+    String KILL_LIVE_WATCH = "kill_live_watch";
     String SEND_LIVE_THEME = "send_live_theme";
     String HIDE_KEY = "hide_key";
 }

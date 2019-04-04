@@ -10,6 +10,7 @@ import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.support.annotation.Nullable;
@@ -27,6 +28,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
@@ -94,6 +96,7 @@ public abstract class BaseService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyMessageHandler);
 
     }
 
@@ -202,6 +205,7 @@ public abstract class BaseService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEmergencyMessageHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
 
@@ -245,7 +249,8 @@ public abstract class BaseService extends Service{
     protected void stopBusiness(){
         SensorUtil.getInstance().unregistSensor();
         revertStateMachine();
-        removeView();
+        mHandler.post(this::removeView);
+
     }
 
     /**
@@ -269,7 +274,7 @@ public abstract class BaseService extends Service{
      */
     private ReceiveForceReloginHandler receiveForceReloginHandler = version -> {
         ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
-        removeView();
+        mHandler.post(() -> removeView());
     };
 
     /**
@@ -306,6 +311,12 @@ public abstract class BaseService extends Service{
             }
         }
     };
+
+    /**
+     * 收到强制停止的通知
+     */
+    private ReceiveNotifyEmergencyMessageHandler receiveNotifyEmergencyMessageHandler = this::stopBusiness;
+
     /**
      * 收到上报图像的通知
      */
@@ -321,7 +332,7 @@ public abstract class BaseService extends Service{
             if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
                 MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
             }
-            removeView();
+            mHandler.post(this::removeView);
         }
     };
 }

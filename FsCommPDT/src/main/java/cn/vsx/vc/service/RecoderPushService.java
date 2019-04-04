@@ -47,6 +47,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicatio
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyOtherStopVideoMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
@@ -116,6 +117,7 @@ public class RecoderPushService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveExternStorageSizeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUVCCameraConnectChangeHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);
 
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
@@ -223,6 +225,7 @@ public class RecoderPushService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUVCCameraConnectChangeHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);
     }
 
     @SuppressLint("InflateParams")
@@ -407,6 +410,14 @@ public class RecoderPushService extends BaseService{
         if(!connected){
             finishVideoLive();
         }
+    };
+
+    /**
+     * 收到上报停止的通知
+     */
+    private ReceiveNotifyOtherStopVideoMessageHandler receiveNotifyOtherStopVideoMessageHandler = (message) -> {
+        logger.info("收到停止上报通知");
+        mHandler.post(() -> finishVideoLive());
     };
 
     private RtspReceiver mResultReceiver;

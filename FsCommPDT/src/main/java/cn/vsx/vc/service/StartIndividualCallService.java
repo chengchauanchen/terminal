@@ -2,6 +2,7 @@ package cn.vsx.vc.service;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -26,6 +27,8 @@ import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.view.IndividualCallTimerView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
+
+import static cn.vsx.vc.receive.Actions.KILL_ACT_CALL;
 
 /**
  * 作者：xuxiaolong

@@ -152,7 +152,7 @@ public class CallingService extends BaseService{
     protected void initBroadCastReceiver(){
         IntentFilter mReceivFilter = new IntentFilter();
         mReceivFilter.addAction(KILL_ACT_CALL);
-        LocalBroadcastManager.getInstance(this).registerReceiver(mBroadcastReceiv, mReceivFilter);
+        registerReceiver(mBroadcastReceiv, mReceivFilter);
     }
 
     @Override

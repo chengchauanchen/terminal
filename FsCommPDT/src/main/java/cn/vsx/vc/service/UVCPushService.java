@@ -43,6 +43,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicatio
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyOtherStopVideoMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
@@ -136,6 +137,7 @@ public class UVCPushService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUVCCameraConnectChangeHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);
 
         mSvUvcLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvUvcLive.setOnClickListener(svOnClickListener);
@@ -237,6 +239,7 @@ public class UVCPushService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUVCCameraConnectChangeHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);
     }
 
     @Override
@@ -366,6 +369,14 @@ public class UVCPushService extends BaseService{
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
             mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
         }
+    };
+
+    /**
+     * 收到上报停止的通知
+     */
+    private ReceiveNotifyOtherStopVideoMessageHandler receiveNotifyOtherStopVideoMessageHandler = (message) -> {
+        logger.info("收到停止上报通知");
+        mHandler.post(() -> finishVideoLive());
     };
 
 

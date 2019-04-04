@@ -32,6 +32,7 @@ import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
+import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
@@ -45,6 +46,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMultimediaMessageComplet
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyOtherStopVideoMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
@@ -366,6 +368,13 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                 intent.putExtra("userId", userId);
                 intent.putExtra("userName", userName);
                 startActivity(intent);
+//                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member(userId, userName));
+//                  OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId);
+//                PTTProtolbuf.NotifyOtherStopVideoMessage.Builder b = PTTProtolbuf.NotifyOtherStopVideoMessage.newBuilder();
+//                b.setCallId(0);
+//                b.setMainMemberId(0);
+//                b.setVersion(TerminalFactory.getSDK().getParam(Params.VERSION, 0));
+//                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyOtherStopVideoMessageHandler.class,b.build());
                 break;
             case R.id.individual_news_help:
                 //                Intent intent = new Intent(this, HelpActivity.class);

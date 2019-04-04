@@ -31,6 +31,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallInco
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.vc.R;
+import cn.vsx.vc.utils.StringUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -314,7 +315,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
         url = getIntent().getStringExtra("URL");
         String liveTheme = getIntent().getStringExtra("liveTheme");
         String duration = getIntent().getStringExtra("DURATION");
-        maxTime = ((int) (Float.valueOf(duration) * 1000));
+        maxTime = ((int) (StringUtil.toFloat(duration) * 1000));
         tv_theme.setText(liveTheme);
         play(0);
     }

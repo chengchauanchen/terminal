@@ -46,6 +46,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicatio
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyOtherStopVideoMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -142,6 +143,7 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveExternStorageSizeHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);
 
 
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
@@ -252,6 +254,7 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);
     }
 
     private void hideAllView(){
@@ -360,6 +363,13 @@ public class PhonePushService extends BaseService{
             ToastUtil.showToast(PhonePushService.this, getString(R.string.toast_tempt_storage_space_is_in_urgent_need));
         }
     });
+    /**
+     * 收到上报停止的通知
+     */
+    private ReceiveNotifyOtherStopVideoMessageHandler receiveNotifyOtherStopVideoMessageHandler = (message) -> {
+        logger.info("收到停止上报通知");
+        mHandler.post(() -> finishVideoLive());
+    };
 
 
     /**

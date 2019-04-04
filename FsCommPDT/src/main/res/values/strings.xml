@@ -520,4 +520,6 @@
     <string name="card_title">card_title</string>
     <string name="toast_tempt_insufficient_storage_space">存储空间不足</string>
     <string name="toast_tempt_storage_space_is_in_urgent_need">存储空间告急</string>
+
+    <string name="force_stop_watch">被踢出观看</string>
 </resources>

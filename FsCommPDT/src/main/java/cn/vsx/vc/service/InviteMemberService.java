@@ -222,7 +222,9 @@ public class InviteMemberService extends BaseService{
 
     }
 
-    private ReceiveRemoveSwitchCameraViewHandler receiveRemoveSwitchCameraViewHandler = this::removeView;
+    private ReceiveRemoveSwitchCameraViewHandler receiveRemoveSwitchCameraViewHandler = ()->{
+        mHandler.post(this::removeView);
+    };
 
     private ReceiveUpdatePhoneMemberHandler receiveUpdatePhoneMemberHandler = PhoneMember -> mHandler.post(() -> {
         MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();

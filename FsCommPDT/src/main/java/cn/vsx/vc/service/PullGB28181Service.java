@@ -1,13 +1,17 @@
 package cn.vsx.vc.service;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ResultReceiver;
+import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
@@ -28,12 +32,15 @@ import java.util.Date;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberStopWatchMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
+import static cn.vsx.vc.receive.Actions.KILL_ACT_CALL;
+import static cn.vsx.vc.receive.Actions.KILL_LIVE_WATCH;
 import static org.easydarwin.config.Config.PLAYKEY;
 
 public class PullGB28181Service extends BaseService{
@@ -81,6 +88,9 @@ public class PullGB28181Service extends BaseService{
 
     @Override
     protected void initBroadCastReceiver(){
+        IntentFilter mReceivFilter = new IntentFilter();
+        mReceivFilter.addAction(KILL_LIVE_WATCH);
+        registerReceiver(mBroadcastReceiv, mReceivFilter);
     }
 
     @Override
@@ -90,6 +100,7 @@ public class PullGB28181Service extends BaseService{
         mIvClose.setOnClickListener(closeOnClickListener);
         mLlInviteMember.setOnClickListener(inviteOnClickListener);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
     }
 
     @Override
@@ -141,9 +152,33 @@ public class PullGB28181Service extends BaseService{
     public void onDestroy(){
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
     }
 
     private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setPushAuthority);
+
+    /**
+     * 通知终端停止观看直播
+     **/
+    private ReceiveNotifyMemberStopWatchMessageHandler receiveNotifyMemberStopWatchMessageHandler = message -> {
+        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.force_stop_watch));
+        mHandler.post(this::stopBusiness);
+    };
+    /**
+     * 停止观看
+     */
+    private BroadcastReceiver mBroadcastReceiv = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent){
+            String action = intent.getAction();
+            if(null == action){
+                return;
+            }
+            if(KILL_LIVE_WATCH.equals(intent.getAction())){
+                stopBusiness();
+            }
+        }
+    };
 
     private View.OnClickListener inviteOnClickListener = v->{
         if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())) {

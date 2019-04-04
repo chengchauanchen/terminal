@@ -170,11 +170,11 @@ public class ReceiveCallComingService extends BaseService{
      */
     private ReceiveNotifyIndividualCallStoppedHandler receiveNotifyIndividualCallStoppedHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
         if(SignalServerErrorCode.getInstanceByCode(methodResult) != null){
-            ToastUtil.showToast(MyTerminalFactory.getSDK().application, SignalServerErrorCode.getInstanceByCode(methodResult).getErrorDiscribe());
+            ToastUtil.showToast(MyTerminalFactory.getSDK().getApplication().getApplicationContext(), SignalServerErrorCode.getInstanceByCode(methodResult).getErrorDiscribe());
         }else{
-            ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.other_cancel));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().getApplication().getApplicationContext(), getResources().getString(R.string.other_cancel));
         }
-        mHandler.post(this::individualCallStopped);
+        mHandler.postDelayed(this::individualCallStopped,500);
     });
 
     private View.OnClickListener refuseCallListener = v -> refuseCall();

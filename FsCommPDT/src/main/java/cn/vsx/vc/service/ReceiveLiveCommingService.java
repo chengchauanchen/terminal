@@ -122,7 +122,9 @@ public class ReceiveLiveCommingService extends BaseService{
         mHandler.post(this::stopBusiness);
     };
 
-    private ReceiveRemoveSwitchCameraViewHandler receiveRemoveSwitchCameraViewHandler = this::removeView;
+    private ReceiveRemoveSwitchCameraViewHandler receiveRemoveSwitchCameraViewHandler = () ->{
+        mHandler.post(this::removeView);
+    };
 
     /**
      * 超时未回复answer 通知界面关闭

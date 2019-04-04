@@ -27,6 +27,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.DataUtil;
+import cn.vsx.vc.utils.StringUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -73,7 +74,7 @@ public class LiveHistoryActivity extends BaseActivity{
                     StringBuilder sb = new StringBuilder();
                     sb.append(year).append("-").append(month).append("-").append(day).append("  ").append(hour).append(":").append(min).append(":").append(second);
                     tv_live_start_time.setText(sb.toString());
-                    tv_live_duration.setText(DataUtil.getTime((int) (Float.valueOf(duration)*1000)));
+                    tv_live_duration.setText((StringUtil.toFloat(duration) != 0)?DataUtil.getTime((int) (Float.valueOf(duration)*1000)):"");
                 break;
                 case RECEIVEVOICECHANGED:
                     ll_volume.setVisibility(View.GONE);

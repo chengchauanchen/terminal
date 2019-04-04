@@ -106,4 +106,22 @@ public class StringUtil{
         }
         return str;
     }
+
+    /**
+     * String转float
+     * @param data
+     * @return
+     */
+    public static float toFloat(String data){
+        if(!TextUtils.isEmpty(data)){
+            float result = 0f;
+            try{
+                result = Float.valueOf(data);
+            }catch (Exception e){
+            }finally {
+                return result;
+            }
+        }
+        return 0f;
+    }
 }

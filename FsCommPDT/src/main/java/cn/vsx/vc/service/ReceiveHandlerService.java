@@ -1,11 +1,15 @@
 package cn.vsx.vc.service;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.Build;
@@ -15,6 +19,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
@@ -58,6 +63,8 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
@@ -65,6 +72,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
+import cn.vsx.util.StateMachine.IState;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
@@ -73,6 +81,7 @@ import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.adapter.StackViewAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipConnectedHandler;
@@ -109,6 +118,8 @@ public class ReceiveHandlerService extends Service{
     private static final int WATCH_LIVE = 7;
     private Logger logger = Logger.getLogger(this.getClass());
     private List<TerminalMessage> data = new ArrayList<>();
+    //记录紧急观看的CallId，防止PC端重复发送强制观看的消息
+    private String emergencyCallId ;
 
     //弹窗
     @Bind(R.id.swipeFlingAdapterView)
@@ -134,11 +145,13 @@ public class ReceiveHandlerService extends Service{
                 case WATCH_LIVE:
                     TerminalMessage terminalMessage1 = (TerminalMessage) msg.obj;
                     int position = msg.arg1;
-                    data.remove(stackViewAdapter.getItem(position));
-                    stackViewAdapter.remove(position);
-                    video_dialog.setVisibility(View.GONE);
-                    if(data.size() ==0){
-                        removeView();
+                    if(position>=0){
+                        data.remove(stackViewAdapter.getItem(position));
+                        stackViewAdapter.remove(position);
+                        video_dialog.setVisibility(View.GONE);
+                        if(data.size() ==0){
+                            removeView();
+                        }
                     }
                     Intent intent = new Intent(ReceiveHandlerService.this,PullLivingService.class);
                     intent.putExtra(Constants.WATCH_TYPE,Constants.ACTIVE_WATCH);
@@ -313,52 +326,61 @@ public class ReceiveHandlerService extends Service{
     private final class OnClickListenerGoWatch implements StackViewAdapter.GoWatchListener{
         @Override
         public void onGoWatchClick(final int position){
-            //判断是否有接受图像功能权限
-            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())){
-                ToastUtil.showToast(MyTerminalFactory.getSDK().application, getString(R.string.text_has_no_video_receiver_authority));
-                removeView();
-                return;
-            }
             if(position > data.size() - 1){
                 return;
             }
             final TerminalMessage terminalMessage = stackViewAdapter.getItem(position);
-            //判断消息类型
-            if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()){
-                MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
-                    int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
-                    String url = "http://" + serverIp + ":" + serverPort + "/file/download/isLiving";
-                    Map<String, String> paramsMap = new HashMap<>();
-                    paramsMap.put("callId", terminalMessage.messageBody.getString(JsonParam.CALLID));
-                    paramsMap.put("sign", SignatureUtil.sign(paramsMap));
-                    logger.info("查看视频播放是否结束url：" + url);
-                    String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
-                    logger.info("查看视频播放是否结束结果：" + result);
-                    if(!Util.isEmpty(result)){
-                        JSONObject jsonObject = JSONObject.parseObject(result);
-                        boolean living = jsonObject.getBoolean("living");
-                        if(living){
-                            Message msg = Message.obtain();
-                            msg.what = WATCH_LIVE;
-                            msg.obj = terminalMessage;
-                            msg.arg1 = position;
-                            myHandler.sendMessage(msg);
-                        }else{
-                            removeView();
-                            Intent intent = new Intent(MyTerminalFactory.getSDK().application, LiveHistoryActivity.class);
-                            intent.putExtra("terminalMessage", terminalMessage);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            //                                intent.putExtra("endChatTime",endChatTime);
-                            startActivity(intent);
-                        }
+            goToWatch(terminalMessage,position);
+        }
+    }
+
+    /**
+     * 去观看
+     * @param terminalMessage
+     * @param position
+     */
+    private void goToWatch(TerminalMessage terminalMessage,int position){
+        //判断是否有接受图像功能权限
+        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application, getString(R.string.text_has_no_video_receiver_authority));
+            removeView();
+            return;
+        }
+        //判断消息类型
+        if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()){
+            MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+                String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
+                int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
+                String url = "http://" + serverIp + ":" + serverPort + "/file/download/isLiving";
+                Map<String, String> paramsMap = new HashMap<>();
+                paramsMap.put("callId", terminalMessage.messageBody.getString(JsonParam.CALLID));
+                paramsMap.put("sign", SignatureUtil.sign(paramsMap));
+                logger.info("查看视频播放是否结束url：" + url);
+                String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
+                logger.info("查看视频播放是否结束结果：" + result);
+                if(!Util.isEmpty(result)){
+                    JSONObject jsonObject = JSONObject.parseObject(result);
+                    boolean living = jsonObject.getBoolean("living");
+                    if(living){
+                        Message msg = Message.obtain();
+                        msg.what = WATCH_LIVE;
+                        msg.obj = terminalMessage;
+                        msg.arg1 = position;
+                        myHandler.sendMessage(msg);
+                    }else{
+                        removeView();
+                        Intent intent = new Intent(MyTerminalFactory.getSDK().application, LiveHistoryActivity.class);
+                        intent.putExtra("terminalMessage", terminalMessage);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        //                                intent.putExtra("endChatTime",endChatTime);
+                        startActivity(intent);
                     }
-                });
-            }else if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
-                // TODO: 2018/5/4 去看警情
-            }else if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
-                goWatchGB28121(terminalMessage);
-            }
+                }
+            });
+        }else if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
+            // TODO: 2018/5/4 去看警情
+        }else if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+            goWatchGB28121(terminalMessage);
         }
     }
 
@@ -416,7 +438,7 @@ public class ReceiveHandlerService extends Service{
     /**
      * 收到别人请求我开启直播的通知
      **/
-    private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId ,emergencyType) -> myHandler.post(() -> {
+    private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId, emergencyType) -> myHandler.post(() -> {
         Intent intent = new Intent();
         intent.putExtra(Constants.MEMBER_NAME, mainMemberName);
         intent.putExtra(Constants.MEMBER_ID, mainMemberId);
@@ -439,13 +461,19 @@ public class ReceiveHandlerService extends Service{
         }else{
             if(emergencyType){
                 //强制上报图像
+                //如果在组呼或者听组呼时  就停止
+                Map<TerminalState, IState<?>> currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
+                if(currentStateMap.containsKey(TerminalState.GROUP_CALL_LISTENING)||currentStateMap.containsKey(TerminalState.GROUP_CALL_SPEAKING)){
+                    TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
+                }
                 MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
                 intent.setClass(ReceiveHandlerService.this, PhonePushService.class);
                 intent.putExtra(Constants.TYPE,Constants.RECEIVE_PUSH);
+                myHandler.postDelayed(() -> startService(intent),1000);
             }else{
                 intent.setClass(ReceiveHandlerService.this, ReceiveLiveCommingService.class);
+                startService(intent);
             }
-            startService(intent);
         }
     });
 
@@ -472,6 +500,28 @@ public class ReceiveHandlerService extends Service{
         if(!isReceiver){
             return;
         }
+        //收到紧急观看的消息(国标、视频)
+        if((terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.EMERGENCY_INFORM_TO_WATCH_LIVE)||
+                (terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.EMERGENCY_INFORM_TO_WATCH_LIVE)){
+            //停止一切业务，开始观看
+            String callId = terminalMessage.messageBody.getString(JsonParam.CALLID);
+            //过滤重复收到强制观看的消息
+            if(android.text.TextUtils.isEmpty(emergencyCallId)||(!android.text.TextUtils.isEmpty(emergencyCallId)&&!android.text.TextUtils.equals(callId,emergencyCallId))){
+                emergencyCallId = callId;
+                Map<TerminalState, IState<?>> currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
+                if(currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PUSHING)
+                        ||currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PLAYING)
+                        || currentStateMap.containsKey(TerminalState.INDIVIDUAL_CALLING)){
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyEmergencyMessageHandler.class);
+                }
+                if(currentStateMap.containsKey(TerminalState.GROUP_CALL_LISTENING) || currentStateMap.containsKey(TerminalState.GROUP_CALL_SPEAKING)){
+                    TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
+                }
+                myHandler.postDelayed(() -> goToWatch(terminalMessage,-1),1000);
+            }
+         return;
+        }
+
         //判断消息类型，是否弹窗
         if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode() || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE){
             if(!MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress){
@@ -507,6 +557,11 @@ public class ReceiveHandlerService extends Service{
         if(ActivityCollector.isActivityExist(GroupCallNewsActivity.class) && GroupCallNewsActivity.isForeground && terminalMessage.messageToId == GroupCallNewsActivity.mGroupId){
             return;
         }
+        createNotification(terminalMessage);
+    };
+
+    private void createNotification(TerminalMessage terminalMessage){
+
         //通知栏标题
         String noticeTitle;
         //通知栏内容
@@ -648,37 +703,70 @@ public class ReceiveHandlerService extends Service{
         bundle.putSerializable("TerminalMessage", terminalMessage);
         intent.putExtra("bundle", bundle);
         Log.e("IndividualCallService", "通知栏消息:" + terminalMessage);
-        //            intent.putExtra("TerminalMessage",terminalMessage);
         PendingIntent pIntent = PendingIntent.getBroadcast(MyTerminalFactory.getSDK().application, noticeId, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Notification.Builder myBuilder = new Notification.Builder(MyTerminalFactory.getSDK().application);
-        myBuilder.setContentTitle(noticeTitle)//设置通知标题
-                .setContentText(unReadCountText + noticeContent)//设置通知内容
-                .setTicker(getString(R.string.text_you_has_a_new_message))//设置状态栏提示消息
-                .setSmallIcon(R.drawable.pttpdt)//设置通知图标
-                .setAutoCancel(true)//点击后取消
-                .setWhen(System.currentTimeMillis())//设置通知时间
-                .setPriority(Notification.PRIORITY_HIGH)//高优先级
-                .setContentIntent(pIntent).setDefaults(Notification.DEFAULT_SOUND); //设置通知点击事件
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-            //设置任何情况都会显示通知
-            myBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            String channelId = createNotificationChannel();
+            NotificationCompat.Builder myBuilder = new NotificationCompat.Builder(getApplicationContext(), channelId);
+            myBuilder.setContentTitle(noticeTitle)//设置通知标题
+                    .setContentText(unReadCountText + noticeContent)//设置通知内容
+                    .setTicker(getString(R.string.text_you_has_a_new_message))//设置状态栏提示消息
+                    .setSmallIcon(R.drawable.pttpdt)//设置通知图标
+                    .setAutoCancel(true)//点击后取消
+                    .setWhen(System.currentTimeMillis())//设置通知时间
+                    .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setContentIntent(pIntent).setDefaults(Notification.DEFAULT_SOUND); //设置通知点击事件
+            Notification notification = myBuilder.build();
+            notificationManager.notify(noticeId,notification);
+        }else {
+            Notification.Builder myBuilder = new Notification.Builder(MyTerminalFactory.getSDK().application);
+            myBuilder.setContentTitle(noticeTitle)//设置通知标题
+                    .setContentText(unReadCountText + noticeContent)//设置通知内容
+                    .setTicker(getString(R.string.text_you_has_a_new_message))//设置状态栏提示消息
+                    .setSmallIcon(R.drawable.pttpdt)//设置通知图标
+                    .setAutoCancel(true)//点击后取消
+                    .setWhen(System.currentTimeMillis())//设置通知时间
+                    .setPriority(Notification.PRIORITY_HIGH)//高优先级
+                    .setContentIntent(pIntent).setDefaults(Notification.DEFAULT_SOUND); //设置通知点击事件
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                //设置任何情况都会显示通知
+                myBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);
+            }
+            Notification notification = myBuilder.build();
+            //通过通知管理器来发起通知，ID区分通知
+            notificationManager.notify(noticeId, notification);
         }
-        Notification notification = myBuilder.build();
-        //通过通知管理器来发起通知，ID区分通知
-        notificationManager.notify(noticeId, notification);
         lastNotifyTime = System.currentTimeMillis();
-    };
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private String createNotificationChannel(){
+        String channelId = "cn.vsx.vc";
+        NotificationChannel chan = new NotificationChannel(channelId,
+                "notifycationMessage", NotificationManager.IMPORTANCE_NONE);
+        chan.setLightColor(Color.BLUE);
+        chan.setSound(null,null);
+        chan.enableVibration(false);
+        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        NotificationManager manager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+        if(null !=manager){
+            manager.createNotificationChannel(chan);
+        }
+        return channelId;
+    }
 
     /**
-     * 收到强制上报的通知
+     * 收到强制上报图像的通知
      */
     private ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler receiveNotifyEmergencyVideoLiveIncommingMessageHandler = message -> myHandler.post(() -> {
-        //紧急模式（先把上报视频的状态机清空）
-
-
+        Map<TerminalState, IState<?>> currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
+        //观看上报图像,个呼
+        if(currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PLAYING)|| currentStateMap.containsKey(TerminalState.INDIVIDUAL_CALLING)){
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyEmergencyMessageHandler.class);
+        }
+        //开启上报功能
+        myHandler.postDelayed(() -> TerminalFactory.getSDK().getLiveManager().openFunctionToLivingIncomming(message),1000);
     });
-
 
 
     private void showDialogView(){
