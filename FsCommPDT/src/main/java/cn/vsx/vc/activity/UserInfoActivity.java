@@ -223,7 +223,7 @@ public class UserInfoActivity extends BaseActivity {
         }
 
 
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId);
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId,false);
     }
 
 

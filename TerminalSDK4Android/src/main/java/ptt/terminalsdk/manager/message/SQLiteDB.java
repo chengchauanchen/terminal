@@ -12,7 +12,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
 
     public SQLiteDB(Context context) {
-        super(context, "4gptt.db", null, 12);
+        super(context, "4gptt.db", null, 13);
     }
 
     @Override
@@ -20,11 +20,11 @@ public class SQLiteDB extends SQLiteOpenHelper {
         //会话列表
         db.execSQL("CREATE TABLE IF NOT EXISTS terminalMessage (_id INTEGER primary key autoincrement, current_member_id INTEGER, message_version LONG, send_time LONG, " +
                 "message_id INTEGER, message_from_id INTEGER, message_from_name varchar, message_url varchar, message_path varchar, message_body TEXT, " +
-                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER, unique(message_version))");
+                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_with_draw INTEGER, unique(message_version))");
         //消息列表
         db.execSQL("CREATE TABLE IF NOT EXISTS messageList (_id INTEGER primary key autoincrement, current_member_id INTEGER,message_version LONG, send_time LONG, unread_count INTEGER," +
                 "message_id INTEGER, message_from_id INTEGER, message_from_name varchar, message_url varchar, message_path varchar, message_body TEXT, " +
-                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER)");
+                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_with_draw INTEGER)");
         //成员列表
         db.execSQL("CREATE TABLE IF NOT EXISTS member (_id INTEGER primary key autoincrement, member_id INTEGER, member_name varchar, member_nick_name varchar, " +
                 "member_pinyin varchar, member_phone varchar, member_type INTEGER, unit_name varchar, department_name varchar, is_contacts varchar, unique(member_id))");

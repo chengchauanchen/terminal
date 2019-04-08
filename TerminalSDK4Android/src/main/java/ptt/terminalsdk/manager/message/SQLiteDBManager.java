@@ -77,6 +77,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         values.put("message_version", terminalMessage.messageVersion);
         values.put("result_code", terminalMessage.resultCode);
         values.put("send_time", terminalMessage.sendTime);
+        values.put("message_with_draw", (terminalMessage.isWithDraw)?1:0);
         db.replace(TABLE_TERMINAL_MESSAGE, null, values);
 //        db.close();
     }
@@ -116,6 +117,18 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         values.put("message_path", terminalMessage.messagePath);
         values.put("message_body", terminalMessage.messageBody.toJSONString());
         db.update(TABLE_TERMINAL_MESSAGE, values, "message_version = ?", new String[]{terminalMessage.messageVersion + ""});
+//        db.close();
+    }
+
+    /**
+     * 更新消息的撤回状态
+     * @param terminalMessage
+     */
+    public synchronized void updateTerminalMessageWithDraw(TerminalMessage terminalMessage) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put("message_with_draw", (terminalMessage.isWithDraw)?1:0);
+        db.update(TABLE_TERMINAL_MESSAGE, values, "message_id = ?", new String[]{terminalMessage.messageId + ""});
 //        db.close();
     }
 
@@ -307,6 +320,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 terminalMessage.messageVersion = cursor.getLong(cursor.getColumnIndex("message_version"));
                 terminalMessage.resultCode = cursor.getInt(cursor.getColumnIndex("result_code"));
                 terminalMessage.sendTime = cursor.getLong(cursor.getColumnIndex("send_time"));
+                int message_with_draw = cursor.getInt(cursor.getColumnIndex("message_with_draw"));
+                terminalMessage.isWithDraw = (message_with_draw == 1) ;
                 //消息列表数据库才有unread_count这个字段
                 try {
                     if (cursor.getColumnIndex("unread_count") != -1) {
@@ -346,6 +361,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("result_code", terminalMessage.resultCode);
                 values.put("send_time", terminalMessage.sendTime);
                 values.put("unread_count", terminalMessage.unReadCount);
+                values.put("message_with_draw", (terminalMessage.isWithDraw)?1:0);
                 db.replace(MESSAGE_LIST, null, values);
             }
             db.setTransactionSuccessful();  //设置事务成功完成

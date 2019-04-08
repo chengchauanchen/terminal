@@ -90,6 +90,7 @@ public class InviteMemberService extends BaseService{
     private ArrayList<VideoMember> watchingmembers;
     private int livingMemberId;
     private boolean gb28181Pull;
+    private boolean isGroupPushLive;
     private TerminalMessage oldTerminalMessage;
     private ImageView mIvSearch;
     private LinearLayout mLlSearchMember;
@@ -169,6 +170,7 @@ public class InviteMemberService extends BaseService{
     @Override
     protected void initView(Intent intent){
         gb28181Pull = intent.getBooleanExtra(Constants.GB28181_PULL,false);
+        isGroupPushLive =  intent.getBooleanExtra(Constants.IS_GROUP_PUSH_LIVING,false);
         if(gb28181Pull){
             oldTerminalMessage = (TerminalMessage) intent.getSerializableExtra(Constants.TERMINALMESSAGE);
         }
@@ -636,7 +638,7 @@ public class InviteMemberService extends BaseService{
         Intent intent = new Intent();
         intent.putExtra(Constants.THEME,theme);
         intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
-
+        intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
         intent.putExtra(Constants.PUSH_MEMBERS,mContactAdapter.getSelectMember());
         switch(type){
             case Constants.PHONE_PUSH:

@@ -172,6 +172,7 @@
     <string name="text_cancel">取消</string>
     <string name="text_forward">转发</string>
     <string name="text_copy">复制</string>
+    <string name="text_withdraw">撤回</string>
     <string name="text_delete_this_message">删除该消息</string>
     <string name="text_group">组群</string>
     <string name="text_radio_station">电台</string>
@@ -394,6 +395,7 @@
     <string name="text_message_list_group_call">[组呼]</string>
     <string name="text_message_list_sound_recording">[录音]</string>
     <string name="text_message_list_face_recognition">[人脸识别]</string>
+    <string name="text_message_list_with_draw">[撤回]</string>
     <string name="text_gesture_mismatch">手势不匹配</string>
     <string name="text_load_gesture_lib_fail">手势库加载失败</string>
     <string name="text_camera_not_open_audio_is_not_used">相机未打开，图像上报功能将不能使用。</string>
@@ -522,4 +524,9 @@
     <string name="toast_tempt_storage_space_is_in_urgent_need">存储空间告急</string>
 
     <string name="force_stop_watch">被踢出观看</string>
+    <string name="group_living_number">%1$d人&#160;&#160;正在上报</string>
+    <string name="living_list">上报列表</string>
+    <string name="living_history">上报历史</string>
+
+    <string name="with_draw_content">%1$s撤回了一条消息</string>
 </resources>

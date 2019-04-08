@@ -249,6 +249,7 @@
         <activity android:name=".activity.LiveHistoryActivity"
             android:launchMode="singleTask"/>
         <activity android:name=".activity.BleActivity"/>
+        <activity android:name=".activity.GroupVideoLiveListActivity"/>
         <service android:name=".service.ReceiveHandlerService"
             android:enabled="true"
             android:exported="false"/>

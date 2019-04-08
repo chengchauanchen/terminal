@@ -46,6 +46,7 @@ import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetAllMessageRecordHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.NotifyRecallRecordMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeNameHandler;
@@ -59,12 +60,14 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandl
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePersonMessageNotifyDateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRecallRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.ChatBaseActivity;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.PhoneAssistantManageActivity;
@@ -77,6 +80,7 @@ import cn.vsx.vc.receiveHandle.ReceiverDeleteMessageHandler;
 import cn.vsx.vc.receiver.NotificationClickReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.DataUtil;
+import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -344,6 +348,8 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeNameHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveDownloadFinishHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRecallRecordHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverDeleteMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
 
@@ -390,6 +396,8 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeNameHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveDownloadFinishHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseRecallRecordHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mNotifyRecallRecordMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverDeleteMessageHandler);
@@ -1261,6 +1269,46 @@ public class NewsFragment extends BaseFragment {
             sortFirstMessageList();
         }
     });
+
+    /**
+     * 撤回消息
+     **/
+    private ReceiveResponseRecallRecordHandler mReceiveResponseRecallRecordHandler = (resultCode, resultDesc, messageId) -> {
+        if(resultCode == 0){
+            updataMessageWithDrawState(messageId,false);
+        }
+    };
+
+    /**
+     * 收到别人撤回消息的通知
+     **/
+    private NotifyRecallRecordMessageHandler mNotifyRecallRecordMessageHandler = (messageId) -> {
+         updataMessageWithDrawState(messageId,true);
+    };
+
+    /**
+     * 更新消息的撤回状态
+     * @param messageId
+     */
+    private void updataMessageWithDrawState(long messageId,boolean saveSqlite){
+        TerminalMessage message = new TerminalMessage();
+        message.messageId = messageId;
+        if(messageList.contains(message)){
+            int index =  messageList.indexOf(message);
+            TerminalMessage message1 = messageList.get(index);
+            message1.isWithDraw = true;
+            //更新UI
+            mHandler.post(() ->{
+                if (mMessageListAdapter != null) {
+                    mMessageListAdapter.notifyDataSetChanged();
+                }
+            });
+            //更新数据库
+            if(saveSqlite){
+                TerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessageWithDraw(message);
+            }
+        }
+    }
 
     /**
      * 去掉在通讯录里不存在的组

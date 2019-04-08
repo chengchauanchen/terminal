@@ -77,4 +77,9 @@ public class Constants{
     public static final String USER_NAME = "userName";
 
     public static String OLD_CURRENT_GROUP = "oldCurrentGroup";
+
+    //是否是组内正在上报的列表
+    public static String IS_GROUP_VIDEO_LIVING = "isGroupVideoLiving";
+    public static String IS_GROUP_PUSH_LIVING = "isGroupPushLiving";
+    public static String GROUP_ID = "groupId";
 }

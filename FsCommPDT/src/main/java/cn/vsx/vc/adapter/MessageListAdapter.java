@@ -296,6 +296,10 @@ public class MessageListAdapter extends BaseAdapter {
                     viewHolder.tv_last_msg.setText(R.string.text_message_list_face_recognition);
                 }
             }
+            //消息撤回
+            if(terminalMessage.isWithDraw){
+                viewHolder.tv_last_msg.setText(R.string.text_message_list_with_draw);
+            }
         }
     }
 

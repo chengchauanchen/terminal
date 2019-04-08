@@ -60,6 +60,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoi
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.application.MyApplication;
@@ -371,6 +372,11 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     private void setData(int position, TerminalMessage terminalMessage, int viewType, ChatViewHolder holder) {
+        //消息撤回
+        if(terminalMessage.isWithDraw){
+            withDrawView(terminalMessage,holder);
+            return;
+        }
         handleData(holder, viewType, terminalMessage, position);
         setListener(viewType, holder, terminalMessage, position);
         aboutSend(holder, terminalMessage, viewType);
@@ -379,6 +385,16 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         } else {
             holder.placeHolder.setVisibility(View.GONE);
         }
+    }
+
+    /**
+     * 设置撤回UI
+     * @param terminalMessage
+     */
+    private void withDrawView(TerminalMessage terminalMessage, ChatViewHolder holder) {
+        setText(holder.timeStamp, String.format(activity.getString(R.string.with_draw_content),isReceiver(terminalMessage)?terminalMessage.messageFromName:"我"));
+        setViewVisibility(holder.timeStamp, View.VISIBLE);
+        setViewVisibility(holder.reMain, View.GONE);
     }
 
     private void aboutSend(ChatViewHolder holder, TerminalMessage terminalMessage, int viewType) {
@@ -511,6 +527,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             case MESSAGE_LOCATION_SEND:
                 sendLocationMessage(terminalMessage);
                 break;
+            case MESSAGE_VIDEO_LIVE_SEND:
+                sendVideoLiveMessage(terminalMessage);
+                break;
+
         }
     }
 
@@ -523,11 +543,11 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 ToastUtil.showToast(activity,activity.getString(R.string.text_in_upload_can_not_forward));
                 return false;
             }
-            if (terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
-                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
-                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
-                    terminalMessage.messageType == MessageType.GROUP_CALL.getCode() ||
-                    terminalMessage.messageType == MessageType.AUDIO.getCode()||
+            if (
+//                    terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
+//                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
+//                    terminalMessage.messageType == MessageType.GROUP_CALL.getCode() ||
+//                    terminalMessage.messageType == MessageType.AUDIO.getCode()||
                     MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
                 return false;
             new TranspondDialog(activity, terminalMessage).show();
@@ -1386,6 +1406,17 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
         terminalMessage1.messageToId = toIds.get(0);
         MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1);
+    }
+
+    /**
+     * 发送上报图像信令
+     */
+    private void sendVideoLiveMessage(TerminalMessage terminalMessage) {
+        List<Integer> toIds = setToIds(terminalMessage);
+        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
+        terminalMessage1.messageToId = toIds.get(0);
+        upload = true;
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1);
     }
 
 

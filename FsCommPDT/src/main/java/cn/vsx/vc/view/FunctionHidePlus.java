@@ -159,7 +159,7 @@ public class FunctionHidePlus extends LinearLayout {
                 }else if (title.equals("发送位置")
                         &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.LOCATION);
-                }else if (title.equals("上报图像")){
+                }else if (title.equals("上报图像")||(title.equals("组内上图"))){
                     if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
                         CheckMyPermission.permissionPrompt((Activity) context, Manifest.permission.RECORD_AUDIO);
                         return;
@@ -446,12 +446,13 @@ public class FunctionHidePlus extends LinearLayout {
     private void setNoVideo() {
         titles = null;
         titles=new String[]{
-                "相册","拍照","文件","发送位置"
+                "相册","拍照","文件","发送位置","组内上图"
         };
         images = null;
         images=new Integer[]{
                 R.drawable.album,R.drawable.take_phones,
-                R.drawable.file_selector,R.drawable.position
+                R.drawable.file_selector,R.drawable.position,
+                R.drawable.push_video
         };
     }
     private void setHasVideo() {

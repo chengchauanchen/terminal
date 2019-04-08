@@ -798,7 +798,7 @@ public class ReceiveHandlerService extends Service{
 
 
     //接收到上报视频的回调
-    private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = memberId -> {
+    private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = (memberId,isGroupPushLive) -> {
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_report));
             return;
@@ -812,13 +812,21 @@ public class ReceiveHandlerService extends Service{
             Intent intent = new Intent(ReceiveHandlerService.this, InviteMemberService.class);
             intent.putExtra(Constants.TYPE, Constants.PUSH);
             intent.putExtra(Constants.PUSHING, false);
+            intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
             startService(intent);
         }else{//直接上报了
+            ArrayList<Integer> memberIds = new ArrayList<>();
+            //如果是组内上报
+            if(!isGroupPushLive){
+                memberIds.add(memberId);
+            }
             if(MyApplication.instance.usbAttached){
                 Intent intent = new Intent(ReceiveHandlerService.this,SwitchCameraService.class);
                 intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
                 intent.putExtra(Constants.THEME,"");
                 intent.putExtra(Constants.CAMERA_TYPE,Constants.UVC_CAMERA);
+                intent.putIntegerArrayListExtra(Constants.PUSH_MEMBERS, memberIds);
+                intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
                 startService(intent);
             }else{
                 if(Constants.HYTERA.equals(Build.MODEL)){
@@ -826,6 +834,8 @@ public class ReceiveHandlerService extends Service{
                     intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
                     intent.putExtra(Constants.THEME,"");
                     intent.putExtra(Constants.CAMERA_TYPE,Constants.RECODER_CAMERA);
+                    intent.putIntegerArrayListExtra(Constants.PUSH_MEMBERS, memberIds);
+                    intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
                     startService(intent);
                 }else{
                         //请求成功,直接开始推送视频
@@ -833,9 +843,8 @@ public class ReceiveHandlerService extends Service{
                         intent.putExtra(Constants.TYPE, Constants.ACTIVE_PUSH);
                         intent.putExtra(Constants.THEME,"");
                         intent.setClass(ReceiveHandlerService.this, PhonePushService.class);
-                        ArrayList<Integer> memberIds = new ArrayList<>();
-                        memberIds.add(memberId);
                         intent.putIntegerArrayListExtra(Constants.PUSH_MEMBERS, memberIds);
+                        intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
                         startService(intent);
                 }
             }

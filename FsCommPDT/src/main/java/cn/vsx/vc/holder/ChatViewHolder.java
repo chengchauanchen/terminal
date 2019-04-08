@@ -73,6 +73,7 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
         reBubble = (RelativeLayout) itemView.findViewById(R.id.bubble);
         ivAvatar = (ImageView) itemView.findViewById(R.id.iv_userhead);
         timeStamp = (TextView) itemView.findViewById(R.id.timestamp);
+        reMain = (RelativeLayout) itemView.findViewById(R.id.re_main);
         placeHolder = itemView.findViewById(R.id.placeholder);
         if (isReceiver) {
             tvNick = (TextView) itemView.findViewById(R.id.tv_userid);
@@ -89,7 +90,6 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
     //文本
     public void textFindViewById(View itemView,boolean isReceiver){
         tvContent = (TextView) itemView.findViewById(R.id.tv_chatcontent);
-        reMain = (RelativeLayout) itemView.findViewById(R.id.re_main);
     }
     //图片
     public void imageFindViewById(View itemView,boolean isReceiver){

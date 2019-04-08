@@ -46,6 +46,7 @@ public class SwitchCameraService extends BaseService{
     private long sendDataTime;
 
     private ArrayList<Integer> pushMembers;
+    private boolean isGroupPushLive;
     private String theme;
 
     public SwitchCameraService(){}
@@ -108,6 +109,7 @@ public class SwitchCameraService extends BaseService{
     @Override
     protected void initView(Intent intent){
         pushMembers = intent.getIntegerArrayListExtra(Constants.PUSH_MEMBERS);
+        isGroupPushLive =  intent.getBooleanExtra(Constants.IS_GROUP_PUSH_LIVING,false);
         mLiveConnecting.setVisibility(View.GONE);
         mRlSwitchCamera.setVisibility(View.VISIBLE);
         cameraType = intent.getStringExtra(Constants.CAMERA_TYPE);
@@ -146,6 +148,7 @@ public class SwitchCameraService extends BaseService{
         intent.putExtra(Constants.TYPE,type);
         intent.putExtra(Constants.THEME,theme);
         intent.putExtra(Constants.PUSH_MEMBERS,pushMembers);
+        intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
         startService(intent);
         mHandler.postDelayed(this::removeView,500);
     };
@@ -182,6 +185,7 @@ public class SwitchCameraService extends BaseService{
             intent.putExtra(Constants.TYPE,type);
             intent.putExtra(Constants.THEME,theme);
             intent.putExtra(Constants.PUSH_MEMBERS,pushMembers);
+            intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
             startService(intent);
             mHandler.postDelayed(this::removeView,500);
         }
@@ -222,6 +226,7 @@ public class SwitchCameraService extends BaseService{
                     intent.putExtra(Constants.TYPE,type);
                     intent.putExtra(Constants.THEME,theme);
                     intent.putExtra(Constants.PUSH_MEMBERS,pushMembers);
+                    intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
                     startService(intent);
                     mHandler.removeMessages(CANCELLIVE);
                     mHandler.postDelayed(()->removeView(),500);

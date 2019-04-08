@@ -55,6 +55,7 @@ import cn.vsx.vc.adapter.MemberEnterAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
+import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -100,6 +101,7 @@ public class PhonePushService extends BaseService{
     private MemberEnterAdapter enterOrExitMemberAdapter;
     private static final int CURRENTTIME = 0;
     private static final int HIDELIVINGVIEW = 1;
+    private boolean isGroupPushLive;
 
     public PhonePushService(){}
 
@@ -161,6 +163,7 @@ public class PhonePushService extends BaseService{
     @Override
     protected void initView(Intent intent){
         String type = intent.getStringExtra(Constants.TYPE);
+        isGroupPushLive =  intent.getBooleanExtra(Constants.IS_GROUP_PUSH_LIVING,false);
         hideAllView();
         mRlPhonePushLive.setVisibility(View.VISIBLE);
         showLivingView();
@@ -313,6 +316,10 @@ public class PhonePushService extends BaseService{
         ip = streamMediaServerIp;
         port = String.valueOf(streamMediaServerPort);
         id = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "_" + callId;
+        //如果是组内上报，在组内发送一条上报消息
+        if(isGroupPushLive){
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverGroupPushLiveHandler.class, streamMediaServerIp,streamMediaServerPort,callId);
+        }
         startPush();
 //        startRecord();
     }, 1000);

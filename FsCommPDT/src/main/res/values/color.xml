@@ -553,9 +553,11 @@
     <color name="blue_1a79">#1A79C3</color>
     <color name="blue_00">#0087ff</color>
     <color name="blue_00a">#00A4FF</color>
+    <color name="blue_008_60">#990084e8</color>
     <color name="blue_16">#161127</color>
     <color name="blue_0d">#0D2040</color>
     <color name="blue_35">#354552</color>
+    <color name="blue_62">#627f9f</color>
     <color name="yellow_ef">#EFB152</color>
     <color name="yellow_ff">#fff799</color>
     <color name="yellow_fc">#FCF596</color>

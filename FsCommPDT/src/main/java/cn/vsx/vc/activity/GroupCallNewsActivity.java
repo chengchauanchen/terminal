@@ -24,12 +24,16 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.alibaba.fastjson.JSONObject;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.http.util.TextUtils;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -37,6 +41,7 @@ import butterknife.Bind;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
+import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -50,11 +55,13 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupCurrentOnlineMemberListHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupLivingListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMultimediaFailHandler;
@@ -69,9 +76,13 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHa
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
+import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
+import cn.vsx.vc.utils.FileUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
@@ -92,6 +103,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     LinearLayout noNetWork;
     @Bind(R.id.news_bar_return)
     ImageView newsBarReturn;
+    @Bind(R.id.group_live_history)
+    ImageView groupLiveHistory;
     @Bind(R.id.group_call_activity_member_info)
     ImageView groupCallActivityMemberInfo;
     @Bind(R.id.tv_speaker)
@@ -102,6 +115,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     RelativeLayout progressGroupCall;
     @Bind(R.id.ll_individual_call_come)
     LinearLayout ll_individual_call_come;
+    @Bind(R.id.ll_living)
+    LinearLayout ll_living;
+    @Bind(R.id.tv_living_number)
+    TextView tv_living_number;
     @Bind(R.id.ll_speaker)
     LinearLayout ll_speaker;
     @Bind(R.id.group_call_activity_help)
@@ -133,7 +150,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     private boolean isCurrentGroup;
     //组Id
     public static int mGroupId;
-
+    //获取组内正在上报人数的间隔时间
+    private static final long GET_GROUP_LIVING_INTERVAL_TIME = 20*1000;
     @SuppressWarnings("HandlerLeak")
     private Handler mHandler = new Handler() {
         @Override
@@ -233,11 +251,12 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     public void initListener() {
         newsBarReturn.setOnClickListener(this);
+        groupLiveHistory.setOnClickListener(this);
         groupCallActivityMemberInfo.setOnClickListener(this);
 
         group_call_activity_help.setOnClickListener(this);
         ptt.setOnTouchListener(mOnTouchListener);
-
+        ll_living.setOnClickListener(this);
         if(keyMointor !=null){
             try{
                 gotaKeyHandler = keyMointor.setHandler(new GotaKeHandler());
@@ -262,6 +281,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveForceChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseGroupActiveHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGetGroupLivingListHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverReplayGroupChatVoiceHandler);
         super.initListener();
     }
@@ -281,7 +301,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         }
 
         funcation.setFunction(true, userId);
+        //获取组内在线人数
         MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false);
+        //获取组内正在上报的人数
+        getGroupLivingList();
     }
 
     @Override
@@ -303,6 +326,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveForceChangeGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseGroupActiveHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetGroupLivingListHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverReplayGroupChatVoiceHandler);
         if (volumeViewLayout != null) {
             volumeViewLayout.unRegistLintener();
@@ -316,7 +340,9 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             case R.id.news_bar_return:
                 onBackPressed();
                 break;
-
+            case R.id.group_live_history:
+                goToVideoLiveList(false);
+                break;
             case R.id.group_call_activity_member_info:
                 if (DataUtil.isExistGroup(userId)) {
                     Intent intent = new Intent(MyApplication.instance, GroupMemberActivity.class);
@@ -332,6 +358,13 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 //                intent.setAction("5");
 //                startActivity(intent);
                 break;
+            case R.id.ll_living:
+                //点击跳转到正在上报的列表
+//                ToastUtil.showToast(GroupCallNewsActivity.this,"点击跳转到正在上报的列表");
+                goToVideoLiveList(true);
+                break;
+
+
         }
     }
 
@@ -523,8 +556,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
             }
         }
-
-
     }
 
     private void change2Forbid() {//禁止组呼，不是遥毙
@@ -636,7 +667,34 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     };
 
 
-/**===============================================================================================handler====================================================================================**/
+    /**
+     * 获取组内正在上报人数
+     */
+    private void getGroupLivingList(){
+        long groupUniqueNo = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupUniqueNo(userId);
+        MyTerminalFactory.getSDK().getGroupManager().getGroupLivingList(String.valueOf(groupUniqueNo),true);
+    }
+
+    @Override
+    public void postVideo() {
+//        ToastUtil.showToast(GroupCallNewsActivity.this,"组内上报");
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId,true);
+        //发送组内观看视频消息
+
+    }
+
+    /**
+     * 跳转到组内上报列表
+     * @param isGroupVideoLiving 是否是正在上报列表
+     */
+    private void goToVideoLiveList(boolean isGroupVideoLiving){
+        Intent intent = new Intent(GroupCallNewsActivity.this, GroupVideoLiveListActivity.class);
+        intent.putExtra(Constants.IS_GROUP_VIDEO_LIVING, isGroupVideoLiving);
+        intent.putExtra(Constants.GROUP_ID, userId);
+        startActivity(intent);
+    }
+
+    /**===============================================================================================handler====================================================================================**/
     /**
      * 是否禁止组呼
      */
@@ -1017,6 +1075,26 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             finish();
         }
     };
+    /**
+     * 获取组内正在直播的成员列表
+     */
+    private ReceiveGetGroupLivingListHandler receiveGetGroupLivingListHandler = (memberList,  resultCode, resultDesc,forNumber) -> {
+        handler.post(() -> {
+            if(resultCode == BaseCommonCode.SUCCESS_CODE && !memberList.isEmpty()){
+                //正在上报的人
+                tv_living_number.setText(String.format(GroupCallNewsActivity.this.getString(R.string.group_living_number),memberList.size()));
+                ll_living.setVisibility(View.VISIBLE);
+            }else{
+                //没有正在上报的人
+                tv_living_number.setText("");
+                ll_living.setVisibility(View.GONE);
+            }
+        });
+        if(forNumber){
+            handler.postDelayed(() -> getGroupLivingList(),GET_GROUP_LIVING_INTERVAL_TIME);
+        }
+    };
+
 
     //GH880手机PTT按钮事件
     public class GotaKeHandler extends IGotaKeyHandler.Stub{

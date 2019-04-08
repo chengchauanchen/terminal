@@ -56,7 +56,9 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MemberEnterAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
+import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -103,6 +105,7 @@ public class RecoderPushService extends BaseService{
     private float downY = 0;
     private int oddOffsetX = 0;
     private int oddOffsetY = 0;
+    private boolean isGroupPushLive;
 
     public RecoderPushService(){}
 
@@ -132,7 +135,7 @@ public class RecoderPushService extends BaseService{
     @Override
     protected void initView(Intent intent){
         String type = intent.getStringExtra(Constants.TYPE);
-
+        isGroupPushLive =  intent.getBooleanExtra(Constants.IS_GROUP_PUSH_LIVING,false);
         mPopupMiniLive.setVisibility(View.GONE);
         mRlRecoderView.setVisibility(View.VISIBLE);
         showLivingView();
@@ -353,6 +356,10 @@ public class RecoderPushService extends BaseService{
         ip = streamMediaServerIp;
         port = String.valueOf(streamMediaServerPort);
         id = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "_" + callId;
+        //如果是组内上报，在组内发送一条上报消息
+        if(isGroupPushLive){
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverGroupPushLiveHandler.class, streamMediaServerIp,streamMediaServerPort,callId);
+        }
         if(null != mSvLive.getSurfaceTexture()){
             pushLawRecorder(mSvLive.getSurfaceTexture());
         }

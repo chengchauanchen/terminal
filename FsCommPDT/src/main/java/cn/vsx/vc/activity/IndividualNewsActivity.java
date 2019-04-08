@@ -198,7 +198,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     @Override
     public void postVideo() {
 
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId);
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId,false);
     }
 
     @Override

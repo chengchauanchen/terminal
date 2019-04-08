@@ -56,6 +56,14 @@
             android:layout_weight="1"/>
 
         <ImageView
+            android:id="@+id/group_live_history"
+            android:layout_width="@dimen/dp_35"
+            android:layout_height="@dimen/dp_35"
+            android:layout_marginRight="@dimen/dp_12"
+            android:src="@drawable/group_live_history"
+            android:padding="@dimen/dp_5"/>
+
+        <ImageView
             android:id="@+id/group_call_activity_member_info"
             android:layout_width="@dimen/dp_35"
             android:layout_height="@dimen/dp_35"
@@ -152,6 +160,36 @@
 
     </RelativeLayout>
 
+    <!--组内正在上报的人数-->
+    <LinearLayout
+        android:id="@+id/ll_living"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x40"
+        android:background="@color/blue_008_60"
+        android:layout_below="@+id/rl_topbar"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <ImageView
+            android:layout_width="27.4dp"
+            android:layout_height="15dp"
+            android:src="@drawable/video_icon" />
+
+        <TextView
+            android:id="@+id/tv_living_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:text="3人  正在上报"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_16" />
+
+    </LinearLayout>
+
     <!--正在说话，个呼来了-->
     <LinearLayout
         android:layout_below="@+id/rl_topbar"
@@ -200,7 +238,6 @@
         android:layout_below="@+id/rl_topbar"
         android:layout_width="match_parent"
         android:layout_height="@dimen/x40"
-
         android:background="@color/group_call_news_speaking_bg"
         android:gravity="center_vertical"
         android:orientation="horizontal"

@@ -32,7 +32,7 @@ dependencies {
     compile "com.android.support:design:$support_version"
     compile 'com.github.bumptech.glide:glide:3.8.0'
     //    annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
-    compile 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.8.0'
+    compile 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.44'
     compile 'com.tapadoo.android:alerter:1.0.6'
     compile "com.android.support:support-v4:$support_version"
     compile 'io.reactivex:rxjava:1.2.1'

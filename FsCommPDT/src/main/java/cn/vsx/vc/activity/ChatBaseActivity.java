@@ -72,6 +72,7 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetAllMessageRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetHistoryMessageRecordHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.NotifyRecallRecordMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGPSLocationHandler;
@@ -79,6 +80,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupOrMemberNotExistHan
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMessageNotifyDateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePersonMessageNotifyDateHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRecallRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageFailedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
@@ -93,9 +95,11 @@ import cn.vsx.vc.fragment.NewsFragment;
 import cn.vsx.vc.fragment.TransponFragment;
 import cn.vsx.vc.model.ChatMember;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
+import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
+import cn.vsx.vc.receiveHandle.ReceiverShowWithDrawPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverTransponHandler;
 import cn.vsx.vc.service.PullLivingService;
 import cn.vsx.vc.utils.BitmapUtil;
@@ -212,10 +216,14 @@ public abstract class ChatBaseActivity extends BaseActivity {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendDataMessageSuccessHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getHistoryMessageRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePersonMessageNotifyDateHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiverGroupPushLiveHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileCheckMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowTransponPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowCopyPopupHandler);
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowWithDrawPopupHandler);
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiveResponseRecallRecordHandler);
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverTransponHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverToFaceRecognitionHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSelectChatListHandler);
@@ -356,9 +364,13 @@ public abstract class ChatBaseActivity extends BaseActivity {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendDataMessageSuccessHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(getHistoryMessageRecordHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePersonMessageNotifyDateHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiverGroupPushLiveHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowTransponPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowCopyPopupHandler);
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowWithDrawPopupHandler);
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiveResponseRecallRecordHandler);
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSendFileCheckMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverTransponHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverToFaceRecognitionHandler);
@@ -1481,6 +1493,55 @@ public abstract class ChatBaseActivity extends BaseActivity {
             });
         }
     };
+
+    /**
+     * 撤回消息
+     **/
+    private ReceiverShowWithDrawPopupHandler mReceiverShowWithDrawPopupHandler = terminalMessage -> handler.post(() -> {
+        TerminalFactory.getSDK().getTerminalMessageManager().requestRecallRecordMessage(terminalMessage.messageId);
+    });
+    /**
+     * 撤回消息
+     **/
+    private ReceiveResponseRecallRecordHandler mReceiveResponseRecallRecordHandler = (resultCode, resultDesc, messageId) -> {
+        if(resultCode == 0){
+            updataMessageWithDrawState(messageId,true);
+        }else{
+         ToastUtil.showToast(ChatBaseActivity.this,resultDesc);
+        }
+    };
+
+    /**
+     * 收到别人撤回消息的通知
+     **/
+    private NotifyRecallRecordMessageHandler mNotifyRecallRecordMessageHandler = (messageId) -> {
+        updataMessageWithDrawState(messageId,false);
+    };
+
+    /**
+     * 更新消息的撤回状态
+     * @param messageId
+     */
+    private void updataMessageWithDrawState(long messageId,boolean saveSqlite){
+        TerminalMessage message = new TerminalMessage();
+        message.messageId = messageId;
+        if(chatMessageList.contains(message)){
+            int index =  chatMessageList.indexOf(message);
+            TerminalMessage message1 = chatMessageList.get(index);
+            message1.isWithDraw = true;
+            //更新UI
+            handler.post(() ->{
+                if (temporaryAdapter != null) {
+                    temporaryAdapter.notifyItemChanged(index);
+                }
+            });
+            //更新数据库
+            if(saveSqlite){
+                TerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessageWithDraw(message1);
+            }
+        }
+    }
+
     /**
      * 选择相片、打开相机、选择文件、发送位置、上报图像、请求上报图像
      */
@@ -2019,5 +2080,40 @@ public abstract class ChatBaseActivity extends BaseActivity {
                 }
             }
         }
+    };
+
+    /**
+     * 组内上报成功之后再组内发一条消息
+     */
+    private ReceiverGroupPushLiveHandler receiverGroupPushLiveHandler = (streamMediaServerIp, streamMediaServerPort, callId) -> {
+        int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+        String memberName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
+        String url = "rtsp://"+streamMediaServerIp+":"+streamMediaServerPort+"/"+memberId+"_"+callId+".sdp";
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
+        jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
+        jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
+        jsonObject.put(JsonParam.CALLID, String.valueOf(callId));
+        jsonObject.put(JsonParam.REMARK, 2);
+        jsonObject.put(JsonParam.LIVER, memberId+"_"+memberName);
+        jsonObject.put(JsonParam.BACKUP, memberId+"_"+memberName);
+        jsonObject.put(JsonParam.EASYDARWIN_RTSP_URL, url);
+        TerminalMessage mTerminalMessage = new TerminalMessage();
+        mTerminalMessage.messageFromId = memberId;
+        mTerminalMessage.messageFromName = memberName;
+        mTerminalMessage.messageToId = userId;
+        mTerminalMessage.messageToName = userName;
+        mTerminalMessage.messageBody = jsonObject;
+        mTerminalMessage.sendTime = System.currentTimeMillis();
+        mTerminalMessage.messageType = MessageType.VIDEO_LIVE.getCode();
+        mTerminalMessage.messageUrl = url;
+
+        handler.post(() -> {
+            chatMessageList.add(mTerminalMessage);
+            setListSelection(chatMessageList.size() - 1);
+            if (temporaryAdapter != null) {
+                temporaryAdapter.notifyDataSetChanged();
+            }
+        });
     };
 }
