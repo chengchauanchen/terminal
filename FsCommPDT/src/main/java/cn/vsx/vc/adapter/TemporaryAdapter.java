@@ -2,7 +2,6 @@ package cn.vsx.vc.adapter;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.drawable.AnimationDrawable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
@@ -60,7 +59,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoi
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
-import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.application.MyApplication;
@@ -550,7 +548,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 //                    terminalMessage.messageType == MessageType.AUDIO.getCode()||
                     MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
                 return false;
-            new TranspondDialog(activity, terminalMessage).show();
+            new TranspondDialog(activity, terminalMessage).showView();
             if (!terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID))
                 terminalMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
             transponMessage = (TerminalMessage) terminalMessage.clone();
@@ -653,7 +651,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 mIsLongClick = true;
                 //处理长按事件
                 transponMessage = (TerminalMessage) terminalMessage.clone();
-                new TranspondDialog(activity, terminalMessage).show();
+                new TranspondDialog(activity, terminalMessage).showView();
                 return true;
             });
         }

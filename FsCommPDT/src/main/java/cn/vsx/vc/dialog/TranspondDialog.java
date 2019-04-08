@@ -25,15 +25,19 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class TranspondDialog  extends Dialog {
 
+    private LinearLayout tv_linkman_delete;
+    private LinearLayout tv_copy;
+    private LinearLayout tv_withdraw;
+
     public TranspondDialog (Context context, final TerminalMessage terminalMessage) {
         super(context, R.style.dialog_style);
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.dialog_transpond, null);
-        LinearLayout tv_linkman_delete =  view.findViewById(R.id.tv_linkman_delete);
-        LinearLayout tv_copy =  view.findViewById(R.id.tv_copy);
-        LinearLayout tv_withdraw =  view.findViewById(R.id.tv_withdraw);
+         tv_linkman_delete =  view.findViewById(R.id.tv_linkman_delete);
+         tv_copy =  view.findViewById(R.id.tv_copy);
+         tv_withdraw =  view.findViewById(R.id.tv_withdraw);
         //只有文本消息才复制
         if(terminalMessage.messageType != MessageType.SHORT_TEXT.getCode() &&terminalMessage.messageType != MessageType.LONG_TEXT.getCode()){
             tv_copy.setVisibility(View.GONE);
@@ -61,6 +65,23 @@ public class TranspondDialog  extends Dialog {
             dismiss();
         });
         setContentView(view);
+    }
+
+    /**
+     * 显示菜单
+     */
+    public void showView(){
+
+        if(tv_linkman_delete==null||tv_copy == null||tv_withdraw == null){
+            return;
+        }
+
+        if(tv_linkman_delete.getVisibility() == View.VISIBLE ||
+                tv_copy.getVisibility() == View.VISIBLE ||
+                tv_withdraw.getVisibility() == View.VISIBLE ){
+            show();
+        }
+
     }
 
     /**
