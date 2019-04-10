@@ -172,6 +172,8 @@ dependencies {
     //时间选择器
     compile 'com.contrarywind:Android-PickerView:3.2.7'
     implementation files('libs/HyteraSDK2.0.jar')
+    /*添加依赖*/
+    implementation 'com.github.yuzhiqiang1993:zxing:2.2.8'
 }
 
 

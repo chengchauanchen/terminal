@@ -36,7 +36,7 @@ public class PTTDownAndUpReceiver extends BroadcastReceiver {
                 TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
                     @Override
                     public void run() {
-                        int requestGroupCall = TerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+                        int requestGroupCall = TerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0));
                         TerminalFactory.getSDK().stopMultimediaMessage();//发起组呼时，把录音关掉
                         TerminalFactory.getSDK().notifyReceiveHandler(ReceivePTTDownHandler.class, requestGroupCall);
                     }

@@ -122,21 +122,12 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.I
  * Created by gt358 on 2017/8/16.
  */
 
-public abstract class ChatBaseActivity extends BaseActivity {
-    private static final int CODE_CAMERA_REQUEST = 0x11;
-    /**
-     * 打开相机
-     */
-    private static final int CODE_IMAGE_RESULT = 0;
-    private static final int CODE_VIDEO_RESULT = 1;
-    private static final int CAMERA_PERMISSIONS_REQUEST_CODE = 0x13;
-    /**
-     * 请求相机权限
-     */
-    private static final int STORAGE_PERMISSIONS_REQUEST_CODE = 0x14;
-    /**
-     * 请求存储读取权限
-     */
+public abstract class ChatBaseActivity extends BaseActivity{
+    private static final int CODE_CAMERA_REQUEST = 0x11;/** 打开相机 */
+    private static final int CODE_IMAGE_RESULT=0;
+    private static final int CODE_VIDEO_RESULT=1;
+    private static final int CAMERA_PERMISSIONS_REQUEST_CODE = 0x13;/** 请求相机权限 */
+    private static final int STORAGE_PERMISSIONS_REQUEST_CODE = 0x14;/** 请求存储读取权限 */
 
     protected Logger logger = Logger.getLogger(getClass());
     protected HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());

@@ -52,6 +52,7 @@ import com.hytera.api.SDKException;
 import com.hytera.api.SDKManager;
 import com.hytera.api.base.common.CallManager;
 import com.hytera.api.base.common.CommonManager;
+import com.yzq.zxinglibrary.common.Constant;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.log4j.Logger;
@@ -205,10 +206,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 MyApplication.instance.isChanging = false;
                 if (MyApplication.instance.isPttPress) {
                     logger.info("转组成功回调消息：isPttPress" + MyApplication.instance.isPttPress);
-                    int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
-                    if (resultCode != BaseCommonCode.SUCCESS_CODE) {
-                        ToastUtil.groupCallFailToast(NewMainActivity.this, resultCode);
-                    }
+//                    int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+//                    if (resultCode != BaseCommonCode.SUCCESS_CODE) {
+//                        ToastUtil.groupCallFailToast(NewMainActivity.this, resultCode);
+//                    }
 //					MyTerminalFactory.getSDK().getGroupCallManager().requestCall();
                 }
                 MyApplication.instance.notifyAll();
@@ -543,7 +544,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         public boolean onLongClick(View v) {
             logger.info("----悬浮按钮-----" + isCircleTouchEvent + "    volumePress" + MyApplication.instance.volumePress);
             if (!isCircleTouchEvent && !MyApplication.instance.volumePress) {
-                int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+                int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
                 if (resultCode == BaseCommonCode.SUCCESS_CODE) {//允许组呼了
                     imgbtn_ptt.setBackgroundResource(R.drawable.fw_c_yellow);
                     talkbackFragment.setPttCurrentState(GroupCallSpeakState.GRANTING);
@@ -1316,6 +1317,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     public static final int OVERLAY_PERMISSION_REQ_CODE = 1234;
     public static final int REQUEST_INSTALL_PACKAGES_CODE = 1235;
     public static final int GET_UNKNOWN_APP_SOURCES = 1236;
+    public static final int REQUEST_CODE_SCAN = 1237;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
@@ -1331,6 +1333,13 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }else if(requestCode == GET_UNKNOWN_APP_SOURCES){
             if(null !=updateManager){
                 updateManager.checkIsAndroidO(false);
+            }
+        }else if(requestCode == REQUEST_CODE_SCAN && resultCode == RESULT_OK){
+            if (data != null) {
+                String content = data.getStringExtra(Constant.CODED_CONTENT);
+                logger.info("扫描二维码结果："+content);
+                // TODO: 2019/4/10 给注册服务发送扫码结果
+                TerminalFactory.getSDK().getAuthManagerTwo().pcLogin();
             }
         }
     }

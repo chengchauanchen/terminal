@@ -26,10 +26,10 @@ import java.util.List;
 
 import butterknife.Bind;
 import cn.vsx.hamster.common.GroupType;
+import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePopBackStackHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetScanGroupListResultHandler;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupSearchAdapter;
@@ -94,7 +94,7 @@ public class GroupSearchFragment extends BaseFragment {
         iv_goback_contacts.setOnClickListener(new OnClickListenerImpGoBackContactsList());
         btn_search_allcontacts.setOnClickListener(new OnClickListenerImpSearchContats());
         lv_search_allcontacts.setOnItemClickListener(new OnItemClickListenerImpAddCall());
-//        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveChangeGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveChangeGroupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverCloseKeyBoardHandler);
         et_search_allcontacts.addTextChangedListener(new TextWatcher() {
             @Override
@@ -155,10 +155,9 @@ public class GroupSearchFragment extends BaseFragment {
     @Override
     public void unRegistListener() {
         super.unRegistListener();
-//        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveChangeGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveChangeGroupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverCloseKeyBoardHandler);
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentDestoryHandler.class);
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveSetScanGroupListResultHandler.class);
     }
 
     public static void showSoftInputFromWindow(Activity activity, final EditText editText) {
@@ -256,9 +255,15 @@ public class GroupSearchFragment extends BaseFragment {
 
     /**  切组回调 **/
     private ReceiveChangeGroupHandler mReceiveChangeGroupHandler = (errorCode, errorDesc) -> myHandler.post(() -> {
-        searchGroups.clear();
-        searchMemberFromGroup();
+        if(errorCode == BaseCommonCode.SUCCESS_CODE){
+            et_search_allcontacts.setText("");
+            InputMethodUtil.hideInputMethod(context, et_search_allcontacts);
 
+            searchGroups.clear();
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceivePopBackStackHandler.class);
+        }else {
+            ToastUtil.groupChangedFailToast(context, errorCode);
+        }
     });
 
     private ReceiverCloseKeyBoardHandler receiverCloseKeyBoardHandler = new ReceiverCloseKeyBoardHandler() {

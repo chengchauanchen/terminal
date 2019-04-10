@@ -6,7 +6,6 @@ import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Message;
-import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,7 +21,6 @@ import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
-import org.easydarwin.push.BITMediaStream;
 import org.easydarwin.push.EasyPusher;
 import org.easydarwin.push.InitCallback;
 import org.easydarwin.push.MediaStream;
@@ -552,6 +550,7 @@ public class PhonePushService extends BaseService{
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surface){
             logger.info("onSurfaceTextureDestroyed----->" + surface);
+
             return true;
         }
 
@@ -650,7 +649,10 @@ public class PhonePushService extends BaseService{
 
     private void pushStream(SurfaceTexture surface){
         if(mMediaStream != null){    // switch from background to front
-//            mMediaStream.stopPreview();
+            mMediaStream.stopPreview();
+            if(mMediaStream.isRecording()){
+                mMediaStream.stopRecord();
+            }
             mMediaStream.setSurfaceTexture(surface);
             mMediaStream.startPreview();
             startRecord();

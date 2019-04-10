@@ -39,6 +39,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLogFileUploadCompleteHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
@@ -187,6 +188,7 @@ public class SettingFragmentNew extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
     }
 
@@ -226,6 +228,7 @@ public class SettingFragmentNew extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
         if (changemaingrouplayout != null)
             changemaingrouplayout.unRegistListener();
@@ -340,6 +343,20 @@ public class SettingFragmentNew extends BaseFragment {
                 int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
                 setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
             });
+        }
+    };
+
+    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler(){
+        @Override
+        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, int tempGroupName, String tempGroupType){
+            if(isAdd){
+                if(isLocked || isSwitch){
+                    mHandler.post(() -> setting_group_name.setText(tempGroupName));
+                }
+            }else {
+                int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                setting_group_name.setText(DataUtil.getMemberByMemberNo(currentGroupId).getName());
+            }
         }
     };
 

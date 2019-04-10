@@ -251,7 +251,7 @@ public class LockScreenActivity extends BaseActivity {
             return;
         }
         logger.info("锁屏界面PTT按下");
-        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
         if (resultCode == BaseCommonCode.SUCCESS_CODE){
             MyApplication.instance.isPttPress = true;
             change2PreSpeaking();

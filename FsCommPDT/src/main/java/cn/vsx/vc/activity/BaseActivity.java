@@ -33,11 +33,14 @@ import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
+import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
@@ -442,7 +445,13 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 				downTimes++;
 				logger.warn("用音量键做ptt按钮，音量键按下时：downTimes："+downTimes+"    pttPress状态："+ MyApplication.instance.isPttPress);
 				if (downTimes == 1 && !MyApplication.instance.folatWindowPress && !MyApplication.instance.isPttPress) {
-
+					if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE) {
+						ToastUtil.showToast(BaseActivity.this,getResources().getString(R.string.text_personal_calling_can_not_group_call));
+						return;
+					}else if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+						ToastUtil.showToast(BaseActivity.this,getResources().getString(R.string.text_personal_pulling_can_not_group_call));
+						return;
+					}
 					MyApplication.instance.isClickVolumeToCall = true;
 					if (onPTTVolumeBtnStatusChangedListener != null) {
 						logger.warn("用音量键做ptt按钮，音量键按下时：ptt的当前状态是："+ MyApplication.instance.getGroupSpeakState());

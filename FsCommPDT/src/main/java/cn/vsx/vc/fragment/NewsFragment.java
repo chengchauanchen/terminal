@@ -54,6 +54,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
@@ -158,15 +159,16 @@ public class NewsFragment extends BaseFragment {
      */
     private void setFirstMessage() {
         if(messageList.size() == 0){//无列表，添加当前组
-            addCurrentGroupMessage();
-        }else{//有列表
-            //列表中有当前组，置顶当前组
-            if(haveCurrentGroupMessage()) {
-                stickCurrentGroupMessage();
-            }else {//列表中无当前组，添加
-                addCurrentGroupMessage();
-            }
+            addMainGroupMessage();
         }
+//        else{//有列表
+//            列表中有当前组，置顶当前组
+//            if(haveCurrentGroupMessage()) {
+//                stickCurrentGroupMessage();
+//            }else {//列表中无当前组，添加
+//                addMainGroupMessage();
+//            }
+//        }
     }
 
     /**
@@ -240,17 +242,17 @@ public class NewsFragment extends BaseFragment {
     }
 
     /**
-     * 添加当前组消息，如果没有就new一个新消息，如果有就取最后一条
+     * 添加主组消息，如果没有就new一个新消息，如果有就取最后一条
      */
-    private void addCurrentGroupMessage() {
+    private void addMainGroupMessage() {
         //查看当前组的全部消息
         List<TerminalMessage> groupMessageRecord = TerminalFactory.getSDK().getTerminalMessageManager().getGroupMessageRecord(
-                MessageCategory.MESSAGE_TO_GROUP.getCode(), TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0),
+                MessageCategory.MESSAGE_TO_GROUP.getCode(), TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0),
                 0, 0);
         TerminalMessage terminalMessage;
         if (groupMessageRecord.size() == 0) {
             terminalMessage = new TerminalMessage();
-            terminalMessage.messageToId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+            terminalMessage.messageToId = MyTerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0);
             terminalMessage.messageToName = DataUtil.getGroupByGroupNo(terminalMessage.messageToId).name;
             terminalMessage.messageCategory = MessageCategory.MESSAGE_TO_GROUP.getCode();
             saveMemberMap(terminalMessage);
@@ -348,6 +350,7 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeNameHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveDownloadFinishHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRecallRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverDeleteMessageHandler);
@@ -400,6 +403,7 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(mNotifyRecallRecordMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverDeleteMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
         clearData();
@@ -583,7 +587,6 @@ public class NewsFragment extends BaseFragment {
                 addData(terminalMessageData);
                 //来一条消息的时候不用删除响应组
                 sortMessageList();
-//                sortFirstMessageList();
                 unReadCountChanged();
             });
         }
@@ -1170,6 +1173,21 @@ public class NewsFragment extends BaseFragment {
             });
         }
     };
+
+    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler(){
+        @Override
+        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, int tempGroupName, String tempGroupType){
+//            if(isAdd){
+//                if(isLocked || isSwitch){
+//                    mHandler.post(()-> setting_group_name.setText(tempGroupName));
+//                }
+//            }else {
+//                int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+//                setting_group_name.setText(DataUtil.getMemberByMemberNo(currentGroupId).getName());
+//            }
+        }
+    };
+
     /**强制切组*/
     private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
         @Override
@@ -1398,16 +1416,16 @@ public class NewsFragment extends BaseFragment {
                 Map<Integer,TimerTask> timerTaskMap  = TerminalFactory.getSDK().getGroupCallManager().getTimerTaskMap();
                 while(iterator.hasNext()){
                     TerminalMessage next = iterator.next();
-                    if(!DataUtil.isExistGroup(next.messageToId)){
-                        //说明组列表中没有这个组了
-                        iterator.remove();//消息列表中移除
-                        removeMemberMap(next.messageToId);
-                        continue;
-                    }
-                    if(next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
+                    if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
+                        if(!DataUtil.isExistGroup(next.messageToId)){
+                            //说明组列表中没有这个组了
+                            iterator.remove();//消息列表中移除
+                            removeMemberMap(next.messageToId);
+                            continue;
+                        }
                         Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
                         if(groupInfo.getResponseGroupType() != null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())
-                           &&!timerTaskMap.containsKey(groupInfo.id)){
+                                &&!timerTaskMap.containsKey(groupInfo.id)){
                             iterator.remove();
                         }
                     }
@@ -1463,7 +1481,7 @@ public class NewsFragment extends BaseFragment {
     private void sortFirstMessageList(){
         if(!messageList.isEmpty()){
             setResponseGroupList();
-//            Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
+            Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
             setFirstMessage();
             //再保存到数据库
             saveMessagesToSql();
@@ -1471,7 +1489,7 @@ public class NewsFragment extends BaseFragment {
                 mMessageListAdapter.notifyDataSetChanged();
             }
         }else {
-            addCurrentGroupMessage();
+            addMainGroupMessage();
         }
     }
 
@@ -1493,7 +1511,7 @@ public class NewsFragment extends BaseFragment {
                     mMessageListAdapter.notifyDataSetChanged();
                 }
             }else {
-                addCurrentGroupMessage();
+                addMainGroupMessage();
             }
         }
     }

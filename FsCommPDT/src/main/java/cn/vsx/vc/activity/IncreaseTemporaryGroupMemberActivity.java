@@ -1,5 +1,6 @@
 package cn.vsx.vc.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -38,7 +39,6 @@ import cn.vsx.vc.fragment.TempGroupSearchFragment;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiverSelectTempGroupMemberHandler;
-import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -91,7 +91,6 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
      * 更新配置信息
      */
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> {//更新当前组
-        CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
         myHandler.post(() -> {
             MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
             List<CatalogBean> catalogBeanList = new ArrayList<>();
@@ -119,6 +118,7 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
     };
     private int screenWidth;
     private int type;
+    private int groupId;
 
     @Override
     public int getLayoutResId() {
@@ -141,6 +141,7 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
         mRecyclerview.setAdapter(mIncreaseTemporaryGroupMemberAdapter);
 
         type = getIntent().getIntExtra("type", 1);
+        groupId = getIntent().getIntExtra("groupId", 0);
         //titlebar初始化
         if(type ==CREATE_TEMP_GROUP){
             barTitle.setText(R.string.text_create_temporary_groups);
@@ -395,10 +396,17 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
                     startActivity(intent);
                 }else if(type ==INCREASE_MEMBER){
                     //添加组员
-                    MyTerminalFactory.getSDK().getTempGroupManager().addMemberToTempGroup(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0),MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),mIncreaseTemporaryGroupMemberAdapter.getSelectMember());
+                    MyTerminalFactory.getSDK().getTempGroupManager().addMemberToTempGroup(groupId,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),mIncreaseTemporaryGroupMemberAdapter.getSelectMember());
                     finish();
                 }
                 break;
         }
+    }
+
+    public static void startActivity(Context context, int type, int groupId){
+        Intent intent = new Intent(context,IncreaseTemporaryGroupMemberActivity.class);
+        intent.putExtra("type",type);
+        intent.putExtra("groupId",groupId);
+        context.startActivity(intent);
     }
 }

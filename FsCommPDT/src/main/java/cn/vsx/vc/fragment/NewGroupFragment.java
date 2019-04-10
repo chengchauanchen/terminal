@@ -6,7 +6,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -33,7 +32,6 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.GroupCatalogBean;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -118,7 +116,6 @@ public class NewGroupFragment extends BaseFragment{
             logger.info("收到转组消息："+errorCode+"/"+errorDesc);
             if(errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()){
                 CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
-                MyTerminalFactory.getSDK().putParam(Params.IS_CHANGE_GROUP_SUCCEED, true);
                 myHandler.post(() -> {
                     GroupResponse mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
                     if(mGroupResponse == null){
@@ -127,7 +124,6 @@ public class NewGroupFragment extends BaseFragment{
                     groupAdapter.notifyDataSetChanged();
                 });
             }else{
-                MyTerminalFactory.getSDK().putParam(Params.IS_CHANGE_GROUP_SUCCEED, false);
                 ToastUtil.showToast(MyApplication.instance, errorDesc);
             }
         }

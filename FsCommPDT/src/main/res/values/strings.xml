@@ -277,6 +277,7 @@
     <string name="text_replication_success">复制成功</string>
     <string name="text_audio_frequency_is_not_open_audio_is_not_used">录制音频权限未打开，语音功能将不能使用。</string>
     <string name="text_create_temporary_groups">创建临时组</string>
+    <string name="scan">扫一扫</string>
     <string name="text_hour">时</string>
     <string name="text_minute">分</string>
     <string name="text_second">秒</string>
@@ -310,6 +311,7 @@
     <string name="text_member_has_no_authority_in_this_group">成员对目标组无权限！</string>
     <string name="text_has_no_group_call_authority">没有组呼权限</string>
     <string name="text_small_window_mode_can_not_do_other_business">小窗口模式中不能进行其他业务</string>
+    <string name="group_locked_can_not_change_group">当前组被锁定，不能转组</string>
     <string name="text_small_window_mode_can_not_change_group">小窗口模式中禁止转组</string>
     <string name="text_small_window_mode_can_not_do_this">小窗口模式中,不能执行该操作</string>
     <string name="text_current_group_only_listener_can_not_speak">当前组是只听组，不能发起组呼</string>
@@ -507,6 +509,8 @@
     <string name="text_watching_can_not_request_report">视频观看中无法请求上报</string>
     <string name="text_push">上报图像</string>
     <string name="text_pull">请求图像</string>
+    <string name="text_personal_pulling_can_not_group_call">观看图像中，不能组呼</string>
+    <string name="text_personal_calling_can_not_group_call">个呼中，不能组呼</string>
     <string name="text_personal_calling_can_not_do_others">个呼中，不能进行其他业务</string>
     <string name="text_in_video_function">您已处于图像业务中</string>
     <string name="text_go_to_setting_open_camera_authority">请前往设置打开相机权限</string>
