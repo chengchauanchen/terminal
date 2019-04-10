@@ -64,6 +64,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandl
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -130,7 +131,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     ImageView img_scan;
     @Bind(R.id.volume_layout)
     VolumeViewLayout volumeViewLayout;
-    private boolean isCurrentGroup;
+    @Bind(R.id.iv_monitor)
+    ImageView iv_monitor;
     //组Id
     public static int mGroupId;
 
@@ -236,6 +238,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         groupCallActivityMemberInfo.setOnClickListener(this);
 
         group_call_activity_help.setOnClickListener(this);
+        iv_monitor.setOnClickListener(this);
         ptt.setOnTouchListener(mOnTouchListener);
 
         if(keyMointor !=null){
@@ -247,6 +250,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         }
 
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverCloseKeyBoardHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupListHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
@@ -269,17 +273,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     public void initData() {
         super.initData();
-
         mGroupId = userId;
-
-        isCurrentGroup = (userId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
-
-        if (!isCurrentGroup) {
-            ptt.setText(R.string.button_change_to_this_group_and_speak);
-            ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-            TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
-        }
-
+        setIvMonitorDrawable();
         funcation.setFunction(true, userId);
         MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false);
     }
@@ -288,6 +283,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     public void doOtherDestroy() {
         mHandler.removeCallbacksAndMessages(null);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverCloseKeyBoardHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupListHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
@@ -332,6 +328,21 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 //                intent.setAction("5");
 //                startActivity(intent);
                 break;
+            case R.id.iv_monitor:
+                if(TerminalFactory.getSDK().getConfigManager().getMonitorGroup().contains(userId)){
+                    TerminalFactory.getSDK().getGroupManager().setMonitorGroup(String.valueOf(userId),false);
+                }else {
+                    TerminalFactory.getSDK().getGroupManager().setMonitorGroup(String.valueOf(userId),true);
+                }
+                break;
+        }
+    }
+
+    private void setIvMonitorDrawable(){
+        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroup().contains(userId)){
+            iv_monitor.setImageResource(R.drawable.monitor_open);
+        }else {
+            iv_monitor.setImageResource(R.drawable.monitor_close);
         }
     }
 
@@ -376,7 +387,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             return;
         }
 
-        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",mGroupId);
 
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {//允许组呼了
             if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {//打开扬声器
@@ -395,18 +406,14 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     }
 
     private void change2Waiting() {
-        if (isCurrentGroup) {
-            ptt.setBackgroundResource(R.drawable.shape_news_ptt_pre);
-        }
+        ptt.setBackgroundResource(R.drawable.shape_news_ptt_pre);
         ptt.setEnabled(true);
     }
 
     private void change2PreSpeaking() {
-        if (isCurrentGroup) {
-            ptt.setBackgroundResource(R.drawable.shape_news_ptt_pre);
-            ptt.setText("PTT");
-            TextViewCompat.setTextAppearance(ptt, R.style.white);
-        }
+        ptt.setBackgroundResource(R.drawable.shape_news_ptt_pre);
+        ptt.setText("PTT");
+        TextViewCompat.setTextAppearance(ptt, R.style.white);
         ptt.setEnabled(true);
         MyApplication.instance.isPttPress = true;
         if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
@@ -421,11 +428,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     }
 
     private void change2Speaking() {
-        if (isCurrentGroup) {
-            ptt.setText("PTT");
-            TextViewCompat.setTextAppearance(ptt, R.style.white);
-            ptt.setBackgroundResource(R.drawable.shape_news_ptt_speak);
-        }
+
+        ptt.setText("PTT");
+        TextViewCompat.setTextAppearance(ptt, R.style.white);
+        ptt.setBackgroundResource(R.drawable.shape_news_ptt_speak);
         logger.info("主界面，ptt被禁 ？  isClickVolumeToCall：" + MyApplication.instance.isClickVolumeToCall);
         ptt.setEnabled(!MyApplication.instance.isClickVolumeToCall);
 
@@ -468,11 +474,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     private void change2Silence() {
         if (ptt != null) {
-            if (isCurrentGroup) {
-                ptt.setBackgroundResource(R.drawable.shape_news_ptt_listen);
-                ptt.setText(R.string.text_ptt);
-                TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
-            }
+
+            ptt.setBackgroundResource(R.drawable.shape_news_ptt_listen);
+            ptt.setText(R.string.text_ptt);
+            TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
             ptt.setEnabled(true);
         }
 
@@ -489,11 +494,9 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     private void change2Listening() {
 
-        if (isCurrentGroup) {
-            ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-            ptt.setText(R.string.button_press_to_line_up);
-            TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
-        }
+        ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
+        ptt.setText(R.string.button_press_to_line_up);
+        TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
         logger.info("主界面，ptt被禁了  isPttPress：" + MyApplication.instance.isPttPress);
         if (MyApplication.instance.isPttPress) {
             pttUpDoThing();
@@ -501,18 +504,18 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
         allViewDefault();
         if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {//没有组呼听的功能不显示通知
-            if (speakingId != MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)) {
-                //设置说话人名字,在组呼来的handler中设置
-                ll_speaker.setVisibility(View.VISIBLE);
-                tv_scan.setVisibility(View.VISIBLE);
-                tv_scan.setText(DataUtil.getGroupByGroupNo(speakingId).name);
-                img_scan.setVisibility(View.VISIBLE);
-                tv_speaker.setText(speakingName + "");
-                ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-                ptt.setText(R.string.button_change_to_this_group_and_speak);
-                TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
-
-            } else {
+//            if (speakingId != MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)) {
+//                //设置说话人名字,在组呼来的handler中设置
+//                ll_speaker.setVisibility(View.VISIBLE);
+//                tv_scan.setVisibility(View.VISIBLE);
+//                tv_scan.setText(DataUtil.getGroupByGroupNo(speakingId).name);
+//                img_scan.setVisibility(View.VISIBLE);
+//                tv_speaker.setText(speakingName + "");
+//                ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
+//                ptt.setText(R.string.button_change_to_this_group_and_speak);
+//                TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
+//
+//            } else {
                 logger.info("sjl_当前组");
                 ll_speaker.setVisibility(View.VISIBLE);
                 tv_scan.setVisibility(View.GONE);
@@ -521,19 +524,18 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
                 ptt.setText(R.string.button_press_to_line_up);
                 TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
-            }
+//            }
         }
 
 
     }
 
     private void change2Forbid() {//禁止组呼，不是遥毙
-        if (isCurrentGroup) {
-            ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-            ptt.setText(R.string.button_press_to_speak);
-            TextViewCompat.setTextAppearance(ptt, R.style.function_wait_text);
-            logger.info("主界面，ptt被禁了  isPttPress：" + MyApplication.instance.isPttPress);
-        }
+
+        ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
+        ptt.setText(R.string.button_press_to_speak);
+        TextViewCompat.setTextAppearance(ptt, R.style.function_wait_text);
+        logger.info("主界面，ptt被禁了  isPttPress：" + MyApplication.instance.isPttPress);
         ptt.setEnabled(false);
         if (MyApplication.instance.isPttPress) {
             pttUpDoThing();
@@ -577,23 +579,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     private View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            if (!isCurrentGroup) {
-                if (MyApplication.instance.isMiniLive) {
-                    ToastUtil.showToast(GroupCallNewsActivity.this, getString(R.string.text_small_window_mode_can_not_do_other_business));
-                } else {
-                    int resultCode = -1;
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        resultCode = MyTerminalFactory.getSDK().getGroupManager().changeGroup(userId);
-                        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                            //转组成功重新请求在线人数
-                            myHandler.postDelayed(() -> MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false), 500);
-                        } else {
-                            ToastUtil.groupChangedFailToast(GroupCallNewsActivity.this, resultCode);
-                        }
-                    }
-                }
-                return true;
-            }
 
 
             if (MyTerminalFactory.getSDK().getAuthManagerTwo().getLoginStatus() != AuthManagerTwo.ONLINE) {
@@ -637,6 +622,18 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
 
 /**===============================================================================================handler====================================================================================**/
+
+    private ReceiveSetMonitorGroupListHandler receiveSetMonitorGroupListHandler = new ReceiveSetMonitorGroupListHandler(){
+        @Override
+        public void handler(int errorCode, String errorDesc){
+            if(errorCode == BaseCommonCode.SUCCESS_CODE){
+                setIvMonitorDrawable();
+            }else {
+                ToastUtil.showToast(GroupCallNewsActivity.this,errorDesc);
+            }
+        }
+    };
+
     /**
      * 是否禁止组呼
      */
@@ -955,13 +952,13 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                     }
 
                     TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
-                    isCurrentGroup = !isCurrentGroup;
                 } else {
                     ToastUtil.showToast(GroupCallNewsActivity.this, errorDesc);
                 }
             });
         }
     };
+
 
     /*** 强制切组回调消息 **/
     private ReceiveForceChangeGroupHandler mReceiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
@@ -977,7 +974,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                         ptt.setBackgroundResource(R.drawable.shape_news_ptt_listen);
                         ptt.setText("PTT");
                         TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
-                        isCurrentGroup = true;
                     });
 
                 } else {//强制切组不是是当前会话组
@@ -988,7 +984,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                             ptt.setText(R.string.button_change_to_this_group_and_speak);
                             ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
                             TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
-                            isCurrentGroup = false;
                         }
                     },1000);
                 }

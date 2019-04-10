@@ -249,7 +249,7 @@ public class CallingService extends BaseService{
             case MotionEvent.ACTION_UP:
                 int newOffsetX = layoutParams.x;
                 int newOffsetY = layoutParams.y;
-                if(Math.abs(newOffsetX - oddOffsetX) <= 30 && Math.abs(newOffsetY - oddOffsetY) <= 30){
+                if (Math.abs(newOffsetX - oddOffsetX) <=30 && Math.abs(newOffsetY - oddOffsetY) <=30){
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverCloseKeyBoardHandler.class);
                     windowManager.removeView(rootView);
                     windowManager.addView(rootView, layoutParams1);
@@ -508,7 +508,8 @@ public class CallingService extends BaseService{
             return;
         }
         cancelAutoHangUpTimer();
-        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+        // FIXME: 2019/4/8 半双工发起组呼，是在临时组内
+        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
         if(resultCode == BaseCommonCode.SUCCESS_CODE){//允许组呼了
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);
             MyApplication.instance.isPttPress = true;

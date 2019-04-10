@@ -199,9 +199,7 @@ public class GroupMemberActivity extends BaseActivity {
                 getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_group_member, personSearchFragment).commit();
                 break;
             case R.id.add_btn:
-                Intent intent = new Intent(GroupMemberActivity.this, IncreaseTemporaryGroupMemberActivity.class);
-                intent.putExtra("type",1);
-                startActivity(intent);
+                IncreaseTemporaryGroupMemberActivity.startActivity(GroupMemberActivity.this,1,groupId);
                 break;
             case R.id.delete_btn:
                 add_btn.setVisibility(View.GONE);
@@ -245,7 +243,7 @@ public class GroupMemberActivity extends BaseActivity {
                     btn_confirm.setOnClickListener(v -> myHandler.post(() -> {
                         ll_success.setVisibility(View.VISIBLE);
                         ll_select.setVisibility(View.GONE);
-                        MyTerminalFactory.getSDK().getTempGroupManager().destroyTempGroup4PC(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0));
+                        MyTerminalFactory.getSDK().getTempGroupManager().destroyTempGroup4PC(groupId);
                         TimerTask task =new TimerTask() {
                             @Override
                             public void run() {
@@ -260,7 +258,7 @@ public class GroupMemberActivity extends BaseActivity {
                     btn_cancel.setOnClickListener(v -> alertDialog.dismiss());
                 }else {
                     List<Member> deleteMemberList = sortAdapter.getDeleteMemberList();
-                    MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0),MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),deleteMemberList);
+                    MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(groupId,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),deleteMemberList);
                     add_btn.setVisibility(View.VISIBLE);
                     delete_btn.setVisibility(View.VISIBLE);
                     delete_text.setVisibility(View.GONE);

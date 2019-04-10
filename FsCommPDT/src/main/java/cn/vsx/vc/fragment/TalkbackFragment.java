@@ -14,7 +14,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
 import android.support.v4.widget.TextViewCompat;
-import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -50,6 +49,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
+import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
@@ -59,6 +59,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicatio
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupScanResultHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEnvironmentMonitorHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
@@ -227,6 +228,19 @@ public class TalkbackFragment extends BaseFragment {
         }
     };
 
+    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler(){
+        @Override
+        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, int tempGroupName, String tempGroupType){
+            if(isAdd && isLocked){
+                //加入临时租，被锁定
+                MyApplication.instance.isLocked = true;
+            }
+            if(!isAdd){
+                MyApplication.instance.isLocked = false;
+            }
+        }
+    };
+
     /**
      * 强制切组
      */
@@ -241,13 +255,8 @@ public class TalkbackFragment extends BaseFragment {
             myHandler.post(() -> {
                 setCurrentGroupView();
                 setChangeGroupView();
-                if (MyTerminalFactory.getSDK().getParam(Params.IS_FORBID_GROUP_CALL, false)) {
-                    change2Forbid();
-                } else {
-                    if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) || MyApplication.instance.getGroupListenenState() != LISTENING) {
-                        change2Silence();
-
-                    }
+                if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) || MyApplication.instance.getGroupListenenState() != LISTENING) {
+                    change2Silence();
 
                 }
             });
@@ -273,7 +282,6 @@ public class TalkbackFragment extends BaseFragment {
                         ToastUtil.showToast(MyApplication.instance,errorDesc+"");
                     }
                 });
-                MyTerminalFactory.getSDK().putParam(Params.IS_CHANGE_GROUP_SUCCEED, false);
 
             } else {
 
@@ -282,19 +290,6 @@ public class TalkbackFragment extends BaseFragment {
                 myHandler.post(() -> {
                     setCurrentGroupView();
                     setChangeGroupView();
-
-                    if (MyTerminalFactory.getSDK().getParam(Params.IS_FORBID_GROUP_CALL, false)) {
-                        change2Forbid();
-                    } else {
-                        logger.info("GROUP_SCAN--------------" + MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false));
-                        logger.info("GUARD_MAIN_GROUP-------------" + MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false));
-                        if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) || MyApplication.instance.getGroupListenenState() != LISTENING) {
-
-                        }
-
-                    }
-
-                    MyTerminalFactory.getSDK().putParam(Params.IS_CHANGE_GROUP_SUCCEED, true);
                 });
             }
         }
@@ -494,10 +489,18 @@ public class TalkbackFragment extends BaseFragment {
             if (!MyApplication.instance.isPttPress && Math.abs(e1.getY() - e2.getY()) < 50) {
                 int verticalMinDistance = 10;
                 if (e1.getX() - e2.getX() > verticalMinDistance) {
-                    change_group_view.addLeft(1);
+                    if(MyApplication.instance.isLocked){
+                        ToastUtil.showToast(context, context.getString(R.string.group_locked_can_not_change_group));
+                    }else {
+                        change_group_view.addLeft(1);
+                    }
                     MyApplication.instance.isMoved = true;
                 } else if (e2.getX() - e1.getX() > verticalMinDistance) {
-                    change_group_view.addRight(1);
+                    if(MyApplication.instance.isLocked){
+                        ToastUtil.showToast(context, context.getString(R.string.group_locked_can_not_change_group));
+                    }else {
+                        change_group_view.addRight(1);
+                    }
                     MyApplication.instance.isMoved = true;
                 }
             }
@@ -574,17 +577,7 @@ public class TalkbackFragment extends BaseFragment {
     private final class OnGroupChangedListenerImplementation implements OnGroupChangedListener {
         @Override
         public void onGroupChanged(final int groupId, String groupName) {
-            myHandler.post(() -> {
-                if (MyApplication.instance.isMiniLive) {
-                    ToastUtil.showToast(getContext(), getString(R.string.text_small_window_mode_can_not_change_group));
-                } else {
-                    int resultCode = MyTerminalFactory.getSDK().getGroupManager().changeGroup(groupId);
-                    setCurrentGroupView();
-                    if (resultCode != BaseCommonCode.SUCCESS_CODE) {
-                        ToastUtil.groupChangedFailToast(context, resultCode);
-                    }
-                }
-            });
+            myHandler.post(() -> MyTerminalFactory.getSDK().getGroupManager().changeGroup(groupId));
         }
     }
 
@@ -626,7 +619,7 @@ public class TalkbackFragment extends BaseFragment {
         }
 
     }
-
+    float downX;
     /**
      * 触摸事件
      */
@@ -636,11 +629,11 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
 
-            mGestureDetector.onTouchEvent(event);
+//            mGestureDetector.onTouchEvent(event);
 
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-
+                    downX = event.getRawX();
                     synchronized (MyApplication.instance) {
                         logger.info("------down------" + MyApplication.instance.isChanging);
                         MyApplication.instance.isChanging = true;
@@ -654,6 +647,12 @@ public class TalkbackFragment extends BaseFragment {
                     v.performClick();
                     logger.info("滑动切组控件-----up cancel事件--------isMoved：" + MyApplication.instance.isMoved);
                     if (!MyApplication.instance.isMoved) {
+                        float upX = event.getRawX();
+                        if(upX-downX >5 ){
+                            change_group_view.addRight(1);
+                        }else if(downX-upX >5){
+                            change_group_view.addLeft(1);
+                        }
                         synchronized (MyApplication.instance) {
                             logger.info("--up---" + MyApplication.instance.isChanging);
                             MyApplication.instance.isChanging = false;
@@ -828,6 +827,7 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public void onPTTVolumeBtnStatusChange(GroupCallSpeakState groupCallSpeakState) {
             if (groupCallSpeakState == IDLE) {
+                //半双工个呼、视频观看中不能组呼
                 pttDownDoThing();
             } else {
                 myHandler.removeMessages(1);
@@ -953,7 +953,7 @@ public class TalkbackFragment extends BaseFragment {
     TextView tv_volume_fw;
     @Bind(R.id.title_bar)
     RelativeLayout title_bar;
-    private GestureDetector mGestureDetector;
+//    private GestureDetector mGestureDetector;
     private Logger logger = Logger.getLogger(getClass());
     private SpeechSynthesizer speechSynthesizer;
     private int groupScanId;
@@ -992,7 +992,7 @@ public class TalkbackFragment extends BaseFragment {
         keyMointor =(IGotaKeyMonitor)context.getSystemService("gotakeymonitor");
 
         getActivity().registerReceiver(mbtBroadcastReceiver, makeGattUpdateIntentFilter());
-        mGestureDetector = new GestureDetector(context, gestureListener);
+//        mGestureDetector = new GestureDetector(context, gestureListener);
 
         iv_volume_off_call.setVisibility(View.VISIBLE);
         iv_volume_off_call.setImageResource(R.drawable.volume_silence);
@@ -1080,6 +1080,7 @@ public class TalkbackFragment extends BaseFragment {
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUnreadMessageAdd1Handler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
         ptt.setOnTouchListener(new OnPttTouchListenerImplementation());
         talkback_change_session.setOnClickListener(v -> GroupCallNewsActivity.startCurrentActivity(context, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0), DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name, speakingId, speakingName));
         to_current_group.setOnClickListener(view -> {
@@ -1421,6 +1422,7 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTUpHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
 
         try {
             getContext().unregisterReceiver(mBatInfoReceiver);
@@ -1573,8 +1575,12 @@ public class TalkbackFragment extends BaseFragment {
             ToastUtil.showToast(context,getString(R.string.text_has_no_group_call_authority));
             return;
         }
+        //半双工个呼中在别的组不能组呼、全双工个呼中不能组呼
+        if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
 
-        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+        }
+
+        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
         logger.info("PTT按下以后resultCode:" + resultCode);
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {//允许组呼了
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);

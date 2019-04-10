@@ -244,8 +244,8 @@ public class SpecificSDK extends TerminalSDK4Android {
      * 发起组呼
      * @return 状态码 0 表示允许组呼
      */
-    public int requestGroupCall(){
-        return MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+    public int requestGroupCall(int groupId){
+        return MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",groupId);
     }
 
     /**

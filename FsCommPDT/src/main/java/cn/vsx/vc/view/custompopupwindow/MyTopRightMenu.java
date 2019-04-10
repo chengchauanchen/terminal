@@ -7,9 +7,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
-import android.view.View;
 import android.widget.ImageView;
 
+import com.yzq.zxinglibrary.android.CaptureActivity;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
@@ -21,6 +21,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.IncreaseTemporaryGroupMemberActivity;
+import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
@@ -39,6 +40,7 @@ public class MyTopRightMenu {
     private static MyTopRightMenu myTopRightMenu;
     private Activity activity;
     private static final int REQUEST_PERMISSION_SETTING = 0;
+
     private MyTopRightMenu(){}
     public static MyTopRightMenu offerObject(){
         synchronized (MyTopRightMenu.class) {
@@ -60,13 +62,16 @@ public class MyTopRightMenu {
             final MenuItem pushItem = new MenuItem(R.drawable.shipin_up, activity.getString(R.string.text_push));
             final MenuItem pullItem = new MenuItem(R.drawable.shipin_hc, activity.getString(R.string.text_pull));
             final MenuItem createItem = new MenuItem(R.drawable.create_temporary_group,activity.getString(R.string.text_create_temporary_groups));
+            final MenuItem scanItem = new MenuItem(R.drawable.create_temporary_group,activity.getString(R.string.scan));
             final List<MenuItem> items = new ArrayList<>();
             mTopRightMenu.addMenuItem(pullItem);
             mTopRightMenu.addMenuItem(pushItem);
             mTopRightMenu.addMenuItem(createItem);
+            mTopRightMenu.addMenuItem(scanItem);
             items.add(pullItem);
             items.add(pushItem);
             items.add(createItem);
+            items.add(scanItem);
             if(items.size() == 1) {
                 mTopRightMenu.setHeight(240);
             }
@@ -75,6 +80,8 @@ public class MyTopRightMenu {
             }
             else if (items.size() == 3){
                 mTopRightMenu.setHeight(720);
+            }else if (items.size() == 4){
+                mTopRightMenu.setHeight(960);
             }
             mTopRightMenu.setHeight(120)
                     .setWidth(DensityUtil.dip2px(context,200))      //默认宽度wrap_content
@@ -134,10 +141,11 @@ public class MyTopRightMenu {
                                                 ToastUtil.showToast(context,activity.getString(R.string.text_has_no_create_temp_group_authority));
                                                 return;
                                             }
-                                            Intent intent = new Intent(context, IncreaseTemporaryGroupMemberActivity.class);
-                                            intent.putExtra("type",0);
-                                            context.startActivity(intent);
+                                            IncreaseTemporaryGroupMemberActivity.startActivity(context,0,0);
                                         }
+                                    }else if(items.get(position) ==scanItem){
+                                        Intent intent = new Intent(context, CaptureActivity.class);
+                                        context.startActivityForResult(intent, NewMainActivity.REQUEST_CODE_SCAN);
                                     }
                                     break;
                                 case SPEAKING:

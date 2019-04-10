@@ -40,19 +40,19 @@
                     android:textColor="@color/news_item_text_name"
                     android:textSize="@dimen/sp_14" />
 
-                <TextView
-                    android:id="@+id/tv_current_group"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerVertical="true"
-                    android:layout_marginLeft="@dimen/x5"
-                    android:layout_toRightOf="@id/tv_user_name"
-                    android:background="@drawable/shape_news_current_group"
-                    android:paddingLeft="@dimen/x5"
-                    android:paddingRight="@dimen/x5"
-                    android:text="当前组"
-                    android:textColor="@color/white"
-                    android:textSize="@dimen/sp_10" />
+                <!--<TextView-->
+                    <!--android:id="@+id/tv_current_group"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_centerVertical="true"-->
+                    <!--android:layout_marginLeft="@dimen/x5"-->
+                    <!--android:layout_toRightOf="@id/tv_user_name"-->
+                    <!--android:background="@drawable/shape_news_current_group"-->
+                    <!--android:paddingLeft="@dimen/x5"-->
+                    <!--android:paddingRight="@dimen/x5"-->
+                    <!--android:text="当前组"-->
+                    <!--android:textColor="@color/white"-->
+                    <!--android:textSize="@dimen/sp_10" />-->
 
                 <TextView
                     android:id="@+id/tv_last_msg_time"

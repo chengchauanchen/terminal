@@ -16,7 +16,6 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -24,7 +23,6 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * 通讯录组搜索adapter
@@ -106,15 +104,17 @@ public class GroupSearchAdapter extends BaseAdapter {
 
         //转组按钮点击事件
         viewHolderGroup.changeGroup.setOnClickListener(v -> {
-            int resultCode = MyTerminalFactory.getSDK().getGroupManager().changeGroup(searchGroupList.get(position).id);
-            if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                v.setVisibility(View.GONE);
-                if (mItemBtnClickListener!=null){
-                    mItemBtnClickListener.onItemBtnClick();
-                }
-            }else {
-                ToastUtil.groupChangedFailToast(context, resultCode);
-            }
+            MyTerminalFactory.getSDK().getGroupManager().changeGroup(searchGroupList.get(position).id);
+
+//            int resultCode =0;
+//            if(resultCode == BaseCommonCode.SUCCESS_CODE){
+//                v.setVisibility(View.GONE);
+//                if (mItemBtnClickListener!=null){
+//                    mItemBtnClickListener.onItemBtnClick();
+//                }
+//            }else {
+//                ToastUtil.groupChangedFailToast(context, resultCode);
+//            }
         });
 
         //会话按钮点击事件

@@ -35,7 +35,6 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -463,6 +462,7 @@ public class PullLivingService extends BaseService{
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surface){
+            stopPull();
             return true;
         }
 
@@ -624,7 +624,6 @@ public class PullLivingService extends BaseService{
                 rtmpClient = null;
             }
         }
-        TerminalFactory.getSDK().getLiveManager().ceaseLiving();
     }
 
     private void pttDownDoThing(){
@@ -638,7 +637,8 @@ public class PullLivingService extends BaseService{
             ToastUtil.showToast(this,getString(R.string.no_group_call_permission));
             return;
         }
-        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+        // FIXME: 2019/4/8 观看视频上报时发起组呼，是在临时组里
+        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
         if(resultCode == BaseCommonCode.SUCCESS_CODE){//允许组呼了
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);
             MyApplication.instance.isPttPress = true;

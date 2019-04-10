@@ -181,6 +181,7 @@ public class PullGB28181Service extends BaseService{
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surface){
+            stopPull();
             return true;
         }
 

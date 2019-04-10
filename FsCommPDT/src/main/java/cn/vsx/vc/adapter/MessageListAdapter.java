@@ -102,14 +102,14 @@ public class MessageListAdapter extends BaseAdapter {
                     viewHolder.tv_user_name.setText(HandleIdUtil.handleName(idNameMap.get(terminalMessage.messageToId)));
                 }
             }
-            viewHolder.tv_current_group.setVisibility(View.GONE);
+//            viewHolder.tv_current_group.setVisibility(View.GONE);
         } else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息，显示组名
             viewHolder.tv_user_name.setText(DataUtil.getGroupByGroupNo(terminalMessage.messageToId).getName());
-            if (terminalMessage.messageToId == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)) {
-                viewHolder.tv_current_group.setVisibility(View.VISIBLE);
-            } else {
-                viewHolder.tv_current_group.setVisibility(View.GONE);
-            }
+//            if (terminalMessage.messageToId == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)) {
+//                viewHolder.tv_current_group.setVisibility(View.VISIBLE);
+//            } else {
+//                viewHolder.tv_current_group.setVisibility(View.GONE);
+//            }
         }
         //设置最后一条消息时间
         if (terminalMessage.sendTime != 0) {
@@ -306,8 +306,8 @@ public class MessageListAdapter extends BaseAdapter {
         TextView tv_unread_msg_num;
         @Bind(R.id.tv_user_name)
         TextView tv_user_name;
-        @Bind(R.id.tv_current_group)
-        TextView tv_current_group;
+//        @Bind(R.id.tv_current_group)
+//        TextView tv_current_group;
         @Bind(R.id.tv_last_msg)
         TextView tv_last_msg;
         @Bind(R.id.tv_last_msg_time)

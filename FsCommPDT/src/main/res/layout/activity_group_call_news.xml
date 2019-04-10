@@ -54,7 +54,12 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"/>
-
+        <ImageView
+            android:id="@+id/iv_monitor"
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_marginRight="@dimen/dp_12"
+            android:src="@drawable/monitor_open"/>
         <ImageView
             android:id="@+id/group_call_activity_member_info"
             android:layout_width="@dimen/dp_35"

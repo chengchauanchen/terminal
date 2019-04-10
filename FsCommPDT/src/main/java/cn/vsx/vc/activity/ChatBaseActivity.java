@@ -1724,7 +1724,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     logger.error("录制音频权限未打开，语音功能将不能使用。");
                     return;
                 }
-                int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+                int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
                 if (resultCode == BaseCommonCode.SUCCESS_CODE){
                     MyApplication.instance.isPttPress = true;
                 }else{

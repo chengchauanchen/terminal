@@ -31,10 +31,6 @@ import butterknife.OnClick;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.TerminalMemberType;
-import cn.vsx.hamster.common.UserType;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.model.Member;
-import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GridViewAdapter;
@@ -407,15 +403,15 @@ public class FunctionHidePlus extends LinearLayout {
                 btn_record.setText(R.string.text_long_press_to_sound_recorder);
                 btn_record.setEnabled(true);
             }
-            canPull=false;
-            canPush=false;
+            canPull=true;
+            canPush=true;
             //是否在同一个组
-            for(Member member :MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers()){
-                if(member.id==userId){
-                    canPull=true;
-                    canPush=true;
-                }
-            }
+//            for(Member member :MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers()){
+//                if(member.id==userId){
+//                    canPull=true;
+//                    canPush=true;
+//                }
+//            }
             if(!canPull&&!canPush){
                 setNoVideo();
             }else {

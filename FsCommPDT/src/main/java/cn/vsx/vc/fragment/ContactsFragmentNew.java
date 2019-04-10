@@ -30,6 +30,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
@@ -136,6 +137,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
         imgbtn_dial.setOnClickListener(v -> {
             if (dialPopupwindow == null){
@@ -202,6 +204,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
@@ -271,6 +274,20 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                 int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
                 setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
             });
+        }
+    };
+
+    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler(){
+        @Override
+        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, int tempGroupName, String tempGroupType){
+            if(isAdd ){
+                if(isLocked || isSwitch){
+                    setting_group_name.setText(tempGroupName);
+                }
+            }else {
+                int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                setting_group_name.setText(DataUtil.getMemberByMemberNo(currentGroupId).getName());
+            }
         }
     };
 
