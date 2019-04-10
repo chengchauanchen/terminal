@@ -296,6 +296,13 @@ public class MessageListAdapter extends BaseAdapter {
                     viewHolder.tv_last_msg.setText(R.string.text_message_list_face_recognition);
                 }
             }
+            if(terminalMessage.messageType ==  MessageType.MERGE_TRANSMIT.getCode()) {
+                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_merge_transmit_),terminalMessage.messageFromName));
+                }else{
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_merge_transmit);
+                }
+            }
             //消息撤回
             if(terminalMessage.isWithDraw){
                 viewHolder.tv_last_msg.setText(R.string.text_message_list_with_draw);

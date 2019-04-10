@@ -698,6 +698,15 @@ public class ReceiveHandlerService extends Service{
                 noticeContent = getString(R.string.text_message_list_face_recognition);
             }
         }
+        //合并转发
+        if(terminalMessage.messageType ==  MessageType.MERGE_TRANSMIT.getCode()) {
+            if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                noticeContent=String.format(getString(R.string.text_message_list_merge_transmit_),terminalMessage.messageFromName);
+            }else{
+                noticeContent=getString(R.string.text_message_list_merge_transmit);
+            }
+
+        }
         Intent intent = new Intent(MyTerminalFactory.getSDK().application, NotificationClickReceiver.class);
         Bundle bundle = new Bundle();
         bundle.putSerializable("TerminalMessage", terminalMessage);

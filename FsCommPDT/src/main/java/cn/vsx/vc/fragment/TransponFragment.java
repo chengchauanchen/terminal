@@ -95,25 +95,24 @@ public class TransponFragment extends BaseFragment{
     public void initData() {
         List<Group> groups = MyTerminalFactory.getSDK().getConfigManager().getAllGroups();
         //消息类型不为图像和个呼的时候
-        if(messageType != MessageType.VIDEO_LIVE.getCode() && messageType != MessageType.PRIVATE_CALL.getCode()) {
+//        if(messageType != MessageType.VIDEO_LIVE.getCode() && messageType != MessageType.PRIVATE_CALL.getCode()) {
                 for(Group group : groups) {
                     if(group.id != userId) {
                         ChatMember chatMember = new ChatMember(group.id, group.name, true);
                         chatLists.add(chatMember);
                     }
                 }
-        }
+//        }
         //消息类型不为组呼和录音的时候
-        if(messageType != MessageType.GROUP_CALL.getCode() && messageType != MessageType.AUDIO.getCode()) {
+//        if(messageType != MessageType.GROUP_CALL.getCode() && messageType != MessageType.AUDIO.getCode()) {
             List<Member> members = MyTerminalFactory.getSDK().getConfigManager().getAllMemberExceptMe();
             for (Member member : members) {
                 if(member.id != userId) {
                     ChatMember chatMember = new ChatMember(member.id, member.getName(), false);
                     chatLists.add(chatMember);
                 }
-
             }
-        }
+//        }
         transponListAdapter.notifyDataSetChanged();
     }
 

@@ -250,6 +250,7 @@
             android:launchMode="singleTask"/>
         <activity android:name=".activity.BleActivity"/>
         <activity android:name=".activity.GroupVideoLiveListActivity"/>
+        <activity android:name=".activity.GroupMergeTransmitListActivity"/>
         <service android:name=".service.ReceiveHandlerService"
             android:enabled="true"
             android:exported="false"/>

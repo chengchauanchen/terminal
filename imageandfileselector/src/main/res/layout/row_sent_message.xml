@@ -19,12 +19,26 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/margin_chat_activity">
 
+        <CheckBox
+            android:id="@+id/cb_forward"
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_gravity="center_vertical"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="@dimen/dp_5"
+            android:background="@android:color/transparent"
+            android:button="@drawable/checkbox"
+            android:clickable="true"
+            android:focusable="false"
+            android:visibility="gone"/>
+
         <ImageView
             android:id="@+id/iv_userhead"
             android:layout_width="@dimen/size_avatar"
             android:layout_height="@dimen/size_avatar"
             android:layout_alignParentTop="true"
-            android:layout_alignParentRight="true"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_toLeftOf="@+id/cb_forward"
             android:layout_marginRight="@dimen/margin_chat_activity"
             android:background="@drawable/user_photo"
             android:scaleType="fitXY" />

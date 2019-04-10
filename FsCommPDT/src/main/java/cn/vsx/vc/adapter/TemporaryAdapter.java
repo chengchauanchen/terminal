@@ -5,12 +5,15 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -46,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
@@ -97,21 +101,23 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private static final int MESSAGE_GROUP_CALL_RECEIVED = 11;//组呼
     private static final int MESSAGE_HYPERLINK_RECEIVED = 12;//超链接
     private static final int MESSAGE_GB28181_RECODE_RECEIVED = 13;//视频平台
+    private static final int MESSAGE_MERGE_TRANSMIT_RECEIVED = 14;//合并转发
 
-    private static final int MESSAGE_SHORT_TEXT_SEND = 14;//短文本
-    private static final int MESSAGE_LONG_TEXT_SEND = 15;//长文本
-    private static final int MESSAGE_IMAGE_SEND = 16;//图片
-    private static final int MESSAGE_VOICE_SEND = 17;//录音
-    private static final int MESSAGE_VEDIO_SEND = 18;//小视频
-    private static final int MESSAGE_FILE_SEND = 19;//文件
-    private static final int MESSAGE_LOCATION_SEND = 20;//位置
-    private static final int MESSAGE_AFFICHE_SEND = 21;//公告
-    private static final int MESSAGE_WARNING_INSTANCE_SEND = 22;//警情
-    private static final int MESSAGE_PRIVATE_CALL_SEND = 23;//个呼
-    private static final int MESSAGE_VIDEO_LIVE_SEND = 24;//图像记录
-    private static final int MESSAGE_GROUP_CALL_SEND = 25;//组呼
-    private static final int MESSAGE_HYPERLINK_SEND = 26;//超链接
-    private static final int MESSAGE_GB28181_RECODE_SEND = 27;//视频平台
+    private static final int MESSAGE_SHORT_TEXT_SEND = 15;//短文本
+    private static final int MESSAGE_LONG_TEXT_SEND = 16;//长文本
+    private static final int MESSAGE_IMAGE_SEND = 17;//图片
+    private static final int MESSAGE_VOICE_SEND = 18;//录音
+    private static final int MESSAGE_VEDIO_SEND = 19;//小视频
+    private static final int MESSAGE_FILE_SEND = 20;//文件
+    private static final int MESSAGE_LOCATION_SEND = 21;//位置
+    private static final int MESSAGE_AFFICHE_SEND = 22;//公告
+    private static final int MESSAGE_WARNING_INSTANCE_SEND = 23;//警情
+    private static final int MESSAGE_PRIVATE_CALL_SEND = 24;//个呼
+    private static final int MESSAGE_VIDEO_LIVE_SEND = 25;//图像记录
+    private static final int MESSAGE_GROUP_CALL_SEND = 26;//组呼
+    private static final int MESSAGE_HYPERLINK_SEND = 27;//超链接
+    private static final int MESSAGE_GB28181_RECODE_SEND = 28;//视频平台
+    private static final int MESSAGE_MERGE_TRANSMIT_SEND = 29;//合并转发
 
     public static final int MIN_CLICK_DELAY_TIME = 1000;
     private long lastClickTime = 0;
@@ -143,6 +149,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     List<String> mImgUrlList = new ArrayList<>();
     List<TerminalMessage> unReadVoiceList = new ArrayList<>();
     private boolean upload;//是否正在上传
+    private boolean isForWardMore;//是否合并转发
 
     public TemporaryAdapter(List<TerminalMessage> chatMessageList, FragmentActivity activity, HashMap<Integer, String> idNameMap) {
         this.chatMessageList = chatMessageList;
@@ -184,6 +191,11 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
     private void setProgress(ProgressBar progressBar, int progress) {
         progressBar.setProgress(progress);
+    }
+
+    private void setViewChecked(CheckBox view, boolean isChecked) {
+        if (view != null)
+            view.setChecked(isChecked);
     }
 
 
@@ -263,6 +275,12 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             case MESSAGE_HYPERLINK_SEND:
                 holder =   new ChatViewHolder.HyperlinkSendHolder(getViewByType(viewType, parent),false);
                 break;
+            case MESSAGE_MERGE_TRANSMIT_RECEIVED:
+                holder =   new ChatViewHolder.TextMergeTransmitHolder(getViewByType(viewType, parent),true);
+                break;
+            case MESSAGE_MERGE_TRANSMIT_SEND:
+                holder =   new ChatViewHolder.TextMergeTransmitHolder(getViewByType(viewType, parent),false);
+                break;
         }
         return holder;
     }
@@ -321,6 +339,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if(chatMessageList.get(position).messageType == MessageType.GB28181_RECORD.getCode()){
                 return MESSAGE_GB28181_RECODE_RECEIVED;
             }
+            if(chatMessageList.get(position).messageType == MessageType.MERGE_TRANSMIT.getCode()){
+                return MESSAGE_MERGE_TRANSMIT_RECEIVED;
+            }
         } else {//发送
             if (chatMessageList.get(position).messageType == MessageType.SHORT_TEXT.getCode()) {
                 return MESSAGE_SHORT_TEXT_SEND;
@@ -364,6 +385,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if(chatMessageList.get(position).messageType == MessageType.GB28181_RECORD.getCode()){
                 return MESSAGE_GB28181_RECODE_SEND;
             }
+            if(chatMessageList.get(position).messageType == MessageType.MERGE_TRANSMIT.getCode()){
+                return MESSAGE_MERGE_TRANSMIT_SEND;
+            }
         }
 
         return MESSAGE_SHORT_TEXT_SEND;
@@ -383,6 +407,39 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         } else {
             holder.placeHolder.setVisibility(View.GONE);
         }
+        //合并转发
+        forwardMore(terminalMessage,holder);
+    }
+
+    /**
+     * 合并转发
+     * @param terminalMessage
+     * @param holder
+     */
+    private void forwardMore(TerminalMessage terminalMessage, ChatViewHolder holder) {
+        if(isForWardMore){
+            if(terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
+                    terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()||
+                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()||
+                    terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+                setViewVisibility(holder.cbForward,View.GONE);
+            }else{
+                if(!isReceiver(terminalMessage)){
+                  if(terminalMessage.messageBody.containsKey(JsonParam.SEND_STATE)&&
+                      terminalMessage.messageBody.getString(JsonParam.SEND_STATE).equals(MessageSendStateEnum.SEND_SUCCESS.toString())){
+                      setViewVisibility(holder.cbForward,View.VISIBLE);
+                      setViewChecked(holder.cbForward,terminalMessage.isForward);
+                    }else{
+                      setViewVisibility(holder.cbForward,View.GONE);
+                  }
+                }else{
+                    setViewVisibility(holder.cbForward,View.VISIBLE);
+                    setViewChecked(holder.cbForward,terminalMessage.isForward);
+                }
+            }
+        }else{
+            setViewVisibility(holder.cbForward,View.GONE);
+        }
     }
 
     /**
@@ -390,7 +447,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
      * @param terminalMessage
      */
     private void withDrawView(TerminalMessage terminalMessage, ChatViewHolder holder) {
-        setText(holder.timeStamp, String.format(activity.getString(R.string.with_draw_content),isReceiver(terminalMessage)?terminalMessage.messageFromName:"我"));
+        setText(holder.timeStamp, String.format(activity.getString(R.string.with_draw_content),isReceiver(terminalMessage)?terminalMessage.messageFromName:"您"));
         setViewVisibility(holder.timeStamp, View.VISIBLE);
         setViewVisibility(holder.reMain, View.GONE);
     }
@@ -571,6 +628,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 individualNewsRecordItemClick(terminalMessage, position);
                 groupCallItemClick(terminalMessage, position);
                 gb28181ItemClick(terminalMessage, viewType);
+                mergeTransmit(terminalMessage,viewType);
             }
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(holder.reBubble.getWindowToken(), 0);
@@ -655,7 +713,12 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 return true;
             });
         }
+        //合并转发  是否选择
+        holder.cbForward.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            terminalMessage.isWithDraw = isChecked;
+        });
     }
+
 
     /**
      * 是否是接收的消息
@@ -878,6 +941,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         if (terminalMessage.messageType == MessageType.HYPERLINK.getCode()) {
             handleHyperlinkData(terminalMessage, holder);
         }
+        //合并转发
+        if(terminalMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()){
+            handleMergeTransmitData(terminalMessage, holder);
+        }
 
         if (terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode()
                 || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode())
@@ -967,6 +1034,40 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             setViewVisibility(holder.lv_face_pair, View.GONE);
             setViewVisibility(holder.tv_error_msg, View.VISIBLE);
             setText(holder.tv_error_msg, errorMsg);
+        }
+    }
+   /**
+    * 合并转发
+    */
+    private void handleMergeTransmitData(TerminalMessage terminalMessage, ChatViewHolder holder) {
+        JSONObject messageBody = terminalMessage.messageBody;
+        //标题
+        if(messageBody.containsKey(JsonParam.CONTENT)){
+            holder.tv_title.setText(messageBody.getString(JsonParam.CONTENT));
+        }else{
+            holder.tv_title.setText(activity.getString(R.string.chat_record));
+        }
+        //内容
+        if(messageBody.containsKey(JsonParam.NOTE_LIST)){
+            JSONArray jsonArray = messageBody.getJSONArray(JsonParam.NOTE_LIST);
+            StringBuffer sb = new StringBuffer();
+            if(jsonArray!=null&&jsonArray.size()>0){
+                int size = (jsonArray.size()>3)?3:jsonArray.size();
+                for(int i = 0; i < size; i++){
+                    sb.append(jsonArray.get(i));
+                    if(i != (size-1)){
+                        sb.append("\n");
+                    }
+                }
+            }
+            CharSequence charSequence;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                charSequence =Html.fromHtml(sb.toString(),Html.FROM_HTML_MODE_LEGACY);
+            } else {
+                charSequence = Html.fromHtml(sb.toString()); }
+            holder.tv_content.setText(charSequence);
+        }else{
+            holder.tv_content.setText(activity.getString(R.string.chat_record));
         }
     }
 
@@ -1362,6 +1463,17 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     /**
+     * 合并转发
+     */
+    public void transponForwardMoreMessage(TerminalMessage terminalMessage, boolean isGrouop) {
+        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGrouop);
+        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
+        terminalMessage1.messageToId = toIds.get(0);
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1);
+    }
+
+
+    /**
      * 转发短文本消息到信令
      */
     private void transponShortTextMessage(TerminalMessage terminalMessage, boolean isGrouop) {
@@ -1633,6 +1745,19 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     /**
+     * 合并转发的点击事件
+     * @param terminalMessage
+     * @param viewType
+     */
+    private void mergeTransmit(TerminalMessage terminalMessage, int viewType) {
+        if (terminalMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()) {
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverChatListItemClickHandler.class,
+                    terminalMessage, isReceiver(terminalMessage));
+        }
+    }
+
+
+    /**
      * 点击图像接收条目
      **/
     private void liveItemClick(TerminalMessage terminalMessage, int viewType) {
@@ -1725,6 +1850,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 return inflater.inflate(R.layout.row_received_face, parent, false);
             case MESSAGE_HYPERLINK_SEND:
                 return inflater.inflate(R.layout.row_received_face, parent, false);
+            case MESSAGE_MERGE_TRANSMIT_RECEIVED:
+                return inflater.inflate(R.layout.row_receiver_merge_transmit, parent, false);
+            case MESSAGE_MERGE_TRANSMIT_SEND:
+                return inflater.inflate(R.layout.row_send_merge_transmit, parent, false);
             default:
                 return inflater.inflate(R.layout.row_sent_message, parent, false);
         }
@@ -1863,12 +1992,106 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
     public void transponMessage(ChatMember chatMember) {
         logger.info("转发消息，type:" + transponMessage.messageType);
-        isTranspon = true;
+            //单个转发
+            forward(chatMember);
+    }
+
+    /**
+     * 清空转发选择的状态
+     */
+    public void clearForWardState(){
+        for (TerminalMessage message: chatMessageList) {
+            message.isWithDraw = false;
+        }
+        isForWardMore = false;
+        notifyDataSetChanged();
+    }
+
+    /**
+     * 获取消息的内容
+     * @param message
+     * @return
+     */
+    public String getMessageContent(TerminalMessage message) {
+        String noticeContent = "";
+        //短文
+        if(message.messageType ==  MessageType.SHORT_TEXT.getCode()) {
+            String content = message.messageBody.getString(JsonParam.CONTENT);
+            noticeContent=message.messageFromName+":"+content;
+        }
+        //长文
+        if(message.messageType ==  MessageType.LONG_TEXT.getCode()) {
+            String path = message.messagePath;
+            File file = new File(path);
+            if (!file.exists()) {
+                MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(message, false);
+                MyTerminalFactory.getSDK().download(message, true);
+            }
+            String content = FileUtil.getStringFromFile(file);
+            noticeContent=String.format(activity.getString(R.string.text_message_list_text_),message.messageFromName,content);
+        }
+        //图片
+        if(message.messageType ==  MessageType.PICTURE.getCode()) {
+            noticeContent=String.format(activity.getString(R.string.text_message_list_picture_),message.messageFromName);
+        }
+        //录音
+        if(message.messageType ==  MessageType.AUDIO.getCode()) {
+            noticeContent=String.format(activity.getString(R.string.text_message_list_voice_),message.messageFromName);
+        }
+        //小视频
+        if(message.messageType ==  MessageType.VIDEO_CLIPS.getCode()) {
+            noticeContent=String.format(activity.getString(R.string.text_message_list_video_),message.messageFromName);
+        }
+        //文件
+        if(message.messageType ==  MessageType.FILE.getCode()) {
+            noticeContent=String.format(activity.getString(R.string.text_message_list_file_),message.messageFromName);
+        }
+        //位置
+        if(message.messageType ==  MessageType.POSITION.getCode()) {
+            noticeContent=String.format(activity.getString(R.string.text_message_list_location_),message.messageFromName);
+        }
+        //公告
+        if(message.messageType ==  MessageType.AFFICHE.getCode()) {
+            noticeContent=String.format(activity.getString(R.string.text_message_list_notice_),message.messageFromName);
+        }
+        //警情
+        if(message.messageType ==  MessageType.WARNING_INSTANCE.getCode()) {
+            noticeContent=String.format(activity.getString(R.string.text_message_list_warning_),message.messageFromName);
+        }
+        //个呼
+        if(message.messageType ==  MessageType.PRIVATE_CALL.getCode()) {
+            noticeContent=String.format(activity.getString(R.string.text_message_list_personal_call_),message.messageFromName);
+        }
+        //图像记录
+        if(message.messageType ==  MessageType.VIDEO_LIVE.getCode()|| message.messageType ==  MessageType.GB28181_RECORD.getCode()) {
+            noticeContent=String.format(activity.getString(R.string.text_message_list_image_),message.messageFromName);
+        }
+        //组呼
+        if(message.messageType ==  MessageType.GROUP_CALL.getCode()) {
+            noticeContent=String.format(activity.getString(R.string.text_message_list_group_call_),message.messageFromName);
+        }
+        //超链接
+        if(message.messageType ==  MessageType.HYPERLINK.getCode()) {
+            noticeContent=String.format(activity.getString(R.string.text_message_list_face_recognition_),message.messageFromName);
+        }
+        //合并转发
+        if(message.messageType ==  MessageType.MERGE_TRANSMIT.getCode()) {
+            noticeContent=String.format(activity.getString(R.string.text_message_list_merge_transmit_),message.messageFromName);
+        }
+        return noticeContent;
+    }
+
+    /**
+     * 单消息转发
+     * @param chatMember
+     */
+    private void forward(ChatMember chatMember){
         transponMessage.messageToId = chatMember.getId();
         transponMessage.messageToName = chatMember.getName();
         transponMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
         transponMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
         transponMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
+
         if (transponMessage.messageType == MessageType.SHORT_TEXT.getCode()) {
             transponShortTextMessage(transponMessage, chatMember.isGroup());
         }
@@ -1951,5 +2174,21 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
     public void setUploadFinished(){
         upload = false;
+    }
+
+    /**
+     * 设置是否合并转发
+     * @param isForWardMore
+     */
+    public void setIsForWardMore(boolean isForWardMore){
+        this.isForWardMore = isForWardMore;
+    }
+
+    /**
+     * 获取是否在合并转发
+     * @return
+     */
+    public boolean isForWardMore(){
+        return isForWardMore;
     }
 }

@@ -15,7 +15,8 @@
     <!--photopicker-->
     <dimen name="actionBarSize" >48dp</dimen>
 
-
+    <dimen name="dp_300" >300dp</dimen>
+    <dimen name="dp_280" >280dp</dimen>
     <dimen name="dp_240" >240dp</dimen>
     <dimen name="dp_225" >225dp</dimen>
     <dimen name="dp_200" >200dp</dimen>

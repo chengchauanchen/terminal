@@ -45,6 +45,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -67,8 +68,10 @@ import java.util.TimerTask;
 import butterknife.Bind;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
+import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.StopGroupCallReason;
+import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -76,6 +79,7 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
@@ -88,6 +92,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePopBackStackHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
@@ -515,6 +520,18 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             });
         }
     };
+    //消息发送成功
+    private ReceiveSendDataMessageSuccessHandler receiveSendDataMessageSuccessHandler = new ReceiveSendDataMessageSuccessHandler() {
+        @Override
+        public void handler(TerminalMessage terminalMessage) {
+            myHandler.post(() -> {
+                //合并转发成功之后提示
+                if(terminalMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()){
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.forwarded));
+                }
+            });
+        }
+    };
     /**=====================================================================================================Listener================================================================================================================================**/
     private CallManager callManager;
     private UpdateManager updateManager;
@@ -883,6 +900,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceivePopBackStackHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSendDataMessageSuccessHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowPersonFragmentHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowGroupFragmentHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverFragmentDestoryHandler);
@@ -1484,7 +1502,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
         //外置摄像头是否连接通知
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUVCCameraConnectChangeHandler);
-
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendDataMessageSuccessHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveUnReadCountChangedHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowPopupwindowHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowPersonFragmentHandler);

@@ -2,6 +2,7 @@ package cn.vsx.vc.holder;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -22,6 +23,8 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
     public TextView timeStamp;//消息时间
     public RelativeLayout reBubble;//消息的主体
     public ImageView ivAvatar;//头像
+    public CheckBox cbForward;//合并转发
+
 
     public TextView tvNick;//昵称
     public RelativeLayout reMain;
@@ -68,12 +71,18 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
     public TextView tv_error_delete;
     public View placeHolder;
 
+    //合并转发
+    public TextView tv_title;//标题
+    public TextView tv_content;//标题
+
     public ChatViewHolder(View itemView, boolean isReceiver) {
         super(itemView);
         reBubble = (RelativeLayout) itemView.findViewById(R.id.bubble);
         ivAvatar = (ImageView) itemView.findViewById(R.id.iv_userhead);
         timeStamp = (TextView) itemView.findViewById(R.id.timestamp);
         reMain = (RelativeLayout) itemView.findViewById(R.id.re_main);
+
+        cbForward = (CheckBox) itemView.findViewById(R.id.cb_forward);
         placeHolder = itemView.findViewById(R.id.placeholder);
         if (isReceiver) {
             tvNick = (TextView) itemView.findViewById(R.id.tv_userid);
@@ -165,6 +174,11 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
     public void hyperlinkFindViewById(View itemView,boolean isReceiver){
         lv_face_pair = (ListView) itemView.findViewById(R.id.lv_face_pair);
         tv_error_msg = (TextView) itemView.findViewById(R.id.tv_error_msg);
+    }
+    //合并转发
+    public void mergeTransmitFindViewById(View itemView,boolean isReceiver){
+        tv_title = (TextView) itemView.findViewById(R.id.tv_title);
+        tv_content = (TextView) itemView.findViewById(R.id.tv_content);
     }
 
     public static class TextReceivedHolder extends ChatViewHolder {
@@ -277,6 +291,13 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
         public HyperlinkSendHolder(View itemView,boolean isReceiver) {
             super(itemView,isReceiver);
             hyperlinkFindViewById(itemView,isReceiver);
+        }
+    }
+
+    public static class TextMergeTransmitHolder extends ChatViewHolder {
+        public TextMergeTransmitHolder(View itemView,boolean isReceiver) {
+            super(itemView,isReceiver);
+            mergeTransmitFindViewById(itemView,isReceiver);
         }
     }
 }

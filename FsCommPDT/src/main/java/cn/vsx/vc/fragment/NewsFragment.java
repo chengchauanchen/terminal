@@ -46,7 +46,6 @@ import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetAllMessageRecordHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.NotifyRecallRecordMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeNameHandler;
@@ -57,6 +56,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandle
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyRecallRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePersonMessageNotifyDateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
@@ -68,7 +68,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHa
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import cn.vsx.vc.activity.ChatBaseActivity;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.PhoneAssistantManageActivity;
@@ -81,7 +80,6 @@ import cn.vsx.vc.receiveHandle.ReceiverDeleteMessageHandler;
 import cn.vsx.vc.receiver.NotificationClickReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.DataUtil;
-import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -1085,6 +1083,15 @@ public class NewsFragment extends BaseFragment {
                 noticeContent=getString(R.string.text_message_list_face_recognition);
             }
         }
+        //合并转发
+        if(terminalMessage.messageType ==  MessageType.MERGE_TRANSMIT.getCode()) {
+            if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                noticeContent=String.format(getString(R.string.text_message_list_merge_transmit_),terminalMessage.messageFromName);
+            }else{
+                noticeContent=getString(R.string.text_message_list_merge_transmit);
+            }
+
+        }
 
         Intent intent=new Intent(getActivity(), NotificationClickReceiver.class);
         Bundle bundle = new Bundle();
@@ -1300,7 +1307,7 @@ public class NewsFragment extends BaseFragment {
     /**
      * 收到别人撤回消息的通知
      **/
-    private NotifyRecallRecordMessageHandler mNotifyRecallRecordMessageHandler = (messageId) -> {
+    private ReceiveNotifyRecallRecordHandler mNotifyRecallRecordMessageHandler = (version, messageId) -> {
          updataMessageWithDrawState(messageId,true);
     };
 
