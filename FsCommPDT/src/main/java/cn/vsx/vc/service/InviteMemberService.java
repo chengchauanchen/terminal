@@ -624,7 +624,9 @@ public class InviteMemberService extends BaseService{
         }
         if(!mContactAdapter.getSelectMember().isEmpty()){
 
-            MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(mContactAdapter.getSelectMember(), MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+            MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(mContactAdapter.getSelectMember(),
+                    MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0),
+                    TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l));
         }
         removeView();
     }
@@ -680,6 +682,10 @@ public class InviteMemberService extends BaseService{
     }
 
     private void inviteOtherMemberToWatch(List<Integer>members){
+        ArrayList<Long> uniqueNos = new ArrayList<>();
+        for (Integer integer: members) {
+            uniqueNos.add(DataUtil.getMemberByMemberNo(integer).getUniqueNo());
+        }
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(JsonParam.SEND_STATE,MessageSendStateEnum.SENDING);
         jsonObject.put(JsonParam.DEVICE_ID, oldTerminalMessage.messageBody.getString(JsonParam.DEVICE_ID));
@@ -696,7 +702,7 @@ public class InviteMemberService extends BaseService{
         mTerminalMessage.sendTime = System.currentTimeMillis();
         mTerminalMessage.messageType = MessageType.GB28181_RECORD.getCode();
         mTerminalMessage.messageBody = jsonObject;
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("",mTerminalMessage,members);
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("",mTerminalMessage,members,uniqueNos);
         removeView();
     }
 }

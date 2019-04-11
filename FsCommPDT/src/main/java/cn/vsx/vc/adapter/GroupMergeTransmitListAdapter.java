@@ -1,5 +1,6 @@
 package cn.vsx.vc.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -13,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -49,7 +49,6 @@ import java.util.List;
 import java.util.Map;
 
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
@@ -63,6 +62,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoi
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.GroupMergeTransmitListActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.application.MyApplication;
@@ -84,7 +84,7 @@ import ptt.terminalsdk.tools.ToastUtil;
  * Created by zckj on 2017/3/22.
  */
 
-public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
+public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 //    private final int VIEW_TYPE = 28;
 
     private static final int MESSAGE_SHORT_TEXT_RECEIVED = 0;//短文本
@@ -103,28 +103,13 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private static final int MESSAGE_GB28181_RECODE_RECEIVED = 13;//视频平台
     private static final int MESSAGE_MERGE_TRANSMIT_RECEIVED = 14;//合并转发
 
-    private static final int MESSAGE_SHORT_TEXT_SEND = 15;//短文本
-    private static final int MESSAGE_LONG_TEXT_SEND = 16;//长文本
-    private static final int MESSAGE_IMAGE_SEND = 17;//图片
-    private static final int MESSAGE_VOICE_SEND = 18;//录音
-    private static final int MESSAGE_VEDIO_SEND = 19;//小视频
-    private static final int MESSAGE_FILE_SEND = 20;//文件
-    private static final int MESSAGE_LOCATION_SEND = 21;//位置
-    private static final int MESSAGE_AFFICHE_SEND = 22;//公告
-    private static final int MESSAGE_WARNING_INSTANCE_SEND = 23;//警情
-    private static final int MESSAGE_PRIVATE_CALL_SEND = 24;//个呼
-    private static final int MESSAGE_VIDEO_LIVE_SEND = 25;//图像记录
-    private static final int MESSAGE_GROUP_CALL_SEND = 26;//组呼
-    private static final int MESSAGE_HYPERLINK_SEND = 27;//超链接
-    private static final int MESSAGE_GB28181_RECODE_SEND = 28;//视频平台
-    private static final int MESSAGE_MERGE_TRANSMIT_SEND = 29;//合并转发
 
     public static final int MIN_CLICK_DELAY_TIME = 1000;
     private long lastClickTime = 0;
 
     FrameLayout fragment_contener;
 
-    private HashMap<Integer, String> idNameMap;
+//    private HashMap<Integer, String> idNameMap;
 
     private Logger logger = Logger.getLogger(getClass());
     List<TerminalMessage> chatMessageList;
@@ -151,11 +136,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private boolean upload;//是否正在上传
     private boolean isForWardMore;//是否合并转发
 
-    public TemporaryAdapter(List<TerminalMessage> chatMessageList, FragmentActivity activity, HashMap<Integer, String> idNameMap) {
+    public GroupMergeTransmitListAdapter(List<TerminalMessage> chatMessageList, FragmentActivity activity) {
         this.chatMessageList = chatMessageList;
         this.activity = activity;
         inflater = activity.getLayoutInflater();
-        this.idNameMap = idNameMap;
     }
 
     public void refreshPersonContactsAdapter(int mposition, List<TerminalMessage> terminalMessageList, boolean isPlaying, boolean isSameItem) {
@@ -217,69 +201,35 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             case MESSAGE_SHORT_TEXT_RECEIVED:
                 holder =  new ChatViewHolder.TextReceivedHolder(getViewByType(viewType, parent),true);
                 break;
-            case MESSAGE_LONG_TEXT_SEND:
-            case MESSAGE_SHORT_TEXT_SEND:
-                holder =   new ChatViewHolder.TextSendHolder(getViewByType(viewType, parent),false);
-                break;
             case MESSAGE_IMAGE_RECEIVED:
                 holder =   new ChatViewHolder.ImageReceivedHolder(getViewByType(viewType, parent),true);
-                break;
-            case MESSAGE_IMAGE_SEND:
-                holder =   new ChatViewHolder.ImageSendHolder(getViewByType(viewType, parent),false);
                 break;
             case MESSAGE_GROUP_CALL_RECEIVED:
             case MESSAGE_VOICE_RECEIVED:
                 holder =   new ChatViewHolder.VoiceReceivedHolder(getViewByType(viewType, parent),true);
                 break;
-            case MESSAGE_GROUP_CALL_SEND:
-            case MESSAGE_VOICE_SEND:
-                holder =   new ChatViewHolder.VoiceSendHolder(getViewByType(viewType, parent),false);
-                break;
             case MESSAGE_FILE_RECEIVED:
                 holder =   new ChatViewHolder.FileReceivedHolder(getViewByType(viewType, parent),true);
-                break;
-            case MESSAGE_FILE_SEND:
-                holder =   new ChatViewHolder.FileSendHolder(getViewByType(viewType, parent),false);
                 break;
             case MESSAGE_VEDIO_RECEIVED:
                 holder =   new ChatViewHolder.VideoReceivedHolder(getViewByType(viewType, parent),true);
                 break;
-            case MESSAGE_VEDIO_SEND:
-                holder =   new ChatViewHolder.VideoSendHolder(getViewByType(viewType, parent),false);
-                break;
             case MESSAGE_LOCATION_RECEIVED:
                 holder =   new ChatViewHolder.LocationReceivedHolder(getViewByType(viewType, parent),true);
-                break;
-            case MESSAGE_LOCATION_SEND:
-                holder =   new ChatViewHolder.LocationSendHolder(getViewByType(viewType, parent),false);
                 break;
             case MESSAGE_WARNING_INSTANCE_RECEIVED:
             case MESSAGE_VIDEO_LIVE_RECEIVED:
             case MESSAGE_GB28181_RECODE_RECEIVED:
                 holder =   new ChatViewHolder.LiveReceivedHolder(getViewByType(viewType, parent),true);
                 break;
-            case MESSAGE_WARNING_INSTANCE_SEND:
-            case MESSAGE_VIDEO_LIVE_SEND:
-            case MESSAGE_GB28181_RECODE_SEND:
-                holder =   new ChatViewHolder.LiveSendHolder(getViewByType(viewType, parent),false);
-                break;
             case MESSAGE_PRIVATE_CALL_RECEIVED:
                 holder =   new ChatViewHolder.PrivateCallReceivedHolder(getViewByType(viewType, parent),true);
-                break;
-            case MESSAGE_PRIVATE_CALL_SEND:
-                holder =   new ChatViewHolder.PrivateCallSendHolder(getViewByType(viewType, parent),false);
                 break;
             case MESSAGE_HYPERLINK_RECEIVED:
                 holder =   new ChatViewHolder.HyperlinkReceivedHolder(getViewByType(viewType, parent),true);
                 break;
-            case MESSAGE_HYPERLINK_SEND:
-                holder =   new ChatViewHolder.HyperlinkSendHolder(getViewByType(viewType, parent),false);
-                break;
             case MESSAGE_MERGE_TRANSMIT_RECEIVED:
                 holder =   new ChatViewHolder.TextMergeTransmitHolder(getViewByType(viewType, parent),true);
-                break;
-            case MESSAGE_MERGE_TRANSMIT_SEND:
-                holder =   new ChatViewHolder.TextMergeTransmitHolder(getViewByType(viewType, parent),false);
                 break;
         }
         return holder;
@@ -296,112 +246,50 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        if (isReceiver(chatMessageList.get(position))) {//接收
             if (chatMessageList.get(position).messageType == MessageType.SHORT_TEXT.getCode()) {
                 return MESSAGE_SHORT_TEXT_RECEIVED;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.LONG_TEXT.getCode()) {
+            } else if (chatMessageList.get(position).messageType == MessageType.LONG_TEXT.getCode()) {
                 return MESSAGE_LONG_TEXT_RECEIVED;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.PICTURE.getCode()) {
+            }else if (chatMessageList.get(position).messageType == MessageType.PICTURE.getCode()) {
                 return MESSAGE_IMAGE_RECEIVED;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.AUDIO.getCode()) {
+            }else if (chatMessageList.get(position).messageType == MessageType.AUDIO.getCode()) {
                 return MESSAGE_VOICE_RECEIVED;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.VIDEO_CLIPS.getCode()) {
+            }else if (chatMessageList.get(position).messageType == MessageType.VIDEO_CLIPS.getCode()) {
                 return MESSAGE_VEDIO_RECEIVED;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.FILE.getCode()) {
+            }else if (chatMessageList.get(position).messageType == MessageType.FILE.getCode()) {
                 return MESSAGE_FILE_RECEIVED;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.POSITION.getCode()) {
+            }else if (chatMessageList.get(position).messageType == MessageType.POSITION.getCode()) {
                 return MESSAGE_LOCATION_RECEIVED;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.AFFICHE.getCode()) {
+            }else if (chatMessageList.get(position).messageType == MessageType.AFFICHE.getCode()) {
                 return MESSAGE_AFFICHE_RECEIVED;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.WARNING_INSTANCE.getCode()) {
+            }else if (chatMessageList.get(position).messageType == MessageType.WARNING_INSTANCE.getCode()) {
                 return MESSAGE_WARNING_INSTANCE_RECEIVED;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.PRIVATE_CALL.getCode()) {
+            }else if (chatMessageList.get(position).messageType == MessageType.PRIVATE_CALL.getCode()) {
                 return MESSAGE_PRIVATE_CALL_RECEIVED;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.VIDEO_LIVE.getCode()) {
+            }else if (chatMessageList.get(position).messageType == MessageType.VIDEO_LIVE.getCode()) {
                 return MESSAGE_VIDEO_LIVE_RECEIVED;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.GROUP_CALL.getCode()) {
+            }else if (chatMessageList.get(position).messageType == MessageType.GROUP_CALL.getCode()) {
                 return MESSAGE_GROUP_CALL_RECEIVED;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.HYPERLINK.getCode()) {
+            }else if (chatMessageList.get(position).messageType == MessageType.HYPERLINK.getCode()) {
                 return MESSAGE_HYPERLINK_RECEIVED;
-            }
-            if(chatMessageList.get(position).messageType == MessageType.GB28181_RECORD.getCode()){
+            }else if(chatMessageList.get(position).messageType == MessageType.GB28181_RECORD.getCode()){
                 return MESSAGE_GB28181_RECODE_RECEIVED;
-            }
-            if(chatMessageList.get(position).messageType == MessageType.MERGE_TRANSMIT.getCode()){
+            }else if(chatMessageList.get(position).messageType == MessageType.MERGE_TRANSMIT.getCode()){
                 return MESSAGE_MERGE_TRANSMIT_RECEIVED;
+            }else {
+                return MESSAGE_SHORT_TEXT_RECEIVED;
             }
-        } else {//发送
-            if (chatMessageList.get(position).messageType == MessageType.SHORT_TEXT.getCode()) {
-                return MESSAGE_SHORT_TEXT_SEND;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.LONG_TEXT.getCode()) {
-                return MESSAGE_LONG_TEXT_SEND;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.PICTURE.getCode()) {
-                return MESSAGE_IMAGE_SEND;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.AUDIO.getCode()) {
-                return MESSAGE_VOICE_SEND;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.VIDEO_CLIPS.getCode()) {
-                return MESSAGE_VEDIO_SEND;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.FILE.getCode()) {
-                return MESSAGE_FILE_SEND;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.POSITION.getCode()) {
-                return MESSAGE_LOCATION_SEND;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.AFFICHE.getCode()) {
-                return MESSAGE_AFFICHE_SEND;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.WARNING_INSTANCE.getCode()) {
-                return MESSAGE_WARNING_INSTANCE_SEND;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.PRIVATE_CALL.getCode()) {
-                return MESSAGE_PRIVATE_CALL_SEND;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.VIDEO_LIVE.getCode()) {
-                return MESSAGE_VIDEO_LIVE_SEND;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.GROUP_CALL.getCode()) {
-                return MESSAGE_GROUP_CALL_SEND;
-            }
-            if (chatMessageList.get(position).messageType == MessageType.HYPERLINK.getCode()) {
-                return MESSAGE_HYPERLINK_SEND;
-            }
-            if(chatMessageList.get(position).messageType == MessageType.GB28181_RECORD.getCode()){
-                return MESSAGE_GB28181_RECODE_SEND;
-            }
-            if(chatMessageList.get(position).messageType == MessageType.MERGE_TRANSMIT.getCode()){
-                return MESSAGE_MERGE_TRANSMIT_SEND;
-            }
-        }
-
-        return MESSAGE_SHORT_TEXT_SEND;
     }
 
     private void setData(int position, TerminalMessage terminalMessage, int viewType, ChatViewHolder holder) {
-        //消息撤回
-        if(terminalMessage.isWithDraw){
-            withDrawView(terminalMessage,holder);
-            return;
-        }
+//        //消息撤回
+//        if(terminalMessage.isWithDraw){
+//            withDrawView(terminalMessage,holder);
+//            return;
+//        }
         handleData(holder, viewType, terminalMessage, position);
         setListener(viewType, holder, terminalMessage, position);
-        aboutSend(holder, terminalMessage, viewType);
+//        aboutSend(holder, terminalMessage, viewType);
         if (position == chatMessageList.size() - 1) {
             holder.placeHolder.setVisibility(View.VISIBLE);
         } else {
@@ -455,59 +343,27 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private void aboutSend(ChatViewHolder holder, TerminalMessage terminalMessage, int viewType) {
 //        logger.error("============="+terminalMessage);
         //发送中状态
-        if (terminalMessage.messageBody.containsKey(JsonParam.SEND_STATE)) {
-            if (terminalMessage.messageBody.getString(JsonParam.SEND_STATE).equals(MessageSendStateEnum.SEND_PRE.toString())) {
-                if (viewType == MESSAGE_LOCATION_SEND && terminalMessage.messageBody.containsKey(JsonParam.ACTUAL_SEND) &&
-                        !terminalMessage.messageBody.getBooleanValue(JsonParam.ACTUAL_SEND)) {
-                } else {
-                    terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
-                    sendMessage(holder, terminalMessage, viewType);
-                }
-                setSendingView(holder, terminalMessage, viewType);
-            } else if (terminalMessage.messageBody.getString(JsonParam.SEND_STATE).equals(MessageSendStateEnum.SENDING.toString())) {
-                setSendingView(holder, terminalMessage, viewType);
-            } else if (terminalMessage.messageBody.getString(JsonParam.SEND_STATE).equals(MessageSendStateEnum.SEND_FAIL.toString())) {
-                setSendResultView(holder, viewType, View.VISIBLE);
-            } else if (terminalMessage.messageBody.getString(JsonParam.SEND_STATE).equals(MessageSendStateEnum.SEND_SUCCESS.toString())) {
-                setSendResultView(holder, viewType, View.GONE);
-            }
-        } else {
-            logger.error("*******没有发送状态的标记，这是不应该的*******");
-        }
+//        if (terminalMessage.messageBody.containsKey(JsonParam.SEND_STATE)) {
+//            if (terminalMessage.messageBody.getString(JsonParam.SEND_STATE).equals(MessageSendStateEnum.SEND_PRE.toString())) {
+//                if (viewType == MESSAGE_LOCATION_SEND && terminalMessage.messageBody.containsKey(JsonParam.ACTUAL_SEND) &&
+//                        !terminalMessage.messageBody.getBooleanValue(JsonParam.ACTUAL_SEND)) {
+//                } else {
+//                    terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
+//                    sendMessage(holder, terminalMessage, viewType);
+//                }
+//                setSendingView(holder, terminalMessage, viewType);
+//            } else if (terminalMessage.messageBody.getString(JsonParam.SEND_STATE).equals(MessageSendStateEnum.SENDING.toString())) {
+//                setSendingView(holder, terminalMessage, viewType);
+//            } else if (terminalMessage.messageBody.getString(JsonParam.SEND_STATE).equals(MessageSendStateEnum.SEND_FAIL.toString())) {
+//                setSendResultView(holder, viewType, View.VISIBLE);
+//            } else if (terminalMessage.messageBody.getString(JsonParam.SEND_STATE).equals(MessageSendStateEnum.SEND_SUCCESS.toString())) {
+//                setSendResultView(holder, viewType, View.GONE);
+//            }
+//        } else {
+//            logger.error("*******没有发送状态的标记，这是不应该的*******");
+//        }
     }
 
-    private void setSendResultView(ChatViewHolder holder, int viewType, int visible) {
-        setViewVisibility(holder.ivMsgStatus, visible);
-        setViewVisibility(holder.progressBar, View.GONE);
-        if (viewType == MESSAGE_IMAGE_SEND || viewType == MESSAGE_FILE_SEND) {
-            setViewVisibility(holder.tv_progress, View.GONE);
-            setViewVisibility(holder.progress_bar_uploading, View.GONE);
-            setViewVisibility(holder.tv_progress_uploading, View.GONE);
-        }
-    }
-
-    private void setSendingView(ChatViewHolder holder, TerminalMessage terminalMessage, int viewType) {
-        setViewVisibility(holder.ivMsgStatus, View.GONE);
-        setViewVisibility(holder.progressBar, View.VISIBLE);
-        if (viewType == MESSAGE_IMAGE_SEND || viewType == MESSAGE_FILE_SEND) {
-            int tokenId = terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID);
-            setViewVisibility(holder.tv_progress, View.VISIBLE);
-            if (progressPercentMap.containsKey(tokenId)) {
-                int percent = progressPercentMap.get(tokenId);
-                setProgress(holder.progressBar, percent);
-                setText(holder.tv_progress, percent + "%");
-            }
-        }
-        if (viewType == MESSAGE_LOCATION_SEND && terminalMessage.messageBody.containsKey(JsonParam.ACTUAL_SEND) &&
-                !terminalMessage.messageBody.getBooleanValue(JsonParam.ACTUAL_SEND)) {
-            if (terminalMessage.messageBody.containsKey(JsonParam.GET_LOCATION_FAIL) &&
-                    terminalMessage.messageBody.getBooleanValue(JsonParam.GET_LOCATION_FAIL)) {
-                setViewVisibility(holder.ivMsgStatus, View.VISIBLE);
-                setViewVisibility(holder.progressBar, View.GONE);
-            }
-            return;//不是真的发送位置
-        }
-    }
 
     public void uploadFileDelay() {
 //        new Thread().start();
@@ -567,28 +423,6 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         }
     }
 
-    private void sendMessage(ChatViewHolder holder, TerminalMessage terminalMessage, int viewType) {
-        switch (viewType) {
-            case MESSAGE_SHORT_TEXT_SEND:
-                sendShortTextMessage(terminalMessage);
-                break;
-            case MESSAGE_LONG_TEXT_SEND:
-                uploadLongText(holder, terminalMessage);
-                break;
-            case MESSAGE_IMAGE_SEND:
-                break;
-            case MESSAGE_FILE_SEND:
-                break;
-            case MESSAGE_LOCATION_SEND:
-                sendLocationMessage(terminalMessage);
-                break;
-            case MESSAGE_VIDEO_LIVE_SEND:
-                sendVideoLiveMessage(terminalMessage);
-                break;
-
-        }
-    }
-
     private void setListener(final int viewType, final ChatViewHolder holder, final TerminalMessage terminalMessage, final int position) {
         //长按消息条目
         holder.reBubble.setOnLongClickListener(v -> {
@@ -639,8 +473,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                     if (terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
                         return;
                     } else {
-                        IndividualNewsActivity activity = ActivityCollector.getActivity(IndividualNewsActivity.class);
-                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO, true, activity.getChatTargetId());
+//                        GroupMergeTransmitListActivity activity = ActivityCollector.getActivity(GroupMergeTransmitListActivity.class);
+//                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO, true, activity.getChatTargetId());
                     }
                 }
             });
@@ -691,7 +525,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 }
             });
         }
-        if (viewType == MESSAGE_SHORT_TEXT_RECEIVED || viewType == MESSAGE_SHORT_TEXT_SEND) {
+        if (viewType == MESSAGE_SHORT_TEXT_RECEIVED ) {
             holder.tvContent.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     return mIsLongClick;
@@ -727,111 +561,6 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         return (terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
     }
 
-
-    /**
-     * 根据消息类型初始化View
-     */
-    private void handleViewAndHolder(final int viewType, final View convertView, final ChatViewHolder holder, final TerminalMessage terminalMessage, final int position) {
-        holder.reBubble =  convertView.findViewById(R.id.bubble);
-        holder.ivAvatar =  convertView.findViewById(R.id.iv_userhead);
-        holder.timeStamp =  convertView.findViewById(R.id.timestamp);
-        holder.placeHolder = convertView.findViewById(R.id.placeholder);
-        if (isReceiver(terminalMessage)) {
-            holder.tvNick =  convertView.findViewById(R.id.tv_userid);
-            holder.progressBar =  convertView.findViewById(R.id.progress_bar);
-        } else {
-            holder.tv_ack_msg =  convertView.findViewById(R.id.tv_ack_msg);
-            holder.tv_delivered =  convertView.findViewById(R.id.tv_delivered);
-
-            holder.ivMsgStatus =  convertView.findViewById(R.id.msg_status);
-            holder.progressBar = convertView.findViewById(R.id.progress_bar);
-            holder.tv_error_delete =  convertView.findViewById(R.id.tv_error);
-        }
-        //文本
-        if ((viewType == MESSAGE_SHORT_TEXT_RECEIVED || viewType == MESSAGE_SHORT_TEXT_SEND) ||
-                (viewType == MESSAGE_LONG_TEXT_RECEIVED || viewType == MESSAGE_LONG_TEXT_SEND)) {
-            holder.tvContent =  convertView.findViewById(R.id.tv_chatcontent);
-            holder.reMain =  convertView.findViewById(R.id.re_main);
-        }
-        //图片
-        if (viewType == MESSAGE_IMAGE_RECEIVED || viewType == MESSAGE_IMAGE_SEND) {
-            holder.ivContent =  convertView.findViewById(R.id.bubbleImage);
-            holder.progressBar =  convertView.findViewById(R.id.progress_bar);
-            holder.tv_progress =  convertView.findViewById(R.id.tv_progress);
-            if (!isReceiver(terminalMessage)) {
-                holder.progress_bar_uploading =  convertView.findViewById(R.id.progress_bar_uploading);
-                holder.tv_progress_uploading =  convertView.findViewById(R.id.tv_progress_uploading);
-            }
-        }
-        //小视频
-        if (viewType == MESSAGE_VEDIO_RECEIVED || viewType == MESSAGE_VEDIO_SEND) {
-            holder.ivContent = convertView.findViewById(R.id.iv_content);
-//            holder.progressBar = convertView.findViewById(R.id.progress_bar);
-//            holder.tv_progress = convertView.findViewById(R.id.tv_progress);
-            holder.tvDuration = convertView.findViewById(R.id.tv_voice_length);
-            holder.loadingView = convertView.findViewById(R.id.loading_view);
-
-        }
-        //个呼
-        if (viewType == MESSAGE_PRIVATE_CALL_RECEIVED || viewType == MESSAGE_PRIVATE_CALL_SEND) {
-            holder.tvContent =  convertView.findViewById(R.id.tv_chatcontent);
-        }
-        //组呼---录音
-        if ((viewType == MESSAGE_GROUP_CALL_RECEIVED || viewType == MESSAGE_GROUP_CALL_SEND) ||
-                (viewType == MESSAGE_VOICE_RECEIVED || viewType == MESSAGE_VOICE_SEND)) {
-            holder.tvDuration =  convertView.findViewById(R.id.tv_voice_length);
-            holder.ivVoice =  convertView.findViewById(R.id.iv_voice);
-            holder.iv_voice_image_anim =  convertView.findViewById(R.id.iv_voice_image_anim);
-            if (viewType == MESSAGE_GROUP_CALL_RECEIVED || viewType == MESSAGE_VOICE_RECEIVED) {
-                holder.ivUnread =  convertView.findViewById(R.id.iv_unread_voice);
-            }
-        }
-        //定位
-        if (viewType == MESSAGE_LOCATION_RECEIVED || viewType == MESSAGE_LOCATION_SEND) {
-            holder.tvContent =  convertView.findViewById(R.id.tv_chatcontent);
-        }
-        //文件
-        if (viewType == MESSAGE_FILE_RECEIVED || viewType == MESSAGE_FILE_SEND) {
-            holder.iv_temp =  convertView.findViewById(R.id.iv_temp);
-            holder.progressBar =  convertView.findViewById(R.id.progress_bar);
-            holder.tvFileSize =  convertView.findViewById(R.id.tv_file_size);
-            holder.tvContent =  convertView.findViewById(R.id.tv_chatcontent);
-            holder.tv_progress =  convertView.findViewById(R.id.tv_progress);
-
-            if (viewType == MESSAGE_FILE_SEND) {
-                holder.progress_bar_uploading =  convertView.findViewById(R.id.progress_bar_uploading);
-                holder.tv_progress_uploading =  convertView.findViewById(R.id.tv_progress_uploading);
-            }
-        }
-
-        //图像
-        if (viewType == MESSAGE_VIDEO_LIVE_RECEIVED || viewType == MESSAGE_VIDEO_LIVE_SEND) {
-            holder.tvContent =  convertView.findViewById(R.id.tv_chatcontent);
-            if (viewType == MESSAGE_VIDEO_LIVE_RECEIVED) {
-                holder.ll_botoom_to_watch =  convertView.findViewById(R.id.ll_botoom_to_watch);
-                holder.tv_watch_time =  convertView.findViewById(R.id.tv_watch_time);
-            }
-            holder.live_bubble =  convertView.findViewById(R.id.live_bubble);
-            holder.live_tv_chatcontent =  convertView.findViewById(R.id.live_tv_chatcontent);
-        }
-        if (viewType == MESSAGE_GB28181_RECODE_RECEIVED || viewType == MESSAGE_GB28181_RECODE_SEND) {
-            holder.tvContent =  convertView.findViewById(R.id.tv_chatcontent);
-            if (viewType == MESSAGE_GB28181_RECODE_RECEIVED) {
-                holder.ll_botoom_to_watch =  convertView.findViewById(R.id.ll_botoom_to_watch);
-                holder.tv_watch_time =  convertView.findViewById(R.id.tv_watch_time);
-            }
-            holder.live_bubble =  convertView.findViewById(R.id.live_bubble);
-            holder.live_tv_chatcontent =  convertView.findViewById(R.id.live_tv_chatcontent);
-            holder.iv_image =  convertView.findViewById(R.id.iv_image);
-        }
-        if (viewType == MESSAGE_HYPERLINK_RECEIVED || viewType == MESSAGE_HYPERLINK_SEND) {
-            holder.lv_face_pair =  convertView.findViewById(R.id.lv_face_pair);
-            holder.tv_error_msg =  convertView.findViewById(R.id.tv_error_msg);
-        }
-
-        convertView.setTag(holder);
-    }
-
     /**
      * 设置数据
      */
@@ -851,7 +580,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             setViewVisibility(holder.tvNick, View.GONE);
         }
 
-        String nick = idNameMap.get(terminalMessage.messageFromId);
+        String nick = terminalMessage.messageFromName;
         if (!TextUtils.isEmpty(nick)) {
             if (isGroupChat && isReceiver(terminalMessage)) {
                 setText(holder.tvNick, nick);
@@ -927,10 +656,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             handlerPrivateCallData(terminalMessage, holder);
         }
         /**  直播接收条目  */
-        if (viewType == MESSAGE_VIDEO_LIVE_RECEIVED || viewType == MESSAGE_VIDEO_LIVE_SEND) {
+        if (viewType == MESSAGE_VIDEO_LIVE_RECEIVED ) {
             handlerLiveData(terminalMessage, holder);
         }
-        if(viewType == MESSAGE_GB28181_RECODE_RECEIVED || viewType == MESSAGE_GB28181_RECODE_SEND){
+        if(viewType == MESSAGE_GB28181_RECODE_RECEIVED ){
             handleGB28181Data(terminalMessage, holder);
         }
         /**  定位条目 */
@@ -1809,51 +1538,27 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             case MESSAGE_LONG_TEXT_RECEIVED:
             case MESSAGE_SHORT_TEXT_RECEIVED:
                 return inflater.inflate(R.layout.row_received_message, parent, false);
-            case MESSAGE_LONG_TEXT_SEND:
-            case MESSAGE_SHORT_TEXT_SEND:
-                return inflater.inflate(R.layout.row_sent_message, parent, false);
             case MESSAGE_IMAGE_RECEIVED:
                 return inflater.inflate(R.layout.row_received_picture, parent, false);
-            case MESSAGE_IMAGE_SEND:
-                return inflater.inflate(R.layout.row_sent_picture, parent, false);
             case MESSAGE_GROUP_CALL_RECEIVED:
             case MESSAGE_VOICE_RECEIVED:
                 return inflater.inflate(R.layout.row_received_voice, parent, false);
-            case MESSAGE_GROUP_CALL_SEND:
-            case MESSAGE_VOICE_SEND:
-                return inflater.inflate(R.layout.row_sent_voice, parent, false);
             case MESSAGE_FILE_RECEIVED:
                 return inflater.inflate(R.layout.row_received_file, parent, false);
-            case MESSAGE_FILE_SEND:
-                return inflater.inflate(R.layout.row_sent_file, parent, false);
             case MESSAGE_VEDIO_RECEIVED:
                 return inflater.inflate(R.layout.row_received_video, parent, false);
-            case MESSAGE_VEDIO_SEND:
-                return inflater.inflate(R.layout.row_sent_video, parent, false);
             case MESSAGE_LOCATION_RECEIVED:
                 return inflater.inflate(R.layout.row_received_location, parent, false);
-            case MESSAGE_LOCATION_SEND:
-                return inflater.inflate(R.layout.row_sent_location, parent, false);
             case MESSAGE_WARNING_INSTANCE_RECEIVED:
             case MESSAGE_VIDEO_LIVE_RECEIVED:
             case MESSAGE_GB28181_RECODE_RECEIVED:
                 return inflater.inflate(R.layout.row_receiver_live, parent, false);
-            case MESSAGE_WARNING_INSTANCE_SEND:
-            case MESSAGE_VIDEO_LIVE_SEND:
-            case MESSAGE_GB28181_RECODE_SEND:
-                return inflater.inflate(R.layout.row_send_live, parent, false);
             case MESSAGE_PRIVATE_CALL_RECEIVED:
                 return inflater.inflate(R.layout.row_receiver_private_call, parent, false);
-            case MESSAGE_PRIVATE_CALL_SEND:
-                return inflater.inflate(R.layout.row_send_private_call, parent, false);
             case MESSAGE_HYPERLINK_RECEIVED:
-                return inflater.inflate(R.layout.row_received_face, parent, false);
-            case MESSAGE_HYPERLINK_SEND:
                 return inflater.inflate(R.layout.row_received_face, parent, false);
             case MESSAGE_MERGE_TRANSMIT_RECEIVED:
                 return inflater.inflate(R.layout.row_receiver_merge_transmit, parent, false);
-            case MESSAGE_MERGE_TRANSMIT_SEND:
-                return inflater.inflate(R.layout.row_send_merge_transmit, parent, false);
             default:
                 return inflater.inflate(R.layout.row_sent_message, parent, false);
         }

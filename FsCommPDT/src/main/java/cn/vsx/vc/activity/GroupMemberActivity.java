@@ -258,7 +258,8 @@ public class GroupMemberActivity extends BaseActivity {
                     btn_cancel.setOnClickListener(v -> alertDialog.dismiss());
                 }else {
                     List<Member> deleteMemberList = sortAdapter.getDeleteMemberList();
-                    MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(groupId,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),deleteMemberList);
+                    MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(groupId,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),
+                            MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l),deleteMemberList);
                     add_btn.setVisibility(View.VISIBLE);
                     delete_btn.setVisibility(View.VISIBLE);
                     delete_text.setVisibility(View.GONE);

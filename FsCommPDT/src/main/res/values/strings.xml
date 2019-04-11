@@ -539,4 +539,5 @@
 
     <string name="with_draw_content">%1$s撤回了一条消息</string>
     <string name="forwarded">已转发</string>
+    <string name="please_choose_use_merge_transmit_message">请选择要合并转发的消息</string>
 </resources>

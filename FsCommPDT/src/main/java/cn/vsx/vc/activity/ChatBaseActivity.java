@@ -448,8 +448,8 @@ public abstract class ChatBaseActivity extends BaseActivity{
         } else {
             if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 //取消合并转发
-                if(temporaryAdapter!=null&&temporaryAdapter.isForWardMore()){
-                    temporaryAdapter.clearForWardState();
+                if(getMergeTransmitState()){
+                    clearMergeTransmitState();
                 }else{
                     //如果消息不为空则保存信息
                     saveUnsendMessage();
@@ -1446,7 +1446,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
             }
             /**  跳转到合并转发  **/
             if (terminalMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()) {
-
+                Intent intent = new Intent(ChatBaseActivity.this, GroupMergeTransmitListActivity.class);
+                intent.putExtra(cn.vsx.vc.utils.Constants.TERMINALMESSAGE, terminalMessage);
+                ChatBaseActivity.this.startActivity(intent);
             }
         }
     };
@@ -1466,6 +1468,16 @@ public abstract class ChatBaseActivity extends BaseActivity{
         public void handler() {
             handler.post(() -> {
                 /**  没有进行组呼的时候才弹出 **/
+                //隐藏合并转发按钮
+                if(getMergeTransmitState()){
+                    //检查是否选择了消息
+                    if(checkChooseMessageToMergeTransmit()){
+                        funcation.setMergeTransmitVisibility(View.GONE);
+                    }else{
+                        ToastUtil.showToast(ChatBaseActivity.this,getString(R.string.please_choose_use_merge_transmit_message));
+                        return;
+                    }
+                }
                 TransponFragment transponFragment = TransponFragment.getInstance(userId, temporaryAdapter.transponMessage.messageType);
                 transponFragment.setFragmentContainer(fl_fragment_container);
                 setViewVisibility(fl_fragment_container, View.VISIBLE);
@@ -1480,14 +1492,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private ReceiverShowForwardMoreHandler mReceiverShowForwardMoreHandler = new ReceiverShowForwardMoreHandler() {
         @Override
         public void handler() {
-            handler.post(() -> {
-                temporaryAdapter.setIsForWardMore(true);
-                //清空之前选择的状态
-                for (TerminalMessage message:chatMessageList) {
-                    message.isWithDraw = false;
-                }
-                temporaryAdapter.notifyDataSetChanged();
-            });
+            handler.post(() -> openMergeTransmitState());
         }
     };
 
@@ -2114,6 +2119,55 @@ public abstract class ChatBaseActivity extends BaseActivity{
     };
 
     /**
+     * 获取是否在合并转发的状态
+     * @return
+     */
+    private boolean getMergeTransmitState(){
+        return (temporaryAdapter!=null&&temporaryAdapter.isForWardMore())||
+                (funcation!=null && funcation.getMergeTransmitVisibility() == View.VISIBLE);
+    }
+
+    /**
+     * 清空合并转发的状态
+     */
+    private void clearMergeTransmitState(){
+        if(temporaryAdapter!=null){
+            temporaryAdapter.clearForWardState();
+        }
+        if(funcation!=null){
+            funcation.setMergeTransmitVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * 打开合并转发的状态
+     */
+    private void openMergeTransmitState(){
+        if(temporaryAdapter!=null){
+            temporaryAdapter.openForWardState();
+        }
+        //显示合并转发的确定按钮
+        if(funcation!=null){
+            funcation.setMergeTransmitVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * 检查在合并转发时是否选择了消息
+     * @return
+     */
+    private boolean checkChooseMessageToMergeTransmit(){
+        boolean canDo = false;
+        lee:for (TerminalMessage message: chatMessageList) {
+            if(message.isWithDraw){
+                canDo = true;
+                break lee;
+            }
+        }
+        return canDo;
+    }
+
+    /**
      * 组内上报成功之后再组内发一条消息
      */
     private ReceiverGroupPushLiveHandler receiverGroupPushLiveHandler = (streamMediaServerIp, streamMediaServerPort, callId) -> {
@@ -2174,7 +2228,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
             jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
             jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
             jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
-            jsonObject.put(JsonParam.CONTENT, String.valueOf(isGroup?userName:(name+"和"+userName+"的聊天记录")));
+            jsonObject.put(JsonParam.CONTENT, String.valueOf(isGroup?userName+"的消息记录":(name+"和"+userName+"的消息记录")));
             jsonObject.put(JsonParam.NOTE_LIST, noteJsonArray);
             jsonObject.put(JsonParam.MESSAGE_ID_LIST, idJsonArray);
             TerminalMessage mTerminalMessage = new TerminalMessage();

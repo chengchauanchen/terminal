@@ -396,7 +396,8 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
                     startActivity(intent);
                 }else if(type ==INCREASE_MEMBER){
                     //添加组员
-                    MyTerminalFactory.getSDK().getTempGroupManager().addMemberToTempGroup(groupId,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),mIncreaseTemporaryGroupMemberAdapter.getSelectMember());
+                    MyTerminalFactory.getSDK().getTempGroupManager().addMemberToTempGroup(groupId,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),
+                            TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l),mIncreaseTemporaryGroupMemberAdapter.getSelectMember());
                     finish();
                 }
                 break;

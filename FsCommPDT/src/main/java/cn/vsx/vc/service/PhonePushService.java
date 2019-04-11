@@ -270,7 +270,9 @@ public class PhonePushService extends BaseService{
         if(resultCode == BaseCommonCode.SUCCESS_CODE){
             if(pushMemberList != null && !pushMemberList.isEmpty()){
                 logger.info("自己发起直播成功,要推送的列表：" + pushMemberList);
-                MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(pushMemberList, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+                MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(pushMemberList,
+                        MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0),
+                        TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l));
             }
         }else{
             ToastUtil.showToast(MyTerminalFactory.getSDK().application, resultDesc);

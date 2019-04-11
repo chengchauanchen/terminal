@@ -36,6 +36,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GridViewAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
+import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
 import cn.vsx.vc.record.AudioRecordButton;
 import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -72,6 +73,11 @@ public class FunctionHidePlus extends LinearLayout {
     LinearLayout ll_function_hide_plus_bottom;
     @Bind(R.id.v_edit_line)
     View v_edit_line;
+
+    //合并转发
+    @Bind(R.id.bt_merge_transmit)
+    Button bt_merge_transmit;
+
     private Context context;
     private Logger logger = Logger.getLogger(DataUtil.class);
     InputMethodManager inputMethodManager ;
@@ -121,6 +127,7 @@ public class FunctionHidePlus extends LinearLayout {
         View view = layoutInflater.inflate(R.layout.layout_functionhideplus, this, true);
         ButterKnife.bind(this, view);
         ll_function_hide_plus_bottom.setVisibility(GONE);
+        bt_merge_transmit.setVisibility(GONE);
     }
 
     private void initListener () {
@@ -193,7 +200,7 @@ public class FunctionHidePlus extends LinearLayout {
             R.drawable.file_selector,R.drawable.position,
             R.drawable.push_video,R.drawable.pull_video
     };
-    @OnClick({R.id.hide_function, R.id.group_call_news_keyboard, R.id.bt_send})
+    @OnClick({R.id.hide_function, R.id.group_call_news_keyboard, R.id.bt_send,R.id.bt_merge_transmit})
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.hide_function:
@@ -252,7 +259,10 @@ public class FunctionHidePlus extends LinearLayout {
                     context.getSharedPreferences("unsendMessage",MODE_PRIVATE).edit().remove(String.valueOf(userId)).apply();
                 }
                 break;
-
+            case R.id.bt_merge_transmit:
+                //合并转发
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowTransponPopupHandler.class);
+                break;
             default:
                 break;
         }
@@ -558,4 +568,21 @@ public class FunctionHidePlus extends LinearLayout {
         void up();
         void down();
     }
+
+    /**
+     * 设置合并转发按钮是否显示
+     * @param visibility
+     */
+    public void setMergeTransmitVisibility(int visibility){
+        bt_merge_transmit.setVisibility(visibility);
+    }
+
+    /**
+     * 获取合并转发按钮的显示和隐藏的状态
+     * @return
+     */
+    public int getMergeTransmitVisibility(){
+        return bt_merge_transmit.getVisibility();
+    }
+
 }
