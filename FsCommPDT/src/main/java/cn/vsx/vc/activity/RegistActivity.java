@@ -59,6 +59,7 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.auth.AuthModel;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetNameByOrgHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
@@ -155,6 +156,13 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             }
         }
     });
+
+    private ReceiveExitHandler receiveExitHandler = new ReceiveExitHandler(){
+        @Override
+        public void handle(String msg){
+            exit();
+        }
+    };
 
     private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = new ReceiveSendUuidResponseHandler() {
         @Override
@@ -920,6 +928,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     @Override
     public void initListener() {
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveExitHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRegistCompleteHandler);
@@ -964,6 +973,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     @Override
     public void doOtherDestroy() {
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRegistCompleteHandler);
