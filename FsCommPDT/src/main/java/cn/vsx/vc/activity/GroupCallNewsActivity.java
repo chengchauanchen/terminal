@@ -30,6 +30,7 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import org.apache.http.util.TextUtils;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Timer;
@@ -364,10 +365,12 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
 
             case R.id.iv_monitor:
+                List<Integer> monitorGroups = new ArrayList<>();
+                monitorGroups.add(userId);
                 if(TerminalFactory.getSDK().getConfigManager().getMonitorGroup().contains(userId)){
-                    TerminalFactory.getSDK().getGroupManager().setMonitorGroup(String.valueOf(userId),false);
+                    TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
                 }else {
-                    TerminalFactory.getSDK().getGroupManager().setMonitorGroup(String.valueOf(userId),true);
+                    TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
                 }
                 break;
         }

@@ -119,6 +119,13 @@ public class NewPoliceAffairsFragment extends BaseFragment {
     private void updateData(MemberResponse memberResponse,List<CatalogBean> catalogBeanList){
         mDatas.clear();
         mCatalogList.clear();
+        //先设置常用联系人
+        for(Member member : TerminalFactory.getSDK().getConfigManager().getFrequentContacts()){
+            ContactItemBean<Member> bean = new ContactItemBean<>();
+            bean.setType(Constants.TYPE_USER);
+            bean.setBean(member);
+            mDatas.add(bean);
+        }
         mCatalogList.addAll(catalogBeanList);
         addData(memberResponse);
         mContactAdapter.notifyDataSetChanged();

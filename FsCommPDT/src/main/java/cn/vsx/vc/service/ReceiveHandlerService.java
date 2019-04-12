@@ -65,7 +65,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
@@ -81,7 +80,6 @@ import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.adapter.StackViewAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
-import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipConnectedHandler;
@@ -336,8 +334,6 @@ public class ReceiveHandlerService extends Service{
 
     /**
      * 去观看
-     * @param terminalMessage
-     * @param position
      */
     private void goToWatch(TerminalMessage terminalMessage,int position){
         //判断是否有接受图像功能权限
@@ -438,6 +434,7 @@ public class ReceiveHandlerService extends Service{
     /**
      * 收到别人请求我开启直播的通知
      **/
+    @SuppressWarnings("unchecked")
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId, emergencyType) -> myHandler.post(() -> {
         Intent intent = new Intent();
         intent.putExtra(Constants.MEMBER_NAME, mainMemberName);
@@ -490,6 +487,7 @@ public class ReceiveHandlerService extends Service{
     /**
      * 接收到消息
      */
+    @SuppressWarnings("unchecked")
     private ReceiveNotifyDataMessageHandler mReceiveNotifyDataMessageHandler = terminalMessage -> {
         logger.info("接收到消息" + terminalMessage.toString());
         if(lastNotifyTime != 0 && System.currentTimeMillis() - lastNotifyTime < 500){
@@ -726,7 +724,9 @@ public class ReceiveHandlerService extends Service{
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                     .setContentIntent(pIntent).setDefaults(Notification.DEFAULT_SOUND); //设置通知点击事件
             Notification notification = myBuilder.build();
-            notificationManager.notify(noticeId,notification);
+            if(null != notificationManager){
+                notificationManager.notify(noticeId,notification);
+            }
         }else {
             Notification.Builder myBuilder = new Notification.Builder(MyTerminalFactory.getSDK().application);
             myBuilder.setContentTitle(noticeTitle)//设置通知标题
@@ -743,7 +743,9 @@ public class ReceiveHandlerService extends Service{
             }
             Notification notification = myBuilder.build();
             //通过通知管理器来发起通知，ID区分通知
-            notificationManager.notify(noticeId, notification);
+            if(null != notificationManager){
+                notificationManager.notify(noticeId, notification);
+            }
         }
         lastNotifyTime = System.currentTimeMillis();
     }
@@ -767,6 +769,7 @@ public class ReceiveHandlerService extends Service{
     /**
      * 收到强制上报图像的通知
      */
+    @SuppressWarnings("unchecked")
     private ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler receiveNotifyEmergencyVideoLiveIncommingMessageHandler = message -> myHandler.post(() -> {
         Map<TerminalState, IState<?>> currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
         //观看上报图像,个呼
