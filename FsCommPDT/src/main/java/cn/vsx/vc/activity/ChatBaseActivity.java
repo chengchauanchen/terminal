@@ -1446,7 +1446,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
             }
             /**  跳转到合并转发  **/
             if (terminalMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()) {
-                Intent intent = new Intent(ChatBaseActivity.this, GroupMergeTransmitListActivity.class);
+                Intent intent = new Intent(ChatBaseActivity.this, MergeTransmitListActivity.class);
+                intent.putExtra(cn.vsx.vc.utils.Constants.IS_GROUP, isGroup);
+                intent.putExtra(cn.vsx.vc.utils.Constants.USER_ID, userId);
                 intent.putExtra(cn.vsx.vc.utils.Constants.TERMINALMESSAGE, terminalMessage);
                 ChatBaseActivity.this.startActivity(intent);
             }

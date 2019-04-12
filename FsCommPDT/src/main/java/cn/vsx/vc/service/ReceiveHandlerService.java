@@ -171,7 +171,7 @@ public class ReceiveHandlerService extends Service{
     @Override
     public IBinder onBind(Intent intent){
         KeepLiveManager.getInstance().setServiceForeground(this);
-        MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().start());
+//        MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().start());
         return receiveHandlerBinder;
     }
 

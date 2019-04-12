@@ -888,7 +888,15 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     private void start() {
-        MyTerminalFactory.getSDK().connectToServer();
+        MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+            MyTerminalFactory.getSDK().start();
+            MyTerminalFactory.getSDK().connectToServer();
+
+            PromptManager.getInstance().start();
+            //发送认证消息，uuid到注册服务器，判断是注册还是登录
+            sendUuid(null, null);
+        });
+
 
 //        if(MyTerminalFactory.getSDK().getParam(Params.IS_FIRST_LOGIN, true)
 //                && TextUtils.isEmpty(MyTerminalFactory.getSDK().getParam(Params.SIGNAL_SERVER_IP,""))){
@@ -898,9 +906,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 //        }else {
 //        }
 
-        PromptManager.getInstance().start();
-        //发送认证消息，uuid到注册服务器，判断是注册还是登录
-        sendUuid(null, null);
+
     }
 
     private void initPopupWindow() {

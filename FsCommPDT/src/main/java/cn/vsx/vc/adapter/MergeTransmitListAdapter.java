@@ -1,6 +1,6 @@
 package cn.vsx.vc.adapter;
 
-import android.app.Activity;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
@@ -25,10 +25,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
 import com.zectec.imageandfileselector.adapter.FaceRecognitionAdapter;
 import com.zectec.imageandfileselector.bean.FaceRecognitionBean;
+import com.zectec.imageandfileselector.bean.FileInfo;
 import com.zectec.imageandfileselector.bean.ImageBean;
+import com.zectec.imageandfileselector.fragment.ImagePreviewFragment;
 import com.zectec.imageandfileselector.fragment.ImagePreviewItemFragment;
-import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileCheckMessageHandler;
-import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileHandler;
 import com.zectec.imageandfileselector.utils.DateUtils;
 import com.zectec.imageandfileselector.utils.FileIcons;
 import com.zectec.imageandfileselector.utils.FileUtil;
@@ -49,33 +49,34 @@ import java.util.List;
 import java.util.Map;
 
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
-import cn.vsx.vc.activity.GroupMergeTransmitListActivity;
-import cn.vsx.vc.activity.IndividualNewsActivity;
+import cn.vsx.vc.activity.LiveHistoryActivity;
+import cn.vsx.vc.activity.MergeTransmitListActivity;
 import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.dialog.TranspondDialog;
+import cn.vsx.vc.dialog.TranspondNewDialog;
+import cn.vsx.vc.fragment.LocationFragment;
 import cn.vsx.vc.fragment.VideoPreviewItemFragment;
 import cn.vsx.vc.holder.ChatViewHolder;
-import cn.vsx.vc.model.ChatMember;
+import cn.vsx.vc.holder.MergeTransmitViewHolder;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
-import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
-import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
-import cn.vsx.vc.utils.ActivityCollector;
+import cn.vsx.vc.receiveHandle.ReceiverReplayGroupMergeTransmitVoiceHandler;
+import cn.vsx.vc.service.PullLivingService;
 import cn.vsx.vc.utils.AnimationsContainer;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -84,24 +85,24 @@ import ptt.terminalsdk.tools.ToastUtil;
  * Created by zckj on 2017/3/22.
  */
 
-public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatViewHolder> {
+public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmitViewHolder> {
 //    private final int VIEW_TYPE = 28;
 
-    private static final int MESSAGE_SHORT_TEXT_RECEIVED = 0;//短文本
-    private static final int MESSAGE_LONG_TEXT_RECEIVED = 1;//长文本
-    private static final int MESSAGE_IMAGE_RECEIVED = 2;//图片
-    private static final int MESSAGE_VOICE_RECEIVED = 3;//录音
-    private static final int MESSAGE_VEDIO_RECEIVED = 4;//小视频
-    private static final int MESSAGE_FILE_RECEIVED = 5;//文件
-    private static final int MESSAGE_LOCATION_RECEIVED = 6;//位置
-    private static final int MESSAGE_AFFICHE_RECEIVED = 7;//公告
-    private static final int MESSAGE_WARNING_INSTANCE_RECEIVED = 8;//警情
-    private static final int MESSAGE_PRIVATE_CALL_RECEIVED = 9;//个呼
-    private static final int MESSAGE_VIDEO_LIVE_RECEIVED = 10;//图像记录
-    private static final int MESSAGE_GROUP_CALL_RECEIVED = 11;//组呼
-    private static final int MESSAGE_HYPERLINK_RECEIVED = 12;//超链接
-    private static final int MESSAGE_GB28181_RECODE_RECEIVED = 13;//视频平台
-    private static final int MESSAGE_MERGE_TRANSMIT_RECEIVED = 14;//合并转发
+    private static final int MESSAGE_SHORT_TEXT = 0;//短文本
+    private static final int MESSAGE_LONG_TEXT = 1;//长文本
+    private static final int MESSAGE_IMAGE = 2;//图片
+    private static final int MESSAGE_VOICE = 3;//录音
+    private static final int MESSAGE_VEDIO = 4;//小视频
+    private static final int MESSAGE_FILE = 5;//文件
+    private static final int MESSAGE_LOCATION = 6;//位置
+    private static final int MESSAGE_AFFICHE = 7;//公告
+    private static final int MESSAGE_WARNING_INSTANCE = 8;//警情
+    private static final int MESSAGE_PRIVATE_CALL = 9;//个呼
+    private static final int MESSAGE_VIDEO_LIVE = 10;//图像记录
+    private static final int MESSAGE_GROUP_CALL = 11;//组呼
+    private static final int MESSAGE_HYPERLINK = 12;//超链接
+    private static final int MESSAGE_GB28181_RECODE = 13;//视频平台
+    private static final int MESSAGE_MERGE_TRANSMIT = 14;//合并转发
 
 
     public static final int MIN_CLICK_DELAY_TIME = 1000;
@@ -132,13 +133,15 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     private boolean mIsLongClick = false;//文本消息是否长按
     List<ImageBean> mImgList = new ArrayList<>();
     List<String> mImgUrlList = new ArrayList<>();
-    List<TerminalMessage> unReadVoiceList = new ArrayList<>();
-    private boolean upload;//是否正在上传
-    private boolean isForWardMore;//是否合并转发
+    //是否是组消息
+    private boolean isGroup;
+    protected int userId;
 
-    public GroupMergeTransmitListAdapter(List<TerminalMessage> chatMessageList, FragmentActivity activity) {
+    public MergeTransmitListAdapter(List<TerminalMessage> chatMessageList, FragmentActivity activity,boolean isGroup,int userId) {
         this.chatMessageList = chatMessageList;
         this.activity = activity;
+        this.isGroup = isGroup;
+        this.userId = userId;
         inflater = activity.getLayoutInflater();
     }
 
@@ -194,49 +197,49 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     }
 
     @Override
-    public ChatViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        ChatViewHolder holder = null;
+    public MergeTransmitViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        MergeTransmitViewHolder holder = null;
         switch (viewType) {
-            case MESSAGE_LONG_TEXT_RECEIVED:
-            case MESSAGE_SHORT_TEXT_RECEIVED:
-                holder =  new ChatViewHolder.TextReceivedHolder(getViewByType(viewType, parent),true);
+            case MESSAGE_LONG_TEXT:
+            case MESSAGE_SHORT_TEXT:
+                holder =  new MergeTransmitViewHolder.TextHolder(getViewByType(viewType, parent));
                 break;
-            case MESSAGE_IMAGE_RECEIVED:
-                holder =   new ChatViewHolder.ImageReceivedHolder(getViewByType(viewType, parent),true);
+            case MESSAGE_IMAGE:
+                holder =   new MergeTransmitViewHolder.ImageHolder(getViewByType(viewType, parent));
                 break;
-            case MESSAGE_GROUP_CALL_RECEIVED:
-            case MESSAGE_VOICE_RECEIVED:
-                holder =   new ChatViewHolder.VoiceReceivedHolder(getViewByType(viewType, parent),true);
+            case MESSAGE_GROUP_CALL:
+            case MESSAGE_VOICE:
+                holder =   new MergeTransmitViewHolder.VoiceHolder(getViewByType(viewType, parent));
                 break;
-            case MESSAGE_FILE_RECEIVED:
-                holder =   new ChatViewHolder.FileReceivedHolder(getViewByType(viewType, parent),true);
+            case MESSAGE_FILE:
+                holder =   new MergeTransmitViewHolder.FileHolder(getViewByType(viewType, parent));
                 break;
-            case MESSAGE_VEDIO_RECEIVED:
-                holder =   new ChatViewHolder.VideoReceivedHolder(getViewByType(viewType, parent),true);
+            case MESSAGE_VEDIO:
+                holder =   new MergeTransmitViewHolder.VideoHolder(getViewByType(viewType, parent));
                 break;
-            case MESSAGE_LOCATION_RECEIVED:
-                holder =   new ChatViewHolder.LocationReceivedHolder(getViewByType(viewType, parent),true);
+            case MESSAGE_LOCATION:
+                holder =   new MergeTransmitViewHolder.LocationHolder(getViewByType(viewType, parent));
                 break;
-            case MESSAGE_WARNING_INSTANCE_RECEIVED:
-            case MESSAGE_VIDEO_LIVE_RECEIVED:
-            case MESSAGE_GB28181_RECODE_RECEIVED:
-                holder =   new ChatViewHolder.LiveReceivedHolder(getViewByType(viewType, parent),true);
+            case MESSAGE_WARNING_INSTANCE:
+            case MESSAGE_VIDEO_LIVE:
+            case MESSAGE_GB28181_RECODE:
+                holder =   new MergeTransmitViewHolder.LiveHolder(getViewByType(viewType, parent));
                 break;
-            case MESSAGE_PRIVATE_CALL_RECEIVED:
-                holder =   new ChatViewHolder.PrivateCallReceivedHolder(getViewByType(viewType, parent),true);
+            case MESSAGE_PRIVATE_CALL:
+                holder =   new MergeTransmitViewHolder.PrivateCallHolder(getViewByType(viewType, parent));
                 break;
-            case MESSAGE_HYPERLINK_RECEIVED:
-                holder =   new ChatViewHolder.HyperlinkReceivedHolder(getViewByType(viewType, parent),true);
+            case MESSAGE_HYPERLINK:
+                holder =   new MergeTransmitViewHolder.HyperlinkHolder(getViewByType(viewType, parent));
                 break;
-            case MESSAGE_MERGE_TRANSMIT_RECEIVED:
-                holder =   new ChatViewHolder.TextMergeTransmitHolder(getViewByType(viewType, parent),true);
+            case MESSAGE_MERGE_TRANSMIT:
+                holder =   new MergeTransmitViewHolder.MergeTransmitHolder(getViewByType(viewType, parent));
                 break;
         }
         return holder;
     }
 
     @Override
-    public void onBindViewHolder(ChatViewHolder holder, int position) {
+    public void onBindViewHolder(MergeTransmitViewHolder holder, int position) {
         if(holder!=null){
             final TerminalMessage terminalMessage = chatMessageList.get(position);
             final int viewType = getItemViewType(position);
@@ -247,86 +250,47 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     @Override
     public int getItemViewType(int position) {
             if (chatMessageList.get(position).messageType == MessageType.SHORT_TEXT.getCode()) {
-                return MESSAGE_SHORT_TEXT_RECEIVED;
+                return MESSAGE_SHORT_TEXT;
             } else if (chatMessageList.get(position).messageType == MessageType.LONG_TEXT.getCode()) {
-                return MESSAGE_LONG_TEXT_RECEIVED;
+                return MESSAGE_LONG_TEXT;
             }else if (chatMessageList.get(position).messageType == MessageType.PICTURE.getCode()) {
-                return MESSAGE_IMAGE_RECEIVED;
+                return MESSAGE_IMAGE;
             }else if (chatMessageList.get(position).messageType == MessageType.AUDIO.getCode()) {
-                return MESSAGE_VOICE_RECEIVED;
+                return MESSAGE_VOICE;
             }else if (chatMessageList.get(position).messageType == MessageType.VIDEO_CLIPS.getCode()) {
-                return MESSAGE_VEDIO_RECEIVED;
+                return MESSAGE_VEDIO;
             }else if (chatMessageList.get(position).messageType == MessageType.FILE.getCode()) {
-                return MESSAGE_FILE_RECEIVED;
+                return MESSAGE_FILE;
             }else if (chatMessageList.get(position).messageType == MessageType.POSITION.getCode()) {
-                return MESSAGE_LOCATION_RECEIVED;
+                return MESSAGE_LOCATION;
             }else if (chatMessageList.get(position).messageType == MessageType.AFFICHE.getCode()) {
-                return MESSAGE_AFFICHE_RECEIVED;
+                return MESSAGE_AFFICHE;
             }else if (chatMessageList.get(position).messageType == MessageType.WARNING_INSTANCE.getCode()) {
-                return MESSAGE_WARNING_INSTANCE_RECEIVED;
+                return MESSAGE_WARNING_INSTANCE;
             }else if (chatMessageList.get(position).messageType == MessageType.PRIVATE_CALL.getCode()) {
-                return MESSAGE_PRIVATE_CALL_RECEIVED;
+                return MESSAGE_PRIVATE_CALL;
             }else if (chatMessageList.get(position).messageType == MessageType.VIDEO_LIVE.getCode()) {
-                return MESSAGE_VIDEO_LIVE_RECEIVED;
+                return MESSAGE_VIDEO_LIVE;
             }else if (chatMessageList.get(position).messageType == MessageType.GROUP_CALL.getCode()) {
-                return MESSAGE_GROUP_CALL_RECEIVED;
+                return MESSAGE_GROUP_CALL;
             }else if (chatMessageList.get(position).messageType == MessageType.HYPERLINK.getCode()) {
-                return MESSAGE_HYPERLINK_RECEIVED;
+                return MESSAGE_HYPERLINK;
             }else if(chatMessageList.get(position).messageType == MessageType.GB28181_RECORD.getCode()){
-                return MESSAGE_GB28181_RECODE_RECEIVED;
+                return MESSAGE_GB28181_RECODE;
             }else if(chatMessageList.get(position).messageType == MessageType.MERGE_TRANSMIT.getCode()){
-                return MESSAGE_MERGE_TRANSMIT_RECEIVED;
+                return MESSAGE_MERGE_TRANSMIT;
             }else {
-                return MESSAGE_SHORT_TEXT_RECEIVED;
+                return MESSAGE_SHORT_TEXT;
             }
     }
 
-    private void setData(int position, TerminalMessage terminalMessage, int viewType, ChatViewHolder holder) {
-//        //消息撤回
-//        if(terminalMessage.isWithDraw){
-//            withDrawView(terminalMessage,holder);
-//            return;
-//        }
+    private void setData(int position, TerminalMessage terminalMessage, int viewType, MergeTransmitViewHolder holder) {
         handleData(holder, viewType, terminalMessage, position);
         setListener(viewType, holder, terminalMessage, position);
-//        aboutSend(holder, terminalMessage, viewType);
         if (position == chatMessageList.size() - 1) {
             holder.placeHolder.setVisibility(View.VISIBLE);
         } else {
             holder.placeHolder.setVisibility(View.GONE);
-        }
-        //合并转发
-        forwardMore(terminalMessage,holder);
-    }
-
-    /**
-     * 合并转发
-     * @param terminalMessage
-     * @param holder
-     */
-    private void forwardMore(TerminalMessage terminalMessage, ChatViewHolder holder) {
-        if(isForWardMore){
-            if(terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
-                    terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()||
-                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()||
-                    terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
-                setViewVisibility(holder.cbForward,View.GONE);
-            }else{
-                if(!isReceiver(terminalMessage)){
-                  if(terminalMessage.messageBody.containsKey(JsonParam.SEND_STATE)&&
-                      terminalMessage.messageBody.getString(JsonParam.SEND_STATE).equals(MessageSendStateEnum.SEND_SUCCESS.toString())){
-                      setViewVisibility(holder.cbForward,View.VISIBLE);
-                      setViewChecked(holder.cbForward,terminalMessage.isForward);
-                    }else{
-                      setViewVisibility(holder.cbForward,View.GONE);
-                  }
-                }else{
-                    setViewVisibility(holder.cbForward,View.VISIBLE);
-                    setViewChecked(holder.cbForward,terminalMessage.isForward);
-                }
-            }
-        }else{
-            setViewVisibility(holder.cbForward,View.GONE);
         }
     }
 
@@ -364,74 +328,11 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
 //        }
     }
 
-
-    public void uploadFileDelay() {
-//        new Thread().start();
-        MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
-            try {
-                Thread.sleep(50L);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            int count = uploadMessages.size();
-            for (int i = 0; i < count; i++) {
-                uploadNextFile();
-            }
-        });
-    }
-
-    /**
-     * 上传下一个文件
-     **/
-    public void uploadNextFile() {
-        if (uploadMessages.size() == 0) {
-            return;
-        }
-        TerminalMessage terminalMessage1 = (TerminalMessage) uploadMessages.get(0).clone();
-
-        uploadMessages.remove(0);
-        terminalMessage1.messageToId = setToIds(terminalMessage1).get(0);
-        terminalMessage1.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
-        File file = new File(terminalMessage1.messagePath);
-        upload = true;
-        //        File file1 = new File(terminalMessage1.messageBody.getString("pictureUrl"));
-        if (terminalMessage1.messageType == MessageType.PICTURE.getCode()) {
-            if(file.length()<=0){
-                ToastUtil.showToast(activity,activity.getString(R.string.text_image_is_empty_can_not_send));
-                return;
-            }
-            MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, ""), file, terminalMessage1, true);
-        } else if (terminalMessage1.messageType == MessageType.FILE.getCode()) {
-            if(file.length()<=0){
-                ToastUtil.showToast(activity,activity.getString(R.string.text_file_is_empty_can_not_send));
-                return;
-            }
-            MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, ""), file, terminalMessage1, true);
-        } else if (terminalMessage1.messageType == MessageType.AUDIO.getCode()) {
-            if(file.length()<=0){
-                ToastUtil.showToast(activity,activity.getString(R.string.text_audio_is_too_short));
-                return;
-            }
-            MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, ""), file, terminalMessage1, true);
-        } else if (terminalMessage1.messageType == MessageType.VIDEO_CLIPS.getCode()) {
-            if(file.length()<=0){
-                ToastUtil.showToast(activity,activity.getString(R.string.text_video_is_too_short));
-                return;
-            }
-            MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, ""), file, terminalMessage1, true);
-//            MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, ""),file1,terminalMessage1,true);//上传视频第一帧图片
-        }
-    }
-
-    private void setListener(final int viewType, final ChatViewHolder holder, final TerminalMessage terminalMessage, final int position) {
+    private void setListener(final int viewType, final MergeTransmitViewHolder holder, final TerminalMessage terminalMessage, final int position) {
         //长按消息条目
         holder.reBubble.setOnLongClickListener(v -> {
             if (!isEnable)
                 return false;
-            if(upload){
-                ToastUtil.showToast(activity,activity.getString(R.string.text_in_upload_can_not_forward));
-                return false;
-            }
             if (
 //                    terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
 //                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
@@ -439,7 +340,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
 //                    terminalMessage.messageType == MessageType.AUDIO.getCode()||
                     MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
                 return false;
-            new TranspondDialog(activity, terminalMessage).showView();
+            new TranspondNewDialog(activity, terminalMessage, terminalMessage1 -> onCopy(terminalMessage1)).showView();
             if (!terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID))
                 terminalMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
             transponMessage = (TerminalMessage) terminalMessage.clone();
@@ -456,12 +357,12 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
                 fileItemClick(holder, terminalMessage, viewType);
                 photoItemClick(holder, terminalMessage, viewType);
                 videoItemClick(holder, terminalMessage, viewType);
-                privateCallClick(terminalMessage);
+//                privateCallClick(terminalMessage);
                 locationItemClick(terminalMessage);
-                liveItemClick(terminalMessage, viewType);
+//                liveItemClick(terminalMessage, viewType);
                 individualNewsRecordItemClick(terminalMessage, position);
                 groupCallItemClick(terminalMessage, position);
-                gb28181ItemClick(terminalMessage, viewType);
+//                gb28181ItemClick(terminalMessage, viewType);
                 mergeTransmit(terminalMessage,viewType);
             }
             InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -473,7 +374,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
                     if (terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
                         return;
                     } else {
-//                        GroupMergeTransmitListActivity activity = ActivityCollector.getActivity(GroupMergeTransmitListActivity.class);
+//                        MergeTransmitListActivity activity = ActivityCollector.getActivity(MergeTransmitListActivity.class);
 //                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO, true, activity.getChatTargetId());
                     }
                 }
@@ -492,40 +393,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
             });
 
         }
-
-        /**  点击失败按钮重新发送  **/
-        if (!isReceiver(terminalMessage) && holder.ivMsgStatus != null) {
-            holder.ivMsgStatus.setOnClickListener(v -> {
-                if (!isEnable)
-                    return;
-                int messageType = terminalMessage.messageType;
-                terminalMessage.resultCode = -1;
-                setViewVisibility(holder.ivMsgStatus, View.GONE);
-                if (messageType == MessageType.SHORT_TEXT.getCode()) {//短文本
-                    sendShortTextMessage(terminalMessage);
-                } else if (messageType == MessageType.LONG_TEXT.getCode()) {//长文本
-                    uploadLongText(holder, terminalMessage);
-                } else if (messageType == MessageType.POSITION.getCode()) {//定位
-//                        sendLocationMessage(terminalMessage);
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.LOCATION);
-
-                } else if (messageType == MessageType.PICTURE.getCode()
-                        || messageType == MessageType.FILE.getCode()
-                        ||messageType == MessageType.VIDEO_CLIPS.getCode()
-                        ||messageType == MessageType.AUDIO.getCode()) {//图片、文件
-                    terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
-                    progressPercentMap.put(terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID), 0);
-                    setProgress(holder.progressBar, 0);
-                    setText(holder.tv_progress, "0%");
-                    setViewVisibility(holder.progressBar, View.VISIBLE);
-                    setViewVisibility(holder.tv_progress, View.VISIBLE);
-                    uploadMessages.add(terminalMessage);
-
-                    uploadFileDelay();
-                }
-            });
-        }
-        if (viewType == MESSAGE_SHORT_TEXT_RECEIVED ) {
+        if (viewType == MESSAGE_SHORT_TEXT) {
             holder.tvContent.setOnTouchListener((view, motionEvent) -> {
                 if (motionEvent.getAction() == MotionEvent.ACTION_UP) {
                     return mIsLongClick;
@@ -535,22 +403,8 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
                 }
                 return false;
             });
-            holder.tvContent.setOnLongClickListener(view -> {
-                if(upload){
-                    ToastUtil.showToast(activity,activity.getString(R.string.text_in_upload_can_not_forward));
-                    return false;
-                }
-                mIsLongClick = true;
-                //处理长按事件
-                transponMessage = (TerminalMessage) terminalMessage.clone();
-                new TranspondDialog(activity, terminalMessage).showView();
-                return true;
-            });
         }
-        //合并转发  是否选择
-        holder.cbForward.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            terminalMessage.isWithDraw = isChecked;
-        });
+
     }
 
 
@@ -564,32 +418,17 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     /**
      * 设置数据
      */
-    private void handleData(ChatViewHolder holder, int viewType, final TerminalMessage terminalMessage, int position) {
+    private void handleData(MergeTransmitViewHolder holder, int viewType, final TerminalMessage terminalMessage, int position) {
         JSONObject messageBody = terminalMessage.messageBody;
         if (messageBody == null) {
             logger.error("messageBody 空了" + messageBody);
             return;
         }
 
-        handlerTime(terminalMessage, position, holder);
-        handlerAvatar(terminalMessage, position, holder);
+        handlerTime(terminalMessage, holder);
+        handlerAvatar(terminalMessage, holder);
+        setText(holder.tvNick, terminalMessage.messageFromName);
 
-        if (isGroupChat && isReceiver(terminalMessage)) {
-            setViewVisibility(holder.tvNick, View.VISIBLE);
-        } else if (!isGroupChat && isReceiver(terminalMessage)) {
-            setViewVisibility(holder.tvNick, View.GONE);
-        }
-
-        String nick = terminalMessage.messageFromName;
-        if (!TextUtils.isEmpty(nick)) {
-            if (isGroupChat && isReceiver(terminalMessage)) {
-                setText(holder.tvNick, nick);
-            }
-        } else {
-            if (isGroupChat && isReceiver(terminalMessage)) {
-                setText(holder.tvNick, terminalMessage.messageFromName);
-            }
-        }
         /**  短文本  */
         if (terminalMessage.messageType == MessageType.SHORT_TEXT.getCode()) {
             setText(holder.tvContent, messageBody.getString(JsonParam.CONTENT));
@@ -626,7 +465,6 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
                     PhotoUtils.getInstance().loadLocalBitmap(activity, pictureThumbUrl, holder.ivContent);
                 }
             }
-
         }
         /**  文件  */
         if (terminalMessage.messageType == MessageType.FILE.getCode()) {
@@ -656,10 +494,10 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
             handlerPrivateCallData(terminalMessage, holder);
         }
         /**  直播接收条目  */
-        if (viewType == MESSAGE_VIDEO_LIVE_RECEIVED ) {
+        if (viewType == MESSAGE_VIDEO_LIVE) {
             handlerLiveData(terminalMessage, holder);
         }
-        if(viewType == MESSAGE_GB28181_RECODE_RECEIVED ){
+        if(viewType == MESSAGE_GB28181_RECODE){
             handleGB28181Data(terminalMessage, holder);
         }
         /**  定位条目 */
@@ -703,7 +541,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
         }
     }
 
-    private void handleFileData(TerminalMessage terminalMessage, ChatViewHolder holder, int viewType) {
+    private void handleFileData(TerminalMessage terminalMessage, MergeTransmitViewHolder holder, int viewType) {
         JSONObject messageBody = terminalMessage.messageBody;
         String fileName = messageBody.getString(JsonParam.FILE_NAME);
         int res = FileIcons.smallIcon(fileName);
@@ -712,7 +550,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
         String fileSize = FileUtil.getFileSzie(messageBody.getLong(JsonParam.FILE_SIZE));
         setText(holder.tvFileSize, fileSize);
         /***  当前条目正在下载就显示进度条， 否则隐藏 **/
-        if (viewType == MESSAGE_FILE_RECEIVED) {
+        if (viewType == MESSAGE_FILE) {
             if (messageBody.containsKey(JsonParam.IS_DOWNLOADINF)
                     && messageBody.getBooleanValue(JsonParam.IS_DOWNLOADINF)) {
                 setViewVisibility(holder.progressBar, View.VISIBLE);
@@ -728,7 +566,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     /**
      * 设置人脸识别数据
      ***/
-    private void handleHyperlinkData(TerminalMessage terminalMessage, ChatViewHolder holder) {
+    private void handleHyperlinkData(TerminalMessage terminalMessage, MergeTransmitViewHolder holder) {
         int code = terminalMessage.messageBody.getIntValue(JsonParam.CODE);
         if (code == 0) {
             setViewVisibility(holder.lv_face_pair, View.VISIBLE);
@@ -768,7 +606,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
    /**
     * 合并转发
     */
-    private void handleMergeTransmitData(TerminalMessage terminalMessage, ChatViewHolder holder) {
+    private void handleMergeTransmitData(TerminalMessage terminalMessage, MergeTransmitViewHolder holder) {
         JSONObject messageBody = terminalMessage.messageBody;
         //标题
         if(messageBody.containsKey(JsonParam.CONTENT)){
@@ -803,7 +641,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     /**
      * 显示全部条目
      **/
-    private void setListViewHeightOnChildren(ChatViewHolder holder) {
+    private void setListViewHeightOnChildren(MergeTransmitViewHolder holder) {
         ListAdapter listAdapter = holder.lv_face_pair.getAdapter();
         if (listAdapter == null) {
             return;
@@ -819,7 +657,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
         holder.lv_face_pair.setLayoutParams(params);
     }
 
-    private void handleGB28181Data(TerminalMessage terminalMessage, ChatViewHolder holder){
+    private void handleGB28181Data(TerminalMessage terminalMessage, MergeTransmitViewHolder holder){
         JSONObject messageBody = terminalMessage.messageBody;
         //设置默认上报视频者，防止数组下标越界异常
         if(messageBody.containsKey(JsonParam.DEVICE_NAME)){
@@ -832,7 +670,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
         holder.iv_image.setImageResource(R.drawable.law_recoder_image);
     }
     /***  设置图像观看数据 **/
-    private void handlerLiveData(TerminalMessage terminalMessage, ChatViewHolder holder) {
+    private void handlerLiveData(TerminalMessage terminalMessage, MergeTransmitViewHolder holder) {
         JSONObject messageBody = terminalMessage.messageBody;
         String liver = messageBody.getString(JsonParam.LIVER);
         String[] split = liver.split("_");
@@ -947,7 +785,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     }
 
     /***  设置个呼数据 **/
-    private void handlerPrivateCallData(TerminalMessage terminalMessage, ChatViewHolder holder) {
+    private void handlerPrivateCallData(TerminalMessage terminalMessage, MergeTransmitViewHolder holder) {
         JSONObject messageBody = terminalMessage.messageBody;
         logger.info("sjl_:" + terminalMessage.resultCode + "," + SignalServerErrorCode.INDIVIDUAL_CALL_WAITE_TIMEOUT.getErrorCode());
         if (terminalMessage.resultCode == 0) {
@@ -1004,7 +842,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     /**
      * 设置头像显示
      */
-    private void handlerAvatar(TerminalMessage terminalMessage, int position, ChatViewHolder holder) {
+    private void handlerAvatar(TerminalMessage terminalMessage, MergeTransmitViewHolder holder) {
         Glide.with(activity)
                 .load(DataUtil.getMemberByMemberNo(terminalMessage.messageFromId).avatarUrl)
                 .asBitmap()
@@ -1016,53 +854,15 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     /**
      * 设置消息时间显示
      */
-    private void handlerTime(TerminalMessage terminalMessage, int position, ChatViewHolder holder) {
+    private void handlerTime(TerminalMessage terminalMessage , MergeTransmitViewHolder holder) {
+        long currentTime = 0;
         if (terminalMessage.sendTime > 0) {
-            long messageTime = terminalMessage.sendTime;
-            if (position == 0) {
-                setText(holder.timeStamp, DateUtils.getNewChatTime(messageTime));
-                setViewVisibility(holder.timeStamp, View.VISIBLE);
-            } else {
-                // 两条消息时间离得如果稍长，显示时间
-                long currentTime = terminalMessage.sendTime;
-                long lastTime = 0L;
-                if (chatMessageList.get(position - 1).sendTime > 0) {
-                    lastTime = chatMessageList.get(position - 1).sendTime;
-
-                } else {
-                    lastTime = currentTime;
-                }
-                handlerTime2(holder, currentTime, lastTime);
-            }
+             currentTime = terminalMessage.sendTime;
         } else {
-            long currentTime = System.currentTimeMillis();
-            if (position == 0) {
-                setText(holder.timeStamp, DateUtils.getNewChatTime(currentTime));
-                setViewVisibility(holder.timeStamp, View.VISIBLE);
-            } else {
-                long lastTime = 0L;
-                if (chatMessageList.get(position - 1).sendTime > 0) {
-                    lastTime = chatMessageList.get(position - 1).sendTime;
-                } else {
-                    lastTime = currentTime;
-                }
-                handlerTime2(holder, currentTime, lastTime);
-            }
-
+             currentTime = System.currentTimeMillis();
         }
-    }
-
-    private void handlerTime2(ChatViewHolder holder, long currentTime, long lastTime) {
-        if (currentTime - lastTime <= 0) {
-            setViewVisibility(holder.timeStamp, View.GONE);
-        } else {
-            if (DateUtils.isCloseEnough(currentTime, lastTime)) {
-                setViewVisibility(holder.timeStamp, View.GONE);
-            } else {
-                setText(holder.timeStamp, DateUtils.getNewChatTime(currentTime));
-                setViewVisibility(holder.timeStamp, View.VISIBLE);
-            }
-        }
+        setText(holder.timeStamp, DateUtils.getNewChatTime(currentTime));
+        setViewVisibility(holder.timeStamp, View.VISIBLE);
     }
 
     private String getCallLength(long time) {
@@ -1102,7 +902,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     /**
      * 显示长文本
      **/
-    private void setLongText(TerminalMessage terminalMessage, ChatViewHolder holder) {
+    private void setLongText(TerminalMessage terminalMessage, MergeTransmitViewHolder holder) {
         String path = terminalMessage.messagePath;
         File file = new File(path);
         if (!file.exists()) {
@@ -1116,7 +916,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     }
 
     /***  播放组呼录音相关改变 **/
-    private void playGroupVoice(int position, ChatViewHolder holder, TerminalMessage terminalMessage) {
+    private void playGroupVoice(int position, MergeTransmitViewHolder holder, TerminalMessage terminalMessage) {
         if(holder.iv_voice_image_anim != null){
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 if (mposition == position) {
@@ -1182,211 +982,10 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
             MyTerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessage(terminalMessage);
         }
     }
-
-    /**
-     * 发送短文本消息到信令
-     */
-    private void sendShortTextMessage(TerminalMessage terminalMessage) {
-        List<Integer> toIds = setToIds(terminalMessage);
-        sendShortTextMessage2(terminalMessage, toIds);
-    }
-
-    /**
-     * 合并转发
-     */
-    public void transponForwardMoreMessage(TerminalMessage terminalMessage, boolean isGrouop) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGrouop);
-        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        terminalMessage1.messageToId = toIds.get(0);
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1);
-    }
-
-
-    /**
-     * 转发短文本消息到信令
-     */
-    private void transponShortTextMessage(TerminalMessage terminalMessage, boolean isGrouop) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGrouop);
-        sendShortTextMessage2(terminalMessage, toIds);
-    }
-
-    private void sendShortTextMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
-        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        String msg = terminalMessage.messageBody.getString(JsonParam.CONTENT);
-        terminalMessage1.messageToId = toIds.get(0);
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1);
-    }
-
-    /**
-     * 上传长文本消息
-     */
-    private void uploadLongText(ChatViewHolder chatViewHolder, TerminalMessage terminalMessage) {
-        File file = new File(terminalMessage.messagePath);
-        terminalMessage.messageToId = setToIds(terminalMessage).get(0);
-        upload = true;
-        MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL), file, terminalMessage, false);
-    }
-
-    /**
-     * 发送定位到信令
-     */
-    private void sendLocationMessage(TerminalMessage terminalMessage) {
-        List<Integer> toIds = setToIds(terminalMessage);
-        sendLocationMessage2(terminalMessage, toIds);
-    }
-
-    /***  转发定位消息 **/
-    private void transponLocationMessage(TerminalMessage terminalMessage, boolean isGroup) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGroup);
-        sendLocationMessage2(terminalMessage, toIds);
-    }
-
-    private void sendLocationMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
-        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        terminalMessage1.messageToId = toIds.get(0);
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1);
-    }
-
-    /**
-     * 发送上报图像信令
-     */
-    private void sendVideoLiveMessage(TerminalMessage terminalMessage) {
-        List<Integer> toIds = setToIds(terminalMessage);
-        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        terminalMessage1.messageToId = toIds.get(0);
-        upload = true;
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1);
-    }
-
-
-    /**
-     * 将长文本相关发送到信令服务
-     **/
-    public void sendLongTxtMessage(TerminalMessage terminalMessage) {
-        List<Integer> toIds = setToIds(terminalMessage);
-        sendLongTxtMessage2(terminalMessage, toIds);
-    }
-
-    /**
-     * 转发长文本相关发送到信令服务
-     **/
-    public void transponLongTxtMessage(TerminalMessage terminalMessage, boolean isGroup) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGroup);
-        sendLongTxtMessage2(terminalMessage, toIds);
-    }
-
-    public void sendLongTxtMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
-        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        terminalMessage1.messageToId = toIds.get(0);
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1);
-    }
-
-    /**
-     * 将图片相关发送到信令服务
-     **/
-    public void sendPhotoMessage(TerminalMessage terminalMessage) {
-        List<Integer> toIds = setToIds(terminalMessage);
-        sendPhotoMessage2(terminalMessage, toIds);
-    }
-
-    /**
-     * 转发图片消息
-     **/
-    private void transponPhotoMessage(TerminalMessage terminalMessage, boolean isGroup) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGroup);
-        if (terminalMessage.resultCode != 0) {//发送失败的文件消息进行转发
-            terminalMessage.messageToId = toIds.get(0);
-            terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
-            terminalMessage.messageBody.put(JsonParam.ISMICROPICTURE, true);
-            File file = new File(terminalMessage.messagePath);
-            upload = true;
-            MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, ""), file, terminalMessage, false);
-        } else {
-            sendPhotoMessage2(terminalMessage, toIds);
-        }
-    }
-
-    public void sendPhotoMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
-        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        terminalMessage1.messageToId = toIds.get(0);
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1);
-    }
-
-    /**
-     * 将文件相关发送到信令服务
-     **/
-    public void sendFileMessage(TerminalMessage terminalMessage) {
-        List<Integer> toIds = setToIds(terminalMessage);
-        sendFileMessage2(terminalMessage, toIds);
-    }
-
-    /***  转发文件消息 **/
-    private void transponFileMessage(TerminalMessage terminalMessage, boolean isGroup) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGroup);
-        if (terminalMessage.resultCode != 0) {//发送失败的文件消息进行转发
-            terminalMessage.messageToId = toIds.get(0);
-            terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
-            File file = new File(terminalMessage.messagePath);
-            upload = true;
-            MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, ""), file, terminalMessage, false);
-        } else {
-            sendFileMessage2(terminalMessage, toIds);
-        }
-    }
-
-    public void sendFileMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
-        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        terminalMessage1.messageToId = toIds.get(0);
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1);
-    }
-
-    /**
-     * 将直播相关发送到信令服务
-     **/
-    private void sendLiveMessage(TerminalMessage terminalMessage) {
-        List<Integer> toIds = setToIds(terminalMessage);
-        sendLiveMessage2(terminalMessage, toIds);
-    }
-
-    /***   转发直播消息  **/
-    private void transponLiveMessage(TerminalMessage terminalMessage, boolean isGroup) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGroup);
-        sendLiveMessage2(terminalMessage, toIds);
-    }
-
-    private void sendLiveMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
-        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        terminalMessage1.messageToId = toIds.get(0);
-
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1);
-    }
-
-    /**
-     * 将组呼相关发送到信令服务
-     **/
-    private void sendGroupCallMessage(TerminalMessage terminalMessage) {
-        List<Integer> toIds = setToIds(terminalMessage);
-        sendGroupCallMessage2(terminalMessage, toIds);
-    }
-
-    /**
-     * 转发组呼或录音消息
-     **/
-    private void transponGroupCallMessage(TerminalMessage terminalMessage, boolean isGroup) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGroup);
-        sendGroupCallMessage2(terminalMessage, toIds);
-    }
-
-    private void sendGroupCallMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
-        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        terminalMessage1.messageToId = toIds.get(0);
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1);
-    }
-
     /**
      * 文件条目点击
      */
-    private void fileItemClick(ChatViewHolder chatViewHolder, TerminalMessage terminalMessage, int type) {
+    private void fileItemClick(MergeTransmitViewHolder chatViewHolder, TerminalMessage terminalMessage, int type) {
         if (terminalMessage.messageType == MessageType.FILE.getCode()){
             openFile(terminalMessage, chatViewHolder);
         }
@@ -1395,7 +994,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     /**
      * 图片条目条目点击
      */
-    private void photoItemClick(ChatViewHolder chatViewHolder, TerminalMessage terminalMessage, int type) {
+    private void photoItemClick(MergeTransmitViewHolder chatViewHolder, TerminalMessage terminalMessage, int type) {
         if (terminalMessage.messageType == MessageType.PICTURE.getCode()) {
             openPhoto(terminalMessage, chatViewHolder);
         }
@@ -1404,7 +1003,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     /**
      * 点击视频条目点击
      */
-    private void videoItemClick(ChatViewHolder chatViewHolder, TerminalMessage terminalMessage, int type) {
+    private void videoItemClick(MergeTransmitViewHolder chatViewHolder, TerminalMessage terminalMessage, int type) {
         if (terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
             if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())){
                 File file = new File(terminalMessage.messagePath);
@@ -1453,18 +1052,15 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
      * 点击定位消息进入定位界面
      **/
     private void locationItemClick(TerminalMessage terminalMessage) {
-
         if (terminalMessage.messageType == MessageType.POSITION.getCode()) {
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverChatListItemClickHandler.class,
-                    terminalMessage, isReceiver(terminalMessage));
+            onListItemClick(terminalMessage, isReceiver(terminalMessage));
         }
-
     }
 
     private void gb28181ItemClick(TerminalMessage terminalMessage, int viewType){
         if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())){
-                if(viewType == MESSAGE_GB28181_RECODE_RECEIVED){
+                if(viewType == MESSAGE_GB28181_RECODE){
                     MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGoWatchRTSPHandler.class,terminalMessage);
                 }
             }else {
@@ -1480,8 +1076,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
      */
     private void mergeTransmit(TerminalMessage terminalMessage, int viewType) {
         if (terminalMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()) {
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverChatListItemClickHandler.class,
-                    terminalMessage, isReceiver(terminalMessage));
+            onListItemClick(terminalMessage, isReceiver(terminalMessage));
         }
     }
 
@@ -1490,20 +1085,15 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
      * 点击图像接收条目
      **/
     private void liveItemClick(TerminalMessage terminalMessage, int viewType) {
-
         if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()){
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())) {
-                if (viewType == MESSAGE_VIDEO_LIVE_RECEIVED && terminalMessage.messageBody.getIntValue("remark") != 1) {
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverChatListItemClickHandler.class,
-                            terminalMessage, isReceiver(terminalMessage));
-
-
+                if (viewType == MESSAGE_VIDEO_LIVE && terminalMessage.messageBody.getIntValue("remark") != 1) {
+                    onListItemClick(terminalMessage, isReceiver(terminalMessage));
                 }
             } else {
                 ToastUtil.showToast(activity, activity.getString(R.string.text_has_no_image_receiver_authority));
             }
         }
-
     }
 
     /**
@@ -1515,7 +1105,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
                 if (MyApplication.instance.isPlayVoice) {
                     MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
                 }
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupChatVoiceHandler.class, position);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupMergeTransmitVoiceHandler.class, position);
             } else {
                 ToastUtil.showToast(activity, activity.getString(R.string.text_has_no_group_call_listener_authority));
             }
@@ -1529,42 +1119,42 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     public void individualNewsRecordItemClick(TerminalMessage terminalMessage, int position) {
         if (terminalMessage.messageType == MessageType.AUDIO.getCode()) {
             logger.error("个呼录音点击事件--->" + position);
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayIndividualChatVoiceHandler.class, terminalMessage, position);
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupMergeTransmitVoiceHandler.class, terminalMessage, position);
         }
     }
 
     private View getViewByType(int viewType, ViewGroup parent) {
         switch (viewType) {
-            case MESSAGE_LONG_TEXT_RECEIVED:
-            case MESSAGE_SHORT_TEXT_RECEIVED:
-                return inflater.inflate(R.layout.row_received_message, parent, false);
-            case MESSAGE_IMAGE_RECEIVED:
-                return inflater.inflate(R.layout.row_received_picture, parent, false);
-            case MESSAGE_GROUP_CALL_RECEIVED:
-            case MESSAGE_VOICE_RECEIVED:
-                return inflater.inflate(R.layout.row_received_voice, parent, false);
-            case MESSAGE_FILE_RECEIVED:
-                return inflater.inflate(R.layout.row_received_file, parent, false);
-            case MESSAGE_VEDIO_RECEIVED:
-                return inflater.inflate(R.layout.row_received_video, parent, false);
-            case MESSAGE_LOCATION_RECEIVED:
-                return inflater.inflate(R.layout.row_received_location, parent, false);
-            case MESSAGE_WARNING_INSTANCE_RECEIVED:
-            case MESSAGE_VIDEO_LIVE_RECEIVED:
-            case MESSAGE_GB28181_RECODE_RECEIVED:
-                return inflater.inflate(R.layout.row_receiver_live, parent, false);
-            case MESSAGE_PRIVATE_CALL_RECEIVED:
-                return inflater.inflate(R.layout.row_receiver_private_call, parent, false);
-            case MESSAGE_HYPERLINK_RECEIVED:
-                return inflater.inflate(R.layout.row_received_face, parent, false);
-            case MESSAGE_MERGE_TRANSMIT_RECEIVED:
-                return inflater.inflate(R.layout.row_receiver_merge_transmit, parent, false);
+            case MESSAGE_LONG_TEXT:
+            case MESSAGE_SHORT_TEXT:
+                return inflater.inflate(R.layout.row_merge_transmit_message, parent, false);
+            case MESSAGE_IMAGE:
+                return inflater.inflate(R.layout.row_merge_transmit_picture, parent, false);
+            case MESSAGE_GROUP_CALL:
+            case MESSAGE_VOICE:
+                return inflater.inflate(R.layout.row_merge_transmit_voice, parent, false);
+            case MESSAGE_FILE:
+                return inflater.inflate(R.layout.row_merge_transmit_file, parent, false);
+            case MESSAGE_VEDIO:
+                return inflater.inflate(R.layout.row_merge_transmit_video, parent, false);
+            case MESSAGE_LOCATION:
+                return inflater.inflate(R.layout.row_merge_transmit_location, parent, false);
+            case MESSAGE_WARNING_INSTANCE:
+            case MESSAGE_VIDEO_LIVE:
+            case MESSAGE_GB28181_RECODE:
+                return inflater.inflate(R.layout.row_merge_transmit_live, parent, false);
+            case MESSAGE_PRIVATE_CALL:
+                return inflater.inflate(R.layout.row_merge_transmit_private_call, parent, false);
+            case MESSAGE_HYPERLINK:
+                return inflater.inflate(R.layout.row_merge_transmit_face, parent, false);
+            case MESSAGE_MERGE_TRANSMIT:
+                return inflater.inflate(R.layout.row_merge_transmit_merge_transmit, parent, false);
             default:
-                return inflater.inflate(R.layout.row_sent_message, parent, false);
+                return inflater.inflate(R.layout.row_merge_transmit_message, parent, false);
         }
     }
 
-    public void openPhoto(TerminalMessage terminalMessage, ChatViewHolder chatViewHolder) {
+    public void openPhoto(TerminalMessage terminalMessage, MergeTransmitViewHolder chatViewHolder) {
         //加载原图
         File file = new File(terminalMessage.messagePath);
         mImgList = findImages();
@@ -1598,7 +1188,7 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     /**
      * 打开文件
      */
-    public void openFile(TerminalMessage terminalMessage, ChatViewHolder chatViewHolder) {
+    public void openFile(TerminalMessage terminalMessage, MergeTransmitViewHolder chatViewHolder) {
         File file;
         if (!TextUtils.isEmpty(terminalMessage.messagePath)) {
             file = new File(terminalMessage.messagePath);
@@ -1635,10 +1225,6 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
         }
 
     }
-
-
-
-
     /**
      * 下载完原图之后打开预览
      **/
@@ -1693,154 +1279,6 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
     }
 
     public TerminalMessage transponMessage;//需要转发的消息
-    public boolean isTranspon;//是否转发了
-
-    public void transponMessage(ChatMember chatMember) {
-        logger.info("转发消息，type:" + transponMessage.messageType);
-            //单个转发
-            forward(chatMember);
-    }
-
-    /**
-     * 清空转发选择的状态
-     */
-    public void clearForWardState(){
-        for (TerminalMessage message: chatMessageList) {
-            message.isWithDraw = false;
-        }
-        isForWardMore = false;
-        notifyDataSetChanged();
-    }
-
-    /**
-     * 打开转发选择的状态
-     */
-    public void openForWardState(){
-        for (TerminalMessage message: chatMessageList) {
-            message.isWithDraw = false;
-        }
-        isForWardMore = true;
-        notifyDataSetChanged();
-    }
-
-    /**
-     * 获取消息的内容
-     * @param message
-     * @return
-     */
-    public String getMessageContent(TerminalMessage message) {
-        String noticeContent = "";
-        //短文
-        if(message.messageType ==  MessageType.SHORT_TEXT.getCode()) {
-            String content = message.messageBody.getString(JsonParam.CONTENT);
-            noticeContent=message.messageFromName+":"+content;
-        }
-        //长文
-        if(message.messageType ==  MessageType.LONG_TEXT.getCode()) {
-            String path = message.messagePath;
-            File file = new File(path);
-            if (!file.exists()) {
-                MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(message, false);
-                MyTerminalFactory.getSDK().download(message, true);
-            }
-            String content = FileUtil.getStringFromFile(file);
-            noticeContent=String.format(activity.getString(R.string.text_message_list_text_),message.messageFromName,content);
-        }
-        //图片
-        if(message.messageType ==  MessageType.PICTURE.getCode()) {
-            noticeContent=String.format(activity.getString(R.string.text_message_list_picture_),message.messageFromName);
-        }
-        //录音
-        if(message.messageType ==  MessageType.AUDIO.getCode()) {
-            noticeContent=String.format(activity.getString(R.string.text_message_list_voice_),message.messageFromName);
-        }
-        //小视频
-        if(message.messageType ==  MessageType.VIDEO_CLIPS.getCode()) {
-            noticeContent=String.format(activity.getString(R.string.text_message_list_video_),message.messageFromName);
-        }
-        //文件
-        if(message.messageType ==  MessageType.FILE.getCode()) {
-            noticeContent=String.format(activity.getString(R.string.text_message_list_file_),message.messageFromName);
-        }
-        //位置
-        if(message.messageType ==  MessageType.POSITION.getCode()) {
-            noticeContent=String.format(activity.getString(R.string.text_message_list_location_),message.messageFromName);
-        }
-        //公告
-        if(message.messageType ==  MessageType.AFFICHE.getCode()) {
-            noticeContent=String.format(activity.getString(R.string.text_message_list_notice_),message.messageFromName);
-        }
-        //警情
-        if(message.messageType ==  MessageType.WARNING_INSTANCE.getCode()) {
-            noticeContent=String.format(activity.getString(R.string.text_message_list_warning_),message.messageFromName);
-        }
-        //个呼
-        if(message.messageType ==  MessageType.PRIVATE_CALL.getCode()) {
-            noticeContent=String.format(activity.getString(R.string.text_message_list_personal_call_),message.messageFromName);
-        }
-        //图像记录
-        if(message.messageType ==  MessageType.VIDEO_LIVE.getCode()|| message.messageType ==  MessageType.GB28181_RECORD.getCode()) {
-            noticeContent=String.format(activity.getString(R.string.text_message_list_image_),message.messageFromName);
-        }
-        //组呼
-        if(message.messageType ==  MessageType.GROUP_CALL.getCode()) {
-            noticeContent=String.format(activity.getString(R.string.text_message_list_group_call_),message.messageFromName);
-        }
-        //超链接
-        if(message.messageType ==  MessageType.HYPERLINK.getCode()) {
-            noticeContent=String.format(activity.getString(R.string.text_message_list_face_recognition_),message.messageFromName);
-        }
-        //合并转发
-        if(message.messageType ==  MessageType.MERGE_TRANSMIT.getCode()) {
-            noticeContent=String.format(activity.getString(R.string.text_message_list_merge_transmit_),message.messageFromName);
-        }
-        return noticeContent;
-    }
-
-    /**
-     * 单消息转发
-     * @param chatMember
-     */
-    private void forward(ChatMember chatMember){
-        transponMessage.messageToId = chatMember.getId();
-        transponMessage.messageToName = chatMember.getName();
-        transponMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-        transponMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
-        transponMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
-
-        if (transponMessage.messageType == MessageType.SHORT_TEXT.getCode()) {
-            transponShortTextMessage(transponMessage, chatMember.isGroup());
-        }
-        if (transponMessage.messageType == MessageType.LONG_TEXT.getCode()) {
-            transponLongTxtMessage(transponMessage, chatMember.isGroup());
-        }
-        if (transponMessage.messageType == MessageType.PICTURE.getCode()) {
-            transponPhotoMessage(transponMessage, chatMember.isGroup());
-        }
-        if (transponMessage.messageType == MessageType.AUDIO.getCode()) {
-        }
-        if (transponMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
-            transponFileMessage(transponMessage, chatMember.isGroup());
-        }
-        if (transponMessage.messageType == MessageType.FILE.getCode()) {
-            transponFileMessage(transponMessage, chatMember.isGroup());
-        }
-        if (transponMessage.messageType == MessageType.POSITION.getCode()) {
-            transponLocationMessage(transponMessage, chatMember.isGroup());
-        }
-        if (transponMessage.messageType == MessageType.WARNING_INSTANCE.getCode()) {
-
-        }
-        if (transponMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
-            transponLiveMessage(transponMessage, chatMember.isGroup());
-        }
-        if (transponMessage.messageType == MessageType.GROUP_CALL.getCode() || transponMessage.messageType == MessageType.AUDIO.getCode()) {
-            //组呼进行转发，类型变为录音
-            transponMessage.messageType = MessageType.AUDIO.getCode();
-            transponGroupCallMessage(transponMessage, chatMember.isGroup());
-        }
-    }
-
 
     @NonNull
     private List<Integer> setToIds(TerminalMessage terminalMessage) {
@@ -1888,23 +1326,116 @@ public class GroupMergeTransmitListAdapter extends RecyclerView.Adapter<ChatView
         return mImgList;
     }
 
-    public void setUploadFinished(){
-        upload = false;
+    /**
+     * 复制
+     * @param terminalMessage
+     */
+    private void onCopy(TerminalMessage terminalMessage){
+        ClipboardManager cmb = (ClipboardManager) activity.getSystemService(Context.CLIPBOARD_SERVICE);
+        if (terminalMessage.messageType == 1) {
+            cmb.setText(terminalMessage.messageBody.getString(JsonParam.CONTENT));
+        } else if (terminalMessage.messageType == 2) {
+            logger.info("sjl_:" + terminalMessage.messageType + "," + terminalMessage.messagePath);
+            String path = terminalMessage.messagePath;
+            File file = new File(path);
+            String content = com.zectec.imageandfileselector.utils.FileUtil.getStringFromFile(file);
+            cmb.setText(content);
+        }
+        ToastUtil.showToast(activity.getString(R.string.text_replication_success), activity);
     }
 
     /**
-     * 设置是否合并转发
-     * @param isForWardMore
-     */
-    public void setIsForWardMore(boolean isForWardMore){
-        this.isForWardMore = isForWardMore;
-    }
+     * 会话界面列表条目点击事件(定位，图片预览，观看图像，合并转发)
+     **/
 
-    /**
-     * 获取是否在合并转发
-     * @return
-     */
-    public boolean isForWardMore(){
-        return isForWardMore;
+    private void onListItemClick(final TerminalMessage terminalMessage, boolean isReceiver){
+
+        /**  进入定位界面 **/
+        if (terminalMessage.messageType == MessageType.POSITION.getCode()) {
+            if (terminalMessage.messageBody.containsKey(JsonParam.LONGITUDE) &&
+                    terminalMessage.messageBody.containsKey(JsonParam.LATITUDE)) {
+                setViewVisibility(fragment_contener, View.VISIBLE);
+                double longitude = terminalMessage.messageBody.getDouble(JsonParam.LONGITUDE);
+                double altitude = terminalMessage.messageBody.getDouble(JsonParam.LATITUDE);
+                //http://192.168.1.96:7007/mapLocationl.html?lng=117.68&lat=39.456
+                String url = TerminalFactory.getSDK().getParam(Params.LOCATION_URL, "") + "?lng=" + longitude + "&lat=" + altitude;
+                if (org.apache.http.util.TextUtils.isEmpty(TerminalFactory.getSDK().getParam(Params.LOCATION_URL, ""))) {
+                    cn.vsx.vc.utils.ToastUtil.showToast(activity, activity.getString(R.string.text_please_go_to_the_management_background_configuration_location_url));
+                } else {
+                    LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
+                    locationFragment.setFragment_contener(fragment_contener);
+                    activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commit();
+                }
+            } else {
+                setViewVisibility(fragment_contener, View.VISIBLE);
+                String url = TerminalFactory.getSDK().getParam(Params.LOCATION_URL, "");
+                if (org.apache.http.util.TextUtils.isEmpty(TerminalFactory.getSDK().getParam(Params.LOCATION_URL, ""))) {
+                    cn.vsx.vc.utils.ToastUtil.showToast(activity, activity.getString(R.string.text_please_go_to_the_management_background_configuration_location_url));
+                } else {
+                    LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
+                    locationFragment.setFragment_contener(fragment_contener);
+                    activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commit();
+                }
+            }
+        }
+
+        /**  进入图片预览界面  **/
+        if (terminalMessage.messageType == MessageType.PICTURE.getCode()) {
+            setViewVisibility(fragment_contener, View.VISIBLE);
+            FileInfo fileInfo = new FileInfo();
+            fileInfo.setFilePath(terminalMessage.messagePath);
+            List<FileInfo> images = new ArrayList<>();
+            images.add(fileInfo);
+            activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, new ImagePreviewFragment(images)).commit();
+        }
+
+        /**  上报图像  **/
+        if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
+            //先请求看视频上报是否已经结束
+            MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+                String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
+                int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
+                String url = "http://" + serverIp + ":" + serverPort + "/file/download/isLiving";
+                Map<String, String> paramsMap = new HashMap<>();
+                paramsMap.put("callId", terminalMessage.messageBody.getString(JsonParam.CALLID));
+                paramsMap.put("sign", SignatureUtil.sign(paramsMap));
+                logger.info("查看视频播放是否结束url：" + url);
+                String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
+                logger.info("查看视频播放是否结束结果：" + result);
+                if (!Util.isEmpty(result)) {
+                    JSONObject jsonObject = JSONObject.parseObject(result);
+                    boolean living = jsonObject.getBoolean("living");
+                    Long endChatTime = jsonObject.getLong("endChatTime");
+                    if (living) {
+                        activity.runOnUiThread(() -> {
+                            Intent intent = new Intent(activity, PullLivingService.class);
+                            intent.putExtra(cn.vsx.vc.utils.Constants.WATCH_TYPE, cn.vsx.vc.utils.Constants.ACTIVE_WATCH);
+                            intent.putExtra(cn.vsx.vc.utils.Constants.TERMINALMESSAGE, terminalMessage);
+                            activity.startService(intent);
+                        });
+                    } else {
+                        // TODO: 2018/8/7
+                        activity.runOnUiThread(() -> {
+                            Intent intent = new Intent(activity, LiveHistoryActivity.class);
+                            intent.putExtra("terminalMessage", terminalMessage);
+//                                intent.putExtra("endChatTime",endChatTime);
+                            activity.startActivity(intent);
+                        });
+                    }
+                }
+            });
+        }
+
+        if (terminalMessage.messageType == MessageType.AUDIO.getCode()) {
+            logger.debug("点击了录音消息！");
+        }
+        /**  跳转到合并转发  **/
+        if (terminalMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()) {
+            Intent intent = new Intent(activity, MergeTransmitListActivity.class);
+            intent.putExtra(cn.vsx.vc.utils.Constants.IS_GROUP, isGroup);
+            intent.putExtra(cn.vsx.vc.utils.Constants.USER_ID, userId);
+            intent.putExtra(Constants.TERMINALMESSAGE, terminalMessage);
+            activity.startActivity(intent);
+        }
     }
 }

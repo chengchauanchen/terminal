@@ -83,5 +83,8 @@ public class Constants{
     public static String IS_GROUP_PUSH_LIVING = "isGroupPushLiving";
     public static String GROUP_ID = "groupId";
 
+    public static String IS_GROUP = "isGroup";
+    public static String USER_ID = "userId";
+
 
 }

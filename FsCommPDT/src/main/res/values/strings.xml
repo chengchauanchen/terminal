@@ -535,7 +535,7 @@
     <string name="group_living_number">%1$d人&#160;&#160;正在上报</string>
     <string name="living_list">上报列表</string>
     <string name="living_history">上报历史</string>
-    <string name="chat_record">聊天记录</string>
+    <string name="chat_record">消息记录</string>
 
     <string name="with_draw_content">%1$s撤回了一条消息</string>
     <string name="forwarded">已转发</string>
