@@ -19,13 +19,16 @@ import android.widget.PopupWindow;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.vc.R;
+import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -122,7 +125,12 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                     return;
                 }
                 Member member = DataUtil.getMemberByMemberNo(callId);
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+                List<Member> list = new ArrayList<>();
+                new ChooseDevicesDialog(context,ChooseDevicesDialog.TYPE_CALL_PRIVATE, list, (view1, position12) -> {
+                    long uniqueNo = 0l;
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
+                }).show();
+
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }

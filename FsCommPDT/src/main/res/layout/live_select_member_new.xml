@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/common_bg"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_50"
+        android:background="@drawable/titel_bar_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:padding="@dimen/dp_5">
+
+        <ImageView
+            android:id="@+id/iv_live_selectmember_return"
+            android:layout_width="@dimen/dp_25"
+            android:layout_height="@dimen/dp_25"
+            android:layout_marginLeft="@dimen/dp_5"
+            android:layout_marginRight="@dimen/dp_10"
+            android:background="@drawable/goback_contacts" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/text_choose"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_20" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/btn_live_selectmember_start"
+            android:layout_width="@dimen/dp_50"
+            android:layout_height="@dimen/dp_30"
+            android:layout_marginRight="@dimen/dp_10"
+            android:background="@drawable/live_theme_confirm_bg"
+            android:gravity="center"
+            android:text="@string/text_sure"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_12" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ll_live_selectmember_theme"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/itemblue"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/dp_5"
+        android:paddingBottom="@dimen/dp_5">
+
+        <TextView
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_25"
+            android:layout_margin="@dimen/dp_10"
+            android:background="@drawable/live_theme_text_bg"
+            android:gravity="center"
+            android:text="@string/text_theme"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_14" />
+
+        <TextView
+            android:id="@+id/tv_live_selectmember_theme"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_5"
+            android:layout_marginRight="@dimen/dp_5"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:maxLength="30"
+            android:maxLines="1"
+            android:textColor="@color/group_text_gray"
+            android:textSize="@dimen/sp_14" />
+
+        <ImageView
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:layout_marginRight="@dimen/dp_25"
+            android:background="@drawable/live_revise" />
+    </LinearLayout>
+
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x1"
+        android:background="@color/common_bg" />
+
+    <LinearLayout
+        android:id="@+id/ll_no_info"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/x35"
+            android:text="@string/text_not_find"
+            android:textColor="@color/folder_name_60"
+            android:textSize="@dimen/sp_15" />
+
+        <TextView
+            android:id="@+id/tv_no_user"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/x35"
+            android:text="大公鸡"
+            android:textColor="@color/blue_0191"
+            android:textSize="@dimen/sp_15" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/x35"
+            android:text="@string/text_related_results"
+            android:textColor="@color/folder_name_60"
+            android:textSize="@dimen/sp_15" />
+    </LinearLayout>
+
+    <include
+        android:id="@+id/ll_layout_members"
+        layout="@layout/layout_invite_member_content" />
+
+</LinearLayout>

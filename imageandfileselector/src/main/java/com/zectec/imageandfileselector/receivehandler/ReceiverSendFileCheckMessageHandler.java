@@ -13,6 +13,7 @@ public interface ReceiverSendFileCheckMessageHandler extends ReceiveHandler {
     public static final int POST_BACK_VIDEO = 4;//上报图像
     public static final int REQUEST_VIDEO = 5;//请求图像
     public static final int RECORD=6;//语音输入
+    public static final int NFC=7;//NFC
 
     /**
      * @param msgType

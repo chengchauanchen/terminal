@@ -166,8 +166,13 @@ public class PersonSearchFragment  extends BaseFragment{
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network){
             if ( searchMemberListExceptMe.size() > 0) {
-
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, searchMemberListExceptMe.get(position));
+//                Member member = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no);
+//                List<Member> list = new ArrayList<>();
+//                new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, list, (view1, position12) -> {
+//                    long uniqueNo = 0l;
+//                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
+//                }).show();
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, searchMemberListExceptMe.get(position),0l);
 
             }
         } else {

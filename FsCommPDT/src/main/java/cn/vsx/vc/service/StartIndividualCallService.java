@@ -50,6 +50,7 @@ public class StartIndividualCallService extends BaseService{
     private TextView mTvWaiting;
     private String memberName;
     private int memberId;
+    private long uniqueNo;
     private float downX = 0;
     private float downY = 0;
     private int oddOffsetX = 0;
@@ -107,7 +108,8 @@ public class StartIndividualCallService extends BaseService{
         SensorUtil.getInstance().registSensor();
         PromptManager.getInstance().IndividualCallRequestRing();
         memberId = intent.getIntExtra(Constants.MEMBER_ID,0);
-        int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(memberId,"");
+        uniqueNo = intent.getLongExtra(Constants.UNIQUE_NO,0l);
+        int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(memberId,uniqueNo,"");
         if (resultCode == BaseCommonCode.SUCCESS_CODE){
             mRlIndividualCallRequest.setVisibility(View.VISIBLE);
             mPopMinimize.setVisibility(View.GONE);

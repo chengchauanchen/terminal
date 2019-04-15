@@ -85,6 +85,10 @@ public class Constants{
 
     public static String IS_GROUP = "isGroup";
     public static String USER_ID = "userId";
+    public static String UNIQUE_NO = "uniqueNo";
+
+    public static String DEVICE_TYPE = "deviceType";
+    public static String BUSINESS_TYPE = "businessType";
 
 
 }

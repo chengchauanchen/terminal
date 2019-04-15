@@ -76,6 +76,20 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/shoutai_live_to"
+            android:layout_width="@dimen/dp_45"
+            android:layout_height="@dimen/dp_45"
+            android:layout_marginRight="@dimen/dp_10"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="@dimen/dp_30"
+                android:layout_height="@dimen/dp_30"
+                android:background="@drawable/new_live_icon" />
+
+        </LinearLayout>
+
 
         <LinearLayout
             android:id="@+id/shoutai_call_to"

@@ -174,8 +174,8 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
         MyApplication.instance.isCallState = true;
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, list.get(groupPosition).memberList.get(childPosition));
-
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class,
+                    list.get(groupPosition).memberList.get(childPosition),0l);
         } else {
             ToastUtil.showToast(activity, activity.getString(R.string.text_network_connection_abnormal_please_check_the_network));
         }

@@ -29,6 +29,7 @@ import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.activity.VoipPhoneActivity;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -237,7 +238,15 @@ public class GroupMemberAdapter extends BaseAdapter {
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network){
             if ( currentGroupMembers.size() > 0) {
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, currentGroupMembers.get(position));
+
+//                Member member = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no);
+//                List<Member> list = new ArrayList<>();
+//                new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, list, (view1, position12) -> {
+//                    long uniqueNo = 0l;
+//                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
+//                }).show();
+
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, currentGroupMembers.get(position),0l);
             }
         } else {
             ToastUtil.showToast(mContext, mContext.getString(R.string.text_network_connection_abnormal_please_check_the_network));

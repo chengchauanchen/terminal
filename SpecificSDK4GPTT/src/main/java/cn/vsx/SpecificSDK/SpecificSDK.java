@@ -236,8 +236,8 @@ public class SpecificSDK extends TerminalSDK4Android {
      * @param memberId 对方memberId
      * @return 状态码 0 表示发起个呼成功
      */
-    public int requestPersonalCall(int memberId){
-        return MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(memberId,"");
+    public int requestPersonalCall(int memberId,long uniqueNo){
+        return MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(memberId,uniqueNo,"");
     }
 
     /**

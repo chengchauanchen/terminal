@@ -209,7 +209,8 @@ public class UserInfoActivity extends BaseActivity {
             CheckMyPermission.permissionPrompt((Activity) UserInfoActivity.this, Manifest.permission.RECORD_AUDIO);
             return;
         }
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
+        long liveUniqueNo = 0l;
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member,liveUniqueNo);
     }
 
     private void pushVideo() {
@@ -246,7 +247,13 @@ public class UserInfoActivity extends BaseActivity {
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
             if(member!=null){
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+//                Member member = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no);
+//                List<Member> list = new ArrayList<>();
+//                new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, list, (view1, position12) -> {
+//                    long uniqueNo = 0l;
+//                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
+//                }).show();
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,0l);
             }else {
                 ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_get_personal_info_fail));
             }

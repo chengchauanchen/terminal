@@ -178,6 +178,10 @@
     <string name="text_group">组群</string>
     <string name="text_radio_station">电台</string>
     <string name="text_police_service">警务通</string>
+    <string name="text_pc">PC</string>
+    <string name="text_recoder">执法记录仪</string>
+    <string name="text_hdmi">HDMI</string>
+    <string name="text_uav">无人机</string>
     <string name="text_search_by_group_name">输入组名称 搜索</string>
     <string name="text_search_by_name_or_number">输入姓名/编号 在本地搜索</string>
     <string name="text_contacts">联系人</string>
@@ -540,4 +544,14 @@
     <string name="with_draw_content">%1$s撤回了一条消息</string>
     <string name="forwarded">已转发</string>
     <string name="please_choose_use_merge_transmit_message">请选择要合并转发的消息</string>
+
+    <string name="choose_devices_to_call">拨打电话</string>
+    <string name="choose_devices_to_private_call">拨打个呼</string>
+    <string name="choose_devices_to_request_live">请求图像</string>
+    <string name="is_not_support_nfc">您的设备不支持NFC功能</string>
+    <string name="is_not_open_nfc">请打开NFC开关</string>
+    <string name="nfc_binding">NFC绑定</string>
+    <string name="binding_success">绑定成功</string>
+    <string name="binding_success_tempt">8小时自动解绑</string>
+    <string name="binding_nfc_tempt">请将警务通贴紧需要绑定的设备</string>
 </resources>

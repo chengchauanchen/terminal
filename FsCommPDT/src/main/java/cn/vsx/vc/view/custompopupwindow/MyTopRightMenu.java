@@ -131,7 +131,7 @@ public class MyTopRightMenu {
                                                 ToastUtil.showToast(context,activity.getString(R.string.text_has_no_image_request_authority));
                                                 return;
                                             }
-                                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member());
+                                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member(),0l);
                                         }
 
                                     }

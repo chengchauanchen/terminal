@@ -8,5 +8,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverRequestVideoHandler extends ReceiveHandler {
-    void handler(Member member);
+    void handler(Member member,long uniqueNo);
 }

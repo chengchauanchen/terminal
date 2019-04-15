@@ -176,7 +176,7 @@ public class IncreaseTemporaryGroupMemberAdapter extends RecyclerView.Adapter<Re
         MyApplication.instance.isCallState = true;
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,0l);
 
         } else {
             ToastUtil.showToast(mContext, mContext.getString(R.string.text_network_connection_abnormal_please_check_the_network));

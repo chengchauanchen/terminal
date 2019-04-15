@@ -3,8 +3,10 @@ package cn.vsx.vc.view;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -39,6 +41,7 @@ import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
 import cn.vsx.vc.record.AudioRecordButton;
 import cn.vsx.vc.utils.DataUtil;
+import cn.vsx.vc.utils.NfcUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -176,22 +179,25 @@ public class FunctionHidePlus extends LinearLayout {
                         return;
                     }
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.POST_BACK_VIDEO, true, userId);
-                }else if (title.equals("请求图像")){
+                }else if (title.equals("请求图像")) {
                     if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
                         CheckMyPermission.permissionPrompt((Activity) context, Manifest.permission.RECORD_AUDIO);
                         return;
                     }
-                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
-                        ToastUtil.showToast(context,context.getString(R.string.no_pull_authority));
+                    if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())) {
+                        ToastUtil.showToast(context, context.getString(R.string.no_pull_authority));
                         return;
                     }
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO, true, userId);
+                }else if(title.equals("NFC")){
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.NFC, true, userId);
                 }else {
                     ToastUtil.showToast(context,context.getString(R.string.text_has_no_send_message_authority));
                 }
             }
         });
     }
+
     private String[] titles=new String[]{
             "相册","拍照","文件","发送位置","上报图像","请求图像"
     };
@@ -383,7 +389,8 @@ public class FunctionHidePlus extends LinearLayout {
         this.isGroupFunction = isGroupFunction;
         String unsendMessage = context.getSharedPreferences("unsendMessage", MODE_PRIVATE).getString(String.valueOf(userId),"");
         if(isGroupFunction){//组消息界面
-            setNoVideo();
+//            setNoVideo();
+            setHasNFC();
             groupCallNewsKeyboard.setBackgroundResource(R.drawable.soft_keyboard);
             groupCallNewsEt.setVisibility(GONE);
             v_edit_line.setVisibility(GONE);
@@ -459,6 +466,22 @@ public class FunctionHidePlus extends LinearLayout {
                 R.drawable.album,R.drawable.take_phones,
                 R.drawable.file_selector,R.drawable.position,
                 R.drawable.push_video
+        };
+    }
+
+    /**
+     * 警情组（包含NFC）
+     */
+    private void setHasNFC() {
+        titles = null;
+        titles=new String[]{
+                "相册","拍照","文件","发送位置","组内上图","NFC"
+        };
+        images = null;
+        images=new Integer[]{
+                R.drawable.album,R.drawable.take_phones,
+                R.drawable.file_selector,R.drawable.position,
+                R.drawable.push_video, R.drawable.nfc
         };
     }
     private void setHasVideo() {

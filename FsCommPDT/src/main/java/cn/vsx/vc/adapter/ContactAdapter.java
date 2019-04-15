@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -28,6 +29,7 @@ import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.activity.VoipPhoneActivity;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -83,9 +85,14 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             final Member member= (Member) mDatas.get(position).getBean();
             userViewHolder.tvName.setText(member.getName()+"");
             userViewHolder.tvId.setText(member.getNo()+"");
-
+            //拨打电话
             userViewHolder.llDialTo.setOnClickListener(view -> {
                 if (!TextUtils.isEmpty(member.phone)) {
+//                    List<Member> list = new ArrayList<>();
+//                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, list, (view1, position12) -> {
+//                        long uniqueNo = 0l;
+////                    activeIndividualCall(member,uniqueNo);
+//                    }).show();
 
                     ItemAdapter adapter = new ItemAdapter(mContext,ItemAdapter.iniDatas());
                     AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
@@ -100,13 +107,9 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                             }else {
                                 ToastUtil.showToast(mContext,mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
                             }
-                        }
-                        else if(position1 ==TELEPHONE){//普通电话
-
+                        } else if(position1 ==TELEPHONE){//普通电话
                           CallPhoneUtil.callPhone((Activity) mContext, member.phone);
-
                         }
-
                     });
                     builder.create();
                     builder.show();
@@ -114,24 +117,38 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     ToastUtil.showToast(mContext,mContext.getString(R.string.text_has_no_member_phone_number));
                 }
             });
+            //发送消息
             userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName()));
-
+            //个呼
             userViewHolder.llCallTo.setOnClickListener(view -> {
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
                     ToastUtil.showToast(mContext,mContext.getString(R.string.text_no_call_permission));
                 }else {
-                    activeIndividualCall(member);
+                    //弹窗选择设备
+                    List<Member> list = new ArrayList<>();
+                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, list, (view1, position12) -> {
+                        long uniqueNo = 0l;
+                        activeIndividualCall(member,uniqueNo);
+                    }).show();
                 }
-
-
             });
+            //请求图像
+            userViewHolder.llLiveTo.setOnClickListener(view -> {
+                List<Member> list = new ArrayList<>();
+                new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_LIVE, list, (view1, position12) -> {
+                    long uniqueNo = 0l;
 
+//                    activeIndividualCall(member,uniqueNo);
+                }).show();
+            });
+            //个人信息页面
             userViewHolder.ivLogo.setOnClickListener(view -> {
                 Intent intent = new Intent(mContext, UserInfoActivity.class);
                 intent.putExtra("userId", member.getNo());
                 intent.putExtra("userName", member.getName());
                 mContext.startActivity(intent);
             });
+            //如果是自己的不显示业务按钮
             if(member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
                 userViewHolder.llDialTo.setVisibility(View.GONE);
                 userViewHolder.llMessageTo.setVisibility(View.GONE);
@@ -142,16 +159,16 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 userViewHolder.llCallTo.setVisibility(View.VISIBLE);
 
             }
-
+            //电话按钮，是否显示
             if(isPoliceAffairs&&member.getNo() != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
                 userViewHolder.llDialTo.setVisibility(View.VISIBLE);
+                userViewHolder.llLiveTo.setVisibility(View.VISIBLE);
             }else {
-                //警务通不显示电话
+                //电台不显示电话
                 userViewHolder.llDialTo.setVisibility(View.GONE);
+                userViewHolder.llLiveTo.setVisibility(View.GONE);
             }
-
         }
-
     }
 
     @Override
@@ -169,11 +186,11 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    private void activeIndividualCall(Member member){
+    private void activeIndividualCall(Member member,long uniqueNo){
         MyApplication.instance.isCallState = true;
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
         } else {
             ToastUtil.showToast(mContext, mContext.getString(R.string.text_network_connection_abnormal_please_check_the_network));
         }
@@ -203,6 +220,10 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         LinearLayout llMessageTo;
         @Bind(R.id.shoutai_call_to)
         LinearLayout llCallTo;
+        @Bind(R.id.shoutai_live_to)
+        LinearLayout llLiveTo;
+
+
 
         public UserViewHolder(View itemView) {
             super(itemView);

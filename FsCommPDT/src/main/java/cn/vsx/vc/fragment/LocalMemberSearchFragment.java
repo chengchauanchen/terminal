@@ -235,7 +235,13 @@ public class LocalMemberSearchFragment extends BaseFragment{
         if (network){
             if ( searchList.size() > 0) {
 
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, searchList.get(position));
+//                Member member = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no);
+//                List<Member> list = new ArrayList<>();
+//                new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, list, (view1, position12) -> {
+//                    long uniqueNo = 0l;
+//                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
+//                }).show();
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, searchList.get(position),0l);
 
             }
         } else {

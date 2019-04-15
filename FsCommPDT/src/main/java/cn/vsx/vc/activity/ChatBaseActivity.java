@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -89,6 +90,7 @@ import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.TemporaryAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.NFCBindingDialog;
 import cn.vsx.vc.fragment.LocationFragment;
 import cn.vsx.vc.fragment.TransponFragment;
 import cn.vsx.vc.model.ChatMember;
@@ -106,6 +108,7 @@ import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.FileUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
+import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
@@ -127,6 +130,8 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private static final int CODE_VIDEO_RESULT=1;
     private static final int CAMERA_PERMISSIONS_REQUEST_CODE = 0x13;/** 请求相机权限 */
     private static final int STORAGE_PERMISSIONS_REQUEST_CODE = 0x14;/** 请求存储读取权限 */
+    private static final int CODE_FNC_REQUEST = 0x15;
+
 
     protected Logger logger = Logger.getLogger(getClass());
     protected HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
@@ -158,7 +163,8 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private boolean refreshing;
     private static final int WATCH_LIVE = 0;
     private static final int PAGE_COUNT = 10;//每次加载的消息数量
-    private boolean isEnoughPageCount = true;//每次从本地取的数据的条数是否够10条
+    private boolean isEnoughPageCount = false;//每次从本地取的数据的条数是否够10条
+    private NFCBindingDialog nfcBindingDialog;
     protected Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -245,8 +251,10 @@ public abstract class ChatBaseActivity extends BaseActivity{
         }
         //如果本地没有或者本地的数据不足10条从网络获取
         if (chatMessageList.size() == 0 || chatMessageList.size() < PAGE_COUNT) {
-            isEnoughPageCount = (chatMessageList.size() == 0);
+            isEnoughPageCount = false;
             getHistoryMessageRecord(PAGE_COUNT - chatMessageList.size());
+        }else{
+            isEnoughPageCount = true;
         }
         HashMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getSerializable(Params.MESSAGE_SEND_FAIL, new HashMap<>());
         if (sendFailMap != null) {
@@ -394,6 +402,8 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     sendVideoFileOrPhoto(data);
 
             }
+        }else if(requestCode == CODE_FNC_REQUEST){
+            checkNFC();
         }
     }
 
@@ -1606,6 +1616,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
                                 case ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO://请求图像
                                     requestVideo();
                                     break;
+                                case ReceiverSendFileCheckMessageHandler.NFC://NFC
+                                    checkNFC();
+                                    break;
                             }
                         } else {
                             setViewVisibility(fl_fragment_container, View.GONE);
@@ -1613,6 +1626,34 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     });
         }
     };
+
+    /**
+     * 检查NFC功能，并提示
+     */
+    private void checkNFC() {
+        int result = NfcUtil.nfcCheck(this);
+        switch (result){
+            case NfcUtil.NFC_ENABLE_FALSE_NONE:
+                ToastUtil.showToast(this,getString(R.string.is_not_support_nfc));
+                break;
+            case NfcUtil.NFC_ENABLE_FALSE_JUMP:
+                ToastUtil.showToast(this,this.getString(R.string.is_not_open_nfc));
+                handler.postDelayed(() -> startActivityForResult(new Intent(Settings.ACTION_NFC_SETTINGS),CODE_FNC_REQUEST),500);
+                break;
+            case NfcUtil.NFC_ENABLE_FALSE_SHOW:
+                showNFCDialog();
+                break;
+            case NfcUtil.NFC_ENABLE_NONE:break;
+        }
+    }
+
+    /**
+     * 显示刷NFC的弹窗
+     */
+    private void showNFCDialog() {
+        nfcBindingDialog = new NFCBindingDialog(ChatBaseActivity.this,NFCBindingDialog.TYPE_WAIT);
+        nfcBindingDialog.show();
+    }
 
     @Override
     protected void onResume() {
@@ -1657,7 +1698,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
             }
         } else {
             //从网络获取
-            isEnoughPageCount = true;
+            isEnoughPageCount = false;
             getHistoryMessageRecord(PAGE_COUNT);
         }
     }

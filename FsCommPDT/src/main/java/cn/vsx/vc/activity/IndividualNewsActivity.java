@@ -203,7 +203,8 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     @Override
     public void requestVideo() {
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member(userId, userName));
+        long liveUniqueNo = 0l;
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member(userId, userName),liveUniqueNo);
     }
 
     @Override
@@ -257,7 +258,13 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         if (network) {
 
             if(member!=null){
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+//                Member member = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no);
+//                List<Member> list = new ArrayList<>();
+//                new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, list, (view1, position12) -> {
+//                    long uniqueNo = 0l;
+//                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
+//                }).show();
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,0l);
             }else {
                 ToastUtil.showToast(IndividualNewsActivity.this,getString(R.string.text_get_member_info_fail));
             }

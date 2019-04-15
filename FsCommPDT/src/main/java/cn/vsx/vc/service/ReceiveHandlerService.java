@@ -396,11 +396,12 @@ public class ReceiveHandlerService extends Service{
     /**
      * 主动发起个呼
      */
-    private ReceiveCurrentGroupIndividualCallHandler receiveCurrentGroupIndividualCallHandler = member -> {
+    private ReceiveCurrentGroupIndividualCallHandler receiveCurrentGroupIndividualCallHandler = (member,uniqueNo) -> {
         logger.info("当前呼叫对象:" + member);
         Intent intent = new Intent(ReceiveHandlerService.this, StartIndividualCallService.class);
         intent.putExtra(Constants.MEMBER_NAME, member.getName());
         intent.putExtra(Constants.MEMBER_ID, member.getNo());
+        intent.putExtra(Constants.UNIQUE_NO, uniqueNo);
         startService(intent);
 
     };
@@ -866,7 +867,7 @@ public class ReceiveHandlerService extends Service{
     /**
      * 请求直播
      */
-    private ReceiverRequestVideoHandler receiverRequestVideoHandler = member -> {
+    private ReceiverRequestVideoHandler receiverRequestVideoHandler = (member,liveUniqueNo) -> {
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_request_report));
             return;
@@ -883,7 +884,7 @@ public class ReceiveHandlerService extends Service{
             startService(intent);
 
         }else{//直接请求
-            int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(member.getNo(), "");
+            int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(member.getNo(),liveUniqueNo, "");
 
             if(requestCode == BaseCommonCode.SUCCESS_CODE){
 
