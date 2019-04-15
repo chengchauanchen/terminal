@@ -141,9 +141,9 @@ public class LiveContactsAdapter extends BaseAdapter {
         viewHolder.tv_pinyin.setVisibility(isShow ? View.VISIBLE : View.GONE);
         viewHolder.tv_pinyin.setText(member.pinyin.substring(0,1));
 
-        if (member.terminalMemberType.equals(TerminalMemberType.TERMINAL_PAD.getValue())){
+        if (member.getType()==TerminalMemberType.TERMINAL_PAD.getCode()){
             viewHolder.img_terminalMemberType.setBackgroundResource(R.drawable.pad);
-        } else if (member.terminalMemberType.equals(TerminalMemberType.TERMINAL_PHONE.getValue())) {
+        } else if (member.getType()==TerminalMemberType.TERMINAL_PHONE.getCode()) {
             viewHolder.img_terminalMemberType.setBackgroundResource(R.drawable.imgphone);
         } else  {
             viewHolder.img_terminalMemberType.setBackgroundResource(R.drawable.pc);

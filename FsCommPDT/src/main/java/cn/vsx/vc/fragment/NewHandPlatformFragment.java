@@ -14,10 +14,12 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.OnClick;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
-import cn.vsx.hamster.terminalsdk.model.MemberResponse;
+import cn.vsx.hamster.terminalsdk.model.NewPDTResponse;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdatePDTMemberHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdatePDTMemberHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
@@ -45,7 +47,7 @@ public class NewHandPlatformFragment extends BaseFragment {
 
     private NewMainActivity mActivity;
     //上部分
-    private List<CatalogBean> mCatalogList = new ArrayList<>();
+    private List<CatalogBean> catalogNames = new ArrayList<>();
 
     //下部分
     private List<ContactItemBean> mDatas = new ArrayList<>();
@@ -53,18 +55,19 @@ public class NewHandPlatformFragment extends BaseFragment {
     private Handler myHandler = new Handler();
     private CatalogAdapter mCatalogAdapter;//上部分横向
     private ContactAdapter mContactAdapter;//下部门竖直
-    private List<CatalogBean> mInitCatalogList=new ArrayList<>();
+    private List<ContactItemBean> lastGroupDatas=new ArrayList<>();
+
+
+    private ReceivegUpdatePDTMemberHandler receivegUpdatePDTMemberHandler = new ReceivegUpdatePDTMemberHandler(){
+        @Override
+        public void handler(int depId,String depName,List<Department> departments, List<Member> members){
+            updateData(depId,depName,departments,members);
+        }
+    };
 
     //更新成员信息
     private ReceiveUpdatePDTMemberHandler receiveUpdatePDTMemberHandler = PDTMember -> myHandler.post(() -> {
-        MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPDTMemeberInfo();
-        List<CatalogBean> catalogBeanList = new ArrayList<>();
-        CatalogBean bean = new CatalogBean();
-        bean.setName(memberResponse.getName());
-        bean.setBean(memberResponse);
-        catalogBeanList.add(bean);
 
-        updateData(memberResponse,catalogBeanList);
 
     });
 
@@ -74,14 +77,7 @@ public class NewHandPlatformFragment extends BaseFragment {
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> {//更新当前组
         CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
         myHandler.post(() -> {
-            MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPDTMemeberInfo();
-            List<CatalogBean> catalogBeanList = new ArrayList<>();
-            CatalogBean bean = new CatalogBean();
-            bean.setName(memberResponse.getName());
-            bean.setBean(memberResponse);
-            catalogBeanList.add(bean);
 
-            updateData(memberResponse,catalogBeanList);
         });
     };
 
@@ -95,7 +91,7 @@ public class NewHandPlatformFragment extends BaseFragment {
     @Override
     public void initView() {
         mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity(), OrientationHelper.HORIZONTAL, false));
-        mCatalogAdapter = new CatalogAdapter(getActivity(), mCatalogList);
+        mCatalogAdapter = new CatalogAdapter(getActivity(), catalogNames);
         mCatalogRecyclerview.setAdapter(mCatalogAdapter);
 
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -107,109 +103,77 @@ public class NewHandPlatformFragment extends BaseFragment {
     @Override
     public void initData() {
         mActivity = (NewMainActivity) getActivity();
-        MemberResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getPDTMemeberInfo();
+        NewPDTResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getPDTMemeberInfo();
         if(mMemberResponse ==null){
             return;
         }
-        CatalogBean catalog=new CatalogBean();
-        catalog.setName(mMemberResponse.getName());
-        catalog.setBean(mMemberResponse);
-        mInitCatalogList.add(catalog);
-
-        updateData(mMemberResponse,mInitCatalogList);
-
+        List<Department> deptList = mMemberResponse.getDeptList();
+        List<Member> memberList = mMemberResponse.getMemberDtoList();
+        updateData(TerminalFactory.getSDK().getParam(Params.DEP_ID,0),TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),deptList,memberList);
     }
 
 
     /**
      * 设置数据
      */
-    private void updateData(MemberResponse memberResponse,List<CatalogBean> catalogBeanList){
-        mDatas.clear();
-        mCatalogList.clear();
-        mCatalogList.addAll(catalogBeanList);
-        addData(memberResponse);
-        mContactAdapter.notifyDataSetChanged();
-        mCatalogAdapter.notifyDataSetChanged();
-        mCatalogRecyclerview.scrollToPosition(mCatalogList.size() - 1);
-    }
+    private void updateData(int depId,String depName,List<Department> deptList,List<Member> memberList){
 
-    private void addData(MemberResponse memberResponse){
-        if (memberResponse != null){
-            addItemMember(memberResponse);
-            addItemDepartment(memberResponse);
+        if(depId == TerminalFactory.getSDK().getParam(Params.DEP_ID,0)){
+            catalogNames.clear();
+            mDatas.clear();
         }
-    }
+        CatalogBean memberCatalogBean = new CatalogBean(depName,depId);
+        catalogNames.add(memberCatalogBean);
+        if(null != memberList && !memberList.isEmpty()){
 
-    /**
-     * 添加子成员
-     */
-    @SuppressWarnings("unchecked")
-    private void addItemMember(MemberResponse memberResponse){
-        //子成员
-        List<Member> memberList = memberResponse.getMembers();
-        //添加子成员
-        if(memberList != null && !memberList.isEmpty()){
-            List<ContactItemBean> itemMemberList = new ArrayList<>();
+            //添加成员
             for(Member member : memberList){
-                if(member.getName()==null){
-                    continue;
-                }
-                ContactItemBean<Member> bean = new ContactItemBean<>();
-                bean.setBean(member);
-                bean.setType(Constants.TYPE_USER);
-                itemMemberList.add(bean);
+                ContactItemBean<Member> contactItemBean = new ContactItemBean<>();
+                contactItemBean.setType(Constants.TYPE_USER);
+                contactItemBean.setBean(member);
+                mDatas.add(contactItemBean);
             }
-            mDatas.addAll(itemMemberList);
         }
-    }
+        if(null != deptList && !deptList.isEmpty()){
+            for(Department department : deptList){
+                ContactItemBean<Department> contactItemBean = new ContactItemBean<>();
+                contactItemBean.setType(Constants.TYPE_DEPARTMENT);
+                contactItemBean.setBean(department);
+                mDatas.add(contactItemBean);
+            }
+        }
+        myHandler.post(()->{
+            if(mContactAdapter !=null){
+                mContactAdapter.notifyDataSetChanged();
+            }
+        });
 
-    /**
-     * 添加子部门
-     */
-    @SuppressWarnings("unchecked")
-    private void addItemDepartment(MemberResponse memberResponse){
-        List<MemberResponse> data = memberResponse.getChildren();
-        if(data!=null && !data.isEmpty()){
-            for(MemberResponse next : data){
-                if(next.getName() ==null){
-                    continue;
-                }
-                ContactItemBean<MemberResponse> bean = new ContactItemBean<>();
-                bean.setType(Constants.TYPE_DEPARTMENT);
-                bean.setName(next.getName());
-                bean.setBean(next);
-                mDatas.add(bean);
-            }
-        }
+
     }
 
     @Override
     public void initListener() {
 
+        MyTerminalFactory.getSDK().registReceiveHandler(receivegUpdatePDTMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdatePDTMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         mCatalogAdapter.setOnItemClick((view, position) -> {
-            MemberResponse memberResponse = mCatalogList.get(position).getBean();
-
-            List<CatalogBean> catalogList = new ArrayList<>();
-            catalogList.addAll(mCatalogList.subList(0, position + 1));
-            updateData(memberResponse,catalogList);
+            // TODO: 2019/4/15 如果点击的不是上一个会有bug
+            //返回到上一级
+            catalogNames.remove(catalogNames.size()-1);
+            mDatas.clear();
+            mDatas.addAll(lastGroupDatas);
+            if(mContactAdapter !=null){
+                mContactAdapter.notifyDataSetChanged();
+            }
+            mRecyclerview.scrollToPosition(0);
         });
 
 
-        mContactAdapter.setOnItemClickListener((view, postion, type) -> {
+        mContactAdapter.setOnItemClickListener((view, depId,depName, type) -> {
             if (type == Constants.TYPE_DEPARTMENT) {
-                MemberResponse memberResponse = (MemberResponse) mDatas.get(postion).getBean();
-                if(memberResponse !=null){
-                    CatalogBean catalog = new CatalogBean();
-                    catalog.setName(memberResponse.getName());
-                    catalog.setBean(memberResponse);
-                    mCatalogList.add(catalog);
-                    List<CatalogBean> catalogBeanList=new ArrayList<>();
-                    catalogBeanList.addAll(mCatalogList);
-                    updateData(memberResponse,catalogBeanList);
-                }
+                saveLastGroupData();
+                TerminalFactory.getSDK().getConfigManager().updatePoliceMember(depId,depName);
             }
         });
 
@@ -222,6 +186,13 @@ public class NewHandPlatformFragment extends BaseFragment {
 
             }, 1200);
         });
+    }
+
+    private void saveLastGroupData(){
+        lastGroupDatas.clear();
+        for(ContactItemBean contactItemBean : mDatas){
+            lastGroupDatas.add((ContactItemBean) contactItemBean.clone());
+        }
     }
 
     private long lastSearchTime;
@@ -245,6 +216,7 @@ public class NewHandPlatformFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receivegUpdatePDTMemberHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdatePDTMemberHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
 
@@ -254,17 +226,17 @@ public class NewHandPlatformFragment extends BaseFragment {
      * 返回操作
      */
     public void onBack(){
-        if (mCatalogList.size() > 1) {
-            MemberResponse memberResponse = mCatalogList.get(mCatalogList.size() - 2).getBean();
+        if(catalogNames.size() > 1){
+            //返回到上一级
+            catalogNames.remove(catalogNames.size()-1);
+            mDatas.clear();
+            mDatas.addAll(lastGroupDatas);
+            if(mContactAdapter !=null){
+                mContactAdapter.notifyDataSetChanged();
+            }
+            mRecyclerview.scrollToPosition(0);
 
-            mCatalogList.remove(mCatalogList.size() - 1);
-
-            List<CatalogBean> catalogBeanList = new ArrayList<>();
-            catalogBeanList.addAll(mCatalogList);
-
-            updateData(memberResponse, catalogBeanList);
-
-        } else {
+        }else{
             mActivity.exit();
         }
     }

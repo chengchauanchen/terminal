@@ -4,15 +4,13 @@ package cn.vsx.vc.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import cn.vsx.hamster.terminalsdk.model.MemberResponse;
-
 /**
  * Created by XX on 2018/4/11.
  */
 
 public class CatalogBean implements Parcelable {
     private String name;
-    private MemberResponse bean;
+    private int id;
 
     public String getName() {
         return name;
@@ -22,41 +20,46 @@ public class CatalogBean implements Parcelable {
         this.name = name;
     }
 
-    public MemberResponse getBean() {
-        return bean;
+    public int getId(){
+        return id;
     }
 
-    public void setBean(MemberResponse bean) {
-        this.bean = bean;
+    public void setId(int id){
+        this.id = id;
     }
 
     @Override
-    public int describeContents() {
+    public int describeContents(){
         return 0;
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(Parcel dest, int flags){
         dest.writeString(this.name);
-        dest.writeSerializable(this.bean);
+        dest.writeInt(this.id);
     }
 
-    public CatalogBean() {
+    public CatalogBean(){
     }
 
-    protected CatalogBean(Parcel in) {
+    public CatalogBean(String name, int id){
+        this.name = name;
+        this.id = id;
+    }
+
+    protected CatalogBean(Parcel in){
         this.name = in.readString();
-        this.bean = (MemberResponse) in.readSerializable();
+        this.id = in.readInt();
     }
 
-    public static final Parcelable.Creator<CatalogBean> CREATOR = new Parcelable.Creator<CatalogBean>() {
+    public static final Creator<CatalogBean> CREATOR = new Creator<CatalogBean>(){
         @Override
-        public CatalogBean createFromParcel(Parcel source) {
+        public CatalogBean createFromParcel(Parcel source){
             return new CatalogBean(source);
         }
 
         @Override
-        public CatalogBean[] newArray(int size) {
+        public CatalogBean[] newArray(int size){
             return new CatalogBean[size];
         }
     };

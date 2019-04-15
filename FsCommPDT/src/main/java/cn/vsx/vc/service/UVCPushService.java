@@ -282,7 +282,7 @@ public class UVCPushService extends BaseService{
         }else{
             mHandler.post(() -> {
                 mLlUvcSpeakState.setVisibility(View.VISIBLE);
-                mTvUvcLiveGroupName.setText(DataUtil.getGroupByGroupNo(groupId).name);
+                mTvUvcLiveGroupName.setText(groupName);
                 mTvUvcLiveSpeakingName.setText(memberName);
                 mTvUvcLiveSpeakingId.setText(HandleIdUtil.handleId(memberId));
             });

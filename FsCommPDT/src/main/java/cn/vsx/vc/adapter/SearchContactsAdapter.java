@@ -143,7 +143,7 @@ public class SearchContactsAdapter extends BaseAdapter  {
 			holder.iv_search_msg.setVisibility(View.VISIBLE);
 		}
 
-		if (TerminalMemberType.TERMINAL_PDT.equals(searchContactsBean.getTerminalMemberTypeEnum())||searchContactsBean.id == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+		if (TerminalMemberType.TERMINAL_PDT.getCode()== searchContactsBean.getType()||searchContactsBean.id == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
 			holder.llDialTo.setVisibility(View.GONE);
 		}else {
 			holder.llDialTo.setVisibility(View.VISIBLE);

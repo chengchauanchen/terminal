@@ -52,4 +52,15 @@ public class ContactItemBean<T> implements Comparable<ContactItemBean> {
 
         return pinyin.compareTo(pinyin2);
     }
+
+    @Override
+    public Object clone() {
+        ContactItemBean contactItemBean = null;
+        try {
+            contactItemBean = (ContactItemBean) super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return contactItemBean;
+    }
 }

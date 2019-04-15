@@ -192,13 +192,9 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             values.put("member_id", member.id);
             values.put("member_no",member.getNo());
             values.put("member_name", member.getName());
-            values.put("member_nick_name", member.getNickName());
-            values.put("member_pinyin", member.pinyin);
+            values.put("member_pinyin", member.getPinyin());
             values.put("member_phone", member.phone);
-            values.put("member_type", member.terminalMemberType);
-            values.put("unit_name", member.unitName);
             values.put("department_name", member.departmentName);
-            values.put("is_contacts", member.isContacts ? "true" : "false");
             values.put("unique_no",member.getUniqueNo());
             db.replace(PDT_MEMBER, null, values);
         }
@@ -210,13 +206,9 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         ContentValues values = new ContentValues();
         values.put("member_name", member.getName());
         values.put("member_no",member.getNo());
-        values.put("member_nick_name", member.getNickName());
         values.put("member_pinyin", member.pinyin);
         values.put("member_phone", member.phone);
-        values.put("member_type", member.terminalMemberType);
-        values.put("unit_name", member.unitName);
         values.put("department_name", member.departmentName);
-        values.put("is_contacts", member.isContacts);
         values.put("unique_no",member.getUniqueNo());
         db.update(PDT_MEMBER, values, "member_id = ?", new String[]{member.id + ""});
     }
@@ -250,13 +242,9 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             values.put("member_id", member.id);
             values.put("member_no",member.getNo());
             values.put("member_name", member.getName());
-            values.put("member_nick_name", member.getNickName());
             values.put("member_pinyin", member.pinyin);
             values.put("member_phone", member.phone);
-            values.put("member_type", member.terminalMemberType);
-            values.put("unit_name", member.unitName);
             values.put("department_name", member.departmentName);
-            values.put("is_contacts", member.isContacts ? "true" : "false");
             values.put("unique_no",member.getUniqueNo());
             db.replace(PHONE_MEMBER, null, values);
         }
@@ -268,13 +256,9 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         ContentValues values = new ContentValues();
         values.put("member_name", member.getName());
         values.put("member_no",member.getNo());
-        values.put("member_nick_name", member.getNickName());
         values.put("member_pinyin", member.pinyin);
         values.put("member_phone", member.phone);
-        values.put("member_type", member.terminalMemberType);
-        values.put("unit_name", member.unitName);
         values.put("department_name", member.departmentName);
-        values.put("is_contacts", member.isContacts);
         values.put("unique_no",member.getUniqueNo());
         db.update(PHONE_MEMBER, values, "member_id = ?", new String[]{member.id + ""});
     }
@@ -398,13 +382,9 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 member.id = cursor.getInt(cursor.getColumnIndex("member_id"));
                 member.setNo(cursor.getInt(cursor.getColumnIndex("member_no")));
                 member.setName(cursor.getString(cursor.getColumnIndex("member_name")));
-                member.setNickName(cursor.getString(cursor.getColumnIndex("member_nick_name")));
                 member.pinyin = cursor.getString(cursor.getColumnIndex("member_pinyin"));
                 member.phone = cursor.getString(cursor.getColumnIndex("member_phone"));
-                member.terminalMemberType = cursor.getString(cursor.getColumnIndex("member_type"));
-                member.unitName = cursor.getString(cursor.getColumnIndex("unit_name"));
                 member.departmentName = cursor.getString(cursor.getColumnIndex("department_name"));
-                member.isContacts = Boolean.valueOf(cursor.getString(cursor.getColumnIndex("is_contacts")));
                 member.setUniqueNo(cursor.getLong(cursor.getColumnIndex("unique_no")));
                 memberList.add(member);
             }

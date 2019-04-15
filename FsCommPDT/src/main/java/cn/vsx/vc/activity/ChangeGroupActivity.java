@@ -9,7 +9,6 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +74,7 @@ public class ChangeGroupActivity extends BaseActivity {
         okBtn.setVisibility(View.GONE);
 
         mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(this, OrientationHelper.HORIZONTAL,false));
-        mCatalogAdapter =new GroupCatalogAdapter(this,mCatalogList);
+//        mCatalogAdapter =new GroupCatalogAdapter(this,mCatalogList);
         mCatalogRecyclerview.setAdapter(mCatalogAdapter);
 
         mRecyclerview.setLayoutManager(new LinearLayoutManager(this));
@@ -90,7 +89,7 @@ public class ChangeGroupActivity extends BaseActivity {
 
         //横向标题栏容器
         mCatalogAdapter.setOnItemClick((view, position) -> {
-            topGroup=mCatalogList.get(position).getBean();
+//            topGroup=mCatalogList.get(position).getBean();
 
             List<GroupCatalogBean> catalogList=new ArrayList<>();
             catalogList.addAll(mCatalogList.subList(0,position+1));
@@ -104,7 +103,7 @@ public class ChangeGroupActivity extends BaseActivity {
                 topGroup= (GroupBean) mDatas.get(postion).getBean();
                 GroupCatalogBean catalog=new GroupCatalogBean();
                 catalog.setName(topGroup.getName());
-                catalog.setBean(topGroup);
+//                catalog.setBean(topGroup);
                 mCatalogList.add(catalog);
 
                 List<GroupCatalogBean> catalogBeanList=new ArrayList<>();
@@ -117,20 +116,20 @@ public class ChangeGroupActivity extends BaseActivity {
 
     @Override
     public void initData() {
-        mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
-
-        groupSweeps.addAll(MyTerminalFactory.getSDK().getConfigManager().loadScanGroup());//获取扫描组列表
-
-        if(mGroupResponse == null){
-            return;
-        }
-        initGroupData();
-        GroupCatalogBean catalog=new GroupCatalogBean();
-        catalog.setName(topGroup.getName());
-        catalog.setBean(topGroup);
-        mInitGroupCatalogList.add(catalog);
-
-        updateData(mInitGroupCatalogList);
+//        mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
+//
+//        groupSweeps.addAll(MyTerminalFactory.getSDK().getConfigManager().loadScanGroup());//获取扫描组列表
+//
+//        if(mGroupResponse == null){
+//            return;
+//        }
+//        initGroupData();
+//        GroupCatalogBean catalog=new GroupCatalogBean();
+//        catalog.setName(topGroup.getName());
+//        catalog.setBean(topGroup);
+//        mInitGroupCatalogList.add(catalog);
+//
+//        updateData(mInitGroupCatalogList);
 
     }
 
@@ -260,18 +259,18 @@ public class ChangeGroupActivity extends BaseActivity {
         @Override
         public void handler() {
             myHandler.post(() -> {
-                mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
-                if(mGroupResponse == null){
-                    return;
-                }
-                initGroupData();
-
-                mInitGroupCatalogList.clear();
-                GroupCatalogBean catalog=new GroupCatalogBean();
-                catalog.setName(topGroup.getName());
-                catalog.setBean(topGroup);
-                mInitGroupCatalogList.add(catalog);
-                updateData(mInitGroupCatalogList);
+//                mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
+//                if(mGroupResponse == null){
+//                    return;
+//                }
+//                initGroupData();
+//
+//                mInitGroupCatalogList.clear();
+//                GroupCatalogBean catalog=new GroupCatalogBean();
+//                catalog.setName(topGroup.getName());
+//                catalog.setBean(topGroup);
+//                mInitGroupCatalogList.add(catalog);
+//                updateData(mInitGroupCatalogList);
             });
         }
 

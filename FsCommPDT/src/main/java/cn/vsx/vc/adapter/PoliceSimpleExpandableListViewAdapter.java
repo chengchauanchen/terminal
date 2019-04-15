@@ -98,7 +98,7 @@ public class PoliceSimpleExpandableListViewAdapter extends BaseExpandableListAda
             Iterator<Member> iterator1 = memberList.iterator();
             while (iterator1.hasNext()){
                 Member member = iterator1.next();
-                if (member.getTerminalMemberTypeEnum() == TerminalMemberType.TERMINAL_TEST){
+                if (member.getType() == TerminalMemberType.TERMINAL_TEST.getCode()){
                     iterator1.remove();
                     logger.error("------------移除的隐形人----------->"+member);
                 }else {

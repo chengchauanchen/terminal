@@ -10,20 +10,20 @@ import java.util.Iterator;
 import java.util.List;
 
 import butterknife.Bind;
-import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.GroupAndDepartment;
-import cn.vsx.hamster.terminalsdk.model.GroupBean;
-import cn.vsx.hamster.terminalsdk.model.GroupResponse;
+import cn.vsx.hamster.terminalsdk.model.MemberGroupResponse;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdateGroupHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
@@ -48,38 +48,100 @@ public class NewGroupFragment extends BaseFragment{
     private NewMainActivity mActivity;
     private GroupAdapter groupAdapter;
     private Handler myHandler = new Handler();
-    private List<GroupBean> groupBeans = new ArrayList<>();
 
     //显示在recyclerview上的所有数据
-    private List<GroupAndDepartment> allGroupAndDepartment = new ArrayList<>();
+    private List<GroupAndDepartment> datas = new ArrayList<>();
+    //临时组的数据
+    private List<GroupAndDepartment> tempGroupDatas = new ArrayList<>();
+    //普通部门组的数据
+    private List<GroupAndDepartment> commonGroupDatas = new ArrayList<>();
+    //点进子部门之前的数据
+    private List<GroupAndDepartment> lastGroupDatas = new ArrayList<>();
 
     //临时组数据
     private List<Group> tempGroup = new ArrayList<>();
 
-    //上面标题数据
-    private List<GroupCatalogBean> mTempCatalogList = new ArrayList<>();
-    private List<GroupCatalogBean> mCatalogList = new ArrayList<>();
-//    private HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
+    private List<GroupCatalogBean> catalogNames = new ArrayList<>();
+    private List<GroupCatalogBean> tempCatalogNames = new ArrayList<>();
+    //    private HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
+    private boolean tempGroupUpdateCompleted;
+    private boolean groupUpdateCompleted;
+    private ReceivegUpdateGroupHandler receivegUpdateGroupHandler = new ReceivegUpdateGroupHandler(){
+        @Override
+        public void handler(int depId, String depName, List<Department> departments, List<Group> groups){
+            updateData( depId,  depName, departments, groups);
+        }
+    };
+
+    private boolean updateCompleted(){
+        return tempGroupUpdateCompleted && groupUpdateCompleted;
+    }
+
+    private void sortList(){
+        datas.clear();
+        datas.addAll(tempGroupDatas);
+        datas.addAll(commonGroupDatas);
+        myHandler.post(new Runnable(){
+            @Override
+            public void run(){
+                if(groupAdapter !=null){
+                    groupAdapter.notifyDataSetChanged();
+                    groupRecyclerView.scrollToPosition(0);
+                }
+            }
+        });
+
+        //        List<GroupAndDepartment> tempList = new ArrayList<>();
+        //        //先将临时组放到前面
+        //        Iterator<GroupAndDepartment> tempIterator = datas.iterator();
+        //        while(tempIterator.hasNext()){
+        //            GroupAndDepartment next = tempIterator.next();
+        //            if(next.getType() == Constants.TYPE_TEMP_TITLE){
+        //                //将临时组标题放到最前面
+        //                tempList.add(0,next);
+        //            }
+        //            //再将临时组放到临时组标题下面
+        //            else if(next.getType() == Constants.TYPE_TEMP_GROUP){
+        //                tempList.add(next);
+        //            }
+        //        }
+        //        //再放普通的组
+        //        Iterator<GroupAndDepartment> iterator = datas.iterator();
+        //        while(iterator.hasNext()){
+        //            GroupAndDepartment next = iterator.next();
+        //            if(next.getType() == Constants.TYPE_TITLE){
+        //                //将临时组标题放到最前面
+        //                tempList.add(next);
+        //            }
+        //        }
+        //        Iterator<GroupAndDepartment> groupIterator = allGroupAndDepartment.iterator();
+        //        while(groupIterator.hasNext()){
+        //            GroupAndDepartment next = groupIterator.next();
+        //            if(next.getType() == Constants.TYPE_GROUP){
+        //                //将临时组标题放到最前面
+        //                tempList.add(next);
+        //            }
+        //        }
+    }
+
     /**
      * 响应组是否显示
      */
     private ReceiveResponseGroupActiveHandler receiveResponseGroupActiveHandler = new ReceiveResponseGroupActiveHandler(){
         @Override
-        public void handler(boolean isActive,int responseGroupId){
-            logger.info("ReceiveResponseGroupActiveHandler---" + "isActive:"+isActive);
-
-            if(TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_HIGH.toString())){
+        public void handler(boolean isActive, int responseGroupId){
+            logger.info("ReceiveResponseGroupActiveHandler---" + "isActive:" + isActive);
+            if(TerminalFactory.getSDK().getParam(Params.USER_TYPE, "").equals(UserType.USER_HIGH.toString())){
                 return;
             }
             if(isActive){
             }else{
                 //普通用户响应组时间到了，并且当前组是响应组，需要切换到之前的组
-                if(TerminalFactory.getSDK().getParam(Params.USER_TYPE).equals(UserType.USER_NORMAL.toString()) &&
-                        TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == responseGroupId){
-                    if(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID,0) != 0){
-                        TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID,0));
-                    }else {
-                        TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
+                if(TerminalFactory.getSDK().getParam(Params.USER_TYPE).equals(UserType.USER_NORMAL.toString()) && TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0) == responseGroupId){
+                    if(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0) != 0){
+                        TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0));
+                    }else{
+                        TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0));
                     }
                 }
                 myHandler.post(() -> {
@@ -94,15 +156,15 @@ public class NewGroupFragment extends BaseFragment{
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> {//更新当前组
         CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
         myHandler.post(() -> {
-            GroupResponse mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
-            if(mGroupResponse == null){
-                return;
-            }
-            groupBeans.clear();
-            groupBeans.addAll(mGroupResponse.getMemberGroups());
-            mTempCatalogList.clear();
-            mCatalogList.clear();
-            updateData();
+            //            GroupResponse mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
+            //            if(mGroupResponse == null){
+            //                return;
+            //            }
+            //            groupBeans.clear();
+            //            groupBeans.addAll(mGroupResponse.getMemberGroups());
+            //            mTempCatalogList.clear();
+            //            mCatalogList.clear();
+            //            updateData();
         });
     };
 
@@ -113,36 +175,35 @@ public class NewGroupFragment extends BaseFragment{
 
         @Override
         public void handler(int errorCode, String errorDesc){
-            logger.info("收到转组消息："+errorCode+"/"+errorDesc);
+            logger.info("收到转组消息：" + errorCode + "/" + errorDesc);
             if(errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()){
                 CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
-                myHandler.post(() -> {
-                    GroupResponse mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
-                    if(mGroupResponse == null){
-                        return;
-                    }
-                    groupAdapter.notifyDataSetChanged();
-                });
+                //                myHandler.post(() -> {
+                //                    GroupResponse mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
+                //                    if(mGroupResponse == null){
+                //                        return;
+                //                    }
+                //                    groupAdapter.notifyDataSetChanged();
+                //                });
             }else{
                 ToastUtil.showToast(MyApplication.instance, errorDesc);
             }
         }
     };
 
-
     /**
      * 更新文件夹和组列表数据
      */
     private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = () -> myHandler.post(() -> {
-        GroupResponse mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
-        if(mGroupResponse == null){
-            return;
-        }
-        groupBeans.clear();
-        groupBeans.addAll(mGroupResponse.getMemberGroups());
-        mTempCatalogList.clear();
-        mCatalogList.clear();
-        updateData();
+        //        GroupResponse mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
+        //        if(mGroupResponse == null){
+        //            return;
+        //        }
+        //        groupBeans.clear();
+        //        groupBeans.addAll(mGroupResponse.getMemberGroups());
+        //        mTempCatalogList.clear();
+        //        mCatalogList.clear();
+        //        updateData();
     });
 
     // 警情临时组处理完成，终端需要切到主组，刷新通讯录
@@ -160,116 +221,95 @@ public class NewGroupFragment extends BaseFragment{
     @Override
     public void initView(){
         groupRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        groupAdapter = new GroupAdapter(getContext(), allGroupAndDepartment, tempGroup, mTempCatalogList, mCatalogList);
+        groupAdapter = new GroupAdapter(getContext(), datas, tempGroup, tempCatalogNames, catalogNames);
         groupRecyclerView.setAdapter(groupAdapter);
     }
 
     @Override
     public void initData(){
         mActivity = (NewMainActivity) getActivity();
-        GroupResponse mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
-        if(mGroupResponse == null){
-            return;
+
+        MemberGroupResponse tempGroupResponse = TerminalFactory.getSDK().getConfigManager().getTempGroupResponse();
+        if(null != tempGroupResponse){
+            List<Department> deptList = tempGroupResponse.getDeptList();
+            List<Group> groupList = tempGroupResponse.getGroupList();
+            updateData(-1,"临时组",deptList,groupList);
         }
-        groupBeans.clear();
-        groupBeans.addAll(mGroupResponse.getMemberGroups());
 
-        mTempCatalogList.clear();
-        mCatalogList.clear();
-        updateData();
-
+        MemberGroupResponse depGroupResponse = TerminalFactory.getSDK().getConfigManager().getDepGroupResponse();
+        if(null != depGroupResponse){
+            List<Department> deptList = depGroupResponse.getDeptList();
+            List<Group> groupList = depGroupResponse.getGroupList();
+            updateData(TerminalFactory.getSDK().getParam(Params.DEP_ID,0),TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),deptList,groupList);
+        }
     }
 
-    public void updateData(){
-        allGroupAndDepartment.clear();
-        tempGroup.clear();
-        //先添加临时组
-        for(GroupBean groupBean : groupBeans){
-            if(groupBean.getId() == -1){
-                //先添加上面的标题
-                GroupAndDepartment<GroupBean> groupAndDepartment = new GroupAndDepartment<>();
-                groupAndDepartment.setType(Constants.TYPE_TEMP_TITLE);
-                groupAndDepartment.setBean(groupBean);
-                allGroupAndDepartment.add(groupAndDepartment);
-                //上面标题添加数据
-                GroupCatalogBean catalog = new GroupCatalogBean();
-                catalog.setName(groupBean.getName());
-                catalog.setBean(groupBean);
-                mTempCatalogList.add(catalog);
-                List<Group> groups = groupBean.getGroups();
-                //再添加组
+    public void updateData(int depId, String depName, List<Department> departments, List<Group> groups){
+        if(depId == -1){
+            tempGroup.clear();
+            tempGroup.addAll(groups);
+            GroupCatalogBean groupCatalogBean = new GroupCatalogBean(depName,depId);
+            tempCatalogNames.clear();
+            tempCatalogNames.add(groupCatalogBean);
+            tempGroupDatas.clear();
+            if(!groups.isEmpty()){
+                //添加临时组
+                GroupAndDepartment<Object> tempTitle = new GroupAndDepartment<>();
+                tempTitle.setType(Constants.TYPE_TEMP_TITLE);
+                tempTitle.setBean(new Object());
+                tempGroupDatas.add(tempTitle);
                 for(Group group : groups){
-                    tempGroup.add(group);
-                    GroupAndDepartment<Group> tempGroup = new GroupAndDepartment<>();
-                    tempGroup.setType(Constants.TYPE_GROUP);
-                    tempGroup.setBean(group);
-                    allGroupAndDepartment.add(tempGroup);
-                }
-                if(tempGroup.isEmpty()){
-                    allGroupAndDepartment.remove(0);
-                }
-                break;
-            }
-
-        }
-
-        //再添加部门组
-        for(GroupBean groupBean : groupBeans){
-            if(groupBean.getId() != -1){
-                //先添加上面的标题
-                GroupAndDepartment<GroupBean> groupAndDepartment = new GroupAndDepartment<>();
-                groupAndDepartment.setType(Constants.TYPE_TITLE);
-                groupAndDepartment.setBean(groupBean);
-                allGroupAndDepartment.add(groupAndDepartment);
-                //上面标题添加数据
-                GroupCatalogBean catalog = new GroupCatalogBean();
-                catalog.setName(groupBean.getName());
-                catalog.setBean(groupBean);
-                mCatalogList.add(catalog);
-                List<Group> groups = groupBean.getGroups();
-                //再添加组
-                for(Group group : groups){
-                    //高级用户所有的组都显示
-                    if(TerminalFactory.getSDK().getParam(Params.USER_TYPE, "").equals(UserType.USER_HIGH.toString())){
-                        GroupAndDepartment<Group> tempGroup = new GroupAndDepartment<>();
-                        tempGroup.setType(Constants.TYPE_GROUP);
-                        tempGroup.setBean(group);
-                        allGroupAndDepartment.add(tempGroup);
-
-                    }else {
-                        //低级用户不显示响应组
-                        if(group.getResponseGroupType() == null){
-                            GroupAndDepartment<Group> tempGroup = new GroupAndDepartment<>();
-                            tempGroup.setType(Constants.TYPE_GROUP);
-                            tempGroup.setBean(group);
-                            allGroupAndDepartment.add(tempGroup);
-                        }else if(group.getResponseGroupType().equals(ResponseGroupType.RESPONSE_FALSE.toString())){
-                            GroupAndDepartment<Group> tempGroup = new GroupAndDepartment<>();
-                            tempGroup.setType(Constants.TYPE_GROUP);
-                            tempGroup.setBean(group);
-                            allGroupAndDepartment.add(tempGroup);
-                        }
-
-                    }
-                }
-                //最后添加子部门
-                List<GroupBean> children = groupBean.getChildren();
-                for(GroupBean child : children){
-                    GroupAndDepartment<GroupBean> department = new GroupAndDepartment<>();
-                    department.setType(Constants.TYPE_FOLDER);
-                    department.setBean(child);
-                    allGroupAndDepartment.add(department);
+                    GroupAndDepartment<Group> groupAndDepartment = new GroupAndDepartment<>();
+                    groupAndDepartment.setType(Constants.TYPE_TEMP_GROUP);
+                    groupAndDepartment.setBean(group);
+                    tempGroupDatas.add(groupAndDepartment);
                 }
             }
+            tempGroupUpdateCompleted = true;
+        }else{
+            //请求一个添加一个部门标题
+            commonGroupDatas.clear();
+            GroupCatalogBean groupCatalogBean = new GroupCatalogBean(depName,depId);
+            catalogNames.add(groupCatalogBean);
+            //先把标题去掉重新添加
+            Iterator<GroupAndDepartment> commonGroupIterator = commonGroupDatas.iterator();
+            while(commonGroupIterator.hasNext()){
+                GroupAndDepartment next = commonGroupIterator.next();
+                if(next.getType() == Constants.TYPE_TITLE){
+                    commonGroupIterator.remove();
+                    break;
+                }
+            }
+            //部门标题
+            GroupAndDepartment<Object> Title = new GroupAndDepartment<>();
+            Title.setType(Constants.TYPE_TITLE);
+            Title.setBean(new Object());
+            commonGroupDatas.add(Title);
+            //添加组
+            for(Group group : groups){
+                GroupAndDepartment<Group> groupAndDepartment = new GroupAndDepartment<>();
+                groupAndDepartment.setType(Constants.TYPE_GROUP);
+                groupAndDepartment.setBean(group);
+                commonGroupDatas.add(groupAndDepartment);
+            }
+            //添加部门
+            for(Department department : departments){
+                GroupAndDepartment<Department> groupAndDepartment = new GroupAndDepartment<>();
+                groupAndDepartment.setType(Constants.TYPE_FOLDER);
+                groupAndDepartment.setBean(department);
+                commonGroupDatas.add(groupAndDepartment);
+            }
+            groupUpdateCompleted = true;
         }
-
-        if(groupAdapter != null){
-            groupAdapter.notifyDataSetChanged();
+        if(updateCompleted()){
+            //请求完成排序
+            sortList();
         }
     }
 
     @Override
     public void initListener(){
+        MyTerminalFactory.getSDK().registReceiveHandler(receivegUpdateGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
@@ -278,6 +318,10 @@ public class NewGroupFragment extends BaseFragment{
         swipeRefreshLayout.setProgressBackgroundColorSchemeResource(R.color.white);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark);
         swipeRefreshLayout.setOnRefreshListener(() -> {
+            groupUpdateCompleted = false;
+            tempGroupUpdateCompleted = false;
+            catalogNames.clear();
+            tempCatalogNames.clear();
             TerminalFactory.getSDK().getConfigManager().updateAllGroups();
             myHandler.postDelayed(() -> {
                 // 加载完数据设置为不刷新状态，将下拉进度收起来
@@ -287,55 +331,40 @@ public class NewGroupFragment extends BaseFragment{
         });
 
         groupAdapter.setCatalogItemClickListener((view, isTempGroup, position) -> {
-            GroupBean groupBean;
-            if(isTempGroup){
-                groupBean = mTempCatalogList.get(position).getBean();
-            }else{
-                groupBean = mCatalogList.get(position).getBean();
-            }
-            //去掉之前的数据
-            Iterator<GroupBean> iterator = groupBeans.iterator();
-            while(iterator.hasNext()){
-                GroupBean next = iterator.next();
-                //临时组只有一级，所以这里只会是部门，先去掉之后再添加新的，如果以后临时组有变动再改
-                if(next.getId() != -1){
-                    iterator.remove();
-                    break;
+            // TODO: 2019/4/15 如果点击的不是上一个会有bug
+            if(position == catalogNames.size()-2){
+                catalogNames.remove(catalogNames.size()-1);
+                datas.removeAll(commonGroupDatas);
+                commonGroupDatas.clear();
+                commonGroupDatas.addAll(lastGroupDatas);
+                datas.addAll(lastGroupDatas);
+                if(groupAdapter !=null){
+                    groupAdapter.notifyDataSetChanged();
                 }
+                groupRecyclerView.scrollToPosition(0);
+            }else {
+                //重新请求
+
             }
-            //添加新的数据
-            groupBeans.add(groupBean);
-            mTempCatalogList.clear();
-            List<GroupCatalogBean> groupCatalogBeans = new ArrayList<>();
-            groupCatalogBeans.addAll(mCatalogList.subList(0, position));
-            mCatalogList.clear();
-            mCatalogList.addAll(groupCatalogBeans);
-            updateData();
         });
-        groupAdapter.setFolderClickListener((view, position, isTempGroup) -> {
-            GroupBean groupBean = (GroupBean) allGroupAndDepartment.get(position).getBean();
-            //去掉之前的数据
-            Iterator<GroupBean> iterator = groupBeans.iterator();
-            while(iterator.hasNext()){
-                GroupBean next = iterator.next();
-                if(next.getId() == groupBean.getParentId()){
-                    if(isTempGroup){
-                        mCatalogList.clear();
-                    }else{
-                        mTempCatalogList.clear();
-                    }
-                    iterator.remove();
-                    break;
-                }
-            }
-            //添加新的数据
-            groupBeans.add(groupBean);
-            updateData();
+        groupAdapter.setFolderClickListener((view, depId, name, isTempGroup) -> {
+            saveLastGroupData();
+            tempGroupUpdateCompleted = true;
+            groupUpdateCompleted = false;
+            TerminalFactory.getSDK().getConfigManager().updateGroup(depId,name);
         });
+    }
+
+    private void saveLastGroupData(){
+        lastGroupDatas.clear();
+        for(GroupAndDepartment commonGroupData : commonGroupDatas){
+            lastGroupDatas.add((GroupAndDepartment) commonGroupData.clone());
+        }
     }
 
     @Override
     public void onDestroy(){
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receivegUpdateGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
@@ -348,33 +377,17 @@ public class NewGroupFragment extends BaseFragment{
      * 返回操作
      */
     public void onBack(){
-        if(mCatalogList.size() > 1){
-
-            GroupBean groupBean = mCatalogList.get(mCatalogList.size() - 2).getBean();
-
-            //去掉最后两个
-            mCatalogList.remove(mCatalogList.size() - 1);
-            mCatalogList.remove(mCatalogList.size() - 1);
-
-            List<GroupCatalogBean> catalogBeanList = new ArrayList<>();
-            catalogBeanList.addAll(mCatalogList);
-
-            mTempCatalogList.clear();
-            mCatalogList.clear();
-            mCatalogList.addAll(catalogBeanList);
-
-            //去掉之前的数据
-            Iterator<GroupBean> iterator = groupBeans.iterator();
-            while(iterator.hasNext()){
-                GroupBean next = iterator.next();
-                //临时组只有一级，所以这里只会是部门，先去掉之后再添加新的，如果以后临时组有变动再改
-                if(next.getId() != -1){
-                    iterator.remove();
-                    break;
-                }
+        if(catalogNames.size() > 1){
+            //返回到上一级
+            catalogNames.remove(catalogNames.size()-1);
+            datas.removeAll(commonGroupDatas);
+            commonGroupDatas.clear();
+            commonGroupDatas.addAll(lastGroupDatas);
+            datas.addAll(lastGroupDatas);
+            if(groupAdapter !=null){
+                groupAdapter.notifyDataSetChanged();
             }
-            groupBeans.add(groupBean);
-            updateData();
+            groupRecyclerView.scrollToPosition(0);
 
         }else{
             mActivity.exit();

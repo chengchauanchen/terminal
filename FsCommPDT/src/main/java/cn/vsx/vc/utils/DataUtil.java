@@ -150,7 +150,6 @@ public class DataUtil {
 					member = new Member();
 					member.id = memberNo;
 					member.setName(allMembers.get(i).getName());
-					member.setTerminalMemberTypeEnum(allMembers.get(i).getTerminalMemberTypeEnum());
 					break;
 				}
 			}

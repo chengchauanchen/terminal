@@ -3,15 +3,13 @@ package cn.vsx.vc.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import cn.vsx.hamster.terminalsdk.model.GroupBean;
-
 /**
  * Created by XX on 2018/4/11.
  */
 
-public class GroupCatalogBean implements Parcelable {
+public class GroupCatalogBean implements Parcelable{
     private String name;
-    private GroupBean bean;
+    private int id;
 
     public String getName() {
         return name;
@@ -21,41 +19,46 @@ public class GroupCatalogBean implements Parcelable {
         this.name = name;
     }
 
-    public GroupBean getBean() {
-        return bean;
+    public int getId(){
+        return id;
     }
 
-    public void setBean(GroupBean bean) {
-        this.bean = bean;
+    public void setId(int id){
+        this.id = id;
     }
 
     @Override
-    public int describeContents() {
+    public int describeContents(){
         return 0;
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
+    public void writeToParcel(Parcel dest, int flags){
         dest.writeString(this.name);
-        dest.writeSerializable(this.bean);
+        dest.writeInt(this.id);
     }
 
-    public GroupCatalogBean() {
+    public GroupCatalogBean(){
     }
 
-    protected GroupCatalogBean(Parcel in) {
+    public GroupCatalogBean(String name, int id){
+        this.name = name;
+        this.id = id;
+    }
+
+    protected GroupCatalogBean(Parcel in){
         this.name = in.readString();
-        this.bean = (GroupBean) in.readSerializable();
+        this.id = in.readInt();
     }
 
-    public static final Creator<GroupCatalogBean> CREATOR = new Creator<GroupCatalogBean>() {
+    public static final Parcelable.Creator<GroupCatalogBean> CREATOR = new Parcelable.Creator<GroupCatalogBean>(){
         @Override
-        public GroupCatalogBean createFromParcel(Parcel source) {
+        public GroupCatalogBean createFromParcel(Parcel source){
             return new GroupCatalogBean(source);
         }
 
         @Override
-        public GroupCatalogBean[] newArray(int size) {
+        public GroupCatalogBean[] newArray(int size){
             return new GroupCatalogBean[size];
         }
     };

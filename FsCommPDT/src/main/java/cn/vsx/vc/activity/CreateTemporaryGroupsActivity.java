@@ -20,7 +20,6 @@ import java.util.TimerTask;
 
 import butterknife.Bind;
 import cn.vsx.hamster.errcode.BaseCommonCode;
-import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginForUIOperationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseCreateTempGroup4PCHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -294,22 +293,22 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         }
         signs = new ArrayList<>();
 
-        for(Group group :MyTerminalFactory.getSDK().getConfigManager().getAllGroups()){
-            if(group.getDepartmentId() !=-1){
-                continue;
-            }
-            if(group.getName().contains("-")){
-                String[] split = group.getName().split("-");
-                String name = split[0];
-                if(name.startsWith("临时组") && name.length()>=3){
-                    String s = name.substring(3);
-                    if(StringUtil.isNumber(s)){
-                        int number = Integer.valueOf(s);
-                        signs.add(number);
-                    }
-                }
-            }
-        }
+//        for(Group group :MyTerminalFactory.getSDK().getConfigManager().getAllGroups()){
+//            if(group.getDepartmentId() !=-1){
+//                continue;
+//            }
+//            if(group.getName().contains("-")){
+//                String[] split = group.getName().split("-");
+//                String name = split[0];
+//                if(name.startsWith("临时组") && name.length()>=3){
+//                    String s = name.substring(3);
+//                    if(StringUtil.isNumber(s)){
+//                        int number = Integer.valueOf(s);
+//                        signs.add(number);
+//                    }
+//                }
+//            }
+//        }
 
         //从1开始判断
         int sign = getSign(1);

@@ -20,9 +20,9 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.common.GroupType;
+import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.GroupAndDepartment;
-import cn.vsx.hamster.terminalsdk.model.GroupBean;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
@@ -131,15 +131,15 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
         }else if(getItemViewType(position)==Constants.TYPE_FOLDER){
             DepartmentViewHolder departmentViewHolder = (DepartmentViewHolder) holder;
-            final GroupBean groupBean = (GroupBean) allGroupAndDepartment.get(position).getBean();
-            departmentViewHolder.tvFolder.setText(groupBean.getName());
+            final Department department = (Department) allGroupAndDepartment.get(position).getBean();
+            departmentViewHolder.tvFolder.setText(department.getName());
 
             departmentViewHolder.itemView.setOnClickListener(view -> {
                 if(folderClickListener !=null){
-                    if(groupBean.getId() ==-1){
-                        folderClickListener.onFolderClick(view,position,true);
+                    if(department.getId() ==-1){
+                        folderClickListener.onFolderClick(view,department.getId(),department.getName(),true);
                     }else {
-                        folderClickListener.onFolderClick(view,position,false);
+                        folderClickListener.onFolderClick(view,department.getId(),department.getName(),false);
                     }
                 }
             });
@@ -259,6 +259,6 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         this.folderClickListener = folderClickListener;
     }
     public interface FolderClickListener{
-        void onFolderClick(View view,int position,boolean isTempGroup);
+        void onFolderClick(View view,int depId,String name,boolean isTempGroup);
     }
 }

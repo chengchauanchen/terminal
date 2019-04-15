@@ -96,9 +96,9 @@ public class LocalMemberSearchAdapter extends BaseAdapter {
         String name = searchContactsBean.getName();
         String id = HandleIdUtil.handleId(searchContactsBean.id);
 
-        logger.info("类型："+searchContactsBean.getTerminalMemberTypeEnum()+"\n"+searchContactsBean.terminalMemberType);
+        logger.info("类型："+"\n"+searchContactsBean.getType());
 
-        if (TerminalMemberType.TERMINAL_PDT.equals(searchContactsBean.getTerminalMemberTypeEnum())){
+        if (TerminalMemberType.TERMINAL_PDT.getCode() == searchContactsBean.getType()){
             holder.llDialTo.setVisibility(View.GONE);
         }else {
             holder.llDialTo.setVisibility(View.VISIBLE);

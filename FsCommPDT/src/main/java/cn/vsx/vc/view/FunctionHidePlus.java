@@ -144,7 +144,7 @@ public class FunctionHidePlus extends LinearLayout {
         gv_function_bottom.setOnItemClickListener((parent, view, position, id) -> {
             String title = titles[position];
             if (isFastClick()){
-                if(DataUtil.getMemberByMemberNo(userId).terminalMemberType== TerminalMemberType.TERMINAL_PDT.name()){
+                if(DataUtil.getMemberByMemberNo(userId).getType()== TerminalMemberType.TERMINAL_PDT.getCode()){
                     ToastUtil.showToast(context,context.getString(R.string.text_the_other_party_not_supported_this_message_type));
                     return;
                 }
@@ -411,7 +411,7 @@ public class FunctionHidePlus extends LinearLayout {
             boolean canPush = false;
             boolean canPull = false;
             //PDT终端不支持录音消息类型
-            if(DataUtil.getMemberByMemberNo(userId).terminalMemberType==TerminalMemberType.TERMINAL_PDT.name()){
+            if(DataUtil.getMemberByMemberNo(userId).getType()==TerminalMemberType.TERMINAL_PDT.getCode()){
                 btn_record.setBackgroundResource(R.drawable.shape_news_ptt_wait);
                 btn_record.setText(R.string.text_can_not_sound_recorder);
                 btn_record.setEnabled(false);

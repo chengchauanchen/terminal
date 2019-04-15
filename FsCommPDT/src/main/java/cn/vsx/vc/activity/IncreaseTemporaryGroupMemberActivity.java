@@ -20,15 +20,14 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.OnClick;
-import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.MemberResponse;
+import cn.vsx.hamster.terminalsdk.model.NewMemberResponse;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdatePhoneMemberHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -78,13 +77,13 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
     private int INCREASE_MEMBER=1;
     //更新警务通成员信息
     private ReceiveUpdatePhoneMemberHandler receiveUpdatePhoneMemberHandler = allMembers -> myHandler.post(() -> {
-        MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
-        List<CatalogBean> catalogBeanList = new ArrayList<>();
-        CatalogBean bean = new CatalogBean();
-        bean.setName(memberResponse.getName());
-        bean.setBean(memberResponse);
-        catalogBeanList.add(bean);
-        updateData(memberResponse,catalogBeanList);
+//        MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
+//        List<CatalogBean> catalogBeanList = new ArrayList<>();
+//        CatalogBean bean = new CatalogBean();
+//        bean.setName(memberResponse.getName());
+//        bean.setBean(memberResponse);
+//        catalogBeanList.add(bean);
+//        updateData(memberResponse,catalogBeanList);
     });
 
     /**
@@ -92,13 +91,13 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
      */
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> {//更新当前组
         myHandler.post(() -> {
-            MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
-            List<CatalogBean> catalogBeanList = new ArrayList<>();
-            CatalogBean bean = new CatalogBean();
-            bean.setName(memberResponse.getName());
-            bean.setBean(memberResponse);
-            catalogBeanList.add(bean);
-            updateData(memberResponse,catalogBeanList);
+            NewMemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
+//            List<CatalogBean> catalogBeanList = new ArrayList<>();
+//            CatalogBean bean = new CatalogBean();
+//            bean.setName(memberResponse.getName());
+//            bean.setBean(memberResponse);
+//            catalogBeanList.add(bean);
+//            updateData(memberResponse,catalogBeanList);
         });
     };
 
@@ -160,25 +159,25 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiverSelectTempGroupMemberHandler);
         mCatalogAdapter.setOnItemClick((view, position) -> {
-            MemberResponse memberResponse = mCatalogList.get(position).getBean();
-
-            List<CatalogBean> catalogList = new ArrayList<>();
-            catalogList.addAll(mCatalogList.subList(0, position + 1));
-            updateData(memberResponse,catalogList);
+//            MemberResponse memberResponse = mCatalogList.get(position).getBean();
+//
+//            List<CatalogBean> catalogList = new ArrayList<>();
+//            catalogList.addAll(mCatalogList.subList(0, position + 1));
+//            updateData(memberResponse,catalogList);
         });
 
         mIncreaseTemporaryGroupMemberAdapter.setOnItemClickListener((view, postion, itemType) -> {
             if (itemType == Constants.TYPE_DEPARTMENT) {
-                MemberResponse memberResponse = (MemberResponse) mDatas.get(postion).getBean();
-                if (memberResponse != null) {
-                    CatalogBean catalog = new CatalogBean();
-                    catalog.setName(memberResponse.getName());
-                    catalog.setBean(memberResponse);
-                    mCatalogList.add(catalog);
-                    List<CatalogBean> catalogBeanList = new ArrayList<>();
-                    catalogBeanList.addAll(mCatalogList);
-                    updateData(memberResponse, catalogBeanList);
-                }
+//                MemberResponse memberResponse = (MemberResponse) mDatas.get(postion).getBean();
+//                if (memberResponse != null) {
+//                    CatalogBean catalog = new CatalogBean();
+//                    catalog.setName(memberResponse.getName());
+//                    catalog.setBean(memberResponse);
+//                    mCatalogList.add(catalog);
+//                    List<CatalogBean> catalogBeanList = new ArrayList<>();
+//                    catalogBeanList.addAll(mCatalogList);
+//                    updateData(memberResponse, catalogBeanList);
+//                }
             } else if(itemType == Constants.TYPE_USER){
 
                 if(!mIncreaseTemporaryGroupMemberAdapter.getSelectMember().isEmpty()){
@@ -231,16 +230,16 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
     @Override
     public void initData() {
 
-        MemberResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
-        if(mMemberResponse ==null){
-            return;
-        }
-        CatalogBean catalog=new CatalogBean();
-        catalog.setName(mMemberResponse.getName());
-        catalog.setBean(mMemberResponse);
-        mInitCatalogList.add(catalog);
-
-        updateData(mMemberResponse,mInitCatalogList);
+        NewMemberResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
+//        if(mMemberResponse ==null){
+//            return;
+//        }
+//        CatalogBean catalog=new CatalogBean();
+//        catalog.setName(mMemberResponse.getName());
+//        catalog.setBean(mMemberResponse);
+//        mInitCatalogList.add(catalog);
+//
+//        updateData(mMemberResponse,mInitCatalogList);
     }
 
 
@@ -270,51 +269,51 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
     @SuppressWarnings("unchecked")
     private void addItemMember(MemberResponse memberResponse){
         //子成员
-        List<Member> memberList = new ArrayList<>();
-        List<Member> members = memberResponse.getMembers();
-        for(Member member : members){
-            Member cloneMember = new Member();
-            //如果没有名字显示No
-            if(member.getName() == null || member.getName().equals("")){
-                cloneMember.setName(String.valueOf(member.getNo()));
-            }else {
-                cloneMember.setName(member.getName());
-            }
-            //memberId终端用不上，代码里的id都是指No
-            cloneMember.setId(member.getNo());
-            cloneMember.setNo(member.getNo());
-            cloneMember.setTerminalMemberTypeEnum(TerminalMemberType.getInstanceByCode(member.type));
-            cloneMember.setPhone(member.getPhone());
-            cloneMember.setDepartmentName(memberResponse.getName());
-            memberList.add(cloneMember);
-        }
-        if(!memberList.isEmpty()){
-            List<ContactItemBean> itemMemberList = new ArrayList<>();
-            Iterator<Member> iterator = memberList.iterator();
-            while(iterator.hasNext()){
-                //不要直接使用MemberResponse里的数据，会一直保存在内存里,下次进来时还是选中状态
-                Member member = (Member) iterator.next().clone();
-                for(Member selectMember : mIncreaseTemporaryGroupMemberAdapter.getSelectMember()){
-                    if(selectMember.getNo() == member.getNo()){
-                        member.setChecked(true);
-                        break;
-                    }
-                }
-                //过滤掉自己
-                if(member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
-                    iterator.remove();
-                    continue;
-                }
-                if(member.getName()==null){
-                    continue;
-                }
-                ContactItemBean<Member> bean = new ContactItemBean<>();
-                bean.setBean(member);
-                bean.setType(Constants.TYPE_USER);
-                itemMemberList.add(bean);
-            }
-            mDatas.addAll(itemMemberList);
-        }
+//        List<Member> memberList = new ArrayList<>();
+//        List<Member> members = memberResponse.getMembers();
+//        for(Member member : members){
+//            Member cloneMember = new Member();
+//            //如果没有名字显示No
+//            if(member.getName() == null || member.getName().equals("")){
+//                cloneMember.setName(String.valueOf(member.getNo()));
+//            }else {
+//                cloneMember.setName(member.getName());
+//            }
+//            //memberId终端用不上，代码里的id都是指No
+//            cloneMember.setId(member.getNo());
+//            cloneMember.setNo(member.getNo());
+//            cloneMember.setTerminalMemberTypeEnum(TerminalMemberType.getInstanceByCode(member.type));
+//            cloneMember.setPhone(member.getPhone());
+//            cloneMember.setDepartmentName(memberResponse.getName());
+//            memberList.add(cloneMember);
+//        }
+//        if(!memberList.isEmpty()){
+//            List<ContactItemBean> itemMemberList = new ArrayList<>();
+//            Iterator<Member> iterator = memberList.iterator();
+//            while(iterator.hasNext()){
+//                //不要直接使用MemberResponse里的数据，会一直保存在内存里,下次进来时还是选中状态
+//                Member member = (Member) iterator.next().clone();
+//                for(Member selectMember : mIncreaseTemporaryGroupMemberAdapter.getSelectMember()){
+//                    if(selectMember.getNo() == member.getNo()){
+//                        member.setChecked(true);
+//                        break;
+//                    }
+//                }
+//                //过滤掉自己
+//                if(member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+//                    iterator.remove();
+//                    continue;
+//                }
+//                if(member.getName()==null){
+//                    continue;
+//                }
+//                ContactItemBean<Member> bean = new ContactItemBean<>();
+//                bean.setBean(member);
+//                bean.setType(Constants.TYPE_USER);
+//                itemMemberList.add(bean);
+//            }
+//            mDatas.addAll(itemMemberList);
+//        }
     }
 
     /**
@@ -350,19 +349,19 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity  {
      * 返回操作
      */
     public void onBack(){
-        if (mCatalogList.size() > 1) {
-            MemberResponse memberResponse = mCatalogList.get(mCatalogList.size() - 2).getBean();
-
-            mCatalogList.remove(mCatalogList.size() - 1);
-
-            List<CatalogBean> catalogBeanList = new ArrayList<>();
-            catalogBeanList.addAll(mCatalogList);
-
-            updateData(memberResponse, catalogBeanList);
-
-        } else {
-            this.finish();
-        }
+//        if (mCatalogList.size() > 1) {
+//            MemberResponse memberResponse = mCatalogList.get(mCatalogList.size() - 2).getBean();
+//
+//            mCatalogList.remove(mCatalogList.size() - 1);
+//
+//            List<CatalogBean> catalogBeanList = new ArrayList<>();
+//            catalogBeanList.addAll(mCatalogList);
+//
+//            updateData(memberResponse, catalogBeanList);
+//
+//        } else {
+//            this.finish();
+//        }
     }
     private long lastSearchTime=0;
 

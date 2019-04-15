@@ -124,8 +124,7 @@ public class PromptManager {
 		@Override
 		public void handler(final int memberId, final String memberName, final int groupId,
 							String version, final CallMode currentCallMode) {
-			TerminalMemberType terminalMemberTypeEnum = DataUtil.getMemberByMemberNo(memberId).getTerminalMemberTypeEnum();
-			if (terminalMemberTypeEnum == TerminalMemberType.TERMINAL_PDT){
+			if (DataUtil.getMemberByMemberNo(memberId).getType() == TerminalMemberType.TERMINAL_PDT.getCode()){
 				if(soundPool != null){
 					streamId =soundPool.play(soundMap.get(ptt.terminalsdk.R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
 				}

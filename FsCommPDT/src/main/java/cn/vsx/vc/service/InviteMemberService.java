@@ -35,7 +35,6 @@ import java.util.List;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
-import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -82,6 +81,7 @@ public class InviteMemberService extends BaseService{
     private boolean pushing;
     private boolean pulling;
 
+//    private List<CatalogBean> mCatalogList=new ArrayList<>();
     private List<CatalogBean> mCatalogList=new ArrayList<>();
     private List<ContactItemBean> mDatas=new ArrayList<>();
     private CatalogAdapter mCatalogAdapter;
@@ -229,17 +229,17 @@ public class InviteMemberService extends BaseService{
     };
 
     private ReceiveUpdatePhoneMemberHandler receiveUpdatePhoneMemberHandler = PhoneMember -> mHandler.post(() -> {
-        MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
-        if(null == memberResponse){
-            return;
-        }
-        // TODO: 2018/12/28 下拉刷新之后之前选中的人没了，要改
-        List<CatalogBean> catalogBeanList = new ArrayList<>();
-        CatalogBean bean = new CatalogBean();
-        bean.setName(memberResponse.getName());
-        bean.setBean(memberResponse);
-        catalogBeanList.add(bean);
-        updateData(memberResponse,catalogBeanList);
+//        MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
+//        if(null == memberResponse){
+//            return;
+//        }
+//        // TODO: 2018/12/28 下拉刷新之后之前选中的人没了，要改
+//        List<CatalogBean> catalogBeanList = new ArrayList<>();
+//        CatalogBean bean = new CatalogBean();
+//        bean.setName(memberResponse.getName());
+//        bean.setBean(memberResponse);
+//        catalogBeanList.add(bean);
+//        updateData(memberResponse,catalogBeanList);
     });
     /**
      * 通知直播停止 通知界面关闭视频页
@@ -305,27 +305,27 @@ public class InviteMemberService extends BaseService{
 
 
     private CatalogAdapter.ItemClickListener catalogItemClickListener = (view, position) -> {
-        MemberResponse memberResponse=mCatalogList.get(position).getBean();
-        List<CatalogBean> catalogList = new ArrayList<>(mCatalogList.subList(0, position + 1));
-        updateData(memberResponse,catalogList);
+//        MemberResponse memberResponse=mCatalogList.get(position).getBean();
+//        List<CatalogBean> catalogList = new ArrayList<>(mCatalogList.subList(0, position + 1));
+//        updateData(memberResponse,catalogList);
     };
 
     private LiveRecyclerViewAdapter.ItemClickListener contractItemClickListener = (postion, adapterType) -> {
-        if (adapterType==Constants.TYPE_DEPARTMENT){
-            MemberResponse memberResponse= (MemberResponse) mDatas.get(postion).getBean();
-            CatalogBean catalog=new CatalogBean();
-            catalog.setName(memberResponse.getName());
-            catalog.setBean(memberResponse);
-            mCatalogList.add(catalog);
-            List<CatalogBean> catalogBeanList = new ArrayList<>(mCatalogList);
-            updateData(memberResponse,catalogBeanList);
-        }else if(adapterType == Constants.TYPE_USER){
-            if(mContactAdapter.getSelectMember().isEmpty()){
-                mBtnLiveSelectmemberStart.setText(getResources().getString(R.string.confirm));
-            }else {
-                mBtnLiveSelectmemberStart.setText(String.format("确定(%s)",mContactAdapter.getSelectMember().size()));
-            }
-        }
+//        if (adapterType==Constants.TYPE_DEPARTMENT){
+//            MemberResponse memberResponse= (MemberResponse) mDatas.get(postion).getBean();
+//            CatalogBean catalog=new CatalogBean();
+//            catalog.setName(memberResponse.getName());
+//            catalog.setBean(memberResponse);
+//            mCatalogList.add(catalog);
+//            List<CatalogBean> catalogBeanList = new ArrayList<>(mCatalogList);
+//            updateData(memberResponse,catalogBeanList);
+//        }else if(adapterType == Constants.TYPE_USER){
+//            if(mContactAdapter.getSelectMember().isEmpty()){
+//                mBtnLiveSelectmemberStart.setText(getResources().getString(R.string.confirm));
+//            }else {
+//                mBtnLiveSelectmemberStart.setText(String.format("确定(%s)",mContactAdapter.getSelectMember().size()));
+//            }
+//        }
     };
 
     private AdapterView.OnItemClickListener searchItemclickListener = (parent, view, position, id) -> {
@@ -471,7 +471,7 @@ public class InviteMemberService extends BaseService{
     private void updateData(MemberResponse memberResponse, List<CatalogBean> catalogBeanList){
         mDatas.clear();
         mCatalogList.clear();
-        mCatalogList.addAll(catalogBeanList);
+//        mCatalogList.addAll(catalogBeanList);
         addData(memberResponse);
         mContactAdapter.notifyDataSetChanged();
         mCatalogAdapter.notifyDataSetChanged();
@@ -505,7 +505,7 @@ public class InviteMemberService extends BaseService{
             //memberId终端用不上，代码里的id都是指No
             cloneMember.setId(member.getNo());
             cloneMember.setNo(member.getNo());
-            cloneMember.setTerminalMemberTypeEnum(TerminalMemberType.getInstanceByCode(member.type));
+//            cloneMember.setTerminalMemberTypeEnum(TerminalMemberType.getInstanceByCode(member.type));
             cloneMember.setPhone(member.getPhone());
             cloneMember.setDepartmentName(memberResponse.getName());
             memberList.add(cloneMember);
@@ -598,16 +598,16 @@ public class InviteMemberService extends BaseService{
         pulling = intent.getBooleanExtra(Constants.PULLING,false);
         livingMemberId = intent.getIntExtra(Constants.LIVING_MEMBER_ID,0);
 
-        MemberResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
-        if(mMemberResponse ==null){
-            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_members_data));
-            return;
-        }
-        CatalogBean catalog=new CatalogBean();
-        catalog.setName(mMemberResponse.getName());
-        catalog.setBean(mMemberResponse);
-        mInitCatalogList.add(catalog);
-        updateData(mMemberResponse,mInitCatalogList);
+//        MemberResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
+//        if(mMemberResponse ==null){
+//            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_members_data));
+//            return;
+//        }
+//        CatalogBean catalog=new CatalogBean();
+//        catalog.setName(mMemberResponse.getName());
+//        catalog.setBean(mMemberResponse);
+//        mInitCatalogList.add(catalog);
+//        updateData(mMemberResponse,mInitCatalogList);
 
 
     }
@@ -664,7 +664,7 @@ public class InviteMemberService extends BaseService{
      */
     private void requestOtherStartLive(){
         if(null != mContactAdapter.getLiveMember()){
-            int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(mContactAdapter.getLiveMember().getNo(), "");
+            int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(mContactAdapter.getLiveMember().getNo(), mContactAdapter.getLiveMember().getUniqueNo(),"");
             logger.error("请求图像：requestCode=" + requestCode);
             if(requestCode == BaseCommonCode.SUCCESS_CODE){
 

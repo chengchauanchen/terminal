@@ -139,7 +139,7 @@ public class GroupMemberActivity extends BaseActivity {
         groupId = getIntent().getIntExtra("groupId", 0);
         groupName = getIntent().getStringExtra("groupName");
         Group group = DataUtil.getGroupByGroupNo(groupId);
-        isTemporaryGroup = group.getDepartmentId() == -1;
+        isTemporaryGroup = group.getDeptId() == -1;
         //只有自己创建的临时组才能添加和删除人
         if(group.getCreatedMemberNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,-1) && isTemporaryGroup){
             canAdd = true;
@@ -290,7 +290,7 @@ public class GroupMemberActivity extends BaseActivity {
                 }
                 GroupMemberActivity.this.groupId = groupId;
                 Group group = DataUtil.getGroupByGroupNo(groupId);
-                isTemporaryGroup = group.getDepartmentId() == -1;
+                isTemporaryGroup = group.getDeptId() == -1;
                 //只有自己创建的临时组才能添加和删除人
                 if(group.getCreatedMemberNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,-1) && isTemporaryGroup){
                     canAdd = true;
