@@ -50,7 +50,6 @@ import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
-import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
@@ -1162,9 +1161,9 @@ public class TalkbackFragment extends BaseFragment {
     private void setChangeGroupView() {
         List<Group> groupList;
         if(TerminalFactory.getSDK().getParam(Params.USER_TYPE, "").equals(UserType.USER_HIGH.toString())){
-            groupList =  TerminalFactory.getSDK().getConfigManager().getAllGroups();
+            groupList =  TerminalFactory.getSDK().getConfigManager().getMonitorGroup();
         }else {
-            groupList =  TerminalFactory.getSDK().getConfigManager().getAllCommonGroup();
+            groupList =  TerminalFactory.getSDK().getConfigManager().getCommonMonitorGroup();
         }
         if (groupList.size() > 0) {
             change_group_view.setData(groupList, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));

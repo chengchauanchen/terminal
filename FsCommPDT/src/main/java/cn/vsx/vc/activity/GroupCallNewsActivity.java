@@ -24,17 +24,13 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.alibaba.fastjson.JSONObject;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.http.util.TextUtils;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -42,7 +38,6 @@ import butterknife.Bind;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
-import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -56,7 +51,6 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Member;
-import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
@@ -80,12 +74,10 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
-import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
-import cn.vsx.vc.utils.FileUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
@@ -367,7 +359,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             case R.id.iv_monitor:
                 List<Integer> monitorGroups = new ArrayList<>();
                 monitorGroups.add(userId);
-                if(TerminalFactory.getSDK().getConfigManager().getMonitorGroup().contains(userId)){
+                if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(userId)){
                     TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
                 }else {
                     TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
@@ -377,7 +369,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     }
 
     private void setIvMonitorDrawable(){
-        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroup().contains(userId)){
+        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(userId)){
             iv_monitor.setImageResource(R.drawable.monitor_open);
         }else {
             iv_monitor.setImageResource(R.drawable.monitor_close);

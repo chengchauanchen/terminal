@@ -118,12 +118,7 @@ public class NewHandPlatformFragment extends BaseFragment {
      */
     private void updateData(int depId,String depName,List<Department> deptList,List<Member> memberList){
 
-        if(depId == TerminalFactory.getSDK().getParam(Params.DEP_ID,0)){
-            catalogNames.clear();
-            mDatas.clear();
-        }
-        CatalogBean memberCatalogBean = new CatalogBean(depName,depId);
-        catalogNames.add(memberCatalogBean);
+        mDatas.clear();
         if(null != memberList && !memberList.isEmpty()){
 
             //添加成员
@@ -146,6 +141,9 @@ public class NewHandPlatformFragment extends BaseFragment {
             if(mContactAdapter !=null){
                 mContactAdapter.notifyDataSetChanged();
             }
+            if(mCatalogAdapter !=null){
+                mCatalogAdapter.notifyDataSetChanged();
+            }
         });
 
 
@@ -158,26 +156,40 @@ public class NewHandPlatformFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdatePDTMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         mCatalogAdapter.setOnItemClick((view, position) -> {
-            // TODO: 2019/4/15 如果点击的不是上一个会有bug
-            //返回到上一级
-            catalogNames.remove(catalogNames.size()-1);
-            mDatas.clear();
-            mDatas.addAll(lastGroupDatas);
-            if(mContactAdapter !=null){
-                mContactAdapter.notifyDataSetChanged();
+            if(position == catalogNames.size()-2){
+                //返回到上一级
+                catalogNames.remove(catalogNames.size()-1);
+                mDatas.clear();
+                mDatas.addAll(lastGroupDatas);
+                if(mContactAdapter !=null){
+                    mContactAdapter.notifyDataSetChanged();
+                }
+                if(mCatalogAdapter !=null){
+                    mCatalogAdapter.notifyDataSetChanged();
+                }
+                mRecyclerview.scrollToPosition(0);
+            }else {
+                List<CatalogBean> catalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
+                catalogNames.clear();
+                catalogNames.addAll(catalogBeans);
+                TerminalFactory.getSDK().getConfigManager().updatePDTMember(catalogNames.get(position).getId(),catalogNames.get(position).getName());
             }
-            mRecyclerview.scrollToPosition(0);
         });
 
 
         mContactAdapter.setOnItemClickListener((view, depId,depName, type) -> {
             if (type == Constants.TYPE_DEPARTMENT) {
+                CatalogBean memberCatalogBean = new CatalogBean(depName,depId);
+                catalogNames.add(memberCatalogBean);
                 saveLastGroupData();
-                TerminalFactory.getSDK().getConfigManager().updatePoliceMember(depId,depName);
+                TerminalFactory.getSDK().getConfigManager().updatePDTMember(depId,depName);
             }
         });
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
+            catalogNames.clear();
+            CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+            catalogNames.add(memberCatalogBean);
             TerminalFactory.getSDK().getConfigManager().updataPDTMemberInfo();
             myHandler.postDelayed(() -> {
                 // 加载完数据设置为不刷新状态，将下拉进度收起来
@@ -233,6 +245,9 @@ public class NewHandPlatformFragment extends BaseFragment {
             mDatas.addAll(lastGroupDatas);
             if(mContactAdapter !=null){
                 mContactAdapter.notifyDataSetChanged();
+            }
+            if(mCatalogAdapter !=null){
+                mCatalogAdapter.notifyDataSetChanged();
             }
             mRecyclerview.scrollToPosition(0);
 

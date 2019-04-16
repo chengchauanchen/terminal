@@ -9,7 +9,7 @@ import cn.vsx.hamster.terminalsdk.tools.PinYinUtils;
  * Created by XX on 2018/4/11.
  */
 
-public class ContactItemBean<T> implements Comparable<ContactItemBean> {
+public class ContactItemBean<T> implements Comparable<ContactItemBean>,Cloneable {
     private String name;
     private T bean;
     private int type;
