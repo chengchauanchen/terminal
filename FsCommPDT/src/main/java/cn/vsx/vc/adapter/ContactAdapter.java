@@ -3,6 +3,8 @@ package cn.vsx.vc.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -19,6 +21,7 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.RequestDataType;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -30,15 +33,16 @@ import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.activity.VoipPhoneActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
+import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
+import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
 import cn.vsx.vc.utils.CallPhoneUtil;
+import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
-import static cn.vsx.vc.utils.Constants.TYPE_ACCOUNT;
 import static cn.vsx.vc.utils.Constants.TYPE_DEPARTMENT;
-import static cn.vsx.vc.utils.Constants.TYPE_USER;
 
 /**
  * Created by XX on 2018/4/11.
@@ -48,22 +52,33 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     private Context mContext;
     private List<ContactItemBean> mDatas;
+    private long lastSearchTime;
     private static int PC_VOIP = 0;
     private static int PHONE_VOIP = 1;
     private static int TELEPHONE = 2;
-
+    private List<CatalogBean> catalogNames;
     private ItemClickListener listener;
+    private CatalogItemClickListener catalogItemClickListener;
     private boolean isPoliceAffairs;//是否为警务通界面
 
-    public ContactAdapter(Context context, List<ContactItemBean> datas, boolean isPoliceAffairs){
+    public ContactAdapter(Context context, List<ContactItemBean> datas,List<CatalogBean> catalogNames, boolean isPoliceAffairs){
         this.mContext = context;
         this.mDatas = datas;
+        this.catalogNames = catalogNames;
         this.isPoliceAffairs = isPoliceAffairs;
     }
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
-        if(viewType == TYPE_DEPARTMENT){
+        if(viewType == Constants.TYPE_FREQUENT){
+            View view = LayoutInflater.from(mContext).inflate(R.layout.frequent_layout, parent, false);
+            return new FrequentViewHolder(view);
+        }
+        if(viewType == Constants.TYPE_TITLE){
+            View view = LayoutInflater.from(mContext).inflate(R.layout.group_adapter_parent_layout, parent, false);
+            return new TitleViewHolder(view);
+        }
+        if(viewType == Constants.TYPE_DEPARTMENT){
             View view = LayoutInflater.from(mContext).inflate(R.layout.item_department, parent, false);
             return new DepartmentViewHolder(view);
         }else{
@@ -74,7 +89,32 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position){
-        if(getItemViewType(position) == TYPE_DEPARTMENT){
+        if(getItemViewType(position) == Constants.TYPE_TITLE){
+            TitleViewHolder titleViewHolder = (TitleViewHolder)holder;
+            titleViewHolder.iv_search.setVisibility(View.VISIBLE);
+            titleViewHolder.parent_recyclerview.setLayoutManager(new LinearLayoutManager(mContext, OrientationHelper.HORIZONTAL,false));
+
+            GroupCatalogAdapter mCatalogAdapter=new GroupCatalogAdapter(mContext,catalogNames);
+            titleViewHolder.parent_recyclerview.setAdapter(mCatalogAdapter);
+            mCatalogAdapter.setOnItemClick((view, position12) -> {
+                if(catalogItemClickListener !=null){
+                    catalogItemClickListener.onCatalogItemClick(view, position12);
+                }
+            });
+
+            titleViewHolder.iv_search.setOnClickListener(v -> {
+                if(System.currentTimeMillis() - lastSearchTime<1000){
+                    return;
+                }
+                if(isPoliceAffairs){
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class, RequestDataType.PC_CONTACTS_MEMBER_DATA.getCode());
+                }else {
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class,RequestDataType.PC_CONTACTS_PDT_DATA.getCode());
+                }
+                lastSearchTime = System.currentTimeMillis();
+            });
+        }
+        else if(getItemViewType(position) == Constants.TYPE_DEPARTMENT){
             DepartmentViewHolder holder1 = (DepartmentViewHolder) holder;
             Department department = (Department) mDatas.get(position).getBean();
             holder1.tvDepartment.setText(department.getName());
@@ -83,7 +123,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     listener.onItemClick(view,department.getId(),department.getName(),TYPE_DEPARTMENT);
                 }
             });
-        }else if(getItemViewType(position) == TYPE_ACCOUNT){
+        }else if(getItemViewType(position) == Constants.TYPE_ACCOUNT){
             // TODO: 2019/4/15
             UserViewHolder userViewHolder = (UserViewHolder) holder;
             final Account account = (Account) mDatas.get(position).getBean();
@@ -162,7 +202,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 userViewHolder.llDialTo.setVisibility(View.GONE);
                 userViewHolder.llLiveTo.setVisibility(View.GONE);
             }
-        }else if(getItemViewType(position) == TYPE_USER){
+        }else if(getItemViewType(position) == Constants.TYPE_USER){
             UserViewHolder userViewHolder = (UserViewHolder) holder;
             final Member member = (Member) mDatas.get(position).getBean();
             if(!TextUtils.isEmpty(member.getName())){
@@ -222,12 +262,16 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public int getItemViewType(int position){
         ContactItemBean bean = mDatas.get(position);
-        if(bean.getType() == TYPE_ACCOUNT){
-            return TYPE_ACCOUNT;
-        }else if(bean.getType() == TYPE_USER){
-            return TYPE_USER;
-        }else if(bean.getType() == TYPE_DEPARTMENT){
-            return TYPE_DEPARTMENT;
+        if(bean.getType() == Constants.TYPE_FREQUENT){
+            return Constants.TYPE_FREQUENT;
+        }else if(bean.getType() == Constants.TYPE_TITLE){
+            return Constants.TYPE_TITLE;
+        }else if(bean.getType() == Constants.TYPE_ACCOUNT){
+            return Constants.TYPE_ACCOUNT;
+        }else if(bean.getType() == Constants.TYPE_USER){
+            return Constants.TYPE_USER;
+        }else if(bean.getType() == Constants.TYPE_DEPARTMENT){
+            return Constants.TYPE_DEPARTMENT;
         }else{
             return -1;
         }
@@ -274,6 +318,26 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
+    class TitleViewHolder extends RecyclerView.ViewHolder{
+        @Bind(R.id.parent_recyclerview)
+        RecyclerView parent_recyclerview;
+        @Bind(R.id.iv_search)
+        ImageView iv_search;
+
+        TitleViewHolder(View rootView){
+            super(rootView);
+            ButterKnife.bind(this, itemView);
+        }
+    }
+
+    class FrequentViewHolder extends RecyclerView.ViewHolder{
+
+        FrequentViewHolder(View rootView){
+            super(rootView);
+        }
+    }
+
+
     public void setOnItemClickListener(ItemClickListener listener){
         this.listener = listener;
     }
@@ -282,4 +346,11 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         void onItemClick(View view, int depId,String depName, int type);
     }
 
+    public void setCatalogItemClickListener(CatalogItemClickListener catalogItemClickListener){
+        this.catalogItemClickListener = catalogItemClickListener;
+    }
+
+    public interface CatalogItemClickListener{
+        void onCatalogItemClick(View view,int position);
+    }
 }

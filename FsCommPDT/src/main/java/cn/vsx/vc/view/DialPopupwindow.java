@@ -2,7 +2,6 @@ package cn.vsx.vc.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.SoundPool;
@@ -22,28 +21,18 @@ import android.widget.PopupWindow;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
-import cn.vsx.hamster.terminalsdk.model.Member;
-import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAccountHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import cn.vsx.vc.activity.RegistActivity;
-import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.dialog.ProgressDialog;
-import cn.vsx.vc.service.PullLivingService;
-import cn.vsx.vc.service.ReceiveHandlerService;
-import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 

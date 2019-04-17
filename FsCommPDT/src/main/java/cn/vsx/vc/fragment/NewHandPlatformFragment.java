@@ -3,16 +3,12 @@ package cn.vsx.vc.fragment;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
-
-import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
-import butterknife.OnClick;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -23,23 +19,20 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdatePDTMemberHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
-import cn.vsx.vc.adapter.CatalogAdapter;
 import cn.vsx.vc.adapter.ContactAdapter;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
-import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * 电台
  */
 public class NewHandPlatformFragment extends BaseFragment {
 
-    @Bind(R.id.catalog_recyclerview)
-    RecyclerView mCatalogRecyclerview;
+//    @Bind(R.id.catalog_recyclerview)
+//    RecyclerView mCatalogRecyclerview;
     @Bind(R.id.swipeRefreshLayout)
     SwipeRefreshLayout swipeRefreshLayout;
     @Bind(R.id.recyclerview)
@@ -53,7 +46,7 @@ public class NewHandPlatformFragment extends BaseFragment {
     private List<ContactItemBean> mDatas = new ArrayList<>();
 
     private Handler myHandler = new Handler();
-    private CatalogAdapter mCatalogAdapter;//上部分横向
+//    private CatalogAdapter mCatalogAdapter;//上部分横向
     private ContactAdapter mContactAdapter;//下部门竖直
     private List<ContactItemBean> lastGroupDatas=new ArrayList<>();
 
@@ -90,12 +83,12 @@ public class NewHandPlatformFragment extends BaseFragment {
 
     @Override
     public void initView() {
-        mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity(), OrientationHelper.HORIZONTAL, false));
-        mCatalogAdapter = new CatalogAdapter(getActivity(), catalogNames);
-        mCatalogRecyclerview.setAdapter(mCatalogAdapter);
+//        mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity(), OrientationHelper.HORIZONTAL, false));
+//        mCatalogAdapter = new CatalogAdapter(getActivity(), catalogNames);
+//        mCatalogRecyclerview.setAdapter(mCatalogAdapter);
 
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mContactAdapter = new ContactAdapter(getActivity(), mDatas,false);
+        mContactAdapter = new ContactAdapter(getActivity(), mDatas,catalogNames,false);
         mRecyclerview.setAdapter(mContactAdapter);
 
     }
@@ -109,6 +102,8 @@ public class NewHandPlatformFragment extends BaseFragment {
         }
         List<Department> deptList = mMemberResponse.getDeptList();
         List<Member> memberList = mMemberResponse.getMemberDtoList();
+        CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+        catalogNames.add(memberCatalogBean);
         updateData(TerminalFactory.getSDK().getParam(Params.DEP_ID,0),TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),deptList,memberList);
     }
 
@@ -119,6 +114,10 @@ public class NewHandPlatformFragment extends BaseFragment {
     private void updateData(int depId,String depName,List<Department> deptList,List<Member> memberList){
 
         mDatas.clear();
+        ContactItemBean<Object> Title = new ContactItemBean<>();
+        Title.setType(Constants.TYPE_TITLE);
+        Title.setBean(new Object());
+        mDatas.add(Title);
         if(null != memberList && !memberList.isEmpty()){
 
             //添加成员
@@ -141,12 +140,7 @@ public class NewHandPlatformFragment extends BaseFragment {
             if(mContactAdapter !=null){
                 mContactAdapter.notifyDataSetChanged();
             }
-            if(mCatalogAdapter !=null){
-                mCatalogAdapter.notifyDataSetChanged();
-            }
         });
-
-
     }
 
     @Override
@@ -155,7 +149,7 @@ public class NewHandPlatformFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receivegUpdatePDTMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdatePDTMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
-        mCatalogAdapter.setOnItemClick((view, position) -> {
+        mContactAdapter.setCatalogItemClickListener((view, position) -> {
             if(position == catalogNames.size()-2){
                 //返回到上一级
                 catalogNames.remove(catalogNames.size()-1);
@@ -164,9 +158,7 @@ public class NewHandPlatformFragment extends BaseFragment {
                 if(mContactAdapter !=null){
                     mContactAdapter.notifyDataSetChanged();
                 }
-                if(mCatalogAdapter !=null){
-                    mCatalogAdapter.notifyDataSetChanged();
-                }
+
                 mRecyclerview.scrollToPosition(0);
             }else {
                 List<CatalogBean> catalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
@@ -179,9 +171,9 @@ public class NewHandPlatformFragment extends BaseFragment {
 
         mContactAdapter.setOnItemClickListener((view, depId,depName, type) -> {
             if (type == Constants.TYPE_DEPARTMENT) {
+                saveLastGroupData();
                 CatalogBean memberCatalogBean = new CatalogBean(depName,depId);
                 catalogNames.add(memberCatalogBean);
-                saveLastGroupData();
                 TerminalFactory.getSDK().getConfigManager().updatePDTMember(depId,depName);
             }
         });
@@ -207,23 +199,6 @@ public class NewHandPlatformFragment extends BaseFragment {
         }
     }
 
-    private long lastSearchTime;
-    /**
-     * 搜索
-     */
-    @OnClick(R.id.iv_search)
-    public void onViewClicked() {
-        if(System.currentTimeMillis() - lastSearchTime<1000){
-            return;
-        }
-        List<Member> memberList = TerminalFactory.getSDK().getConfigManager().getPDTMembers();
-        if (memberList != null) {
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class, memberList);
-        } else {
-            ToastUtil.showToast(getActivity(), getString(R.string.text_no_radio_users));
-        }
-        lastSearchTime = System.currentTimeMillis();
-    }
 
     @Override
     public void onDestroy() {
@@ -245,9 +220,6 @@ public class NewHandPlatformFragment extends BaseFragment {
             mDatas.addAll(lastGroupDatas);
             if(mContactAdapter !=null){
                 mContactAdapter.notifyDataSetChanged();
-            }
-            if(mCatalogAdapter !=null){
-                mCatalogAdapter.notifyDataSetChanged();
             }
             mRecyclerview.scrollToPosition(0);
 

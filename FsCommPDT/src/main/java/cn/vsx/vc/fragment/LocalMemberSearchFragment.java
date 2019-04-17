@@ -383,4 +383,7 @@ public class LocalMemberSearchFragment extends BaseFragment{
         }
     };
 
+    public void setType(int type){
+
+    }
 }

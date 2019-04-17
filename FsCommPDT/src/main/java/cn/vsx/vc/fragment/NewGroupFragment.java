@@ -6,7 +6,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import butterknife.Bind;
@@ -28,7 +27,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.adapter.GroupAdapter;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.model.GroupCatalogBean;
+import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -60,8 +59,8 @@ public class NewGroupFragment extends BaseFragment{
     //临时组数据
     private List<Group> tempGroup = new ArrayList<>();
 
-    private List<GroupCatalogBean> catalogNames = new ArrayList<>();
-    private List<GroupCatalogBean> tempCatalogNames = new ArrayList<>();
+    private List<CatalogBean> catalogNames = new ArrayList<>();
+    private List<CatalogBean> tempCatalogNames = new ArrayList<>();
     //    private HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
     private boolean tempGroupUpdateCompleted;
     private boolean groupUpdateCompleted;
@@ -182,7 +181,7 @@ public class NewGroupFragment extends BaseFragment{
     public void initData(){
         mActivity = (NewMainActivity) getActivity();
 
-        GroupCatalogBean groupCatalogBean = new GroupCatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+        CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
         catalogNames.add(groupCatalogBean);
         MemberGroupResponse tempGroupResponse = TerminalFactory.getSDK().getConfigManager().getTempGroupResponse();
         if(null != tempGroupResponse){
@@ -203,7 +202,7 @@ public class NewGroupFragment extends BaseFragment{
         if(depId == -1){
             tempGroup.clear();
             tempGroup.addAll(groups);
-            GroupCatalogBean groupCatalogBean = new GroupCatalogBean(depName,depId);
+            CatalogBean groupCatalogBean = new CatalogBean(depName,depId);
             tempCatalogNames.clear();
             tempCatalogNames.add(groupCatalogBean);
             tempGroupDatas.clear();
@@ -224,15 +223,6 @@ public class NewGroupFragment extends BaseFragment{
         }else{
             //请求一个添加一个部门标题
             commonGroupDatas.clear();
-            //先把标题去掉重新添加
-            Iterator<GroupAndDepartment> commonGroupIterator = commonGroupDatas.iterator();
-            while(commonGroupIterator.hasNext()){
-                GroupAndDepartment next = commonGroupIterator.next();
-                if(next.getType() == Constants.TYPE_TITLE){
-                    commonGroupIterator.remove();
-                    break;
-                }
-            }
             //部门标题
             GroupAndDepartment<Object> Title = new GroupAndDepartment<>();
             Title.setType(Constants.TYPE_TITLE);
@@ -275,7 +265,7 @@ public class NewGroupFragment extends BaseFragment{
             catalogNames.clear();
             tempCatalogNames.clear();
 
-            GroupCatalogBean groupCatalogBean = new GroupCatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+            CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
             catalogNames.add(groupCatalogBean);
             TerminalFactory.getSDK().getConfigManager().updateAllGroups();
             myHandler.postDelayed(() -> {
@@ -299,7 +289,7 @@ public class NewGroupFragment extends BaseFragment{
             }else {
                 //重新请求
                 synchronized(NewGroupFragment.this){
-                    List<GroupCatalogBean> groupCatalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
+                    List<CatalogBean> groupCatalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
                     catalogNames.clear();
                     catalogNames.addAll(groupCatalogBeans);
                 }
@@ -310,7 +300,7 @@ public class NewGroupFragment extends BaseFragment{
             saveLastGroupData();
             tempGroupUpdateCompleted = true;
             groupUpdateCompleted = false;
-            GroupCatalogBean groupCatalogBean = new GroupCatalogBean(name,depId);
+            CatalogBean groupCatalogBean = new CatalogBean(name,depId);
             catalogNames.add(groupCatalogBean);
             TerminalFactory.getSDK().getConfigManager().updateGroup(depId,name);
         });

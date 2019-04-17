@@ -118,6 +118,19 @@ public class NewsFragment extends BaseFragment {
     private void saveMessagesToSql(){
         synchronized(NewsFragment.this){
             logger.info("---------保存消息列表---------"+messageList);
+            if(messageList.size()>0){
+                List<TerminalMessage> frequentMember = new ArrayList<>(5);
+                for(int i = 0; i < messageList.size(); i++){
+                    TerminalMessage terminalMessage = messageList.get(i);
+                    if(terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()){
+                        frequentMember.add(terminalMessage);
+                    }
+                }
+                for(TerminalMessage terminalMessage : frequentMember){
+                    TerminalFactory.getSDK().getConfigManager().updateFrequentMember(terminalMessage.messageFromId);
+                }
+            }
+
             MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(messageList);
         }
     }

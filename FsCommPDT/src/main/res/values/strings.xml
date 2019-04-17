@@ -366,7 +366,6 @@
     <string name="text_group_size">(%1$d)</string>
     <string name="text_watch_live_enter_name">%1$s加入</string>
     <string name="text_watch_live_leave_name">%1$s离开</string>
-
     <string name="text_message_list_text_">%1$s:%2$s</string>
     <string name="text_message_list_picture_">%1$s:[图片]</string>
     <string name="text_message_list_voice_">%1$s:[语音]</string>
@@ -529,24 +528,20 @@
     <string name="text_can_not_sound_recorder">禁止录音</string>
     <string name="text_long_press_to_sound_recorder">长按录音</string>
     <string name="text_no_video_push_authority">没有图像推送的权限</string>
-
     <string name="aid">f22eca0ca7eb9ed0022a64e4fff5c34b</string>
     <string name="header">00A40400</string>
     <string name="service_name">service_name</string>
     <string name="card_title">card_title</string>
     <string name="toast_tempt_insufficient_storage_space">存储空间不足</string>
     <string name="toast_tempt_storage_space_is_in_urgent_need">存储空间告急</string>
-
     <string name="force_stop_watch">被踢出观看</string>
     <string name="group_living_number">%1$d人&#160;&#160;正在上报</string>
     <string name="living_list">上报列表</string>
     <string name="living_history">上报历史</string>
     <string name="chat_record">消息记录</string>
-
     <string name="with_draw_content">%1$s撤回了一条消息</string>
     <string name="forwarded">已转发</string>
     <string name="please_choose_use_merge_transmit_message">请选择要合并转发的消息</string>
-
     <string name="choose_devices_to_call">拨打电话</string>
     <string name="choose_devices_to_private_call">拨打个呼</string>
     <string name="choose_devices_to_request_live">请求图像</string>

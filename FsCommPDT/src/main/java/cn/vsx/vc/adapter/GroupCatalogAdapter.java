@@ -11,7 +11,7 @@ import android.widget.TextView;
 import java.util.List;
 
 import cn.vsx.vc.R;
-import cn.vsx.vc.model.GroupCatalogBean;
+import cn.vsx.vc.model.CatalogBean;
 
 /**
  * Created by XX on 2018/4/11.
@@ -19,10 +19,10 @@ import cn.vsx.vc.model.GroupCatalogBean;
 
 public class GroupCatalogAdapter extends RecyclerView.Adapter<GroupCatalogAdapter.MyViewHolder> {
     private Context mContext;
-    private List<GroupCatalogBean> mCatalogs;
+    private List<CatalogBean> mCatalogs;
     private ItemClickListener mItemClickListener;
 
-    public GroupCatalogAdapter(Context context, List<GroupCatalogBean> catalogs) {
+    public GroupCatalogAdapter(Context context, List<CatalogBean> catalogs) {
         this.mContext=context;
         this.mCatalogs=catalogs;
     }

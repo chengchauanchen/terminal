@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -190,31 +188,6 @@ public class DataUtil {
 		}
 
 		return member;
-	}
-
-	/**
-	 * @param memberNo 人员编号
-	 * @return 根据编号查找人员
-	 */
-	public static Account getAccountByMemberNo(int memberNo) {
-		List<Account> list = TerminalFactory.getSDK().getConfigManager().getAllAccount();
-		Account result = null;
-		if (list.size() > 0) {
-			for (Account account: list) {
-				if(account.getNo() == memberNo){
-					result = account;
-					break;
-				}
-			}
-		}
-		if (result == null) {
-			result = TerminalFactory.getSDK().getConfigManager().getAccountByNo(memberNo);
-//			result = new Account();
-//			result.setId(memberNo);
-//			result.setNo(memberNo);
-//			result.setMembers(new ArrayList<>());
-		}
-		return result;
 	}
 
 

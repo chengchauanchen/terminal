@@ -3,41 +3,34 @@ package cn.vsx.vc.fragment;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
-
-import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
-import butterknife.OnClick;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
-import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.NewMemberResponse;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFrequentMemberHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdatePoliceMemberHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
-import cn.vsx.vc.adapter.CatalogAdapter;
 import cn.vsx.vc.adapter.ContactAdapter;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
-import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * 警务通
  */
 public class NewPoliceAffairsFragment extends BaseFragment {
 
-    @Bind(R.id.catalog_recyclerview)
-    RecyclerView mCatalogRecyclerview;
+//    @Bind(R.id.catalog_recyclerview)
+//    RecyclerView mCatalogRecyclerview;
     @Bind(R.id.swipeRefreshLayout)
     SwipeRefreshLayout swipeRefreshLayout;
     @Bind(R.id.recyclerview)
@@ -47,11 +40,28 @@ public class NewPoliceAffairsFragment extends BaseFragment {
     private List<CatalogBean> catalogNames=new ArrayList<>();
 
     private List<ContactItemBean> mDatas=new ArrayList<>();
+    private List<ContactItemBean> allFrequentContacts =new ArrayList<>();
     private List<ContactItemBean> lastGroupDatas=new ArrayList<>();
     private Handler myHandler = new Handler();
-    private CatalogAdapter mCatalogAdapter;
+//    private CatalogAdapter mCatalogAdapter;
     private ContactAdapter mContactAdapter;
 
+    private ReceiveUpdateFrequentMemberHandler receiveUpdateFrequentMemberHandler = new ReceiveUpdateFrequentMemberHandler(){
+        @Override
+        public void handle(){
+            updateFrequentMember();
+        }
+    };
+
+    private void updateFrequentMember(){
+        initFrequentContacts();
+        myHandler.post(() -> {
+            if(mContactAdapter != null){
+                mContactAdapter.notifyDataSetChanged();
+            }
+        });
+
+    }
 
     private ReceivegUpdatePoliceMemberHandler receivegUpdatePoliceMemberHandler = new ReceivegUpdatePoliceMemberHandler(){
         @Override
@@ -67,12 +77,12 @@ public class NewPoliceAffairsFragment extends BaseFragment {
 
     @Override
     public void initView() {
-        mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity(), OrientationHelper.HORIZONTAL,false));
-        mCatalogAdapter=new CatalogAdapter(getActivity(),catalogNames);
-        mCatalogRecyclerview.setAdapter(mCatalogAdapter);
+//        mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity(), OrientationHelper.HORIZONTAL,false));
+//        mCatalogAdapter=new CatalogAdapter(getActivity(),catalogNames);
+//        mCatalogRecyclerview.setAdapter(mCatalogAdapter);
 
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mContactAdapter=new ContactAdapter(getActivity(),mDatas,true);
+        mContactAdapter=new ContactAdapter(getActivity(),mDatas,catalogNames,true);
         mRecyclerview.setAdapter(mContactAdapter);
 
     }
@@ -82,6 +92,7 @@ public class NewPoliceAffairsFragment extends BaseFragment {
         mActivity= (NewMainActivity) getActivity();
         NewMemberResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
         if(null != mMemberResponse){
+            initFrequentContacts();
             CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
             catalogNames.add(memberCatalogBean);
             List<Department> deptList = mMemberResponse.getDeptList();
@@ -90,6 +101,25 @@ public class NewPoliceAffairsFragment extends BaseFragment {
         }
     }
 
+    /**
+     * 添加常用联系人
+     */
+    private void initFrequentContacts(){
+        allFrequentContacts.clear();
+        List<Account> frequentContacts = TerminalFactory.getSDK().getConfigManager().getFrequentContacts();
+        if(frequentContacts != null && !frequentContacts.isEmpty()){
+            ContactItemBean memberCatalogBean = new ContactItemBean();
+            memberCatalogBean.setName("常用联系人");
+            memberCatalogBean.setType(Constants.TYPE_FREQUENT);
+            allFrequentContacts.add(memberCatalogBean);
+            for(Account account : frequentContacts){
+                ContactItemBean<Account> bean = new ContactItemBean<>();
+                bean.setType(Constants.TYPE_ACCOUNT);
+                bean.setBean(account);
+                allFrequentContacts.add(bean);
+            }
+        }
+    }
 
     /**
      * 设置数据
@@ -97,16 +127,14 @@ public class NewPoliceAffairsFragment extends BaseFragment {
     private void updateData(int depId,String depName,List<Department> deptList,List<Account> accountList){
 
         mDatas.clear();
-        //根部门先设置常用联系人
         if(depId == TerminalFactory.getSDK().getParam(Params.DEP_ID,0)){
-            for(Member member : TerminalFactory.getSDK().getConfigManager().getFrequentContacts()){
-                ContactItemBean<Member> bean = new ContactItemBean<>();
-                bean.setType(Constants.TYPE_USER);
-                bean.setBean(member);
-                mDatas.add(bean);
-            }
+            mDatas.addAll(allFrequentContacts);
         }
-
+        //添加标题
+        ContactItemBean<Object> Title = new ContactItemBean<>();
+        Title.setType(Constants.TYPE_TITLE);
+        Title.setBean(new Object());
+        mDatas.add(Title);
         if(null != accountList && !accountList.isEmpty()){
             //添加成员
             for(Account account : accountList){
@@ -128,9 +156,6 @@ public class NewPoliceAffairsFragment extends BaseFragment {
             if(null != mContactAdapter){
                 mContactAdapter.notifyDataSetChanged();
             }
-            if(mCatalogAdapter !=null){
-                mCatalogAdapter.notifyDataSetChanged();
-            }
         });
 
     }
@@ -142,8 +167,9 @@ public class NewPoliceAffairsFragment extends BaseFragment {
     public void initListener() {
 
         MyTerminalFactory.getSDK().registReceiveHandler(receivegUpdatePoliceMemberHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFrequentMemberHandler);
 
-        mCatalogAdapter.setOnItemClick((view, position) -> {
+        mContactAdapter.setCatalogItemClickListener((view, position) -> {
 
             if(position == catalogNames.size()-2){
                 //返回到上一级
@@ -153,9 +179,7 @@ public class NewPoliceAffairsFragment extends BaseFragment {
                 if(mContactAdapter !=null){
                     mContactAdapter.notifyDataSetChanged();
                 }
-                if(mCatalogAdapter !=null){
-                    mCatalogAdapter.notifyDataSetChanged();
-                }
+
                 mRecyclerview.scrollToPosition(0);
             }else {
                 List<CatalogBean> catalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
@@ -176,6 +200,7 @@ public class NewPoliceAffairsFragment extends BaseFragment {
         });
 
         swipeRefreshLayout.setOnRefreshListener(() -> {
+            initFrequentContacts();
             catalogNames.clear();
             CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
             catalogNames.add(memberCatalogBean);
@@ -196,27 +221,11 @@ public class NewPoliceAffairsFragment extends BaseFragment {
         }
     }
 
-    private long lastSearchTime;
-    /**
-     * 搜索
-     */
-    @OnClick(R.id.iv_search)
-    public void onViewClicked() {
-        if(System.currentTimeMillis() - lastSearchTime<1000){
-            return;
-        }
-        List<Member> memberList=TerminalFactory.getSDK().getConfigManager().getPhoneMembers();
-        if (memberList!=null) {
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class, memberList);
-        }else {
-            ToastUtil.showToast(getActivity(),getString(R.string.text_no_general_police_users));
-        }
-        lastSearchTime = System.currentTimeMillis();
-    }
 
     @Override
     public void onDestroy() {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivegUpdatePoliceMemberHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateFrequentMemberHandler);
         super.onDestroy();
     }
 
@@ -231,9 +240,6 @@ public class NewPoliceAffairsFragment extends BaseFragment {
            mDatas.addAll(lastGroupDatas);
            if(mContactAdapter !=null){
                mContactAdapter.notifyDataSetChanged();
-           }
-           if(mCatalogAdapter !=null){
-               mCatalogAdapter.notifyDataSetChanged();
            }
            mRecyclerview.scrollToPosition(0);
 

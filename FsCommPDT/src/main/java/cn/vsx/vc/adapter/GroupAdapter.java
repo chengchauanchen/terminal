@@ -27,7 +27,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.model.GroupCatalogBean;
+import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -49,15 +49,15 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     private List<Group>tempGroup = new ArrayList<>();
 
     //上面标题数据
-    private List<GroupCatalogBean> mTempCatalogList=new ArrayList<>();
-    private List<GroupCatalogBean> mCatalogList=new ArrayList<>();
+    private List<CatalogBean> mTempCatalogList=new ArrayList<>();
+    private List<CatalogBean> mCatalogList=new ArrayList<>();
 
     private CatalogItemClickListener catalogItemClickListener;
     private FolderClickListener folderClickListener;
     private long lastSearchTime;
     public GroupAdapter(Context context,List<GroupAndDepartment>allGroupAndDepartment,
-                        List<Group>tempGroup,List<GroupCatalogBean> mTempCatalogList,
-                        List<GroupCatalogBean> mCatalogList){
+                        List<Group>tempGroup,List<CatalogBean> mTempCatalogList,
+                        List<CatalogBean> mCatalogList){
         this.context = context;
         this.allGroupAndDepartment = allGroupAndDepartment;
         this.tempGroup = tempGroup;

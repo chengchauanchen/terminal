@@ -29,6 +29,7 @@ public class Constants{
     public final static int TYPE_DEPARTMENT=103;
     public final static int TYPE_USER=104;
     public final static int TYPE_ACCOUNT=105;
+    public final static int TYPE_FREQUENT=106;
 
     public final static int FORCE_KILL = 0;
     public final static int LOGINED = 1;

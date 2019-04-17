@@ -45,7 +45,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -68,10 +67,8 @@ import java.util.TimerTask;
 import butterknife.Bind;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
-import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.StopGroupCallReason;
-import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -395,9 +392,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     /**  弹出好友列表的搜索fragment **/
     private ReceiverShowPersonFragmentHandler mReceiverShowPersonFragmentHandler = new ReceiverShowPersonFragmentHandler() {
         @Override
-        public void handler(List<Member> memberList) {
+        public void handler(int type) {
             LocalMemberSearchFragment localMemberSearchFragment = new LocalMemberSearchFragment();
-            localMemberSearchFragment.setMemberList(memberList);
+//            localMemberSearchFragment.setMemberList(memberList);
+            localMemberSearchFragment.setType(type);
             fl_fragment_container_main.setVisibility(View.VISIBLE);
             getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, localMemberSearchFragment).commit();
             myHandler.postDelayed(() -> ll_content.setVisibility(View.GONE),500);

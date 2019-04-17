@@ -1,8 +1,5 @@
 package cn.vsx.vc.receiveHandle;
 
-import java.util.List;
-
-import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 
 /**
@@ -11,5 +8,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverShowPersonFragmentHandler extends ReceiveHandler {
-    void handler(List<Member> memberList);
+    void handler(int type);
 }
