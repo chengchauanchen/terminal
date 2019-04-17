@@ -525,6 +525,7 @@
     <string name="text_go_to_setting_open_camera_authority">请前往设置打开相机权限</string>
     <string name="text_no_set_sweep_group_authority">没有设置扫描组权限</string>
     <string name="text_has_no_personal_call_authority">没有个呼权限</string>
+    <string name="text_has_no_found_this_user">没有找到该成员</string>
     <string name="text_can_not_sound_recorder">禁止录音</string>
     <string name="text_long_press_to_sound_recorder">长按录音</string>
     <string name="text_no_video_push_authority">没有图像推送的权限</string>
