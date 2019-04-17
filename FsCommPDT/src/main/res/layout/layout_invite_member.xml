@@ -10,6 +10,6 @@
     <include layout="@layout/layout_search_member"
         android:id="@+id/ll_search_member"/>
     <!--上报选择 -->
-    <include layout="@layout/live_select_member"
+    <include layout="@layout/live_select_member_new"
         android:id="@+id/live_select_member"/>
 </FrameLayout>

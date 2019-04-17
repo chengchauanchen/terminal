@@ -210,7 +210,7 @@ public class UserInfoActivity extends BaseActivity {
             return;
         }
         long liveUniqueNo = 0l;
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member,liveUniqueNo);
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
     }
 
     private void pushVideo() {
@@ -253,7 +253,7 @@ public class UserInfoActivity extends BaseActivity {
 //                    long uniqueNo = 0l;
 //                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
 //                }).show();
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,0l);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
             }else {
                 ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_get_personal_info_fail));
             }

@@ -455,7 +455,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
             timerTaskLock = new TimerTask() {
                 @Override
                 public void run() {
-                    MyTerminalFactory.getSDK().getTempGroupManager().createTempGroup(forceSwitchGroup,temporaryGroupsName,list,existTime, finalIslock,lockedTime);
+//                    MyTerminalFactory.getSDK().getTempGroupManager().createTempGroup(forceSwitchGroup,temporaryGroupsName,list,existTime, finalIslock,lockedTime);
                 }
             };
             MyTerminalFactory.getSDK().getTimer().schedule(timerTaskLock, 2000);

@@ -52,7 +52,7 @@
             android:id="@+id/shoutai_dial_to"
             android:layout_width="@dimen/dp_45"
             android:layout_height="@dimen/dp_45"
-            android:layout_marginRight="@dimen/dp_10"
+            android:layout_marginRight="@dimen/dp_2"
             android:gravity="center">
 
             <ImageView
@@ -66,7 +66,7 @@
             android:id="@+id/shoutai_message_to"
             android:layout_width="@dimen/dp_45"
             android:layout_height="@dimen/dp_45"
-            android:layout_marginRight="@dimen/dp_10"
+            android:layout_marginRight="@dimen/dp_2"
             android:gravity="center">
 
             <ImageView
@@ -80,7 +80,7 @@
             android:id="@+id/shoutai_live_to"
             android:layout_width="@dimen/dp_45"
             android:layout_height="@dimen/dp_45"
-            android:layout_marginRight="@dimen/dp_10"
+            android:layout_marginRight="@dimen/dp_2"
             android:gravity="center">
 
             <ImageView

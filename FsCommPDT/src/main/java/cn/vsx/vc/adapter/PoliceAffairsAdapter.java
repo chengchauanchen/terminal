@@ -184,7 +184,7 @@ public class PoliceAffairsAdapter extends BaseExpandableListAdapter {
 //                    long uniqueNo = 0l;
 //                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
 //                }).show();
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, list.get(groupPosition).memberList.get(childPosition),0l);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, list.get(groupPosition).memberList.get(childPosition));
 
             }
         } else {

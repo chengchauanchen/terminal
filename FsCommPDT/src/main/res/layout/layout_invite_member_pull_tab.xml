@@ -23,7 +23,7 @@
                 android:layout_height="match_parent"
                 android:layout_gravity="center"
                 android:text="@string/text_pc"
-                android:textSize="@dimen/sp_17"
+                android:textSize="@dimen/sp_14"
                 android:textColor="@color/contacts_line_blue"/>
         </LinearLayout>
 
@@ -64,7 +64,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/text_police_service"
-                android:textSize="@dimen/sp_17"
+                android:textSize="@dimen/sp_14"
                 android:textColor="@color/chat_title"/>
         </LinearLayout>
 
@@ -106,7 +106,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/text_uav"
-                android:textSize="@dimen/sp_17"
+                android:textSize="@dimen/sp_14"
                 android:textColor="@color/chat_title"/>
         </LinearLayout>
 
@@ -148,7 +148,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="@string/text_recoder"
-                android:textSize="@dimen/sp_17"
+                android:textSize="@dimen/sp_14"
                 android:textColor="@color/chat_title"/>
         </LinearLayout>
 

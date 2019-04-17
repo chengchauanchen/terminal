@@ -256,6 +256,7 @@
     <string name="text_connectivity_test">连通效验</string>
     <string name="text_no_more_data">没有更多数据了！</string>
     <string name="text_recording_telephone">录音电话</string>
+    <string name="text_normal_telephone">普通电话</string>
     <string name="text_delete">删除</string>
     <string name="text_enter_and_watch">进入观看</string>
     <string name="text_switch_to_session_mode">切换到会话模式</string>
@@ -548,10 +549,12 @@
     <string name="choose_devices_to_call">拨打电话</string>
     <string name="choose_devices_to_private_call">拨打个呼</string>
     <string name="choose_devices_to_request_live">请求图像</string>
+    <string name="choose_devices_to_push_live">上报图像</string>
     <string name="is_not_support_nfc">您的设备不支持NFC功能</string>
     <string name="is_not_open_nfc">请打开NFC开关</string>
     <string name="nfc_binding">NFC绑定</string>
     <string name="binding_success">绑定成功</string>
     <string name="binding_success_tempt">8小时自动解绑</string>
     <string name="binding_nfc_tempt">请将警务通贴紧需要绑定的设备</string>
+    <string name="no_use_devices">没有可选择的设备</string>
 </resources>

@@ -3,7 +3,6 @@ package cn.vsx.vc.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -28,8 +27,11 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.UserInfoActivity;
+import cn.vsx.vc.activity.VoipPhoneActivity;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -91,30 +93,20 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             userViewHolder.tvId.setText(account.getNo() + "");
             userViewHolder.llDialTo.setOnClickListener(view -> {
                 if(!TextUtils.isEmpty(account.getPhone())){
-                    //                    List<Member> list = new ArrayList<>();
-                    //                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, list, (view1, position12) -> { long uniqueNo = 0l;
-                    //                     activeIndividualCall(member,uniqueNo);
-                    //                    }).show();
-                    ItemAdapter adapter = new ItemAdapter(mContext, ItemAdapter.iniDatas());
-                    AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                    //设置标题
-                    builder.setTitle("拨打电话");
-                    builder.setAdapter(adapter, (dialogInterface, position1) -> {
-                        if(position1 == PC_VOIP){//voip电话
-                            //                            if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
-                            //                                Intent intent = new Intent(mContext, VoipPhoneActivity.class);
-                            //                                intent.putExtra("member",member);
-                            //                                mContext.startActivity(intent);
-                            //                            }else {
-                            //                                ToastUtil.showToast(mContext,mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
-                            //                            }
-                        }else if(position == PHONE_VOIP){
-                        }else if(position1 == TELEPHONE){//普通电话
+                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account.getMembers(), (member) -> {
+                        if(member.getUniqueNo() == 0){
+                            //普通电话
                             CallPhoneUtil.callPhone((Activity) mContext, account.getPhone());
+                        }else{
+                            if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
+                                Intent intent = new Intent(mContext, VoipPhoneActivity.class);
+                                intent.putExtra("member",member);
+                                mContext.startActivity(intent);
+                            }else {
+                                ToastUtil.showToast(mContext,mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
+                            }
                         }
-                    });
-                    builder.create();
-                    builder.show();
+                    }).showDialog();
                 }else{
                     ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_member_phone_number));
                 }
@@ -125,7 +117,20 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
                 }else{
                     // TODO: 2019/4/15弹窗拨打个呼
-                    //                    activeIndividualCall(member);
+                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account.getMembers(), (member) -> {
+                        activeIndividualCall(member);
+                    }).showDialog();
+                }
+            });
+            //请求图像
+            userViewHolder.llLiveTo.setOnClickListener(view -> {
+                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
+                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
+                }else{
+                    // TODO: 2019/4/15弹窗请求图像
+                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_PULL_LIVE, account.getMembers(), (member) -> {
+                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
+                    }).showDialog();
                 }
             });
             //个人信息页面
@@ -166,7 +171,15 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
                     ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
                 }else{
-                    activeIndividualCall(member, member.getUniqueNo());
+                    activeIndividualCall(member);
+                }
+            });
+            //请求图像
+            userViewHolder.llLiveTo.setOnClickListener(view -> {
+                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
+                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
+                }else{
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
                 }
             });
             //个人信息页面
@@ -217,11 +230,11 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-    private void activeIndividualCall(Member member, long uniqueNo){
+    private void activeIndividualCall(Member member){
         MyApplication.instance.isCallState = true;
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if(network){
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member, uniqueNo);
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
         }else{
             ToastUtil.showToast(mContext, mContext.getString(R.string.text_network_connection_abnormal_please_check_the_network));
         }
@@ -265,4 +278,5 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public interface ItemClickListener{
         void onItemClick(View view, int depId,String depName, int type);
     }
+
 }

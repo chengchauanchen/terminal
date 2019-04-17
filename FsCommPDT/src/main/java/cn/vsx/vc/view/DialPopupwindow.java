@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.vc.R;
@@ -124,11 +126,9 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                     dismiss();
                     return;
                 }
-                Member member = DataUtil.getMemberByMemberNo(callId);
-                List<Member> list = new ArrayList<>();
-                new ChooseDevicesDialog(context,ChooseDevicesDialog.TYPE_CALL_PRIVATE, list, (view1, position12) -> {
-                    long uniqueNo = 0l;
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
+                Account account = DataUtil.getAccountByMemberNo(callId);
+                new ChooseDevicesDialog(context,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account.getMembers(), (member) -> {
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
                 }).show();
 
             } catch (NumberFormatException e) {
