@@ -54,7 +54,7 @@ public class ChooseDevicesDialog extends Dialog {
         rvList = findViewById(R.id.rv_list);
 
         textTitle.setText(getDialogTitle(type));
-        adapter = new ChooseDevicesAdapter(this.getContext(), list, mItemClickListener, (type == TYPE_CALL_PHONE));
+        adapter = new ChooseDevicesAdapter(this.getContext(),this, list, mItemClickListener, (type == TYPE_CALL_PHONE));
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this.getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rvList.setLayoutManager(linearLayoutManager);
@@ -196,7 +196,8 @@ public class ChooseDevicesDialog extends Dialog {
         if (list != null && !list.isEmpty()) {
             for (Member member : list) {
                 if (member.type != TerminalMemberType.TERMINAL_HDMI.getCode() &&
-                        member.type != TerminalMemberType.TERMINAL_PDT.getCode()) {
+                        member.type != TerminalMemberType.TERMINAL_PDT.getCode()&&
+                        member.type != TerminalMemberType.TERMINAL_PC.getCode()) {
                     result.add(member);
                 }
             }

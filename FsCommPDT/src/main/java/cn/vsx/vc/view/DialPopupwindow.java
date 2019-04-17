@@ -131,8 +131,9 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                     ToastUtil.showToast(context,context.getString(R.string.text_has_no_found_this_user));
                     return;
                 }
-                new ChooseDevicesDialog(context,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account.getMembers(), (member) -> {
+                new ChooseDevicesDialog(context,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account.getMembers(), (dialog,member) -> {
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+                    dialog.dismiss();
                 }).show();
 
             } catch (NumberFormatException e) {

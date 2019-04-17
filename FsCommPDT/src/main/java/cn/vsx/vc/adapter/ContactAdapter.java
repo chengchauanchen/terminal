@@ -93,7 +93,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             userViewHolder.tvId.setText(account.getNo() + "");
             userViewHolder.llDialTo.setOnClickListener(view -> {
                 if(!TextUtils.isEmpty(account.getPhone())){
-                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account.getMembers(), (member) -> {
+                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account.getMembers(), (dialog,member) -> {
                         if(member.getUniqueNo() == 0){
                             //普通电话
                             CallPhoneUtil.callPhone((Activity) mContext, account.getPhone());
@@ -106,6 +106,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                                 ToastUtil.showToast(mContext,mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
                             }
                         }
+                        dialog.dismiss();
                     }).showDialog();
                 }else{
                     ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_member_phone_number));
@@ -117,19 +118,21 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
                 }else{
                     // TODO: 2019/4/15弹窗拨打个呼
-                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account.getMembers(), (member) -> {
+                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account.getMembers(), (dialog,member) -> {
                         activeIndividualCall(member);
+                        dialog.dismiss();
                     }).showDialog();
                 }
             });
             //请求图像
             userViewHolder.llLiveTo.setOnClickListener(view -> {
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
-                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
+                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
                 }else{
                     // TODO: 2019/4/15弹窗请求图像
-                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_PULL_LIVE, account.getMembers(), (member) -> {
+                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_PULL_LIVE, account.getMembers(), (dialog,member) -> {
                         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
+                        dialog.dismiss();
                     }).showDialog();
                 }
             });

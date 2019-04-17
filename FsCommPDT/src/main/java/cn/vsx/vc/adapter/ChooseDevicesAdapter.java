@@ -15,6 +15,7 @@ import java.util.List;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
+import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.model.CatalogBean;
 
 /**
@@ -24,14 +25,16 @@ import cn.vsx.vc.model.CatalogBean;
 public class ChooseDevicesAdapter extends RecyclerView.Adapter<ChooseDevicesAdapter.MyViewHolder> {
     private Context mContext;
     private List<Member> list;
+    private ChooseDevicesDialog dialog;
     private ItemClickListener mItemClickListener;
 
     //是否是打电话
     private boolean isCallPhone ;
 
-    public ChooseDevicesAdapter(Context context, List<Member> list, ItemClickListener mItemClickListener,boolean isCallPhone) {
+    public ChooseDevicesAdapter(Context context, ChooseDevicesDialog dialog, List<Member> list, ItemClickListener mItemClickListener, boolean isCallPhone) {
         this.mContext = context;
         this.list = list;
+        this.dialog = dialog;
         this.mItemClickListener = mItemClickListener;
         this.isCallPhone = isCallPhone;
     }
@@ -55,7 +58,7 @@ public class ChooseDevicesAdapter extends RecyclerView.Adapter<ChooseDevicesAdap
             }
             holder.llAll.setOnClickListener(view -> {
                 if (mItemClickListener != null) {
-                    mItemClickListener.onItemClick(list.get(position));
+                    mItemClickListener.onItemClick(dialog,list.get(position));
                 }
             });
         }
@@ -67,7 +70,7 @@ public class ChooseDevicesAdapter extends RecyclerView.Adapter<ChooseDevicesAdap
     }
 
     public interface ItemClickListener {
-        void onItemClick(Member member);
+        void onItemClick( ChooseDevicesDialog dialog,Member member);
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {
@@ -100,36 +103,20 @@ public class ChooseDevicesAdapter extends RecyclerView.Adapter<ChooseDevicesAdap
         }
     }
 
+    /**
+     * 根据类型获取类型名称
+     * @param type
+     * @return
+     */
     private String getTypeName(int type) {
-        if (type == TerminalMemberType.TERMINAL_PC.getCode()) {
-            return subName(TerminalMemberType.TERMINAL_PC.getValue());
-        } else if (type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()) {
-            return subName(TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getValue());
-        } else if (type == TerminalMemberType.TERMINAL_UAV.getCode()) {
-            return subName(TerminalMemberType.TERMINAL_UAV.getValue());
-        } else if (type == TerminalMemberType.TERMINAL_PHONE.getCode()) {
-            return subName(TerminalMemberType.TERMINAL_PHONE.getValue());
-        } else if (type == TerminalMemberType.TERMINAL_TETRA.getCode()) {
-            return subName(TerminalMemberType.TERMINAL_TETRA.getValue());
-        } else if (type == TerminalMemberType.TERMINAL_PAD.getCode()) {
-            return subName(TerminalMemberType.TERMINAL_PAD.getValue());
-        } else if (type == TerminalMemberType.TERMINAL_HDMI.getCode()) {
-            return subName(TerminalMemberType.TERMINAL_HDMI.getValue());
-        } else if (type == TerminalMemberType.TERMINAL_PDT.getCode()) {
-            return subName(TerminalMemberType.TERMINAL_PDT.getValue());
-        } else if (type == TerminalMemberType.TERMINAL_SUPER.getCode()) {
-            return subName(TerminalMemberType.TERMINAL_SUPER.getValue());
-        } else if (type == TerminalMemberType.TERMINAL_PROXY.getCode()) {
-            return subName(TerminalMemberType.TERMINAL_PROXY.getValue());
-        } else if (type == TerminalMemberType.TERMINAL_LTE.getCode()) {
-            return subName(TerminalMemberType.TERMINAL_LTE.getValue());
-        } else if (type == TerminalMemberType.TERMINAL_TEST.getCode()) {
-            return subName(TerminalMemberType.TERMINAL_TEST.getValue());
-        } else {
-            return subName(TerminalMemberType.TERMINAL_PHONE.getValue());
-        }
+        return subName(TerminalMemberType.getInstanceByCode(type).getValue());
     }
 
+    /**
+     * 截取类型名称
+     * @param name
+     * @return
+     */
     private String  subName(String name){
         if(!TextUtils.isEmpty(name)){
             String content = mContext.getString(R.string.text_terminal);
