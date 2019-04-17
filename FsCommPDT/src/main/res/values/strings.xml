@@ -558,4 +558,6 @@
     <string name="binding_success_tempt">8小时自动解绑</string>
     <string name="binding_nfc_tempt">请将警务通贴紧需要绑定的设备</string>
     <string name="no_use_devices">没有可选择的设备</string>
+    <string name="get_data_now">正在获取数据...</string>
+    <string name="please_input_other_no">请输入他人的编号</string>
 </resources>

@@ -61,6 +61,7 @@ import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAccountHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
@@ -79,6 +80,7 @@ import cn.vsx.vc.activity.LiveHistoryActivity;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.adapter.StackViewAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
@@ -118,6 +120,8 @@ public class ReceiveHandlerService extends Service{
     private List<TerminalMessage> data = new ArrayList<>();
     //记录紧急观看的CallId，防止PC端重复发送强制观看的消息
     private String emergencyCallId ;
+
+    private ProgressDialog myProgressDialog;
 
     //弹窗
     @Bind(R.id.swipeFlingAdapterView)
@@ -197,12 +201,18 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);//请求开视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverActivePushVideoHandler);//上报视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoHandler);//请求视频
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveGetAccountHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         //开启voip电话服务
         MyTerminalFactory.getSDK().getVoipCallManager().startService(MyTerminalFactory.getSDK().application);
         //监听voip来电
         MyTerminalFactory.getSDK().getVoipCallManager().addCallback(voipRegistrationCallback,voipPhoneCallback);
+
+        if (myProgressDialog == null) {
+            myProgressDialog = new ProgressDialog(MyApplication.instance.getApplicationContext());
+            myProgressDialog.setCancelable(true);
+        }
     }
 
     @Override
@@ -425,6 +435,7 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoHandler);
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveGetAccountHandler);
 
         removeView();
         return super.onUnbind(intent);
@@ -896,6 +907,18 @@ public class ReceiveHandlerService extends Service{
                 ToastUtil.livingFailToast(ReceiveHandlerService.this, requestCode, TerminalErrorCode.LIVING_REQUEST.getErrorCode());
             }
         }
+    };
+
+    /**
+     * 获取Account数据
+     */
+    private ReceiveGetAccountHandler receiveGetAccountHandler = (member) -> {
+//        myHandler.post(() -> {
+//            if(myProgressDialog!=null){
+//                myProgressDialog.setMsg(MyApplication.instance.getApplicationContext().getString(R.string.get_data_now));
+//                myProgressDialog.show();
+//            }
+//        });
     };
 
 

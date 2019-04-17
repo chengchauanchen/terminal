@@ -2,9 +2,12 @@ package cn.vsx.vc.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.SoundPool;
+import android.os.Handler;
+import android.os.Message;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
@@ -28,9 +31,18 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAccountHandler;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.RegistActivity;
+import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
+import cn.vsx.vc.dialog.ProgressDialog;
+import cn.vsx.vc.service.PullLivingService;
+import cn.vsx.vc.service.ReceiveHandlerService;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -39,7 +51,7 @@ import ptt.terminalsdk.tools.ToastUtil;
  * Created by weishixin on 2017/12/14.
  */
 
-public class DialPopupwindow extends PopupWindow implements View.OnClickListener {
+public class DialPopupwindow extends PopupWindow implements View.OnClickListener, PopupWindow.OnDismissListener {
 
     private View mPopView;
     private EditText phone;
@@ -47,6 +59,17 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
     private SoundPool spool;
     private AudioManager am = null;
     private String str="";
+    private ProgressDialog myProgressDialog;
+    private Handler myHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg){
+            super.handleMessage(msg);
+            switch(msg.what){
+                default:
+                    break;
+            }
+        }
+    };
 
     public DialPopupwindow(Context context) {
         super(context);
@@ -126,16 +149,30 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                     dismiss();
                     return;
                 }
-                Account account = DataUtil.getAccountByMemberNo(callId);
-                if(account == null){
-                    ToastUtil.showToast(context,context.getString(R.string.text_has_no_found_this_user));
+                if(callId == TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
+                    ToastUtil.showToast(context,context.getString(R.string.please_input_other_no));
                     return;
                 }
-                new ChooseDevicesDialog(context,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account.getMembers(), (dialog,member) -> {
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
-                    dialog.dismiss();
-                }).show();
-
+                if(myProgressDialog!=null){
+                    myProgressDialog.setMsg(context.getString(R.string.get_data_now));
+                    myProgressDialog.show();
+                }
+                TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                    Account account = DataUtil.getAccountByMemberNo(callId);
+                    myHandler.post(() -> {
+                        if(myProgressDialog!=null){
+                            myProgressDialog.dismiss();
+                        }
+                        if(account == null){
+                         ToastUtil.showToast(context,context.getString(R.string.text_has_no_found_this_user));
+                         return;
+                         }
+                        new ChooseDevicesDialog(context,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account.getMembers(), (dialog,member) -> {
+                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+                        dialog.dismiss();
+                         }).show();
+                    });
+                });
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
@@ -143,6 +180,11 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
             dismiss();
         });
         btDiss.setOnClickListener(view -> dismiss());
+
+        if (myProgressDialog == null) {
+            myProgressDialog = new ProgressDialog(context);
+            myProgressDialog.setCancelable(true);
+        }
 
     }
 
@@ -157,6 +199,7 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
         this.setFocusable(true);// 设置弹出窗口可
         this.setAnimationStyle(R.style.mypopwindow_anim_style);// 设置动画
         this.setBackgroundDrawable(new ColorDrawable(0x00000000));// 设置背景透明
+        this.setOnDismissListener(this);
 //        mPopView.setOnTouchListener(new View.OnTouchListener() {// 如果触摸位置在窗口外面则销毁
 //
 //            @Override
@@ -283,5 +326,10 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
 //		Uri uri = Uri.parse("tel:" + phone);
 //		Intent it = new Intent(Intent.ACTION_CALL, uri);
 //		startActivity(it);
+    }
+
+    @Override
+    public void onDismiss() {
+        myHandler.removeCallbacksAndMessages(null);
     }
 }

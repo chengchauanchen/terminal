@@ -207,13 +207,13 @@ public class DataUtil {
 				}
 			}
 		}
-
-//		if (result == null) {
+		if (result == null) {
+			result = TerminalFactory.getSDK().getConfigManager().getAccountByNo(memberNo);
 //			result = new Account();
 //			result.setId(memberNo);
 //			result.setNo(memberNo);
 //			result.setMembers(new ArrayList<>());
-//		}
+		}
 		return result;
 	}
 
