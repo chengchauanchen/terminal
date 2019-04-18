@@ -174,7 +174,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 //平台
                 if (MyTerminalFactory.getSDK().getParam(Params.POLICE_STORE_APK,false)) {
                     if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                        login();
+                        changeProgressMsg("正在登入...");
+//                        login();
                     }
                     else if(resultCode ==TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()){
                         AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this)
@@ -205,7 +206,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                         if (isRegisted) {//卸载后重装，应该显示注册过了,直接去登录
                             ll_regist.setVisibility(View.GONE);
-                            login();
+                            changeProgressMsg("正在登入...");
+//                            login();
                         } else {//没注册
                             MyTerminalFactory.getSDK().putParam(Params.MESSAGE_VERSION, 0l);
                             if (availableIPlist.size() < 1) {
@@ -275,7 +277,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private ReceiveRegistCompleteHandler receiveRegistCompleteHandler = (errorCode, errorDesc) -> myHandler.post(() -> {
         if (errorCode == BaseCommonCode.SUCCESS_CODE) {//注册成功，直接登录
             logger.info("注册完成的回调----注册成功，直接登录");
-            login();
+            changeProgressMsg("正在登入...");
+//            login();
         } else {//注册失败，提示并关界面
             if (errorCode == TerminalErrorCode.REGISTER_PARAMETER_ERROR.getErrorCode()) {
                 changeProgressMsg(getString(R.string.text_invitation_code_wrong_please_regist_again));
