@@ -16,6 +16,7 @@ import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowForwardMoreHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowWithDrawPopupHandler;
+import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
@@ -53,7 +54,7 @@ public class TranspondDialog  extends Dialog {
         if(terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode()){
             tv_forward.setVisibility(View.GONE);
         }
-        //只有自己才撤回，并且是五分钟之内的消息
+        //只有自己才撤回，并且是两分钟之内的消息
         if(terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)&&
                 isShowWithDrawBySendTime(terminalMessage.sendTime)){
             tv_withdraw.setVisibility(View.VISIBLE);
@@ -79,7 +80,11 @@ public class TranspondDialog  extends Dialog {
         });
         //撤回
         tv_withdraw.setOnClickListener(v -> {
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowWithDrawPopupHandler.class,terminalMessage);
+            if(isShowWithDrawBySendTime(terminalMessage.sendTime)){
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowWithDrawPopupHandler.class,terminalMessage);
+            }else{
+                ToastUtil.showToast(getContext(),"只能撤销"+WITH_DRAW_TIME+"分钟之内发送的消息");
+            }
             dismiss();
         });
         //合并转发

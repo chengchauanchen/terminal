@@ -27,6 +27,7 @@ import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.IndividualNewsActivity;
@@ -43,6 +44,7 @@ import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
+import static cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMember;
 import static cn.vsx.vc.utils.Constants.TYPE_DEPARTMENT;
 
 /**
@@ -54,9 +56,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private Context mContext;
     private List<ContactItemBean> mDatas;
     private long lastSearchTime;
-    private static int PC_VOIP = 0;
-    private static int PHONE_VOIP = 1;
-    private static int TELEPHONE = 2;
     private List<CatalogBean> catalogNames;
     private ItemClickListener listener;
     private CatalogItemClickListener catalogItemClickListener;
@@ -133,7 +132,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
             userViewHolder.tvId.setText(account.getNo() + "");
             userViewHolder.llDialTo.setOnClickListener(view -> {
-//                if(!TextUtils.isEmpty(account.getPhone())){
                     new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog,member) -> {
                         if(member.getUniqueNo() == 0){
                             //普通电话
@@ -149,9 +147,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         }
                         dialog.dismiss();
                     }).showDialog();
-//                }else{
-//                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_member_phone_number));
-//                }
             });
             userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, account.getNo(), account.getName()));
             userViewHolder.llCallTo.setOnClickListener(view -> {
@@ -211,7 +206,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
             userViewHolder.tvId.setText(member.getNo() + "");
             userViewHolder.llDialTo.setOnClickListener(view -> {
-                Account account = getAccountByMember(member);
+                Account account = DataUtil.getAccountByMember(member);
                 new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog,member1) -> {
                     if(member1.getUniqueNo() == 0){
                         //普通电话
@@ -271,24 +266,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 userViewHolder.llLiveTo.setVisibility(View.GONE);
             }
         }
-    }
-
-    /**
-     * 通过member创建Account
-     * @param member
-     * @return
-     */
-    private Account getAccountByMember(Member member) {
-        Account account = new Account();
-        account.setId(member.getId());
-        account.setDeptId(member.getDeptId());
-        account.setName(member.getName());
-        account.setNo(member.getNo());
-        account.setPhone(member.getPhone());
-        List<Member> members = new ArrayList<>();
-        members.add(member);
-        account.setMembers(members);
-        return account;
     }
 
     @Override

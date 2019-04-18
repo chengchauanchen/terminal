@@ -1314,7 +1314,7 @@ public class NewsFragment extends BaseFragment {
      **/
     private ReceiveResponseRecallRecordHandler mReceiveResponseRecallRecordHandler = (resultCode, resultDesc, messageId) -> {
         if(resultCode == 0){
-            updataMessageWithDrawState(messageId,false);
+            updataMessageWithDrawState(messageId);
         }
     };
 
@@ -1322,14 +1322,14 @@ public class NewsFragment extends BaseFragment {
      * 收到别人撤回消息的通知
      **/
     private ReceiveNotifyRecallRecordHandler mNotifyRecallRecordMessageHandler = (version, messageId) -> {
-         updataMessageWithDrawState(messageId,true);
+         updataMessageWithDrawState(messageId);
     };
 
     /**
      * 更新消息的撤回状态
      * @param messageId
      */
-    private void updataMessageWithDrawState(long messageId,boolean saveSqlite){
+    private void updataMessageWithDrawState(long messageId){
         TerminalMessage message = new TerminalMessage();
         message.messageId = messageId;
         if(messageList.contains(message)){
@@ -1342,11 +1342,9 @@ public class NewsFragment extends BaseFragment {
                     mMessageListAdapter.notifyDataSetChanged();
                 }
             });
-            //更新数据库
-            if(saveSqlite){
-                TerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessageWithDraw(message);
-            }
         }
+        //更新消息的撤回状态
+        TerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessageWithDraw(messageId,true);
     }
 
     /**

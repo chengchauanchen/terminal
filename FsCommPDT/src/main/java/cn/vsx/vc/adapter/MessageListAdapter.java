@@ -305,7 +305,11 @@ public class MessageListAdapter extends BaseAdapter {
             }
             //消息撤回
             if(terminalMessage.isWithDraw){
-                viewHolder.tv_last_msg.setText(R.string.text_message_list_with_draw);
+                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_with_draw_),terminalMessage.messageFromName));
+                }else{
+                    viewHolder.tv_last_msg.setText(R.string.text_message_list_with_draw);
+                }
             }
         }
     }
