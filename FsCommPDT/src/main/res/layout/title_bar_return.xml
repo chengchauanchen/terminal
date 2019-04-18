@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/other_title"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/y45"
+    android:background="@drawable/titel_bar_bg"
+    android:paddingTop="@dimen/x30">
+
+    <ImageView
+        android:id="@+id/iv_return"
+        android:layout_width="@dimen/x40"
+        android:layout_height="@dimen/x20"
+        android:layout_marginLeft="@dimen/x3"
+        android:src="@drawable/news_bar_return"/>
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:text="@string/tv_combat_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/iv_return"
+        android:ellipsize="middle"
+        android:maxEms="10"
+        android:singleLine="true"
+        android:textColor="@color/bar_text_white"
+        android:textSize="@dimen/sp_18" />
+
+
+
+    <TextView
+        android:id="@+id/tv_close_combat"
+        android:text="@string/tv_close_combat"
+        android:textSize="@dimen/dp_16"
+        android:textColor="@color/bar_text_white"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/dp_15"/>
+
+
+
+</RelativeLayout>

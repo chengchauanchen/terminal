@@ -8,10 +8,10 @@
     android:background="@color/common_bg">
 
     <include
-        layout="@layout/title_bar" />
+        layout="@layout/title_bar_return" />
 
     <ListView
-        android:id="@+id/news_list"
+        android:id="@+id/help_combat_list"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible"
