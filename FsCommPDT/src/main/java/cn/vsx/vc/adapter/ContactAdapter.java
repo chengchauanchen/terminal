@@ -54,9 +54,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private Context mContext;
     private List<ContactItemBean> mDatas;
     private long lastSearchTime;
-    private static int PC_VOIP = 0;
-    private static int PHONE_VOIP = 1;
-    private static int TELEPHONE = 2;
     private List<CatalogBean> catalogNames;
     private ItemClickListener listener;
     private CatalogItemClickListener catalogItemClickListener;
@@ -133,7 +130,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
             userViewHolder.tvId.setText(account.getNo() + "");
             userViewHolder.llDialTo.setOnClickListener(view -> {
-//                if(!TextUtils.isEmpty(account.getPhone())){
                     new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog,member) -> {
                         if(member.getUniqueNo() == 0){
                             //普通电话
@@ -149,9 +145,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         }
                         dialog.dismiss();
                     }).showDialog();
-//                }else{
-//                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_member_phone_number));
-//                }
             });
             userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, account.getNo(), account.getName()));
             userViewHolder.llCallTo.setOnClickListener(view -> {

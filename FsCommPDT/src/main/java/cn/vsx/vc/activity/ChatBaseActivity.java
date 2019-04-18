@@ -215,14 +215,14 @@ public abstract class ChatBaseActivity extends BaseActivity{
         MyTerminalFactory.getSDK().registReceiveHandler(getHistoryMessageRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiverGroupPushLiveHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRecallRecordHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileCheckMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowTransponPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowForwardMoreHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowCopyPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowWithDrawPopupHandler);
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiveResponseRecallRecordHandler);
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverTransponHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverToFaceRecognitionHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSelectChatListHandler);
@@ -366,13 +366,13 @@ public abstract class ChatBaseActivity extends BaseActivity{
         MyTerminalFactory.getSDK().unregistReceiveHandler(getHistoryMessageRecordHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiverGroupPushLiveHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseRecallRecordHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowTransponPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowForwardMoreHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowCopyPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowWithDrawPopupHandler);
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiveResponseRecallRecordHandler);
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSendFileCheckMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverTransponHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverToFaceRecognitionHandler);
@@ -1544,7 +1544,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
      **/
     private ReceiveResponseRecallRecordHandler mReceiveResponseRecallRecordHandler = (resultCode, resultDesc, messageId) -> {
         if(resultCode == 0){
-            updataMessageWithDrawState(messageId,true);
+            updataMessageWithDrawState(messageId);
         }else{
          ToastUtil.showToast(ChatBaseActivity.this,resultDesc);
         }
@@ -1554,14 +1554,14 @@ public abstract class ChatBaseActivity extends BaseActivity{
      * 收到别人撤回消息的通知
      **/
     private ReceiveNotifyRecallRecordHandler mNotifyRecallRecordMessageHandler = (version,messageId) -> {
-        updataMessageWithDrawState(messageId,false);
+        updataMessageWithDrawState(messageId);
     };
 
     /**
      * 更新消息的撤回状态
      * @param messageId
      */
-    private void updataMessageWithDrawState(long messageId,boolean saveSqlite){
+    private void updataMessageWithDrawState(long messageId){
         TerminalMessage message = new TerminalMessage();
         message.messageId = messageId;
         if(chatMessageList.contains(message)){
@@ -1574,10 +1574,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     temporaryAdapter.notifyItemChanged(index);
                 }
             });
-            //更新数据库
-            if(saveSqlite){
-                TerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessageWithDraw(message1);
-            }
         }
     }
 

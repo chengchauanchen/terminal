@@ -373,6 +373,7 @@
     <string name="text_message_list_face_recognition_">%1$s:[人脸识别]</string>
     <string name="text_message_list_hyper_link_">%1$s:[超链接]</string>
     <string name="text_message_list_merge_transmit_">%1$s:[聊天记录]</string>
+    <string name="text_message_list_with_draw_">%1$s:[撤回]</string>
     <string name="text_people_request_report_name">%1$s请求上报图像</string>
     <string name="text_unknown_sector_name">%1$s&#160;%2$s&#160;未知部门</string>
     <string name="text_known_sector_name">%1$s&#160;%2$s&#160;%3$s</string>

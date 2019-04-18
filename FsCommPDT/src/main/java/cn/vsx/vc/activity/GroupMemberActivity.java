@@ -125,6 +125,7 @@ public class GroupMemberActivity extends BaseActivity {
         }else {
             MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, false);
         }
+//        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId);
     }
 
     @Override

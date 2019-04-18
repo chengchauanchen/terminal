@@ -103,7 +103,7 @@
     <Button
         android:id="@+id/bt_merge_transmit"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/y34"
         android:background="@color/funcation_top_et_underline"
         android:text="@string/text_forward_more"
         android:textColor="@color/white"

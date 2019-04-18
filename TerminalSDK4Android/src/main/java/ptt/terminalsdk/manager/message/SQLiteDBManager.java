@@ -122,13 +122,14 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     /**
      * 更新消息的撤回状态
-     * @param terminalMessage
+     * @param message_id
+     * @param isWithDraw
      */
-    public synchronized void updateTerminalMessageWithDraw(TerminalMessage terminalMessage) {
+    public synchronized void updateTerminalMessageWithDraw(long message_id,boolean isWithDraw) {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("message_with_draw", (terminalMessage.isWithDraw)?1:0);
-        db.update(TABLE_TERMINAL_MESSAGE, values, "message_id = ?", new String[]{terminalMessage.messageId + ""});
+        values.put("message_with_draw", (isWithDraw)?1:0);
+        db.update(TABLE_TERMINAL_MESSAGE, values, "message_id = ?", new String[]{message_id + ""});
 //        db.close();
     }
 
