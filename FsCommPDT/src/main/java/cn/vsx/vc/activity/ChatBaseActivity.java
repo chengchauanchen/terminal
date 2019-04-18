@@ -91,6 +91,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.TemporaryAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.NFCBindingDialog;
+import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.fragment.LocationFragment;
 import cn.vsx.vc.fragment.TransponFragment;
 import cn.vsx.vc.model.ChatMember;
@@ -164,7 +165,8 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private static final int WATCH_LIVE = 0;
     private static final int PAGE_COUNT = 10;//每次加载的消息数量
     private boolean isEnoughPageCount = false;//每次从本地取的数据的条数是否够10条
-    private NFCBindingDialog nfcBindingDialog;
+    private NFCBindingDialog nfcBindingDialog;//nfc弹窗
+
     protected Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -1123,6 +1125,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         public void handler(final double longitude, final double latitude) {
             logger.error("ReceiveGetGPSLocationHandler-------" + " " + longitude + "/" + latitude);
             handler.post(() -> {
+//                sendLocation(30.495792, 114.433282, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
                 if (longitude != 0.0 && latitude != 0.0) {//获取位置成功
                     sendLocation(longitude, latitude, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
                 } else {//获取位置失败

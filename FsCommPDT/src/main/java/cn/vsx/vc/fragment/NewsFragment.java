@@ -119,6 +119,7 @@ public class NewsFragment extends BaseFragment {
         synchronized(NewsFragment.this){
             logger.info("---------保存消息列表---------"+messageList);
             if(messageList.size()>0){
+                int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
                 List<TerminalMessage> frequentMember = new ArrayList<>(5);
                 for(int i = 0; i < messageList.size(); i++){
                     TerminalMessage terminalMessage = messageList.get(i);
@@ -127,7 +128,7 @@ public class NewsFragment extends BaseFragment {
                     }
                 }
                 for(TerminalMessage terminalMessage : frequentMember){
-                    TerminalFactory.getSDK().getConfigManager().updateFrequentMember(terminalMessage.messageFromId);
+                    TerminalFactory.getSDK().getConfigManager().updateFrequentMember((terminalMessage.messageFromId != memberId)?terminalMessage.messageFromId:terminalMessage.messageToId);
                 }
             }
 

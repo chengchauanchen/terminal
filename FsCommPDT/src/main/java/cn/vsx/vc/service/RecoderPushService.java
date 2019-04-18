@@ -55,6 +55,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MemberEnterAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
@@ -94,7 +95,7 @@ public class RecoderPushService extends BaseService{
     private String port;
     private ArrayList<VideoMember> watchMembers;
     private ArrayList<VideoMember> watchOrExitMembers;
-    private List<Integer> pushMemberList;
+    private List<Long> pushMemberList = new ArrayList<>();
     private MemberEnterAdapter enterOrExitMemberAdapter;
     private static final int CURRENTTIME = 0;
     private static final int HIDELIVINGVIEW = 1;
@@ -142,7 +143,11 @@ public class RecoderPushService extends BaseService{
         mHandler.sendEmptyMessage(CURRENTTIME);
         mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
         if(Constants.ACTIVE_PUSH.equals(type)){
-            pushMemberList = intent.getIntegerArrayListExtra(Constants.PUSH_MEMBERS);
+            PushLiveMemberList list = (PushLiveMemberList) intent.getSerializableExtra(Constants.PUSH_MEMBERS);
+            if(list!=null&&list.getList()!=null){
+                pushMemberList.clear();
+                pushMemberList.addAll(list.getList());
+            }
             String theme = intent.getStringExtra(Constants.THEME);
             if(TextUtils.isEmpty(theme)){
                 mLiveVedioTheme.setText(getResources().getString(R.string.i_pushing_video));

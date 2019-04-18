@@ -105,11 +105,13 @@ public class VoipPhoneActivity extends BaseActivity{
             ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
             status = HANG_UP_SELF + "";
             MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+            mHandler.postDelayed(() -> finish(),500);
         });
         llHangupSpreaking.setOnClickListener(v -> {
             ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
             status = CALL_END + "";
             MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+            mHandler.postDelayed(() -> finish(),500);
         });
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipConnectedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallEndHandler);
@@ -274,6 +276,7 @@ public class VoipPhoneActivity extends BaseActivity{
             MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateFoldersAndGroupsHandler.class);
         }
         MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+        mHandler.removeCallbacksAndMessages(null);
     }
 
 }
