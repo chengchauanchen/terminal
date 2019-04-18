@@ -27,6 +27,7 @@ import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.IndividualNewsActivity;
@@ -43,6 +44,7 @@ import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
+import static cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMember;
 import static cn.vsx.vc.utils.Constants.TYPE_DEPARTMENT;
 
 /**
@@ -204,7 +206,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
             userViewHolder.tvId.setText(member.getNo() + "");
             userViewHolder.llDialTo.setOnClickListener(view -> {
-                Account account = getAccountByMember(member);
+                Account account = DataUtil.getAccountByMember(member);
                 new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog,member1) -> {
                     if(member1.getUniqueNo() == 0){
                         //普通电话
@@ -264,24 +266,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 userViewHolder.llLiveTo.setVisibility(View.GONE);
             }
         }
-    }
-
-    /**
-     * 通过member创建Account
-     * @param member
-     * @return
-     */
-    private Account getAccountByMember(Member member) {
-        Account account = new Account();
-        account.setId(member.getId());
-        account.setDeptId(member.getDeptId());
-        account.setName(member.getName());
-        account.setNo(member.getNo());
-        account.setPhone(member.getPhone());
-        List<Member> members = new ArrayList<>();
-        members.add(member);
-        account.setMembers(members);
-        return account;
     }
 
     @Override
