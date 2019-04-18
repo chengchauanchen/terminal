@@ -14,6 +14,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetTerminalHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MemberListAdapter;
@@ -82,6 +83,7 @@ public class MemberListFragment extends BaseFragment{
             public void itemClick(int type, int position){
                 if(type == Constants.TYPE_USER){
                     Member member = (Member) mData.get(position).getBean();
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class,member,!member.isChecked());
                     member.setChecked(!member.isChecked());
                 }else if(type == Constants.TYPE_FOLDER){
                     Department department = (Department) mData.get(position).getBean();

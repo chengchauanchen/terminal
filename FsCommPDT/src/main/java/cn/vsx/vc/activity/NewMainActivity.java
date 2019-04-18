@@ -1119,7 +1119,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             if (!to.isAdded()) {    // 先判断是否被add过
-                transaction.hide(from).add(R.id.ll_fragment, to).commit(); // 隐藏当前的fragment，add下一个Fragment
+                transaction.hide(from).add(R.id.ll_fragment, to).show(to).commit(); // 隐藏当前的fragment，add下一个Fragment
             } else {
                 transaction.hide(from).show(to).commit(); // 隐藏当前的fragment，显示下一个
             }

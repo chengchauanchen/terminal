@@ -1197,7 +1197,7 @@ public class NewsFragment extends BaseFragment {
 
     private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler(){
         @Override
-        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, int tempGroupName, String tempGroupType){
+        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType){
 //            if(isAdd){
 //                if(isLocked || isSwitch){
 //                    mHandler.post(()-> setting_group_name.setText(tempGroupName));

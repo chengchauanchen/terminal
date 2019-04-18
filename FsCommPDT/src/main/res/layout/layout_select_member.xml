@@ -11,12 +11,12 @@
         android:layout_height="@dimen/dp_46"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingLeft="@dimen/dp_18"
+        android:visibility="gone"
         android:paddingRight="@dimen/dp_10">
         
         <android.support.v7.widget.RecyclerView
             android:id="@+id/catalog_recyclerview"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1" />
         

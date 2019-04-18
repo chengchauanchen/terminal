@@ -1,5 +1,6 @@
 package cn.vsx.vc.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
@@ -278,7 +279,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     @Override
     public void initData() {
 
-        list = getIntent().getIntegerArrayListExtra("list");
+        list = getIntent().getIntegerArrayListExtra("data");
         logger.info("创建临时组成员列表："+list.toString());
         int index1=0;
         for(int i=0;i<=23;i++){
@@ -343,7 +344,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
  **/
     private ReceiveResponseCreateTempGroup4PCHandler receiveResponseCreateTempGroup4PCHandler=new ReceiveResponseCreateTempGroup4PCHandler() {
     @Override
-    public void handler(int tempGroupNo, final int resultCode, final String resultDesc) {
+    public void handler(int tempGroupNo,String alarmNo,String tempGroupType,long uniqueNo, int resultCode, String resultDesc) {
 
         myHandler.post(() -> {
             checkDialogIsNotNull();
@@ -478,5 +479,12 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         if(createTemporaryGroupsDialog!=null){
             createTemporaryGroupsDialog.dismiss();
         }
+    }
+
+    public static void startActivity(Context context,ArrayList<Integer> data){
+        Intent intent = new Intent();
+        intent.setClass(context,CreateTemporaryGroupsActivity.class);
+        intent.putExtra("data",data);
+        context.startActivity(intent);
     }
 }

@@ -230,7 +230,7 @@ public class TalkbackFragment extends BaseFragment {
 
     private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler(){
         @Override
-        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, int tempGroupName, String tempGroupType){
+        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType){
             if(isAdd && isLocked){
                 //加入临时租，被锁定
                 MyApplication.instance.isLocked = true;
