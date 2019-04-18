@@ -472,4 +472,21 @@ public class DataUtil {
 		return retStr;
 	}
 
+	/**
+	 * 获取uniqueNo集合
+	 * @param list
+	 * @return
+	 */
+	public static List<Long> getUniqueNos(List<Member> list){
+		List<Long> result = new ArrayList<>();
+		if(list!=null&&!list.isEmpty()){
+			for (Member member: list) {
+				if(member!=null){
+					result.add(member.getUniqueNo());
+				}
+			}
+		}
+		return result;
+	}
+
 	}

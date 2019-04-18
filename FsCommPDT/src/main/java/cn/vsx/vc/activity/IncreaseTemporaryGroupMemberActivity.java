@@ -18,6 +18,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdatePhoneMemberHandler
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.fragment.TempGroupMemberFragment;
+import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -108,7 +109,10 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
                     ArrayList<Integer> list=new ArrayList<>(tempGroupMemberFragment.getSelectedMemberNo());
                     CreateTemporaryGroupsActivity.startActivity(this,list);
                 }else if(type == INCREASE_MEMBER){
-                    MyTerminalFactory.getSDK().getTempGroupManager().addMemberToTempGroup(groupId,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0), TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L),tempGroupMemberFragment.getSelectedMember());
+                    MyTerminalFactory.getSDK().getTempGroupManager().addMemberToTempGroup(groupId,
+                            MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),
+                            TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L),
+                            DataUtil.getUniqueNos(tempGroupMemberFragment.getSelectedMember()));
                 }
                 break;
             default:
