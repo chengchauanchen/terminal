@@ -552,4 +552,5 @@
     <string name="tv_close_combat">已关闭的组</string>
     <string name="tv_combat_group">合成作战组</string>
     <string name="tv_history_combat_group">历史组</string>
+    <string name="only_choose_one_device">只能选择单个设备</string>
 </resources>

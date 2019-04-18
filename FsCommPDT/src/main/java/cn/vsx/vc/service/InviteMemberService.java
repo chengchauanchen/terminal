@@ -32,6 +32,7 @@ import com.alibaba.fastjson.JSONObject;
 import org.apache.http.util.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -40,15 +41,19 @@ import butterknife.Bind;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.MemberResponse;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetTerminalHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdatePhoneMemberHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -56,8 +61,11 @@ import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.CatalogAdapter;
 import cn.vsx.vc.adapter.LiveRecyclerViewAdapter;
+import cn.vsx.vc.adapter.MemberListAdapter;
+import cn.vsx.vc.adapter.SelectAdapter;
 import cn.vsx.vc.adapter.TempGroupSearchAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.fragment.MemberListFragment;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.PushLiveMemberList;
@@ -79,16 +87,17 @@ public class InviteMemberService extends BaseService {
     private Button mBtnLiveSelectmemberStart;
     private LinearLayout mLlLiveSelectmemberTheme;
     private TextView mTvLiveSelectmemberTheme;
-    private RecyclerView mCatalogRecyclerview;
+
+    private LinearLayout llSelect;
+    private RecyclerView selectRecyclerview;
     private LinearLayout mLlEditTheme;
     private LinearLayout mLlSelectMember;
     private String type;
     private boolean pushing;
     private boolean pulling;
 
-    private List<CatalogBean> mCatalogList = new ArrayList<>();
-    private CatalogAdapter mCatalogAdapter;
-    private List<CatalogBean> mInitCatalogList = new ArrayList<>();
+    private SelectAdapter selectAdapter;
+    private List<Member> selectedMembers = new ArrayList<>();
     private ArrayList<VideoMember> watchingmembers;
     private int livingMemberId;
     private boolean gb28181Pull;
@@ -104,7 +113,6 @@ public class InviteMemberService extends BaseService {
     private ListView mLvSearchAllcontacts;
 
 
-    private ImageView ivSelect;
     private List<TextView> tabs = new ArrayList<>();
     private int[] tabIds = new int[]{R.id.pc_tv, R.id.jingwutong_tv, R.id.uav_tv, R.id.recoder_tv};
 
@@ -117,8 +125,14 @@ public class InviteMemberService extends BaseService {
     private List<RecyclerView> rls = new ArrayList<>();
     private int[] rlIds = new int[]{R.id.rv_one, R.id.rv_two, R.id.rv_three, R.id.rv_four};
 
+    //请求图像的类型
+    private List<String> pullTypes = Arrays.asList(TerminalMemberType.TERMINAL_PC.toString(), TerminalMemberType.TERMINAL_PHONE.toString(),
+                                                   TerminalMemberType.TERMINAL_UAV.toString(),TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
+    //上报图像的类型
+    private List<String> pushTypes = Arrays.asList(TerminalMemberType.TERMINAL_PC.toString(), TerminalMemberType.TERMINAL_PHONE.toString(),
+                                                   TerminalMemberType.TERMINAL_UAV.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
     private List<List<ContactItemBean>> mAllDatas = new ArrayList<>();
-    private List<LiveRecyclerViewAdapter> contactAdapter = new ArrayList<>();
+    private List<MemberListAdapter> contactAdapter = new ArrayList<>();
 
     private List<ContactItemBean> mOneDatas = new ArrayList<>();
     private List<ContactItemBean> mTwoDatas = new ArrayList<>();
@@ -160,7 +174,8 @@ public class InviteMemberService extends BaseService {
         mLlLiveSelectmemberTheme = rootView.findViewById(R.id.ll_live_selectmember_theme);
         mTvLiveSelectmemberTheme = rootView.findViewById(R.id.tv_live_selectmember_theme);
 
-        mCatalogRecyclerview = rootView.findViewById(R.id.catalog_recyclerview);
+        llSelect = rootView.findViewById(R.id.ll_select);
+        selectRecyclerview = rootView.findViewById(R.id.select_recyclerview);
         mLlSearchMember = rootView.findViewById(R.id.ll_search_member);
 
         mIvBack = rootView.findViewById(R.id.iv_back);
@@ -170,8 +185,6 @@ public class InviteMemberService extends BaseService {
         mTvSearchNothing = rootView.findViewById(R.id.tv_search_nothing);
         mRlSearchResult = rootView.findViewById(R.id.rl_search_result);
         mLvSearchAllcontacts = rootView.findViewById(R.id.lv_search_allcontacts);
-
-        ivSelect = rootView.findViewById(R.id.iv_select);
 
         tabs.clear();
         lines.clear();
@@ -207,8 +220,7 @@ public class InviteMemberService extends BaseService {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdatePhoneMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRemoveSwitchCameraViewHandler);
-
-        mCatalogAdapter.setOnItemClick(catalogItemClickListener);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGetTerminalHandler);
         layout_search.setOnClickListener(searchOnClickListener);
 
         mIvBack.setOnClickListener(searchBackOnClickListener);
@@ -217,6 +229,7 @@ public class InviteMemberService extends BaseService {
         mEtSearchAllcontacts.addTextChangedListener(editTextChangedListener);
         mEtSearchAllcontacts.setOnEditorActionListener(onEditorActionListener);
         mLvSearchAllcontacts.setOnItemClickListener(searchItemclickListener);
+        llSelect.setOnClickListener(selectedOnClickListener);
 
     }
 
@@ -250,13 +263,13 @@ public class InviteMemberService extends BaseService {
 
     @Override
     protected void initData() {
-        mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(MyTerminalFactory.getSDK().application, OrientationHelper.HORIZONTAL, false));
-        mCatalogAdapter = new CatalogAdapter(MyTerminalFactory.getSDK().application, mCatalogList);
-        mCatalogRecyclerview.setAdapter(mCatalogAdapter);
+        selectRecyclerview.setLayoutManager(new LinearLayoutManager(MyTerminalFactory.getSDK().application, OrientationHelper.HORIZONTAL, false));
+        selectAdapter = new SelectAdapter(this, selectedMembers);
+        selectRecyclerview.setAdapter(selectAdapter);
         contactAdapter.clear();
         for (int i = 0; i < rls.size(); i++) {
-            LiveRecyclerViewAdapter adapter = new LiveRecyclerViewAdapter(MyTerminalFactory.getSDK().application, mAllDatas.get(i), type);
-            adapter.setOnItemClickListener(new MyItemClickListener(i));
+            MemberListAdapter adapter = new MemberListAdapter(MyTerminalFactory.getSDK().application, mAllDatas.get(i));
+            adapter.setItemClickListener(new MyItemClickListener(i));
             rls.get(i).setLayoutManager(new LinearLayoutManager(MyTerminalFactory.getSDK().application));
             rls.get(i).setAdapter(adapter);
             contactAdapter.add(adapter);
@@ -265,6 +278,9 @@ public class InviteMemberService extends BaseService {
         searchMemberListExceptMe.addAll(TerminalFactory.getSDK().getConfigManager().getPhoneMemberExceptMe());
         tempGroupSearchAdapter = new TempGroupSearchAdapter(MyTerminalFactory.getSDK().application, searchList);
         mLvSearchAllcontacts.setAdapter(tempGroupSearchAdapter);
+
+        TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), type);
+
     }
 
     @Override
@@ -275,14 +291,18 @@ public class InviteMemberService extends BaseService {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        for (LiveRecyclerViewAdapter adapter : contactAdapter) {
-            adapter.getSelectMember().clear();
+        for (MemberListAdapter adapter : contactAdapter) {
+//            adapter.getSelectMember().clear();
         }
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdatePhoneMemberHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRemoveSwitchCameraViewHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetTerminalHandler);
+        mHandler.removeCallbacksAndMessages(null);
 
     }
+
+    /**************************************************************************listener***********************************************************************************************/
 
     private ReceiveRemoveSwitchCameraViewHandler receiveRemoveSwitchCameraViewHandler = () -> {
         mHandler.post(this::removeView);
@@ -334,6 +354,12 @@ public class InviteMemberService extends BaseService {
         mLlSearchMember.setVisibility(View.GONE);
         mLlSelectMember.setVisibility(View.VISIBLE);
     };
+    /**
+     * 跳转到已经选择成员的信息
+     */
+    private View.OnClickListener selectedOnClickListener =  v -> {
+        ToastUtil.showToast(this,"显示已经选择的成员");
+    };
 
     private View.OnClickListener startOnClickListener = v -> {
         if (Constants.PUSH.equals(type)) {
@@ -363,11 +389,11 @@ public class InviteMemberService extends BaseService {
         }
     };
 
-
-    private CatalogAdapter.ItemClickListener catalogItemClickListener = (view, position) -> {
-//        MemberResponse memberResponse=mCatalogList.get(position).getBean();
-//        List<CatalogBean> catalogList = new ArrayList<>(mCatalogList.subList(0, position + 1));
-//        updateData(memberResponse,catalogList);
+    /**
+     * 获取到数据
+     */
+    private ReceiveGetTerminalHandler receiveGetTerminalHandler = (depId, type, departments, members) -> {
+        mHandler.post(()-> updateData(depId,type, departments, members));
     };
 
     /**
@@ -385,10 +411,11 @@ public class InviteMemberService extends BaseService {
         public void onClick(View v) {
             currentIndex = index;
             setTabView(index);
+            loadData(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0),true);
         }
     }
 
-    private class MyItemClickListener implements LiveRecyclerViewAdapter.ItemClickListener {
+    private class MyItemClickListener implements MemberListAdapter.ItemClickListener {
 
         private int index;
 
@@ -397,23 +424,63 @@ public class InviteMemberService extends BaseService {
         }
 
         @Override
-        public void onItemClick(int postion, int adapterType) {
-            if (adapterType == Constants.TYPE_DEPARTMENT) {
-                MemberResponse memberResponse = (MemberResponse) mAllDatas.get(index).get(postion).getBean();
-                CatalogBean catalog = new CatalogBean();
-                catalog.setName(memberResponse.getName());
-//            catalog.setBean(memberResponse);
-                mCatalogList.add(catalog);
-                List<CatalogBean> catalogBeanList = new ArrayList<>(mCatalogList);
-                updateData(memberResponse, catalogBeanList);
-            } else if (adapterType == Constants.TYPE_USER) {
-                int count = getSelectMember().size();
-                if (count == 0) {
-                    mBtnLiveSelectmemberStart.setText(getResources().getString(R.string.confirm));
-                } else {
-                    mBtnLiveSelectmemberStart.setText(String.format("确定(%s)", count));
-                }
+        public void itemClick(int adapterType, int position) {
+            if(adapterType == Constants.TYPE_USER){
+                //请求图像只能选单个设备，上报图像可选多个
+                checkSelectSingleOrMultiple(index,position);
+            }else if(adapterType == Constants.TYPE_FOLDER){
+                Department department = (Department) mAllDatas.get(index).get(position).getBean();
+                loadData(department.getId(),false);
             }
+        }
+    }
+
+    /**
+     * 检查选择单个设备还是选择多个设备
+     *
+     * @param position
+     */
+    private void checkSelectSingleOrMultiple(int index,int position) {
+        if(android.text.TextUtils.equals(type,Constants.PULL)){
+            Member member = (Member) mAllDatas.get(index).get(position).getBean();
+            //请求图像，只能选择单个设备
+            if(selectedMembers.isEmpty()|| member.isChecked()){
+                //还没有选择设备
+                member.setChecked(!member.isChecked());
+                updateSelectMember(member);
+            }else{
+                member.setChecked(false);
+                if(index>=0&&index<contactAdapter.size()){
+                    contactAdapter.get(index).notifyItemChanged(position);
+                }
+                ToastUtil.showToast(this,getString(R.string.only_choose_one_device));
+            }
+        }else{
+            //上报图像，选择多个设备
+            Member member = (Member) mAllDatas.get(index).get(position).getBean();
+            member.setChecked(!member.isChecked());
+            updateSelectMember(member);
+        }
+    }
+
+    /**
+     *设置选择的成员
+     * @param member
+     */
+    private void updateSelectMember(Member member) {
+        if(member.isChecked){
+            //添加
+            selectedMembers.add(member);
+        }else{
+            //删除
+            selectedMembers.remove(member);
+        }
+        selectAdapter.notifyDataSetChanged();
+        int count = searchList.size();
+        if (count == 0) {
+            mBtnLiveSelectmemberStart.setText(getResources().getString(R.string.confirm));
+        } else {
+            mBtnLiveSelectmemberStart.setText(String.format("确定(%s)", count));
         }
     }
 
@@ -425,7 +492,7 @@ public class InviteMemberService extends BaseService {
             return;
         }
         if(currentIndex>=0&&currentIndex<contactAdapter.size()){
-            contactAdapter.get(currentIndex).setSelectMember(searchList.get(position).getNo());
+//            contactAdapter.get(currentIndex).setSelectMember(searchList.get(position).getNo());
         }
 
         mEtSearchAllcontacts.setText("");
@@ -458,7 +525,6 @@ public class InviteMemberService extends BaseService {
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application, getString(R.string.text_search_content_is_illegal));
             }
             if (android.text.TextUtils.isEmpty(s.toString())) {
-
                 mIvDeleteEdittext.setVisibility(View.GONE);
                 mBtnSearchAllcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
                 mBtnSearchAllcontacts.setTextColor(ContextCompat.getColor(MyTerminalFactory.getSDK().application, R.color.search_button_text_color1));
@@ -500,15 +566,7 @@ public class InviteMemberService extends BaseService {
         mLlSearchMember.setVisibility(View.VISIBLE);
     };
 
-//    private SwipeRefreshLayout.OnRefreshListener onRefreshListener = () -> {
-//        TerminalFactory.getSDK().getConfigManager().updataPhoneMemberInfo();
-//        mHandler.postDelayed(() -> {
-//            // 加载完数据设置为不刷新状态，将下拉进度收起来
-////            mSwipeRefreshLayout.setRefreshing(false);
-//            // 加载完数据设置为不刷新状态，将下拉进度收起来
-//
-//        }, 1200);
-//    };
+    /**************************************************************************listener***********************************************************************************************/
 
 
     /**
@@ -685,9 +743,6 @@ public class InviteMemberService extends BaseService {
     @SuppressWarnings("unchecked")
     private void filterMember(Intent intent) {
         type = intent.getStringExtra(Constants.TYPE);
-        for (LiveRecyclerViewAdapter adapter : contactAdapter) {
-            adapter.setType(type);
-        }
 
         setTabTextView(type);
         pushing = intent.getBooleanExtra(Constants.PUSHING, false);
@@ -696,6 +751,7 @@ public class InviteMemberService extends BaseService {
         pulling = intent.getBooleanExtra(Constants.PULLING, false);
         livingMemberId = intent.getIntExtra(Constants.LIVING_MEMBER_ID, 0);
 
+        loadData(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0),true);
 //        MemberResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
 //        if(mMemberResponse ==null){
 //            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_members_data));
@@ -706,8 +762,95 @@ public class InviteMemberService extends BaseService {
 //        catalog.setBean(mMemberResponse);
 //        mInitCatalogList.add(catalog);
 //        updateData(mMemberResponse,mInitCatalogList);
+    }
 
+    /**
+     * 加载数据
+     */
+    private void loadData(int depId,boolean isNeedCheck){
+        if(checkDataIsNeedRequest(isNeedCheck)){
+            TerminalFactory.getSDK().getConfigManager().getTerminal(depId, getTerminalType());
+        }
+    }
 
+    /**
+     * 更新数据
+     * @param depId
+     * @param type
+     * @param departments
+     * @param members
+     */
+    private void updateData(int depId,String type, List<Department> departments, List<Member> members){
+        int index = getTerminalTypeListByType(type);
+        if(index>=0&&index<mAllDatas.size()){
+            mAllDatas.get(index).clear();
+            for(Member member : members){
+                ContactItemBean<Member> contactItemBean = new ContactItemBean<>();
+                contactItemBean.setBean(member);
+                contactItemBean.setType(Constants.TYPE_USER);
+                mAllDatas.get(index).add(contactItemBean);
+            }
+            for(Department department : departments){
+                ContactItemBean<Department> contactItemBean = new ContactItemBean<>();
+                contactItemBean.setBean(department);
+                contactItemBean.setType(Constants.TYPE_FOLDER);
+                mAllDatas.get(index).add(contactItemBean);
+            }
+            //还原选择状态
+            restoreSelectStatus(mAllDatas.get(index),index);
+            if(index<contactAdapter.size()&&contactAdapter.get(index)!=null){
+                contactAdapter.get(index).notifyDataSetChanged();
+            }
+        }
+    }
+
+    /**
+     * 还原选择的状态
+     * @param contactItemBeans
+     */
+    private void restoreSelectStatus(List<ContactItemBean> contactItemBeans,int index) {
+        for (Member member: selectedMembers) {
+            for (ContactItemBean bean: contactItemBeans) {
+                if(bean.getType() == Constants.TYPE_USER){
+                    Member member1 = (Member) bean.getBean();
+                    if(member.getNo() == member1.getNo()){
+                        member1.setChecked(true);
+                    }
+                }
+            }
+        }
+        if(index>=0&&index<contactAdapter.size()){
+            contactAdapter.get(index).notifyDataSetChanged();
+        }
+    }
+
+    /**
+     * 检查列表是否需要获取数据
+     * @return
+     */
+    private boolean checkDataIsNeedRequest(boolean isNeedCheck) {
+       return (!isNeedCheck) || mAllDatas.get(currentIndex).isEmpty();
+    }
+
+    /**
+     * 获取设备类型
+     * @return
+     */
+    private String getTerminalType(){
+        return ((android.text.TextUtils.equals(type,Constants.PULL))?pullTypes:pushTypes).get(currentIndex);
+    }
+
+    /**
+     * 根据类型名称获取列表的index
+     * @param type
+     * @return
+     */
+    private int getTerminalTypeListByType(String type){
+        List<String> types = android.text.TextUtils.equals(type,Constants.PULL)?pullTypes:pushTypes;
+        if(types.contains(type)){
+            return types.indexOf(type);
+        }
+        return -1;
     }
 
     /**
@@ -740,9 +883,9 @@ public class InviteMemberService extends BaseService {
      */
     private ArrayList<Integer> getSelectMember(){
         ArrayList<Integer> result = new ArrayList<>();
-        for (LiveRecyclerViewAdapter adapter: contactAdapter) {
-            result.addAll(adapter.getSelectMember());
-        }
+//        for (LiveRecyclerViewAdapter adapter: contactAdapter) {
+//            result.addAll(adapter.getSelectMember());
+//        }
         return result;
     }
 
@@ -752,11 +895,11 @@ public class InviteMemberService extends BaseService {
      */
     private Member getLiveMember(){
         Member member  = null;
-        for (LiveRecyclerViewAdapter adapter: contactAdapter) {
-            if(adapter.getLiveMember() !=null){
-                member = adapter.getLiveMember();
-            }
-        }
+//        for (LiveRecyclerViewAdapter adapter: contactAdapter) {
+//            if(adapter.getLiveMember() !=null){
+//                member = adapter.getLiveMember();
+//            }
+//        }
         return member;
     }
 
@@ -773,20 +916,8 @@ public class InviteMemberService extends BaseService {
 
         @Override
         public void onRefresh() {
-            switch (srl.getId()) {
-                case R.id.srl_one:
-
-                    break;
-                case R.id.srl_two:
-
-                    break;
-                case R.id.srl_three:
-
-                    break;
-                case R.id.srl_four:
-
-                    break;
-            }
+            loadData(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0),false);
+            mHandler.postDelayed(()-> srl.setRefreshing(false),1200);
         }
     }
 

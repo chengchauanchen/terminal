@@ -5,10 +5,12 @@
     
     <!-- 主题编辑 -->
     <include layout="@layout/live_edit_theme"
-        android:id="@+id/ll_live_edit_theme"/>
+        android:id="@+id/ll_live_edit_theme"
+        android:visibility="gone"/>
     
     <include layout="@layout/layout_search_member"
-        android:id="@+id/ll_search_member"/>
+        android:id="@+id/ll_search_member"
+        android:visibility="gone"/>
     <!--上报选择 -->
     <include layout="@layout/live_select_member_new"
         android:id="@+id/live_select_member"/>
