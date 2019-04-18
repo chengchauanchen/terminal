@@ -20,9 +20,11 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import cn.vsx.hamster.common.GroupType;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.ResponseGroupType;
+import cn.vsx.hamster.common.TempGroupType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
@@ -40,15 +42,19 @@ import ptt.terminalsdk.context.MyTerminalFactory;
  */
 
 public class MessageListAdapter extends BaseAdapter {
+    private final boolean isNewsFragment;
+    private final boolean isGoToHistory;
     private HashMap<Integer, String> idNameMap;
     private Context context;
     private List<TerminalMessage> messageList = new ArrayList<>();
     public Logger logger = Logger.getLogger(getClass());
 
-    public MessageListAdapter (Context context, List<TerminalMessage> messageList, HashMap<Integer, String> idNameMap) {
+    public MessageListAdapter (Context context, List<TerminalMessage> messageList, HashMap<Integer, String> idNameMap, boolean isNewsFragment, boolean isGoToHistory) {
         this.context = context;
         this.messageList = messageList;
         this.idNameMap = idNameMap;
+        this.isNewsFragment = isNewsFragment;
+        this.isGoToHistory = isGoToHistory;
     }
 
     @Override
@@ -104,12 +110,11 @@ public class MessageListAdapter extends BaseAdapter {
             }
 //            viewHolder.tv_current_group.setVisibility(View.GONE);
         } else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息，显示组名
-            viewHolder.tv_user_name.setText(DataUtil.getGroupByGroupNo(terminalMessage.messageToId).getName());
-//            if (terminalMessage.messageToId == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)) {
-//                viewHolder.tv_current_group.setVisibility(View.VISIBLE);
-//            } else {
-//                viewHolder.tv_current_group.setVisibility(View.GONE);
-//            }
+            if (TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())) {//如果是合成作战组，上面显示合成作战组
+                viewHolder.tv_user_name.setText(context.getString(R.string.text_to_help_combat));
+            } else {
+                viewHolder.tv_user_name.setText(DataUtil.getGroupByGroupNo(terminalMessage.messageToId).getName());
+            }
         }
         //设置最后一条消息时间
         if (terminalMessage.sendTime != 0) {
@@ -130,6 +135,16 @@ public class MessageListAdapter extends BaseAdapter {
             Group groupInfo = DataUtil.getGroupByGroupNo(terminalMessage.messageToId);
             if(groupInfo.getResponseGroupType()!=null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
                 viewHolder.iv_user_photo.setBackgroundResource(R.drawable.response_group_photo);
+            }else if (groupInfo.getTempGroupType()!=null && groupInfo.getTempGroupType().equals(TempGroupType.TO_HELP_COMBAT.toString())){
+                if (isNewsFragment) {
+                    viewHolder.iv_user_photo.setBackgroundResource(R.drawable.message_alertgroup);
+                } else{
+                    if (isGoToHistory){
+                        viewHolder.iv_user_photo.setBackgroundResource(R.drawable.alertgroup_history);
+                    } else {
+                        viewHolder.iv_user_photo.setBackgroundResource(R.drawable.alertgroup_unfold);
+                    }
+                }
             }else{
                 viewHolder.iv_user_photo.setBackgroundResource(R.drawable.group_photo);
             }

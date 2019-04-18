@@ -39,6 +39,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     private SQLiteDB helper;
     private final static String TABLE_TERMINAL_MESSAGE = "terminalMessage";
     private final static String MESSAGE_LIST = "messageList";
+    private final static String COMBAT_MESSAGE_LIST = "combatMessageList";
+    private final static String HISTORY_COMBAT_MESSAGE_LIST = "historyCombatMessageList";
     private final static String PDT_MEMBER = "pdtMember";
     private final static String PHONE_MEMBER = "phoneMember";
     private final static String FOLDER_GROUP = "folderGroup";
@@ -362,9 +364,96 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 //        db.close();
     }
 
+    public synchronized void updateCombatMessageList(List<TerminalMessage> terminalMessages) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        //开始事务
+        db.beginTransaction();
+        try{
+            db.execSQL("DELETE FROM messageList");
+            for (TerminalMessage terminalMessage : terminalMessages) {
+                ContentValues values = new ContentValues();
+                values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+                values.put("message_id", terminalMessage.messageId);
+                values.put("message_body", terminalMessage.messageBody == null ? null : terminalMessage.messageBody.toJSONString());
+                values.put("message_url", terminalMessage.messageUrl);
+                values.put("message_path", terminalMessage.messagePath);
+                values.put("message_from_id", terminalMessage.messageFromId);
+                values.put("message_from_name", terminalMessage.messageFromName);
+                values.put("message_to_id", terminalMessage.messageToId);
+                values.put("message_category", terminalMessage.messageCategory);
+                values.put("message_to_name", terminalMessage.messageToName);
+                values.put("message_type", terminalMessage.messageType);
+                values.put("message_version", terminalMessage.messageVersion);
+                values.put("result_code", terminalMessage.resultCode);
+                values.put("send_time", terminalMessage.sendTime);
+                values.put("unread_count", terminalMessage.unReadCount);
+                values.put("message_with_draw", (terminalMessage.isWithDraw)?1:0);
+                db.replace(COMBAT_MESSAGE_LIST, null, values);
+            }
+            db.setTransactionSuccessful();  //设置事务成功完成
+        }catch(Exception e){
+            logger.error(e);
+        }
+        finally{
+            //结束事务
+            db.endTransaction();
+        }
+
+
+//        db.close();
+    }
+    public synchronized void updateHistoryCombatMessageList(List<TerminalMessage> terminalMessages) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        //开始事务
+        db.beginTransaction();
+        try{
+            db.execSQL("DELETE FROM messageList");
+            for (TerminalMessage terminalMessage : terminalMessages) {
+                ContentValues values = new ContentValues();
+                values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+                values.put("message_id", terminalMessage.messageId);
+                values.put("message_body", terminalMessage.messageBody == null ? null : terminalMessage.messageBody.toJSONString());
+                values.put("message_url", terminalMessage.messageUrl);
+                values.put("message_path", terminalMessage.messagePath);
+                values.put("message_from_id", terminalMessage.messageFromId);
+                values.put("message_from_name", terminalMessage.messageFromName);
+                values.put("message_to_id", terminalMessage.messageToId);
+                values.put("message_category", terminalMessage.messageCategory);
+                values.put("message_to_name", terminalMessage.messageToName);
+                values.put("message_type", terminalMessage.messageType);
+                values.put("message_version", terminalMessage.messageVersion);
+                values.put("result_code", terminalMessage.resultCode);
+                values.put("send_time", terminalMessage.sendTime);
+                values.put("unread_count", terminalMessage.unReadCount);
+                values.put("message_with_draw", (terminalMessage.isWithDraw)?1:0);
+                db.replace(HISTORY_COMBAT_MESSAGE_LIST, null, values);
+            }
+            db.setTransactionSuccessful();  //设置事务成功完成
+        }catch(Exception e){
+            logger.error(e);
+        }
+        finally{
+            //结束事务
+            db.endTransaction();
+        }
+
+
+//        db.close();
+    }
+
     public synchronized List<TerminalMessage> getMessageList() {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(MESSAGE_LIST, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
+        return getTerminalMessageList(db, cursor);
+    }
+    public synchronized List<TerminalMessage> getCombatMessageList() {
+        SQLiteDatabase db = helper.getReadableDatabase();
+        Cursor cursor = db.query(COMBAT_MESSAGE_LIST, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
+        return getTerminalMessageList(db, cursor);
+    }
+    public synchronized List<TerminalMessage> getHistoryCombatMessageList() {
+        SQLiteDatabase db = helper.getReadableDatabase();
+        Cursor cursor = db.query(HISTORY_COMBAT_MESSAGE_LIST, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
         return getTerminalMessageList(db, cursor);
     }
 

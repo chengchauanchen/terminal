@@ -37,6 +37,7 @@ import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.ResponseGroupType;
+import cn.vsx.hamster.common.TempGroupType;
 import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -75,6 +76,7 @@ import cn.vsx.vc.activity.PushLiveMessageManageActivity;
 import cn.vsx.vc.adapter.MessageListAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.DeleteMessageDialog;
+import cn.vsx.vc.receiveHandle.ReceiveGoToHelpCombatHandler;
 import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverDeleteMessageHandler;
 import cn.vsx.vc.receiver.NotificationClickReceiver;
@@ -114,6 +116,7 @@ public class NewsFragment extends BaseFragment {
     private HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
     private boolean soundOff;//是否静音
     private boolean isFirstCall;
+    private boolean combatFragmentCreate;
 
     private void saveMessagesToSql(){
         synchronized(NewsFragment.this){
@@ -373,7 +376,7 @@ public class NewsFragment extends BaseFragment {
     @Override
     public void initData() {
         loadMessages();
-        mMessageListAdapter = new MessageListAdapter(getContext(), messageList, idNameMap);
+        mMessageListAdapter = new MessageListAdapter(getContext(), messageList, idNameMap, true, false);
         newsList.setAdapter(mMessageListAdapter);
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(messageList));
     }
@@ -477,7 +480,9 @@ public class NewsFragment extends BaseFragment {
     private final class OnItemClickListenerImp implements OnItemClickListener{
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            TerminalMessage terminalMessage = messageList.get(position);
+            combatFragmentCreate = true;
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveGoToHelpCombatHandler.class, false, false);
+            /*TerminalMessage terminalMessage = messageList.get(position);
             if(terminalMessage.unReadCount!=0){
                 terminalMessage.unReadCount = 0;
                 unReadCountChanged();//未读消息数变了，通知tab
@@ -516,9 +521,10 @@ public class NewsFragment extends BaseFragment {
                 intent.putExtra("speakingId",speakingId);
                 intent.putExtra("speakingName",speakingName);
                 context.startActivity(intent);
-            }
+            }*/
         }
     }
+
 
     private void unReadCountChanged() {
         int allUnReadCount = 0;
@@ -591,6 +597,10 @@ public class NewsFragment extends BaseFragment {
                         && terminalMessage.resultCode==0) {
                     saveVideoMessage(terminalMessage,false);
                 }
+            }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
+                    TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())){
+                saveHelpCombatMessage(terminalMessage, false);
+                saveHelpCombatMessageToSql(terminalMessage);
             }else {
                 saveMessageToList(terminalMessage,false);
             }
@@ -603,6 +613,67 @@ public class NewsFragment extends BaseFragment {
             });
         }
     };
+
+    private void saveHelpCombatMessageToSql(TerminalMessage terminalMessage) {
+        if (!combatFragmentCreate){//当合成作战的fragment没有创建时，手动更新合成作战的列表
+            List<TerminalMessage> combatMessageList = TerminalFactory.getSDK().getTerminalMessageManager().getCombatMessageList();
+            Iterator<TerminalMessage> iterator = combatMessageList.iterator();
+            while (iterator.hasNext()){
+                TerminalMessage next = iterator.next();
+                if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
+                        TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
+                        next.messageToId == terminalMessage.messageToId){
+                    iterator.remove();
+                    break;
+                }
+            }
+            combatMessageList.add(terminalMessage);
+            MyTerminalFactory.getSDK().getTerminalMessageManager().updateCombatMessageList(combatMessageList);
+        }
+    }
+    private void saveHistoryHelpCombatMessageToSql(int combatGroupId) {
+        if (!combatFragmentCreate){//当合成作战的fragment没有创建时
+            TerminalMessage handleMessage = null;
+            //从处理中变为处理完成；从处理列表移除
+            List<TerminalMessage> combatMessageList = TerminalFactory.getSDK().getTerminalMessageManager().getCombatMessageList();
+            Iterator<TerminalMessage> iterator = combatMessageList.iterator();
+            while (iterator.hasNext()){
+                TerminalMessage next = iterator.next();
+                if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
+                        TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
+                        next.messageToId == combatGroupId){
+                    handleMessage = next;
+                    iterator.remove();
+                    break;
+                }
+            }
+            MyTerminalFactory.getSDK().getTerminalMessageManager().updateCombatMessageList(combatMessageList);
+            //添加到历史列表
+            if (handleMessage != null){
+                //从处理中变为处理完成；从处理列表移除
+                List<TerminalMessage> historyCombatMessageList = TerminalFactory.getSDK().getTerminalMessageManager().getHistoryCombatMessageList();
+                historyCombatMessageList.add(handleMessage);
+                MyTerminalFactory.getSDK().getTerminalMessageManager().updateHistoryCombatMessageList(historyCombatMessageList);
+            }
+        }
+    }
+
+    /**找到合成作战组的条目替换成新的合成作战组的最新一条消息*/
+    private void saveHelpCombatMessage(TerminalMessage terminalMessage, boolean clearUnread) {
+        int unReadCount = 0;
+        final Iterator<TerminalMessage> iterator = terminalMessageData.iterator();
+        while (iterator.hasNext()){
+            TerminalMessage next = iterator.next();
+            if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
+                    TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType())){
+                unReadCount = next.unReadCount;
+                iterator.remove();
+                break;
+            }
+        }
+        terminalMessageData.add(terminalMessage);
+        whetherUnReadAdd(unReadCount, terminalMessage,clearUnread,0);
+    }
 
     /**
      * 根据id保存名字
@@ -1198,14 +1269,18 @@ public class NewsFragment extends BaseFragment {
     private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler(){
         @Override
         public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType){
-//            if(isAdd){
-//                if(isLocked || isSwitch){
-//                    mHandler.post(()-> setting_group_name.setText(tempGroupName));
-//                }
-//            }else {
-//                int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-//                setting_group_name.setText(DataUtil.getMemberByMemberNo(currentGroupId).getName());
-//            }
+            if(isAdd){
+                if(isLocked || isSwitch){
+                    mHandler.post(()-> setting_group_name.setText(tempGroupName));
+                }
+            }else {
+                int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                setting_group_name.setText(DataUtil.getMemberByMemberNo(currentGroupId).getName());
+                //合成作战组处理完成后，刷新完成列表
+                if (TempGroupType.TO_HELP_COMBAT.equals(tempGroupType)) {
+                    saveHistoryHelpCombatMessageToSql(tempGroupNo);
+                }
+            }
         }
     };
 

@@ -12,7 +12,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
 
     public SQLiteDB(Context context) {
-        super(context, "4gptt.db", null, 14);
+        super(context, "4gptt.db", null, 15);
     }
 
     @Override
@@ -23,6 +23,14 @@ public class SQLiteDB extends SQLiteOpenHelper {
                 "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_with_draw INTEGER, unique(message_version))");
         //消息列表
         db.execSQL("CREATE TABLE IF NOT EXISTS messageList (_id INTEGER primary key autoincrement, current_member_id INTEGER,message_version LONG, send_time LONG, unread_count INTEGER," +
+                "message_id INTEGER, message_from_id INTEGER, message_from_name varchar, message_url varchar, message_path varchar, message_body TEXT, " +
+                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_with_draw INTEGER)");
+        //合成作战组消息列表
+        db.execSQL("CREATE TABLE IF NOT EXISTS combatMessageList (_id INTEGER primary key autoincrement, current_member_id INTEGER,message_version LONG, send_time LONG, unread_count INTEGER," +
+                "message_id INTEGER, message_from_id INTEGER, message_from_name varchar, message_url varchar, message_path varchar, message_body TEXT, " +
+                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_with_draw INTEGER)");
+        //已完成合成作战组消息列表
+        db.execSQL("CREATE TABLE IF NOT EXISTS historyCombatMessageList (_id INTEGER primary key autoincrement, current_member_id INTEGER,message_version LONG, send_time LONG, unread_count INTEGER," +
                 "message_id INTEGER, message_from_id INTEGER, message_from_name varchar, message_url varchar, message_path varchar, message_body TEXT, " +
                 "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_with_draw INTEGER)");
         //成员列表
@@ -53,6 +61,8 @@ public class SQLiteDB extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS terminalMessage");
         db.execSQL("DROP TABLE IF EXISTS messageList");
+        db.execSQL("DROP TABLE IF EXISTS combatMessageList");
+        db.execSQL("DROP TABLE IF EXISTS historyCombatMessageList");
         db.execSQL("DROP TABLE IF EXISTS member");
         db.execSQL("DROP TABLE IF EXISTS pdtMember");
         db.execSQL("DROP TABLE IF EXISTS phoneMember");
