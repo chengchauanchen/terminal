@@ -60,6 +60,7 @@ import cn.vsx.vc.adapter.TempGroupSearchAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSwitchCameraViewHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
@@ -822,9 +823,9 @@ public class InviteMemberService extends BaseService {
         }
         if (!getSelectMember().isEmpty()) {
 
-            MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(getSelectMember(),
-                    MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0),
-                    TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l));
+//            MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(getSelectMember(),
+//                    MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0),
+//                    TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l));
         }
         removeView();
     }
@@ -839,7 +840,7 @@ public class InviteMemberService extends BaseService {
         intent.putExtra(Constants.THEME, theme);
         intent.putExtra(Constants.TYPE, Constants.ACTIVE_PUSH);
         intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
-        intent.putIntegerArrayListExtra(Constants.PUSH_MEMBERS, getSelectMember());
+        intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList());
         switch (type) {
             case Constants.PHONE_PUSH:
                 intent.setClass(this, PhonePushService.class);
@@ -871,6 +872,7 @@ public class InviteMemberService extends BaseService {
                 Intent intent = new Intent(InviteMemberService.this, LiveRequestService.class);
                 intent.putExtra(Constants.MEMBER_NAME, member.getName());
                 intent.putExtra(Constants.MEMBER_ID, member.getNo());
+                intent.putExtra(Constants.UNIQUE_NO, member.getUniqueNo());
                 startService(intent);
                 removeView();
             } else {

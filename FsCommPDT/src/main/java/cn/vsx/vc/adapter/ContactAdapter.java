@@ -16,6 +16,7 @@ import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -26,6 +27,7 @@ import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.IndividualNewsActivity;
@@ -42,6 +44,7 @@ import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
+import static cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMember;
 import static cn.vsx.vc.utils.Constants.TYPE_DEPARTMENT;
 
 /**
@@ -53,9 +56,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private Context mContext;
     private List<ContactItemBean> mDatas;
     private long lastSearchTime;
-    private static int PC_VOIP = 0;
-    private static int PHONE_VOIP = 1;
-    private static int TELEPHONE = 2;
     private List<CatalogBean> catalogNames;
     private ItemClickListener listener;
     private CatalogItemClickListener catalogItemClickListener;
@@ -132,8 +132,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
             userViewHolder.tvId.setText(account.getNo() + "");
             userViewHolder.llDialTo.setOnClickListener(view -> {
-                if(!TextUtils.isEmpty(account.getPhone())){
-                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account.getMembers(), (dialog,member) -> {
+                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog,member) -> {
                         if(member.getUniqueNo() == 0){
                             //普通电话
                             CallPhoneUtil.callPhone((Activity) mContext, account.getPhone());
@@ -148,9 +147,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                         }
                         dialog.dismiss();
                     }).showDialog();
-                }else{
-                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_member_phone_number));
-                }
             });
             userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, account.getNo(), account.getName()));
             userViewHolder.llCallTo.setOnClickListener(view -> {
@@ -158,7 +154,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
                 }else{
                     // TODO: 2019/4/15弹窗拨打个呼
-                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account.getMembers(), (dialog,member) -> {
+                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account, (dialog,member) -> {
                         activeIndividualCall(member);
                         dialog.dismiss();
                     }).showDialog();
@@ -170,7 +166,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
                 }else{
                     // TODO: 2019/4/15弹窗请求图像
-                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_PULL_LIVE, account.getMembers(), (dialog,member) -> {
+                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_PULL_LIVE, account, (dialog,member) -> {
                         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
                         dialog.dismiss();
                     }).showDialog();
@@ -209,6 +205,24 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 userViewHolder.tvName.setText(member.getName() + "");
             }
             userViewHolder.tvId.setText(member.getNo() + "");
+            userViewHolder.llDialTo.setOnClickListener(view -> {
+                Account account = DataUtil.getAccountByMember(member);
+                new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog,member1) -> {
+                    if(member1.getUniqueNo() == 0){
+                        //普通电话
+                        CallPhoneUtil.callPhone((Activity) mContext, account.getPhone());
+                    }else{
+                        if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
+                            Intent intent = new Intent(mContext, VoipPhoneActivity.class);
+                            intent.putExtra("member",member1);
+                            mContext.startActivity(intent);
+                        }else {
+                            ToastUtil.showToast(mContext,mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
+                        }
+                    }
+                    dialog.dismiss();
+                }).showDialog();
+            });
             userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName()));
             userViewHolder.llCallTo.setOnClickListener(view -> {
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){

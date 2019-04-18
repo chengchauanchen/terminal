@@ -48,6 +48,10 @@
         </attr>
     </declare-styleable>
     
-    
+    <declare-styleable name="TabView">
+        <attr name="tabView_selected" format="boolean"/>
+        <attr name="tabView_text" format="string"/>
+        <attr name="tabView_textSize" format="dimension"/>
+    </declare-styleable>
 
 </resources>

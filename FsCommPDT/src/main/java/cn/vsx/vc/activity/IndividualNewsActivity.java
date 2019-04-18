@@ -1,13 +1,11 @@
 package cn.vsx.vc.activity;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
-import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
@@ -32,11 +30,11 @@ import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
-import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerIndividualCallTimeoutHandler;
@@ -46,15 +44,15 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMultimediaMessageComplet
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyOtherStopVideoMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import cn.vsx.vc.adapter.ItemAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
@@ -63,7 +61,6 @@ import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.record.AudioRecordButton;
 import cn.vsx.vc.record.MediaManager;
 import cn.vsx.vc.utils.CallPhoneUtil;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
@@ -188,7 +185,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         super.initData();
         mFromId = userId;
         member = DataUtil.getMemberByMemberNo(userId);
-        String mPhoneNo = member.phone;
         logger.info("userId：" + userId);
         logger.info("member：" + member.toString());
         funcation.setFunction(false, userId);
@@ -197,14 +193,12 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     @Override
     public void postVideo() {
-
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId,false);
+        goToChooseDevices(ChooseDevicesDialog.TYPE_PUSH_LIVE);
     }
 
     @Override
     public void requestVideo() {
-        long liveUniqueNo = 0l;
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member(userId, userName));
+        goToChooseDevices(ChooseDevicesDialog.TYPE_PULL_LIVE);
     }
 
     @Override
@@ -250,20 +244,11 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     /**
      * 请求个呼
      */
-    private void activeIndividualCall() {
+    private void activeIndividualCall(Member member) {
         MyApplication.instance.isCallState = true;
-        Member member = DataUtil.getMemberByMemberNo(userId);
-        //        Member member = new Member(userId, HandleIdUtil.handleName(userName));
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
-
             if(member!=null){
-//                Member member = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no);
-//                List<Member> list = new ArrayList<>();
-//                new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, list, (view1, position12) -> {
-//                    long uniqueNo = 0l;
-//                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
-//                }).show();
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
             }else {
                 ToastUtil.showToast(IndividualNewsActivity.this,getString(R.string.text_get_member_info_fail));
@@ -361,27 +346,18 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                 onBackPressed();
                 break;
             case R.id.individual_news_phone:
-
                 hideKey();
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
                     ToastUtil.showToast(this,getString(R.string.text_no_call_permission));
                 }else {
-                    activeIndividualCall();
+                    goToChooseDevices(ChooseDevicesDialog.TYPE_CALL_PRIVATE);
                 }
-
                 break;
             case R.id.individual_news_info:
                 Intent intent = new Intent(MyApplication.instance, UserInfoActivity.class);
                 intent.putExtra("userId", userId);
                 intent.putExtra("userName", userName);
                 startActivity(intent);
-//                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member(userId, userName));
-//                  OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId);
-//                PTTProtolbuf.NotifyOtherStopVideoMessage.Builder b = PTTProtolbuf.NotifyOtherStopVideoMessage.newBuilder();
-//                b.setCallId(0);
-//                b.setMainMemberId(0);
-//                b.setVersion(TerminalFactory.getSDK().getParam(Params.VERSION, 0));
-//                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyOtherStopVideoMessageHandler.class,b.build());
                 break;
             case R.id.individual_news_help:
                 //                Intent intent = new Intent(this, HelpActivity.class);
@@ -390,44 +366,86 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                 break;
             case R.id.iv_call:
                 hideKey();
-                if (!TextUtils.isEmpty(member.phone)) {
-
-                    ItemAdapter adapter = new ItemAdapter(IndividualNewsActivity.this,ItemAdapter.iniDatas());
-                    AlertDialog.Builder builder = new AlertDialog.Builder(IndividualNewsActivity.this);
-                    //设置标题
-                    builder.setTitle(R.string.text_call_up);
-                    builder.setAdapter(adapter, (dialogInterface, position) -> {
-                        if(position==VOIP){//voip电话
-
-
-                            if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
-                                Intent intent1 = new Intent(IndividualNewsActivity.this, VoipPhoneActivity.class);
-                                intent1.putExtra("member",member);
-                                IndividualNewsActivity.this.startActivity(intent1);
-                            }else {
-                                ToastUtil.showToast(IndividualNewsActivity.this,getString(R.string.text_voip_regist_fail_please_check_server_configure));
-                            }
-                        }
-                        else if(position==TELEPHONE){//普通电话
-
-                            CallPhoneUtil.callPhone(IndividualNewsActivity.this, member.phone);
-
-                        }
-
-                    });
-                    builder.create();
-                    builder.show();
-                }else {
-                    ToastUtil.showToast(IndividualNewsActivity.this,getString(R.string.text_has_no_member_phone_number));
-                }
+                goToChooseDevices(ChooseDevicesDialog.TYPE_CALL_PHONE);
                 break;
         }
     }
 
     /**
+     * 选择设备进行相应的操作
+     * @param type
+     */
+    private void goToChooseDevices(int type){
+        showProgressDialog();
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            Account account = DataUtil.getAccountByMemberNo(userId);
+            myHandler.post(() -> {
+                dismissProgressDialog();
+                if(account == null){
+                    ToastUtil.showToast(IndividualNewsActivity.this,getString(R.string.text_has_no_found_this_user));
+                    return;
+                }
+                new ChooseDevicesDialog(this,type, account, (dialog,member) -> {
+                    switch (type){
+                        case ChooseDevicesDialog.TYPE_CALL_PRIVATE:
+                            activeIndividualCall(member);
+                            break;
+                        case ChooseDevicesDialog.TYPE_CALL_PHONE:
+                            goToCall(member);
+                            break;
+                        case ChooseDevicesDialog.TYPE_PULL_LIVE:
+                            goToPullLive(member);
+                            break;
+                        case ChooseDevicesDialog.TYPE_PUSH_LIVE:
+                            goToPushLive(member);
+                            break;
+                    }
+                    dialog.dismiss();
+                }).showDialog();
+            });
+        });
+    }
+
+    /**
+     * 拨打电话
+     */
+    private void goToCall(Member member) {
+        if(member.getUniqueNo() == 0){
+            //普通电话
+            CallPhoneUtil.callPhone( IndividualNewsActivity.this, member.getPhone());
+        }else{
+            if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
+                Intent intent = new Intent(IndividualNewsActivity.this, VoipPhoneActivity.class);
+                intent.putExtra("member",member);
+                startActivity(intent);
+            }else {
+                ToastUtil.showToast(IndividualNewsActivity.this,getString(R.string.text_voip_regist_fail_please_check_server_configure));
+            }
+        }
+    }
+
+    /**
+     * 请求图像
+     * @param member
+     */
+    private void goToPullLive(Member member) {
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
+    }
+
+    /**
+     * 上报图像
+     * @param member
+     */
+    private void goToPushLive(Member member) {
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, member.getUniqueNo(),false);
+    }
+
+    /**
      * 点击个呼条目
      */
-    private ReceiverIndividualCallFromMsgItemHandler mReceiverIndividualCallFromMsgItemHandler = () -> activeIndividualCall();
+    private ReceiverIndividualCallFromMsgItemHandler mReceiverIndividualCallFromMsgItemHandler = () -> {
+        handler.post(() -> goToChooseDevices(ChooseDevicesDialog.TYPE_CALL_PRIVATE));
+    };
 
     private int mposition = -1;
     private int lastPosition = -1;

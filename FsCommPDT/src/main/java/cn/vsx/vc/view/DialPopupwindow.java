@@ -42,6 +42,7 @@ import ptt.terminalsdk.tools.ToastUtil;
 
 public class DialPopupwindow extends PopupWindow implements View.OnClickListener, PopupWindow.OnDismissListener {
 
+    private Context context;
     private View mPopView;
     private EditText phone;
     private Map<Integer, Integer> map = new HashMap<>();
@@ -62,6 +63,7 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
 
     public DialPopupwindow(Context context) {
         super(context);
+        this.context = context;
         // TODO Auto-generated constructor stub
         init(context);
         setPopupWindow();
@@ -142,21 +144,16 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                     ToastUtil.showToast(context,context.getString(R.string.please_input_other_no));
                     return;
                 }
-                if(myProgressDialog!=null){
-                    myProgressDialog.setMsg(context.getString(R.string.get_data_now));
-                    myProgressDialog.show();
-                }
+                showProgressDialog();
                 TerminalFactory.getSDK().getThreadPool().execute(() -> {
                     Account account = DataUtil.getAccountByMemberNo(callId);
                     myHandler.post(() -> {
-                        if(myProgressDialog!=null){
-                            myProgressDialog.dismiss();
-                        }
+                        dismissProgressDialog();
                         if(account == null){
                          ToastUtil.showToast(context,context.getString(R.string.text_has_no_found_this_user));
                          return;
                          }
-                        new ChooseDevicesDialog(context,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account.getMembers(), (dialog,member) -> {
+                        new ChooseDevicesDialog(context,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account, (dialog,member) -> {
                         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
                         dialog.dismiss();
                          }).show();
@@ -169,12 +166,7 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
             dismiss();
         });
         btDiss.setOnClickListener(view -> dismiss());
-
-        if (myProgressDialog == null) {
-            myProgressDialog = new ProgressDialog(context);
-            myProgressDialog.setCancelable(true);
-        }
-
+        createProgressDialog();
     }
 
     /**
@@ -315,6 +307,35 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
 //		Uri uri = Uri.parse("tel:" + phone);
 //		Intent it = new Intent(Intent.ACTION_CALL, uri);
 //		startActivity(it);
+    }
+
+    /**
+     * 创建加载数据的ProgressDialog
+     */
+    private void createProgressDialog(){
+        if (myProgressDialog == null) {
+            myProgressDialog = new ProgressDialog(context);
+            myProgressDialog.setCancelable(true);
+        }
+    }
+
+    /**
+     * 显示加载数据的ProgressDialog
+     */
+    private void  showProgressDialog(){
+        if(myProgressDialog!=null){
+            myProgressDialog.setMsg(context.getString(R.string.get_data_now));
+            myProgressDialog.show();
+        }
+    }
+
+    /**
+     * 隐藏加载数据的ProgressDialog
+     */
+    private void dismissProgressDialog(){
+        if(myProgressDialog!=null){
+            myProgressDialog.dismiss();
+        }
     }
 
     @Override

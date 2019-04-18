@@ -1,0 +1,95 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/itemblue"
+    android:orientation="vertical">
+    
+    <LinearLayout
+        android:id="@+id/ll_selected"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_46"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/dp_18"
+        android:paddingRight="@dimen/dp_10">
+        
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/catalog_recyclerview"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+        
+        <ImageView
+            android:id="@+id/iv_select"
+            android:layout_width="@dimen/dp_50"
+            android:layout_height="@dimen/dp_50"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:padding="@dimen/dp_16"
+            android:src="@drawable/arrow_right" />
+    </LinearLayout>
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_half_one"
+        android:background="@color/diver_bg" />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y30">
+        
+        <cn.vsx.vc.view.TabView
+            android:id="@+id/tab_pc"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:textColor="@color/contacts_line_blue"
+            app:tabView_selected="true"
+            app:tabView_text="@string/text_pc"
+            app:tabView_textSize="@dimen/sp_14" />
+        
+        <cn.vsx.vc.view.TabView
+            android:id="@+id/tab_police"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:tabView_selected="false"
+            app:tabView_text="@string/text_police_service"
+            app:tabView_textSize="@dimen/sp_14" />
+        
+        <cn.vsx.vc.view.TabView
+            android:id="@+id/tab_recoder"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:tabView_selected="false"
+            app:tabView_text="@string/text_recoder"
+            app:tabView_textSize="@dimen/sp_14" />
+        
+        <cn.vsx.vc.view.TabView
+            android:id="@+id/tab_uav"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            app:tabView_selected="false"
+            app:tabView_text="@string/text_uav"
+            app:tabView_textSize="@dimen/sp_14" />
+    </LinearLayout>
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_half_one"
+        android:background="@color/diver_bg" />
+    
+    <include layout="@layout/layout_search" />
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_half_one"
+        android:background="@color/diver_bg" />
+    
+    <FrameLayout
+        android:id="@+id/contacts_viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"></FrameLayout>
+</LinearLayout>

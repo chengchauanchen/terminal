@@ -91,6 +91,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.TemporaryAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.NFCBindingDialog;
+import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.fragment.LocationFragment;
 import cn.vsx.vc.fragment.TransponFragment;
 import cn.vsx.vc.model.ChatMember;
@@ -164,7 +165,8 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private static final int WATCH_LIVE = 0;
     private static final int PAGE_COUNT = 10;//每次加载的消息数量
     private boolean isEnoughPageCount = false;//每次从本地取的数据的条数是否够10条
-    private NFCBindingDialog nfcBindingDialog;
+    private NFCBindingDialog nfcBindingDialog;//nfc弹窗
+
     protected Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -213,14 +215,14 @@ public abstract class ChatBaseActivity extends BaseActivity{
         MyTerminalFactory.getSDK().registReceiveHandler(getHistoryMessageRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiverGroupPushLiveHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRecallRecordHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileCheckMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowTransponPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowForwardMoreHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowCopyPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowWithDrawPopupHandler);
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiveResponseRecallRecordHandler);
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverTransponHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverToFaceRecognitionHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSelectChatListHandler);
@@ -364,13 +366,13 @@ public abstract class ChatBaseActivity extends BaseActivity{
         MyTerminalFactory.getSDK().unregistReceiveHandler(getHistoryMessageRecordHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiverGroupPushLiveHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseRecallRecordHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowTransponPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowForwardMoreHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowCopyPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowWithDrawPopupHandler);
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiveResponseRecallRecordHandler);
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSendFileCheckMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverTransponHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverToFaceRecognitionHandler);
@@ -1123,6 +1125,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         public void handler(final double longitude, final double latitude) {
             logger.error("ReceiveGetGPSLocationHandler-------" + " " + longitude + "/" + latitude);
             handler.post(() -> {
+//                sendLocation(30.495792, 114.433282, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
                 if (longitude != 0.0 && latitude != 0.0) {//获取位置成功
                     sendLocation(longitude, latitude, MyTerminalFactory.getSDK().getMessageSeq(), true, false);
                 } else {//获取位置失败
@@ -1541,7 +1544,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
      **/
     private ReceiveResponseRecallRecordHandler mReceiveResponseRecallRecordHandler = (resultCode, resultDesc, messageId) -> {
         if(resultCode == 0){
-            updataMessageWithDrawState(messageId,true);
+            updataMessageWithDrawState(messageId);
         }else{
          ToastUtil.showToast(ChatBaseActivity.this,resultDesc);
         }
@@ -1551,14 +1554,14 @@ public abstract class ChatBaseActivity extends BaseActivity{
      * 收到别人撤回消息的通知
      **/
     private ReceiveNotifyRecallRecordHandler mNotifyRecallRecordMessageHandler = (version,messageId) -> {
-        updataMessageWithDrawState(messageId,false);
+        updataMessageWithDrawState(messageId);
     };
 
     /**
      * 更新消息的撤回状态
      * @param messageId
      */
-    private void updataMessageWithDrawState(long messageId,boolean saveSqlite){
+    private void updataMessageWithDrawState(long messageId){
         TerminalMessage message = new TerminalMessage();
         message.messageId = messageId;
         if(chatMessageList.contains(message)){
@@ -1571,10 +1574,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     temporaryAdapter.notifyItemChanged(index);
                 }
             });
-            //更新数据库
-            if(saveSqlite){
-                TerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessageWithDraw(message1);
-            }
         }
     }
 

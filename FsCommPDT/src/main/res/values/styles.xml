@@ -264,4 +264,12 @@
     <style name="temp_group_unchecked">
         <item name="android:textColor">@color/textview_unchecked</item>
     </style>
+    <style name="tab_checked">
+        <item name="android:textColor">@color/contacts_line_blue</item>
+        <item name="android:textSize">@dimen/sp_14</item>
+    </style>
+    <style name="tab_unchecked">
+        <item name="android:textColor">@color/chat_title</item>
+        <item name="android:textSize">@dimen/sp_14</item>
+    </style>
 </resources>

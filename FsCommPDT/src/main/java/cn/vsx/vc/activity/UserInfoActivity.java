@@ -2,7 +2,6 @@ package cn.vsx.vc.activity;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.v7.widget.GridLayoutManager;
@@ -23,20 +22,22 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.OnClick;
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import cn.vsx.vc.adapter.ItemAdapter;
 import cn.vsx.vc.adapter.UserInfoMenuAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.model.Picture;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.CallPhoneUtil;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -78,11 +79,9 @@ public class UserInfoActivity extends BaseActivity {
 
     private List<Picture> mPictures=new ArrayList<>();
 
-    private Member member;
+    private Account account;
     private String userName;
     private int userId;
-    private int VOIP=0;
-    private int TELEPHONE=1;
 
     @Override
     public int getLayoutResId() {
@@ -107,22 +106,46 @@ public class UserInfoActivity extends BaseActivity {
         userId = getIntent().getIntExtra("userId", 0);
         userName = getIntent().getStringExtra("userName");
         String avatarUrl = getIntent().getStringExtra("avatarUrl");
-        member = DataUtil.getMemberByMemberNo(userId);
+        loadData();
+    }
 
+    /**
+     * 获取Account数据
+     */
+    private void loadData(){
+        showProgressDialog();
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            account = DataUtil.getAccountByMemberNo(userId);
+            myHandler.post(() -> {
+                dismissProgressDialog();
+                if(account == null){
+                    ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_has_no_found_this_user));
+                    myHandler.postDelayed(() -> finish(),500);
+                    return;
+                }else{
+                    setViewData();
+                }
+            });
+        });
 
-        if (!TextUtils.isEmpty(member.getDepartmentName())){
-            tvUnit.setText(member.getDepartmentName());
+    }
+
+    /**
+     * 布局设置数据
+     */
+    private void setViewData() {
+        if (!TextUtils.isEmpty(account.getDepartmentName())){
+            tvUnit.setText(account.getDepartmentName());
         }
-        user_no.setText(HandleIdUtil.handleId(member.getNo()));
+        user_no.setText(HandleIdUtil.handleId(account.getNo()));
         user_Name.setText(HandleIdUtil.handleName(userName));
-        if(!TextUtils.isEmpty(member.getPhone())){
-            userPhone.setText(member.getPhone());
+        if(!TextUtils.isEmpty(account.getPhone())){
+            userPhone.setText(account.getPhone());
         }
 
         Glide.with(UserInfoActivity.this).load(DataUtil.getMemberByMemberNo(userId).avatarUrl).asBitmap().placeholder(R.drawable.user_photo)//加载中显示的图片
                 .error(R.drawable.user_photo)//加载失败时显示的图片
                 .into(userLogo);
-
         initBottomMenu();
     }
 
@@ -140,12 +163,9 @@ public class UserInfoActivity extends BaseActivity {
                     setHasVideo();
                 }
             }
-
             logger.info("个人信息界面ICON"+mPictures.toString());
-
             mRecyclerView.setAdapter(mAdapter);
         }
-
 
         mAdapter.setOnItemClickListener((postion, picture) -> {
             if (picture.getTitle().equals("发消息")){
@@ -155,65 +175,86 @@ public class UserInfoActivity extends BaseActivity {
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
                     ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_no_call_permission));
                 }else {
-                    activeIndividualCall();
+                    goToChooseDevices(ChooseDevicesDialog.TYPE_CALL_PRIVATE);
                 }
-
-
             } else if (picture.getTitle().equals("电话")) {
-                if (!TextUtils.isEmpty(member.phone)) {
-                    ItemAdapter adapter = new ItemAdapter(UserInfoActivity.this, ItemAdapter.iniDatas());
-                    AlertDialog.Builder builder = new AlertDialog.Builder(UserInfoActivity.this);
-                    //设置标题
-                    builder.setTitle("拨打电话");
-                    builder.setAdapter(adapter, (dialogInterface, position) -> {
-                        if (position == VOIP) {//voip电话
-                            if (MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS, false)) {
-                                Intent intent = new Intent(UserInfoActivity.this, VoipPhoneActivity.class);
-                                intent.putExtra("member", member);
-                                UserInfoActivity.this.startActivity(intent);
-                            } else {
-                                ToastUtil.showToast(UserInfoActivity.this, getString(R.string.text_voip_regist_fail_please_check_server_configure));
-                            }
-                        } else if (position == TELEPHONE) {//普通电话
-
-                            CallPhoneUtil.callPhone(UserInfoActivity.this, member.phone);
-
-                        }
-
-                    });
-                    builder.create();
-                    builder.show();
-                } else {
-                    ToastUtil.showToast(UserInfoActivity.this, getString(R.string.text_has_no_member_phone_number));
-                }
+                goToChooseDevices(ChooseDevicesDialog.TYPE_CALL_PHONE);
             }else if (picture.getTitle().equals("图像回传")){
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
                     ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_has_no_image_request_authority));
                 }else {
-                    pullVideo();
+                    goToChooseDevices(ChooseDevicesDialog.TYPE_PULL_LIVE);
                 }
-
             }else if (picture.getTitle().equals("图像上报")){
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
                     ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_has_no_image_report_authority));
                 }else {
-                    pushVideo();
+                    goToChooseDevices(ChooseDevicesDialog.TYPE_PUSH_LIVE);
                 }
             }
         });
 
     }
 
-    private void pullVideo() {
+    /**
+     * 选择设备进行相应的操作
+     * @param type
+     */
+    private void goToChooseDevices(int type){
+        new ChooseDevicesDialog(this,type, account, (dialog, member) -> {
+            switch (type){
+                case ChooseDevicesDialog.TYPE_CALL_PRIVATE:
+                    activeIndividualCall(member);
+                    break;
+                case ChooseDevicesDialog.TYPE_CALL_PHONE:
+                    goToCall(member);
+                    break;
+                case ChooseDevicesDialog.TYPE_PULL_LIVE:
+                    pullVideo(member);
+                    break;
+                case ChooseDevicesDialog.TYPE_PUSH_LIVE:
+                    pushVideo(member);
+                    break;
+            }
+            dialog.dismiss();
+        }).showDialog();
+    }
+
+    /**
+     * 拨打电话
+     */
+    private void goToCall(Member member) {
+        if(member.getUniqueNo() == 0){
+            //普通电话
+            CallPhoneUtil.callPhone( UserInfoActivity.this, member.getPhone());
+        }else{
+            if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
+                Intent intent = new Intent(UserInfoActivity.this, VoipPhoneActivity.class);
+                intent.putExtra("member",member);
+                startActivity(intent);
+            }else {
+                ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_voip_regist_fail_please_check_server_configure));
+            }
+        }
+    }
+
+    /**
+     * 请求图像
+     * @param member
+     */
+    private void pullVideo(Member member) {
         if (!CheckMyPermission.selfPermissionGranted(UserInfoActivity.this, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
             CheckMyPermission.permissionPrompt((Activity) UserInfoActivity.this, Manifest.permission.RECORD_AUDIO);
             return;
         }
-        long liveUniqueNo = 0l;
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
     }
 
-    private void pushVideo() {
+    /**
+     * 上报图像
+     * @param member
+     */
+    private void pushVideo(Member member) {
         if (!CheckMyPermission.selfPermissionGranted(UserInfoActivity.this, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
             CheckMyPermission.permissionPrompt( UserInfoActivity.this, Manifest.permission.RECORD_AUDIO);
             return;
@@ -222,9 +263,7 @@ public class UserInfoActivity extends BaseActivity {
             CheckMyPermission.permissionPrompt(UserInfoActivity.this, Manifest.permission.CAMERA);
             return;
         }
-
-
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId,false);
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, member.getUniqueNo(),false);
     }
 
 
@@ -235,29 +274,21 @@ public class UserInfoActivity extends BaseActivity {
         }
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
+        myHandler.removeCallbacksAndMessages(null);
     }
 
     /**
      * 请求个呼
      */
-    private void activeIndividualCall() {
-
-
+    private void activeIndividualCall(Member member) {
         MyApplication.instance.isCallState = true;
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
             if(member!=null){
-//                Member member = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no);
-//                List<Member> list = new ArrayList<>();
-//                new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, list, (view1, position12) -> {
-//                    long uniqueNo = 0l;
-//                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
-//                }).show();
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
             }else {
                 ToastUtil.showToast(UserInfoActivity.this,getString(R.string.text_get_personal_info_fail));
             }
-
         } else {
             ToastUtil.showToast(this, getString(R.string.text_network_connection_abnormal_please_check_the_network));
         }
@@ -301,5 +332,4 @@ public class UserInfoActivity extends BaseActivity {
             });
         }
     };
-
 }

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSwitchCameraViewHandler;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -45,7 +46,8 @@ public class SwitchCameraService extends BaseService{
     private static final int CANCELLIVE = 0;
     private long sendDataTime;
 
-    private ArrayList<Integer> pushMembers;
+//    private ArrayList<Integer> pushMembers;
+    private PushLiveMemberList pushLiveMemberList;
     private boolean isGroupPushLive;
     private String theme;
 
@@ -108,7 +110,7 @@ public class SwitchCameraService extends BaseService{
 
     @Override
     protected void initView(Intent intent){
-        pushMembers = intent.getIntegerArrayListExtra(Constants.PUSH_MEMBERS);
+        pushLiveMemberList = (PushLiveMemberList) intent.getSerializableExtra(Constants.PUSH_MEMBERS);
         isGroupPushLive =  intent.getBooleanExtra(Constants.IS_GROUP_PUSH_LIVING,false);
         mLiveConnecting.setVisibility(View.GONE);
         mRlSwitchCamera.setVisibility(View.VISIBLE);
@@ -147,7 +149,7 @@ public class SwitchCameraService extends BaseService{
         Intent intent = new Intent(SwitchCameraService.this,PhonePushService.class);
         intent.putExtra(Constants.TYPE,type);
         intent.putExtra(Constants.THEME,theme);
-        intent.putExtra(Constants.PUSH_MEMBERS,pushMembers);
+        intent.putExtra(Constants.PUSH_MEMBERS,pushLiveMemberList);
         intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
         startService(intent);
         mHandler.postDelayed(this::removeView,500);
@@ -184,7 +186,7 @@ public class SwitchCameraService extends BaseService{
             Intent intent = new Intent(SwitchCameraService.this,UVCPushService.class);
             intent.putExtra(Constants.TYPE,type);
             intent.putExtra(Constants.THEME,theme);
-            intent.putExtra(Constants.PUSH_MEMBERS,pushMembers);
+            intent.putExtra(Constants.PUSH_MEMBERS,pushLiveMemberList);
             intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
             startService(intent);
             mHandler.postDelayed(this::removeView,500);
@@ -225,7 +227,7 @@ public class SwitchCameraService extends BaseService{
                     Intent intent = new Intent(SwitchCameraService.this,RecoderPushService.class);
                     intent.putExtra(Constants.TYPE,type);
                     intent.putExtra(Constants.THEME,theme);
-                    intent.putExtra(Constants.PUSH_MEMBERS,pushMembers);
+                    intent.putExtra(Constants.PUSH_MEMBERS,pushLiveMemberList);
                     intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
                     startService(intent);
                     mHandler.removeMessages(CANCELLIVE);

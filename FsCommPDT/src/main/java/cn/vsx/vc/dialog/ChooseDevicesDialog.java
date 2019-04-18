@@ -5,6 +5,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.Display;
 import android.view.Window;
 import android.view.WindowManager;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.ChooseDevicesAdapter;
@@ -24,6 +26,7 @@ public class ChooseDevicesDialog extends Dialog {
     private TextView textTitle;
     private RecyclerView rvList;
 
+    private Account account;
     private List<Member> list;
     private ChooseDevicesAdapter adapter;
     private ChooseDevicesAdapter.ItemClickListener mItemClickListener;
@@ -34,10 +37,11 @@ public class ChooseDevicesDialog extends Dialog {
     public static final int TYPE_CALL_PHONE = 3;//打电话
     public static final int TYPE_PUSH_LIVE = 4;//上报图像
 
-    public ChooseDevicesDialog(Context context, int type, List<Member> list, ChooseDevicesAdapter.ItemClickListener mItemClickListener) {
-        super(context);
+    public ChooseDevicesDialog(Context context, int type, Account account, ChooseDevicesAdapter.ItemClickListener mItemClickListener) {
+        super(context,R.style.progress_dialog);
         this.type = type;
-        this.list = getList(list, type);
+        this.account = account;
+        this.list = getList(account, type);
         this.mItemClickListener = mItemClickListener;
     }
 
@@ -66,8 +70,8 @@ public class ChooseDevicesDialog extends Dialog {
         int width = display.getWidth();
         Window window = getWindow();
         WindowManager.LayoutParams layoutParams = window.getAttributes();
-//        layoutParams.width= (int) (width*0.9);
-        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+        layoutParams.width= (int) (width*0.9);
+//        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
         layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         window.setAttributes(layoutParams);
         setCanceledOnTouchOutside(true);
@@ -113,28 +117,28 @@ public class ChooseDevicesDialog extends Dialog {
     /**
      * 获取对应业务的数据集合
      *
-     * @param list
+     * @param account
      * @return
      */
-    private List<Member> getList(List<Member> list, int type) {
+    private List<Member> getList(Account account, int type) {
         List<Member> result = new ArrayList<>();
-        if (list != null && !list.isEmpty()) {
+        if (account != null && account.getMembers()!=null&&!account.getMembers().isEmpty()) {
             switch (type) {
                 //打电话
                 case ChooseDevicesDialog.TYPE_CALL_PHONE:
-                    result.addAll(getCallPhoneMemberList(list));
+                    result.addAll(getCallPhoneMemberList(account));
                     break;
                 //个呼
                 case ChooseDevicesDialog.TYPE_CALL_PRIVATE:
-                    result.addAll(getCallPrivateMemberList(list));
+                    result.addAll(getCallPrivateMemberList(account));
                     break;
                 //请求图像
                 case ChooseDevicesDialog.TYPE_PULL_LIVE:
-                    result.addAll(getPullLiveMemberList(list));
+                    result.addAll(getPullLiveMemberList(account));
                     break;
                 //请求图像
                 case ChooseDevicesDialog.TYPE_PUSH_LIVE:
-                    result.addAll(getPushLiveMemberList(list));
+                    result.addAll(getPushLiveMemberList(account));
                     break;
             }
         }
@@ -144,83 +148,77 @@ public class ChooseDevicesDialog extends Dialog {
     /**
      * 获取可以打电话的设备信息
      *
-     * @param list
+     * @param account
      * @return
      */
-    private List<Member> getCallPhoneMemberList(List<Member> list) {
+    private List<Member> getCallPhoneMemberList(Account account) {
         List<Member> result = new ArrayList<>();
-        if (list != null && !list.isEmpty()) {
-            for (Member member : list) {
+            for (Member member : account.getMembers()) {
                 if (member.type != TerminalMemberType.TERMINAL_HDMI.getCode() &&
                         member.type != TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode() &&
                         member.type != TerminalMemberType.TERMINAL_PDT.getCode()) {
                     result.add(member);
                 }
             }
-        }
         //普通电话
-        Member m = new Member();
-        m.type = TerminalMemberType.TERMINAL_PHONE.getCode();
-        m.setUniqueNo(0);
-        result.add(m);
+        if(!TextUtils.isEmpty(account.getPhone())){
+            Member m = new Member();
+            m.type = TerminalMemberType.TERMINAL_PHONE.getCode();
+            m.setUniqueNo(0);
+            result.add(m);
+        }
         return result;
     }
 
     /**
      * 获取可以打个呼的设备信息
      *
-     * @param list
+     * @param account
      * @return
      */
-    private List<Member> getCallPrivateMemberList(List<Member> list) {
+    private List<Member> getCallPrivateMemberList(Account account) {
         List<Member> result = new ArrayList<>();
-        if (list != null && !list.isEmpty()) {
-            for (Member member : list) {
+            for (Member member : account.getMembers()) {
                 if (member.type != TerminalMemberType.TERMINAL_HDMI.getCode() &&
                         member.type != TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()) {
                     result.add(member);
                 }
             }
-        }
         return result;
     }
 
     /**
      * 获取可以请求图像的设备信息
      *
-     * @param list
+     * @param account
      * @return
      */
-    private List<Member> getPullLiveMemberList(List<Member> list) {
+    private List<Member> getPullLiveMemberList(Account account) {
         List<Member> result = new ArrayList<>();
-        if (list != null && !list.isEmpty()) {
-            for (Member member : list) {
+            for (Member member : account.getMembers()) {
                 if (member.type != TerminalMemberType.TERMINAL_HDMI.getCode() &&
                         member.type != TerminalMemberType.TERMINAL_PDT.getCode()&&
                         member.type != TerminalMemberType.TERMINAL_PC.getCode()) {
                     result.add(member);
                 }
             }
-        }
         return result;
     }
 
     /**
      * 获取可以上报图像的设备信息
      *
-     * @param list
+     * @param account
      * @return
      */
-    private List<Member> getPushLiveMemberList(List<Member> list) {
+    private List<Member> getPushLiveMemberList(Account account) {
         List<Member> result = new ArrayList<>();
-        if (list != null && !list.isEmpty()) {
-            for (Member member : list) {
+            for (Member member : account.getMembers()) {
                 if (member.type != TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode() &&
                         member.type != TerminalMemberType.TERMINAL_PDT.getCode()) {
                     result.add(member);
                 }
             }
-        }
         return result;
     }
 

@@ -60,7 +60,6 @@ public class NewPoliceAffairsFragment extends BaseFragment {
                 mContactAdapter.notifyDataSetChanged();
             }
         });
-
     }
 
     private ReceivegUpdatePoliceMemberHandler receivegUpdatePoliceMemberHandler = new ReceivegUpdatePoliceMemberHandler(){

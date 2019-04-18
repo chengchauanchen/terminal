@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -41,8 +42,6 @@ public class GroupMemberAdapter extends BaseAdapter {
     private List<Member> deleteMembers = new ArrayList<>();
     private Context mContext;
     private boolean isDelete;
-    private int VOIP=0;
-    private int TELEPHONE=1;
     private OnItemClickListener onItemClickListener;
 
     public GroupMemberAdapter(Context mContext, List<Member> currentGroupMembers, boolean isDelete) {
@@ -179,34 +178,22 @@ public class GroupMemberAdapter extends BaseAdapter {
             mContext.startActivity(intent);
         });
         viewHolder.dialTo.setOnClickListener(view12 -> {
-            if (!TextUtils.isEmpty(member.phone)) {
-
-                ItemAdapter adapter = new ItemAdapter(mContext,ItemAdapter.iniDatas());
-                AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                //设置标题
-                builder.setTitle(mContext.getString(R.string.text_call_up));
-                builder.setAdapter(adapter, (dialogInterface, position1) -> {
-                    if(position1 ==VOIP){//voip电话
-                        if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
-                            Intent intent = new Intent(mContext, VoipPhoneActivity.class);
-                            intent.putExtra("member",member);
-                            mContext.startActivity(intent);
-                        }else {
-                            ToastUtil.showToast(mContext,mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
-                        }
+            Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMember(member);
+            new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog,member1) -> {
+                if(member1.getUniqueNo() == 0){
+                    //普通电话
+                    CallPhoneUtil.callPhone((Activity) mContext, account.getPhone());
+                }else{
+                    if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
+                        Intent intent = new Intent(mContext, VoipPhoneActivity.class);
+                        intent.putExtra("member",member1);
+                        mContext.startActivity(intent);
+                    }else {
+                        ToastUtil.showToast(mContext,mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
                     }
-                    else if(position1 ==TELEPHONE){//普通电话
-
-                        CallPhoneUtil.callPhone((Activity) mContext, member.phone);
-
-                    }
-
-                });
-                builder.create();
-                builder.show();
-            }else {
-                ToastUtil.showToast(mContext,mContext.getString(R.string.text_has_no_member_phone_number));
-            }
+                }
+                dialog.dismiss();
+            }).showDialog();
         });
         return view;
 
@@ -238,14 +225,6 @@ public class GroupMemberAdapter extends BaseAdapter {
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network){
             if ( currentGroupMembers.size() > 0) {
-
-//                Member member = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no);
-//                List<Member> list = new ArrayList<>();
-//                new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, list, (view1, position12) -> {
-//                    long uniqueNo = 0l;
-//                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member,uniqueNo);
-//                }).show();
-
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, currentGroupMembers.get(position));
             }
         } else {

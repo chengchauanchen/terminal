@@ -29,6 +29,7 @@ public class LiveRequestService extends BaseService{
     private TextView mTvLiveRequestId;
     private LinearLayout mLlLiveRequestStopTotal;
     private int memberId;
+    private long uniqueNo;
 
     public LiveRequestService(){}
 
@@ -68,6 +69,7 @@ public class LiveRequestService extends BaseService{
 
         String memberName = intent.getStringExtra(Constants.MEMBER_NAME);
         memberId = intent.getIntExtra(Constants.MEMBER_ID, 0);
+        uniqueNo = intent.getLongExtra(Constants.UNIQUE_NO, 0l);
         //开始响铃
         PromptManager.getInstance().IndividualCallRequestRing();
         mTvLiveRequestName.setText(HandleIdUtil.handleName(memberName));
@@ -85,7 +87,7 @@ public class LiveRequestService extends BaseService{
     @Override
     protected void onNetworkChanged(boolean connected){
         if(!connected){
-            MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId);
+            MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId,uniqueNo);
             stopBusiness();
         }
     }
@@ -101,7 +103,7 @@ public class LiveRequestService extends BaseService{
 
     private View.OnClickListener cancelOnClickListener = v ->{
         ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.canceled));
-        MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId);
+        MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId,uniqueNo);
         stopBusiness();
     };
 

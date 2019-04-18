@@ -28,6 +28,7 @@ import org.easydarwin.push.MediaStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -51,6 +52,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MemberEnterAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
@@ -87,7 +89,7 @@ public class PhonePushService extends BaseService{
     private List<String> listResolution;
     private List<VideoMember> watchOrExitMembers;
     private ArrayList<VideoMember> watchMembers;
-    private List<Integer> pushMemberList;
+    private List<Long> pushMemberList = new ArrayList<>();
     private PushCallback pushCallback;
     private String ip;
     private String port;
@@ -168,7 +170,11 @@ public class PhonePushService extends BaseService{
         mHandler.sendEmptyMessage(CURRENTTIME);
         mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
         if(Constants.ACTIVE_PUSH.equals(type)){
-            pushMemberList = intent.getIntegerArrayListExtra(Constants.PUSH_MEMBERS);
+            PushLiveMemberList list = (PushLiveMemberList) intent.getSerializableExtra(Constants.PUSH_MEMBERS);
+            if(list!=null&&list.getList()!=null){
+                pushMemberList.clear();
+                pushMemberList.addAll(list.getList());
+            }
             String theme = intent.getStringExtra(Constants.THEME);
             if(TextUtils.isEmpty(theme)){
                 mLiveVedioTheme.setText(getResources().getString(R.string.i_pushing_video));

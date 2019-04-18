@@ -42,6 +42,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
 import cn.vsx.vc.receive.RecvCallBack;
@@ -60,6 +61,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
 	protected Logger logger = Logger.getLogger(BaseActivity.class);
 	protected final String TAG = getClass().getSimpleName();
+	private ProgressDialog myProgressDialog;//加载数据的弹窗
 
     //成员被删除了
 	private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
@@ -183,6 +185,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 		}
 		//适配Android9.0调用hide时，关闭警告弹窗
 		closeAndroidPDialog();
+		createProgressDialog();
 	}
 
 	protected void protectApp(){
@@ -542,4 +545,33 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             }
 		}
 	};
+
+	/**
+	 * 创建加载数据的ProgressDialog
+	 */
+	private void createProgressDialog(){
+		if (myProgressDialog == null) {
+			myProgressDialog = new ProgressDialog(this);
+			myProgressDialog.setCancelable(true);
+		}
+	}
+
+	/**
+	 * 显示加载数据的ProgressDialog
+	 */
+	public void  showProgressDialog(){
+		if(myProgressDialog!=null){
+			myProgressDialog.setMsg(this.getString(R.string.get_data_now));
+			myProgressDialog.show();
+		}
+	}
+
+	/**
+	 * 隐藏加载数据的ProgressDialog
+	 */
+	public void dismissProgressDialog(){
+		if(myProgressDialog!=null){
+			myProgressDialog.dismiss();
+		}
+	}
 }

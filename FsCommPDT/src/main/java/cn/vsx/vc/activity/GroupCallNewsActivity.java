@@ -39,6 +39,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -291,7 +292,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         setIvMonitorDrawable();
         funcation.setFunction(true, userId);
         //获取组内在线人数
-        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false);
+//        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false);
+        TerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(userId, TerminalMemberStatusEnum.ONLINE.toString() );
         //获取组内正在上报的人数
         getGroupLivingList();
     }
@@ -334,15 +336,14 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 goToVideoLiveList(false);
                 break;
             case R.id.group_call_activity_member_info:
-//                if (DataUtil.isExistGroup(userId)) {
-//                    Intent intent = new Intent(MyApplication.instance, GroupMemberActivity.class);
-//                    intent.putExtra("groupId", userId);
-//                    intent.putExtra("groupName", userName);
-//                    startActivity(intent);
-//                } else {
-//                    ToastUtil.showToast(this, getString(R.string.text_member_has_no_authority_in_this_group));
-//                }
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowTransponPopupHandler.class);
+                if (DataUtil.isExistGroup(userId)) {
+                    Intent intent = new Intent(MyApplication.instance, GroupMemberActivity.class);
+                    intent.putExtra("groupId", userId);
+                    intent.putExtra("groupName", userName);
+                    startActivity(intent);
+                } else {
+                    ToastUtil.showToast(this, getString(R.string.text_member_has_no_authority_in_this_group));
+                }
                 break;
             case R.id.group_call_activity_help:
 //                Intent intent = new Intent(GroupCallNewsActivity.this, HelpActivity.class);
@@ -967,10 +968,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
      **/
     private ReceiveGetGroupCurrentOnlineMemberListHandler mmReceiveGetGroupCurrentOnlineMemberListHandler = new ReceiveGetGroupCurrentOnlineMemberListHandler() {
         @Override
-        public void handler(final List<Member> memberList, final boolean isAllMember,int groupId) {
+        public void handler(final List<Member> memberList, final String status,int groupId) {
             Log.e("GroupCallNewsActivity", "memberList:" + memberList);
             mHandler.post(() -> {
-                if (isFinishing() ||isAllMember) {
+                if (isFinishing() ||(TerminalMemberStatusEnum.valueOf(status).getCode() != TerminalMemberStatusEnum.ONLINE.getCode())) {
                     return;
                 }
                 if (DataUtil.isExistGroup(userId)) {
@@ -989,7 +990,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         if (MyTerminalFactory.getSDK().getGroupManager().getErrorCode() == -1) {
             finish();
         }
-        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false);
+//        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false);
+        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(userId, TerminalMemberStatusEnum.ONLINE.toString());
     };
 
     /***  主动切组成功 ***/

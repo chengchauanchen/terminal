@@ -23,6 +23,7 @@ import java.util.TimerTask;
 
 import butterknife.Bind;
 import butterknife.OnClick;
+import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -120,11 +121,12 @@ public class GroupMemberActivity extends BaseActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if(isTemporaryGroup){
-            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
-        }else {
-            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, false);
-        }
+//        if(isTemporaryGroup){
+//            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
+//        }else {
+//            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, false);
+//        }
+        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId, TerminalMemberStatusEnum.ONLINE.toString());
     }
 
     @Override
@@ -283,7 +285,7 @@ public class GroupMemberActivity extends BaseActivity {
      **/
     private ReceiveGetGroupCurrentOnlineMemberListHandler mReceiveGetGroupCurrentOnlineMemberListHandler = new ReceiveGetGroupCurrentOnlineMemberListHandler() {
         @Override
-        public void handler(final List<Member> memberList,boolean isAllMember,int groupId) {
+        public void handler(final List<Member> memberList,final String status,int groupId) {
             myHandler.post(() -> {
                 if(isFinishing()){
                     return;
@@ -334,7 +336,7 @@ public class GroupMemberActivity extends BaseActivity {
             if(methodResult == BaseCommonCode.SUCCESS_CODE){
                 if(tempGroupNo == groupId && canAdd){
                     myHandler.postDelayed(() -> {
-                        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
+                        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId, TerminalMemberStatusEnum.ONLINE.toString());
                         ToastUtil.showToast(GroupMemberActivity.this,getString(R.string.text_delete_success));
                     },2000);
 
@@ -349,7 +351,7 @@ public class GroupMemberActivity extends BaseActivity {
             if(methodResult == BaseCommonCode.SUCCESS_CODE){
                 if(tempGroupNo == groupId && canAdd){
                     myHandler.postDelayed(() -> {
-                        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
+                        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId, TerminalMemberStatusEnum.ONLINE.toString());
                         ToastUtil.showToast(GroupMemberActivity.this,getString(R.string.text_add_success));
                     },2000);
                 }

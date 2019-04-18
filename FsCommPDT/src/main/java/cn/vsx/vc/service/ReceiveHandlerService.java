@@ -61,7 +61,6 @@ import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAccountHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
@@ -81,6 +80,7 @@ import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.adapter.StackViewAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ProgressDialog;
+import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
@@ -201,7 +201,6 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);//请求开视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverActivePushVideoHandler);//上报视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoHandler);//请求视频
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveGetAccountHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         //开启voip电话服务
@@ -435,7 +434,6 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoHandler);
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveGetAccountHandler);
 
         removeView();
         return super.onUnbind(intent);
@@ -822,34 +820,34 @@ public class ReceiveHandlerService extends Service{
 
 
     //接收到上报视频的回调
-    private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = (memberId,isGroupPushLive) -> {
+    private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = (uniqueNo,isGroupPushLive) -> {
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_report));
             return;
         }
-        logger.error("上报给：" + memberId);
+        logger.error("上报给：" + uniqueNo);
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_push_authority));
             return;
         }
-        if(memberId == 0){//要弹出选择成员页
+        if(uniqueNo == 0){//要弹出选择成员页
             Intent intent = new Intent(ReceiveHandlerService.this, InviteMemberService.class);
             intent.putExtra(Constants.TYPE, Constants.PUSH);
             intent.putExtra(Constants.PUSHING, false);
             intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
             startService(intent);
         }else{//直接上报了
-            ArrayList<Integer> memberIds = new ArrayList<>();
+            ArrayList<Long> uniqueNos = new ArrayList<>();
             //如果是组内上报
             if(!isGroupPushLive){
-                memberIds.add(memberId);
+                uniqueNos.add(uniqueNo);
             }
             if(MyApplication.instance.usbAttached){
                 Intent intent = new Intent(ReceiveHandlerService.this,SwitchCameraService.class);
                 intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
                 intent.putExtra(Constants.THEME,"");
                 intent.putExtra(Constants.CAMERA_TYPE,Constants.UVC_CAMERA);
-                intent.putIntegerArrayListExtra(Constants.PUSH_MEMBERS, memberIds);
+                intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
                 intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
                 startService(intent);
             }else{
@@ -858,7 +856,7 @@ public class ReceiveHandlerService extends Service{
                     intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
                     intent.putExtra(Constants.THEME,"");
                     intent.putExtra(Constants.CAMERA_TYPE,Constants.RECODER_CAMERA);
-                    intent.putIntegerArrayListExtra(Constants.PUSH_MEMBERS, memberIds);
+                    intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
                     intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
                     startService(intent);
                 }else{
@@ -867,7 +865,7 @@ public class ReceiveHandlerService extends Service{
                         intent.putExtra(Constants.TYPE, Constants.ACTIVE_PUSH);
                         intent.putExtra(Constants.THEME,"");
                         intent.setClass(ReceiveHandlerService.this, PhonePushService.class);
-                        intent.putIntegerArrayListExtra(Constants.PUSH_MEMBERS, memberIds);
+                        intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
                         intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
                         startService(intent);
                 }
@@ -902,25 +900,13 @@ public class ReceiveHandlerService extends Service{
                 Intent intent = new Intent(ReceiveHandlerService.this, LiveRequestService.class);
                 intent.putExtra(Constants.MEMBER_NAME, member.getName());
                 intent.putExtra(Constants.MEMBER_ID, member.getNo());
+                intent.putExtra(Constants.UNIQUE_NO, member.getUniqueNo());
                 startService(intent);
             }else{
                 ToastUtil.livingFailToast(ReceiveHandlerService.this, requestCode, TerminalErrorCode.LIVING_REQUEST.getErrorCode());
             }
         }
     };
-
-    /**
-     * 获取Account数据
-     */
-    private ReceiveGetAccountHandler receiveGetAccountHandler = (member) -> {
-//        myHandler.post(() -> {
-//            if(myProgressDialog!=null){
-//                myProgressDialog.setMsg(MyApplication.instance.getApplicationContext().getString(R.string.get_data_now));
-//                myProgressDialog.show();
-//            }
-//        });
-    };
-
 
     private class FlingListener implements SwipeFlingAdapterView.onFlingListener{
 
