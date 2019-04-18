@@ -123,38 +123,24 @@ public class SelectMemberFragment extends Fragment implements View.OnClickListen
                 if(pcFragment == null){
                     pcFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_PC.toString());
                 }
-                if(pcFragment.isAdded()){
-                    if(lastFragment !=null){
-
-                        getFragmentManager().beginTransaction().hide(lastFragment).show(pcFragment).commit();
-                    }else {
-                        getFragmentManager().beginTransaction().show(pcFragment).commit();
-                    }
-                }else {
-                    if(lastFragment !=null){
-                        getFragmentManager().beginTransaction().hide(lastFragment).add(R.id.contacts_viewPager, pcFragment).show(pcFragment).commit();
-                    }else {
-                        getFragmentManager().beginTransaction().add(R.id.contacts_viewPager, pcFragment).show(pcFragment).commit();
-                    }
+                if(lastFragment !=null){
+                    getFragmentManager().beginTransaction().remove(lastFragment).commit();
                 }
+                if(!pcFragment.isAdded()){
+                    getFragmentManager().beginTransaction().add(R.id.contacts_viewPager, pcFragment).show(pcFragment).commit();
+                }
+
                 lastFragment = pcFragment;
                 break;
             case 1:
                 if(policeFragment == null){
                     policeFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_PHONE.toString());
                 }
-                if(policeFragment.isAdded()){
-                    if(lastFragment !=null){
-                        getFragmentManager().beginTransaction().hide(lastFragment).show(policeFragment).commit();
-                    }else {
-                        getFragmentManager().beginTransaction().show(policeFragment).commit();
-                    }
-                }else {
-                    if(lastFragment !=null){
-                        getFragmentManager().beginTransaction().hide(lastFragment).add(R.id.contacts_viewPager, policeFragment).show(policeFragment).commit();
-                    }else {
-                        getFragmentManager().beginTransaction().add(R.id.contacts_viewPager, policeFragment).show(policeFragment).commit();
-                    }
+                if(lastFragment !=null){
+                    getFragmentManager().beginTransaction().remove(lastFragment).commit();
+                }
+                if(!policeFragment.isAdded()){
+                    getFragmentManager().beginTransaction().add(R.id.contacts_viewPager, policeFragment).show(policeFragment).commit();
                 }
                 lastFragment = policeFragment;
                 break;
@@ -162,19 +148,11 @@ public class SelectMemberFragment extends Fragment implements View.OnClickListen
                 if(recoderFragment == null){
                     recoderFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
                 }
-                if(recoderFragment.isAdded()){
-                    if(lastFragment != null){
-                        getFragmentManager().beginTransaction().hide(lastFragment).show(recoderFragment).commit();
-                    }else {
-                        getFragmentManager().beginTransaction().show(recoderFragment).commit();
-                    }
-                }else {
-                    if(lastFragment !=null){
-                        getFragmentManager().beginTransaction().hide(lastFragment).add(R.id.contacts_viewPager, recoderFragment).show(recoderFragment).commit();
-                    }else {
-                        getFragmentManager().beginTransaction().add(R.id.contacts_viewPager, recoderFragment).show(recoderFragment).commit();
-
-                    }
+                if(lastFragment !=null){
+                    getFragmentManager().beginTransaction().remove(lastFragment).commit();
+                }
+                if(!recoderFragment.isAdded()){
+                    getFragmentManager().beginTransaction().add(R.id.contacts_viewPager, recoderFragment).show(recoderFragment).commit();
                 }
                 lastFragment = recoderFragment;
                 break;
@@ -182,18 +160,11 @@ public class SelectMemberFragment extends Fragment implements View.OnClickListen
                 if(uavFragment == null){
                     uavFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_UAV.toString());
                 }
-                if(uavFragment.isAdded()){
-                    if(lastFragment !=null){
-                        getFragmentManager().beginTransaction().hide(lastFragment).show(uavFragment).commit();
-                    }else {
-                        getFragmentManager().beginTransaction().show(uavFragment).commit();
-                    }
-                }else {
-                    if(lastFragment !=null){
-                        getFragmentManager().beginTransaction().hide(lastFragment).add(R.id.contacts_viewPager, uavFragment).show(uavFragment).commit();
-                    }else{
-                        getFragmentManager().beginTransaction().add(R.id.contacts_viewPager, uavFragment).show(uavFragment).commit();
-                    }
+                if(lastFragment !=null){
+                    getFragmentManager().beginTransaction().remove(lastFragment).commit();
+                }
+                if(!uavFragment.isAdded()){
+                    getFragmentManager().beginTransaction().add(R.id.contacts_viewPager, uavFragment).show(uavFragment).commit();
                 }
                 lastFragment = uavFragment;
                 break;
