@@ -48,12 +48,15 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-        <include
-            layout="@layout/layout_invite_member_content"
-            android:visibility="gone"/>
 
         <include
-            layout="@layout/layout_invite_member_selected" />
+            android:id="@+id/ll_all_select"
+            layout="@layout/layout_invite_member_content" />
+
+        <include
+            android:id="@+id/ll_all_selected"
+            layout="@layout/layout_invite_member_selected"
+            android:visibility="gone"/>
 
     </FrameLayout>
 
