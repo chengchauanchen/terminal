@@ -45,7 +45,16 @@
             android:textSize="@dimen/sp_12" />
     </LinearLayout>
 
-    <include
-        layout="@layout/layout_invite_member_content" />
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <include
+            layout="@layout/layout_invite_member_content"
+            android:visibility="gone"/>
+
+        <include
+            layout="@layout/layout_invite_member_selected" />
+
+    </FrameLayout>
 
 </LinearLayout>

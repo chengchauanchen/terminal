@@ -54,7 +54,7 @@
             android:layout_height="@dimen/dp_40"
             android:padding="@dimen/dp_13"
             android:layout_marginRight="@dimen/dp_12"
-            android:src="@drawable/dialog_close"/>
+            android:src="@drawable/icon_close_read"/>
     </LinearLayout>
     
     <View
