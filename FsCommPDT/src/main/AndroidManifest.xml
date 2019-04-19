@@ -160,6 +160,7 @@
             />
         <activity android:name=".activity.DeleteTemporaryGroupMemberActivity"/>
         <activity android:name=".activity.IncreaseTemporaryGroupMemberActivity"/>
+        <activity android:name=".activity.PcLoginActivity"/>
         <activity android:name=".activity.PixelActivity"
             android:process=":remote"
             android:theme="@style/TranslucentTheme"

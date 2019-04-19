@@ -279,7 +279,7 @@
     <string name="text_replication_success">复制成功</string>
     <string name="text_audio_frequency_is_not_open_audio_is_not_used">录制音频权限未打开，语音功能将不能使用。</string>
     <string name="text_create_temporary_groups">创建临时组</string>
-    <string name="scan">扫一扫</string>
+    <string name="scan_to_login_pc_device">扫码登录PC</string>
     <string name="text_hour">时</string>
     <string name="text_minute">分</string>
     <string name="text_second">秒</string>
@@ -553,4 +553,7 @@
     <string name="tv_combat_group">合成作战组</string>
     <string name="tv_history_combat_group">历史组</string>
     <string name="only_choose_one_device">只能选择单个设备</string>
+    <string name="pc_login_confirm">融合通信PC端登录确认</string>
+    <string name="login">登录</string>
+    <string name="login_cancel">取消登录</string>
 </resources>

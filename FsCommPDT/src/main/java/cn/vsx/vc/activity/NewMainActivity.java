@@ -100,7 +100,6 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.application.UpdateManager;
-import cn.vsx.vc.fragment.CombatFragment;
 import cn.vsx.vc.fragment.ContactsFragmentNew;
 import cn.vsx.vc.fragment.CurrentCombatFragment;
 import cn.vsx.vc.fragment.GroupSearchFragment;
@@ -120,6 +119,7 @@ import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowPopupwindowHandler;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.ActivityCollector;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.NfcUtil;
@@ -1392,10 +1392,12 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             }
         }else if(requestCode == REQUEST_CODE_SCAN && resultCode == RESULT_OK){
             if (data != null) {
-                String content = data.getStringExtra(Constant.CODED_CONTENT);
-                logger.info("扫描二维码结果："+content);
+                String result = data.getStringExtra(Constant.CODED_CONTENT);
+                logger.info("扫描二维码结果："+result);
                 // TODO: 2019/4/10 给注册服务发送扫码结果
-                TerminalFactory.getSDK().getAuthManagerTwo().pcLogin();
+                Intent intent  = new Intent(this,PcLoginActivity.class);
+                intent.putExtra(Constants.SCAN_DATA,result);
+                startActivity(intent);
             }
         }
     }

@@ -1799,7 +1799,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     /**
      * 从网络获取数据后刷新页面
      */
-    private ReceiveHistoryMessageNotifyDateHandler receivePersonMessageNotifyDateHandler = (resultCode, resultDes) -> handler.post(() -> {
+    private ReceiveHistoryMessageNotifyDateHandler receivePersonMessageNotifyDateHandler = (resultCode, resultDes) -> {
         if (resultCode != BaseCommonCode.SUCCESS_CODE) {
             if (resultCode == TerminalErrorCode.OPTION_EXECUTE_ERROR.getErrorCode()&&!isEnoughPageCount) {
                 handler.post(() -> {
@@ -1810,7 +1810,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
             }
             refreshing = false;
         }
-    });
+    };
 
 //    /**  获取百度地图定位的信息  **/
 //    private ReceiveGetBaiDuLocationHandler mReceiveGetBaiDuLocationHandler = new ReceiveGetBaiDuLocationHandler() {

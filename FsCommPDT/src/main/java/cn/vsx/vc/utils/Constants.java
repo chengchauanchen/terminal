@@ -93,5 +93,7 @@ public class Constants{
     public static String DEVICE_TYPE = "deviceType";
     public static String BUSINESS_TYPE = "businessType";
 
+    public static String SCAN_DATA = "scanData";
+
 
 }
