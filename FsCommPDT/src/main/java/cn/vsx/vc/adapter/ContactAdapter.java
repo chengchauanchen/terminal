@@ -127,6 +127,9 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             // TODO: 2019/4/15
             UserViewHolder userViewHolder = (UserViewHolder) holder;
             final Account account = (Account) mDatas.get(position).getBean();
+            if(account==null){
+                return;
+            }
             if(!TextUtils.isEmpty(account.getName())){
                 userViewHolder.tvName.setText(account.getName() + "");
             }
