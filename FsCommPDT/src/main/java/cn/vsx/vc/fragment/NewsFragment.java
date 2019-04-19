@@ -480,9 +480,7 @@ public class NewsFragment extends BaseFragment {
     private final class OnItemClickListenerImp implements OnItemClickListener{
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            combatFragmentCreate = true;
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveGoToHelpCombatHandler.class, false, false);
-            /*TerminalMessage terminalMessage = messageList.get(position);
+            TerminalMessage terminalMessage = messageList.get(position);
             if(terminalMessage.unReadCount!=0){
                 terminalMessage.unReadCount = 0;
                 unReadCountChanged();//未读消息数变了，通知tab
@@ -514,14 +512,19 @@ public class NewsFragment extends BaseFragment {
                 context.startActivity(intent);
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//进入组会话页
-                Intent intent = new Intent(context, GroupCallNewsActivity.class);
-                intent.putExtra("isGroup", true);
-                intent.putExtra("userId", terminalMessage.messageToId);//组id
-                intent.putExtra("userName", DataUtil.getGroupByGroupNo(terminalMessage.messageToId).getName());
-                intent.putExtra("speakingId",speakingId);
-                intent.putExtra("speakingName",speakingName);
-                context.startActivity(intent);
-            }*/
+                if (TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())) {
+                    combatFragmentCreate = true;
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveGoToHelpCombatHandler.class, false, false);
+                } else {
+                    Intent intent = new Intent(context, GroupCallNewsActivity.class);
+                    intent.putExtra("isGroup", true);
+                    intent.putExtra("userId", terminalMessage.messageToId);//组id
+                    intent.putExtra("userName", DataUtil.getGroupByGroupNo(terminalMessage.messageToId).getName());
+                    intent.putExtra("speakingId",speakingId);
+                    intent.putExtra("speakingName",speakingName);
+                    context.startActivity(intent);
+                }
+            }
         }
     }
 
