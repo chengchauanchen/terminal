@@ -3,13 +3,15 @@ package cn.vsx.vc.model;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.chad.library.adapter.base.entity.MultiItemEntity;
+
 import cn.vsx.hamster.terminalsdk.tools.PinYinUtils;
 
 /**
  * Created by XX on 2018/4/11.
  */
 
-public class ContactItemBean<T> implements Comparable<ContactItemBean>,Cloneable {
+public class ContactItemBean<T> implements Comparable<ContactItemBean>,Cloneable, MultiItemEntity{
     private String name;
     private T bean;
     private int type;
@@ -63,4 +65,10 @@ public class ContactItemBean<T> implements Comparable<ContactItemBean>,Cloneable
         }
         return contactItemBean;
     }
+
+    @Override
+    public int getItemType(){
+        return type;
+    }
+
 }

@@ -35,6 +35,7 @@ public class MemberListFragment extends BaseFragment{
 
     private Handler mHandler = new Handler();
     private MemberListAdapter memberListAdapter;
+    private List<Integer> selectedMemberNos = new ArrayList<>();
 
     public MemberListFragment(){
         // Required empty public constructor
@@ -72,6 +73,7 @@ public class MemberListFragment extends BaseFragment{
 
     @Override
     public void initListener(){
+        TerminalFactory.getSDK().registReceiveHandler(receiveMemberSelectedHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveGetTerminalHandler);
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
             TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), type);
@@ -84,7 +86,7 @@ public class MemberListFragment extends BaseFragment{
                 if(type == Constants.TYPE_USER){
                     Member member = (Member) mData.get(position).getBean();
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class,member,!member.isChecked());
-                    member.setChecked(!member.isChecked());
+
                 }else if(type == Constants.TYPE_FOLDER){
                     Department department = (Department) mData.get(position).getBean();
                     TerminalFactory.getSDK().getConfigManager().getTerminal(department.getId(),MemberListFragment.this.type);
@@ -100,8 +102,38 @@ public class MemberListFragment extends BaseFragment{
     }
 
     private ReceiveGetTerminalHandler receiveGetTerminalHandler = (depId, type, departments, members) -> {
-        mHandler.post(()-> updateData(depId, departments, members));
+        if(type.equals(this.type)){
+            mHandler.post(()-> updateData(depId, departments, members));
+        }
     };
+
+    private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected) -> {
+        if(selected){
+            if(!selectedMemberNos.contains(member.getNo())){
+                selectedMemberNos.add(member.getNo());
+            }
+        }else {
+            if(selectedMemberNos.contains(member.getNo())){
+                selectedMemberNos.remove((Integer)member.getNo());
+            }
+        }
+        for(ContactItemBean bean : mData){
+            if(bean.getBean() instanceof Member){
+                if(((Member) bean.getBean()).getNo() == member.getNo()){
+                    ((Member) bean.getBean()).setChecked(selected);
+                    break;
+                }
+            }
+        }
+        mHandler.post(()-> memberListAdapter.notifyDataSetChanged());
+    };
+
+    @Override
+    public void onDestroyView(){
+        super.onDestroyView();
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveGetTerminalHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveMemberSelectedHandler);
+    }
 
     private void updateData(int depId, List<Department> departments, List<Member> members){
         mData.clear();
@@ -116,6 +148,17 @@ public class MemberListFragment extends BaseFragment{
             contactItemBean.setBean(department);
             contactItemBean.setType(Constants.TYPE_FOLDER);
             mData.add(contactItemBean);
+        }
+        //将之前选中的人重新选中
+        for(Integer selectedMemberNo : selectedMemberNos){
+            for(ContactItemBean contactItemBean : mData){
+                if(contactItemBean.getBean() instanceof Member){
+                    if(selectedMemberNo == contactItemBean.getBean()){
+                        ((Member) contactItemBean.getBean()).setChecked(true);
+                    }
+                }
+
+            }
         }
         if(memberListAdapter !=null){
             memberListAdapter.notifyDataSetChanged();

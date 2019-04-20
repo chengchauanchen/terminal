@@ -16,13 +16,11 @@ import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.RequestDataType;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -44,7 +42,6 @@ import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
-import static cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMember;
 import static cn.vsx.vc.utils.Constants.TYPE_DEPARTMENT;
 
 /**
@@ -107,9 +104,9 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     return;
                 }
                 if(isPoliceAffairs){
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class, RequestDataType.PC_CONTACTS_MEMBER_DATA.getCode());
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class, Constants.TYPE_CONTRACT_MEMBER);
                 }else {
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class,RequestDataType.PC_CONTACTS_PDT_DATA.getCode());
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class,Constants.TYPE_CONTRACT_PDT);
                 }
                 lastSearchTime = System.currentTimeMillis();
             });

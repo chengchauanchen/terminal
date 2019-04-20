@@ -30,6 +30,19 @@ public class Constants{
     public final static int TYPE_USER=104;
     public final static int TYPE_ACCOUNT=105;
     public final static int TYPE_FREQUENT=106;
+    //搜索 通讯录的组
+    public final static int TYPE_CONTRACT_GROUP=107;
+    //搜索 通讯录的成员
+    public final static int TYPE_CONTRACT_MEMBER=108;
+    //搜索 通讯录的PDT
+    public final static int TYPE_CONTRACT_PDT=109;
+    //搜索 勾选组
+    public final static int TYPE_CHECK_SEARCH_GROUP=110;
+    public final static int TYPE_CHECK_SEARCH_POLICE=111;
+    public final static int TYPE_CHECK_SEARCH_HDMI=112;
+    public final static int TYPE_CHECK_SEARCH_RECODER=113;
+    public final static int TYPE_CHECK_SEARCH_UAV=114;
+    public final static int TYPE_CHECK_SEARCH_PC=115;
 
     public final static int FORCE_KILL = 0;
     public final static int LOGINED = 1;

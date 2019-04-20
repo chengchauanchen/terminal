@@ -21,7 +21,7 @@ public class GroupVideoLiveListAdapter extends BaseQuickAdapter<Member, BaseView
 
     @Override
     protected void convert(BaseViewHolder helper, Member item) {
-        if (item != null) {
+        if (item != null){
             //图标
             helper.setImageResource(R.id.iv_user_photo,R.drawable.icon_phone);
 //            helper.setImageResource(R.id.iv_user_photo,R.drawable.icon_lte);

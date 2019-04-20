@@ -179,7 +179,7 @@
     <string name="text_hdmi">HDMI</string>
     <string name="text_uav">无人机</string>
     <string name="text_search_by_group_name">输入组名称 搜索</string>
-    <string name="text_search_by_name_or_number">输入姓名/编号 在本地搜索</string>
+    <string name="text_search_by_name_or_number">输入姓名/编号 搜索</string>
     <string name="text_contacts">联系人</string>
     <string name="text_me">我</string>
     <string name="text_close">关闭</string>
@@ -546,8 +546,6 @@
     <string name="no_use_devices">没有可选择的设备</string>
     <string name="get_data_now">正在获取数据...</string>
     <string name="please_input_other_no">请输入他人的编号</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="text_to_help_combat">合成作战组</string>
     <string name="tv_close_combat">已关闭的组</string>
     <string name="tv_combat_group">合成作战组</string>
@@ -556,4 +554,6 @@
     <string name="pc_login_confirm">融合通信PC端登录确认</string>
     <string name="login">登录</string>
     <string name="login_cancel">取消登录</string>
+    <string name="input_search_content">请输入搜索内容</string>
+    
 </resources>

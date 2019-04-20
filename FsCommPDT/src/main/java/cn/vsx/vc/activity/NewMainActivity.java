@@ -104,9 +104,9 @@ import cn.vsx.vc.fragment.ContactsFragmentNew;
 import cn.vsx.vc.fragment.CurrentCombatFragment;
 import cn.vsx.vc.fragment.GroupSearchFragment;
 import cn.vsx.vc.fragment.HistoryCombatFragment;
-import cn.vsx.vc.fragment.LocalMemberSearchFragment;
 import cn.vsx.vc.fragment.NewsFragment;
 import cn.vsx.vc.fragment.PersonSearchFragment;
+import cn.vsx.vc.fragment.SearchFragment;
 import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
 import cn.vsx.vc.prompt.PromptManager;
@@ -397,12 +397,17 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private ReceiverShowPersonFragmentHandler mReceiverShowPersonFragmentHandler = new ReceiverShowPersonFragmentHandler() {
         @Override
         public void handler(int type) {
-            LocalMemberSearchFragment localMemberSearchFragment = new LocalMemberSearchFragment();
-//            localMemberSearchFragment.setMemberList(memberList);
-            localMemberSearchFragment.setType(type);
+            SearchFragment searchFragment = SearchFragment.newInstance(type,new ArrayList<>());
             fl_fragment_container_main.setVisibility(View.VISIBLE);
-            getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, localMemberSearchFragment).commit();
+            getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, searchFragment).commit();
             myHandler.postDelayed(() -> ll_content.setVisibility(View.GONE),500);
+
+//            LocalMemberSearchFragment localMemberSearchFragment = new LocalMemberSearchFragment();
+//            localMemberSearchFragment.setMemberList(memberList);
+//            localMemberSearchFragment.setType(type);
+//            fl_fragment_container_main.setVisibility(View.VISIBLE);
+//            getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, localMemberSearchFragment).commit();
+//            myHandler.postDelayed(() -> ll_content.setVisibility(View.GONE),500);
 
         }
     };

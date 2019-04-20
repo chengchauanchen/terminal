@@ -4,16 +4,10 @@
     android:layout_height="match_parent"
     android:background="@color/common_bg">
     
-    <include layout="@layout/in_title_bar"
-        android:id="@+id/title"/>
     
     
     <FrameLayout
-        android:id="@+id/container"
-        android:layout_below="@id/title"
+        android:id="@+id/search_framelayout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/transparent"
-        android:clickable="false"
-        android:focusable="false" />
+        android:layout_height="match_parent"/>
 </RelativeLayout>

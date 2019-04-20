@@ -3,38 +3,19 @@ package cn.vsx.vc.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
-import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import java.util.ArrayList;
-
-import butterknife.Bind;
-import butterknife.OnClick;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdatePhoneMemberHandler;
-import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import cn.vsx.vc.fragment.TempGroupMemberFragment;
-import cn.vsx.vc.utils.DataUtil;
+import cn.vsx.vc.fragment.EstablishTempGroupFragment;
+import cn.vsx.vc.fragment.SearchFragment;
+import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.ToastUtil;
 
 public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
 
-    @Bind(R.id.ok_btn)
-    Button okBtn;
-    @Bind(R.id.bar_title)
-    TextView barTitle;
-    @Bind(R.id.right_btn)
-    ImageView rightBtn;
-
-    private int CREATE_TEMP_GROUP = 0;
-    private int INCREASE_MEMBER = 1;
-
     private Handler myHandler = new Handler();
+    private EstablishTempGroupFragment establishTempGroupFragment;
     //更新警务通成员信息
     private ReceiveUpdatePhoneMemberHandler receiveUpdatePhoneMemberHandler = allMembers -> myHandler.post(() -> {
         //        MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
@@ -52,9 +33,16 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> {//更新当前组
     };
 
-    private int type;
-    private int groupId;
-    private TempGroupMemberFragment tempGroupMemberFragment;
+    private ReceiveShowSearchFragmentHandler receiveShowSearchFragmentHandler = (type,selectedNos) -> {
+        SearchFragment searchFragment = SearchFragment.newInstance(type,selectedNos);
+        searchFragment.setBacklistener(new SearchFragment.BackListener(){
+            @Override
+            public void onBack(){
+                onBackPressed();
+            }
+        });
+        getSupportFragmentManager().beginTransaction().hide(establishTempGroupFragment).add(R.id.search_framelayout, searchFragment).addToBackStack(null).show(searchFragment).commit();
+    };
 
     @Override
     public int getLayoutResId(){
@@ -63,61 +51,28 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
 
     @Override
     public void initView(){
-        type = getIntent().getIntExtra("type", 1);
-        groupId = getIntent().getIntExtra("groupId", 0);
-        //titlebar初始化
-        if(type == CREATE_TEMP_GROUP){
-            barTitle.setText(R.string.text_create_temporary_groups);
-            okBtn.setText(R.string.text_next);
-        }else if(type == INCREASE_MEMBER){
-            barTitle.setText(R.string.text_add_group_member);
-            okBtn.setText(R.string.text_sure);
-        }
-        rightBtn.setVisibility(View.GONE);
+        int type = getIntent().getIntExtra("type", 1);
+        int groupId = getIntent().getIntExtra("groupId", 0);
+        establishTempGroupFragment = EstablishTempGroupFragment.newInstance(type, groupId);
+        getSupportFragmentManager().beginTransaction().add(R.id.search_framelayout, establishTempGroupFragment).show(establishTempGroupFragment).commit();
     }
 
     @Override
     public void initListener(){
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveShowSearchFragmentHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdatePhoneMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
     }
 
     @Override
     public void initData(){
-        tempGroupMemberFragment = TempGroupMemberFragment.newInstance(type);
-        getSupportFragmentManager().beginTransaction().add(R.id.container, tempGroupMemberFragment).show(tempGroupMemberFragment).commit();
     }
 
     @Override
     public void doOtherDestroy(){
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveShowSearchFragmentHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdatePhoneMemberHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
-    }
-
-    @OnClick({R.id.news_bar_back, R.id.ok_btn})
-    public void onClick(View view){
-        switch(view.getId()){
-            case R.id.news_bar_back:
-                finish();
-                break;
-            case R.id.ok_btn:
-                if(tempGroupMemberFragment.getSelectedMember().isEmpty()){
-                    ToastUtil.showToast(IncreaseTemporaryGroupMemberActivity.this,getString(R.string.text_add_at_least_one_member));
-                    return;
-                }
-                if(type == CREATE_TEMP_GROUP){
-                    ArrayList<Integer> list=new ArrayList<>(tempGroupMemberFragment.getSelectedMemberNo());
-                    CreateTemporaryGroupsActivity.startActivity(this,list);
-                }else if(type == INCREASE_MEMBER){
-                    MyTerminalFactory.getSDK().getTempGroupManager().addMemberToTempGroup(groupId,
-                            MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),
-                            TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L),
-                            DataUtil.getUniqueNos(tempGroupMemberFragment.getSelectedMember()));
-                }
-                break;
-            default:
-                break;
-        }
     }
 
     public static void startActivity(Context context, int type, int groupId){
@@ -125,5 +80,11 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
         intent.putExtra("type", type);
         intent.putExtra("groupId", groupId);
         context.startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed(){
+        // TODO: 2019/4/19 返回键和搜索界面返回的处理
+        super.onBackPressed();
     }
 }
