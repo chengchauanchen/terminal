@@ -399,7 +399,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler(int type) {
             SearchFragment searchFragment = SearchFragment.newInstance(type,new ArrayList<>());
-            searchFragment.setBacklistener(() -> onBackPressed());
+            searchFragment.setBacklistener(() -> {
+                ll_content.setVisibility(View.VISIBLE);
+                getSupportFragmentManager().popBackStack();
+            });
             fl_fragment_container_main.setVisibility(View.VISIBLE);
             getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, searchFragment).commit();
             myHandler.postDelayed(() -> ll_content.setVisibility(View.GONE),500);
