@@ -12,8 +12,10 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
+import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.utils.HandleIdUtil;
 
 /**
@@ -23,34 +25,42 @@ import cn.vsx.vc.utils.HandleIdUtil;
  * 描述：
  * 修订历史：
  */
-public class SelectedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
-    private List<Member> mData;
+public class SelectedItemListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
+    private List<ContactItemBean> mData;
     private Context mContext;
     private ItemClickListener itemClickListener;
 
-    public SelectedListAdapter(Context mContext, List<Member> mData){
+    public SelectedItemListAdapter(Context mContext, List<ContactItemBean> mData ){
         this.mContext = mContext;
         this.mData = mData;
     }
-
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
-        View view = LayoutInflater.from(mContext).inflate(R.layout.layout_item_selected, parent, false);
-        return new UserViewHolder(view);
+            View view = LayoutInflater.from(mContext).inflate(R.layout.layout_item_selected, parent, false);
+            return new UserViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position){
+        ContactItemBean contactItemBean = mData.get(position);
         UserViewHolder userViewHolder = (UserViewHolder) holder;
-        Member member = mData.get(position);
-        if(member != null){
-            userViewHolder.tvName.setText(member.getName());
-            userViewHolder.tvId.setText(HandleIdUtil.handleId(member.getNo()));
-            userViewHolder.ivDelete.setOnClickListener(v -> {
-                if(null != itemClickListener){
-                    itemClickListener.itemClick(position);
-                }
-            });
+        if(contactItemBean.getBean() instanceof Member){
+            Member member = (Member) contactItemBean.getBean();
+            if(member != null){
+                userViewHolder.tvName.setText(member.getName());
+                userViewHolder.tvId.setText(HandleIdUtil.handleId(member.getNo()));
+                userViewHolder.ivDelete.setOnClickListener(v -> {
+                    if(null != itemClickListener){
+                        itemClickListener.itemClick(position);
+                    }
+                });
+            }
+        }else if(contactItemBean.getBean() instanceof Group){
+            Group group = (Group) contactItemBean.getBean();
+            if(group != null){
+                userViewHolder.tvName.setText(group.getName());
+                userViewHolder.tvId.setVisibility(View.GONE);
+            }
         }
         userViewHolder.ivDelete.setOnClickListener(v -> {
             if(null != itemClickListener){
@@ -63,6 +73,7 @@ public class SelectedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     public int getItemCount(){
         return mData.size();
     }
+
 
     class UserViewHolder extends RecyclerView.ViewHolder{
         @Bind(R.id.shoutai_user_logo)
@@ -81,7 +92,7 @@ public class SelectedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     public void setItemClickListener(ItemClickListener itemClickListener){
-        this.itemClickListener = itemClickListener;
+        this.itemClickListener =itemClickListener;
     }
 
     public interface ItemClickListener{

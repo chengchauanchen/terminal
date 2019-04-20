@@ -158,7 +158,7 @@ public class ScanGroupSearchFragment extends BaseFragment{
     private void searchMemberFromGroup (){
         for (Group group : MyTerminalFactory.getSDK().getConfigManager().getAllGroups()) {
             //去掉响应组
-            if(group.getGroupType()!= GroupType.RESPONSE && !Util.isEmpty(group.name) && !Util.isEmpty(keyWord) && group.name.toLowerCase().contains(keyWord.toLowerCase())) {
+            if(!group.getGroupType().equals(GroupType.RESPONSE.toString()) && !Util.isEmpty(group.name) && !Util.isEmpty(keyWord) && group.name.toLowerCase().contains(keyWord.toLowerCase())) {
                 searchGroups.add(group);
             }
         }

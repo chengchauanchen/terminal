@@ -155,7 +155,7 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 groupViewHolder.ivMessage.setVisibility(View.VISIBLE);
                 groupViewHolder.ivCurrentGroup.setVisibility(View.INVISIBLE);
             }
-            if(group.getGroupType() == GroupType.RESPONSE){
+            if(group.getGroupType().equals(GroupType.RESPONSE.toString())){
                 groupViewHolder.iv_group_logo.setImageResource(R.drawable.response_group_photo);
                 TextViewCompat.setTextAppearance(groupViewHolder.tvName, R.style.group_name_color);
                 groupViewHolder.iv_response_group_icon.setVisibility(View.VISIBLE);

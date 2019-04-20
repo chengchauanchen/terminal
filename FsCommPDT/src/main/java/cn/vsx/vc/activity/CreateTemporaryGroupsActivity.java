@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bigkoo.pickerview.OptionsPickerView;
@@ -21,6 +20,7 @@ import java.util.TimerTask;
 
 import butterknife.Bind;
 import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginForUIOperationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseCreateTempGroup4PCHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -47,39 +47,28 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
     @Bind(R.id.create_temporary_group_name)
     EditText create_temporary_group_name;
-    @Bind(R.id.iv_locked)
-    ImageView ivLocked;
-    @Bind(R.id.iv_unlocked)
-    ImageView ivUnlocked;
+
     @Bind(R.id.btn_create_temporary_group)
     Button btn_create_temporary_group;
-    @Bind(R.id.iv_change)
-    ImageView iv_change;
-    @Bind(R.id.iv_unchange)
-    ImageView iv_unchange;
+    @Bind(R.id.iv_scan)
+    ImageView iv_scan;
+    @Bind(R.id.iv_unscan)
+    ImageView iv_unscan;
     @Bind(R.id.exist_time)
     TextView exist_time;
-    @Bind(R.id.locked_time)
-    TextView locked_time;
-    @Bind(R.id.ll_lock_time)
-    LinearLayout ll_lock_time;
-    @Bind(R.id.tv_locked)
-    TextView tv_locked;
-    @Bind(R.id.tv_unlocked)
-    TextView tv_unlocked;
-    @Bind(R.id.tv_change)
-    TextView tv_change;
-    @Bind(R.id.tv_unchange)
-    TextView tv_unchange;
+
+    @Bind(R.id.tv_scan)
+    TextView tv_scan;
+    @Bind(R.id.tv_unscan)
+    TextView tv_unscan;
 
     private Handler myHandler = new Handler();
-    private ArrayList<Integer> list;
+    private ArrayList<Member> list;
     private OptionsPickerView optionsPickerViewA;
-    private OptionsPickerView optionsPickerViewB;
     private List<Integer>options1Items=new ArrayList<>();
     private List<Integer>options2Items=new ArrayList<>();
     private List<Integer>options3Items=new ArrayList<>();
-    private boolean forceSwitchGroup;
+    private boolean scanGroup;
     private TimerTask timerTaskLock;
     private List<Integer> signs;
     //创建临时组的弹窗提示
@@ -97,13 +86,9 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         right_btn.setVisibility(View.GONE);
         left_btn.setVisibility(View.GONE);
         ok_btn.setVisibility(View.GONE);
-        iv_change.setSelected(true);
-        iv_unchange.setSelected(false);
-        ivLocked.setSelected(false);
-        ivUnlocked.setSelected(true);
-        ll_lock_time.setVisibility(View.GONE);
+        iv_scan.setSelected(true);
+        iv_unscan.setSelected(false);
         initOptionsPickerViewA();
-        initOptionsPickerViewB();
         createTemporaryGroupsDialog = new CreateTemporaryGroupsDialog(this);
     }
 
@@ -138,38 +123,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
     }
 
-    private void initOptionsPickerViewB() {
 
-        optionsPickerViewB = new OptionsPickerView.Builder(this, (options1, options2, options3, v) -> {
-            lockedHour=options1;
-            lockedMin=options2;
-            lockedSec=options3;
-
-            logger.info("锁定时间"+options1+"时"+options2+"分"+options3+"秒");
-            myHandler.post(() -> locked_time.setText(String.format(getResources().getString(R.string.activity_create_temporary_groups_time),options1,options2,options3)));
-
-        }).setLabels(getResources().getString(R.string.text_hour), getResources().getString(R.string.text_minute), getResources().getString(R.string.text_second))
-                .setSubmitText(getResources().getString(R.string.text_sure))//确定按钮文字
-                .setCancelText(getResources().getString(R.string.text_cancel))//取消按钮文字
-                .setTitleText("")//标题
-                .setSubCalSize(15)//确定和取消文字大小
-                .setSubmitColor(Color.BLACK)//确定按钮文字颜色
-                .setCancelColor(Color.BLACK)//取消按钮文字颜色
-                .setTitleBgColor(Color.WHITE)//标题背景颜色 Night mode
-                .setBgColor(Color.WHITE)//滚轮背景颜色 Night mode
-                .setTextColorCenter(Color.BLACK)
-                .setContentTextSize(18)//滚轮文字大小
-                .setLinkage(false)//设置是否联动，默认 true
-                .isCenterLabel(false) //是否只显示中间选中项的 label 文字，false 则每项 item 全部都带有 label。
-                .setCyclic(false, false, false)//循环与否
-                .setSelectOptions(0, 10, 0)  //设置默认选中项
-                .setOutSideCancelable(false)//点击外部 dismiss default true
-                .isDialog(false)//是否显示为对话框样式
-                .build();
-
-        optionsPickerViewB.setNPicker(options1Items,options2Items,options3Items);
-
-    }
 
 
     @Override
@@ -179,92 +133,34 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
         //创建临时组
         news_bar_back.setOnClickListener(this);
-        ivLocked.setOnClickListener(v -> {
-            if (ivLocked.isSelected()) {
-                ivLocked.setSelected(false);
-                ivUnlocked.setSelected(true);
-                ll_lock_time.setVisibility(View.GONE);
-                TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_unchecked);
-                TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_checked);
-            } else {
-                TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
-                TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
-                TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
-                TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
-                ivLocked.setSelected(true);
-                ivUnlocked.setSelected(false);
-                iv_change.setSelected(true);
-                iv_unchange.setSelected(false);
-                ll_lock_time.setVisibility(View.VISIBLE);
-            }
-        });
-        ivUnlocked.setOnClickListener(v -> {
-            if (ivUnlocked.isSelected()) {
-                ivUnlocked.setSelected(false);
-                ivLocked.setSelected(true);
-                iv_change.setSelected(true);
-                iv_unchange.setSelected(false);
-                ll_lock_time.setVisibility(View.VISIBLE);
-                TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
-                TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
-                TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
-                TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
-            } else {
-                ivUnlocked.setSelected(true);
-                ivLocked.setSelected(false);
-                ll_lock_time.setVisibility(View.GONE);
-                TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_unchecked);
-                TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_checked);
-            }
-        });
-        iv_change.setOnClickListener(v -> {
-            if(iv_change.isSelected()){
-                if(ivLocked.isSelected()){
-                    ivLocked.setSelected(true);
-                    ivUnlocked.setSelected(false);
-                    iv_change.setSelected(true);
-                    iv_unchange.setSelected(false);
-                    TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
-                    TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
-                    TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
-                    TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
-                }else {
-                    iv_change.setSelected(false);
-                    iv_unchange.setSelected(true);
-                    TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_unchecked);
-                    TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_checked);
-                }
+
+
+        iv_scan.setOnClickListener(v -> {
+            if(iv_scan.isSelected()){
+                iv_scan.setSelected(false);
+                iv_unscan.setSelected(true);
+                TextViewCompat.setTextAppearance(tv_scan,R.style.temp_group_unchecked);
+                TextViewCompat.setTextAppearance(tv_unscan,R.style.temp_group_checked);
+
             }else {
-                iv_change.setSelected(true);
-                iv_unchange.setSelected(false);
-                TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
-                TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
+                iv_scan.setSelected(true);
+                iv_unscan.setSelected(false);
+                TextViewCompat.setTextAppearance(tv_scan,R.style.temp_group_checked);
+                TextViewCompat.setTextAppearance(tv_unscan,R.style.temp_group_unchecked);
             }
         });
 
-        iv_unchange.setOnClickListener(v -> {
-            if(iv_change.isSelected()){
-                if(ivLocked.isSelected()){
-                    ivLocked.setSelected(true);
-                    ivUnlocked.setSelected(false);
-                    iv_change.setSelected(true);
-                    iv_unchange.setSelected(false);
-                    TextViewCompat.setTextAppearance(tv_locked,R.style.temp_group_checked);
-                    TextViewCompat.setTextAppearance(tv_unlocked,R.style.temp_group_unchecked);
-                    TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
-                    TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
-                    ToastUtil.showToast(CreateTemporaryGroupsActivity.this,getString(R.string.activity_create_temporary_groups_tempts_one));
-                }else {
-                    iv_change.setSelected(false);
-                    iv_unchange.setSelected(true);
-                    TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_unchecked);
-                    TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_checked);
-                }
+        iv_unscan.setOnClickListener(v -> {
+            if(iv_scan.isSelected()){
+                iv_scan.setSelected(false);
+                iv_unscan.setSelected(true);
+                TextViewCompat.setTextAppearance(tv_scan,R.style.temp_group_unchecked);
+                TextViewCompat.setTextAppearance(tv_unscan,R.style.temp_group_checked);
             }else {
-                iv_change.setSelected(true);
-                iv_unchange.setSelected(false);
-                TextViewCompat.setTextAppearance(tv_change,R.style.temp_group_checked);
-                TextViewCompat.setTextAppearance(tv_unchange,R.style.temp_group_unchecked);
+                iv_scan.setSelected(true);
+                iv_unscan.setSelected(false);
+                TextViewCompat.setTextAppearance(tv_scan,R.style.temp_group_checked);
+                TextViewCompat.setTextAppearance(tv_unscan,R.style.temp_group_unchecked);
             }
         });
 
@@ -272,14 +168,13 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
         exist_time.setOnClickListener(v -> optionsPickerViewA.show());
 
-        locked_time.setOnClickListener(v -> optionsPickerViewB.show());
 
     }
 
     @Override
     public void initData() {
 
-        list = getIntent().getIntegerArrayListExtra("data");
+        list = (ArrayList<Member>) getIntent().getSerializableExtra("data");
         logger.info("创建临时组成员列表："+list.toString());
         int index1=0;
         for(int i=0;i<=23;i++){
@@ -317,9 +212,6 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         String s = String.valueOf(memberId);
         create_temporary_group_name.setText(String.format(getResources().getString(R.string.activity_create_temporary_groups_name),sign,s.substring(s.length()-4)));
         exist_time.setText(R.string.activity_create_temporary_groups_tempts_exist_time);
-        locked_time.setText(R.string.activity_create_temporary_groups_tempts_locked_time);
-        ivUnlocked.setSelected(true);
-        ivLocked.setSelected(false);
     }
 
     //获取临时组名字里的编号
@@ -349,16 +241,16 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         myHandler.post(() -> {
             checkDialogIsNotNull();
             if(resultCode== BaseCommonCode.SUCCESS_CODE){
-                createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_SUCCESS,"",forceSwitchGroup);
+                createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_SUCCESS,"",scanGroup);
                 myHandler.postDelayed(() -> {
                     //刷新通讯录组群列表
-                    MyTerminalFactory.getSDK().getConfigManager().updateAllGroups();
+//                    MyTerminalFactory.getSDK().getConfigManager().updateAllGroups();
                     dismissTemporaryGroupDialog();
                     startActivity(new Intent(CreateTemporaryGroupsActivity.this,NewMainActivity.class));
                     CreateTemporaryGroupsActivity.this.finish();
                 },2000);
             }else {
-                createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_FAIL,resultDesc,forceSwitchGroup);
+                createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_FAIL,resultDesc,scanGroup);
                 myHandler.postDelayed(() -> dismissTemporaryGroupDialog(),2000);
 
             }
@@ -401,9 +293,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     private int existHour = 23;
     private int existMin = 59;
     private int existSec = 59;//默认存活时间23小时59分59秒
-    private int lockedHour = 0;
-    private int lockedMin = 10;//默认锁定时间10分钟
-    private int lockedSec = 0;
+
 
 
     private final class OnClickListenerImplementation implements View.OnClickListener {
@@ -413,9 +303,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
             final String temporaryGroupsName = create_temporary_group_name.getText().toString().trim();
             final long existTime = existHour * 3600  + existMin * 60  +existSec ;
-            final long lockedTime = lockedHour * 3600  + lockedMin * 60 +lockedSec;
-            forceSwitchGroup = iv_change.isSelected();
-            final boolean finalIslock = ivLocked.isSelected();
+            scanGroup = iv_scan.isSelected();
             if(TextUtils.isEmpty(temporaryGroupsName)){
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.activity_create_temporary_groups_check_data_name_one));
                 return;
@@ -428,14 +316,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.activity_create_temporary_groups_check_data_time_two));
                 return;
             }
-            if(lockedTime>24*60*60-1){
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.activity_create_temporary_groups_check_data_lock_time_one));
-                return;
-            }
-            if(finalIslock && lockedTime>existTime){
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.activity_create_temporary_groups_check_data_lock_time_two));
-                return;
-            }
+
             if(StringUtil.isEmoji(temporaryGroupsName)){
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.activity_create_temporary_groups_check_data_name_two));
                 return;
@@ -446,8 +327,8 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
             }
            //显示提示框
             checkDialogIsNotNull();
-            createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_CREATTING,"",forceSwitchGroup);
-            logger.error("创建临时组：" + "forceSwitchGroup" + forceSwitchGroup + ",temporaryGroupsName" + temporaryGroupsName + ",pushMemberList" + list.toString() + ",existTime" + existTime + ",islock" + finalIslock + ",lockedTime" + lockedTime);
+            createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_CREATTING,"",scanGroup);
+            logger.error("创建临时组：" + "scanGroup" + scanGroup + ",temporaryGroupsName" + temporaryGroupsName + ",pushMemberList" + list.toString() + ",existTime" + existTime );
             //延时创建临时组
             if (timerTaskLock != null) {
                 timerTaskLock.cancel();
@@ -456,7 +337,13 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
             timerTaskLock = new TimerTask() {
                 @Override
                 public void run() {
-//                    MyTerminalFactory.getSDK().getTempGroupManager().createTempGroup(forceSwitchGroup,temporaryGroupsName,list,existTime, false,0,);
+                    List<Long> uniqueNoList = new ArrayList<>();
+                    List<Integer> memberNos = new ArrayList<>();
+                    for(Member member : list){
+                        uniqueNoList.add(member.getUniqueNo());
+                        memberNos.add(member.getNo());
+                    }
+                    MyTerminalFactory.getSDK().getTempGroupManager().createTempGroup(false,temporaryGroupsName,memberNos,existTime, false,0,scanGroup,"",uniqueNoList);
                 }
             };
             MyTerminalFactory.getSDK().getTimer().schedule(timerTaskLock, 2000);
@@ -481,7 +368,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         }
     }
 
-    public static void startActivity(Context context,ArrayList<Integer> data){
+    public static void startActivity(Context context,ArrayList<Member> data){
         Intent intent = new Intent();
         intent.setClass(context,CreateTemporaryGroupsActivity.class);
         intent.putExtra("data",data);

@@ -224,6 +224,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         setTabView(currentIndex);
     }
 
+    @Override
     protected void initListener() {
         mIvLiveSelectmemberReturn.setOnClickListener(returnOnClickListener);
         mBtnLiveEditConfirm.setOnClickListener(editThemeConfirmOnClickListener);

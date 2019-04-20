@@ -10,8 +10,6 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
@@ -116,8 +114,7 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
                     return;
                 }
                 if(type == CREATE_TEMP_GROUP){
-                    ArrayList<Integer> list = new ArrayList<>(tempGroupMemberFragment.getSelectedMemberNo());
-                    CreateTemporaryGroupsActivity.startActivity(getContext(), list);
+                    CreateTemporaryGroupsActivity.startActivity(getContext(), tempGroupMemberFragment.getSelectedMember());
                 }else if(type == INCREASE_MEMBER){
                     MyTerminalFactory.getSDK().getTempGroupManager().addMemberToTempGroup(groupId, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0), TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L), DataUtil.getUniqueNos(tempGroupMemberFragment.getSelectedMember()));
                 }

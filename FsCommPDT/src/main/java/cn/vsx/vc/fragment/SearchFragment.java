@@ -23,9 +23,11 @@ import java.util.List;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSearchAccountResultHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSearchMemberResultHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.SearchAdapter;
@@ -35,6 +37,7 @@ import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
+ * 搜索的界面
  */
 public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnItemChildClickListener, BaseQuickAdapter.RequestLoadMoreListener, SwipeRefreshLayout.OnRefreshListener{
     private static final String TYPE = "type";
@@ -102,6 +105,51 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
         }
     };
 
+    private ReceiveSearchAccountResultHandler receiveSearchAccountResultHandler = new ReceiveSearchAccountResultHandler() {
+
+        @Override
+        public void handler(int page, int totalPages, int size, List<Account> accounts){
+            mhandler.post(() -> {
+                mLayoutSrl.setRefreshing(false);
+                if(totalPages == 0){
+                    mTvSearchNothing.setVisibility(View.VISIBLE);
+                    mTvSearchNothing.setText(R.string.text_contact_is_not_exist);
+                    searchAdapter.loadMoreEnd(true);
+                    mRlSearchResult.setVisibility(View.GONE);
+                }else{
+                    mTvSearchNothing.setVisibility(View.GONE);
+                    mRlSearchResult.setVisibility(View.VISIBLE);
+                    searchAdapter.setEnableLoadMore(totalPages -1 > page);
+                    if(page == totalPages-1){
+                        //最后一页
+                        searchAdapter.loadMoreEnd(true);
+                    }else {
+                        searchAdapter.loadMoreComplete();
+                    }
+
+                    if(page == 0){
+                        mData.clear();
+                    }
+
+                    for(Account account : accounts){
+                        for(Integer selectedNo : selectedNos){
+                            if(account.getNo() == selectedNo){
+                                account.setChecked(true);
+                                break;
+                            }
+                        }
+                        ContactItemBean<Account> contactItemBean = new ContactItemBean<>();
+                        contactItemBean.setType(type);
+                        contactItemBean.setBean(account);
+                        mData.add(contactItemBean);
+                    }
+
+                    searchAdapter.notifyDataSetChanged();
+                }
+            });
+        }
+    };
+
     public SearchFragment(){
     }
 
@@ -142,6 +190,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
 
     @Override
     public void initListener(){
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSearchAccountResultHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSearchMemberResultHandler);
         mIvBack.setOnClickListener(v -> getActivity().getSupportFragmentManager().popBackStack());
         mIvBack.setOnClickListener(v -> {
@@ -184,7 +233,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
                 TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_PC.toString(), keywords);
                 break;
             case Constants.TYPE_CONTRACT_MEMBER:
-
+                TerminalFactory.getSDK().getConfigManager().searchAccount(currentPage,PAGE_SIZE, keywords);
                 break;
             case Constants.TYPE_CHECK_SEARCH_GROUP:
                 break;
@@ -251,6 +300,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
     @Override
     public void onDestroyView(){
         super.onDestroyView();
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSearchAccountResultHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSearchMemberResultHandler);
     }
 

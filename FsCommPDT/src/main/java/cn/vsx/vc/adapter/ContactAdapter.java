@@ -143,11 +143,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
                     ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
                 }else{
-                    // TODO: 2019/4/15弹窗请求图像
-                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_PULL_LIVE, account, (dialog,member) -> {
-                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
-                        dialog.dismiss();
-                    }).showDialog();
+                    pullStream(account);
                 }
             });
             //个人信息页面
@@ -230,6 +226,13 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 userViewHolder.llLiveTo.setVisibility(View.GONE);
             }
         }
+    }
+
+    private void pullStream(Account account){
+        new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_PULL_LIVE, account, (dialog, member) -> {
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
+            dialog.dismiss();
+        }).showDialog();
     }
 
     private void indivudualCall(Account account){

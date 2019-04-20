@@ -70,119 +70,6 @@
             android:textColor="@color/textview_color" />
     </RelativeLayout>
     
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/x65"
-        android:layout_marginTop="@dimen/x10"
-        android:background="@color/about_item_background">
-        
-        <TextView
-            android:id="@+id/tv_lock_time"
-            android:layout_width="@dimen/dp_80"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/x15"
-            android:layout_marginTop="@dimen/dp_10"
-            android:text="@string/text_is_it_locked"
-            android:textColor="@color/textview_color"
-            android:textSize="@dimen/sp_15" />
-        
-        <LinearLayout
-            android:id="@+id/ll_locked"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dp_10"
-            android:layout_toRightOf="@+id/tv_lock_time"
-            android:gravity="center"
-            android:orientation="horizontal">
-            
-            <ImageView
-                android:id="@+id/iv_locked"
-                android:layout_width="@dimen/x20"
-                android:layout_height="@dimen/x20"
-                android:background="@drawable/checkbox_background" />
-            
-            <TextView
-                android:id="@+id/tv_locked"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/x10"
-                android:text="@string/text_yes"
-                android:textSize="@dimen/sp_18"
-                android:textColor="@color/about_text_gray"/>
-        </LinearLayout>
-        
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/x40"
-            android:layout_marginTop="@dimen/dp_10"
-            android:layout_toRightOf="@+id/ll_locked"
-            android:gravity="center"
-            android:orientation="horizontal">
-            
-            <ImageView
-                android:id="@+id/iv_unlocked"
-                android:layout_width="@dimen/x20"
-                android:layout_height="@dimen/x20"
-                android:background="@drawable/checkbox_background" />
-            
-            <TextView
-                android:id="@+id/tv_unlocked"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="@dimen/x10"
-                android:text="@string/text_no"
-                android:textSize="@dimen/sp_18"
-                android:textColor="@color/edittext_textcolor"/>
-        </LinearLayout>
-        
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="@dimen/dp_12"
-            android:layout_marginLeft="@dimen/x14"
-            android:text="@string/text_locked_tempt"
-            android:textColor="@color/textview_color" />
-    </RelativeLayout>
-    
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_1"
-        android:background="@color/about_item_background"
-        android:paddingLeft="@dimen/dp_20">
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_1"
-            android:background="@color/temp_group_bg"
-             />
-    </FrameLayout>
-    
-    
-    <LinearLayout
-        android:id="@+id/ll_lock_time"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/x50"
-        android:background="@color/about_item_background"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
-        
-        <TextView
-            android:layout_width="@dimen/dp_80"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/x15"
-            android:text="@string/text_locked_time"
-            android:textColor="@color/textview_color"
-            android:textSize="@dimen/sp_15" />
-        
-        <TextView
-            android:id="@+id/locked_time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="00时10分00秒"
-            android:textColor="@color/edittext_textcolor"
-            android:textSize="@dimen/sp_18" />
-    </LinearLayout>
     
     <RelativeLayout
         android:layout_width="match_parent"
@@ -191,32 +78,32 @@
         android:background="@color/about_item_background">
         
         <TextView
-            android:id="@+id/tv_change_group"
+            android:id="@+id/tv_scan_group"
             android:layout_width="@dimen/dp_80"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/x15"
             android:layout_marginTop="@dimen/dp_10"
-            android:text="@string/text_change_group_auto"
+            android:text="@string/whether_scan"
             android:textColor="@color/textview_color"
             android:textSize="@dimen/sp_15" />
         
         <LinearLayout
-            android:id="@+id/ll_change"
+            android:id="@+id/ll_scan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dp_10"
-            android:layout_toRightOf="@+id/tv_change_group"
+            android:layout_toRightOf="@id/tv_scan_group"
             android:gravity="center"
             android:orientation="horizontal">
             
             <ImageView
-                android:id="@+id/iv_change"
+                android:id="@+id/iv_scan"
                 android:layout_width="@dimen/x20"
                 android:layout_height="@dimen/x20"
                 android:background="@drawable/checkbox_background" />
             
             <TextView
-                android:id="@+id/tv_change"
+                android:id="@+id/tv_scan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/x10"
@@ -231,18 +118,18 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/x40"
             android:layout_marginTop="@dimen/dp_10"
-            android:layout_toRightOf="@+id/ll_change"
+            android:layout_toRightOf="@id/ll_scan"
             android:gravity="center"
             android:orientation="horizontal">
             
             <ImageView
-                android:id="@+id/iv_unchange"
+                android:id="@+id/iv_unscan"
                 android:layout_width="@dimen/x20"
                 android:layout_height="@dimen/x20"
                 android:background="@drawable/checkbox_background" />
             
             <TextView
-                android:id="@+id/tv_unchange"
+                android:id="@+id/tv_unscan"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="@dimen/x10"
@@ -257,7 +144,7 @@
             android:layout_alignParentBottom="true"
             android:layout_marginBottom="@dimen/dp_12"
             android:layout_marginLeft="@dimen/x14"
-            android:text="@string/text_change_group_auto_tempt"
+            android:text="@string/whether_listen_the_group"
             android:textColor="@color/textview_color" />
     </RelativeLayout>
     

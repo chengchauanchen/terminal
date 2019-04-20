@@ -23,7 +23,9 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.SelectAdapter;
+import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
+import cn.vsx.vc.receiveHandle.ReceiveShowSelectedFragmentHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.view.TabView;
 
@@ -47,7 +49,7 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
     private MemberListFragment uavFragment;
     private BaseFragment currentFragment;
 
-    private List<Member> selectedMembers;
+    private ArrayList<Member> selectedMembers;
     private List<Integer> selectedMemberNos;
     private SelectAdapter selectAdapter;
     private int currentIndex;
@@ -178,6 +180,15 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
 
                 break;
             case R.id.iv_select:
+                ArrayList<ContactItemBean> selectedContacts = new ArrayList<>();
+                for(Member selectedMember : selectedMembers){
+                    ContactItemBean<Member> contactItemBean = new ContactItemBean<>();
+                    contactItemBean.setBean(selectedMember);
+                    contactItemBean.setType(Constants.TYPE_USER);
+                    selectedContacts.add(contactItemBean);
+                }
+
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSelectedFragmentHandler.class,selectedContacts);
 
                 break;
             default:
@@ -245,7 +256,7 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
         }
     };
 
-    public List<Member> getSelectedMember(){
+    public ArrayList<Member> getSelectedMember(){
         return selectedMembers;
     }
 

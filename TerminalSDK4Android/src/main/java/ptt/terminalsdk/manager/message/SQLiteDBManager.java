@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import cn.vsx.hamster.common.GroupType;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.message.ISQLiteDBManager;
@@ -62,6 +61,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         return mySqliteDBManager;
     }
 
+    @Override
     public synchronized void addTerminalMessage(TerminalMessage terminalMessage) {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -98,6 +98,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         db.execSQL(sql, new String[]{""+message_id});
     }
 
+    @Override
     public synchronized void deleteMessageFromSQLite(int messageCategory, int targetId, int memberId) {
         SQLiteDatabase db = helper.getWritableDatabase();
         if (messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
@@ -112,6 +113,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 //        db.close();
     }
 
+    @Override
     public synchronized void updateTerminalMessage(TerminalMessage terminalMessage) {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -127,6 +129,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
      * @param message_id
      * @param isWithDraw
      */
+    @Override
     public synchronized void updateTerminalMessageWithDraw(long message_id,boolean isWithDraw) {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -138,6 +141,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     /**
      * 查询所有的记录
      */
+    @Override
     public synchronized List<TerminalMessage> getTerminalMessage() {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(TABLE_TERMINAL_MESSAGE, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
@@ -325,6 +329,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         return terminalMessageList;
     }
 
+    @Override
     public synchronized void updateMessageList(List<TerminalMessage> terminalMessages) {
         SQLiteDatabase db = helper.getWritableDatabase();
         //开始事务
@@ -364,6 +369,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 //        db.close();
     }
 
+    @Override
     public synchronized void updateCombatMessageList(List<TerminalMessage> terminalMessages) {
         SQLiteDatabase db = helper.getWritableDatabase();
         //开始事务
@@ -402,6 +408,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
 //        db.close();
     }
+
+    @Override
     public synchronized void updateHistoryCombatMessageList(List<TerminalMessage> terminalMessages) {
         SQLiteDatabase db = helper.getWritableDatabase();
         //开始事务
@@ -441,22 +449,28 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 //        db.close();
     }
 
+    @Override
     public synchronized List<TerminalMessage> getMessageList() {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(MESSAGE_LIST, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
         return getTerminalMessageList(db, cursor);
     }
+
+    @Override
     public synchronized List<TerminalMessage> getCombatMessageList() {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(COMBAT_MESSAGE_LIST, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
         return getTerminalMessageList(db, cursor);
     }
+
+    @Override
     public synchronized List<TerminalMessage> getHistoryCombatMessageList() {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(HISTORY_COMBAT_MESSAGE_LIST, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
         return getTerminalMessageList(db, cursor);
     }
 
+    @Override
     public void deleteMessageList() {
         SQLiteDatabase db = helper.getWritableDatabase();
         db.execSQL("DELETE FROM messageList");
@@ -521,6 +535,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         }
     }
 
+    @Override
     public synchronized void deleteFolder() {
         SQLiteDatabase db = helper.getWritableDatabase();
         db.execSQL("DELETE FROM folderGroup");
@@ -543,7 +558,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             values.put("group_no",group.getNo());
             values.put("group_name", group.getName());
             values.put("department_name",group.getDepartmentName());
-            values.put("group_type",group.getGroupType().getCode());
+            values.put("group_type",group.getGroupType());
             values.put("response_group_type",group.getResponseGroupType());
             values.put("group_unique_no",group.getUniqueNo());
             db.replace(GROUP_DATA, null, values);
@@ -563,7 +578,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         values.put("group_name", group.getName());
         values.put("group_no", group.getNo());
         values.put("department_name",group.getDepartmentName());
-        values.put("group_type",group.getGroupType().getCode());
+        values.put("group_type",group.getGroupType());
         values.put("response_group_type",group.getResponseGroupType());
         values.put("group_unique_no",group.getUniqueNo());
         db.update(GROUP_DATA, values, "group_id = ?", new String[]{group.id + ""});
@@ -586,7 +601,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 group.setId(cursor.getInt(cursor.getColumnIndex("group_id")));
                 group.setName(cursor.getString(cursor.getColumnIndex("group_name")));
                 group.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
-                group.setGroupType(GroupType.getInstanceByCode(cursor.getInt(cursor.getColumnIndex("group_type"))));
+                group.setGroupType((cursor.getString(cursor.getColumnIndex("group_type"))));
                 group.setResponseGroupType(cursor.getString(cursor.getColumnIndex("response_group_type")));
                 group.setUniqueNo(cursor.getLong(cursor.getColumnIndex("group_unique_no")));
                 groupList.add(group);

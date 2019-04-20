@@ -41,7 +41,6 @@ import cn.vsx.vc.adapter.MessageListAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiveGoToHelpCombatHandler;
 import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
-import cn.vsx.vc.receiveHandle.ReceiverDeleteMessageHandler;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -201,7 +200,7 @@ public abstract class CombatFragment extends BaseFragment {
             terminalMessageData.addAll(messageList);
             //合成作战组消息，只存一个条目
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() &&
-                    TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())){
+                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())){
                 saveMessageToList(terminalMessage,false);
                 saveHelpCombatMessageToSql(terminalMessage);//来合成作战组消息了，刷新并保存列表
             }
@@ -219,7 +218,7 @@ public abstract class CombatFragment extends BaseFragment {
         while (iterator.hasNext()){
             TerminalMessage next = iterator.next();
             if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                    TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
+                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
                     next.messageToId == terminalMessage.messageToId){
                 iterator.remove();
                 break;
@@ -236,7 +235,7 @@ public abstract class CombatFragment extends BaseFragment {
         while (iterator.hasNext()){
             TerminalMessage next = iterator.next();
             if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                    TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
+                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
                     next.messageToId == combatGroupId){
                 handleMessage = next;
                 iterator.remove();

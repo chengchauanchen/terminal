@@ -20,7 +20,6 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import cn.vsx.hamster.common.GroupType;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.ResponseGroupType;
@@ -110,7 +109,7 @@ public class MessageListAdapter extends BaseAdapter {
             }
 //            viewHolder.tv_current_group.setVisibility(View.GONE);
         } else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息，显示组名
-            if (TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())) {//如果是合成作战组，上面显示合成作战组
+            if (TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())) {//如果是合成作战组，上面显示合成作战组
                 viewHolder.tv_user_name.setText(context.getString(R.string.text_to_help_combat));
             } else {
                 viewHolder.tv_user_name.setText(DataUtil.getGroupByGroupNo(terminalMessage.messageToId).getName());

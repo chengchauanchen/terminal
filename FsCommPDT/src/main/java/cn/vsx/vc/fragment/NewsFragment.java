@@ -512,7 +512,7 @@ public class NewsFragment extends BaseFragment {
                 context.startActivity(intent);
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//进入组会话页
-                if (TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())) {
+                if (TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())) {
                     combatFragmentCreate = true;
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveGoToHelpCombatHandler.class, false, false);
                 } else {
@@ -601,7 +601,7 @@ public class NewsFragment extends BaseFragment {
                     saveVideoMessage(terminalMessage,false);
                 }
             }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                    TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())){
+                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())){
                 saveHelpCombatMessage(terminalMessage, false);
                 saveHelpCombatMessageToSql(terminalMessage);
             }else {
@@ -624,7 +624,7 @@ public class NewsFragment extends BaseFragment {
             while (iterator.hasNext()){
                 TerminalMessage next = iterator.next();
                 if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                        TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
+                        TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
                         next.messageToId == terminalMessage.messageToId){
                     iterator.remove();
                     break;
@@ -643,7 +643,7 @@ public class NewsFragment extends BaseFragment {
             while (iterator.hasNext()){
                 TerminalMessage next = iterator.next();
                 if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                        TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
+                        TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
                         next.messageToId == combatGroupId){
                     handleMessage = next;
                     iterator.remove();
@@ -668,7 +668,7 @@ public class NewsFragment extends BaseFragment {
         while (iterator.hasNext()){
             TerminalMessage next = iterator.next();
             if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                    TempGroupType.TO_HELP_COMBAT.equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType())){
+                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType())){
                 unReadCount = next.unReadCount;
                 iterator.remove();
                 break;

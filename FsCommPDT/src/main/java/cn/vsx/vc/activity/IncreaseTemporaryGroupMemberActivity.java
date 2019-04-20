@@ -4,12 +4,17 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 
+import java.util.ArrayList;
+
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdatePhoneMemberHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.fragment.EstablishTempGroupFragment;
 import cn.vsx.vc.fragment.SearchFragment;
+import cn.vsx.vc.fragment.SelectedMemberFragment;
+import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
+import cn.vsx.vc.receiveHandle.ReceiveShowSelectedFragmentHandler;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
@@ -33,14 +38,18 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> {//更新当前组
     };
 
+    private ReceiveShowSelectedFragmentHandler receiveShowSelectedFragmentHandler = new ReceiveShowSelectedFragmentHandler(){
+        @Override
+        public void handler(ArrayList<ContactItemBean> selectedContacts){
+            SelectedMemberFragment selectedMemberFragment = SelectedMemberFragment.newInstance(selectedContacts);
+            selectedMemberFragment.setBackListener(() -> onBackPressed());
+            getSupportFragmentManager().beginTransaction().hide(establishTempGroupFragment).add(R.id.search_framelayout, selectedMemberFragment).addToBackStack(null).show(selectedMemberFragment).commit();
+        }
+    };
+
     private ReceiveShowSearchFragmentHandler receiveShowSearchFragmentHandler = (type,selectedNos) -> {
         SearchFragment searchFragment = SearchFragment.newInstance(type,selectedNos);
-        searchFragment.setBacklistener(new SearchFragment.BackListener(){
-            @Override
-            public void onBack(){
-                onBackPressed();
-            }
-        });
+        searchFragment.setBacklistener(() -> onBackPressed());
         getSupportFragmentManager().beginTransaction().hide(establishTempGroupFragment).add(R.id.search_framelayout, searchFragment).addToBackStack(null).show(searchFragment).commit();
     };
 
@@ -59,6 +68,7 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
 
     @Override
     public void initListener(){
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveShowSelectedFragmentHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveShowSearchFragmentHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdatePhoneMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
@@ -70,6 +80,7 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
 
     @Override
     public void doOtherDestroy(){
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveShowSelectedFragmentHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveShowSearchFragmentHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdatePhoneMemberHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);

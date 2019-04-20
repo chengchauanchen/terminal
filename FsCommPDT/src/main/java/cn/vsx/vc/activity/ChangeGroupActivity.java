@@ -189,7 +189,7 @@ public class ChangeGroupActivity extends BaseActivity {
                     continue;
                 }
                 //响应组不显示
-                if(group.getGroupType()!= GroupType.RESPONSE){
+                if(!group.getGroupType().equals(GroupType.RESPONSE.toString()) ){
                     GroupItemBean<Group> bean = new GroupItemBean<>();
                     bean.setBean(group);
                     bean.setType(Constants.TYPE_GROUP);

@@ -155,6 +155,8 @@
     <string name="text_locked_tempt">( 锁定后，不允许临时组内成员切组 )</string>
     <string name="text_locked_time">锁定时间</string>
     <string name="text_change_group_auto">自动切组</string>
+    <string name="whether_scan">是否扫描</string>
+    <string name="whether_listen_the_group">( 组员是否收听这个组 )</string>
     <string name="text_change_group_auto_tempt">( 将组员自动切换到所创建的组 )</string>
     <string name="text_sure_to_create_group">确定创建</string>
     <string name="dialog_change_group_cancel_title">将7B-13T添加到扫描组?</string>
@@ -556,5 +558,6 @@
     <string name="login_cancel">取消登录</string>
     <string name="input_search_content">请输入搜索内容</string>
     <string name="force_off_line">该账号被强制下线</string>
-    
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
