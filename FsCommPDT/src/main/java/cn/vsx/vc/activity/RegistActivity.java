@@ -893,7 +893,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private void start() {
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
             MyTerminalFactory.getSDK().start();
-            MyTerminalFactory.getSDK().connectToServer();
+//            MyTerminalFactory.getSDK().connectToServer();
 
             PromptManager.getInstance().start();
             //发送认证消息，uuid到注册服务器，判断是注册还是登录

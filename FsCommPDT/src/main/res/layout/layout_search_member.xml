@@ -101,34 +101,26 @@
         android:textColor="@color/grey_b5"
         android:textSize="@dimen/x12"
         android:textStyle="normal" />
-    
-    
+
     <RelativeLayout
         android:id="@+id/rl_search_result"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:visibility="gone">
-        
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_30"
-            android:background="@color/common_bg"
-            android:gravity="center_vertical"
-            android:paddingLeft="@dimen/x14"
-            android:text="@string/text_contacts"
-            android:textColor="@color/gray"
-            android:textSize="@dimen/sp_14"
-            android:textStyle="normal" />
-        
-        <ListView
-            android:id="@+id/lv_search_allcontacts"
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/layout_srl"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@id/tv_search_contactscount"
-            android:divider="@null"
-            android:scrollbars="none" />
-    
+            android:layout_below="@id/tv_search_contactscount">
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:divider="@null"
+                android:scrollbars="none" />
+        </android.support.v4.widget.SwipeRefreshLayout>
+        
     </RelativeLayout>
 
 </LinearLayout>

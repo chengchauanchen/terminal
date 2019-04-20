@@ -13,25 +13,24 @@ import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONObject;
+import com.chad.library.adapter.base.BaseQuickAdapter;
 
 import org.apache.http.util.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
@@ -45,21 +44,19 @@ import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
-import cn.vsx.hamster.terminalsdk.model.MemberResponse;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetTerminalHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdatePhoneMemberHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSearchMemberResultHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MemberListAdapter;
+import cn.vsx.vc.adapter.SearchAdapter;
 import cn.vsx.vc.adapter.SelectAdapter;
 import cn.vsx.vc.adapter.SelectedListAdapter;
-import cn.vsx.vc.adapter.TempGroupSearchAdapter;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSwitchCameraViewHandler;
@@ -69,7 +66,7 @@ import cn.vsx.vc.utils.InputMethodUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
-public class InviteMemberService extends BaseService {
+public class InviteMemberService extends BaseService implements SwipeRefreshLayout.OnRefreshListener, BaseQuickAdapter.RequestLoadMoreListener {
     //编辑主题
     private LinearLayout mLlEditTheme;
     private ImageView mIvLiveEditReturn;
@@ -83,7 +80,8 @@ public class InviteMemberService extends BaseService {
     private ImageView mIvDeleteEdittext;
     private Button mBtnSearchAllcontacts;
     private TextView mTvSearchNothing;
-    private ListView mLvSearchAllcontacts;
+    private SwipeRefreshLayout mLvSearchSwipeRefreshLayout;
+    private RecyclerView mLvSearchRecyclerView;
     private RelativeLayout mRlSearchResult;
 
     //选择布局
@@ -131,6 +129,14 @@ public class InviteMemberService extends BaseService {
     //上报图像的类型
     private List<String> pushTypes = Arrays.asList(TerminalMemberType.TERMINAL_PC.toString(), TerminalMemberType.TERMINAL_PHONE.toString(),
                                                    TerminalMemberType.TERMINAL_UAV.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
+
+    //请求图像的搜索页面的类型
+    private List<Integer> pullSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_PC, Constants.TYPE_CHECK_SEARCH_POLICE,
+            Constants.TYPE_CHECK_SEARCH_UAV,Constants.TYPE_CHECK_SEARCH_RECODER);
+    //上报图像的搜索页面的类型
+    private List<Integer> pushSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_PC, Constants.TYPE_CHECK_SEARCH_POLICE,
+            Constants.TYPE_CHECK_SEARCH_UAV,Constants.TYPE_CHECK_SEARCH_HDMI);
+
     private List<List<ContactItemBean>> mAllDatas = new ArrayList<>();
     private List<MemberListAdapter> contactAdapter = new ArrayList<>();
 
@@ -141,13 +147,10 @@ public class InviteMemberService extends BaseService {
 
     private LinearLayout layout_search;
 
-    private String keyWord;
-    private List<Member> searchList = new ArrayList<>();
-    private TempGroupSearchAdapter tempGroupSearchAdapter;
-    private List<Member> searchMemberListExceptMe = new ArrayList<>();
-    /**
-     * 搜索到的结果集合
-     */
+    private List<ContactItemBean> searchList = new ArrayList<>();
+    private SearchAdapter searchAdapter;
+    private int currentPage = 0;
+    private static final int PAGE_SIZE = 20;
 
     private static final int TAB_COUNT = 4;
     //当前显示的列表
@@ -177,7 +180,8 @@ public class InviteMemberService extends BaseService {
         mIvDeleteEdittext = rootView.findViewById(R.id.iv_delete_edittext);
         mBtnSearchAllcontacts = rootView.findViewById(R.id.btn_search_allcontacts);
         mTvSearchNothing = rootView.findViewById(R.id.tv_search_nothing);
-        mLvSearchAllcontacts = rootView.findViewById(R.id.lv_search_allcontacts);
+        mLvSearchSwipeRefreshLayout = rootView.findViewById(R.id.layout_srl);
+        mLvSearchRecyclerView = rootView.findViewById(R.id.recyclerview);
         mRlSearchResult = rootView.findViewById(R.id.rl_search_result);
 
         //选择布局
@@ -227,9 +231,11 @@ public class InviteMemberService extends BaseService {
         mIvLiveEditReturn.setOnClickListener(editThemeReturnOnClickListener);
         mBtnLiveSelectmemberStart.setOnClickListener(startOnClickListener);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdatePhoneMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRemoveSwitchCameraViewHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetTerminalHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSearchMemberResultHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberSelectedHandler);
+
         layout_search.setOnClickListener(searchOnClickListener);
 
         mIvBack.setOnClickListener(searchBackOnClickListener);
@@ -237,7 +243,6 @@ public class InviteMemberService extends BaseService {
         mBtnSearchAllcontacts.setOnClickListener(doSearchOnClickListener);
         mEtSearchAllcontacts.addTextChangedListener(editTextChangedListener);
         mEtSearchAllcontacts.setOnEditorActionListener(onEditorActionListener);
-        mLvSearchAllcontacts.setOnItemClickListener(searchItemclickListener);
         llSelect.setOnClickListener(selectedOnClickListener);
 
     }
@@ -284,12 +289,17 @@ public class InviteMemberService extends BaseService {
             contactAdapter.add(adapter);
         }
 
-        searchMemberListExceptMe.addAll(TerminalFactory.getSDK().getConfigManager().getPhoneMemberExceptMe());
-        tempGroupSearchAdapter = new TempGroupSearchAdapter(MyTerminalFactory.getSDK().application, searchList);
-        mLvSearchAllcontacts.setAdapter(tempGroupSearchAdapter);
+        mLvSearchSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
+        mLvSearchSwipeRefreshLayout.setProgressViewOffset(false, 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources().getDisplayMetrics()));
+        mLvSearchSwipeRefreshLayout.setOnRefreshListener(this);
+        searchAdapter = new SearchAdapter(searchList);
+        searchAdapter.enableLoadMoreEndClick(true);
+        searchAdapter.setOnLoadMoreListener(this, mLvSearchRecyclerView);
+        mLvSearchRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mLvSearchRecyclerView.setAdapter(searchAdapter);
 
         //已经选择的成员列表
-        mRvSelected.setLayoutManager(new LinearLayoutManager(MyTerminalFactory.getSDK().application, OrientationHelper.HORIZONTAL, false));
+        mRvSelected.setLayoutManager(new LinearLayoutManager(MyTerminalFactory.getSDK().application, OrientationHelper.VERTICAL, false));
         selectedListAdapter = new SelectedListAdapter(this,selectedMembers);
         mRvSelected.setAdapter(selectedListAdapter);
         selectedListAdapter.setItemClickListener(new MyItemDeleteClickListener());
@@ -307,9 +317,10 @@ public class InviteMemberService extends BaseService {
     public void onDestroy() {
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdatePhoneMemberHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRemoveSwitchCameraViewHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetTerminalHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSearchMemberResultHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberSelectedHandler);
         mHandler.removeCallbacksAndMessages(null);
 
     }
@@ -320,19 +331,6 @@ public class InviteMemberService extends BaseService {
         mHandler.post(this::removeView);
     };
 
-    private ReceiveUpdatePhoneMemberHandler receiveUpdatePhoneMemberHandler = PhoneMember -> mHandler.post(() -> {
-//        MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
-//        if(null == memberResponse){
-//            return;
-//        }
-//        // TODO: 2018/12/28 下拉刷新之后之前选中的人没了，要改
-//        List<CatalogBean> catalogBeanList = new ArrayList<>();
-//        CatalogBean bean = new CatalogBean();
-//        bean.setName(memberResponse.getName());
-//        bean.setBean(memberResponse);
-//        catalogBeanList.add(bean);
-//        updateData(memberResponse,catalogBeanList);
-    });
     /**
      * 通知直播停止 通知界面关闭视频页
      **/
@@ -340,13 +338,17 @@ public class InviteMemberService extends BaseService {
         ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_stoped));
         stopBusiness();
     };
-
+    /**
+     *
+     */
     private View.OnClickListener editThemeOnClickListener = v -> {
         mLlEditTheme.setVisibility(View.VISIBLE);
         mLlSearchMember.setVisibility(View.GONE);
         mLlSelectMember.setVisibility(View.GONE);
     };
-
+    /**
+     * 编辑主题页面的确定按钮
+     */
     private View.OnClickListener editThemeConfirmOnClickListener = v -> {
         if (!TextUtils.isEmpty(mEtLiveEditImportTheme.getText().toString().trim())) {
             mLlEditTheme.setVisibility(View.GONE);
@@ -370,7 +372,9 @@ public class InviteMemberService extends BaseService {
             removeView();
         }
     };
-
+    /**
+     * 编辑主题页面的返回按钮
+     */
     private View.OnClickListener editThemeReturnOnClickListener = v -> {
         mLlEditTheme.setVisibility(View.GONE);
         mLlSearchMember.setVisibility(View.GONE);
@@ -382,7 +386,9 @@ public class InviteMemberService extends BaseService {
     private View.OnClickListener selectedOnClickListener =  v -> {
         goToSelectedView();
     };
-
+    /**
+     * 请求图像和上报图像的确定按钮
+     */
     private View.OnClickListener startOnClickListener = v -> {
         if (Constants.PUSH.equals(type)) {
             if (pushing) {
@@ -481,34 +487,6 @@ public class InviteMemberService extends BaseService {
         }
     }
 
-    private AdapterView.OnItemClickListener searchItemclickListener = (parent, view, position, id) -> {
-        List<Integer> selectMember = getSelectMembersNo();
-        if (!selectMember.isEmpty() && selectMember.contains(searchList.get(position).getNo())) {
-            ToastUtil.showToast(MyTerminalFactory.getSDK().application, getString(R.string.text_you_have_added_this_member));
-            return;
-        }
-        if(currentIndex>=0&&currentIndex<contactAdapter.size()){
-//            contactAdapter.get(currentIndex).setSelectMember(searchList.get(position).getNo());
-        }
-
-        mEtSearchAllcontacts.setText("");
-        InputMethodUtil.hideInputMethod(MyTerminalFactory.getSDK().application, mEtSearchAllcontacts);
-//        searchMemberListExceptMe.clear();
-        searchList.clear();
-        mTvSearchNothing.setVisibility(View.VISIBLE);
-        mRlSearchResult.setVisibility(View.GONE);
-
-        mLlEditTheme.setVisibility(View.GONE);
-        mLlSelectMember.setVisibility(View.VISIBLE);
-        mLlSearchMember.setVisibility(View.GONE);
-    };
-
-    private TextView.OnEditorActionListener onEditorActionListener = (v, actionId, event) -> {
-        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-            doSearch();
-        }
-        return false;
-    };
 
     private TextWatcher editTextChangedListener = new TextWatcher() {
         @Override
@@ -538,29 +516,58 @@ public class InviteMemberService extends BaseService {
         }
     };
 
-    private View.OnClickListener doSearchOnClickListener = v -> {
-        doSearch();
+    private TextView.OnEditorActionListener onEditorActionListener = (v, actionId, event) -> {
+        if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+            if(!android.text.TextUtils.isEmpty(mEtSearchAllcontacts.getText().toString())){
+                doSearch();
+            }
+
+        }
+        return false;
     };
 
-    private View.OnClickListener deleteEditTextOnClickListener = v -> {
-        mEtSearchAllcontacts.setText("");
-    };
-
-    private View.OnClickListener searchBackOnClickListener = v -> {
-        searchList.clear();
-        mEtSearchAllcontacts.setText("");
-        tempGroupSearchAdapter.notifyDataSetChanged();
-        mLlEditTheme.setVisibility(View.GONE);
-        mLlSearchMember.setVisibility(View.GONE);
-        InputMethodUtil.hideInputMethod(MyTerminalFactory.getSDK().application, mEtSearchAllcontacts);
-        mLlSelectMember.setVisibility(View.VISIBLE);
-    };
-
+    /**
+     * 点击搜索布局，显示搜索页面开始搜索
+     */
     private View.OnClickListener searchOnClickListener = v -> {
         mLlEditTheme.setVisibility(View.GONE);
         mLlSelectMember.setVisibility(View.GONE);
         mLlSearchMember.setVisibility(View.VISIBLE);
     };
+
+    /**
+     * 搜索页面的搜索按钮
+     */
+    private View.OnClickListener doSearchOnClickListener = v -> {
+        doSearch();
+    };
+
+    /**
+     * 搜索页面的清除输入按钮
+     */
+    private View.OnClickListener deleteEditTextOnClickListener = v -> {
+        mEtSearchAllcontacts.setText("");
+    };
+
+    /**
+     * 搜索页面的返回按钮
+     */
+    private View.OnClickListener searchBackOnClickListener = v -> {
+        fromSearchViewGoBackToSeletView();
+    };
+
+    /**
+     * 从搜索页面退到选择页面
+     */
+    private void fromSearchViewGoBackToSeletView(){
+        searchList.clear();
+        mEtSearchAllcontacts.setText("");
+        searchAdapter.notifyDataSetChanged();
+        mLlEditTheme.setVisibility(View.GONE);
+        mLlSearchMember.setVisibility(View.GONE);
+        InputMethodUtil.hideInputMethod(MyTerminalFactory.getSDK().application, mEtSearchAllcontacts);
+        mLlSelectMember.setVisibility(View.VISIBLE);
+    }
 
     /**
      * 下拉刷新
@@ -580,6 +587,101 @@ public class InviteMemberService extends BaseService {
         }
     }
 
+    /**
+     * 搜索页面-下拉刷新
+     */
+    @Override
+    public void onRefresh() {
+        currentPage = 0;
+        mLvSearchRecyclerView.scrollToPosition(0);
+        if(android.text.TextUtils.isEmpty(mEtSearchAllcontacts.getText().toString())){
+            ToastUtil.showToast(this, getResources().getString(R.string.input_search_content));
+            return;
+        }
+        doSearch();
+    }
+
+    /**
+     * 搜索页面-上拉加载更多
+     */
+    @Override
+    public void onLoadMoreRequested() {
+        currentPage++;
+        if(android.text.TextUtils.isEmpty(mEtSearchAllcontacts.getText().toString())){
+            ToastUtil.showToast(this, getResources().getString(R.string.input_search_content));
+            return;
+        }
+        doSearch();
+    }
+
+    /**
+     * 搜索页面点击选择
+     */
+    private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected) -> {
+        member.setChecked(selected);
+        if(selectedMembers.contains(member)){
+            if(!member.isChecked()){
+                selectedMembers.remove(member);
+            }
+        }else{
+            if(member.isChecked()){
+                selectedMembers.add(member);
+            }
+        }
+        mHandler.post(() -> {
+            selectAdapter.notifyDataSetChanged();
+            refreshAllSelectedStatus();
+            fromSearchViewGoBackToSeletView();
+        });
+    };
+
+    private ReceiveSearchMemberResultHandler receiveSearchMemberResultHandler = new ReceiveSearchMemberResultHandler() {
+
+        @Override
+        public void handler(int page, int totalPages, int size, List<Member> members){
+            logger.info("totalPages:" + totalPages + "SearchFragment搜索结果：" + members);
+            mHandler.post(() -> {
+                mLvSearchSwipeRefreshLayout.setRefreshing(false);
+                if(totalPages == 0){
+                    mTvSearchNothing.setVisibility(View.VISIBLE);
+                    mTvSearchNothing.setText(R.string.text_contact_is_not_exist);
+                    searchAdapter.loadMoreEnd(true);
+                    mRlSearchResult.setVisibility(View.GONE);
+                }else{
+                    mTvSearchNothing.setVisibility(View.GONE);
+                    mRlSearchResult.setVisibility(View.VISIBLE);
+                    searchAdapter.setEnableLoadMore(totalPages -1 > page);
+                    if(page == totalPages-1){
+                        //最后一页
+                        searchAdapter.loadMoreEnd(true);
+                    }else {
+                        searchAdapter.loadMoreComplete();
+                    }
+
+                    if(page == 0){
+                        searchList.clear();
+                    }
+                    int viewType = getSearchTerminalType();
+                    for(Member member : members){
+                        member.setChecked(false);
+                        for(Member m : selectedMembers){
+                            if(member.getNo() == m.getNo()){
+                                member.setChecked(true);
+                                break;
+                            }
+                        }
+                        ContactItemBean<Member> contactItemBean = new ContactItemBean<>();
+                        contactItemBean.setType(viewType);
+                        contactItemBean.setBean(member);
+                        searchList.add(contactItemBean);
+                    }
+
+                    searchAdapter.notifyDataSetChanged();
+                }
+            });
+        }
+    };
+
     /**************************************************************************listener***********************************************************************************************/
 
 
@@ -588,48 +690,23 @@ public class InviteMemberService extends BaseService {
      */
     private void doSearch() {
         InputMethodUtil.hideInputMethod(MyTerminalFactory.getSDK().application, mEtSearchAllcontacts);
-        keyWord = mEtSearchAllcontacts.getText().toString();
-        tempGroupSearchAdapter.setFilterKeyWords(keyWord);
-
-        mTvSearchNothing.setVisibility(View.VISIBLE);
-        mTvSearchNothing.setText(R.string.text_search_contact);
-        mRlSearchResult.setVisibility(View.GONE);
-        searchList.clear();
+        String keyWord = mEtSearchAllcontacts.getText().toString();
+        searchAdapter.setFilterKeyWords(keyWord);
 
         if (android.text.TextUtils.isEmpty(keyWord)) {
             ToastUtil.showToast(MyTerminalFactory.getSDK().application, getString(R.string.text_search_content_can_not_empty));
         } else {
-            searchMemberFromGroup();
+            requestSearchData(keyWord);
         }
     }
 
     /**
      * 搜索
-     **/
-    private void searchMemberFromGroup() {
-        searchList.clear();
-        for (Member member : searchMemberListExceptMe) {
-            String name = member.getName();
-            String id = String.valueOf(member.getNo());
-            if (!Util.isEmpty(name) && !Util.isEmpty(keyWord) && name.toLowerCase().contains(keyWord.toLowerCase())) {
-                searchList.add(member);
-            } else if (!Util.isEmpty(id) && !Util.isEmpty(keyWord) && id.contains(keyWord)) {
-                searchList.add(member);
-            }
-        }
-        if (searchList.size() == 0) {
-            mTvSearchNothing.setText(R.string.text_contact_is_not_exist);
-            mRlSearchResult.setVisibility(View.GONE);
-        } else {
-            mTvSearchNothing.setVisibility(View.GONE);
-            mRlSearchResult.setVisibility(View.VISIBLE);
-
-            if (tempGroupSearchAdapter != null) {
-                tempGroupSearchAdapter.notifyDataSetChanged();
-                mLvSearchAllcontacts.setSelection(0);
-            }
-        }
+     */
+    private void requestSearchData(String keyWord) {
+        TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,getTerminalType(),keyWord);
     }
+
 
     /**
      * 跳转到已经选择成员的信息
@@ -642,129 +719,6 @@ public class InviteMemberService extends BaseService {
             mBtnLiveSelectmemberStart.setVisibility(View.GONE);
         }
     }
-
-    /**
-     * 设置数据
-     */
-    private void updateData(MemberResponse memberResponse, List<CatalogBean> catalogBeanList) {
-//        mDatas.clear();
-//        mCatalogList.clear();
-//        mCatalogList.addAll(catalogBeanList);
-//        addData(memberResponse);
-//        mContactAdapter.notifyDataSetChanged();
-//        mCatalogAdapter.notifyDataSetChanged();
-//        mCatalogRecyclerview.scrollToPosition(mCatalogList.size() - 1);
-
-    }
-
-    private void addData(MemberResponse memberResponse) {
-        if (memberResponse != null) {
-            addItemMember(memberResponse);
-            addItemDepartment(memberResponse);
-        }
-    }
-
-    /**
-     * 添加子成员
-     */
-    @SuppressWarnings("unchecked")
-    private void addItemMember(MemberResponse memberResponse) {
-//        //子成员
-//        List<Member> memberList = new ArrayList<>();
-//        List<Member> members = memberResponse.getMembers();
-//        for (Member member : members) {
-//            Member cloneMember = new Member();
-//            //如果没有名字显示No
-//            if (member.getName() == null || member.getName().equals("")) {
-//                cloneMember.setName(String.valueOf(member.getNo()));
-//            } else {
-//                cloneMember.setName(member.getName());
-//            }
-//            //memberId终端用不上，代码里的id都是指No
-//            cloneMember.setId(member.getNo());
-//            cloneMember.setNo(member.getNo());
-////            cloneMember.setTerminalMemberTypeEnum(TerminalMemberType.getInstanceByCode(member.type));
-//            cloneMember.setPhone(member.getPhone());
-//            cloneMember.setDepartmentName(memberResponse.getName());
-//            memberList.add(cloneMember);
-//        }
-//        if (!memberList.isEmpty()) {
-//            List<ContactItemBean> itemMemberList = new ArrayList<>();
-//            if (Constants.PUSH.equals(type)) {
-//                filterPushMember(memberList);
-//            } else if (Constants.PULL.equals(type)) {
-//                filterPullMember(memberList);
-//            }
-//
-//            for (Member member : memberList) {
-//                if (member.getName() == null) {
-//                    continue;
-//                }
-//                member.setChecked(false);
-//                ContactItemBean<Member> bean = new ContactItemBean<>();
-//                bean.setBean(member);
-//                bean.setType(Constants.TYPE_USER);
-//                itemMemberList.add(bean);
-//            }
-//            Collections.sort(itemMemberList);
-//            mDatas.addAll(itemMemberList);
-//        }
-    }
-
-    private void filterPullMember(List<Member> memberList) {
-        Iterator<Member> iterator = memberList.iterator();
-        while (iterator.hasNext()) {
-            Member member = iterator.next();
-            if (MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) == member.getNo()) {
-                iterator.remove();
-                continue;
-            }
-            if (livingMemberId != 0 && livingMemberId == member.getNo()) {
-                iterator.remove();
-            }
-        }
-    }
-
-    private void filterPushMember(List<Member> memberList) {
-        //去掉正在观看的人和自己
-        Iterator<Member> iterator = memberList.iterator();
-        while (iterator.hasNext()) {
-            Member member = iterator.next();
-            if (MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) == member.getNo()) {
-                iterator.remove();
-                continue;
-            }
-            if (null != watchingmembers) {
-                for (VideoMember watchingmember : watchingmembers) {
-                    if (watchingmember.getId() == member.getNo()) {
-                        iterator.remove();
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * 添加子部门
-     */
-    @SuppressWarnings("unchecked")
-    private void addItemDepartment(MemberResponse memberResponse) {
-//        List<MemberResponse> data = memberResponse.getChildren();
-//        if (data != null && !data.isEmpty()) {
-//            for (MemberResponse next : data) {
-//                if (next.getName() == null) {
-//                    continue;
-//                }
-//                ContactItemBean<MemberResponse> bean = new ContactItemBean<>();
-//                bean.setType(Constants.TYPE_DEPARTMENT);
-//                bean.setName(next.getName());
-//                bean.setBean(next);
-//                mDatas.add(bean);
-//                //                Collections.sort(mDatas);
-//            }
-//        }
-    }
-
 
     @SuppressWarnings("unchecked")
     private void filterMember(Intent intent) {
@@ -825,24 +779,12 @@ public class InviteMemberService extends BaseService {
      * @param contactItemBeans
      */
     private void restoreSelectStatus(List<ContactItemBean> contactItemBeans,int index) {
-        if(selectedMembers.isEmpty()){
-            for (ContactItemBean bean: contactItemBeans) {
-                if(bean.getType() == Constants.TYPE_USER){
-                    Member member1 = (Member) bean.getBean();
-                    member1.setChecked(false);
-                }
-            }
-        }else{
-            for (Member member: selectedMembers) {
-                for (ContactItemBean bean: contactItemBeans) {
-                    if(bean.getType() == Constants.TYPE_USER){
-                        Member member1 = (Member) bean.getBean();
-                        member1.setChecked((member.getNo() == member1.getNo()));
-                    }
-                }
+        for (ContactItemBean bean: contactItemBeans) {
+            if(bean.getType() == Constants.TYPE_USER){
+                Member member = (Member) bean.getBean();
+                member.setChecked((selectedMembers.contains(member)));
             }
         }
-
         if(index>=0&&index<contactAdapter.size()){
             contactAdapter.get(index).notifyDataSetChanged();
         }
@@ -862,6 +804,14 @@ public class InviteMemberService extends BaseService {
      */
     private String getTerminalType(){
         return ((android.text.TextUtils.equals(type,Constants.PULL))?pullTypes:pushTypes).get(currentIndex);
+    }
+
+    /**
+     * 获取搜索页面的对应设备的布局类型
+     * @return
+     */
+    private int getSearchTerminalType(){
+        return ((android.text.TextUtils.equals(type,Constants.PULL))?pullSearchTypes:pushSearchTypes).get(currentIndex);
     }
 
     /**
