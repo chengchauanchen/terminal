@@ -155,7 +155,7 @@ public class PTTButtonEventService extends Service {
       ToastUtil.showToast(this, "没有组呼权限");
       return;
     }
-    int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+    int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
     logger.info("PTT按下以后resultCode:" + resultCode);
     if (resultCode == BaseCommonCode.SUCCESS_CODE) {//允许组呼了
       if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
