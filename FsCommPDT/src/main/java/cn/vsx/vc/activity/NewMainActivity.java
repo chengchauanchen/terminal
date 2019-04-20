@@ -81,6 +81,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandle
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
@@ -398,6 +399,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler(int type) {
             SearchFragment searchFragment = SearchFragment.newInstance(type,new ArrayList<>());
+            searchFragment.setBacklistener(() -> onBackPressed());
             fl_fragment_container_main.setVisibility(View.VISIBLE);
             getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, searchFragment).commit();
             myHandler.postDelayed(() -> ll_content.setVisibility(View.GONE),500);
@@ -409,6 +411,14 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 //            getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, localMemberSearchFragment).commit();
 //            myHandler.postDelayed(() -> ll_content.setVisibility(View.GONE),500);
 
+        }
+    };
+
+    private ReceiveForceOfflineHandler receiveForceOfflineHandler = new ReceiveForceOfflineHandler(){
+        @Override
+        public void handler(){
+            ToastUtil.showToast(NewMainActivity.this,getResources().getString(R.string.force_off_line));
+            myHandler.postDelayed(()-> exitApp(),3000);
         }
     };
 
@@ -934,6 +944,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCallingCannotClickHandler);
 
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveForceOfflineHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
@@ -1537,6 +1548,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler );
 
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceOfflineHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateFoldersAndGroupsHandler );
 

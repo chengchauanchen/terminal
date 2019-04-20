@@ -61,7 +61,6 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
 
         @Override
         public void handler(int page, int totalPages, int size, List<Member> members){
-            logger.info("totalPages:" + totalPages + "SearchFragment搜索结果：" + members);
             mhandler.post(() -> {
                 mLayoutSrl.setRefreshing(false);
                 if(totalPages == 0){
@@ -171,12 +170,21 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
     private void doSearch(String keywords){
         switch(type){
             case Constants.TYPE_CONTRACT_GROUP:
+                List<Group> groups = TerminalFactory.getSDK().getConfigManager().searchGroup(keywords);
+                mLayoutSrl.setRefreshing(false);
+                for(Group group : groups){
+                    ContactItemBean<Group> contactItemBean = new ContactItemBean<>();
+                    contactItemBean.setType(type);
+                    contactItemBean.setBean(group);
+                    mData.add(contactItemBean);
+                    searchAdapter.notifyDataSetChanged();
+                }
                 break;
             case Constants.TYPE_CONTRACT_PDT:
-                TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_PDT.toString(),keywords);
+                TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_PC.toString(), keywords);
                 break;
             case Constants.TYPE_CONTRACT_MEMBER:
-                TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_PHONE.toString(), keywords);
+
                 break;
             case Constants.TYPE_CHECK_SEARCH_GROUP:
                 break;
@@ -207,18 +215,9 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
         searchAdapter.setOnItemChildClickListener(this);
         searchAdapter.enableLoadMoreEndClick(true);
         searchAdapter.setOnLoadMoreListener(this, mRecyclerview);
-        searchAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener(){
-            @Override
-            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position){
-                ContactItemBean contactItemBean = mData.get(position);
-                if(contactItemBean.getBean() instanceof Member){
-                    Member member = (Member) contactItemBean.getBean();
-                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class,member,!member.isChecked());
-                    member.setChecked(!member.isChecked());
-                    if(backListener !=null){
-                        backListener.onBack();
-                    }
-                }
+        searchAdapter.setOnItemClickListener(() -> {
+            if(backListener !=null){
+                backListener.onBack();
             }
         });
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));

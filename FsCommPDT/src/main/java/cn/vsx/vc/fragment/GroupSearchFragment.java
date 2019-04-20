@@ -25,12 +25,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
-import cn.vsx.hamster.common.GroupType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePopBackStackHandler;
-import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupSearchAdapter;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
@@ -186,17 +185,14 @@ public class GroupSearchFragment extends BaseFragment {
         if (TextUtils.isEmpty(keyWord)) {
             ToastUtil.showToast(context, getString(R.string.text_search_content_can_not_empty));
         }else {
-            searchMemberFromGroup();
+            searchMemberFromGroup(keyWord);
         }
     }
 
     /**  搜索 **/
-    private void searchMemberFromGroup (){
-        for (Group group : MyTerminalFactory.getSDK().getConfigManager().getAllGroups()) {
-            if(group.getGroupType()!= GroupType.RESPONSE &&!Util.isEmpty(group.name) && !Util.isEmpty(keyWord) && group.name.toLowerCase().contains(keyWord.toLowerCase())) {
-                searchGroups.add(group);
-            }
-        }
+    private void searchMemberFromGroup (String keyWord){
+        searchGroups.clear();
+        searchGroups.addAll(TerminalFactory.getSDK().getConfigManager().searchGroup(keyWord));
         if (searchGroups.size() == 0) {
             tv_search_nothing.setText(R.string.text_group_is_not_exist);
             rl_search_result.setVisibility(View.GONE);

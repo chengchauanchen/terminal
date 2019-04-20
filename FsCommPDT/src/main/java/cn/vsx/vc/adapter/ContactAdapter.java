@@ -132,33 +132,11 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             }
             userViewHolder.tvId.setText(account.getNo() + "");
             userViewHolder.llDialTo.setOnClickListener(view -> {
-                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog,member) -> {
-                        if(member.getUniqueNo() == 0){
-                            //普通电话
-                            CallPhoneUtil.callPhone((Activity) mContext, account.getPhone());
-                        }else{
-                            if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
-                                Intent intent = new Intent(mContext, VoipPhoneActivity.class);
-                                intent.putExtra("member",member);
-                                mContext.startActivity(intent);
-                            }else {
-                                ToastUtil.showToast(mContext,mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
-                            }
-                        }
-                        dialog.dismiss();
-                    }).showDialog();
+                callPhone(account);
             });
             userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, account.getNo(), account.getName()));
             userViewHolder.llCallTo.setOnClickListener(view -> {
-                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
-                }else{
-                    // TODO: 2019/4/15弹窗拨打个呼
-                    new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account, (dialog,member) -> {
-                        activeIndividualCall(member);
-                        dialog.dismiss();
-                    }).showDialog();
-                }
+                indivudualCall(account);
             });
             //请求图像
             userViewHolder.llLiveTo.setOnClickListener(view -> {
@@ -207,21 +185,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             userViewHolder.tvId.setText(member.getNo() + "");
             userViewHolder.llDialTo.setOnClickListener(view -> {
                 Account account = DataUtil.getAccountByMember(member);
-                new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog,member1) -> {
-                    if(member1.getUniqueNo() == 0){
-                        //普通电话
-                        CallPhoneUtil.callPhone((Activity) mContext, account.getPhone());
-                    }else{
-                        if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
-                            Intent intent = new Intent(mContext, VoipPhoneActivity.class);
-                            intent.putExtra("member",member1);
-                            mContext.startActivity(intent);
-                        }else {
-                            ToastUtil.showToast(mContext,mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
-                        }
-                    }
-                    dialog.dismiss();
-                }).showDialog();
+                callPhone(account);
             });
             userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName()));
             userViewHolder.llCallTo.setOnClickListener(view -> {
@@ -266,6 +230,36 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 userViewHolder.llLiveTo.setVisibility(View.GONE);
             }
         }
+    }
+
+    private void indivudualCall(Account account){
+        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+            ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
+        }else{
+            // TODO: 2019/4/15弹窗拨打个呼
+            new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account, (dialog, member) -> {
+                activeIndividualCall(member);
+                dialog.dismiss();
+            }).showDialog();
+        }
+    }
+
+    private void callPhone(Account account){
+        new ChooseDevicesDialog(mContext, ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog, member) -> {
+            if(member.getUniqueNo() == 0){
+                //普通电话
+                CallPhoneUtil.callPhone((Activity) mContext, account.getPhone());
+            }else{
+                if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS, false)){
+                    Intent intent = new Intent(mContext, VoipPhoneActivity.class);
+                    intent.putExtra("member", member);
+                    mContext.startActivity(intent);
+                }else{
+                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
+                }
+            }
+            dialog.dismiss();
+        }).showDialog();
     }
 
     @Override

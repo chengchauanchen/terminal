@@ -555,5 +555,6 @@
     <string name="login">登录</string>
     <string name="login_cancel">取消登录</string>
     <string name="input_search_content">请输入搜索内容</string>
+    <string name="force_off_line">该账号被强制下线</string>
     
 </resources>

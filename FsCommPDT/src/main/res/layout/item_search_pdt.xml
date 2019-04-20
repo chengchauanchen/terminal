@@ -52,19 +52,7 @@
             android:layout_height="1dp"
             android:layout_weight="1" />
 
-        <LinearLayout
-            android:id="@+id/shoutai_dial_to"
-            android:layout_width="@dimen/dp_45"
-            android:layout_height="@dimen/dp_45"
-            android:layout_marginRight="@dimen/dp_10"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="@dimen/dp_30"
-                android:layout_height="@dimen/dp_30"
-                android:background="@drawable/tel" />
-
-        </LinearLayout>
+        
 
         <LinearLayout
             android:id="@+id/iv_search_msg"
@@ -79,19 +67,7 @@
                 android:background="@drawable/new_message_icon" />
         </LinearLayout>
     
-        <LinearLayout
-            android:id="@+id/shoutai_live_to"
-            android:layout_width="@dimen/dp_45"
-            android:layout_height="@dimen/dp_45"
-            android:layout_marginRight="@dimen/dp_2"
-            android:gravity="center">
         
-            <ImageView
-                android:layout_width="@dimen/dp_30"
-                android:layout_height="@dimen/dp_30"
-                android:background="@drawable/new_live_icon" />
-    
-        </LinearLayout>
         <LinearLayout
             android:id="@+id/iv_search_call"
             android:layout_width="@dimen/dp_45"
