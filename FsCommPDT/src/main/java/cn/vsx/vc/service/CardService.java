@@ -7,10 +7,16 @@ import android.os.Bundle;
 
 import com.google.gson.Gson;
 
+import org.apache.log4j.Logger;
+
 import java.util.Arrays;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.vc.R;
+import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.NFCBean;
+import cn.vsx.vc.receiveHandle.ReceiveNFCWriteResultHandler;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 @TargetApi(Build.VERSION_CODES.KITKAT)
 public class CardService extends HostApduService {
@@ -22,7 +28,7 @@ public class CardService extends HostApduService {
 
     private static  String AID = "f22eca0ca7eb9ed0022a64e4fff5c34b";
     private static  String HEADER = "00A40400";
-
+    protected Logger logger = Logger.getLogger(getClass());
     @Override
     public void onCreate() {
         super.onCreate();
@@ -39,18 +45,18 @@ public class CardService extends HostApduService {
     public byte[] processCommandApdu(byte[] commandApdu, Bundle extras) {
         //做判断，是否在警情临时组（警情编号和警情临时组id）
         //如果没有，就不发送  return null
-//        if(!Myapplication.isServiceEnable){
-//            return null;
-//        }
-
+        NFCBean nfcBean = MyApplication.instance.getNfcBean();
+        logger.debug("processCommandApdu---nfcBean:"+nfcBean);
+        if(nfcBean == null){
+            return null;
+        }
         // 将指令转换成 byte[]
         byte[] selectAPDU = buildSelectApdu(AID);
 
         // 判断是否和读卡器发来的数据相同
         if (Arrays.equals(selectAPDU, commandApdu)) {
-
-            Gson gson = new Gson();
-            String account = gson.toJson(new NFCBean("1234123",123456789));
+//            String account = new Gson().toJson(new NFCBean("1234123",123456789));
+            String account = new Gson().toJson(nfcBean);
             // 直接模拟返回16位卡号
 //            String account = "6222222200000001";
 
@@ -58,8 +64,10 @@ public class CardService extends HostApduService {
             byte[] accountBytes = account.getBytes();
 
             // 处理欲返回的响应数据
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveNFCWriteResultHandler.class,0,"");
             return concatArrays(accountBytes, SELECT_OK);
         } else {
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveNFCWriteResultHandler.class,-1,"");
             return UNKNOWN_ERROR;
         }
     }

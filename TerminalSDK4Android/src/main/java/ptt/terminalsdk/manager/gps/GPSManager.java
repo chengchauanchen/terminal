@@ -266,6 +266,7 @@ public class GPSManager {
 			final String url = "http://"+ip+":"+port+"/save";
 			Map<String,Object> params = new HashMap<>();
 			params.put("terminalno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
+			params.put("memberuniqueno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0l));
 			params.put("longitude",location.getLongitude());
 			params.put("latitude",location.getLatitude());
 			params.put("speed",location.getSpeed());

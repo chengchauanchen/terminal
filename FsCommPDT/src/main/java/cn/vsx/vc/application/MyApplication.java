@@ -33,6 +33,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.vc.model.NFCBean;
 import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
@@ -75,6 +76,8 @@ public class MyApplication extends Application {
 	/**标记个呼来或者请求图形来，是否做了接受或拒绝的操作，默认是false*/
 	public boolean isPrivateCallOrVideoLiveHand = false;
 	public boolean isLocked;//当前组是否被锁定，能否切走
+	//保存在警情组会话页面的nfcBean
+	private NFCBean nfcBean;
 
 	@Override
 	public void onCreate() {
@@ -103,6 +106,8 @@ public class MyApplication extends Application {
 				//				.setSkinStatusBarColorEnable(false)                     // 关闭状态栏换肤，默认打开[可选]
 				//				.setSkinWindowBackgroundEnable(false)                   // 关闭windowBackground换肤，默认打开[可选]
 				.loadSkin();
+        //清空刷NFC需要传的数据
+        MyApplication.instance.setNfcBean(null);
 
 	}
 
@@ -214,4 +219,11 @@ public class MyApplication extends Application {
 		}
 	};
 
+	public NFCBean getNfcBean() {
+		return nfcBean;
+	}
+
+	public void setNfcBean(NFCBean nfcBean) {
+		this.nfcBean = nfcBean;
+	}
 }

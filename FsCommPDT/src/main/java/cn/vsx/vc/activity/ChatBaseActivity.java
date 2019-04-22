@@ -1651,7 +1651,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
      */
     private void showNFCDialog() {
         nfcBindingDialog = new NFCBindingDialog(ChatBaseActivity.this,NFCBindingDialog.TYPE_WAIT);
-        nfcBindingDialog.show();
+        nfcBindingDialog.showDialog();
     }
 
     @Override

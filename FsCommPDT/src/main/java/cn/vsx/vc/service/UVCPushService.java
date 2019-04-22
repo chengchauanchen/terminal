@@ -317,7 +317,7 @@ public class UVCPushService extends BaseService{
         logger.info("自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
         ip = streamMediaServerIp;
         port = String.valueOf(streamMediaServerPort);
-        id = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "_" + callId;
+        id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0) + "_" + callId;
         //如果是组内上报，在组内发送一条上报消息
         if(isGroupPushLive){
             MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverGroupPushLiveHandler.class, streamMediaServerIp,streamMediaServerPort,callId);
