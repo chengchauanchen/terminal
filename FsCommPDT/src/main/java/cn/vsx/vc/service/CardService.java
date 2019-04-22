@@ -11,10 +11,9 @@ import org.apache.log4j.Logger;
 
 import java.util.Arrays;
 
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.NFCBean;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.model.NFCBean;
 import cn.vsx.vc.receiveHandle.ReceiveNFCWriteResultHandler;
 import ptt.terminalsdk.context.MyTerminalFactory;
 

@@ -18,9 +18,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.NFCBean;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.model.NFCBean;
 import cn.vsx.vc.receiveHandle.ReceiveNFCWriteResultHandler;
 import ptt.terminalsdk.context.MyTerminalFactory;
 

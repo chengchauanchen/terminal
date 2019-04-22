@@ -32,8 +32,8 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.model.NFCBean;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.vc.model.NFCBean;
 import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
