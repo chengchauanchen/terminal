@@ -1,6 +1,5 @@
 package cn.vsx.vc.utils;
 
-import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -24,7 +23,7 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.util.Arrays;
 
-import cn.vsx.vc.model.NFCBean;
+import cn.vsx.hamster.terminalsdk.model.NFCBean;
 
 public class NfcUtil {
 
@@ -35,9 +34,9 @@ public class NfcUtil {
     public static final int RESULT_CODE_TYPE_ERROR=1;
     public static final int RESULT_CODE_ERROR=2;
 
-    private static final String RESULT_CONTENT_SUCCESS = "已成功读取警情信息！";
-    private static final String RESULT_CONTENT_TYPE_ERROR = "不能识别的标签类型！";
-    private static final String RESULT_CONTENT_ERROR = "读取失败！";
+    private static final String RESULT_CONTENT_SUCCESS = "已刷入成员信息！";
+    private static final String RESULT_CONTENT_TYPE_ERROR = "不能识别的信息类型！";
+    private static final String RESULT_CONTENT_ERROR = "信息读取失败！";
 
     // 私有的请求码
     private static final int REQUEST_CODE = 1 << 16;
@@ -191,7 +190,7 @@ public class NfcUtil {
         if(TextUtils.isEmpty(content)){
             return null;
         }
-        return new Gson().fromJson(content,NFCBean.class);
+        return new Gson().fromJson(content, NFCBean.class);
     }
 
     /**

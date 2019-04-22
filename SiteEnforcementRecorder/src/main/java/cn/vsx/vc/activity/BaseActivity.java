@@ -39,32 +39,36 @@ import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
+import cn.vsx.hamster.terminalsdk.model.NFCBean;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
 import cn.vsx.vc.receive.RecvCallBack;
-import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.ReceiverAudioButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
+import cn.vsx.vc.receiveHandle.ReceiverStartAuthHandler;
+import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.BITDialogUtil;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.utils.VolumeToastUitl;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
 
-public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack, Actions{
+public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack, Actions, NfcUtil.OnReadListener {
 
     private AudioManager audioManager;
     private HeadsetPlugReceiver headsetPlugReceiver;
@@ -84,6 +88,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     private AlertDialog dialog;
     private Timer timer = new Timer();
     private long currentTime;
+
+    private NfcUtil mNFCUtil;
 
     @Override
     protected void onStart() {
@@ -143,10 +149,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             myHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
-                    stoppedCallIntent.putExtra("stoppedResult", "0");
-                    SendRecvHelper.send(getApplicationContext(), stoppedCallIntent);
-
                     MyTerminalFactory.getSDK().exit();//停止服务
                     PromptManager.getInstance().stop();
                     for (Activity activity : ActivityCollector.getAllActivity().values()) {
@@ -186,6 +188,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         //判断横竖屏
         setRequestedOrientation(SystemUtil.isScreenLandscape(this)?ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        //常亮
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         //透明状态栏
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -213,6 +217,10 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
             regBroadcastRecv(ACT_SHOW_FULL_SCREEN, ACT_DISMISS_FULL_SCREEN, STOP_INDIVDUALCALL_SERVEIC);
             ActivityCollector.addActivity(this, getClass());
+
+            //nfc初始化
+            mNFCUtil = new NfcUtil(this);
+            mNFCUtil.setOnReadListener(this);
 
             initData();
             initView();
@@ -283,6 +291,31 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
      * 子类activity处理自己的destroy()
      */
     public abstract void doOtherDestroy();
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //nfc
+        if(mNFCUtil!=null&&mNFCUtil.getmNfcAdapter()!=null){
+            mNFCUtil.getmNfcAdapter().enableForegroundDispatch(this, mNFCUtil.getmPendingIntent(), mNFCUtil.getmIntentFilter(), mNFCUtil.getmTechList());
+            mNFCUtil.proccessIntent(getIntent());
+        }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(mNFCUtil!=null&&mNFCUtil.getmNfcAdapter()!=null){
+            mNFCUtil.getmNfcAdapter().disableForegroundDispatch(this);
+        }
+    }
+
 
     @Override
     protected void onDestroy() {
@@ -610,5 +643,80 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             }
         }
     };
+
+    /**
+     * 读取NFC数据的回调
+     * @param resultCode
+     * @param readType
+     * @param resultDescribe
+     * @param bean
+     */
+    @Override
+    public void onReadResult(int resultCode, String readType, String resultDescribe, final NFCBean bean) {
+        ToastUtil.showToast(this,resultDescribe);
+        switch (resultCode){
+            case NfcUtil.RESULT_CODE_SUCCESS:
+                //切组，上报，录像
+                if(bean!=null){
+                    logger.debug("onReadResult---bean:"+bean);
+                    if(DataUtil.getNFCBean() != null){
+                        //说明在主页面，
+                        //停止业务
+                        loginOut();
+                        //保存NFCBean
+                        DataUtil.saveNFCBean(bean);
+                        //进入登录页面
+                        myHandler.postDelayed(() -> {
+                            startActivity(new Intent(BaseActivity.this,RegistNFCActivity.class));
+                            BaseActivity.this.finish();
+                        },500);
+                    }else{
+                        //保存NFCBean
+                        DataUtil.saveNFCBean(bean);
+                        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverStartAuthHandler.class,false);
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 切组
+     * @param bean
+     */
+    private void changeGroup(final NFCBean bean){
+//        int result = MyTerminalFactory.getSDK().getGroupManager().changeGroup(bean.getGroupId());
+//        if (result == BaseCommonCode.SUCCESS_CODE) {
+//            isFromNFCToChangeGroup = true;
+//            //转组成功重新请求在线人数
+//            myHandler.postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(bean.getGroupId(), false);
+//                }
+//            }, 500);
+//        } else {
+//            ToastUtil.groupChangedFailToast(MainActivity.this, result);
+//        }
+    }
+
+    /**
+     * 退出登录
+     */
+    private void loginOut(){
+        //停止一切业务
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverStopAllBusniessHandler.class,false);
+//        MyTerminalFactory.getSDK().exit();//停止服务
+        PromptManager.getInstance().stop();
+        TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
+        TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
+        MyApplication.instance.isClickVolumeToCall = false;
+        MyApplication.instance.isPttPress = false;
+        MyApplication.instance.stopPTTButtonEventService();
+        //停止上报或者观看的页面
+//        MyTerminalFactory.getSDK().stop();
+    }
 
 }

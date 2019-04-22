@@ -35,6 +35,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRegistCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
@@ -43,6 +44,7 @@ import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receive.SendRecvHelper;
+import cn.vsx.vc.receiveHandle.ReceiverStartAuthHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.KeyboarUtils;
 import cn.vsx.vc.utils.NetworkUtil;
@@ -258,6 +260,14 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
     });
 
     /**
+     * 刷入NFC开始认证
+     */
+    private ReceiverStartAuthHandler receiverStartAuthHandler = (showMessage) -> myHandler.post(() -> {
+        logger.info("刷入NFC开始认证");
+        judgePermission();
+    });
+
+    /**
      * ============================================================================Listener=================================================================================
      **/
 
@@ -282,7 +292,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
             myProgressDialog = new ProgressDialog(RegistNFCActivity.this);
             myProgressDialog.setCancelable(false);
         }
-        ll_regist.setVisibility(View.GONE);
+//        ll_regist.setVisibility(View.GONE);
         judgePermission();
     }
 
@@ -353,7 +363,6 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
             if (netWorkDialog != null) {
                 netWorkDialog.dismiss();
             }
-            changeProgressMsg("正在获取信息");
             start();
         } else {
             if (netWorkDialog != null && !netWorkDialog.isShowing()) {
@@ -397,8 +406,11 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
             PromptManager.getInstance().start();
         });
         //发送认证消息，uuid到注册服务器，判断是注册还是登录
-
-        sendUuid(null, null);
+        if(DataUtil.getNFCBean() != null){
+            changeProgressMsg("正在获取信息");
+            ll_regist.setVisibility(View.GONE);
+            sendUuid(null, null);
+        }
     }
 
     @Override
@@ -409,6 +421,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReturnAvailableIPHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiverStartAuthHandler);
     }
 
     @Override
@@ -431,6 +444,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReturnAvailableIPHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiverStartAuthHandler);
         myHandler.removeCallbacksAndMessages(null);
         if (myProgressDialog != null) {
             myProgressDialog.dismiss();

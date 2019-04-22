@@ -46,7 +46,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -56,7 +55,6 @@ import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerLiveTimeoutHandler;
@@ -66,7 +64,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNobodyRequestVideoLiveHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
@@ -76,19 +73,17 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandle
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.util.StateMachine.IState;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.application.UpdateManager;
-import cn.vsx.vc.model.NFCBean;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverAudioButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
+import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.APPStateUtil;
 import cn.vsx.vc.utils.DataUtil;
-import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.PhotoUtils;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -103,7 +98,7 @@ import ptt.terminalsdk.tools.SDCardUtil;
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 import static cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory.USB;
 
-public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListener {
+public class MainActivity extends BaseActivity   {
     //没有网络的提示
     @Bind(R.id.ll_no_network)
     LinearLayout llNoNetwork;
@@ -155,14 +150,12 @@ public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListene
     private String id;//自己发起直播返回的callId和member拼接
     private PushCallback pushCallback;
 
-    private PowerManager.WakeLock wakeLockComing;
+//    private PowerManager.WakeLock wakeLockComing;
     public static final int REQUEST_PERMISSION_SETTING = 1235;
     private List<VideoMember> watchLiveList = new ArrayList<>();//加入观看人员的集合
 
     private boolean canTakePicture = true;//是否可以拍照
     private TimerTask takePictureTimer;
-//    //nfcutil
-    private NfcUtil mNFCUtil;
 
     @Override
     public int getLayoutResId() {
@@ -172,11 +165,11 @@ public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListene
     @SuppressLint("InvalidWakeLockTag")
     @Override
     public void initData() {
-        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-        if(powerManager!=null){
-            wakeLockComing = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE, "wakeLock3");//
-            logger.info("wakeLock3 = "+wakeLockComing);
-        }
+//        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+//        if(powerManager!=null){
+//            wakeLockComing = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE, "wakeLock3");//
+//            logger.info("wakeLock3 = "+wakeLockComing);
+//        }
 
         svLive.setVisibility(View.GONE);
         svLive.setOpaque(false);
@@ -206,9 +199,6 @@ public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListene
             }, 4000);
         }
         judgePermission();
-        //nfc初始化
-        mNFCUtil = new NfcUtil(this);
-        mNFCUtil.setOnReadListener(this);
 
         button1.setText("录像");
         button1.setOnClickListener(new View.OnClickListener() {
@@ -273,6 +263,7 @@ public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListene
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);//请求开视频
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNobodyRequestVideoLiveHandler);//对方取消请求
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);//收到停止上报的通知
+        MyTerminalFactory.getSDK().registReceiveHandler(receiverStopAllBusniessHandler);//收到停止一切业务的通知
         MyTerminalFactory.getSDK().registReceiveHandler(receiverCameraButtonEventHandler);//视频实体按钮上报和录像视频
         MyTerminalFactory.getSDK().registReceiveHandler(receiverPhotoButtonEventHandler);//拍照实体按钮
         MyTerminalFactory.getSDK().registReceiveHandler(receiverAudioButtonEventHandler);//录音实体按钮
@@ -308,31 +299,12 @@ public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListene
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
 
-        //nfc
-        if(mNFCUtil!=null&&mNFCUtil.getmNfcAdapter()!=null){
-            mNFCUtil.getmNfcAdapter().enableForegroundDispatch(this, mNFCUtil.getmPendingIntent(), mNFCUtil.getmIntentFilter(), mNFCUtil.getmTechList());
-            mNFCUtil.proccessIntent(getIntent());
-        }
     }
 
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
             setIntent(intent);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if(mNFCUtil!=null&&mNFCUtil.getmNfcAdapter()!=null){
-            mNFCUtil.getmNfcAdapter().disableForegroundDispatch(this);
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
     }
 
     @Override
@@ -351,6 +323,7 @@ public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListene
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);//请求开视频
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNobodyRequestVideoLiveHandler);//对方取消请求
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);//收到停止上报的通知
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiverStopAllBusniessHandler);//收到停止一切业务的通知
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiverCameraButtonEventHandler);//视频实体按钮上报和录像视频
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiverPhotoButtonEventHandler);//拍照实体按钮
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiverAudioButtonEventHandler);//录音实体按钮
@@ -501,7 +474,7 @@ public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListene
                 public void run() {
                     logger.info("自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
                     String port = streamMediaServerPort + "";
-                    id = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "_" + callId;
+                    id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0) + "_" + callId;
                         startPush(streamMediaServerIp, port, id);
                 }
             }, 1000);
@@ -593,7 +566,7 @@ public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListene
                         //无屏保界面
                         APPStateUtil.setTopApp(MainActivity.this);
                     }
-                    wakeLockComing.acquire();
+//                    wakeLockComing.acquire();
                     logger.info("main点亮屏幕");
                     //自动接收上报视频
                     MyTerminalFactory.getSDK().getLiveManager().responseLiving(true);
@@ -607,12 +580,9 @@ public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListene
     /**
      * 收到没人请求我开视频的消息，关闭界面和响铃
      */
-    private ReceiveNobodyRequestVideoLiveHandler receiveNobodyRequestVideoLiveHandler = new ReceiveNobodyRequestVideoLiveHandler() {
-        @Override
-        public void handler() {
-            ToastUtil.showToast(getApplicationContext(),"对方已取消");
-            finishVideoLive();
-        }
+    private ReceiveNobodyRequestVideoLiveHandler receiveNobodyRequestVideoLiveHandler = () -> {
+        ToastUtil.showToast(getApplicationContext(),"对方已取消");
+        finishVideoLive();
     };
 
     /**
@@ -621,16 +591,21 @@ public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListene
     private ReceiveNotifyOtherStopVideoMessageHandler receiveNotifyOtherStopVideoMessageHandler = (message) -> {
         logger.info("收到停止上报通知");
         ToastUtil.showToast(getApplicationContext(),"收到停止上报的通知");
-        if(mMediaStream!=null) {
-            if (mMediaStream.isStreaming()) {
-                stopPush();
-            }
-            if (mMediaStream.isRecording()) {
-                //已经在录像，停止录像
-                mMediaStream.stopRecord();
-            }
-        }
+        stopAll();
     };
+
+    /**
+     * 收到上报一切业务的通知
+     */
+    private ReceiverStopAllBusniessHandler receiverStopAllBusniessHandler = (showMessage) -> {
+        logger.info("收到停止上报通知");
+        if(showMessage){
+            ToastUtil.showToast(getApplicationContext(),"收到停止业务的通知");
+        }
+        stopAll();
+    };
+
+
 
     /**
      * 视频实体按钮，上报视频
@@ -823,52 +798,6 @@ public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListene
             });
         }
     };
-
-    /**
-     * 读取NFC数据的回调
-     * @param resultCode
-     * @param readType
-     * @param resultDescribe
-     * @param bean
-     */
-    @Override
-    public void onReadResult(int resultCode, String readType, String resultDescribe, final NFCBean bean) {
-        ToastUtil.showToast(MainActivity.this,resultDescribe);
-        switch (resultCode){
-            case NfcUtil.RESULT_CODE_SUCCESS:
-                //切组，上报，录像
-                if(bean!=null){
-                    logger.debug("onReadResult---bean:"+bean);
-//                    //切组
-//                    changeGroup(bean);
-                }
-                break;
-            default:
-                break;
-        }
-
-    }
-
-    /**
-     * 切组
-     * @param bean
-     */
-    private void changeGroup(final NFCBean bean){
-//        int result = MyTerminalFactory.getSDK().getGroupManager().changeGroup(bean.getGroupId());
-//        if (result == BaseCommonCode.SUCCESS_CODE) {
-//            isFromNFCToChangeGroup = true;
-//            //转组成功重新请求在线人数
-//            myHandler.postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(bean.getGroupId(), false);
-//                }
-//            }, 500);
-//        } else {
-//            ToastUtil.groupChangedFailToast(MainActivity.this, result);
-//        }
-    }
-
 
     private final class SurfaceTextureListener implements TextureView.SurfaceTextureListener {
         @Override
@@ -1487,6 +1416,21 @@ public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListene
             return "停止录音";
         }else {
             return "退出";
+        }
+    }
+
+    /**
+     * 停止业务
+     */
+    private void stopAll(){
+        if(mMediaStream!=null) {
+            if (mMediaStream.isStreaming()) {
+                stopPush();
+            }
+            if (mMediaStream.isRecording()) {
+                //已经在录像，停止录像
+                mMediaStream.stopRecord();
+            }
         }
     }
 }
