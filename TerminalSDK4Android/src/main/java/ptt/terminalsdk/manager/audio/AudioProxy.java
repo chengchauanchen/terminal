@@ -36,7 +36,7 @@ public class AudioProxy implements IAudioProxy{
 		realtimeAudio.pauseSender(cookie);
 	}
 	@Override
-	public void resumeSender(String ip, int port, long callId, long uniqueNo, int cookie){
+	public void resumeSender(String ip, int port, long callId, long uniqueNo, int cookie,int memberId){
 		realtimeAudio.resumeSender(ip, port, callId, uniqueNo, cookie);
 	}
 	@Override
@@ -52,7 +52,7 @@ public class AudioProxy implements IAudioProxy{
 		realtimeAudio.fausePauseReceiver(cookie);
 	}
 	@Override
-	public void resumeReceiver(String srcIp, int srcPort, long callId, long uniqueNo, int cookie){
+	public void resumeReceiver(String srcIp, int srcPort, long callId, long uniqueNo, int cookie,int memberId){
 		realtimeAudio.resumeReceiver(srcIp, srcPort, callId, uniqueNo, cookie);
 	}
 	@Override
@@ -65,7 +65,7 @@ public class AudioProxy implements IAudioProxy{
 	}
 
 	@Override
-	public void startDuplexCommunication(String sendIp, int sendPort, long sendCallId, String receivedIp, int receivedPort, long receivedCallId, long uniqueNo) {
+	public void startDuplexCommunication(String sendIp, int sendPort, long sendCallId, String receivedIp, int receivedPort, long receivedCallId, long uniqueNo,int memberId) {
 		mode = audiomanage.getMode();
 		if (audiomanage.isSpeakerphoneOn()) {
 			audiomanage.setSpeakerphoneOn(false);
