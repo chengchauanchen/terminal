@@ -22,7 +22,6 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
@@ -64,9 +63,8 @@ import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.utils.VolumeToastUitl;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
-import ptt.terminalsdk.tools.DialogUtil;
 
-public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack, Actions {
+public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack, Actions{
 
     private AudioManager audioManager;
     private HeadsetPlugReceiver headsetPlugReceiver;
@@ -110,33 +108,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             });
         }
     };
-
-
-    public void hideKey() {
-    }
-
-    /**
-     * 个呼到来---子类继承
-     **/
-    protected void receiveIndividualCall() {
-    }
-
-    private void setMySpeakerphoneOn(boolean on) {
-        if (on) {
-            if (!audioManager.isSpeakerphoneOn() && audioManager.getMode() == AudioManager.MODE_NORMAL) {
-                logger.info(TAG+"---------打开扬声器--------" + audioManager.getMode());
-                audioManager.setSpeakerphoneOn(true);
-            }
-        } else {
-            if (audioManager.isSpeakerphoneOn()) {
-                audioManager.setStreamVolume(AudioManager.STREAM_VOICE_CALL,
-                        audioManager.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL),
-                        AudioManager.STREAM_VOICE_CALL);//设置听筒的最大音量
-                audioManager.setSpeakerphoneOn(false);//关闭扬声器
-                logger.info(TAG+"--------关闭扬声器---------" + audioManager.getMode());
-            }
-        }
-    }
 
 
     private Handler myHandler = new Handler(Looper.getMainLooper());
@@ -244,7 +215,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             ActivityCollector.addActivity(this, getClass());
 
             initData();
-
             initView();
             initListener();
 
@@ -283,7 +253,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
     protected void protectApp() {
         // 重新走应用的流程是一个正确的做法，因为应用被强杀了还保存 Activity 的栈信息是不合理的
-        Intent intent = new Intent(this, RegistActivity.class);
+        Intent intent = new Intent(this, RegistNFCActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
@@ -313,12 +283,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
      * 子类activity处理自己的destroy()
      */
     public abstract void doOtherDestroy();
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-    }
 
     @Override
     protected void onDestroy() {

@@ -103,7 +103,7 @@ import ptt.terminalsdk.tools.SDCardUtil;
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 import static cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory.USB;
 
-public class MainActivity extends BaseActivity implements NfcUtil.OnReadListener {
+public class MainActivity extends BaseActivity  implements NfcUtil.OnReadListener {
     //没有网络的提示
     @Bind(R.id.ll_no_network)
     LinearLayout llNoNetwork;
@@ -161,7 +161,7 @@ public class MainActivity extends BaseActivity implements NfcUtil.OnReadListener
 
     private boolean canTakePicture = true;//是否可以拍照
     private TimerTask takePictureTimer;
-    //nfcutil
+//    //nfcutil
     private NfcUtil mNFCUtil;
 
     @Override
@@ -399,7 +399,7 @@ public class MainActivity extends BaseActivity implements NfcUtil.OnReadListener
                     logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity中登录了");
 //                    MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
                 } else {//没注册过，关掉主界面，去注册界面
-                    startActivity(new Intent(getApplicationContext(), RegistActivity.class));
+                    startActivity(new Intent(getApplicationContext(), RegistNFCActivity.class));
                     MainActivity.this.finish();
                     stopService(new Intent(getApplicationContext(), LockScreenService.class));
                 }
@@ -838,8 +838,9 @@ public class MainActivity extends BaseActivity implements NfcUtil.OnReadListener
             case NfcUtil.RESULT_CODE_SUCCESS:
                 //切组，上报，录像
                 if(bean!=null){
-                    //切组
-                    changeGroup(bean);
+                    logger.debug("onReadResult---bean:"+bean);
+//                    //切组
+//                    changeGroup(bean);
                 }
                 break;
             default:

@@ -11,8 +11,6 @@ import android.os.IBinder;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
-import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.vc.service.PTTButtonEventService;
 import org.easydarwin.push.UVCCameraService;
 
 import java.util.ArrayList;
@@ -32,9 +30,11 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
-import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.vc.service.PTTButtonEventService;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.NfcUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class MyApplication extends Application {
@@ -60,6 +60,8 @@ public class MyApplication extends Application {
 
 	/**标记个呼来或者请求图形来，是否做了接受或拒绝的操作，默认是false*/
 	public boolean isPrivateCallOrVideoLiveHand = false;
+    //NFC util
+	private NfcUtil mNFCUtil;
 
 	@Override
 	public void onCreate() {
@@ -85,8 +87,8 @@ public class MyApplication extends Application {
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
 		//保存录像，录音，照片的存储路径
 		MyTerminalFactory.getSDK().getFileTransferOperation().initExternalUsableStorage();
-	}
 
+	}
 
 
 	public void setIsContactsPersonal(boolean isContactsIndividual){
@@ -139,10 +141,7 @@ public class MyApplication extends Application {
 		super.attachBaseContext(base);
 		MultiDex.install(this);
 	}
-	public enum TYPE{
-		PUSH ,
-		IDLE
-	}
+
 	public void startPTTButtonEventService(String  action) {
 		Intent intent1 = new Intent(this,PTTButtonEventService.class);
 		intent1.putExtra(Constants.PTTEVEVT_ACTION,action);
