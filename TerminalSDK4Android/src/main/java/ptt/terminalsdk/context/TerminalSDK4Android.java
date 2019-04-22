@@ -46,6 +46,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.TerminalSDKBaseImpl;
@@ -75,6 +76,9 @@ import ptt.terminalsdk.manager.channel.ClientChannel;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.manager.gps.BDGPSManager;
 import ptt.terminalsdk.manager.gps.GPSManager;
+import ptt.terminalsdk.manager.gps.recoder.LocationManager;
+import ptt.terminalsdk.manager.gps.recoder.RecorderBDGPSManager;
+import ptt.terminalsdk.manager.gps.recoder.RecorderGPSManager;
 import ptt.terminalsdk.manager.http.MyHttpClient;
 import ptt.terminalsdk.manager.http.ProgressHelper;
 import ptt.terminalsdk.manager.http.ProgressUIListener;
@@ -104,7 +108,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	//网络是否连接，只有两个都连接上才是真正的在线，只要有一个为false就是离线
 	private boolean netWorkConnected = true;
 	private NetWorkConnectionChangeReceiver netWorkConnectionChangeReceiver;
-
 	public TerminalSDK4Android (Application mApplication){
 		application = mApplication;
 		account = application.getSharedPreferences(Params.DEFAULT_PRE_NAME,Context.MODE_MULTI_PROCESS);
@@ -116,8 +119,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		OperateReceiveHandlerUtil.getInstance().start();
 		putParam(Params.NETWORK_JITTER_CHECK_INTERVAL, 60 * 1000);//网络抖动检测间隔，60秒
 		putParam(Params.GPS_UPLOAD_INTERVAL, 5 * 60 * 1000);//GPS上传时间间隔，5分钟
-		getBDGPSManager().start();
-		getGpsManager().start();
+		locationStart();
 		getVideoProxy().start();
 		PromptManager.getInstance().start(application);
 		getFileTransferOperation().start();
@@ -147,11 +149,11 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			e.printStackTrace();
 		}
 	}
+
 	@Override
 	protected void onStop() {
 		getFileTransferOperation().stop();
-		getGpsManager().stop();
-		getBDGPSManager().stop();
+		locationStop();
 		getVideoProxy().stop();
 		PromptManager.getInstance().stop();
 		disConnectToServer();
@@ -597,6 +599,27 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 		return bdgpsManager;
 	}
+	private RecorderGPSManager recorderGPSManager;
+	public RecorderGPSManager getRecorderGPSManager(){
+		if(recorderGPSManager == null){
+			recorderGPSManager = new RecorderGPSManager(application);
+		}
+		return recorderGPSManager;
+	}
+	private RecorderBDGPSManager recorderBDGPSManager;
+	public RecorderBDGPSManager getRecorderBDGPSManager(){
+		if(recorderBDGPSManager == null){
+			recorderBDGPSManager = new RecorderBDGPSManager(application);
+		}
+		return recorderBDGPSManager;
+	}
+	private LocationManager locationManager;
+	public LocationManager getLocationManager(){
+		if(locationManager == null){
+			locationManager = new LocationManager(application);
+		}
+		return locationManager;
+	}
 	public Application getApplication(){
 		return application;
 	}
@@ -904,6 +927,39 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			}
 		}catch (Exception e){
 			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 根据设备的类型开启对应的定位
+	 */
+	private void locationStart() {
+		String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+		if(!TextUtils.isEmpty(deviceType)){
+			if(!TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_HDMI.toString())){
+				if(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString())){
+					getLocationManager().start();
+				}else{
+					getBDGPSManager().start();
+					getGpsManager().start();
+				}
+			}
+		}
+	}
+	/**
+	 * 根据设备的类型关闭对应的定位
+	 */
+	private void locationStop(){
+		String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+		if(!TextUtils.isEmpty(deviceType)){
+			if(!TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_HDMI.toString())){
+				if(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString())){
+					getLocationManager().stop();
+				}else{
+					getGpsManager().stop();
+					getBDGPSManager().stop();
+				}
+			}
 		}
 	}
 
