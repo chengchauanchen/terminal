@@ -2,6 +2,7 @@ package cn.vsx.vc.utils;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.nfc.NdefMessage;
@@ -55,7 +56,7 @@ public class NfcUtil {
     /**
      * 构造函数，用于初始化nfc
      */
-    public NfcUtil(Activity activity) {
+    public NfcUtil(Context activity) {
         nfcCheck(activity);
         nfcInit(activity);
     }
@@ -63,7 +64,7 @@ public class NfcUtil {
     /**
      * 检查NFC是否打开
      */
-    public  void nfcCheck(Activity activity) {
+    public  void nfcCheck(Context activity) {
         mNfcAdapter = NfcAdapter.getDefaultAdapter(activity);
         if (mNfcAdapter == null) {
             logger.info(TAG + "不支持nfc功能");
@@ -79,7 +80,7 @@ public class NfcUtil {
     /**
      * 初始化nfc设置
      */
-    private  void nfcInit(Activity activity) {
+    private  void nfcInit(Context activity) {
         mPendingIntent = PendingIntent.getActivity(activity, REQUEST_CODE, new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
         IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
         IntentFilter tech = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
@@ -190,8 +191,7 @@ public class NfcUtil {
         if(TextUtils.isEmpty(content)){
             return null;
         }
-        Gson gson = new Gson();
-        return gson.fromJson(content,NFCBean.class);
+        return new Gson().fromJson(content,NFCBean.class);
     }
 
     /**

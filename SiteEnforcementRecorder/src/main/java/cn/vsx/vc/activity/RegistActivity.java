@@ -413,8 +413,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             OnClickListener {
         @Override
         public void onClick(View v) {
-            //startActivity(new Intent (RegistActivity.this,MainActivity.class));
-            //finish();
 
             String useOrg = userOrg.getText().toString().trim();
             String useName = userName.getText().toString().trim();
@@ -491,49 +489,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private void setEnableButton() {
         btn_confirm.setEnabled(orgIsInput && nameIsInput);
     }
-
-    public String selectIp;
-    public String selectPort;
-
-    //控件XCDropDownListView的点击事件
-//    private final class XCDClickListener implements XCDropDownListView.XCDropDownListViewClickListeren {
-//
-//        @Override
-//        public void onXCDropDownListViewClickListeren(final int position) {
-//            myHandler.post(new Runnable() {
-//                @Override
-//                public void run() {
-//                    if (availableIPlist.size() == 2) {
-//                        if (position != 0) {
-//                            popupWindow.showAsDropDown(view_pop);
-//                            viewHolder.iv_regist_connect_efficacy_ok.setVisibility(View.GONE);
-//                            viewHolder.tv_regist_connect_efficacy.setVisibility(View.VISIBLE);
-////                            viewHolder.rl_regist_connect_efficacy.setBackgroundColor(getResources().getColor(R.color.liantong));
-//                        }
-//                    }
-//                    if (availableIPlist.size() > 2) {
-//                        if (position == (availableIPlist.size() - 1)) {
-//                            popupWindow.showAsDropDown(view_pop);
-//                            viewHolder.iv_regist_connect_efficacy_ok.setVisibility(View.GONE);
-//                            viewHolder.tv_regist_connect_efficacy.setVisibility(View.VISIBLE);
-////                            viewHolder.rl_regist_connect_efficacy.setBackgroundColor(getResources().getColor(R.color.liantong));
-//                        } else if (position != 0) {
-//                            String name = availableIPlist.get(position);
-//                            availableIPlist.remove(name);
-//                            availableIPlist.remove("选择单位");
-//                            availableIPlist.add(0, name);
-//                            xcd_available_ip.setItemsData(availableIPlist);
-//                            selectIp = availableIPMap.get(name).getIp();
-//                            selectPort = availableIPMap.get(name).getPort();
-//
-//                            MyTerminalFactory.getSDK().getAuthManagerTwo().reAuth(false, availableIPMap.get(name).getIp(), availableIPMap.get(name).getPort());
-//
-//                        }
-//                    }
-//                }
-//            });
-//        }
-//    }
 
 
     @Override

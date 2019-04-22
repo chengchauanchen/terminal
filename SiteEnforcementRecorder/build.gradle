@@ -1,0 +1,127 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+        release {
+            keyAlias '4gpttpdt'
+            keyPassword '4gpttvsx'
+            storeFile file('E:/vsxin/app.keyStory')
+            storePassword '4gpttvsx'
+        }
+        debug {
+            keyAlias '4gpttpdt'
+            keyPassword '4gpttvsx'
+            storeFile file('E:/vsxin/app.keyStory')
+            storePassword '4gpttvsx'
+        }
+    }
+    compileSdkVersion 26
+    buildToolsVersion '28.0.3'
+    flavorDimensions "default"
+    defaultConfig {
+        applicationId "cn.vsx.vc"
+        minSdkVersion 21
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0.0"
+
+        multiDexEnabled true
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath = true
+            }
+        }
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a"
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true//去掉不用资源
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            minifyEnabled false
+            shrinkResources false//去掉不用资源
+             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    productFlavors {
+        common {
+//            buildConfigField "String" ,"apk_type","common"
+        }
+        policeTest{
+//            buildConfigField "String", "apk_type","policeTest"
+        }
+        policeStore{
+//            buildConfigField "String", "apk_type","policeStore"
+        }
+    }
+    productFlavors.all {
+        flavor -> flavor.manifestPlaceholders = [apk_type: name]
+    }
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/plexus/components.xml'
+        exclude 'licenses/javolution.license.TXT'
+        exclude 'licenses/thoughtworks.TXT'
+        exclude 'org/apache/maven/project/pom-4.0.0.xml'
+        exclude 'licenses/extreme.indiana.edu.license.TXT'
+        exclude 'org/cyberneko/html/res/HTMLlat1.properties'
+        exclude 'org/cyberneko/html/res/ErrorMessages_ja.properties'
+        exclude 'org/cyberneko/html/res/ErrorMessages_ja.txt'
+        exclude 'org/cyberneko/html/res/ErrorMessages.properties'
+        exclude 'org/codehaus/plexus/plexus-bootstrap.xml'
+        exclude 'org/cyberneko/html/res/HTMLspecial.properties'
+        exclude 'org/cyberneko/html/res/XMLbuiltin.properties'
+        exclude 'org/cyberneko/html/res/HTMLsymbol.properties'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    dexOptions {
+        javaMaxHeapSize "4g"
+    }
+    configurations.all {
+        resolutionStrategy.force 'com.android.support:support-annotations:26.1.0'
+    }
+}
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:multidex:1.0.3'
+    implementation "com.android.support:appcompat-v7:$support_version"
+    implementation "com.android.support:support-v4:$support_version"
+    implementation "com.android.support:design:$support_version"
+    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+    implementation 'android.arch.lifecycle:runtime:1.1.1'
+    implementation 'android.arch.lifecycle:extensions:1.1.1'
+    implementation 'android.arch.lifecycle:reactivestreams:1.1.1'
+    annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
+    implementation project(':imageandfileselector')
+    implementation project(':SpecificSDK4GPTT')
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.6'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    implementation(name: 'libuvccamera-release', ext: 'aar') {
+        exclude module: 'support-v4'
+        exclude module: 'appcompat-v7'
+    }
+}

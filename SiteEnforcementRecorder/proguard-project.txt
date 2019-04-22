@@ -1,0 +1,197 @@
+# To enable ProGuard in your project, edit project.properties
+# to define the proguard.config property as described in that file.
+#
+# Add project specific ProGuard rules here.
+# By default, the flags in this file are appended to flags specified
+# in ${sdk.dir}/tools/proguard/proguard-android.txt
+# You can edit the include path and order by changing the ProGuard
+# include property in project.properties.
+#
+# For more details, see
+#   http://developer.android.com/guide/developing/tools/proguard.html
+
+# Add any project specific keep options here:
+
+# If your project uses WebView with JS, uncomment the following
+# and specify the fully qualified class name to the JavaScript interface
+# class:
+
+-keepclassmembers class fqcn.of.javascript.interface.for.webview {
+   public *;
+}
+
+-keep public class * extends android.app.Activity
+-keep public class * extends android.app.Application
+-keep public class * extends android.app.Service
+-keep public class * extends android.content.BroadcastReceiver
+-keep public class * extends android.content.ContentProvider
+-keep public class * extends android.app.Fragment
+-keep public class * extends android.app.backup.BackupAgentHelper  
+-keep public class * extends android.preference.Preference  
+-keep public class * extends android.support.v4.**  
+-keep public class com.android.vending.licensing.ILicensingService 
+-keep public class android.support.design.widget.**
+
+-keepnames class * implements java.io.Serializable  
+-keep public class * implements java.io.Serializable {  
+    public *;  
+} 
+
+-dontwarn android.support.v4.**
+-keep class android.support.v4.** { *; }
+-keep interface android.support.v4.** { *; }
+-keep public class * extends android.app.Fragment
+
+-keep class butterknife.** { *; }
+-dontwarn butterknife.internal.**
+-keep class **$$ViewBinder { *; }
+-keepclasseswithmembernames class * {
+    @butterknife.* <fields>;
+}
+-keepclasseswithmembernames class * {
+    @butterknife.* <methods>;
+}
+
+-dontwarn net.sourceforge.pinyin4j.**
+-keep class net.sourceforge.pinyin4j.** { *; }
+-dontwarn demo.**
+-keep class demo.** { *;}
+-dontwarn com.hp.hpl.sparta.**
+-keep class com.hp.hpl.sparta.** { *;}
+-keep class pinyindb.** { *;}
+
+-dontwarn org.apache.log4j.**
+-keep class org.apache.log4j.** { *; }
+-keep class org.apache.log4j.lf5.config.** { *; }
+-keep class org.apache.log4j.lf5.viewer.images.** { *; }
+-keep interface org.apache.log4j.** { *; }
+
+-dontwarn org.apache.http.**
+-keep class  org.apache.http.** { *; }
+-keep interface org.apache.http.** { *; }
+-dontwarn org.apache.zectec.http.**
+-keep class  org.apache.zectec.http.** { *; }
+-keep interface org.apache.zectec.http.** { *; }
+
+-dontwarn com.baidu.a.a.a.**
+-keep class com.baidu.a.a.a.** { *; }
+-dontwarn com.baidu.lbsapi.auth.**
+-keep class com.baidu.lbsapi.auth.** { *; }
+-dontwarn com.baidu.location.**
+-keep class com.baidu.location.** { *; }
+-dontwarn com.baidu.android.bbalbs.common.**
+-keep class com.baidu.android.bbalbs.common.** { *; }
+
+-dontwarn org.apache.zectec.commons.codec.**
+-keep class org.apache.zectec.commons.codec.** { *; }
+-keep interface org.apache.zectec.commons.codec.** { *; }
+
+-dontwarn com.baidu.speechsynthesizer.**
+-keep class com.baidu.speechsynthesizer.** { *; }
+
+-dontwarn com.alibaba.fastjson.**
+-keep class com.alibaba.fastjson.** { *; }
+
+-dontwarn com.google.protobuf.**
+-keep class com.google.protobuf.** { *; }
+
+-dontwarn com.hp.hpl.sparta.**
+-keep class com.hp.hpl.sparta.** { *; }
+
+-dontwarn android.content.pm.**
+-keep class android.content.pm.** { *; }
+-dontwarn com.baidu.android.common.**
+-keep class com.baidu.android.common.** { *; }
+
+-dontwarn org.slf4j.**
+-keep class org.slf4j.** { *; }
+-keep interface org.slf4j.** { *; }
+
+-dontwarn org.apache.http.entity.mime.**
+-keep class org.apache.http.entity.mime.** { *; }
+-keep interface org.apache.http.entity.mime.** { *; }
+
+-dontwarn com.google.gson.**
+-keep class com.google.gson.** { *; }
+
+-dontwarn de.mindpipe.android.logging.log4j.**
+-keep class de.mindpipe.android.logging.log4j.** { *; }
+
+-dontwarn org.slf4j.impl.**
+-keep class org.slf4j.impl.** { *; }
+-keep interface org.slf4j.impl.** { *; }
+
+-keep class cn.vsx.hamster.errcode.** { *; }
+-keep class cn.vsx.hamster.common.** { *; }
+
+-keep class cn.vsx.hamster.terminalsdk.manager.channel** { *; }
+-keep class cn.vsx.hamster.protolbuf.** { *; }
+-keep class org.ddpush.im.** { *; }
+
+-keep class cn.vsx.hamster.terminalsdk.receiveHandler.** { *; }
+-keep class cn.vsx.vc.receiveHandle.** { *; }
+-keep class com.zectec.imageandfileselector.receivehandler.** { *; }
+
+-keepattributes *Annotation* #假如项目中有用到注解，应加入这行配置
+-keepattributes Signature #过滤泛型（不写可能会出现类型转换错误，一般情况把这个加上就是了）
+-keep class **.R$* { *; }  #保持R文件不被混淆，否则，你的反射是获取不到资源id的
+
+-renamesourcefileattribute SourceFile
+-keepattributes SourceFile,LineNumberTable
+-keep class cn.vsx.vc.utils.ToastUtil
+
+-keep class com.android.webrtc.audio.** { *; }
+-keep class org.easydarwin.** { *; }
+
+-keep class cn.com.cybertech.** { *; }
+
+-keep class cn.vsx.hamster.terminalsdk.model.** { *; }
+
+-keepclasseswithmembernames class * {
+    native <methods>;
+}
+
+-keep class * implements android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+
+-keep class ptt.terminalsdk.service.MessageService
+
+#rxJava
+-dontwarn sun.misc.**
+-keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
+    long producerIndex;
+    long consumerIndex;
+}
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueProducerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode producerNode;
+}
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueConsumerNodeRef {
+    rx.internal.util.atomic.LinkedQueueNode consumerNode;
+}
+
+
+
+
+-keep class * implements android.os.IInterface {*;}
+
+
+-keep class org.linphone.** { *; }
+-keep interface org.linphone.** { *; }
+
+-keep class com.serenegiant.usb.** { *; }
+-keep interface com.serenegiant.usb.** { *; }
+
+-keep class android.dsp.proxy.** { *; }
+-keep class com.hytera.api.base.common.** { *; }
+-keep interface com.hytera.api.base.common.** { *; }
+
+
+-keep class com.chad.library.adapter.** {
+*;
+}
+-keep public class * extends com.chad.library.adapter.base.BaseQuickAdapter
+-keep public class * extends com.chad.library.adapter.base.BaseViewHolder
+-keepclassmembers  class **$** extends com.chad.library.adapter.base.BaseViewHolder {
+     <init>(...);
+}
