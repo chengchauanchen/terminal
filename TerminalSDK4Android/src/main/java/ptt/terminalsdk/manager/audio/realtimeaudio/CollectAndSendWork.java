@@ -87,7 +87,7 @@ public class CollectAndSendWork implements Runnable {
                             logger.warn("audioRecord重建后依然不能正常工作，放弃此次录音行为", e1);
                         }
                     }
-                    ByteBuffer.wrap(sendBuf).putLong(command.getCallId()).putInt(command.getMemberId());
+                    ByteBuffer.wrap(sendBuf).putLong(command.getCallId()).putLong(command.getUniqueNo());
                     sendDp.setAddress(command.getIp());
                     sendDp.setPort(command.getPort());
                     while (collectAndSendCommandBlockingQueue.isEmpty() && started) {

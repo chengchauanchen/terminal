@@ -58,9 +58,9 @@ public class RealtimeAudio {
             }
         }
     }
-    public synchronized void resumeReceiver(String srcIp, int srcPort, long callId, int memberId, int cookie){
+    public synchronized void resumeReceiver(String srcIp, int srcPort, long callId, long uniqueNo, int cookie){
         if(currentReceiverCookies.isEmpty()){
-            Command cmd = new Command(Command.CmdType.RESUME_RECEIVER, srcIp, srcPort, callId, memberId);
+            Command cmd = new Command(Command.CmdType.RESUME_RECEIVER, srcIp, srcPort, callId, uniqueNo);
             try {
                 receiveAndPlayCommandBlockingQueue.put(cmd);
             } catch (InterruptedException e) {
@@ -87,9 +87,9 @@ public class RealtimeAudio {
             }
         }
     }
-    public synchronized void resumeSender(String ip, int port, long callId, int memberId, int cookie){
+    public synchronized void resumeSender(String ip, int port, long callId, long uniqueNo, int cookie){
         if(currentSendCookies.isEmpty()){
-            Command cmd = new Command(Command.CmdType.RESUME_SENDER, ip, port, callId, memberId);
+            Command cmd = new Command(Command.CmdType.RESUME_SENDER, ip, port, callId, uniqueNo);
             try {
                 collectAndSendCommandBlockingQueue.put(cmd);
             } catch (InterruptedException e) {
@@ -104,9 +104,9 @@ public class RealtimeAudio {
         return nextSendCookie++;
     }
 
-    public void startDuplexCommunication(String sendIp, int sendPort, long sendCallId,String receivedIp, int receivedPort, long receiveCallId, int memberId) {
-        Command sendCmd = new Command(Command.CmdType.START_DUPLEX_COMMUNICATION, sendIp, sendPort, sendCallId, memberId);
-        Command receivedCmd = new Command(Command.CmdType.START_DUPLEX_COMMUNICATION, receivedIp, receivedPort, receiveCallId, memberId);
+    public void startDuplexCommunication(String sendIp, int sendPort, long sendCallId,String receivedIp, int receivedPort, long receiveCallId, long uniqueNo) {
+        Command sendCmd = new Command(Command.CmdType.START_DUPLEX_COMMUNICATION, sendIp, sendPort, sendCallId, uniqueNo);
+        Command receivedCmd = new Command(Command.CmdType.START_DUPLEX_COMMUNICATION, receivedIp, receivedPort, receiveCallId, uniqueNo);
         try {
             collectAndSendCommandBlockingQueue.put(sendCmd);
         } catch (InterruptedException e) {

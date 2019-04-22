@@ -24,6 +24,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.SelectAdapter;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.receiveHandle.ReceiveRemoveSelectedMemberHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSelectedFragmentHandler;
 import cn.vsx.vc.utils.Constants;
@@ -116,12 +117,14 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
         mIvSelect.setOnClickListener(this);
         mLl_search.setOnClickListener(this);
         TerminalFactory.getSDK().registReceiveHandler(receiveMemberSelectedHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiveRemoveSelectedMemberHandler);
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
         TerminalFactory.getSDK().unregistReceiveHandler(receiveMemberSelectedHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveRemoveSelectedMemberHandler);
     }
 
     @Override
@@ -225,6 +228,25 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
         }
     }
 
+    private ReceiveRemoveSelectedMemberHandler receiveRemoveSelectedMemberHandler = new ReceiveRemoveSelectedMemberHandler(){
+        @Override
+        public void handle(ContactItemBean contactItemBean){
+            if(contactItemBean.getBean() instanceof Member){
+                Member member = (Member) contactItemBean.getBean();
+                if(selectedMemberNos.contains(member.getNo())){
+                    Iterator<Member> iterator = selectedMembers.iterator();
+                    while(iterator.hasNext()){
+                        Member next = iterator.next();
+                        if(next.getNo() == member.getNo()){
+                            iterator.remove();
+                        }
+                    }
+                    selectedMemberNos.remove((Integer) member.getNo());
+                }
+            }
+            selectAdapter.notifyDataSetChanged();
+        }
+    };
 
     private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected) -> {
         //不是同一个member对象

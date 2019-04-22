@@ -11,12 +11,13 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.SelectedItemListAdapter;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.receiveHandle.ReceiveRemoveSelectedMemberHandler;
 
 public class SelectedMemberFragment extends BaseFragment{
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String DATA = "data";
     private List<ContactItemBean> mData;
     private RecyclerView mRvSelected;
@@ -83,6 +84,13 @@ public class SelectedMemberFragment extends BaseFragment{
     @Override
     public void initData(){
         SelectedItemListAdapter selectedListAdapter = new SelectedItemListAdapter(getContext(),mData);
+        selectedListAdapter.setItemClickListener(position -> {
+            if(position>=0&&position<mData.size()){
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveRemoveSelectedMemberHandler.class,mData.get(position).getBean());
+                mData.remove(position);
+                selectedListAdapter.notifyDataSetChanged();
+            }
+        });
         mRvSelected.setAdapter(selectedListAdapter);
         mRvSelected.setLayoutManager(new LinearLayoutManager(getContext()));
     }

@@ -12,14 +12,14 @@ public class Command {
     private InetAddress ip;
     private int port;
     private long callId;
-    private int memberId;
+    private long uniqueNo;
     public Command(CmdType cmdType){
         if(cmdType == null){
             throw new IllegalArgumentException("cmdType 不能为 null");
         }
         this.cmdType = cmdType;
     }
-    public Command(CmdType cmdType, String ip, int port, long callId, int memberId){
+    public Command(CmdType cmdType, String ip, int port, long callId, long uniqueNo){
         this(cmdType);
         try {
             this.ip = InetAddress.getByName(ip);
@@ -28,7 +28,7 @@ public class Command {
         }
         this.port = port;
         this.callId = callId;
-        this.memberId = memberId;
+        this.uniqueNo = uniqueNo;
     }
 
     public CmdType getCmdType() {
@@ -47,8 +47,8 @@ public class Command {
         return callId;
     }
 
-    public int getMemberId() {
-        return memberId;
+    public long getUniqueNo() {
+        return uniqueNo;
     }
 
     enum CmdType{

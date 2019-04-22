@@ -36,8 +36,8 @@ public class AudioProxy implements IAudioProxy{
 		realtimeAudio.pauseSender(cookie);
 	}
 	@Override
-	public void resumeSender(String ip, int port, long callId, int memberId, int cookie){
-		realtimeAudio.resumeSender(ip, port, callId, memberId, cookie);
+	public void resumeSender(String ip, int port, long callId, long uniqueNo, int cookie){
+		realtimeAudio.resumeSender(ip, port, callId, uniqueNo, cookie);
 	}
 	@Override
 	public int getSenderCookie(){
@@ -52,8 +52,8 @@ public class AudioProxy implements IAudioProxy{
 		realtimeAudio.fausePauseReceiver(cookie);
 	}
 	@Override
-	public void resumeReceiver(String srcIp, int srcPort, long callId, int memberId, int cookie){
-		realtimeAudio.resumeReceiver(srcIp, srcPort, callId, memberId, cookie);
+	public void resumeReceiver(String srcIp, int srcPort, long callId, long uniqueNo, int cookie){
+		realtimeAudio.resumeReceiver(srcIp, srcPort, callId, uniqueNo, cookie);
 	}
 	@Override
 	public void playRecord(String fileName, final IAudioPlayComplateHandler handler){
@@ -65,13 +65,13 @@ public class AudioProxy implements IAudioProxy{
 	}
 
 	@Override
-	public void startDuplexCommunication(String sendIp, int sendPort, long sendCallId, String receivedIp, int receivedPort, long receivedCallId, int memberId) {
+	public void startDuplexCommunication(String sendIp, int sendPort, long sendCallId, String receivedIp, int receivedPort, long receivedCallId, long uniqueNo) {
 		mode = audiomanage.getMode();
 		if (audiomanage.isSpeakerphoneOn()) {
 			audiomanage.setSpeakerphoneOn(false);
 		}
 		audiomanage.setMode(AudioManager.MODE_IN_COMMUNICATION);
-		realtimeAudio.startDuplexCommunication(sendIp, sendPort, sendCallId, receivedIp, receivedPort, receivedCallId, memberId);
+		realtimeAudio.startDuplexCommunication(sendIp, sendPort, sendCallId, receivedIp, receivedPort, receivedCallId, uniqueNo);
 	}
 
 	@Override

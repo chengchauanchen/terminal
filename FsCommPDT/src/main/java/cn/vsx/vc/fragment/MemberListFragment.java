@@ -8,6 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -19,6 +20,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MemberListAdapter;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.receiveHandle.ReceiveRemoveSelectedMemberHandler;
 import cn.vsx.vc.utils.Constants;
 
 /**
@@ -75,6 +77,7 @@ public class MemberListFragment extends BaseFragment{
     public void initListener(){
         TerminalFactory.getSDK().registReceiveHandler(receiveMemberSelectedHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveGetTerminalHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiveRemoveSelectedMemberHandler);
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
             TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), type);
             mHandler.postDelayed(()-> mSwipeRefreshLayout.setRefreshing(false),1200);
@@ -101,6 +104,24 @@ public class MemberListFragment extends BaseFragment{
         TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), type);
     }
 
+    private ReceiveRemoveSelectedMemberHandler receiveRemoveSelectedMemberHandler = contactItemBean -> {
+        // TODO: 2019/4/22 如果删除的是子部门的，需要更改子部门数据的状态
+        if(contactItemBean.getBean() instanceof Member){
+            Member bean = (Member) contactItemBean.getBean();
+            Iterator<ContactItemBean> iterator = mData.iterator();
+            while(iterator.hasNext()){
+                ContactItemBean next = iterator.next();
+                if(next.getBean() instanceof Member){
+                    if(bean.getNo() == ((Member) next.getBean()).getNo()){
+                        iterator.remove();
+                    }
+                }
+            }
+
+        }
+        memberListAdapter.notifyDataSetChanged();
+    };
+
     private ReceiveGetTerminalHandler receiveGetTerminalHandler = (depId, type, departments, members) -> {
         if(type.equals(this.type)){
             mHandler.post(()-> updateData(depId, departments, members));
@@ -108,6 +129,7 @@ public class MemberListFragment extends BaseFragment{
     };
 
     private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected) -> {
+        // TODO: 2019/4/22 如果选中的是子部门的，需要修改子部门数据的状态
         if(selected){
             if(!selectedMemberNos.contains(member.getNo())){
                 selectedMemberNos.add(member.getNo());
@@ -131,6 +153,7 @@ public class MemberListFragment extends BaseFragment{
     @Override
     public void onDestroyView(){
         super.onDestroyView();
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveRemoveSelectedMemberHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveGetTerminalHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveMemberSelectedHandler);
     }

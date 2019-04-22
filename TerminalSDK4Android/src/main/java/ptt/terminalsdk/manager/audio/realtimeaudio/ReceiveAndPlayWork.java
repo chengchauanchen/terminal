@@ -104,7 +104,7 @@ public class ReceiveAndPlayWork implements Runnable {
                     speex = AudioResourceManager.INSTANCE.getSpeex4Receiver();
                     lastSendReceiveRequestTime = 0;
                     receiveAddress = new InetSocketAddress(command.getIp(), command.getPort());
-                    ByteBuffer.wrap(receiveRequest).putLong(command.getCallId()).putInt(command.getMemberId());
+                    ByteBuffer.wrap(receiveRequest).putLong(command.getCallId()).putLong(command.getUniqueNo());
                     receiveCallId = command.getCallId();
                     receiveRequestDp.setSocketAddress(receiveAddress);
                     try {

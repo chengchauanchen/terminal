@@ -43,6 +43,7 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
         // Required empty public constructor
     }
 
+
     public static EstablishTempGroupFragment newInstance(int type, int groupId){
         EstablishTempGroupFragment fragment = new EstablishTempGroupFragment();
         Bundle args = new Bundle();
