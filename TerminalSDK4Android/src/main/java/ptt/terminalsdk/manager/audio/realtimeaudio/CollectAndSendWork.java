@@ -49,7 +49,7 @@ public class CollectAndSendWork implements Runnable {
         short[] collectedBuffer = new short[Math.min(AudioResourceManager.INSTANCE.getAudioRecordBufferSize()/2, 960)];//采集数据的缓冲区
         int len;//采集到数据的长度，编码后数据的长度
         byte[] sendBuf = new byte[512];//发送音频数据的缓冲区
-        int sendBufHead = 12;//发送的音频数据的数据头长度
+        int sendBufHead = 16;//发送的音频数据的数据头长度
         DatagramPacket sendDp = new DatagramPacket(sendBuf, sendBuf.length);//发送数据的数据载体
         while (started){
             try{

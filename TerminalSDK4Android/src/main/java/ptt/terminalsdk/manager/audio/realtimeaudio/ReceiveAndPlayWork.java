@@ -77,7 +77,7 @@ public class ReceiveAndPlayWork implements Runnable {
         int len;//解码后数据的长度
         byte[] receivedData = new byte[512];//接收到的数据
         DatagramPacket receivedDataDp = new DatagramPacket(receivedData, receivedData.length);
-        byte[] receiveRequest = new byte[12];
+        byte[] receiveRequest = new byte[16];
         DatagramPacket receiveRequestDp = new DatagramPacket(receiveRequest, receiveRequest.length);
         SocketAddress receiveAddress;//接收数据的地址
         long receiveCallId;//接收数据的标识（CallId）
