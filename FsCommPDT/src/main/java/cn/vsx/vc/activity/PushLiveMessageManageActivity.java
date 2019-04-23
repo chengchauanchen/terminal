@@ -17,6 +17,7 @@ import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.PushLiveListAdapter;
 import cn.vsx.vc.view.PullToRefreshLayout;
@@ -103,9 +104,9 @@ public class PushLiveMessageManageActivity extends BaseActivity{
         @Override
         public void handler(final TerminalMessage terminalMessage) {
             if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
-                String liverId_Name = terminalMessage.messageBody.getString(JsonParam.LIVER);
-                int liverId = Integer.parseInt(liverId_Name.substring(0, liverId_Name.indexOf("_")));
-                if(liverId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
+//                String liverId_Name = terminalMessage.messageBody.getString(JsonParam.LIVER);
+                int liverNo = Util.stringToInt(terminalMessage.messageBody.getString(JsonParam.LIVERNO));
+                if(liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
                     mHandler.post(() -> {
                         mLiveMessageList.add(terminalMessage);
                         mPushLiveListAdapter.notifyDataSetChanged();

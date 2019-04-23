@@ -399,7 +399,7 @@ public class PersonSearchFragment  extends BaseFragment{
 
     private ReceiverIndividualMsgForAddressBookHandler mReceiverIndividualMsgForAddressBookHandler = (where, position) -> {
         if(where == 2) {
-            IndividualNewsActivity.startCurrentActivity(context, searchMemberListExceptMe.get(position).id, searchMemberListExceptMe.get(position).getName());
+            IndividualNewsActivity.startCurrentActivity(context, searchMemberListExceptMe.get(position).no, searchMemberListExceptMe.get(position).getName());
         }
     };
     /*************************************************************Handler和其他监听**************************************************************************************/

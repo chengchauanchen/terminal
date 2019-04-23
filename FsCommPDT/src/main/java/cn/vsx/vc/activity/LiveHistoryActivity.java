@@ -20,6 +20,7 @@ import butterknife.Bind;
 import butterknife.OnClick;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
@@ -104,24 +105,31 @@ public class LiveHistoryActivity extends BaseActivity{
 
         JSONObject messageBody = terminalMessage.messageBody;
         String liver = messageBody.getString(JsonParam.LIVER);
+        int liverNo = Util.stringToInt(messageBody.getString(JsonParam.LIVERNO));
         String[] split = liver.split("_");
-        //设置默认上报视频者，防止数组下标越界异常
-        int memberNo = terminalMessage.messageFromId;
-        if(split.length>0){
-            memberNo = Integer.valueOf(split[0]);
-        }
+//        //设置默认上报视频者，防止数组下标越界异常
+//        int memberNo = terminalMessage.messageFromId;
+//        if(split.length>0){
+//            memberNo = Integer.valueOf(split[0]);
+//        }
         //上报主题，如果没有就取上报者的名字
         liveTheme = messageBody.getString(JsonParam.TITLE);
         if(TextUtils.isEmpty(liveTheme)){
             if(split.length>1){
                 String memberName = split[1];
                 liveTheme = String.format(getString(R.string.text_living_theme_member_name),memberName);
+                tv_theme.setText(liveTheme);
             }else {
-                Member member = DataUtil.getMemberByMemberNo(memberNo);
-                liveTheme = String.format(getString(R.string.text_living_theme_member_name),member.getName());
+                TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo);
+                    String name = (account!=null)?account.getName():terminalMessage.messageFromName;
+                    new Handler().post(() -> {
+                        tv_theme.setText(String.format(this.getString(R.string.current_push_member),name));
+                    });
+                });
             }
         }
-        tv_theme.setText(liveTheme);
+
 
         //获取播放url
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> {

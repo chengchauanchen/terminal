@@ -161,7 +161,9 @@ public class GroupMemberAdapter extends BaseAdapter {
         });
 
         //跳转到消息界面
-        viewHolder.messageTo.setOnClickListener(v -> IndividualNewsActivity.startCurrentActivity(mContext, member.id, member.getName() ));
+        viewHolder.messageTo.setOnClickListener(v -> {
+            IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName() );
+        });
         //跳转到个呼
         viewHolder.callTo.setOnClickListener(v -> {
             if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){

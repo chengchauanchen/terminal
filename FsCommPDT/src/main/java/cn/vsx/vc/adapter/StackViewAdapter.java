@@ -1,6 +1,8 @@
 package cn.vsx.vc.adapter;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.constraint.ConstraintLayout;
 import android.text.TextUtils;
 import android.util.Log;
@@ -21,8 +23,11 @@ import java.util.List;
 
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -42,6 +47,7 @@ public class StackViewAdapter extends BaseAdapter{
     private CloseDialogListener closeDialogListener;
     private GoWatchListener goWatchListener;
     private Context context;
+    public Handler myHandler = new Handler(Looper.getMainLooper());
 
     public StackViewAdapter(Context context){
         this.context = context;
@@ -139,52 +145,62 @@ public class StackViewAdapter extends BaseAdapter{
             viewHolder.dialog_root.setBackgroundResource(R.drawable.warning_background);
 //            viewHolder.iv_warning_level.setImageResource();
         }else if(data.get(position).messageType == MessageType.VIDEO_LIVE.getCode()){
+            TerminalMessage message = data.get(position);
             viewHolder.iv_warning_level.setVisibility(View.GONE);
             viewHolder.dialog_root.setBackgroundResource(R.drawable.video_background);
-            String liver = (String) data.get(position).messageBody.get("liver");
+            String liver = (String) message.messageBody.get(JsonParam.LIVER);
+            int liverNo = Util.stringToInt(message.messageBody.getString(JsonParam.LIVERNO));
             if(!TextUtils.isEmpty(liver)){
                 if(liver.contains("_")){
                     String[] split = liver.split("_");
-                    String memberNo = split[0];
-                    Member member = DataUtil.getMemberByMemberNo(Integer.valueOf(memberNo));
-                    if(split.length>1){
-                        String memberName = split[1];
+                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                        Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo);
+                        if(account!=null){
+                            myHandler.post(() -> {
+                                if(split.length>1){
+                                    String memberName = split[1];
 
-                        if(TextUtils.isEmpty(member.getDepartmentName())){
-                            viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),memberName,HandleIdUtil.handleId(Integer.valueOf(memberNo))));
-                        }else{
-                            viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),memberName,HandleIdUtil.handleId(Integer.valueOf(memberNo)),member.getDepartmentName()));
+                                    if(TextUtils.isEmpty(account.getDepartmentName())){
+                                        viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),memberName,HandleIdUtil.handleId(liverNo)));
+                                    }else{
+                                        viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),memberName,HandleIdUtil.handleId(liverNo),account.getDepartmentName()));
+                                    }
+
+                                    viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),memberName));
+                                }else {
+                                    if(TextUtils.isEmpty(account.getDepartmentName())){
+                                        viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),account.getName(),HandleIdUtil.handleId(liverNo)));
+                                    }else{
+                                        viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),account.getName(),HandleIdUtil.handleId(liverNo),account.getDepartmentName()));
+                                    }
+                                    viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),account.getName()));
+                                }
+                            });
                         }
-
-                        viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),memberName));
-                    }else {
-                        if(TextUtils.isEmpty(member.getDepartmentName())){
-                            viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),member.getName(),HandleIdUtil.handleId(Integer.valueOf(memberNo))));
-                        }else{
-                            viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),member.getName(),HandleIdUtil.handleId(Integer.valueOf(memberNo)),member.getDepartmentName()));
-                        }
-                        viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),member.getName()));
-                    }
-
+                    });
                 }else {
                     Log.e("StackViewAdapter","有上报者，但是liver里没有_，无法获取编号和名字");
                 }
             }else {
-                Member member = DataUtil.getMemberByMemberNo(data.get(position).messageFromId);
-                if(TextUtils.isEmpty(member.getDepartmentName())){
-                    viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),data.get(position).messageFromName,HandleIdUtil.handleId(member.getNo())));
-                }else {
-                    viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),data.get(position).messageFromName,HandleIdUtil.handleId(member.getNo()),member.getDepartmentName()));
-                }
+                TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(data.get(position).messageFromId);
+                    if(account!=null){
+                        myHandler.post(() -> {
+                            if(TextUtils.isEmpty(account.getDepartmentName())){
+                                viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),data.get(position).messageFromName,HandleIdUtil.handleId(account.getNo())));
+                            }else {
+                                viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),data.get(position).messageFromName,HandleIdUtil.handleId(account.getNo()),account.getDepartmentName()));
+                            }
+                            viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),account.getName()));
 
-                viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),member.getName()));
+                        });
+                    }
+                });
             }
-
             //如果有标题就设置标题，这个放在最后设置
             if(!TextUtils.isEmpty(data.get(position).messageBody.getString(JsonParam.TITLE))){
                 viewHolder.tv_live_theme.setText(data.get(position).messageBody.getString(JsonParam.TITLE));
             }
-
         }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
         Date date = new Date(data.get(position).sendTime);

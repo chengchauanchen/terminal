@@ -718,8 +718,10 @@ public class PullLivingService extends BaseService{
         builder.setMessageUrl(terminalMessage.messageUrl);
         builder.setMessageFromName(terminalMessage.messageFromName);
         builder.setMessageFromNo(terminalMessage.messageFromId);
+        builder.setMessageFromUniqueNo(terminalMessage.messageFromUniqueNo);
         builder.setMessageToName(terminalMessage.messageToName);
         builder.setMessageToNo(terminalMessage.messageToId);
+        builder.setMessageToUniqueNo(terminalMessage.messageToUniqueNo);
         builder.setMessageType(terminalMessage.messageType);
         builder.setMessageVersion(terminalMessage.messageVersion);
         builder.setResultCode(terminalMessage.resultCode);

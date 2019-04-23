@@ -126,7 +126,7 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
         });
         viewHolderPerson.shoutai_message_to.setOnClickListener(v -> {
             Member member = list.get(groupPosition).memberList.get(childPosition);
-            IndividualNewsActivity.startCurrentActivity(activity, member.id, member.getName());
+            IndividualNewsActivity.startCurrentActivity(activity, member.no, member.getName());
         });
 
         return convertView;

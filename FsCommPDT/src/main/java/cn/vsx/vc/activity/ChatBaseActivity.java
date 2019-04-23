@@ -2214,19 +2214,21 @@ public abstract class ChatBaseActivity extends BaseActivity{
      */
     private ReceiverGroupPushLiveHandler receiverGroupPushLiveHandler = (streamMediaServerIp, streamMediaServerPort, callId) -> {
         int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+        long memberUniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
         String memberName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
-        String url = "rtsp://"+streamMediaServerIp+":"+streamMediaServerPort+"/"+memberId+"_"+callId+".sdp";
+        String url = "rtsp://"+streamMediaServerIp+":"+streamMediaServerPort+"/"+memberUniqueNo+"_"+callId+".sdp";
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
         jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
         jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
         jsonObject.put(JsonParam.CALLID, String.valueOf(callId));
         jsonObject.put(JsonParam.REMARK, 2);
-        jsonObject.put(JsonParam.LIVER, memberId+"_"+memberName);
+        jsonObject.put(JsonParam.LIVER, memberUniqueNo+"_"+memberName);
+        jsonObject.put(JsonParam.LIVERNO, memberId);
         jsonObject.put(JsonParam.BACKUP, memberId+"_"+memberName);
         jsonObject.put(JsonParam.EASYDARWIN_RTSP_URL, url);
         TerminalMessage mTerminalMessage = new TerminalMessage();
-        mTerminalMessage.messageFromId = memberId;
+        mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
         mTerminalMessage.messageFromName = memberName;
         mTerminalMessage.messageToId = userId;
         mTerminalMessage.messageToName = userName;

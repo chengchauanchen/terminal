@@ -133,7 +133,7 @@ public class PoliceAffairsAdapter extends BaseExpandableListAdapter {
         });
         viewHolderPerson.jingwutong_message_to.setOnClickListener(v -> {
             Member member1 = list.get(groupPosition).memberList.get(childPosition);
-            IndividualNewsActivity.startCurrentActivity(activity, member1.id, member1.getName());
+            IndividualNewsActivity.startCurrentActivity(activity, member1.no, member1.getName());
         });
         return convertView;
     }

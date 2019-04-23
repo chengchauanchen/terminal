@@ -2,6 +2,8 @@ package cn.vsx.vc.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
@@ -56,7 +58,9 @@ import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
@@ -150,6 +154,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     List<TerminalMessage> unReadVoiceList = new ArrayList<>();
     private boolean upload;//是否正在上传
     private boolean isForWardMore;//是否合并转发
+
+    public Handler myHandler = new Handler(Looper.getMainLooper());
 
     public TemporaryAdapter(List<TerminalMessage> chatMessageList, FragmentActivity activity, HashMap<Integer, String> idNameMap) {
         this.chatMessageList = chatMessageList;
@@ -1106,24 +1112,31 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private void handlerLiveData(TerminalMessage terminalMessage, ChatViewHolder holder) {
         JSONObject messageBody = terminalMessage.messageBody;
         String liver = messageBody.getString(JsonParam.LIVER);
+        int liverNo = Util.stringToInt(messageBody.getString(JsonParam.LIVERNO));
         String[] split = liver.split("_");
         //设置默认上报视频者，防止数组下标越界异常
-        int memberNo = terminalMessage.messageFromId;
-        if(split.length>0){
-            memberNo = Integer.valueOf(split[0]);
-        }
+//        int memberNo = terminalMessage.messageFromId;
+//        if(split.length>0){
+//            memberNo = Integer.valueOf(split[0]);
+//        }
         //上报主题，如果没有就取上报者的名字
         liveTheme = messageBody.getString(JsonParam.TITLE);
         if(TextUtils.isEmpty(liveTheme)){
             if(split.length>1){
                 String memberName = split[1];
                 liveTheme = String.format(activity.getString(R.string.current_push_member),memberName);
+                setText(holder.tvContent, liveTheme);
             }else {
-                Member member = DataUtil.getMemberByMemberNo(memberNo);
-                liveTheme = String.format(activity.getString(R.string.current_push_member),member.getName());
+                TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo);
+                    String name = (account!=null)?account.getName():terminalMessage.messageFromName;
+                    myHandler.post(() -> {
+                        setText(holder.tvContent, String.format(activity.getString(R.string.current_push_member),name));
+                    });
+                });
             }
         }
-        setText(holder.tvContent, liveTheme);
+
         if(!messageBody.containsKey(JsonParam.REMARK)){
             return;
         }
@@ -1161,44 +1174,44 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if (!Util.isEmpty(liver)) {
                 if (terminalMessage.resultCode == SignalServerErrorCode.VIDEO_LIVE_WAITE_TIMEOUT.getErrorCode()) {//超时
 
-                    if (memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
+                    if (liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.other_no_answer));
                     }
 
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.SLAVE_BUSY.getErrorCode()) {
-                    if ((memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
+                    if ((liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_busy_party));
                     }
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_IS_KILLED.getErrorCode()) {//主叫或被叫被遥弊
-                    if ((memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
+                    if ((liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.other_no_answer));
                     }
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.CALLED_MEMBER_OFFLINE.getErrorCode()) {
-                    if ((memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
+                    if ((liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
                         setText(holder.live_tv_chatcontent, SignalServerErrorCode.CALLED_MEMBER_OFFLINE.getErrorDiscribe());
                     }
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.TERMINAL_OFFLINE_LOGOUT.getErrorCode()) {
-                    if ((memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
+                    if ((liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_the_other_party_is_not_online));
                     }
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_REFUSE.getErrorCode()) {
-                    if (memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
+                    if (liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.refused));
                     } else {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_the_other_party_has_refus));
                     }
 
-                } else if (memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
+                } else if (liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
                     setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                 }
             } else {
@@ -1208,7 +1221,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             setViewVisibility(holder.reBubble, View.GONE);
             setViewVisibility(holder.live_bubble, View.VISIBLE);
             if (terminalMessage.resultCode == SignalServerErrorCode.STOP_ASK_VIDEO_LIVE.getErrorCode()) {
-                if ((memberNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
+                if ((liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
                     setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                 } else {
                     setText(holder.live_tv_chatcontent, activity.getString(R.string.canceled));
