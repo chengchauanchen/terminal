@@ -1,6 +1,8 @@
 package cn.vsx.vc.application;
 
+import android.app.AlarmManager;
 import android.app.Application;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +13,7 @@ import android.os.IBinder;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
+import org.apache.log4j.Logger;
 import org.easydarwin.push.UVCCameraService;
 
 import java.util.ArrayList;
@@ -31,14 +34,18 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.vc.receiver.AccountValidReceiver;
 import cn.vsx.vc.service.PTTButtonEventService;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.NfcUtil;
+import ptt.terminalsdk.broadcastreceiver.FileExpireReceiver;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class MyApplication extends Application {
 
+	private Logger logger = Logger.getLogger(getClass());
+	public static final String TAG = "MyApplication---";
 	public int mAppStatus = Constants.FORCE_KILL;//App运行状态，是否被强杀
 	public boolean isBinded=false;
 	public boolean isGroupCalling = false;
@@ -60,8 +67,11 @@ public class MyApplication extends Application {
 
 	/**标记个呼来或者请求图形来，是否做了接受或拒绝的操作，默认是false*/
 	public boolean isPrivateCallOrVideoLiveHand = false;
-    //NFC util
-	private NfcUtil mNFCUtil;
+	//
+	private AlarmManager accountValidAlarmManager;
+	private PendingIntent accountValidPendingIntent;
+	//通知账号有效的间隔时间
+	public static final long ACCOUNT_VALID_TIME = 8 * 60 * 60 * 1000;
 
 	@Override
 	public void onCreate() {
@@ -87,7 +97,8 @@ public class MyApplication extends Application {
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
 		//保存录像，录音，照片的存储路径
 		MyTerminalFactory.getSDK().getFileTransferOperation().initExternalUsableStorage();
-
+		//开启账号解绑的倒计时
+		startAccountValidClock();
 	}
 
 
@@ -193,4 +204,58 @@ public class MyApplication extends Application {
 			Log.e("MyApplication", "UVCCameraService服务断开了");
 		}
 	};
+
+	/**
+	 * 获取AlarmManager
+	 *
+	 * @return
+	 */
+	public AlarmManager getAccountValidAlarmManager() {
+		if (accountValidAlarmManager == null) {
+			accountValidAlarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+		}
+		return accountValidAlarmManager;
+	}
+
+	/**
+	 * 获取PendingIntent
+	 */
+	private PendingIntent getAccountValidPendingIntent() {
+		if (accountValidPendingIntent == null) {
+			Intent intent = new Intent(this, AccountValidReceiver.class);
+			intent.setAction("vsxin.action.accountvalid");
+			accountValidPendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+		}
+		return accountValidPendingIntent;
+	}
+
+	/**
+	 * 开启8小时解绑的倒计时
+	 *
+	 * @param endTime 到期时间
+	 */
+	public void startAccountValidAlarmManager(long endTime) {
+		logger.info("AccountValidAlarmManager---" + "startAccountValidAlarmManager:endTime-" + endTime);
+		getAccountValidAlarmManager().set(AlarmManager.RTC_WAKEUP, endTime, getAccountValidPendingIntent());
+	}
+
+	/**
+	 * 关闭8小时解绑的倒计时
+	 */
+	public void cancelAccountValidAlarmManager() {
+		logger.info("AccountValidAlarmManager---" + "cancelAccountValidAlarmManager");
+		getAccountValidAlarmManager().cancel(getAccountValidPendingIntent());
+	}
+
+	/**
+	 * 开启倒计时
+	 */
+	public void startAccountValidClock(){
+		//停止之前的账号解绑的倒计时
+		MyApplication.instance.cancelAccountValidAlarmManager();
+		long time = TerminalFactory.getSDK().getParam(Params.NFC_BEAN_TIME, 0L);
+		if(time != 0){
+			startAccountValidAlarmManager(time + ACCOUNT_VALID_TIME);
+		}
+	}
 }

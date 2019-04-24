@@ -41,18 +41,21 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.model.NFCBean;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
 import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receiveHandle.ReceiverAudioButtonEventHandler;
+import cn.vsx.vc.receiveHandle.ReceiverClearAccountHandler;
 import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStartAuthHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
@@ -98,6 +101,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiverClearAccountHandler);
         setPttVolumeChangedListener();
     }
 
@@ -328,6 +332,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiverClearAccountHandler);
 
             if (mBroadcastReceiv != null) {
                 LocalBroadcastManager.getInstance(BaseActivity.this).unregisterReceiver(
@@ -630,18 +635,18 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     /**
      * 强制重新注册的消息
      */
-    private ReceiveForceReloginHandler receiveForceReloginHandler = new ReceiveForceReloginHandler() {
-        @Override
-        public void handler(String version) {
-            if(SystemUtil.isForeground(BaseActivity.this)){
-                myHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        ToastUtil.showToast(BaseActivity.this,"正在强制重新登录");
-                    }
-                });
-            }
+    private ReceiveForceReloginHandler receiveForceReloginHandler = version -> {
+        if(SystemUtil.isForeground(BaseActivity.this)){
+            myHandler.post(() -> ToastUtil.showToast(BaseActivity.this,"正在强制重新登录"));
         }
+    };
+
+    /**
+     * 清除账号信息的消息
+     */
+    private ReceiverClearAccountHandler receiverClearAccountHandler = showMessage -> {
+        ToastUtil.showToast(BaseActivity.this,"账号信息已过期，请重新登录");
+        clearAccount();
     };
 
     /**
@@ -659,27 +664,65 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 //切组，上报，录像
                 if(bean!=null){
                     logger.debug("onReadResult---bean:"+bean);
-                    if(DataUtil.getNFCBean() != null){
-                        //说明在主页面，
-                        //停止业务
-                        loginOut();
-                        //保存NFCBean
-                        DataUtil.saveNFCBean(bean);
-                        //进入登录页面
-                        myHandler.postDelayed(() -> {
-                            startActivity(new Intent(BaseActivity.this,RegistNFCActivity.class));
-                            BaseActivity.this.finish();
-                        },500);
-                    }else{
-                        //保存NFCBean
-                        DataUtil.saveNFCBean(bean);
-                        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverStartAuthHandler.class,false);
-                    }
+                    //保存账号解绑时间信息
+                    TerminalFactory.getSDK().putParam(Params.NFC_BEAN_TIME, System.currentTimeMillis());
+                    //开启解绑倒计时
+                    MyApplication.instance.startAccountValidClock();
+                    //保存NFC信息
+                    DataUtil.saveNFCBean(bean);
+                    //跳转
+                    goJump();
                 }
                 break;
             default:
                 break;
         }
+    }
+
+    /**
+     * 清除账号信息
+     */
+    public void clearAccount(){
+        //保存账号解绑时间信息
+        TerminalFactory.getSDK().putParam(Params.NFC_BEAN_TIME, 0L);
+        //清空账号信息
+        DataUtil.clearNFCBean();
+        //跳转
+        goJump();
+    }
+
+    /**
+     * 跳转
+     */
+    private void goJump(){
+        if(BaseActivity.this instanceof RegistNFCActivity){
+            //等待登录页面
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiverStartAuthHandler.class,false);
+        }else{
+            //停止业务
+            loginOut();
+            myHandler.postDelayed(() -> {
+                startActivity(new Intent(BaseActivity.this,RegistNFCActivity.class));
+                BaseActivity.this.finish();
+            },500);
+        }
+    }
+
+    /**
+     * 退出登录
+     */
+    private void loginOut(){
+        //停止一切业务
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverStopAllBusniessHandler.class,false);
+        MyTerminalFactory.getSDK().exit();//停止服务
+        PromptManager.getInstance().stop();
+        TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
+        TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
+        MyApplication.instance.isClickVolumeToCall = false;
+        MyApplication.instance.isPttPress = false;
+        MyApplication.instance.stopPTTButtonEventService();
+        //停止上报或者观看的页面
+        MyTerminalFactory.getSDK().stop();
     }
 
     /**
@@ -700,23 +743,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 //        } else {
 //            ToastUtil.groupChangedFailToast(MainActivity.this, result);
 //        }
-    }
-
-    /**
-     * 退出登录
-     */
-    private void loginOut(){
-        //停止一切业务
-        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverStopAllBusniessHandler.class,false);
-//        MyTerminalFactory.getSDK().exit();//停止服务
-        PromptManager.getInstance().stop();
-        TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
-        TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
-        MyApplication.instance.isClickVolumeToCall = false;
-        MyApplication.instance.isPttPress = false;
-        MyApplication.instance.stopPTTButtonEventService();
-        //停止上报或者观看的页面
-//        MyTerminalFactory.getSDK().stop();
     }
 
 }

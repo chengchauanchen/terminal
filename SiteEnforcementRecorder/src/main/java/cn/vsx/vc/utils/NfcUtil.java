@@ -1,5 +1,6 @@
 package cn.vsx.vc.utils;
 
+import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +25,8 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import cn.vsx.hamster.terminalsdk.model.NFCBean;
+
+import static android.content.Context.ALARM_SERVICE;
 
 public class NfcUtil {
 
@@ -55,16 +58,16 @@ public class NfcUtil {
     /**
      * 构造函数，用于初始化nfc
      */
-    public NfcUtil(Context activity) {
-        nfcCheck(activity);
-        nfcInit(activity);
+    public NfcUtil(Context context) {
+        nfcCheck(context);
+        nfcInit(context);
     }
 
     /**
      * 检查NFC是否打开
      */
-    public  void nfcCheck(Context activity) {
-        mNfcAdapter = NfcAdapter.getDefaultAdapter(activity);
+    public  void nfcCheck(Context context) {
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(context);
         if (mNfcAdapter == null) {
             logger.info(TAG + "不支持nfc功能");
         } else {
@@ -79,8 +82,8 @@ public class NfcUtil {
     /**
      * 初始化nfc设置
      */
-    private  void nfcInit(Context activity) {
-        mPendingIntent = PendingIntent.getActivity(activity, REQUEST_CODE, new Intent(activity, activity.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+    private  void nfcInit(Context context) {
+        mPendingIntent = PendingIntent.getActivity(context, REQUEST_CODE, new Intent(context, context.getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
         IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_NDEF_DISCOVERED);
         IntentFilter tech = new IntentFilter(NfcAdapter.ACTION_TECH_DISCOVERED);
         IntentFilter tag = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
@@ -155,6 +158,8 @@ public class NfcUtil {
             }
         }
     }
+
+
 
     private byte[] buildSelectApdu(String aid) {
         return stringToBytes(HEADER + String.format("%02X", aid.length() / 2) + aid);

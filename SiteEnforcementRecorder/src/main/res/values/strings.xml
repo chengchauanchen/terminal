@@ -67,4 +67,5 @@
     <string name="release_cancel">松开 取消</string>
     <string name="current_group_members">%1$d人在线</string>
     <string name="current_push_member">%1$s上报图像</string>
+    <string name="force_off_line">该账号被强制下线</string>
 </resources>

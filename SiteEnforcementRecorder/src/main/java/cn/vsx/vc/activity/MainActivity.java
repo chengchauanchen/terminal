@@ -60,6 +60,7 @@ import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerLiveTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExternStorageSizeHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
@@ -137,8 +138,6 @@ public class MainActivity extends BaseActivity   {
     List<String> listResolution;
     List<String> listResolutionName;
 
-
-//    private MyApplication.TYPE currentType = MyApplication.TYPE.PUSH;
     private BITBackgroundCameraService mService;
     int width = 640, height = 480;
 
@@ -150,7 +149,6 @@ public class MainActivity extends BaseActivity   {
     private String id;//自己发起直播返回的callId和member拼接
     private PushCallback pushCallback;
 
-//    private PowerManager.WakeLock wakeLockComing;
     public static final int REQUEST_PERMISSION_SETTING = 1235;
     private List<VideoMember> watchLiveList = new ArrayList<>();//加入观看人员的集合
 
@@ -165,11 +163,6 @@ public class MainActivity extends BaseActivity   {
     @SuppressLint("InvalidWakeLockTag")
     @Override
     public void initData() {
-//        PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
-//        if(powerManager!=null){
-//            wakeLockComing = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP | PowerManager.ON_AFTER_RELEASE, "wakeLock3");//
-//            logger.info("wakeLock3 = "+wakeLockComing);
-//        }
 
         svLive.setVisibility(View.GONE);
         svLive.setOpaque(false);
@@ -269,6 +262,7 @@ public class MainActivity extends BaseActivity   {
         MyTerminalFactory.getSDK().registReceiveHandler(receiverAudioButtonEventHandler);//录音实体按钮
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);//观看人员的加入或者退出
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveExternStorageSizeHandler);//通知存储空间不足
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveForceOfflineHandler);//终端强制下线
     }
 
     @Override
@@ -302,12 +296,6 @@ public class MainActivity extends BaseActivity   {
     }
 
     @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-            setIntent(intent);
-    }
-
-    @Override
     public void doOtherDestroy() {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
@@ -329,6 +317,7 @@ public class MainActivity extends BaseActivity   {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiverAudioButtonEventHandler);//录音实体按钮
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);//观看人员的加入或者退出
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);//通知存储空间不足
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceOfflineHandler);//终端强制下线
 
 
         myHandler.removeCallbacksAndMessages(null);
@@ -362,20 +351,17 @@ public class MainActivity extends BaseActivity   {
     /**
      * 信令服务发送NotifyForceRegisterMessage消息时，先去reAuth(false)，然后login()
      */
-    private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = new ReceiveSendUuidResponseHandler() {
-        @Override
-        public void handler(int resultCode, final String resultDesc, boolean isRegisted) {
-            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity: isRegisted" + isRegisted);
-                if (isRegisted) {//注册过，在后台登录，session超时也走这
-                    TerminalFactory.getSDK().getAuthManagerTwo().login();
-                    logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity中登录了");
+    private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = (resultCode, resultDesc, isRegisted) -> {
+        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+            logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity: isRegisted" + isRegisted);
+            if (isRegisted) {//注册过，在后台登录，session超时也走这
+                TerminalFactory.getSDK().getAuthManagerTwo().login();
+                logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity中登录了");
 //                    MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
-                } else {//没注册过，关掉主界面，去注册界面
-                    startActivity(new Intent(getApplicationContext(), RegistNFCActivity.class));
-                    MainActivity.this.finish();
-                    stopService(new Intent(getApplicationContext(), LockScreenService.class));
-                }
+            } else {//没注册过，关掉主界面，去注册界面
+                startActivity(new Intent(getApplicationContext(), RegistNFCActivity.class));
+                MainActivity.this.finish();
+                stopService(new Intent(getApplicationContext(), LockScreenService.class));
             }
         }
     };
@@ -407,31 +393,24 @@ public class MainActivity extends BaseActivity   {
     /**
      * 被动方组呼来了
      */
-    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
-        @Override
-        public void handler(final int memberId, final String memberName, final int groupId,
-                            String version, CallMode currentCallMode) {
-            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-                ptt.terminalsdk.tools.ToastUtil.showToast(getApplicationContext(),"没有组呼听的权限");
-            }
-            PromptManager.getInstance().groupCallCommingRing();
-            logger.info("组呼来了");
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    //是组扫描的组呼,且当前组没人说话，变文件夹和组名字
-                    if (groupId != MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)) {
-                        logger.info("扫描组组呼来了");
-                    }
-                    //是当前组的组呼,且扫描组有人说话，变文件夹和组名字
-                    if (groupId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0) && MyApplication.instance.getGroupListenenState() == LISTENING) {
-                        logger.info("当前组组呼来了");
-                    }
-                    MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, memberName);
-                }
-            });
-
+    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, version, currentCallMode) -> {
+        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
+            ptt.terminalsdk.tools.ToastUtil.showToast(getApplicationContext(),"没有组呼听的权限");
         }
+        PromptManager.getInstance().groupCallCommingRing();
+        logger.info("组呼来了");
+        myHandler.post(() -> {
+            //是组扫描的组呼,且当前组没人说话，变文件夹和组名字
+            if (groupId != MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)) {
+                logger.info("扫描组组呼来了");
+            }
+            //是当前组的组呼,且扫描组有人说话，变文件夹和组名字
+            if (groupId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0) && MyApplication.instance.getGroupListenenState() == LISTENING) {
+                logger.info("当前组组呼来了");
+            }
+            MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, memberName);
+        });
+
     };
 
     /**
@@ -441,22 +420,19 @@ public class MainActivity extends BaseActivity   {
         @Override
         public void handler(final boolean connected) {
             logger.info("主界面收到服务是否连接的通知ServerConnectionEstablishedHandler" + connected);
-            MainActivity.this.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (!connected) {
-                        llNoNetwork.setVisibility(View.VISIBLE);
-                        MyApplication.instance.isPopupWindowShow = false;
-                    } else {
+            MainActivity.this.runOnUiThread(() -> {
+                if (!connected) {
+                    llNoNetwork.setVisibility(View.VISIBLE);
+                    MyApplication.instance.isPopupWindowShow = false;
+                } else {
 //                            initMediaStream(svLive.getSurfaceTexture());
 //                            //判断是否之前在上报中，如果上报中请求继续上报
 //                            if(isPushing){
 //                                requestStartLive();
 //                            }
-                        llNoNetwork.setVisibility(View.GONE);
-                        //上传未上传的文件信息
-                        MyTerminalFactory.getSDK().getFileTransferOperation().uploadFileTreeBean(null);
-                    }
+                    llNoNetwork.setVisibility(View.GONE);
+                    //上传未上传的文件信息
+                    MyTerminalFactory.getSDK().getFileTransferOperation().uploadFileTreeBean(null);
                 }
             });
         }
@@ -469,14 +445,11 @@ public class MainActivity extends BaseActivity   {
     private ReceiveGetVideoPushUrlHandler receiveGetVideoPushUrlHandler = new ReceiveGetVideoPushUrlHandler() {
         @Override
         public void handler(final String streamMediaServerIp, final int streamMediaServerPort, final long callId) {
-            myHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    logger.info("自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
-                    String port = streamMediaServerPort + "";
-                    id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0) + "_" + callId;
-                        startPush(streamMediaServerIp, port, id);
-                }
+            myHandler.postDelayed(() -> {
+                logger.info("自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
+                String port = streamMediaServerPort + "";
+                id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0) + "_" + callId;
+                    startPush(streamMediaServerIp, port, id);
             }, 1000);
         }
     };
@@ -487,22 +460,19 @@ public class MainActivity extends BaseActivity   {
     private ReceiveResponseMyselfLiveHandler receiveReaponseMyselfLiveHandler = new ReceiveResponseMyselfLiveHandler() {
         @Override
         public void handler(final int resultCode, final String resultDesc) {
-            myHandler.post(new Runnable(){
-                @Override
-                public void run(){
-                    if(resultCode == 0){
+            myHandler.post(() -> {
+                if(resultCode == 0){
 //                        List<Integer> pushMemberList = new ArrayList<>();
 //                        pushMemberList.add(88011103);
 //                        logger.info("自己发起直播成功,要推送的列表：" + pushMemberList);
 //                        if (pushMemberList != null) {
 //                            MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(pushMemberList,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
 //                        }
-                        isPushing = true;
-                    }else {
-                        isPushing = false;
-                        ToastUtil.showToast(getApplicationContext(),resultDesc);
-                        finishVideoLive();
-                    }
+                    isPushing = true;
+                }else {
+                    isPushing = false;
+                    ToastUtil.showToast(getApplicationContext(),resultDesc);
+                    finishVideoLive();
                 }
             });
         }
@@ -511,34 +481,25 @@ public class MainActivity extends BaseActivity   {
     /**
      * 对方拒绝直播，通知界面关闭响铃页
      **/
-    private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = new ReceiveResponseStartLiveHandler() {
-        @Override
-        public void handler(int resultCode, final String resultDesc) {
-            ToastUtil.showToast(getApplicationContext(),resultDesc);
-            finishVideoLive();
-        }
+    private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc) -> {
+        ToastUtil.showToast(getApplicationContext(),resultDesc);
+        finishVideoLive();
     };
 
     /**
      * 通知直播停止 通知界面关闭视频页
      **/
-    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = new ReceiveNotifyLivingStoppedHandler() {
-        @Override
-        public void handler(int liveMemberId,long callId,int methodResult, String resultDesc) {
-            ToastUtil.showToast(getApplicationContext(),"上报已结束");
-            finishVideoLive();
-        }
+    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> {
+        ToastUtil.showToast(getApplicationContext(),"上报已结束");
+        finishVideoLive();
     };
 
     /**
      * 超时未回复answer 通知界面关闭
      **/
-    private ReceiveAnswerLiveTimeoutHandler receiveAnswerLiveTimeoutHandler = new ReceiveAnswerLiveTimeoutHandler() {
-        @Override
-        public void handler() {
-            ToastUtil.showToast(getApplicationContext(),"对方已取消");
-            finishVideoLive();
-        }
+    private ReceiveAnswerLiveTimeoutHandler receiveAnswerLiveTimeoutHandler = () -> {
+        ToastUtil.showToast(getApplicationContext(),"对方已取消");
+        finishVideoLive();
     };
 
     /**
@@ -556,23 +517,20 @@ public class MainActivity extends BaseActivity   {
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler() {
         @Override
         public void handler(String mainMemberName, int mainMemberId ,boolean emergencyType) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    //如果正在拍摄视频时
-                    if (APPStateUtil.isBackground(getApplicationContext())) {//程序处于后台
-                        //                        sendBroadcast(new Intent("MainActivityfinish"));
-                        logger.info("main程序拿到前台");
-                        //无屏保界面
-                        APPStateUtil.setTopApp(MainActivity.this);
-                    }
-//                    wakeLockComing.acquire();
-                    logger.info("main点亮屏幕");
-                    //自动接收上报视频
-                    MyTerminalFactory.getSDK().getLiveManager().responseLiving(true);
-                    MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
-                    isPassiveReport = true;
+            myHandler.post(() -> {
+                //如果正在拍摄视频时
+                if (APPStateUtil.isBackground(getApplicationContext())) {//程序处于后台
+                    //                        sendBroadcast(new Intent("MainActivityfinish"));
+                    logger.info("main程序拿到前台");
+                    //无屏保界面
+                    APPStateUtil.setTopApp(MainActivity.this);
                 }
+//                    wakeLockComing.acquire();
+                logger.info("main点亮屏幕");
+                //自动接收上报视频
+                MyTerminalFactory.getSDK().getLiveManager().responseLiving(true);
+                MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
+                isPassiveReport = true;
             });
         }
     };
@@ -705,28 +663,25 @@ public class MainActivity extends BaseActivity   {
     /**
      * 录音实体按钮，录音
      */
-    private ReceiverAudioButtonEventHandler receiverAudioButtonEventHandler = new ReceiverAudioButtonEventHandler() {
-        @Override
-        public void handler(boolean isLongPress) {
-            if(isLongPress){
-                //长按
-                if(MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus() == AudioRecordStatus.STATUS_STOPED){
-                    //开始录音
-                    if(TerminalFactory.getSDK().checkeExternalStorageIsAvailable(MyTerminalFactory.getSDK().getFileTransferOperation().getExternalUsableStorageDirectory())){
-                        startRecordAudio();
-                        PromptManager.getInstance().startRecordAudio();
-                        ToastUtil.showToast(MainActivity.this,"开始录音");
+    private ReceiverAudioButtonEventHandler receiverAudioButtonEventHandler = isLongPress -> {
+        if(isLongPress){
+            //长按
+            if(MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus() == AudioRecordStatus.STATUS_STOPED){
+                //开始录音
+                if(TerminalFactory.getSDK().checkeExternalStorageIsAvailable(MyTerminalFactory.getSDK().getFileTransferOperation().getExternalUsableStorageDirectory())){
+                    startRecordAudio();
+                    PromptManager.getInstance().startRecordAudio();
+                    ToastUtil.showToast(MainActivity.this,"开始录音");
 
-                    }
-                }else{
-                    ToastUtil.showToast(MainActivity.this,"录音中");
                 }
             }else{
-                //短按-停止录音
-                stopRecordAudio();
-                PromptManager.getInstance().stopRecordAudio();
-                ToastUtil.showToast(MainActivity.this,"停止录音");
+                ToastUtil.showToast(MainActivity.this,"录音中");
             }
+        }else{
+            //短按-停止录音
+            stopRecordAudio();
+            PromptManager.getInstance().stopRecordAudio();
+            ToastUtil.showToast(MainActivity.this,"停止录音");
         }
     };
 
@@ -734,38 +689,29 @@ public class MainActivity extends BaseActivity   {
      * 观看成员的进入和退出
      **/
     @SuppressLint("SimpleDateFormat")
-    private ReceiveMemberJoinOrExitHandler receiveMemberJoinOrExitHandler = new ReceiveMemberJoinOrExitHandler() {
-        @Override
-        public void handler(final String memberName, final int memberId, final boolean joinOrExit) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Log.e("IndividualCallService", memberName+",memberId:"+memberId);
-                    SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
-                    Date currentTime = new Date();
-                    String enterTime = formatter.format(currentTime);
-                    VideoMember videoMember = new VideoMember(memberId, memberName, enterTime, joinOrExit);
-                    if (joinOrExit) {//进入直播间
-                        watchLiveList.add(videoMember);
-                    } else {//退出直播间
-                        int position = -1;
-                        for (int i = 0; i < watchLiveList.size(); i++) {
-                            if (watchLiveList.get(i).getId() == memberId) {
-                                position = i;
-                            }
-                        }
-                        if (position != -1) {
-                            watchLiveList.remove(position);
-                        }
-                        if(watchLiveList.size()<1){
-                            stopPush();
-                        }
-                    }
+    private ReceiveMemberJoinOrExitHandler receiveMemberJoinOrExitHandler = (memberName, memberId, joinOrExit) -> myHandler.post(() -> {
+        Log.e("IndividualCallService", memberName+",memberId:"+memberId);
+        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
+        Date currentTime = new Date();
+        String enterTime = formatter.format(currentTime);
+        VideoMember videoMember = new VideoMember(memberId, memberName, enterTime, joinOrExit);
+        if (joinOrExit) {//进入直播间
+            watchLiveList.add(videoMember);
+        } else {//退出直播间
+            int position = -1;
+            for (int i = 0; i < watchLiveList.size(); i++) {
+                if (watchLiveList.get(i).getId() == memberId) {
+                    position = i;
                 }
-            });
-
+            }
+            if (position != -1) {
+                watchLiveList.remove(position);
+            }
+            if(watchLiveList.size()<1){
+                stopPush();
+            }
         }
-    };
+    });
 
     /**
      *通知存储空间不足
@@ -773,30 +719,35 @@ public class MainActivity extends BaseActivity   {
     private ReceiveExternStorageSizeHandler mReceiveExternStorageSizeHandler = new ReceiveExternStorageSizeHandler() {
         @Override
         public void handler(final long memorySize) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (memorySize < 100) {
-                        ToastUtil.showToast(MainActivity.this, "存储空间不足");
-                        PromptManager.getInstance().startExternNoStorage();
-                        if(mService!=null&&mService.getMediaStream()!=null){
-                            //停止上报
-                            stopPush();
-                            //停止录像
-                            mService.getMediaStream().stopRecord();
-                        }
-                        //停止录音
-                        stopRecordAudio();
-                        //上传没有上传的文件，删除已经上传的文件
-                       MyTerminalFactory.getSDK().getFileTransferOperation().externNoStorageOperation();
-
-                    } else if (memorySize < 200){
-                        PromptManager.getInstance().startExternStorageNotEnough();
-                        ToastUtil.showToast(MainActivity.this, "存储空间告急");
+            myHandler.post(() -> {
+                if (memorySize < 100) {
+                    ToastUtil.showToast(MainActivity.this, "存储空间不足");
+                    PromptManager.getInstance().startExternNoStorage();
+                    if(mService!=null&&mService.getMediaStream()!=null){
+                        //停止上报
+                        stopPush();
+                        //停止录像
+                        mService.getMediaStream().stopRecord();
                     }
+                    //停止录音
+                    stopRecordAudio();
+                    //上传没有上传的文件，删除已经上传的文件
+                   MyTerminalFactory.getSDK().getFileTransferOperation().externNoStorageOperation();
+
+                } else if (memorySize < 200){
+                    PromptManager.getInstance().startExternStorageNotEnough();
+                    ToastUtil.showToast(MainActivity.this, "存储空间告急");
                 }
             });
         }
+    };
+
+    /**
+     * 终端强制下线
+     */
+    private ReceiveForceOfflineHandler receiveForceOfflineHandler = () -> {
+        ToastUtil.showToast(MainActivity.this,getResources().getString(R.string.force_off_line));
+        myHandler.postDelayed(()-> clearAccount(),3000);
     };
 
     private final class SurfaceTextureListener implements TextureView.SurfaceTextureListener {
@@ -983,17 +934,14 @@ public class MainActivity extends BaseActivity   {
      * 停止上报
      */
     private void finishVideoLive() {
-        myHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                PromptManager.getInstance().stopRing();//停止响铃
-                //将TextureView设置成全屏
-                svLive.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
-                svLive.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
-                svLive.requestLayout();
-                stopPush();
-                id = null;
-            }
+        myHandler.post(() -> {
+            PromptManager.getInstance().stopRing();//停止响铃
+            //将TextureView设置成全屏
+            svLive.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
+            svLive.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
+            svLive.requestLayout();
+            stopPush();
+            id = null;
         });
 
     }
@@ -1058,22 +1006,12 @@ public class MainActivity extends BaseActivity   {
      * 开始录音
      */
     private void startRecordAudio(){
-        myHandler.postDelayed(new Runnable() {
+        myHandler.postDelayed(() -> MyTerminalFactory.getSDK().getRecordingAudioManager().start((mr, what, extra) -> myHandler.post(new Runnable() {
             @Override
             public void run() {
-                MyTerminalFactory.getSDK().getRecordingAudioManager().start(new MediaRecorder.OnErrorListener() {
-                    @Override
-                    public void onError(MediaRecorder mr, int what, int extra) {
-                        myHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                stopRecordAudio();
-                            }
-                        });
-                    }
-                });
+                stopRecordAudio();
             }
-        },500);
+        })),500);
     }
 
     /**
@@ -1103,25 +1041,22 @@ public class MainActivity extends BaseActivity   {
                 }
                 PromptManager.getInstance().startPhotograph();
                 camera.startPreview();
-                MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        //检测内存卡的size
-                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
-                        operation.checkExternalUsableSize();
-                        String fileName = FileTransgerUtil.getPhotoFileName();
-                        String directoty = MyTerminalFactory.getSDK().getBITPhotoRecordedDirectoty(operation.getExternalUsableStorageDirectory());
-                        File file = new File( directoty, fileName+FileTransgerUtil._TYPE_IMAGE_SUFFIX);
-                        PhotoUtils.savePictureForByte(data, file, MainActivity.this);
-                        SDCardUtil.scanMtpAsync(MainActivity.this, file.getAbsolutePath());
-                        long fileSize = DataUtil.getFileSize(file);
-                        logger.info("保存图片的大小=====" + fileSize);
-                        if (fileSize > 0) {
-                            //拍完照 上传文件目录，并保存到数据库中
-                            operation.generateFileComplete(directoty,file.getPath());
-                            //发送到群组中
+                MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+                    //检测内存卡的size
+                    FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
+                    operation.checkExternalUsableSize();
+                    String fileName = FileTransgerUtil.getPhotoFileName();
+                    String directoty = MyTerminalFactory.getSDK().getBITPhotoRecordedDirectoty(operation.getExternalUsableStorageDirectory());
+                    File file = new File( directoty, fileName+FileTransgerUtil._TYPE_IMAGE_SUFFIX);
+                    PhotoUtils.savePictureForByte(data, file, MainActivity.this);
+                    SDCardUtil.scanMtpAsync(MainActivity.this, file.getAbsolutePath());
+                    long fileSize = DataUtil.getFileSize(file);
+                    logger.info("保存图片的大小=====" + fileSize);
+                    if (fileSize > 0) {
+                        //拍完照 上传文件目录，并保存到数据库中
+                        operation.generateFileComplete(directoty,file.getPath());
+                        //发送到群组中
 //                            PhotoUtils.sendPhotoFromCamera(file);
-                        }
                     }
                 });
                 canTakePicture = true;
@@ -1392,12 +1327,7 @@ public class MainActivity extends BaseActivity   {
         if (!mExitFlag) {
             ToastUtil.showToast(this, "再点一次"+getExitState());
             mExitFlag = true;
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mExitFlag = false;
-                }
-            }, CLICK_EXIT_TIME);
+            new Handler().postDelayed(() -> mExitFlag = false, CLICK_EXIT_TIME);
         } else {
             moveTaskToBack(true);//把程序变成后台的
         }

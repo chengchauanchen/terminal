@@ -177,6 +177,12 @@
         <action android:name="android.intent.action.BOOT_COMPLETED"/>
       </intent-filter>
     </receiver>
+    <receiver android:name=".receiver.AccountValidReceiver"
+        android:process=":accountvalid">
+      <intent-filter >
+        <action android:name="vsxin.action.accountvalid" />
+      </intent-filter>
+    </receiver>
     <!--                receiver end               -->
 
 
@@ -193,6 +199,9 @@
         <action android:name="com.baidu.location.service_v2.2" />
       </intent-filter>
     </service>
+    <service android:name=".service.AccountValidService"
+        android:process=":accountvalid"
+        android:enabled="true"/>
     <!--                service end               -->
 
     <meta-data
