@@ -2,8 +2,8 @@
 <manifest package="cn.vsx.vc"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="6"
-    android:versionName="1.0.6">
+    android:versionCode="7"
+    android:versionName="1.0.7">
     
     <!-- android:sharedUserId="android.uid.system" -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -252,6 +252,7 @@
         <activity android:name=".activity.BleActivity"/>
         <activity android:name=".activity.GroupVideoLiveListActivity"/>
         <activity android:name=".activity.MergeTransmitListActivity"/>
+        <activity android:name=".activity.TransponActivity"/>
         <service android:name=".service.ReceiveHandlerService"
             android:enabled="true"
             android:exported="false"/>

@@ -218,7 +218,9 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
 
     private void doSearch(String keywords){
         switch(type){
+            case Constants.TYPE_CHECK_SEARCH_GROUP:
             case Constants.TYPE_CONTRACT_GROUP:
+                mData.clear();
                 List<Group> groups = TerminalFactory.getSDK().getConfigManager().searchGroup(keywords);
                 mLayoutSrl.setRefreshing(false);
                 for(Group group : groups){
@@ -226,7 +228,15 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
                     contactItemBean.setType(type);
                     contactItemBean.setBean(group);
                     mData.add(contactItemBean);
+                }
+                if(mData.isEmpty()){
+                    mTvSearchNothing.setVisibility(View.VISIBLE);
+                    mRlSearchResult.setVisibility(View.GONE);
+                }else{
+                    mTvSearchNothing.setVisibility(View.GONE);
+                    mRlSearchResult.setVisibility(View.VISIBLE);
                     searchAdapter.notifyDataSetChanged();
+                    searchAdapter.loadMoreEnd(true);
                 }
                 break;
             case Constants.TYPE_CONTRACT_PDT:
@@ -235,8 +245,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
             case Constants.TYPE_CONTRACT_MEMBER:
                 TerminalFactory.getSDK().getConfigManager().searchAccount(currentPage,PAGE_SIZE, keywords);
                 break;
-            case Constants.TYPE_CHECK_SEARCH_GROUP:
-                break;
+
             case Constants.TYPE_CHECK_SEARCH_PC:
                 TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_PC.toString(), keywords);
                 break;

@@ -86,7 +86,7 @@ public class SelectedMemberFragment extends BaseFragment{
         SelectedItemListAdapter selectedListAdapter = new SelectedItemListAdapter(getContext(),mData);
         selectedListAdapter.setItemClickListener(position -> {
             if(position>=0&&position<mData.size()){
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveRemoveSelectedMemberHandler.class,mData.get(position).getBean());
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveRemoveSelectedMemberHandler.class,mData.get(position));
                 mData.remove(position);
                 selectedListAdapter.notifyDataSetChanged();
             }

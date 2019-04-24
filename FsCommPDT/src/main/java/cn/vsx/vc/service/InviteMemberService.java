@@ -116,7 +116,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
 
     private SelectAdapter selectAdapter;
     private SelectedListAdapter selectedListAdapter;
-    private List<Member> selectedMembers = new ArrayList<>();
+    private List<ContactItemBean> selectedMembers = new ArrayList<>();
     private ArrayList<VideoMember> watchingmembers;
     private int livingMemberId;
     private boolean gb28181Pull;
@@ -620,13 +620,28 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      */
     private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected) -> {
         member.setChecked(selected);
-        if(selectedMembers.contains(member)){
+        int index = -1;
+        for (int i = 0; i < selectedMembers.size(); i++) {
+            ContactItemBean bean = selectedMembers.get(i);
+            if(bean.getType() == Constants.TYPE_USER){
+                Member member1 = (Member) bean.getBean();
+                if(member1!=null&&member1.getNo() == member.getNo()){
+                    index = i;
+                    break;
+                }
+            }
+        }
+
+        if(index>=0&&index < selectedMembers.size()){
             if(!member.isChecked()){
-                selectedMembers.remove(member);
+                selectedMembers.remove(index);
             }
         }else{
             if(member.isChecked()){
-                selectedMembers.add(member);
+                ContactItemBean bean = new ContactItemBean();
+                bean.setBean(member);
+                bean.setType(Constants.TYPE_USER);
+                selectedMembers.add(bean);
             }
         }
         mHandler.post(() -> {
@@ -665,10 +680,13 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
                     int viewType = getSearchTerminalType();
                     for(Member member : members){
                         member.setChecked(false);
-                        for(Member m : selectedMembers){
-                            if(member.getNo() == m.getNo()){
-                                member.setChecked(true);
-                                break;
+                        for(ContactItemBean bean : selectedMembers){
+                            if(bean.getType() ==  Constants.TYPE_USER){
+                                Member member1 = (Member) bean.getBean();
+                                if(member.getNo() == member1.getNo()){
+                                    member.setChecked(true);
+                                    break;
+                                }
                             }
                         }
                         ContactItemBean<Member> contactItemBean = new ContactItemBean<>();
@@ -783,12 +801,29 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         for (ContactItemBean bean: contactItemBeans) {
             if(bean.getType() == Constants.TYPE_USER){
                 Member member = (Member) bean.getBean();
-                member.setChecked((selectedMembers.contains(member)));
+                member.setChecked((getMemberListFromSelected().contains(member)));
             }
         }
         if(index>=0&&index<contactAdapter.size()){
             contactAdapter.get(index).notifyDataSetChanged();
         }
+    }
+
+    /**
+     * 获取Member
+     * @return
+     */
+    private List<Member> getMemberListFromSelected(){
+        List<Member> list = new ArrayList<>();
+        for (ContactItemBean bean: selectedMembers) {
+            if(bean.getType() == Constants.TYPE_USER){
+                Member member = (Member) bean.getBean();
+                if(member!=null){
+                    list.add(member);
+                }
+            }
+        }
+        return list;
     }
 
     /**
@@ -846,8 +881,11 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      */
     private ArrayList<Integer> getSelectMembersNo(){
         ArrayList<Integer> result = new ArrayList<>();
-        for (Member member:selectedMembers) {
-            result.add(member.getNo());
+        for (ContactItemBean bean:selectedMembers) {
+            if(bean.getType() == Constants.TYPE_USER){
+                Member member = (Member) bean.getBean();
+                result.add(member.getNo());
+            }
         }
         return result;
     }
@@ -858,8 +896,11 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      */
     private ArrayList<Long> getSelectMembersUniqueNo(){
         ArrayList<Long> result = new ArrayList<>();
-        for (Member member:selectedMembers) {
-            result.add(member.getUniqueNo());
+        for (ContactItemBean bean:selectedMembers) {
+            if(bean.getType() == Constants.TYPE_USER){
+                Member member = (Member) bean.getBean();
+                result.add(member.getUniqueNo());
+            }
         }
         return result;
     }
@@ -871,7 +912,10 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private Member getLiveMember(){
         Member member  = null;
         if(!selectedMembers.isEmpty()){
-            member = selectedMembers.get(0);
+            ContactItemBean bean  = selectedMembers.get(0);
+            if(bean.getType() == Constants.TYPE_USER){
+                member = (Member) bean.getBean();
+            }
         }
         return member;
     }
@@ -920,10 +964,21 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private void updateSelectMember(Member member) {
         if(member.isChecked){
             //添加
-            selectedMembers.add(member);
+            ContactItemBean bean = new ContactItemBean();
+            bean.setType(Constants.TYPE_USER);
+            bean.setBean(member);
+            selectedMembers.add(bean);
         }else{
             //删除
-            selectedMembers.remove(member);
+            for (ContactItemBean bean: selectedMembers) {
+                if(bean.getType() == Constants.TYPE_USER){
+                    Member member1 = (Member) bean.getBean();
+                    if(member1.getNo() == member.getNo()){
+                        selectedMembers.remove(bean);
+                        break;
+                    }
+                }
+            }
         }
         selectAdapter.notifyDataSetChanged();
         int count = searchList.size();

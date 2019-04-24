@@ -50,7 +50,7 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
     private MemberListFragment uavFragment;
     private BaseFragment currentFragment;
 
-    private ArrayList<Member> selectedMembers;
+    private ArrayList<ContactItemBean> selectedMembers;
     private List<Integer> selectedMemberNos;
     private SelectAdapter selectAdapter;
     private int currentIndex;
@@ -183,15 +183,7 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
 
                 break;
             case R.id.iv_select:
-                ArrayList<ContactItemBean> selectedContacts = new ArrayList<>();
-                for(Member selectedMember : selectedMembers){
-                    ContactItemBean<Member> contactItemBean = new ContactItemBean<>();
-                    contactItemBean.setBean(selectedMember);
-                    contactItemBean.setType(Constants.TYPE_USER);
-                    selectedContacts.add(contactItemBean);
-                }
-
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSelectedFragmentHandler.class,selectedContacts);
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSelectedFragmentHandler.class,selectedMembers);
 
                 break;
             default:
@@ -234,11 +226,14 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
             if(contactItemBean.getBean() instanceof Member){
                 Member member = (Member) contactItemBean.getBean();
                 if(selectedMemberNos.contains(member.getNo())){
-                    Iterator<Member> iterator = selectedMembers.iterator();
+                    Iterator<ContactItemBean> iterator = selectedMembers.iterator();
                     while(iterator.hasNext()){
-                        Member next = iterator.next();
-                        if(next.getNo() == member.getNo()){
-                            iterator.remove();
+                        ContactItemBean next = iterator.next();
+                        if(next.getType() == Constants.TYPE_USER){
+                            Member member1 = (Member) next.getBean();
+                            if(member1.getNo() == member.getNo()){
+                                iterator.remove();
+                            }
                         }
                     }
                     selectedMemberNos.remove((Integer) member.getNo());
@@ -251,17 +246,23 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
     private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected) -> {
         //不是同一个member对象
         if(selected){
+            ContactItemBean bean = new ContactItemBean();
+            bean.setType(Constants.TYPE_USER);
+            bean.setBean(member);
             if(!selectedMemberNos.contains(member.getNo())){
-                selectedMembers.add(member);
+                selectedMembers.add(bean);
                 selectedMemberNos.add(member.getNo());
             }
         }else{
             if(selectedMemberNos.contains(member.getNo())){
-                Iterator<Member> iterator = selectedMembers.iterator();
+                Iterator<ContactItemBean> iterator = selectedMembers.iterator();
                 while(iterator.hasNext()){
-                    Member next = iterator.next();
-                    if(next.getNo() == member.getNo()){
-                        iterator.remove();
+                    ContactItemBean next = iterator.next();
+                    if(next.getType() == Constants.TYPE_USER){
+                        Member member1 = (Member) next.getBean();
+                        if(member1.getNo() == member.getNo()){
+                            iterator.remove();
+                        }
                     }
                 }
                 selectedMemberNos.remove((Integer) member.getNo());
@@ -279,7 +280,13 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
     };
 
     public ArrayList<Member> getSelectedMember(){
-        return selectedMembers;
+        ArrayList<Member> list = new ArrayList<>();
+        for (ContactItemBean bean: selectedMembers) {
+            if(bean.getType() == Constants.TYPE_USER){
+                list.add((Member) bean.getBean());
+            }
+        }
+        return list;
     }
 
     public List<Integer> getSelectedMemberNo(){

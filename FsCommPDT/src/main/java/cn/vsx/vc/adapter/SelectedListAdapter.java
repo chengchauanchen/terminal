@@ -12,8 +12,11 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
+import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 
 /**
@@ -24,11 +27,11 @@ import cn.vsx.vc.utils.HandleIdUtil;
  * 修订历史：
  */
 public class SelectedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
-    private List<Member> mData;
+    private List<ContactItemBean> mData;
     private Context mContext;
     private ItemClickListener itemClickListener;
 
-    public SelectedListAdapter(Context mContext, List<Member> mData){
+    public SelectedListAdapter(Context mContext, List<ContactItemBean> mData){
         this.mContext = mContext;
         this.mData = mData;
     }
@@ -42,10 +45,18 @@ public class SelectedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position){
         UserViewHolder userViewHolder = (UserViewHolder) holder;
-        Member member = mData.get(position);
-        if(member != null){
-            userViewHolder.tvName.setText(member.getName());
-            userViewHolder.tvId.setText(HandleIdUtil.handleId(member.getNo()));
+        ContactItemBean bean = mData.get(position);
+        if(bean != null){
+            if(bean.getType() == Constants.TYPE_USER){
+                Member member = (Member) bean.getBean();
+                userViewHolder.tvName.setText(member.getName());
+                userViewHolder.tvId.setText(HandleIdUtil.handleId(member.getNo()));
+                userViewHolder.tvId.setVisibility(View.VISIBLE);
+            }else if(bean.getType() == Constants.TYPE_GROUP) {
+                Group group = (Group) bean.getBean();
+                userViewHolder.tvName.setText(group.getDepartmentName());
+                userViewHolder.tvId.setVisibility(View.GONE);
+            }
             userViewHolder.ivDelete.setOnClickListener(v -> {
                 if(null != itemClickListener){
                     itemClickListener.itemClick(position);

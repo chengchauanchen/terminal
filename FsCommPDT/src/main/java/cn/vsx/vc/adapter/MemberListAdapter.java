@@ -14,6 +14,7 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.model.Department;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.ContactItemBean;
@@ -48,7 +49,7 @@ public class MemberListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             return new DepartmentViewHolder(view);
         }else if(viewType == Constants.TYPE_GROUP){
             View view = LayoutInflater.from(mContext).inflate(R.layout.layout_item_group_check, parent, false);
-            return new DepartmentViewHolder(view);
+            return new GroupViewHolder(view);
         }
         return null;
     }
@@ -80,7 +81,18 @@ public class MemberListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
                 }
             });
         }else if(getItemViewType(position) == Constants.TYPE_GROUP){
-
+            GroupViewHolder groupViewHolder = (GroupViewHolder) holder;
+            Group group = (Group) mData.get(position).getBean();
+            groupViewHolder.tvName.setText(group.getName());
+            groupViewHolder.checkbox.setChecked(group.isChecked());
+            groupViewHolder.checkbox.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    if(null != itemClickListener){
+                        itemClickListener.itemClick(Constants.TYPE_GROUP,position);
+                    }
+                }
+            });
         }
     }
 
@@ -103,11 +115,15 @@ public class MemberListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     class GroupViewHolder extends RecyclerView.ViewHolder{
-
-
+        @Bind(R.id.shoutai_user_logo)
+        ImageView ivLogo;
+        @Bind(R.id.shoutai_tv_member_name)
+        TextView tvName;
+        @Bind(R.id.checkbox)
+        CheckBox checkbox;
         public GroupViewHolder(View itemView){
             super(itemView);
-
+            ButterKnife.bind(this, itemView);
         }
     }
 

@@ -61,6 +61,7 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.model.Account;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
@@ -74,12 +75,15 @@ import cn.vsx.vc.dialog.TranspondDialog;
 import cn.vsx.vc.fragment.VideoPreviewItemFragment;
 import cn.vsx.vc.holder.ChatViewHolder;
 import cn.vsx.vc.model.ChatMember;
+import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.model.TransponToBean;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.AnimationsContainer;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -721,7 +725,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         }
         //合并转发  是否选择
         holder.cbForward.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            terminalMessage.isWithDraw = isChecked;
+            terminalMessage.isForward = isChecked;
         });
     }
 
@@ -1478,20 +1482,19 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     /**
      * 合并转发
      */
-    public void transponForwardMoreMessage(TerminalMessage terminalMessage, boolean isGrouop) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGrouop);
+    public void transponForwardMoreMessage(TerminalMessage terminalMessage,ArrayList<ContactItemBean> list) {
+        List<Integer> toIds = getToIdsTranspon(list);
         TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
         terminalMessage1.messageToId = toIds.get(0);
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1);
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1,toIds,new ArrayList<Long>());
     }
-
 
     /**
      * 转发短文本消息到信令
      */
-    private void transponShortTextMessage(TerminalMessage terminalMessage, boolean isGrouop) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGrouop);
-        sendShortTextMessage2(terminalMessage, toIds);
+    private void transponShortTextMessage(TerminalMessage terminalMessage, List<Integer> list) {
+        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1,list,new ArrayList<Long>());
     }
 
     private void sendShortTextMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
@@ -1520,9 +1523,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     /***  转发定位消息 **/
-    private void transponLocationMessage(TerminalMessage terminalMessage, boolean isGroup) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGroup);
-        sendLocationMessage2(terminalMessage, toIds);
+    private void transponLocationMessage(TerminalMessage terminalMessage, List<Integer> list) {
+        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1,list,new ArrayList<Long>());
     }
 
     private void sendLocationMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
@@ -1554,9 +1557,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     /**
      * 转发长文本相关发送到信令服务
      **/
-    public void transponLongTxtMessage(TerminalMessage terminalMessage, boolean isGroup) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGroup);
-        sendLongTxtMessage2(terminalMessage, toIds);
+    public void transponLongTxtMessage(TerminalMessage terminalMessage,  List<Integer> list) {
+        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1,list,new ArrayList<Long>());
     }
 
     public void sendLongTxtMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
@@ -1576,17 +1579,16 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     /**
      * 转发图片消息
      **/
-    private void transponPhotoMessage(TerminalMessage terminalMessage, boolean isGroup) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGroup);
+    private void transponPhotoMessage(TerminalMessage terminalMessage, List<Integer> list ) {
         if (terminalMessage.resultCode != 0) {//发送失败的文件消息进行转发
-            terminalMessage.messageToId = toIds.get(0);
             terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
             terminalMessage.messageBody.put(JsonParam.ISMICROPICTURE, true);
             File file = new File(terminalMessage.messagePath);
             upload = true;
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, ""), file, terminalMessage, false);
         } else {
-            sendPhotoMessage2(terminalMessage, toIds);
+            TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
+            MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1,list,new ArrayList<Long>());
         }
     }
 
@@ -1605,16 +1607,15 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     /***  转发文件消息 **/
-    private void transponFileMessage(TerminalMessage terminalMessage, boolean isGroup) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGroup);
+    private void transponFileMessage(TerminalMessage terminalMessage, List<Integer> list) {
         if (terminalMessage.resultCode != 0) {//发送失败的文件消息进行转发
-            terminalMessage.messageToId = toIds.get(0);
             terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
             File file = new File(terminalMessage.messagePath);
             upload = true;
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, ""), file, terminalMessage, false);
         } else {
-            sendFileMessage2(terminalMessage, toIds);
+            TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
+            MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1,list,new ArrayList<Long>());
         }
     }
 
@@ -1633,9 +1634,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     /***   转发直播消息  **/
-    private void transponLiveMessage(TerminalMessage terminalMessage, boolean isGroup) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGroup);
-        sendLiveMessage2(terminalMessage, toIds);
+    private void transponLiveMessage(TerminalMessage terminalMessage, List<Integer> list) {
+        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1,list,new ArrayList<Long>());
     }
 
     private void sendLiveMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
@@ -1656,9 +1657,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     /**
      * 转发组呼或录音消息
      **/
-    private void transponGroupCallMessage(TerminalMessage terminalMessage, boolean isGroup) {
-        List<Integer> toIds = setToIdsWhenTranspon(terminalMessage, isGroup);
-        sendGroupCallMessage2(terminalMessage, toIds);
+    private void transponGroupCallMessage(TerminalMessage terminalMessage, List<Integer> list) {
+        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1,list,new ArrayList<Long>());
     }
 
     private void sendGroupCallMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
@@ -1815,6 +1816,54 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             logger.error("个呼录音点击事件--->" + position);
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayIndividualChatVoiceHandler.class, terminalMessage, position);
         }
+    }
+
+    /**
+     * 获取合并转发的ToID
+     * @param list
+     * @return
+     */
+    private List<Integer>  getToIdsTranspon(ArrayList<ContactItemBean> list) {
+        List<Integer> toIds = new ArrayList<>();
+        for (ContactItemBean bean: list) {
+            if (bean.getType() == Constants.TYPE_USER) {
+                Member member = (Member) bean.getBean();
+                if(member!=null){
+                    toIds.add(NoCodec.encodeMemberNo(member.getNo()));
+                }
+            }else if(bean.getType() == Constants.TYPE_GROUP){
+                Group group = (Group) bean.getBean();
+                if(group!=null){
+                    toIds.add( NoCodec.encodeGroupNo(group.getNo()));
+                }
+            }
+        }
+        return toIds;
+    }
+
+    /**
+     * 获取第一个名字
+     * @param list
+     * @return
+     */
+    private TransponToBean getToNamesTranspon(ArrayList<ContactItemBean> list){
+        TransponToBean result = null;
+        for (ContactItemBean bean: list) {
+            if (bean.getType() == Constants.TYPE_USER) {
+                Member member = (Member) bean.getBean();
+                if(member!=null){
+                    result = new TransponToBean(NoCodec.encodeMemberNo(member.getNo()),member.getName());
+                    break;
+                }
+            }else if(bean.getType() == Constants.TYPE_GROUP){
+                Group group = (Group) bean.getBean();
+                if(group!=null){
+                    result = new TransponToBean(NoCodec.encodeGroupNo(group.getNo()),group.getName());
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     private View getViewByType(int viewType, ViewGroup parent) {
@@ -2003,10 +2052,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     public TerminalMessage transponMessage;//需要转发的消息
     public boolean isTranspon;//是否转发了
 
-    public void transponMessage(ChatMember chatMember) {
+    public void transponMessage(ArrayList<ContactItemBean> list) {
         logger.info("转发消息，type:" + transponMessage.messageType);
             //单个转发
-            forward(chatMember);
+            forward(list);
     }
 
     /**
@@ -2107,45 +2156,49 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
     /**
      * 单消息转发
-     * @param chatMember
+     * @param list
      */
-    private void forward(ChatMember chatMember){
-        transponMessage.messageToId = chatMember.getId();
-        transponMessage.messageToName = chatMember.getName();
+    private void forward(ArrayList<ContactItemBean> list){
+        List<Integer> toIds = getToIdsTranspon(list);
+        TransponToBean bean = getToNamesTranspon(list);
+        if(bean!=null){
+            transponMessage.messageToId = bean.getNo();
+            transponMessage.messageToName = bean.getName();
+        }
         transponMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
         transponMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
         transponMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
 
         if (transponMessage.messageType == MessageType.SHORT_TEXT.getCode()) {
-            transponShortTextMessage(transponMessage, chatMember.isGroup());
+            transponShortTextMessage(transponMessage, toIds);
         }
         if (transponMessage.messageType == MessageType.LONG_TEXT.getCode()) {
-            transponLongTxtMessage(transponMessage, chatMember.isGroup());
+            transponLongTxtMessage(transponMessage, toIds);
         }
         if (transponMessage.messageType == MessageType.PICTURE.getCode()) {
-            transponPhotoMessage(transponMessage, chatMember.isGroup());
+            transponPhotoMessage(transponMessage, toIds);
         }
         if (transponMessage.messageType == MessageType.AUDIO.getCode()) {
         }
         if (transponMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
-            transponFileMessage(transponMessage, chatMember.isGroup());
+            transponFileMessage(transponMessage, toIds);
         }
         if (transponMessage.messageType == MessageType.FILE.getCode()) {
-            transponFileMessage(transponMessage, chatMember.isGroup());
+            transponFileMessage(transponMessage, toIds);
         }
         if (transponMessage.messageType == MessageType.POSITION.getCode()) {
-            transponLocationMessage(transponMessage, chatMember.isGroup());
+            transponLocationMessage(transponMessage, toIds);
         }
         if (transponMessage.messageType == MessageType.WARNING_INSTANCE.getCode()) {
 
         }
         if (transponMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
-            transponLiveMessage(transponMessage, chatMember.isGroup());
+            transponLiveMessage(transponMessage, toIds);
         }
         if (transponMessage.messageType == MessageType.GROUP_CALL.getCode() || transponMessage.messageType == MessageType.AUDIO.getCode()) {
             //组呼进行转发，类型变为录音
             transponMessage.messageType = MessageType.AUDIO.getCode();
-            transponGroupCallMessage(transponMessage, chatMember.isGroup());
+            transponGroupCallMessage(transponMessage, toIds);
         }
     }
 

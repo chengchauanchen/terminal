@@ -173,7 +173,7 @@
     <string name="text_withdraw">撤回</string>
     <string name="text_forward_more">合并转发</string>
     <string name="text_delete_this_message">删除该消息</string>
-    <string name="text_group">组群</string>
+    <string name="text_group">群组</string>
     <string name="text_radio_station">电台</string>
     <string name="text_police_service">警务通</string>
     <string name="text_pc">PC</string>
@@ -560,4 +560,5 @@
     <string name="force_off_line">该账号被强制下线</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="please_choose_one">请选择一个</string>
 </resources>

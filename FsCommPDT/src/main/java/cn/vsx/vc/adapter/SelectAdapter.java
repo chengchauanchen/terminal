@@ -9,8 +9,11 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
+import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.utils.Constants;
 
 /**
  * 作者：ly-xuxiaolong
@@ -21,10 +24,10 @@ import cn.vsx.vc.R;
  */
 public class SelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
-    private List<Member> data;
+    private List<ContactItemBean> data;
     private Context context;
 
-    public SelectAdapter(Context context,List<Member> data){
+    public SelectAdapter(Context context,List<ContactItemBean> data){
         this.context = context;
         this.data= data;
     }
@@ -38,7 +41,15 @@ public class SelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position){
         ViewHolder viewHolder = (ViewHolder) holder;
-        viewHolder.mTvName.setText(data.get(position).getName());
+        ContactItemBean bean = data.get(position);
+        if(bean.getType() == Constants.TYPE_USER){
+            Member member = (Member) bean.getBean();
+            viewHolder.mTvName.setText(member.getName());
+        }else if(bean.getType() == Constants.TYPE_GROUP){
+            Group group = (Group) bean.getBean();
+            viewHolder.mTvName.setText(group.getName());
+        }
+
     }
 
     @Override

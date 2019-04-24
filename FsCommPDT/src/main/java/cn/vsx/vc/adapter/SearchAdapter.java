@@ -15,6 +15,7 @@ import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
@@ -99,7 +100,17 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 });
                 break;
             case Constants.TYPE_CHECK_SEARCH_GROUP:
-
+                Group group1 = (Group) item.getBean();
+                holder.setText(R.id.shoutai_tv_member_name, group1.getName());
+                holder.setGone(R.id.shoutai_tv_member_id,false);
+                holder.setChecked(R.id.checkbox,group1.isChecked());
+                holder.setOnClickListener(R.id.checkbox, v -> {
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveGroupSelectedHandler.class,group1,!group1.isChecked());
+                    group1.setChecked(!group1.isChecked());
+                    if(onItemClickListener !=null){
+                        onItemClickListener.onItemClick();
+                    }
+                });
                 break;
             case Constants.TYPE_CHECK_SEARCH_PC:
             case Constants.TYPE_CHECK_SEARCH_POLICE:

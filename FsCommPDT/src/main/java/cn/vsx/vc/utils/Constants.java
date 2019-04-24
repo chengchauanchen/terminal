@@ -107,6 +107,7 @@ public class Constants{
     public static String BUSINESS_TYPE = "businessType";
 
     public static String SCAN_DATA = "scanData";
+    public static String TRANSPON_SELECTED_BEAN = "transponSelectedBean";
 
 
 }

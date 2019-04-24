@@ -95,6 +95,8 @@ import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.fragment.LocationFragment;
 import cn.vsx.vc.fragment.TransponFragment;
 import cn.vsx.vc.model.ChatMember;
+import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.model.TransponSelectedBean;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
@@ -129,9 +131,11 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private static final int CODE_CAMERA_REQUEST = 0x11;/** 打开相机 */
     private static final int CODE_IMAGE_RESULT=0;
     private static final int CODE_VIDEO_RESULT=1;
+
     private static final int CAMERA_PERMISSIONS_REQUEST_CODE = 0x13;/** 请求相机权限 */
     private static final int STORAGE_PERMISSIONS_REQUEST_CODE = 0x14;/** 请求存储读取权限 */
     private static final int CODE_FNC_REQUEST = 0x15;
+    private static final int CODE_TRANSPON_REQUEST=0x16;//转发
 
 
     protected Logger logger = Logger.getLogger(getClass());
@@ -223,7 +227,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowForwardMoreHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowCopyPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowWithDrawPopupHandler);
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverTransponHandler);
+//        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverTransponHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverToFaceRecognitionHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSelectChatListHandler);
         sflCallList.setOnRefreshListener(new OnRefreshListenerImplementationImpl());
@@ -374,7 +378,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowCopyPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowWithDrawPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSendFileCheckMessageHandler);
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverTransponHandler);
+//        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverTransponHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverToFaceRecognitionHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSelectChatListHandler);
         HashMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getSerializable(Params.MESSAGE_SEND_FAIL, new HashMap<>());
@@ -406,6 +410,22 @@ public abstract class ChatBaseActivity extends BaseActivity{
             }
         }else if(requestCode == CODE_FNC_REQUEST){
             checkNFC();
+        }else if(requestCode == CODE_TRANSPON_REQUEST){
+         if(resultCode == RESULT_OK){
+             //转发返回结果
+             TransponSelectedBean bean = (TransponSelectedBean) data.getSerializableExtra(cn.vsx.vc.utils.Constants.TRANSPON_SELECTED_BEAN);
+             if(bean!=null&&bean.getList()!=null&&!bean.getList().isEmpty()){
+                 if(temporaryAdapter!=null){
+                     if(temporaryAdapter.isForWardMore()){
+                         //合并转发
+                         transponMessageMore(bean.getList());
+                     }else{
+                         //单个转发
+                         temporaryAdapter.transponMessage(bean.getList());
+                     }
+                 }
+             }
+          }
         }
     }
 
@@ -1488,15 +1508,20 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     //检查是否选择了消息
                     if(checkChooseMessageToMergeTransmit()){
                         funcation.setMergeTransmitVisibility(View.GONE);
+                        if(temporaryAdapter!=null){
+                            temporaryAdapter.setIsForWardMore(false);
+                            temporaryAdapter.notifyDataSetChanged();
+                        }
                     }else{
                         ToastUtil.showToast(ChatBaseActivity.this,getString(R.string.please_choose_use_merge_transmit_message));
                         return;
                     }
                 }
-                TransponFragment transponFragment = TransponFragment.getInstance(userId, temporaryAdapter.transponMessage.messageType);
-                transponFragment.setFragmentContainer(fl_fragment_container);
-                setViewVisibility(fl_fragment_container, View.VISIBLE);
-                getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, transponFragment).commit();
+                startActivityForResult(new Intent(ChatBaseActivity.this,TransponActivity.class),CODE_TRANSPON_REQUEST);
+//                TransponFragment transponFragment = TransponFragment.getInstance(userId, temporaryAdapter.transponMessage.messageType);
+//                transponFragment.setFragmentContainer(fl_fragment_container);
+//                setViewVisibility(fl_fragment_container, View.VISIBLE);
+//                getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, transponFragment).commit();
             });
         }
     };
@@ -1761,23 +1786,23 @@ public abstract class ChatBaseActivity extends BaseActivity{
         });
     }
 
-    /**
-     * 转发
-     **/
-    private ReceiverTransponHandler mReceiverTransponHandler = new ReceiverTransponHandler() {
-        @Override
-        public void handler(ChatMember chatMember) {
-            if(temporaryAdapter!=null){
-                if(temporaryAdapter.isForWardMore()){
-                    //合并转发
-                    transponMessageMore(chatMember);
-                }else{
-                    //单个转发
-                    temporaryAdapter.transponMessage(chatMember);
-                }
-            }
-        }
-    };
+//    /**
+//     * 转发
+//     **/
+//    private ReceiverTransponHandler mReceiverTransponHandler = new ReceiverTransponHandler() {
+//        @Override
+//        public void handler(ChatMember chatMember) {
+//            if(temporaryAdapter!=null){
+//                if(temporaryAdapter.isForWardMore()){
+//                    //合并转发
+//                    transponMessageMore(chatMember);
+//                }else{
+//                    //单个转发
+//                    temporaryAdapter.transponMessage(chatMember);
+//                }
+//            }
+//        }
+//    };
 
 
     private GetHistoryMessageRecordHandler getHistoryMessageRecordHandler = messageRecord -> {
@@ -2201,7 +2226,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private boolean checkChooseMessageToMergeTransmit(){
         boolean canDo = false;
         lee:for (TerminalMessage message: chatMessageList) {
-            if(message.isWithDraw){
+            if(message.isForward){
                 canDo = true;
                 break lee;
             }
@@ -2248,9 +2273,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
     /**
      * 合并转发
-     * @param chatMember
+     * @param list
      */
-    private  void transponMessageMore(ChatMember chatMember){
+    private  void transponMessageMore(ArrayList<ContactItemBean> list){
         if(chatMessageList!=null&&chatMessageList.size()>0){
             List<TerminalMessage> forwardList = new ArrayList<>();
             for (TerminalMessage message: chatMessageList) {
@@ -2278,8 +2303,8 @@ public abstract class ChatBaseActivity extends BaseActivity{
             TerminalMessage mTerminalMessage = new TerminalMessage();
             mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
             mTerminalMessage.messageFromName = name;
-            mTerminalMessage.messageToId = chatMember.getId();
-            mTerminalMessage.messageToName = chatMember.getName();
+//            mTerminalMessage.messageToId = chatMember.getId();
+//            mTerminalMessage.messageToName = chatMember.getName();
             mTerminalMessage.messageBody = jsonObject;
             mTerminalMessage.sendTime = System.currentTimeMillis();
             mTerminalMessage.messageType = MessageType.MERGE_TRANSMIT.getCode();
@@ -2287,7 +2312,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
             if(temporaryAdapter!=null){
                 //发送
-                temporaryAdapter.transponForwardMoreMessage(mTerminalMessage,chatMember.isGroup());
+                temporaryAdapter.transponForwardMoreMessage(mTerminalMessage,list);
                 //清空转发选择的状态
                 temporaryAdapter.clearForWardState();
             }
