@@ -144,23 +144,23 @@ public class GroupMemberAdapter extends BaseAdapter {
         }else {
             viewHolder.cbSelectmember.setChecked(false);
         }
-        view.setOnClickListener(v -> {
-            if(isDelete){
-                if (member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
-                    return;
-                }
-                if(member.isChecked()){
-                    member.isChecked = false;
-                    deleteMembers.remove(member);
-                }else {
-                    member.isChecked = true;
-                    deleteMembers.add(member);
-                }
-                if(onItemClickListener!=null){
-                    onItemClickListener.onItemClick(v,position,member.isChecked,member);
-                }
-                notifyDataSetChanged();
+        view.setOnClickListener(v -> {if(isDelete){
+            if (member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+                return;
             }
+            if(member.isChecked()){
+                member.isChecked = false;
+                deleteMembers.remove(member);
+            }else {
+                member.isChecked = true;
+                deleteMembers.add(member);
+            }
+            if(onItemClickListener!=null){
+                onItemClickListener.onItemClick(v,position,member.isChecked,member);
+            }
+            notifyDataSetChanged();
+        }
+
         });
 
         //跳转到消息界面

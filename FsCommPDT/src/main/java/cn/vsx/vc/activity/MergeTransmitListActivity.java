@@ -202,6 +202,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
             layoutSrl.setRefreshing(false);
             if (resultCode == BaseCommonCode.SUCCESS_CODE && !memberList.isEmpty()) {
                 chatMessageList.clear();
+                setMessagePath(memberList);
                 chatMessageList.addAll(memberList);
                 adapter.notifyDataSetChanged();
             } else {
@@ -425,6 +426,16 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
             }
         }
         return ids.toString();
+    }
+
+    /**
+     * 设置messagePath
+     * @param memberList
+     */
+    private void setMessagePath(List<TerminalMessage> memberList) {
+        for (TerminalMessage message: memberList) {
+            TerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(message,true);
+        }
     }
 
 }
