@@ -95,6 +95,8 @@ public class GroupMemberAdapter extends BaseAdapter {
 
         viewHolder.catagory.setVisibility(View.GONE);
 
+//        viewHolder.userLogo.setImageResource(getImageResourceByType(member));
+
         String no = HandleIdUtil.handleId(member.no);
         viewHolder.userName.setText(member.getName());
         String phoneNum = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no).phone;

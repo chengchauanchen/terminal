@@ -40,6 +40,7 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
 import cn.vsx.vc.record.AudioRecordButton;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.NfcUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -267,7 +268,7 @@ public class FunctionHidePlus extends LinearLayout {
                 break;
             case R.id.bt_merge_transmit:
                 //合并转发
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowTransponPopupHandler.class);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowTransponPopupHandler.class, Constants.TRANSPON_TYPE_MORE);
                 break;
             default:
                 break;

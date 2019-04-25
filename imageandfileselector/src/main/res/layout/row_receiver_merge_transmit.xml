@@ -30,7 +30,7 @@
 
         <RelativeLayout
             android:id="@+id/bubble"
-            android:layout_width="@dimen/dp_300"
+            android:layout_width="@dimen/dp_240"
             android:layout_height="wrap_content"
             android:layout_below="@+id/tv_userid"
             android:layout_marginLeft="@dimen/margin_chat_activity"

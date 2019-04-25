@@ -416,14 +416,13 @@ public abstract class ChatBaseActivity extends BaseActivity{
              //转发返回结果
              TransponSelectedBean bean = (TransponSelectedBean) data.getSerializableExtra(cn.vsx.vc.utils.Constants.TRANSPON_SELECTED_BEAN);
              if(bean!=null&&bean.getList()!=null&&!bean.getList().isEmpty()){
-                 if(temporaryAdapter!=null){
-                     if(temporaryAdapter.isForWardMore()){
-                         //合并转发
-                         transponMessageMore(bean.getList());
-                     }else{
-                         //单个转发
-                         temporaryAdapter.transponMessage(bean.getList(),pushMessageSendResultHandler);
-                     }
+                 int type = data.getIntExtra(cn.vsx.vc.utils.Constants.TRANSPON_TYPE,cn.vsx.vc.utils.Constants.TRANSPON_TYPE_ONE);
+                 if(type == cn.vsx.vc.utils.Constants.TRANSPON_TYPE_ONE){
+                     //单个转发
+                     temporaryAdapter.transponMessage(bean.getList(),pushMessageSendResultHandler);
+                 }else if(type == cn.vsx.vc.utils.Constants.TRANSPON_TYPE_MORE){
+                     //合并转发
+                     transponMessageMore(bean.getList());
                  }
              }
           }
@@ -1480,11 +1479,11 @@ public abstract class ChatBaseActivity extends BaseActivity{
             }
             /**  跳转到合并转发  **/
             if (terminalMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()) {
-//                Intent intent = new Intent(ChatBaseActivity.this, MergeTransmitListActivity.class);
-//                intent.putExtra(cn.vsx.vc.utils.Constants.IS_GROUP, isGroup);
-//                intent.putExtra(cn.vsx.vc.utils.Constants.USER_ID, userId);
-//                intent.putExtra(cn.vsx.vc.utils.Constants.TERMINALMESSAGE, terminalMessage);
-//                ChatBaseActivity.this.startActivity(intent);
+                Intent intent = new Intent(ChatBaseActivity.this, MergeTransmitListActivity.class);
+                intent.putExtra(cn.vsx.vc.utils.Constants.IS_GROUP, isGroup);
+                intent.putExtra(cn.vsx.vc.utils.Constants.USER_ID, userId);
+                intent.putExtra(cn.vsx.vc.utils.Constants.TERMINALMESSAGE, terminalMessage);
+                ChatBaseActivity.this.startActivity(intent);
             }
         }
     };
@@ -1501,7 +1500,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
      **/
     private ReceiverShowTransponPopupHandler mReceiverShowTransponPopupHandler = new ReceiverShowTransponPopupHandler() {
         @Override
-        public void handler() {
+        public void handler(int transponType) {
             handler.post(() -> {
                 /**  没有进行组呼的时候才弹出 **/
                 //隐藏合并转发按钮
@@ -1518,7 +1517,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
                         return;
                     }
                 }
-                startActivityForResult(new Intent(ChatBaseActivity.this,TransponActivity.class),CODE_TRANSPON_REQUEST);
+                Intent intent = new Intent(ChatBaseActivity.this,TransponActivity.class);
+                intent.putExtra( cn.vsx.vc.utils.Constants.TRANSPON_TYPE,transponType);
+                startActivityForResult(intent,CODE_TRANSPON_REQUEST);
 //                TransponFragment transponFragment = TransponFragment.getInstance(userId, temporaryAdapter.transponMessage.messageType);
 //                transponFragment.setFragmentContainer(fl_fragment_container);
 //                setViewVisibility(fl_fragment_container, View.VISIBLE);
@@ -2292,7 +2293,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         if(chatMessageList!=null&&chatMessageList.size()>0){
             List<TerminalMessage> forwardList = new ArrayList<>();
             for (TerminalMessage message: chatMessageList) {
-                if(message.isWithDraw){
+                if(message.isForward){
                     forwardList.add(message);
                 }
             }

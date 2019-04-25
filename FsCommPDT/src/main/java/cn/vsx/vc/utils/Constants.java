@@ -109,5 +109,9 @@ public class Constants{
     public static String SCAN_DATA = "scanData";
     public static String TRANSPON_SELECTED_BEAN = "transponSelectedBean";
 
+    public static String TRANSPON_TYPE = "transponType";
+    public static int TRANSPON_TYPE_ONE = 1;
+    public static int TRANSPON_TYPE_MORE = 2;
+
 
 }

@@ -1071,12 +1071,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                     }
                 }
             }
-            CharSequence charSequence;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-                charSequence =Html.fromHtml(sb.toString(),Html.FROM_HTML_MODE_LEGACY);
-            } else {
-                charSequence = Html.fromHtml(sb.toString()); }
-            holder.tv_content.setText(charSequence);
+            holder.tv_content.setText(sb.toString());
         }else{
             holder.tv_content.setText(activity.getString(R.string.chat_record));
         }
@@ -2130,7 +2125,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
      */
     public void clearForWardState(){
         for (TerminalMessage message: chatMessageList) {
-            message.isWithDraw = false;
+            message.isForward = false;
         }
         isForWardMore = false;
         notifyDataSetChanged();
@@ -2141,7 +2136,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
      */
     public void openForWardState(){
         for (TerminalMessage message: chatMessageList) {
-            message.isWithDraw = false;
+            message.isForward = false;
         }
         isForWardMore = true;
         notifyDataSetChanged();

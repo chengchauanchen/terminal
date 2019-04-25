@@ -16,6 +16,7 @@ import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowForwardMoreHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowWithDrawPopupHandler;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -75,7 +76,7 @@ public class TranspondDialog  extends Dialog {
         });
         //转发
         tv_forward.setOnClickListener(view1 -> {
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowTransponPopupHandler.class);
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowTransponPopupHandler.class, Constants.TRANSPON_TYPE_ONE);
             dismiss();
         });
         //撤回

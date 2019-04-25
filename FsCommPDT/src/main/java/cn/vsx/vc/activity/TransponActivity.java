@@ -21,7 +21,7 @@ import static cn.vsx.vc.utils.Constants.TRANSPON_SELECTED_BEAN;
 public class TransponActivity extends BaseActivity implements TransponNewFragment.BackListener {
 
     private TransponNewFragment transponNewFragment;
-
+    private int transponType = 0;
     /**
      * 更新配置信息
      */
@@ -64,6 +64,7 @@ public class TransponActivity extends BaseActivity implements TransponNewFragmen
 
     @Override
     public void initData(){
+        transponType = getIntent().getIntExtra(Constants.TRANSPON_TYPE,Constants.TRANSPON_TYPE_ONE);
     }
 
     @Override
@@ -88,6 +89,7 @@ public class TransponActivity extends BaseActivity implements TransponNewFragmen
     public void onResult(ArrayList<ContactItemBean> list) {
         Intent intent = new Intent();
         intent.putExtra(Constants.TRANSPON_SELECTED_BEAN,new TransponSelectedBean(list));
+        intent.putExtra(Constants.TRANSPON_TYPE,transponType);
         setResult(RESULT_OK,intent);
         finish();
     }
