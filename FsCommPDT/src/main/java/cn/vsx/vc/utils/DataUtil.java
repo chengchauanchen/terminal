@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.vc.R;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class DataUtil {
@@ -489,4 +491,20 @@ public class DataUtil {
 		return result;
 	}
 
+	/**
+	 * 根据设备类型获取设备对应的图标
+	 * @param type
+	 * @return
+	 */
+	public static int getImageResourceByType(int type) {
+		if (type == TerminalMemberType.TERMINAL_PC.getCode()) {
+			return R.drawable.icon_pc_device;
+		} else if (type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()) {
+			return R.drawable.icon_record_device;
+		} else if (type == TerminalMemberType.TERMINAL_UAV.getCode()) {
+			return R.drawable.icon_uav_device;
+		} else {
+			return R.drawable.icon_phone_device;
+		}
+	}
 	}

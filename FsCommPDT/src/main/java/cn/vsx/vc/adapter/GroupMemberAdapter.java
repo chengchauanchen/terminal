@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
@@ -95,7 +96,7 @@ public class GroupMemberAdapter extends BaseAdapter {
 
         viewHolder.catagory.setVisibility(View.GONE);
 
-//        viewHolder.userLogo.setImageResource(getImageResourceByType(member));
+//        viewHolder.userLogo.setImageResource(DataUtil.getImageResourceByType(member.type));
 
         String no = HandleIdUtil.handleId(member.no);
         viewHolder.userName.setText(member.getName());
@@ -202,7 +203,6 @@ public class GroupMemberAdapter extends BaseAdapter {
         return view;
 
     }
-
 
     final static class ViewHolder {
         LinearLayout ll_person_search_item;
