@@ -262,6 +262,27 @@ public class PromptManager {
 		}
 	}
 
+	/**
+	 * 收到请求上报的通知开始上报
+	 */
+	public void startReportByNotity(){
+		if(soundPool != null){
+			logger.info("开始被动上报！");
+			soundPool.play(soundMap.get(R.raw.start_report_by_notify), 0.5f, 0.5f, 0, 0, 1);
+		}
+	}
+
+	/**
+	 * 收到请求观看的通知
+	 */
+	public void startPlayByNotity(){
+		if(soundPool != null){
+			logger.info("开始被动上报！");
+			soundPool.play(soundMap.get(R.raw.start_play_by_notify), 0.5f, 0.5f, 0, 0, 1);
+		}
+	}
+
+
 	public void stopRing(){
 		if(soundPool != null){
 			logger.info("停止响铃---------->" + streamId);
@@ -307,6 +328,8 @@ public class PromptManager {
 		soundMap.put(R.raw.passive_dropped_warning,soundPool.load(MyApplication.instance,R.raw.passive_dropped_warning,1));
 		soundMap.put(R.raw.exten_no_storage, soundPool.load(MyApplication.instance, R.raw.exten_no_storage,1));
 		soundMap.put(R.raw.exten_storage_not_engou, soundPool.load(MyApplication.instance, R.raw.exten_storage_not_engou,1));
+		soundMap.put(R.raw.start_report_by_notify, soundPool.load(MyApplication.instance, R.raw.start_report_by_notify,1));
+		soundMap.put(R.raw.start_play_by_notify, soundPool.load(MyApplication.instance, R.raw.start_play_by_notify,1));
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);

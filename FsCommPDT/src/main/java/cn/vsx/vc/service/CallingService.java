@@ -196,6 +196,7 @@ public class CallingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
+        unregisterReceiver(mBroadcastReceiv);
     }
 
     private View.OnClickListener retractListener = v-> retract();

@@ -153,6 +153,7 @@ public class PullGB28181Service extends BaseService{
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
+        unregisterReceiver(mBroadcastReceiv);
     }
 
     private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setPushAuthority);

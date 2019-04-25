@@ -473,6 +473,7 @@ public class ReceiveHandlerService extends Service{
                 if(currentStateMap.containsKey(TerminalState.GROUP_CALL_LISTENING)||currentStateMap.containsKey(TerminalState.GROUP_CALL_SPEAKING)){
                     TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
                 }
+                myHandler.post(() -> PromptManager.getInstance().startReportByNotity());
                 MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
                 intent.setClass(ReceiveHandlerService.this, PhonePushService.class);
                 intent.putExtra(Constants.TYPE,Constants.RECEIVE_PUSH);
@@ -525,6 +526,7 @@ public class ReceiveHandlerService extends Service{
                 if(currentStateMap.containsKey(TerminalState.GROUP_CALL_LISTENING) || currentStateMap.containsKey(TerminalState.GROUP_CALL_SPEAKING)){
                     TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
                 }
+                myHandler.post(() -> PromptManager.getInstance().startPlayByNotity());
                 myHandler.postDelayed(() -> goToWatch(terminalMessage,-1),1000);
             }
          return;

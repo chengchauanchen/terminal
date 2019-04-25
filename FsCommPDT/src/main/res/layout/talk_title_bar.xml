@@ -18,7 +18,7 @@
             style="@style/image_wrap_content_style"
             android:layout_marginLeft="@dimen/x20"
             android:src="@drawable/open_group_scan"
-            android:visibility="visible" />
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tv_group_scan"
@@ -27,7 +27,8 @@
             android:layout_marginLeft="@dimen/dp_10"
             android:text="@string/text_group_scan"
             android:textColor="@color/group_scan_text"
-            android:textSize="@dimen/sp_15" />
+            android:textSize="@dimen/sp_15"
+            android:visibility="gone"/>
 
         <ImageView
             android:id="@+id/iv_environment_monitor"

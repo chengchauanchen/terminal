@@ -71,7 +71,8 @@
             <cn.vsx.vc.view.ChangeMainGroupLayout
                 android:id="@+id/changemaingrouplayout"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
 
             <!--音量设置和静音-->
             <cn.vsx.vc.view.VolumeChangLayout

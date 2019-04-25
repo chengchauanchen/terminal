@@ -175,7 +175,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 if (MyTerminalFactory.getSDK().getParam(Params.POLICE_STORE_APK,false)) {
                     if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                         changeProgressMsg("正在登入...");
-                         if(TerminalFactory.getSDK().isServerConnected()){
+                         if(MyTerminalFactory.getSDK().isServerConnected()){
                                 login();
                          }
                     }
@@ -209,7 +209,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         if (isRegisted) {//卸载后重装，应该显示注册过了,直接去登录
                             ll_regist.setVisibility(View.GONE);
                             changeProgressMsg("正在登入...");
-                            if(TerminalFactory.getSDK().isServerConnected()){
+                            if(MyTerminalFactory.getSDK().isServerConnected()){
                                 login();
                             }
                         } else {//没注册
@@ -282,7 +282,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         if (errorCode == BaseCommonCode.SUCCESS_CODE) {//注册成功，直接登录
             logger.info("注册完成的回调----注册成功，直接登录");
             changeProgressMsg("正在登入...");
-            if(TerminalFactory.getSDK().isServerConnected()){
+            if(MyTerminalFactory.getSDK().isServerConnected()){
                 login();
             }
         } else {//注册失败，提示并关界面

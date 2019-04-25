@@ -371,11 +371,11 @@ public class TalkbackFragment extends BaseFragment {
             myHandler.post(() -> {
                 if (groupScanType == GroupScanType.GROUP_SCANNING.getCode()
                         &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_SCAN.name())) {//组扫描
-                    if (enable) {//打开组扫描Icon
-                        setChangeGroupScan(true);
-                    } else {//关闭组扫描Icon
-                        setChangeGroupScan(false);
-                    }
+//                    if (enable) {//打开组扫描Icon
+//                        setChangeGroupScan(true);
+//                    } else {//关闭组扫描Icon
+//                        setChangeGroupScan(false);
+//                    }
                 }
             });
 
@@ -1116,7 +1116,7 @@ public class TalkbackFragment extends BaseFragment {
 
         startTimerToLock();
         setVideoIcon();//设置视频回传上报相关图标
-        setScanGroupIcon();//设置组扫描相关图标
+//        setScanGroupIcon();//设置组扫描相关图标
     }
 
     private void setScanGroupIcon() {

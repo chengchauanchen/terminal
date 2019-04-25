@@ -104,10 +104,13 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private boolean bindService;
     private VoipManager voipManager;
 	//DDpush连接
-	private boolean Established = true;
+	private boolean Established = false;
 	//网络是否连接，只有两个都连接上才是真正的在线，只要有一个为false就是离线
 	private boolean netWorkConnected = true;
 	private NetWorkConnectionChangeReceiver netWorkConnectionChangeReceiver;
+
+	private boolean isBindOnlineService;
+	private boolean isBindBleService;
 	public TerminalSDK4Android (Application mApplication){
 		application = mApplication;
 		account = application.getSharedPreferences(Params.DEFAULT_PRE_NAME,Context.MODE_MULTI_PROCESS);
@@ -340,10 +343,16 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		logger.info("TerminalSDK4Android关闭了OnlineService");
 		Intent onlineService = new Intent(application, OnlineService.class);
 		application.stopService(onlineService);
-		application.unbindService(onlineServiceConn);
+		if(isBindOnlineService){
+			application.unbindService(onlineServiceConn);
+			isBindOnlineService = false;
+		}
 		Intent bleService = new Intent(application, BluetoothLeService.class);
 		application.stopService(bleService);
-		application.unbindService(bleServiceConn);
+		if(isBindBleService){
+			application.unbindService(bleServiceConn);
+			isBindBleService = false;
+		}
 	}
 
 	private void startService(){
@@ -352,9 +361,9 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		Intent bleService = new Intent(application, BluetoothLeService.class);
 		if (application != null) {
 			application.startService(onlineService);
-			application.bindService(onlineService,onlineServiceConn,BIND_AUTO_CREATE);
+			isBindOnlineService = application.bindService(onlineService,onlineServiceConn,BIND_AUTO_CREATE);
 			application.startService(bleService);
-			application.bindService(bleService,bleServiceConn,BIND_AUTO_CREATE);
+			isBindBleService = application.bindService(bleService,bleServiceConn,BIND_AUTO_CREATE);
 		}
 	}
 
@@ -367,6 +376,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 		@Override
 		public void onServiceDisconnected(ComponentName name){
+			isBindOnlineService = false;
 			startService();
 		}
 	};
@@ -380,6 +390,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 		@Override
 		public void onServiceDisconnected(ComponentName name){
+			isBindBleService = false;
 			startService();
 		}
 	};
@@ -639,6 +650,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	        return true;
 	    }
 	    return false;
+	}
+	@Override
+	public boolean isServerConnected(){
+		return Established;
 	}
 	private FileTransferOperation fileTransferOperation;
 	public FileTransferOperation getFileTransferOperation(){

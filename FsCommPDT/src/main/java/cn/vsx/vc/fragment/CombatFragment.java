@@ -34,6 +34,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHand
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
@@ -419,10 +420,11 @@ public abstract class CombatFragment extends BaseFragment {
                     terminalMessage.unReadCount = unReadCount;
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.VIDEO_LIVE_WAITE_TIMEOUT.getErrorCode()){//请求图像超时
                     String liver = terminalMessage.messageBody.getString("liver");
+                    int liveNo = Util.stringToInt(terminalMessage.messageBody.getString(JsonParam.LIVERNO));
                     if (TextUtils.isEmpty(liver)){
                         terminalMessage.unReadCount = unReadCount;
                     }else{
-                        if (Integer.valueOf(liver.split("_")[0]) == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
+                        if (liveNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
                             terminalMessage.unReadCount = unReadCount + 1;//直播方，超时未读
                         }else {
                             terminalMessage.unReadCount = unReadCount;//主叫方已读
