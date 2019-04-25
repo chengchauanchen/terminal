@@ -40,6 +40,7 @@ import com.zectec.imageandfileselector.utils.PhotoUtils;
 import com.zectec.imageandfileselector.view.LoadingCircleView;
 
 import org.apache.log4j.Logger;
+import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -1482,19 +1483,20 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     /**
      * 合并转发
      */
-    public void transponForwardMoreMessage(TerminalMessage terminalMessage,ArrayList<ContactItemBean> list) {
+    public void transponForwardMoreMessage(TerminalMessage terminalMessage, ArrayList<ContactItemBean> list, PushMessageSendResultHandler pushMessageSendResultHandler) {
         List<Integer> toIds = getToIdsTranspon(list);
+        List<Long> toUniqueNos = getToUniqueNoTranspon(list);
         TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
         terminalMessage1.messageToId = toIds.get(0);
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1,toIds,new ArrayList<Long>());
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),toIds,toUniqueNos,pushMessageSendResultHandler);
     }
 
     /**
      * 转发短文本消息到信令
      */
-    private void transponShortTextMessage(TerminalMessage terminalMessage, List<Integer> list) {
+    private void transponShortTextMessage(TerminalMessage terminalMessage, List<Integer> list,List<Long> toUniqueNos,PushMessageSendResultHandler pushMessageSendResultHandler) {
         TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1,list,new ArrayList<Long>());
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),list,toUniqueNos,pushMessageSendResultHandler);
     }
 
     private void sendShortTextMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
@@ -1523,9 +1525,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     /***  转发定位消息 **/
-    private void transponLocationMessage(TerminalMessage terminalMessage, List<Integer> list) {
+    private void transponLocationMessage(TerminalMessage terminalMessage, List<Integer> list,List<Long> toUniqueNos,PushMessageSendResultHandler pushMessageSendResultHandler) {
         TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1,list,new ArrayList<Long>());
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),list,toUniqueNos,pushMessageSendResultHandler);
     }
 
     private void sendLocationMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
@@ -1557,9 +1559,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     /**
      * 转发长文本相关发送到信令服务
      **/
-    public void transponLongTxtMessage(TerminalMessage terminalMessage,  List<Integer> list) {
+    public void transponLongTxtMessage(TerminalMessage terminalMessage,  List<Integer> list,List<Long> toUniqueNos,PushMessageSendResultHandler pushMessageSendResultHandler) {
         TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1,list,new ArrayList<Long>());
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),list,toUniqueNos,pushMessageSendResultHandler);
     }
 
     public void sendLongTxtMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
@@ -1579,7 +1581,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     /**
      * 转发图片消息
      **/
-    private void transponPhotoMessage(TerminalMessage terminalMessage, List<Integer> list ) {
+    private void transponPhotoMessage(TerminalMessage terminalMessage, List<Integer> list ,List<Long> toUniqueNos,PushMessageSendResultHandler pushMessageSendResultHandler) {
         if (terminalMessage.resultCode != 0) {//发送失败的文件消息进行转发
             terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
             terminalMessage.messageBody.put(JsonParam.ISMICROPICTURE, true);
@@ -1588,7 +1590,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, ""), file, terminalMessage, false);
         } else {
             TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-            MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1,list,new ArrayList<Long>());
+            MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),list,toUniqueNos,pushMessageSendResultHandler);
         }
     }
 
@@ -1607,7 +1609,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     /***  转发文件消息 **/
-    private void transponFileMessage(TerminalMessage terminalMessage, List<Integer> list) {
+    private void transponFileMessage(TerminalMessage terminalMessage, List<Integer> list,List<Long> toUniqueNos,PushMessageSendResultHandler pushMessageSendResultHandler) {
         if (terminalMessage.resultCode != 0) {//发送失败的文件消息进行转发
             terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
             File file = new File(terminalMessage.messagePath);
@@ -1615,7 +1617,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, ""), file, terminalMessage, false);
         } else {
             TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-            MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1,list,new ArrayList<Long>());
+            MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),list,toUniqueNos,pushMessageSendResultHandler);
         }
     }
 
@@ -1634,9 +1636,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     /***   转发直播消息  **/
-    private void transponLiveMessage(TerminalMessage terminalMessage, List<Integer> list) {
+    private void transponLiveMessage(TerminalMessage terminalMessage, List<Integer> list,List<Long> toUniqueNos,PushMessageSendResultHandler pushMessageSendResultHandler) {
         TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1,list,new ArrayList<Long>());
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),list,toUniqueNos,pushMessageSendResultHandler);
     }
 
     private void sendLiveMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
@@ -1657,9 +1659,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     /**
      * 转发组呼或录音消息
      **/
-    private void transponGroupCallMessage(TerminalMessage terminalMessage, List<Integer> list) {
+    private void transponGroupCallMessage(TerminalMessage terminalMessage, List<Integer> list,List<Long> toUniqueNos,PushMessageSendResultHandler pushMessageSendResultHandler) {
         TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1,list,new ArrayList<Long>());
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),list,toUniqueNos,pushMessageSendResultHandler);
     }
 
     private void sendGroupCallMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
@@ -1866,6 +1868,30 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         return result;
     }
 
+    /**
+     * 获取转发的对方的UniqueNo
+     * @param list
+     * @return
+     */
+    private List<Long> getToUniqueNoTranspon(ArrayList<ContactItemBean> list){
+        List<Long> toUniques = new ArrayList<>();
+        for (ContactItemBean bean: list) {
+            if (bean.getType() == Constants.TYPE_USER) {
+                Member member = (Member) bean.getBean();
+                if(member!=null){
+                    toUniques.add(member.getUniqueNo());
+                }
+            }else if(bean.getType() == Constants.TYPE_GROUP){
+                Group group = (Group) bean.getBean();
+                if(group!=null){
+                    toUniques.add(group.getUniqueNo());
+                }
+            }
+        }
+
+        return toUniques;
+    }
+
     private View getViewByType(int viewType, ViewGroup parent) {
         switch (viewType) {
             case MESSAGE_LONG_TEXT_RECEIVED:
@@ -2052,10 +2078,51 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     public TerminalMessage transponMessage;//需要转发的消息
     public boolean isTranspon;//是否转发了
 
-    public void transponMessage(ArrayList<ContactItemBean> list) {
+    public void transponMessage(ArrayList<ContactItemBean> list, PushMessageSendResultHandler pushMessageSendResultHandler) {
         logger.info("转发消息，type:" + transponMessage.messageType);
             //单个转发
-            forward(list);
+        List<Integer> toIds = getToIdsTranspon(list);
+        TransponToBean bean = getToNamesTranspon(list);
+        List<Long> toUniqueNos = getToUniqueNoTranspon(list);
+        if(bean!=null){
+            transponMessage.messageToId = bean.getNo();
+            transponMessage.messageToName = bean.getName();
+        }
+        transponMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+        transponMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
+        transponMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
+
+        if (transponMessage.messageType == MessageType.SHORT_TEXT.getCode()) {
+            transponShortTextMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
+        }
+        if (transponMessage.messageType == MessageType.LONG_TEXT.getCode()) {
+            transponLongTxtMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
+        }
+        if (transponMessage.messageType == MessageType.PICTURE.getCode()) {
+            transponPhotoMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
+        }
+        if (transponMessage.messageType == MessageType.AUDIO.getCode()) {
+        }
+        if (transponMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
+            transponFileMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
+        }
+        if (transponMessage.messageType == MessageType.FILE.getCode()) {
+            transponFileMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
+        }
+        if (transponMessage.messageType == MessageType.POSITION.getCode()) {
+            transponLocationMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
+        }
+        if (transponMessage.messageType == MessageType.WARNING_INSTANCE.getCode()) {
+
+        }
+        if (transponMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
+            transponLiveMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
+        }
+        if (transponMessage.messageType == MessageType.GROUP_CALL.getCode() || transponMessage.messageType == MessageType.AUDIO.getCode()) {
+            //组呼进行转发，类型变为录音
+            transponMessage.messageType = MessageType.AUDIO.getCode();
+            transponGroupCallMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
+        }
     }
 
     /**
@@ -2152,54 +2219,6 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             noticeContent=String.format(activity.getString(R.string.text_message_list_merge_transmit_),message.messageFromName);
         }
         return noticeContent;
-    }
-
-    /**
-     * 单消息转发
-     * @param list
-     */
-    private void forward(ArrayList<ContactItemBean> list){
-        List<Integer> toIds = getToIdsTranspon(list);
-        TransponToBean bean = getToNamesTranspon(list);
-        if(bean!=null){
-            transponMessage.messageToId = bean.getNo();
-            transponMessage.messageToName = bean.getName();
-        }
-        transponMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-        transponMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
-        transponMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
-
-        if (transponMessage.messageType == MessageType.SHORT_TEXT.getCode()) {
-            transponShortTextMessage(transponMessage, toIds);
-        }
-        if (transponMessage.messageType == MessageType.LONG_TEXT.getCode()) {
-            transponLongTxtMessage(transponMessage, toIds);
-        }
-        if (transponMessage.messageType == MessageType.PICTURE.getCode()) {
-            transponPhotoMessage(transponMessage, toIds);
-        }
-        if (transponMessage.messageType == MessageType.AUDIO.getCode()) {
-        }
-        if (transponMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
-            transponFileMessage(transponMessage, toIds);
-        }
-        if (transponMessage.messageType == MessageType.FILE.getCode()) {
-            transponFileMessage(transponMessage, toIds);
-        }
-        if (transponMessage.messageType == MessageType.POSITION.getCode()) {
-            transponLocationMessage(transponMessage, toIds);
-        }
-        if (transponMessage.messageType == MessageType.WARNING_INSTANCE.getCode()) {
-
-        }
-        if (transponMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
-            transponLiveMessage(transponMessage, toIds);
-        }
-        if (transponMessage.messageType == MessageType.GROUP_CALL.getCode() || transponMessage.messageType == MessageType.AUDIO.getCode()) {
-            //组呼进行转发，类型变为录音
-            transponMessage.messageType = MessageType.AUDIO.getCode();
-            transponGroupCallMessage(transponMessage, toIds);
-        }
     }
 
 

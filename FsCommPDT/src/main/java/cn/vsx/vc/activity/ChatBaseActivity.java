@@ -44,6 +44,7 @@ import com.zectec.imageandfileselector.view.LoadingCircleView;
 
 import org.apache.http.util.TextUtils;
 import org.apache.log4j.Logger;
+import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -421,7 +422,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                          transponMessageMore(bean.getList());
                      }else{
                          //单个转发
-                         temporaryAdapter.transponMessage(bean.getList());
+                         temporaryAdapter.transponMessage(bean.getList(),pushMessageSendResultHandler);
                      }
                  }
              }
@@ -1479,11 +1480,11 @@ public abstract class ChatBaseActivity extends BaseActivity{
             }
             /**  跳转到合并转发  **/
             if (terminalMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()) {
-                Intent intent = new Intent(ChatBaseActivity.this, MergeTransmitListActivity.class);
-                intent.putExtra(cn.vsx.vc.utils.Constants.IS_GROUP, isGroup);
-                intent.putExtra(cn.vsx.vc.utils.Constants.USER_ID, userId);
-                intent.putExtra(cn.vsx.vc.utils.Constants.TERMINALMESSAGE, terminalMessage);
-                ChatBaseActivity.this.startActivity(intent);
+//                Intent intent = new Intent(ChatBaseActivity.this, MergeTransmitListActivity.class);
+//                intent.putExtra(cn.vsx.vc.utils.Constants.IS_GROUP, isGroup);
+//                intent.putExtra(cn.vsx.vc.utils.Constants.USER_ID, userId);
+//                intent.putExtra(cn.vsx.vc.utils.Constants.TERMINALMESSAGE, terminalMessage);
+//                ChatBaseActivity.this.startActivity(intent);
             }
         }
     };
@@ -2152,6 +2153,18 @@ public abstract class ChatBaseActivity extends BaseActivity{
         }
     };
 
+    /**
+     * 转发结果回调
+     */
+    private PushMessageSendResultHandler pushMessageSendResultHandler = new PushMessageSendResultHandler() {
+        @Override
+        public void handler(boolean sendOK, String uuid) {
+            handler.post(() -> {
+                ToastUtil.showToast(ChatBaseActivity.this,ChatBaseActivity.this.getString(sendOK?R.string.transpond_success:R.string.transpond_fail));
+            });
+        }
+    };
+
 
     public void setSmoothScrollToPosition(int position) {
         groupCallList.smoothScrollToPosition(position);
@@ -2312,7 +2325,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
             if(temporaryAdapter!=null){
                 //发送
-                temporaryAdapter.transponForwardMoreMessage(mTerminalMessage,list);
+                temporaryAdapter.transponForwardMoreMessage(mTerminalMessage,list,pushMessageSendResultHandler);
                 //清空转发选择的状态
                 temporaryAdapter.clearForWardState();
             }

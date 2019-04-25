@@ -32,6 +32,7 @@ import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
@@ -189,7 +190,9 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
      * @param isRefresh
      */
     private void loadData(boolean isRefresh) {
-        MyTerminalFactory.getSDK().getTerminalMessageManager().getMessageListByIds(messageIds);
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            MyTerminalFactory.getSDK().getTerminalMessageManager().getMessageListByIds(messageIds);
+        });
     }
     /**
      * 获取组内直播历史列表
