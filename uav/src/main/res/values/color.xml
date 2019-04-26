@@ -577,5 +577,6 @@
     <color name="green_27b">#27B382</color>
     <color name="green_32">#32B16C</color>
     <color name="green_47">#47B347</color>
+    <color name="transparent_10">#1A000000</color>
 
 </resources>
