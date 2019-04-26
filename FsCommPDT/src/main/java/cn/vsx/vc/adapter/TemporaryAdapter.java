@@ -1128,7 +1128,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 setText(holder.tvContent, liveTheme);
             }else {
                 TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo);
+                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo,true);
                     String name = (account!=null)?account.getName():terminalMessage.messageFromName;
                     myHandler.post(() -> {
                         setText(holder.tvContent, String.format(activity.getString(R.string.current_push_member),name));
@@ -1579,7 +1579,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private void transponPhotoMessage(TerminalMessage terminalMessage, List<Integer> list ,List<Long> toUniqueNos,PushMessageSendResultHandler pushMessageSendResultHandler) {
         if (terminalMessage.resultCode != 0) {//发送失败的文件消息进行转发
             terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
-            terminalMessage.messageBody.put(JsonParam.ISMICROPICTURE, true);
+            terminalMessage.messageBody.put(JsonParam.ISMICROPICTURE, false);
             File file = new File(terminalMessage.messagePath);
             upload = true;
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, ""), file, terminalMessage, false);

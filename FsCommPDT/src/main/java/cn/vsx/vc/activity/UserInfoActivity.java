@@ -115,7 +115,7 @@ public class UserInfoActivity extends BaseActivity {
     private void loadData(){
         showProgressDialog();
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
-            account = DataUtil.getAccountByMemberNo(userId);
+            account = DataUtil.getAccountByMemberNo(userId,true);
             myHandler.post(() -> {
                 dismissProgressDialog();
                 if(account == null){

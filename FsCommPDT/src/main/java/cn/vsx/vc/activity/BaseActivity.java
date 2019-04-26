@@ -46,6 +46,7 @@ import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
 import cn.vsx.vc.receive.RecvCallBack;
+import cn.vsx.vc.receiveHandle.OnBackListener;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
@@ -62,6 +63,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 	protected Logger logger = Logger.getLogger(BaseActivity.class);
 	protected final String TAG = getClass().getSimpleName();
 	private ProgressDialog myProgressDialog;//加载数据的弹窗
+
+	public OnBackListener backListener;
 
     //成员被删除了
 	private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
@@ -573,5 +576,9 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 		if(myProgressDialog!=null){
 			myProgressDialog.dismiss();
 		}
+	}
+
+	public void setBackListener(OnBackListener backListener) {
+		this.backListener = backListener;
 	}
 }

@@ -98,6 +98,7 @@ import cn.vsx.vc.fragment.TransponFragment;
 import cn.vsx.vc.model.ChatMember;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.TransponSelectedBean;
+import cn.vsx.vc.receiveHandle.OnBackListener;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
@@ -162,7 +163,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     protected int speakingId;
     protected String speakingName;
     protected boolean isGroup;//组会话还是个人会话
-    private OnBackListener backListener;
+
     private long lastVersion;//最后一条发送成功的消息的version
     private TerminalMessage tempGetMessage;//获取消息时传给服务器查询该消息版本号之前的10条
     private int tempPage = 1;
@@ -1520,10 +1521,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
                 Intent intent = new Intent(ChatBaseActivity.this,TransponActivity.class);
                 intent.putExtra( cn.vsx.vc.utils.Constants.TRANSPON_TYPE,transponType);
                 startActivityForResult(intent,CODE_TRANSPON_REQUEST);
-//                TransponFragment transponFragment = TransponFragment.getInstance(userId, temporaryAdapter.transponMessage.messageType);
-//                transponFragment.setFragmentContainer(fl_fragment_container);
-//                setViewVisibility(fl_fragment_container, View.VISIBLE);
-//                getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, transponFragment).commit();
             });
         }
     };
@@ -2169,14 +2166,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
     public void setSmoothScrollToPosition(int position) {
         groupCallList.smoothScrollToPosition(position);
-    }
-
-    public void setBackListener(OnBackListener backListener) {
-        this.backListener = backListener;
-    }
-
-    public interface OnBackListener {
-        void onBack();
     }
 
     /**

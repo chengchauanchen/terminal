@@ -498,13 +498,17 @@ public class DataUtil {
 	 */
 	public static int getImageResourceByType(int type) {
 		if (type == TerminalMemberType.TERMINAL_PC.getCode()) {
-			return R.drawable.icon_pc_device;
+			return R.drawable.icon_pc;
 		} else if (type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()) {
-			return R.drawable.icon_record_device;
+			return R.drawable.icon_record;
 		} else if (type == TerminalMemberType.TERMINAL_UAV.getCode()) {
-			return R.drawable.icon_uav_device;
+			return R.drawable.icon_uav;
+		} else if (type == TerminalMemberType.TERMINAL_HDMI.getCode()) {
+			return R.drawable.icon_hdmi;
+		} else if (type == TerminalMemberType.TERMINAL_LTE.getCode()) {
+			return R.drawable.icon_lte;
 		} else {
-			return R.drawable.icon_phone_device;
+			return R.drawable.icon_phone;
 		}
 	}
 	}

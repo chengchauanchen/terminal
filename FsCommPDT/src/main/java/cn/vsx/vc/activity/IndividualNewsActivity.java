@@ -378,7 +378,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     private void goToChooseDevices(int type){
         showProgressDialog();
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
-            Account account = DataUtil.getAccountByMemberNo(userId);
+            Account account = DataUtil.getAccountByMemberNo(userId,true);
             myHandler.post(() -> {
                 dismissProgressDialog();
                 if(account == null){

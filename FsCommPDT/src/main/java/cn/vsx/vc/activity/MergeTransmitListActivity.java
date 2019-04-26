@@ -3,6 +3,7 @@ package cn.vsx.vc.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -32,6 +33,7 @@ import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
@@ -40,10 +42,14 @@ import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetMessagesByIdsHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMultimediaFailHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMultimediaMessageCompleteHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MergeTransmitListAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.receiveHandle.OnBackListener;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupMergeTransmitVoiceHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.ToastUtil;
@@ -80,7 +86,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
     //每页显示条数
     private static final int mPageSize = 10;
 
-    protected Handler handler = new Handler() {
+    protected Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -143,17 +149,29 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
     @Override
     protected void onResume() {
         super.onResume();
+        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveDownloadProgressHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveDownloadFinishHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(mReceiverReplayGroupMergeTransmitVoiceHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMultimediaMessageCompleteHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveHistoryMultimediaFailHandler);
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverReplayGroupMergeTransmitVoiceHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getMessagesByIdsHandler);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveDownloadFinishHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiverReplayGroupMergeTransmitVoiceHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveDownloadProgressHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveDownloadFinishHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMultimediaMessageCompleteHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveHistoryMultimediaFailHandler);
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverReplayGroupMergeTransmitVoiceHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(getMessagesByIdsHandler);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        stopRecord();
     }
 
     @Override
@@ -229,9 +247,6 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
 
                     if (lastPosition == mposition) {//点击同一个条目
                         if (MyApplication.instance.isPlayVoice) {
-                            MyApplication.instance.isPlayVoice = false;
-                            isSameItem = true;
-                            adapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
                             MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
                         } else {
                             executorService.execute(() -> {
@@ -271,6 +286,71 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
         }
     };
 
+    /**
+     * 开始播放或停止播放的回调
+     */
+    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = (resultCode, resultDes) -> {
+        logger.info("ReceiveMultimediaMessageCompleteHandler   "+resultCode+"/"+resultDes);
+        handler.post(() -> {
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                if (lastPosition == mposition) {//点击同一个条目
+                    isSameItem = true;
+                    MyApplication.instance.isPlayVoice = !MyApplication.instance.isPlayVoice;
+                } else {//点击不同条目
+                    isSameItem = false;
+                    MyApplication.instance.isPlayVoice = false;
+                }
+                Collections.sort(chatMessageList);
+                if (adapter != null) {
+                    adapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+                }
+                lastPosition = mposition;
+            } else {
+                logger.info("开始播放或停止播放的回调" + resultDes);
+                ToastUtil.showToast(MergeTransmitListActivity.this, resultDes);
+            }
+        });
+    };
+
+
+    /***  下载进度更新 **/
+    private ReceiveDownloadProgressHandler mReceiveDownloadProgressHandler = new ReceiveDownloadProgressHandler() {
+
+        @Override
+        public void handler(final float percent, TerminalMessage terminalMessage) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
+                        if (null != adapter.loadingView) {
+                            int percentInt = (int) (percent * 100);
+                            if (percentInt >= 100) {
+                                setViewVisibility(adapter.loadingView, View.GONE);
+                                adapter.loadingView = null;
+                            } else {
+                                setViewVisibility(adapter.loadingView, View.VISIBLE);
+                                adapter.loadingView.setProgerss(percentInt);
+                            }
+                        }
+                    } else {
+                        if (adapter.downloadProgressBar != null
+                                && adapter.download_tv_progressBars != null) {
+                            int percentInt = (int) (percent * 100);
+                            adapter.downloadProgressBar.setProgress(percentInt);
+                            setText(adapter.download_tv_progressBars, percentInt + "%");
+
+                            if (percentInt >= 100) {
+                                setViewVisibility(adapter.downloadProgressBar, View.GONE);
+                                setViewVisibility(adapter.download_tv_progressBars, View.GONE);
+                                adapter.downloadProgressBar = null;
+                                adapter.download_tv_progressBars = null;
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    };
 
     /**
      * 文件等下载完成的监听handler
@@ -279,24 +359,11 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
         @Override
         public void handler(final TerminalMessage terminalMessage, final boolean success) {
             handler.post(() -> {
-                if (!success) {
+                if(!checkMessageIsHave(terminalMessage)){
                     return;
                 }
-                if (isGroup) {//组消息
-                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode())//个人消息屏蔽
-                        return;
-                    if (terminalMessage.messageToId != userId)//其它组的屏蔽
-                        return;
-                } else {//个人消息
-                    if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode())//个人消息屏蔽
-                        return;
-                    if (terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {//自己发的
-                        if (terminalMessage.messageToId != userId)
-                            return;
-                    } else {//接收的
-                        if (terminalMessage.messageFromId != userId)//其它人的屏蔽
-                            return;
-                    }
+                if (!success) {
+                    return;
                 }
 
                 if (terminalMessage.messageType == MessageType.LONG_TEXT.getCode()
@@ -304,10 +371,18 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
                     replaceMessage(terminalMessage);
                 }
                 if (terminalMessage.messageType == MessageType.PICTURE.getCode()) {
+                    adapter.isDownloadingPicture = false;
                     replaceMessage(terminalMessage);
+                    //如果是原图下载完了就打开
+                    if (terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE) &&
+                            !terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE)) {
+                        adapter.openPhotoAfterDownload(terminalMessage);
+                    }
                 }
 
                 if (terminalMessage.messageType == MessageType.FILE.getCode()) {
+                    adapter.openFileAfterDownload(terminalMessage);
+                    adapter.isDownloading = false;
                     terminalMessage.messageBody.put(JsonParam.IS_DOWNLOADINF, false);
                     replaceMessage(terminalMessage);
                 }
@@ -317,12 +392,17 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
                     replaceMessage(terminalMessage);
                 }
                 if (terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
+                    File file = new File(terminalMessage.messagePath);
+                    adapter.openVideo(terminalMessage, file);
+                    adapter.isDownloading = false;
                     terminalMessage.messageBody.put(JsonParam.IS_DOWNLOADINF, false);
                     replaceMessage(terminalMessage);
                 }
             });
         }
     };
+
+
 
     /**
      * 将列表中的terminalMessage替换成新的terminalMessage
@@ -346,28 +426,25 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
-
-        if(has){
-            //如果包含这条消息
-            if (terminalMessage.messageType == MessageType.PICTURE.getCode()) {
-                //如果是原图下载完了就打开
-                adapter.isDownloadingPicture = false;
-                if (terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE) &&
-                        !terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE)) {
-                    adapter.openPhotoAfterDownload(terminalMessage);
-                }
-            }
-            if (terminalMessage.messageType == MessageType.FILE.getCode()) {
-                adapter.openFileAfterDownload(terminalMessage);
-                adapter.isDownloading = false;
-            }
-            if (terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
-                File file = new File(terminalMessage.messagePath);
-                adapter.openVideo(terminalMessage, file);
-                adapter.isDownloading = false;
-            }
+        if (!has) {
+            contentView.scrollToPosition(chatMessageList.size() - 1);
         }
     }
+
+    /**
+     * 音频播放失败
+     **/
+    private ReceiveHistoryMultimediaFailHandler receiveHistoryMultimediaFailHandler = resultCode -> {
+        if (resultCode == TerminalErrorCode.STOP_PLAY_RECORD.getErrorCode()) {
+            MyApplication.instance.isPlayVoice = false;
+            isSameItem = true;
+            adapter.refreshPersonContactsAdapter(mposition, chatMessageList, false, true);
+//            temporaryAdapter.notifyDataSetChanged();
+        } else {
+            logger.info("音频播放失败了！！errorCode=" + resultCode);
+            ToastUtil.showToast(MergeTransmitListActivity.this, getString(R.string.text_play_recorder_fail_has_no_get_recorder_data_please_try_later));
+        }
+    };
 
     /**
      * 录音播放完成的消息
@@ -375,8 +452,11 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
     private IAudioPlayComplateHandler audioPlayComplateHandler = () -> handler.post(() -> {
         MyApplication.instance.isPlayVoice = false;
         isSameItem = true;
+//                    logger.error("录音播放完成的消息：" + chatMessageList.get(mposition).toString());
         adapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
         setSmoothScrollToPosition(mposition);
+//        temporaryAdapter.notifyDataSetChanged();
+
         autoPlay(mposition + 1);
 
     });
@@ -434,7 +514,78 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
      */
     private void setMessagePath(List<TerminalMessage> memberList) {
         for (TerminalMessage message: memberList) {
-            TerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(message,true);
+            TerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(message,false);
+        }
+    }
+
+    /**
+     * 检查该消息是否存在
+     * @param terminalMessage
+     * @return
+     */
+    private boolean checkMessageIsHave(TerminalMessage terminalMessage) {
+        boolean isHave = false;
+        if(terminalMessage!=null){
+            for (TerminalMessage message: chatMessageList) {
+                if(message.messageId == terminalMessage.messageId){
+                    isHave = true;
+                    break;
+                }
+            }
+        }
+        return isHave;
+    }
+
+    public void setBackListener(OnBackListener backListener) {
+        this.backListener = backListener;
+    }
+
+    @Override
+    public void onBackPressed() {
+        //返回时删除文件
+        File dir = new File(TerminalFactory.getSDK().getLogDirectory() + File.separator + "log");
+        if (dir.exists() && dir.isDirectory()) {
+            String[] files = dir.list();
+            for (String file : files) {
+                File deleteFile = new File(dir.getPath() + File.separator + file);
+                if (deleteFile.exists()) {
+                    deleteFile.delete();
+                }
+            }
+            dir.delete();
+        }
+        if (null != backListener) {
+            backListener.onBack();
+        } else {
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                    super.onBackPressed();
+            } else if (getSupportFragmentManager().getBackStackEntryCount() == 1) {
+                fl_fragment_container.setVisibility(View.GONE);
+                getSupportFragmentManager().popBackStack();
+            } else {
+                super.onBackPressed();
+            }
+        }
+    }
+
+    protected void setText(TextView textView, String content) {
+        if (textView != null) {
+            textView.setText(content);
+        }
+    }
+
+    protected void setViewVisibility(View view, int visibility) {
+        if (view != null) {
+            view.setVisibility(visibility);
+        }
+    }
+
+    /**
+     * 停止播放组呼录音
+     */
+    public void stopRecord() {
+        if (MyApplication.instance.isPlayVoice) {
+            MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
         }
     }
 

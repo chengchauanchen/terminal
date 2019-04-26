@@ -146,7 +146,7 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                 }
                 showProgressDialog();
                 TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    Account account = DataUtil.getAccountByMemberNo(callId);
+                    Account account = DataUtil.getAccountByMemberNo(callId,true);
                     myHandler.post(() -> {
                         dismissProgressDialog();
                         if(account == null){

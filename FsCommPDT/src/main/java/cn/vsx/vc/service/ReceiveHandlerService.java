@@ -535,6 +535,12 @@ public class ReceiveHandlerService extends Service{
         //判断消息类型，是否弹窗
         if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode() || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE){
             if(!MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress){
+
+                int liverNo = Util.stringToInt(terminalMessage.messageBody.getString(JsonParam.LIVERNO));
+                TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                        cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo,true);
+                        cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(terminalMessage.messageFromId,true);
+                    });
                 //延迟弹窗，否则判断是否在上报接口返回的是没有在上报
                 myHandler.postDelayed(() -> {
                     data.add(terminalMessage);
