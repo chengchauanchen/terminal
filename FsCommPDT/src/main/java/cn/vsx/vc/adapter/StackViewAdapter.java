@@ -153,10 +153,10 @@ public class StackViewAdapter extends BaseAdapter{
             if(!TextUtils.isEmpty(liver)){
                 if(liver.contains("_")){
                     String[] split = liver.split("_");
-                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                        Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo);
+//                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                        Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo,false);
                         if(account!=null){
-                            myHandler.post(() -> {
+//                            myHandler.post(() -> {
                                 if(split.length>1){
                                     String memberName = split[1];
 
@@ -175,17 +175,17 @@ public class StackViewAdapter extends BaseAdapter{
                                     }
                                     viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),account.getName()));
                                 }
-                            });
+//                            });
                         }
-                    });
+//                    });
                 }else {
                     Log.e("StackViewAdapter","有上报者，但是liver里没有_，无法获取编号和名字");
                 }
             }else {
-                TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(data.get(position).messageFromId);
+//                TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(data.get(position).messageFromId,false);
                     if(account!=null){
-                        myHandler.post(() -> {
+//                        myHandler.post(() -> {
                             if(TextUtils.isEmpty(account.getDepartmentName())){
                                 viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),data.get(position).messageFromName,HandleIdUtil.handleId(account.getNo())));
                             }else {
@@ -193,9 +193,9 @@ public class StackViewAdapter extends BaseAdapter{
                             }
                             viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),account.getName()));
 
-                        });
+//                        });
                     }
-                });
+//                });
             }
             //如果有标题就设置标题，这个放在最后设置
             if(!TextUtils.isEmpty(data.get(position).messageBody.getString(JsonParam.TITLE))){

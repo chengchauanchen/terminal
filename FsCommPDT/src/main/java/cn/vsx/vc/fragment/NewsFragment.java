@@ -1281,7 +1281,7 @@ public class NewsFragment extends BaseFragment {
                 }
             }else {
                 int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                setting_group_name.setText(DataUtil.getMemberByMemberNo(currentGroupId).getName());
+                mHandler.post(()-> setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).getName()));
                 //合成作战组处理完成后，刷新完成列表
                 if (TempGroupType.TO_HELP_COMBAT.equals(tempGroupType)) {
                     saveHistoryHelpCombatMessageToSql(tempGroupNo);

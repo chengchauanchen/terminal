@@ -32,7 +32,9 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.BaseActivity;
 import cn.vsx.vc.activity.ChatBaseActivity;
+import cn.vsx.vc.receiveHandle.OnBackListener;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 import static cn.vsx.vc.utils.DataUtil.getTime;
@@ -116,7 +118,7 @@ public class VideoPreviewItemFragment extends BaseFragment implements TextureVie
 
     @Override
     public void initView(){
-        ((ChatBaseActivity) getActivity()).setBackListener(new ChatBaseActivity.OnBackListener(){
+        ((BaseActivity) getActivity()).setBackListener(new OnBackListener(){
             @Override
             public void onBack(){
                 if(null !=getActivity() && !isDetached()){
@@ -222,7 +224,7 @@ public class VideoPreviewItemFragment extends BaseFragment implements TextureVie
         if(null != getActivity() && !isDetached()){
             getActivity().getSupportFragmentManager().beginTransaction().remove(this).commit();
             getActivity().getSupportFragmentManager().popBackStack();
-            ((ChatBaseActivity) getActivity()).setBackListener(null);
+            ((BaseActivity) getActivity()).setBackListener(null);
         }
     }
 

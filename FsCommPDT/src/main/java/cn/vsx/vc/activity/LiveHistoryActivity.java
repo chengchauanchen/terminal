@@ -121,7 +121,7 @@ public class LiveHistoryActivity extends BaseActivity{
                 tv_theme.setText(liveTheme);
             }else {
                 TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo);
+                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo,true);
                     String name = (account!=null)?account.getName():terminalMessage.messageFromName;
                     new Handler().post(() -> {
                         tv_theme.setText(String.format(this.getString(R.string.current_push_member),name));

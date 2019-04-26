@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.BaseActivity;
 import cn.vsx.vc.activity.ChatBaseActivity;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -155,14 +156,14 @@ public class LocationFragment extends Fragment{
                 ToastUtil.showToast(getActivity(), getString(R.string.text_get_face_recognition_info_fail));
             }
         }
-        ((ChatBaseActivity) getActivity()).setBackListener(() -> {
+        ((BaseActivity) getActivity()).setBackListener(() -> {
             if(null !=fragment_contener){
                 fragment_contener.setVisibility(View.GONE);
             }
             if(null != getActivity() && !isDetached()){
                 getActivity().getSupportFragmentManager().beginTransaction().remove(LocationFragment.this).commit();
                 getActivity().getSupportFragmentManager().popBackStack();
-                ((ChatBaseActivity) getActivity()).setBackListener(null);
+                ((BaseActivity) getActivity()).setBackListener(null);
             }
         });
     }

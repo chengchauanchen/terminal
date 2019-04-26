@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.BaseActivity;
 import cn.vsx.vc.activity.ChatBaseActivity;
 import cn.vsx.vc.utils.ToastUtil;
 
@@ -97,14 +98,14 @@ public class ImagePreviewItemFragment extends BaseFragment{
         });
         mViewPager.setCurrentItem(pos);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverSaveImgHandler);
-        ((ChatBaseActivity) getActivity()).setBackListener(() -> {
+        ((BaseActivity) getActivity()).setBackListener(() -> {
             if(null !=fragment_contener){
                 fragment_contener.setVisibility(View.GONE);
             }
             if(null != getActivity() && !isDetached()){
                 getActivity().getSupportFragmentManager().beginTransaction().remove(ImagePreviewItemFragment.this).commit();
                 getActivity().getSupportFragmentManager().popBackStack();
-                ((ChatBaseActivity) getActivity()).setBackListener(null);
+                ((BaseActivity) getActivity()).setBackListener(null);
             }
         });
     }
