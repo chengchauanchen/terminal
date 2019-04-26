@@ -13,7 +13,6 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 
 import org.apache.log4j.Logger;
-import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,8 +25,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandl
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.manager.gps.BDGPSManager;
-import ptt.terminalsdk.manager.gps.GPSManager;
 
 public class LocationManager {
 
@@ -228,7 +225,7 @@ public class LocationManager {
     /**
      * 检查是否在强制上传期间
      */
-    private boolean checkForceUploadState(){
+    public boolean checkForceUploadState(){
         return (System.currentTimeMillis() - MyTerminalFactory.getSDK().getParam(Params.GPS_FORCE_UPLOAD_START_TIME, 0l)
                 < MyTerminalFactory.getSDK().getParam(Params.GPS_FORCE_UPLOAD_HOLD_TIME, 0));
     }
@@ -401,7 +398,7 @@ public class LocationManager {
      * @param isChat
      * @return
      */
-    private long getUploadTime(boolean isCommonUpload, boolean isChat) {
+    public long getUploadTime(boolean isCommonUpload, boolean isChat) {
         if (isChat) {
             return 1000;
         }

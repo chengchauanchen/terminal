@@ -161,8 +161,8 @@ public class VoipManager{
         EasyLinphone.addCallback(registrationCallback,phoneCallback);
     }
 
-    public void destroy(){
-        EasyLinphone.destroy();
+    public void destroy(Context context){
+        EasyLinphone.stopService(context);
     }
 
     public void clearCache(){

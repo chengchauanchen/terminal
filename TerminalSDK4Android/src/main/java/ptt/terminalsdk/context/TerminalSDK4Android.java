@@ -338,7 +338,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		//启动内部事件处理类
 		OperateReceiveHandlerUtil.getInstance().stop();
 		getAuthManagerTwo().logout();
-		getVoipCallManager().destroy();//VOIP服务注销
+		getVoipCallManager().destroy(application);//VOIP服务注销
 		putParam(Params.CURRENT_SPEAKER,"");
 		logger.info("TerminalSDK4Android关闭了OnlineService");
 		Intent onlineService = new Intent(application, OnlineService.class);

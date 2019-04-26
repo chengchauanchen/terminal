@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/lock_screen_bg">
+    
+    <RelativeLayout
+        android:id="@+id/content_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/lock_screen_bg">
+    
+    
+        <View
+            android:id="@+id/my_view"
+            android:layout_width="match_parent"
+            android:layout_height="0dp" />
+    
+        <FrameLayout
+            android:id="@+id/fl_lockscreen"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true">
+        
+            <RelativeLayout
+                android:id="@+id/rl_lockscreen"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="visible">
+            
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/y50"
+                    android:layout_marginTop="@dimen/y7"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+                
+                    <TextView
+                        android:id="@+id/tv_lockscreen_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/x9"
+                        android:gravity="center_vertical"
+                        android:text="10:30"
+                        android:textColor="@color/lock_time"
+                        android:textSize="@dimen/y32"
+                        android:textStyle="normal" />
+                
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/y50"
+                        android:layout_marginLeft="@dimen/x9"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical">
+                    
+                        <TextView
+                            android:id="@+id/tv_lockscreen_date"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:text="9月21日"
+                            android:textColor="@color/lock_time"
+                            android:textSize="@dimen/x14" />
+                    
+                        <TextView
+                            android:id="@+id/tv_lockscreen_week"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="@dimen/dp_5"
+                            android:gravity="center_vertical"
+                            android:text="星期"
+                            android:textColor="@color/lock_time"
+                            android:textSize="@dimen/x14" />
+                    </LinearLayout>
+                </LinearLayout>
+            
+                <LinearLayout
+                    android:id="@+id/ll_group"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="@dimen/y63"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                
+                    <TextView
+                        android:id="@+id/tv_current_online"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:gravity="center"
+                        android:text="在线人数"
+                        android:textColor="@color/lock_online_num"
+                        android:textSize="@dimen/x15" />
+                
+                    <TextView
+                        android:id="@+id/tv_current_folder"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="@dimen/x9"
+                        android:layout_marginRight="@dimen/x9"
+                        android:gravity="center"
+                        android:text="文件夹名"
+                        android:textColor="@color/lock_current_folder"
+                        android:textSize="@dimen/x20" />
+                
+                    <TextView
+                        android:id="@+id/tv_current_group"
+                        style="@style/current_group"
+                        android:layout_marginLeft="@dimen/x9"
+                        android:layout_marginRight="@dimen/x9"
+                        android:layout_marginTop="@dimen/y7"
+                        android:text="组名"
+                        android:textColor="@color/lock_current_group" />
+                </LinearLayout>
+            
+                <LinearLayout
+                    android:id="@+id/ll_speaking_prompt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginRight="@dimen/x30"
+                    android:layout_marginTop="@dimen/x70"
+                    android:background="@drawable/individual_call_button_off_shape"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+                
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginTop="@dimen/x20"
+                        android:src="@drawable/phone" />
+                
+                    <cn.vsx.vc.view.IndividualCallTimerView
+                        android:id="@+id/ICTV_speaking_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="20dp"
+                        android:layout_gravity="center"
+                        android:layout_marginBottom="@dimen/x10"
+                        android:layout_marginLeft="@dimen/x10"
+                        android:layout_marginRight="@dimen/x10"
+                        android:layout_marginTop="@dimen/x10"
+                        android:gravity="center_vertical" />
+                </LinearLayout>
+            
+                <cn.vsx.vc.view.MyRelativeLayout
+                    android:id="@+id/rl_lock_screen"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true">
+                
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginBottom="@dimen/y19"
+                        android:layout_marginRight="@dimen/x9"
+                        android:gravity="center"
+                        android:text="@string/text_upper_row_unlock"
+                        android:textColor="@color/lock_slid_tv"
+                        android:textSize="@dimen/x14" />
+                </cn.vsx.vc.view.MyRelativeLayout>
+            
+                <Button
+                    android:id="@+id/ptt"
+                    style="@style/ptt_button"
+                    android:layout_above="@id/rl_lock_screen"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="@dimen/y28"
+                    android:text="按住说话"
+                    android:textColor="@color/lock_silence_tv"
+                    android:textSize="@dimen/sp_20" />
+            
+                <LinearLayout
+                    android:id="@+id/ll_speaking_time"
+                    style="@style/wrap_content_style"
+                    android:layout_below="@id/ll_group"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginBottom="@dimen/y7"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+                
+                    <View
+                        android:layout_width="@dimen/x18"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/dash_line"
+                        android:layerType="software" />
+                
+                    <cn.vsx.vc.view.TimerView
+                        android:id="@+id/talk_time"
+                        style="@style/wrap_content_style"
+                        android:layout_marginLeft="@dimen/x2"
+                        android:layout_marginRight="@dimen/x2" />
+                
+                    <View
+                        android:layout_width="@dimen/x18"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/dash_line"
+                        android:layerType="software" />
+                </LinearLayout>
+                <!-- 听别人说话 -->
+                <LinearLayout
+                    android:id="@+id/ll_listening"
+                    style="@style/wrap_content_style"
+                    android:layout_below="@id/ll_group"
+                    android:layout_centerHorizontal="true"
+                    android:orientation="vertical">
+                
+                    <LinearLayout
+                        style="@style/wrap_content_style"
+                        android:layout_marginTop="@dimen/x10"
+                        android:orientation="horizontal">
+                        <!--<ImageView-->
+                        <!--style="@style/image_wrap_content_style"-->
+                        <!--android:src="@drawable/member_listening" />-->
+                        <TextView
+                            android:id="@+id/incomming_call_current_speaker"
+                            style="@style/current_speaker" />
+                    
+                        <ImageView
+                            android:layout_width="@dimen/x20"
+                            android:layout_height="@dimen/x20"
+                            android:layout_marginLeft="@dimen/x10"
+                            android:src="@drawable/self_speaking" />
+                    </LinearLayout>
+                    <!--<TextView-->
+                    <!--style="@style/speaking_text"-->
+                    <!--android:text="正在说话" />-->
+                </LinearLayout>
+                <!-- 准备说话 -->
+                <LinearLayout
+                    android:id="@+id/ll_pre_speaking"
+                    style="@style/wrap_content_style"
+                    android:layout_below="@id/ll_group"
+                    android:layout_centerHorizontal="true"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+                
+                    <TextView style="@style/pre_speaking_text" />
+                </LinearLayout>
+                <!-- 静默状态 -->
+                <LinearLayout
+                    android:id="@+id/ll_silence"
+                    style="@style/wrap_content_style"
+                    android:layout_below="@id/ll_group"
+                    android:layout_centerHorizontal="true"
+                    android:orientation="vertical">
+                    <!-- 空闲 -->
+                    <TextView
+                        style="@style/silence_text"
+                        android:textColor="@color/lock_ptt_silence_text_idle" />
+                </LinearLayout>
+                <!-- 禁言禁听状态 -->
+                <LinearLayout
+                    android:id="@+id/ll_forbid"
+                    style="@style/wrap_content_style"
+                    android:orientation="vertical"
+                    android:visibility="gone" />
+                <!-- 排队中状态 -->
+                <LinearLayout
+                    android:id="@+id/ll_waiting"
+                    style="@style/wrap_content_style"
+                    android:orientation="vertical"
+                    android:visibility="gone" />
+            </RelativeLayout>
+        </FrameLayout>
+    
+        <cn.vsx.vc.view.VolumeViewLayout
+            android:id="@+id/volume_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center" />
+    </RelativeLayout>
+    
+</RelativeLayout>

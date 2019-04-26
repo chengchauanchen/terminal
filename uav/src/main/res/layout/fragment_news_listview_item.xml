@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y39"
+        android:background="@color/itemblue">
+
+        <ImageView
+            android:id="@+id/iv_user_photo"
+            android:layout_width="@dimen/y30"
+            android:layout_height="@dimen/y30"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x12"
+            android:background="@drawable/user_photo" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:layout_toRightOf="@id/iv_user_photo"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/tv_user_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:ellipsize="end"
+                    android:maxEms="10"
+                    android:maxLines="1"
+                    android:textColor="@color/news_item_text_name"
+                    android:textSize="@dimen/sp_14" />
+
+                <!--<TextView-->
+                    <!--android:id="@+id/tv_current_group"-->
+                    <!--android:layout_width="wrap_content"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_centerVertical="true"-->
+                    <!--android:layout_marginLeft="@dimen/x5"-->
+                    <!--android:layout_toRightOf="@id/tv_user_name"-->
+                    <!--android:background="@drawable/shape_news_current_group"-->
+                    <!--android:paddingLeft="@dimen/x5"-->
+                    <!--android:paddingRight="@dimen/x5"-->
+                    <!--android:text="当前组"-->
+                    <!--android:textColor="@color/white"-->
+                    <!--android:textSize="@dimen/sp_10" />-->
+
+                <TextView
+                    android:id="@+id/tv_last_msg_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginTop="@dimen/y8"
+                    android:layout_marginRight="@dimen/x18"
+                    android:text="15:20"
+                    android:textColor="@color/news_item_text_time"
+                    android:textSize="@dimen/sp_10" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+
+                    android:id="@+id/tv_last_msg"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/iv_user_photo"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="@dimen/x18"
+                    android:layout_marginBottom="@dimen/x1"
+                    android:layout_toRightOf="@id/iv_user_photo"
+                    android:ellipsize="end"
+                    android:gravity="center_vertical"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textColor="@color/news_item_text_type"
+                    android:textSize="@dimen/sp_12" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_unread_msg_num"
+            android:layout_width="@dimen/x15"
+            android:layout_height="@dimen/x15"
+            android:layout_marginLeft="@dimen/x45"
+            android:layout_marginTop="@dimen/y1"
+            android:background="@drawable/news_red_circle_shape"
+            android:gravity="center"
+            android:text="99+"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_8" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_half_one"
+            android:layout_alignParentBottom="true"
+            android:background="@color/diver_bg" />
+    </RelativeLayout>
+
+</LinearLayout>

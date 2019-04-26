@@ -348,7 +348,7 @@ public class UVCMediaStream {
                     mVC = new USBHWConsumer(mApplicationContext, mEasyPusher);
                 }
                 mVC.onVideoStart(width, height);
-                overlay.init(width, height, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath());
+                overlay.init(width, height, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath(), 12);
             }
         } catch (IOException ex) {
             ex.printStackTrace();

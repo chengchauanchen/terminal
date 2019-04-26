@@ -458,10 +458,10 @@ public class BITMediaStream {
                 }
                 if (!rotate) {
                     mVC.onVideoStart(previewSize.width, previewSize.height);
-                    overlay.init(previewSize.width, previewSize.height, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath());
+                    overlay.init(previewSize.width, previewSize.height, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath(), 12);
                 } else {
                     mVC.onVideoStart(previewSize.height, previewSize.width);
-                    overlay.init(previewSize.height, previewSize.width, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath());
+                    overlay.init(previewSize.height, previewSize.width, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath(), 12);
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();

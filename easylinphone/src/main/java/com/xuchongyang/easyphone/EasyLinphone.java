@@ -44,6 +44,14 @@ public class EasyLinphone {
         }
     }
 
+    public static void stopService(Context context){
+        if(LinphoneService.isReady()){
+            Intent intent = new Intent(Intent.ACTION_MAIN);
+            intent.setClass(context, LinphoneService.class);
+            context.stopService(intent);
+        }
+    }
+
     /**
      * 设置 sip 账户信息
      * @param username sip 账户

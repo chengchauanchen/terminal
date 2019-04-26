@@ -258,6 +258,7 @@ public class LinphoneManager implements LinphoneCoreListener {
         }
         sExited = true;
         instance.doDestroy();
+        instance = null;
     }
 
     private void doDestroy() {

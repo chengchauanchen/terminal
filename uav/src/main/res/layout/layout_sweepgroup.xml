@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:myattrs="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/sweep_group"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y30"
+        android:layout_marginTop="@dimen/y5"
+        android:background="@color/setting_background_white"
+        android:gravity="center_vertical"
+        android:paddingLeft="@dimen/x30"
+        android:text="@string/text_group_scan"
+        android:textColor="@color/setting_text_black"
+        android:textSize="@dimen/sp_16" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y30"
+        android:layout_marginTop="@dimen/y1"
+        android:background="@color/setting_background_white">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x30"
+            android:text="@string/text_start_group_scan"
+            android:textColor="@color/setting_text_gray"
+            android:textSize="@dimen/sp_16" />
+
+        <cn.vsx.vc.view.MToggleButton
+            android:id="@+id/open_sweep"
+            android:layout_width="@dimen/dp_80"
+            android:layout_height="@dimen/dp_30"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/x20"
+            myattrs:mtogglebutton_background_off="@drawable/mtogglebutton_background_off"
+            myattrs:mtogglebutton_background_on="@drawable/mtogglebutton_background_on"
+            myattrs:mtogglebutton_button_off="@drawable/mtogglebutton_button_off"
+            myattrs:mtogglebutton_button_on="@drawable/mtogglebutton_button_on" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/set_sweep"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y30"
+        android:layout_marginTop="@dimen/y1"
+        android:background="@color/setting_background_white">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center_vertical"
+            android:layout_marginLeft="@dimen/x30"
+            android:text="@string/text_set_group_scan"
+            android:textColor="@color/setting_text_gray"
+            android:textSize="@dimen/sp_16" />
+
+        <ImageView
+            android:layout_width="@dimen/x15"
+            android:layout_height="@dimen/y13"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/x20"
+            android:background="@drawable/new_next_icon" />
+    </RelativeLayout>
+
+</LinearLayout>

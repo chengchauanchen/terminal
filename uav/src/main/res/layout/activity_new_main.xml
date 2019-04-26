@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_page"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/main_white">
+
+    <!--对讲bar-->
+
+    <!--消息，通讯录，设置bar-->
+    <LinearLayout
+        android:id="@+id/ll_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <FrameLayout
+            android:id="@+id/ll_fragment"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_half_one"
+            android:background="@color/bottom_line"
+            />
+
+        <!--tab选项-->
+        <LinearLayout
+            android:id="@+id/rg"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/y40"
+            android:background="@color/bottom_bg"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            <cn.vsx.vc.view.BottomView
+                android:id="@+id/bv_talk_back"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                app:src="@drawable/icon_talkback"
+                app:text="@string/bottom_navigation_talkback"/>
+    
+            <cn.vsx.vc.view.BottomView
+                android:id="@+id/bv_person_contacts"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                app:src="@drawable/icon_person_contacts"
+                app:text="@string/bottom_navigation_person_contacts"
+                />
+            
+    
+            
+            <cn.vsx.vc.view.BottomView
+                android:id="@+id/bv_group_contacts"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                app:src="@drawable/icon_group_contacts"
+                app:text="@string/bottom_navigation_group_contacts"
+                />
+            
+            <cn.vsx.vc.view.BottomView
+                android:id="@+id/bv_setting"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                app:src="@drawable/icon_setting"
+                app:text="@string/bottom_navigation_setting"
+                />
+            
+        </LinearLayout>
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/ll_emergency_prompt"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_40"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:background="@color/white"
+        >
+
+        <ImageView
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:layout_marginLeft="@dimen/dp_20"
+            android:background="@drawable/phone_red_x"
+            />
+
+        <TextView
+            android:id="@+id/tv_emergency_member"
+            style="@style/setting_text_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_20"
+            android:text="你正在紧急通话"
+            android:textSize="16dp" />
+
+        <cn.vsx.vc.view.IndividualCallTimerView
+            android:id="@+id/ICTV_emergency_time"
+            android:layout_gravity="center"
+            android:gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/dp_20"
+            android:layout_marginLeft="@dimen/dp_10"
+            />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="@dimen/dp_1"
+            />
+
+        <ImageView
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:background="@drawable/arrow_left"
+            android:layout_marginRight="@dimen/dp_20"
+            />
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/ll_groupCall_prompt"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_40"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="gone"
+        android:background="@color/grey_66">
+
+        <TextView
+            android:id="@+id/tv_current_group"
+            style="@style/setting_text_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:text="测试组一"
+            android:textColor="#fff"
+            android:textSize="@dimen/sp_16" />
+
+        <TextView
+            android:id="@+id/incomming_call_current_speaker"
+            style="@style/setting_text_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:text="我正在说话"
+            android:textColor="#fff"
+            android:textSize="@dimen/sp_16" />
+
+        <cn.vsx.vc.view.TimerView
+            android:id="@+id/ICTV_groupCall_time"
+            android:layout_gravity="center"
+            android:gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/dp_20"
+            android:layout_marginLeft="@dimen/dp_10"
+            />
+
+    </LinearLayout>
+    <!--无网络警告-->
+    <LinearLayout
+        android:id="@+id/no_network"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y20"
+        android:layout_marginTop="@dimen/y45"
+        android:background="@color/no_network_background"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone"
+        >
+
+        <ImageView
+            android:layout_width="@dimen/x19"
+            android:layout_height="@dimen/y13"
+            android:layout_marginLeft="@dimen/x30"
+            android:background="@drawable/warning_icon" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/x30"
+            android:text="网络连接断开"
+            android:textColor="@color/group_text_black"
+            android:textSize="@dimen/sp_15" />
+    </LinearLayout>
+
+    <!--PPT按钮-->
+    <Button
+        android:visibility="gone"
+        android:id="@+id/imgbtn_ptt"
+        android:layout_width="@dimen/x70"
+        android:layout_height="@dimen/x70"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="@dimen/y50"
+        android:layout_marginRight="@dimen/x15"
+        android:background="@drawable/fw_c_blue"
+        android:ellipsize="end"
+        android:gravity="bottom|center_horizontal"
+        android:paddingBottom="@dimen/y5"
+        android:text="7B-10S"
+        android:textColor="@color/main_text_white"
+        android:textSize="@dimen/sp_10" />
+
+
+
+    <RelativeLayout
+        android:id="@+id/rl_livecome"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/transparent_60"
+        android:layout_marginTop="@dimen/dp_40"
+        android:visibility="gone"
+        >
+        <ImageView
+            android:id="@+id/lv_live_return"
+            android:layout_width="@dimen/dp_20"
+            android:layout_height="@dimen/dp_20"
+            android:layout_marginTop="@dimen/dp_10"
+            android:layout_marginRight="@dimen/dp_10"
+            android:background="@drawable/live_exit"
+            android:layout_alignParentRight="true"/>
+
+        <TextView
+            android:id="@+id/tv_live_theme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="二龙路81号发生大火。"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_20"
+            android:lines="2"
+            android:layout_marginTop="@dimen/dp_10"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:layout_marginRight="@dimen/dp_40"
+            />
+
+
+        <TextView
+            android:id="@+id/tv_live_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="张武宁邀请您观看图像"
+            android:textSize="@dimen/tv_live_name_textsize"
+            android:textColor="@color/white"
+            android:layout_marginTop="@dimen/dp_15"
+            android:lines="1"
+            android:layout_below="@+id/tv_live_theme"
+            android:layout_marginLeft="@dimen/dp_10"
+            />
+
+        <Button
+            android:id="@+id/btn_live_gowatch"
+            android:layout_below="@+id/tv_live_theme"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/dp_10"
+            android:text="前往观看"
+            android:textSize="@dimen/sp_20"
+            android:paddingTop="@dimen/dp_5"
+            android:paddingBottom="@dimen/dp_5"
+            android:paddingLeft="@dimen/dp_10"
+            android:paddingRight="@dimen/dp_10"
+            android:layout_marginBottom="@dimen/dp_10"
+            android:layout_marginTop="@dimen/dp_5"
+            android:background="@drawable/live_talkback_look"
+            android:textColor="@color/white"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </RelativeLayout>
+    <LinearLayout
+        android:visibility="gone"
+        android:layout_marginTop="@dimen/x60"
+        android:id="@+id/noNetWork"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x40"
+        android:orientation="horizontal"
+        android:layout_below="@id/rl_topbar"
+        android:background="@drawable/nonet">
+        <ImageView
+            android:src="@drawable/duanwang"
+            android:layout_marginLeft="@dimen/x30"
+            android:layout_gravity="center"
+            android:layout_width="@dimen/x30"
+            android:layout_height="@dimen/x30" />
+        <TextView
+            android:layout_marginLeft="@dimen/x30"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/sp_13"
+            android:text="@string/text_disconnection_of_network_connection"/>
+    </LinearLayout>
+    <!--<include layout="@layout/layout_base_activity"/>-->
+    <View
+        android:id="@+id/my_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp" />
+    <View
+        android:id="@+id/pop_view"
+        android:layout_width="0dp"
+        android:layout_height="0dp"/>
+
+    <FrameLayout
+        android:id="@+id/fl_fragment_container_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false"
+        android:background="@color/transparent"
+        android:visibility="gone"/>
+    <LinearLayout
+        android:id="@+id/ll_sliding_chenge_volume"
+        android:layout_width="@dimen/dp_80"
+        android:layout_height="@dimen/dp_40"
+        android:layout_centerInParent="true"
+        android:background="@color/transparent_40"
+        android:visibility="gone"
+        android:gravity="center">
+        <ImageView
+            android:id="@+id/iv_volume_fw"
+            android:layout_width="@dimen/dp_14"
+            android:layout_height="@dimen/dp_24"
+            android:background="@drawable/volume_adjust" />
+
+        <TextView
+            android:id="@+id/tv_volume_fw"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:text="100%"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_14"
+            android:textStyle="normal" />
+    </LinearLayout>
+</RelativeLayout>

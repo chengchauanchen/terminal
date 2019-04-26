@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_function_hide_plus_bottom"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_alignParentBottom="true"
+    android:orientation="vertical"
+    android:background="@color/function_bg"
+    android:visibility="visible"
+    >
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_half_one"
+        />
+
+    <GridView
+        android:id="@+id/gv_function_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_220"
+        android:numColumns="4"
+        />
+</LinearLayout>

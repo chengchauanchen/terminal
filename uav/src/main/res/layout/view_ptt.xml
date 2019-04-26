@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/view_ll_ptt"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/view_pager"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="4"
+        android:background="@color/new_call_include_ptt_bg">
+
+        <TextView
+            android:id="@+id/tv_ptt"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/y8"
+            android:text="@string/press_blank_space_talk_text"
+            android:textColor="@color/new_call_text_talking"
+            android:textSize="@dimen/x15" />
+
+        <RelativeLayout
+            android:id="@+id/vp_ptt_rl"
+            android:layout_width="@dimen/dp_150"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true">
+
+            <TextView
+                android:id="@+id/fragment_main_tal"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="@dimen/y8"
+                android:layout_marginRight="@dimen/x10"
+                android:text="@string/text_switch_to_session_mode"
+                android:textColor="@color/new_call_text_talking"
+                android:textSize="@dimen/x15" />
+
+            <ImageView
+                android:id="@+id/talkback_change_session"
+                android:layout_width="@dimen/x24"
+                android:layout_height="@dimen/y17"
+                android:layout_below="@+id/fragment_main_tal"
+                android:layout_alignParentRight="true"
+                android:layout_marginTop="@dimen/y4"
+                android:layout_marginRight="@dimen/x38"
+                android:src="@drawable/toggle" />
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/ptt"
+            style="@style/ptt_button"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="@dimen/y20"
+            android:gravity="center_horizontal" />
+    </RelativeLayout>
+</LinearLayout>
