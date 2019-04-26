@@ -102,8 +102,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="@dimen/dp_8"
                 android:layout_marginRight="@dimen/dp_10"
-                android:src="@drawable/private_video_121"
-                android:visibility="gone" />
+                android:src="@drawable/private_video_121" />
 
             <TextView
                 android:id="@+id/live_tv_chatcontent"
