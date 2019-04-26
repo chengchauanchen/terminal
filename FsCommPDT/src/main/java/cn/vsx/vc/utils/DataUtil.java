@@ -21,10 +21,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.model.TransponToBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class DataUtil {
@@ -510,5 +513,77 @@ public class DataUtil {
 		} else {
 			return R.drawable.icon_phone;
 		}
+	}
+
+	/**
+	 * 获取合并转发的ToID
+	 * @param list
+	 * @return
+	 */
+	public static List<Integer>  getToIdsTranspon(ArrayList<ContactItemBean> list) {
+		List<Integer> toIds = new ArrayList<>();
+		for (ContactItemBean bean: list) {
+			if (bean.getType() == Constants.TYPE_USER) {
+				Member member = (Member) bean.getBean();
+				if(member!=null){
+					toIds.add(NoCodec.encodeMemberNo(member.getNo()));
+				}
+			}else if(bean.getType() == Constants.TYPE_GROUP){
+				Group group = (Group) bean.getBean();
+				if(group!=null){
+					toIds.add( NoCodec.encodeGroupNo(group.getNo()));
+				}
+			}
+		}
+		return toIds;
+	}
+
+	/**
+	 * 获取第一个名字
+	 * @param list
+	 * @return
+	 */
+	public static TransponToBean getToNamesTranspon(ArrayList<ContactItemBean> list){
+		TransponToBean result = null;
+		for (ContactItemBean bean: list) {
+			if (bean.getType() == Constants.TYPE_USER) {
+				Member member = (Member) bean.getBean();
+				if(member!=null){
+					result = new TransponToBean(NoCodec.encodeMemberNo(member.getNo()),member.getName());
+					break;
+				}
+			}else if(bean.getType() == Constants.TYPE_GROUP){
+				Group group = (Group) bean.getBean();
+				if(group!=null){
+					result = new TransponToBean(NoCodec.encodeGroupNo(group.getNo()),group.getName());
+					break;
+				}
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * 获取转发的对方的UniqueNo
+	 * @param list
+	 * @return
+	 */
+	public static List<Long> getToUniqueNoTranspon(ArrayList<ContactItemBean> list){
+		List<Long> toUniques = new ArrayList<>();
+		for (ContactItemBean bean: list) {
+			if (bean.getType() == Constants.TYPE_USER) {
+				Member member = (Member) bean.getBean();
+				if(member!=null){
+					toUniques.add(member.getUniqueNo());
+				}
+			}else if(bean.getType() == Constants.TYPE_GROUP){
+				Group group = (Group) bean.getBean();
+				if(group!=null){
+					toUniques.add(group.getUniqueNo());
+				}
+			}
+		}
+
+		return toUniques;
 	}
 	}

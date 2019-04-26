@@ -17,6 +17,7 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 
 /**
@@ -49,6 +50,7 @@ public class SelectedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
         if(bean != null){
             if(bean.getType() == Constants.TYPE_USER){
                 Member member = (Member) bean.getBean();
+                userViewHolder.ivLogo.setImageResource(DataUtil.getImageResourceByType(member.getType()));
                 userViewHolder.tvName.setText(member.getName());
                 userViewHolder.tvId.setText(HandleIdUtil.handleId(member.getNo()));
                 userViewHolder.tvId.setVisibility(View.VISIBLE);

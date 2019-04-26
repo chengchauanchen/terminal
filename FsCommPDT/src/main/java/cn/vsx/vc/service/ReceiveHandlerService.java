@@ -541,6 +541,8 @@ public class ReceiveHandlerService extends Service{
                         cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo,true);
                         cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(terminalMessage.messageFromId,true);
                     });
+                //判断是否是组内上报，组内上报不弹窗
+
                 //延迟弹窗，否则判断是否在上报接口返回的是没有在上报
                 myHandler.postDelayed(() -> {
                     data.add(terminalMessage);

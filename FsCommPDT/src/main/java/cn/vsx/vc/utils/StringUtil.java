@@ -2,6 +2,8 @@ package cn.vsx.vc.utils;
 
 import android.text.TextUtils;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -124,4 +126,16 @@ public class StringUtil{
         }
         return 0f;
     }
+
+    /*
+     * 将时间戳转换为时间
+     */
+    public static String stringToDate(Long time){
+        String res;
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+        Date date = new Date(time);
+        res = simpleDateFormat.format(date);
+        return res;
+    }
+
 }

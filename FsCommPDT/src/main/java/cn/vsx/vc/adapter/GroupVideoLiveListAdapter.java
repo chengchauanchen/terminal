@@ -5,22 +5,25 @@ import com.chad.library.adapter.base.BaseViewHolder;
 
 import java.util.ArrayList;
 
+import cn.vsx.hamster.terminalsdk.model.GetGroupLivingBean;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.vc.R;
+import cn.vsx.vc.utils.DataUtil;
 
-public class GroupVideoLiveListAdapter extends BaseQuickAdapter<Member, BaseViewHolder> {
+public class GroupVideoLiveListAdapter extends BaseQuickAdapter<TerminalMessage, BaseViewHolder> {
 
     //是否是组内正在上报的列表
     private boolean isGroupVideoLiving;
     private OnItemClickListerner onItemClickListerner;
 
     public GroupVideoLiveListAdapter(boolean isGroupVideoLiving) {
-        super(R.layout.item_group_video_live, new ArrayList<Member>());
+        super(R.layout.item_group_video_live, new ArrayList<TerminalMessage>());
         this.isGroupVideoLiving = isGroupVideoLiving;
     }
 
     @Override
-    protected void convert(BaseViewHolder helper, Member item) {
+    protected void convert(BaseViewHolder helper, TerminalMessage item) {
         if (item != null){
             //图标
             helper.setImageResource(R.id.iv_user_photo,R.drawable.icon_phone);
@@ -34,7 +37,7 @@ public class GroupVideoLiveListAdapter extends BaseQuickAdapter<Member, BaseView
 //            helper.setText(R.id.tv_user_number, listBean.getcName());
             //时间
             helper.setGone(R.id.tv_time,!isGroupVideoLiving);
-//            helper.setText(R.id.tv_time, listBean.getcName());
+//            helper.setText(R.id.tv_time, DataUtil.stringToDate());
             //点击：观看
             helper.setOnClickListener(R.id.iv_watch, v -> {
                 if(onItemClickListerner!=null){
@@ -56,7 +59,7 @@ public class GroupVideoLiveListAdapter extends BaseQuickAdapter<Member, BaseView
 
 
     public interface  OnItemClickListerner{
-        void goToWatch(Member item);
-        void goToForward(Member item);
+        void goToWatch(TerminalMessage item);
+        void goToForward(TerminalMessage item);
     }
 }

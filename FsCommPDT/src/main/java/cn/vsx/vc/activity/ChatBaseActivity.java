@@ -172,6 +172,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private static final int PAGE_COUNT = 10;//每次加载的消息数量
     private boolean isEnoughPageCount = false;//每次从本地取的数据的条数是否够10条
     private NFCBindingDialog nfcBindingDialog;//nfc弹窗
+    private boolean isActivity;//是否是显示
 
     protected Handler handler = new Handler() {
         @Override
@@ -1328,9 +1329,14 @@ public abstract class ChatBaseActivity extends BaseActivity{
         @Override
         public void handler(final TerminalMessage terminalMessage, final boolean success) {
             handler.post(() -> {
+                if(!isActivity){
+                    return;
+                }
+
                 if (!success) {
                     return;
                 }
+
                 if (isGroup) {//组消息
                     if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode())//个人消息屏蔽
                         return;
@@ -1681,12 +1687,14 @@ public abstract class ChatBaseActivity extends BaseActivity{
     @Override
     protected void onResume() {
         super.onResume();
+        isActivity = true;
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileHandler);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        isActivity = false;
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSendFileHandler);
     }
 
@@ -1716,7 +1724,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                 getHistoryMessageRecord(PAGE_COUNT - groupMessageRecord1.size());
             } else {
                 isEnoughPageCount = true;
-                sflCallList.setRefreshing(false);
+                handler.post(() -> sflCallList.setRefreshing(false));
                 refreshing = false;
             }
         } else {
@@ -1964,29 +1972,31 @@ public abstract class ChatBaseActivity extends BaseActivity{
             handler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
-                        if (null != temporaryAdapter.loadingView) {
-                            int percentInt = (int) (percent * 100);
-                            if (percentInt >= 100) {
-                                setViewVisibility(temporaryAdapter.loadingView, View.GONE);
-                                temporaryAdapter.loadingView = null;
-                            } else {
-                                setViewVisibility(temporaryAdapter.loadingView, View.VISIBLE);
-                                temporaryAdapter.loadingView.setProgerss(percentInt);
+                    if(isActivity){
+                        if (terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
+                            if (null != temporaryAdapter.loadingView) {
+                                int percentInt = (int) (percent * 100);
+                                if (percentInt >= 100) {
+                                    setViewVisibility(temporaryAdapter.loadingView, View.GONE);
+                                    temporaryAdapter.loadingView = null;
+                                } else {
+                                    setViewVisibility(temporaryAdapter.loadingView, View.VISIBLE);
+                                    temporaryAdapter.loadingView.setProgerss(percentInt);
+                                }
                             }
-                        }
-                    } else {
-                        if (temporaryAdapter.downloadProgressBar != null
-                                && temporaryAdapter.download_tv_progressBars != null) {
-                            int percentInt = (int) (percent * 100);
-                            temporaryAdapter.downloadProgressBar.setProgress(percentInt);
-                            setText(temporaryAdapter.download_tv_progressBars, percentInt + "%");
+                        } else {
+                            if (temporaryAdapter.downloadProgressBar != null
+                                    && temporaryAdapter.download_tv_progressBars != null) {
+                                int percentInt = (int) (percent * 100);
+                                temporaryAdapter.downloadProgressBar.setProgress(percentInt);
+                                setText(temporaryAdapter.download_tv_progressBars, percentInt + "%");
 
-                            if (percentInt >= 100) {
-                                setViewVisibility(temporaryAdapter.downloadProgressBar, View.GONE);
-                                setViewVisibility(temporaryAdapter.download_tv_progressBars, View.GONE);
-                                temporaryAdapter.downloadProgressBar = null;
-                                temporaryAdapter.download_tv_progressBars = null;
+                                if (percentInt >= 100) {
+                                    setViewVisibility(temporaryAdapter.downloadProgressBar, View.GONE);
+                                    setViewVisibility(temporaryAdapter.download_tv_progressBars, View.GONE);
+                                    temporaryAdapter.downloadProgressBar = null;
+                                    temporaryAdapter.download_tv_progressBars = null;
+                                }
                             }
                         }
                     }

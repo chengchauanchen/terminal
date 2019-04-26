@@ -53,6 +53,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberStopWatchMes
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseWatchLiveAndTempGroupMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
@@ -104,6 +105,9 @@ public class PullLivingService extends BaseService{
     private RelativeLayout mPopupMiniLive;
     private RelativeLayout mRlPullLive;
     private Member liveMember;
+    //callId
+    private long callId;
+    private int tempGroupId;
 
     public PullLivingService(){}
 
@@ -120,6 +124,7 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseWatchLiveAndTempGroupMessageHandler);
         mPopupMiniLive.setOnTouchListener(miniPopOnTouchListener);
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
@@ -238,6 +243,8 @@ public class PullLivingService extends BaseService{
         mTvLiveSpeakingName = rootView.findViewById(R.id.tv_live_speakingName);
         mTvLiveGroupName = rootView.findViewById(R.id.tv_live_groupName);
         mTvLiveSpeakingId = rootView.findViewById(R.id.tv_live_speakingId);
+
+        mBtnLiveLookPtt.setVisibility(View.GONE);
     }
 
     @Override
@@ -265,6 +272,7 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseWatchLiveAndTempGroupMessageHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
     /**
@@ -356,6 +364,7 @@ public class PullLivingService extends BaseService{
      * 获取到流地址
      */
     private ReceiveGetRtspStreamUrlHandler receiveGetRtspStreamUrlHandler = (final String rtspUrl, final Member liveMember, long callId)-> mHandler.post(() -> {
+        PullLivingService.this.callId = callId;
         if (Util.isEmpty(rtspUrl)) {
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_rtsp_data));
             stopBusiness();
@@ -393,6 +402,20 @@ public class PullLivingService extends BaseService{
         ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.force_stop_watch));
         mHandler.post(this::finishVideoLive);
     };
+
+    /**
+     * 通知观看直播获取临时组id
+     **/
+    private ReceiveResponseWatchLiveAndTempGroupMessageHandler receiveResponseWatchLiveAndTempGroupMessageHandler = (callId,liveMemberId,liveMemberUniqueNo,tempGroupId,uniqueNo) -> {
+        mHandler.post(() -> {
+            if(PullLivingService.this.callId == callId){
+                PullLivingService.this.tempGroupId = tempGroupId;
+                mBtnLiveLookPtt.setVisibility(View.VISIBLE);
+            }
+        });
+    };
+
+
     /**
      * 停止观看
      */
@@ -676,17 +699,22 @@ public class PullLivingService extends BaseService{
             return;
         }
         // FIXME: 2019/4/8 观看视频上报时发起组呼，是在临时组里
-        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
-        if(resultCode == BaseCommonCode.SUCCESS_CODE){//允许组呼了
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);
-            MyApplication.instance.isPttPress = true;
-            mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_yellow);
-        }else if(resultCode == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()){
-            mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_yellow);
-        }else{//组呼失败的提示
-            ToastUtil.groupCallFailToast(this, resultCode);
+        if(PullLivingService.this.tempGroupId!=0){
+            int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",PullLivingService.this.tempGroupId);
+            if(resultCode == BaseCommonCode.SUCCESS_CODE){//允许组呼了
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);
+                MyApplication.instance.isPttPress = true;
+                mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_yellow);
+            }else if(resultCode == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()){
+                mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_yellow);
+            }else{//组呼失败的提示
+                ToastUtil.groupCallFailToast(this, resultCode);
+            }
+            setViewEnable(false);
+        }else{
+            logger.error(getString(R.string.no_get_temporary_group_id));
         }
-        setViewEnable(false);
+
     }
 
     private void pttUpDoThing(){

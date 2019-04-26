@@ -1072,11 +1072,11 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     /**
      * 获取组内正在直播的成员列表
      */
-    private ReceiveGetGroupLivingListHandler receiveGetGroupLivingListHandler = (memberList,  resultCode, resultDesc,forNumber) -> {
+    private ReceiveGetGroupLivingListHandler receiveGetGroupLivingListHandler = (beanList,  resultCode, resultDesc,forNumber) -> {
         handler.post(() -> {
-            if(resultCode == BaseCommonCode.SUCCESS_CODE && !memberList.isEmpty()){
+            if(resultCode == BaseCommonCode.SUCCESS_CODE && !beanList.isEmpty()){
                 //正在上报的人
-                tv_living_number.setText(String.format(GroupCallNewsActivity.this.getString(R.string.group_living_number),memberList.size()));
+                tv_living_number.setText(String.format(GroupCallNewsActivity.this.getString(R.string.group_living_number),beanList.size()));
                 ll_living.setVisibility(View.VISIBLE);
             }else{
                 //没有正在上报的人

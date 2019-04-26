@@ -216,20 +216,18 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
      * 获取组内直播历史列表
      */
     private GetMessagesByIdsHandler getMessagesByIdsHandler = (resultCode, resultDesc,memberList) -> {
-        handler.post(() -> {
-            layoutSrl.setRefreshing(false);
+             handler.post(() -> layoutSrl.setRefreshing(false));
             if (resultCode == BaseCommonCode.SUCCESS_CODE && !memberList.isEmpty()) {
                 chatMessageList.clear();
                 setMessagePath(memberList);
                 chatMessageList.addAll(memberList);
-                adapter.notifyDataSetChanged();
+                handler.post(() -> adapter.notifyDataSetChanged());
             } else {
                 if (mPage > 1) {
                     mPage = mPage - 1;
                 }
-                ToastUtil.showToast(MergeTransmitListActivity.this, resultDesc);
+                handler.post(() -> ToastUtil.showToast(MergeTransmitListActivity.this, resultDesc));
             }
-        });
     };
 
     /**
@@ -514,7 +512,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
      */
     private void setMessagePath(List<TerminalMessage> memberList) {
         for (TerminalMessage message: memberList) {
-            TerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(message,false);
+            TerminalFactory.getSDK().getTerminalMessageManager().downloadOrSetMessage(message);
         }
     }
 

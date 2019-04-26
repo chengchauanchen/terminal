@@ -1479,8 +1479,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
      * 合并转发
      */
     public void transponForwardMoreMessage(TerminalMessage terminalMessage, ArrayList<ContactItemBean> list, PushMessageSendResultHandler pushMessageSendResultHandler) {
-        List<Integer> toIds = getToIdsTranspon(list);
-        List<Long> toUniqueNos = getToUniqueNoTranspon(list);
+        List<Integer> toIds = DataUtil.getToIdsTranspon(list);
+        List<Long> toUniqueNos = DataUtil.getToUniqueNoTranspon(list);
         TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
         terminalMessage1.messageToId = toIds.get(0);
         MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),toIds,toUniqueNos,pushMessageSendResultHandler);
@@ -1579,7 +1579,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private void transponPhotoMessage(TerminalMessage terminalMessage, List<Integer> list ,List<Long> toUniqueNos,PushMessageSendResultHandler pushMessageSendResultHandler) {
         if (terminalMessage.resultCode != 0) {//发送失败的文件消息进行转发
             terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
-            terminalMessage.messageBody.put(JsonParam.ISMICROPICTURE, false);
+            terminalMessage.messageBody.put(JsonParam.ISMICROPICTURE, true);
             File file = new File(terminalMessage.messagePath);
             upload = true;
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, ""), file, terminalMessage, false);
@@ -1815,77 +1815,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         }
     }
 
-    /**
-     * 获取合并转发的ToID
-     * @param list
-     * @return
-     */
-    private List<Integer>  getToIdsTranspon(ArrayList<ContactItemBean> list) {
-        List<Integer> toIds = new ArrayList<>();
-        for (ContactItemBean bean: list) {
-            if (bean.getType() == Constants.TYPE_USER) {
-                Member member = (Member) bean.getBean();
-                if(member!=null){
-                    toIds.add(NoCodec.encodeMemberNo(member.getNo()));
-                }
-            }else if(bean.getType() == Constants.TYPE_GROUP){
-                Group group = (Group) bean.getBean();
-                if(group!=null){
-                    toIds.add( NoCodec.encodeGroupNo(group.getNo()));
-                }
-            }
-        }
-        return toIds;
-    }
 
-    /**
-     * 获取第一个名字
-     * @param list
-     * @return
-     */
-    private TransponToBean getToNamesTranspon(ArrayList<ContactItemBean> list){
-        TransponToBean result = null;
-        for (ContactItemBean bean: list) {
-            if (bean.getType() == Constants.TYPE_USER) {
-                Member member = (Member) bean.getBean();
-                if(member!=null){
-                    result = new TransponToBean(NoCodec.encodeMemberNo(member.getNo()),member.getName());
-                    break;
-                }
-            }else if(bean.getType() == Constants.TYPE_GROUP){
-                Group group = (Group) bean.getBean();
-                if(group!=null){
-                    result = new TransponToBean(NoCodec.encodeGroupNo(group.getNo()),group.getName());
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
-    /**
-     * 获取转发的对方的UniqueNo
-     * @param list
-     * @return
-     */
-    private List<Long> getToUniqueNoTranspon(ArrayList<ContactItemBean> list){
-        List<Long> toUniques = new ArrayList<>();
-        for (ContactItemBean bean: list) {
-            if (bean.getType() == Constants.TYPE_USER) {
-                Member member = (Member) bean.getBean();
-                if(member!=null){
-                    toUniques.add(member.getUniqueNo());
-                }
-            }else if(bean.getType() == Constants.TYPE_GROUP){
-                Group group = (Group) bean.getBean();
-                if(group!=null){
-                    toUniques.add(group.getUniqueNo());
-                }
-            }
-        }
-
-        return toUniques;
-    }
 
     private View getViewByType(int viewType, ViewGroup parent) {
         switch (viewType) {
@@ -2076,9 +2006,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     public void transponMessage(ArrayList<ContactItemBean> list, PushMessageSendResultHandler pushMessageSendResultHandler) {
         logger.info("转发消息，type:" + transponMessage.messageType);
             //单个转发
-        List<Integer> toIds = getToIdsTranspon(list);
-        TransponToBean bean = getToNamesTranspon(list);
-        List<Long> toUniqueNos = getToUniqueNoTranspon(list);
+        List<Integer> toIds = DataUtil.getToIdsTranspon(list);
+        TransponToBean bean = DataUtil.getToNamesTranspon(list);
+        List<Long> toUniqueNos = DataUtil.getToUniqueNoTranspon(list);
         if(bean!=null){
             transponMessage.messageToId = bean.getNo();
             transponMessage.messageToName = bean.getName();

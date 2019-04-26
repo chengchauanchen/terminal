@@ -268,11 +268,11 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
                 selectedMemberNos.remove((Integer) member.getNo());
             }
         }
-        if(selectedMemberNos.isEmpty()){
-            mLlSelected.setVisibility(View.GONE);
-        }else{
-            mLlSelected.setVisibility(View.VISIBLE);
-        }
+//        if(selectedMemberNos.isEmpty()){
+//            mLlSelected.setVisibility(View.GONE);
+//        }else{
+//            mLlSelected.setVisibility(View.VISIBLE);
+//        }
 
         if(selectAdapter != null){
             selectAdapter.notifyDataSetChanged();

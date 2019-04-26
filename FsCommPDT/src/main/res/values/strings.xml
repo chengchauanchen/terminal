@@ -563,4 +563,5 @@
     <string name="please_choose_one">请选择一个</string>
     <string name="transpond_success">转发成功</string>
     <string name="transpond_fail">转发失败</string>
+    <string name="no_get_temporary_group_id">没有获取到临时组id</string>
 </resources>

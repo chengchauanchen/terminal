@@ -19,6 +19,7 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 
 /**
@@ -59,15 +60,17 @@ public class MemberListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         if(getItemViewType(position) == Constants.TYPE_USER){
             UserViewHolder userViewHolder = (UserViewHolder) holder;
             Member member = (Member) mData.get(position).getBean();
-            userViewHolder.tvName.setText(member.getName());
-            userViewHolder.tvId.setText(HandleIdUtil.handleId(member.getNo()));
-            userViewHolder.checkbox.setChecked(member.isChecked());
-            userViewHolder.checkbox.setOnClickListener(v -> {
-                if(null != itemClickListener){
-                    itemClickListener.itemClick(Constants.TYPE_USER,position);
-                }
-            });
-
+            if (member != null) {
+                userViewHolder.ivLogo.setImageResource(DataUtil.getImageResourceByType(member.getType()));
+                userViewHolder.tvName.setText(member.getName());
+                userViewHolder.tvId.setText(HandleIdUtil.handleId(member.getNo()));
+                userViewHolder.checkbox.setChecked(member.isChecked());
+                userViewHolder.checkbox.setOnClickListener(v -> {
+                    if(null != itemClickListener){
+                        itemClickListener.itemClick(Constants.TYPE_USER,position);
+                    }
+                });
+            }
         }else if(getItemViewType(position) == Constants.TYPE_FOLDER){
             DepartmentViewHolder departmentViewHolder = (DepartmentViewHolder) holder;
             Department department = (Department) mData.get(position).getBean();
