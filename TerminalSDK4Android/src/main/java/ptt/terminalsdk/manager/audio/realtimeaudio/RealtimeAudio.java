@@ -32,6 +32,13 @@ public class RealtimeAudio {
 
     private Logger logger = Logger.getLogger(getClass());
 
+    public RealtimeAudio(){
+        collectAndSendCommandBlockingQueue = new LinkedBlockingQueue<>();
+        collectAndSendWork = new CollectAndSendWork(collectAndSendCommandBlockingQueue);
+        receiveAndPlayCommandBlockingQueue = new LinkedBlockingQueue<>();
+        receiveAndPlayWork = new ReceiveAndPlayWork(receiveAndPlayCommandBlockingQueue);
+    }
+
     public synchronized void pauseReceiver(int cookie){
         if(currentReceiverCookies.contains(cookie)){
             currentReceiverCookies.remove(Integer.valueOf(cookie));
@@ -144,16 +151,12 @@ public class RealtimeAudio {
 
     public synchronized void start(){
         //初始化并启动采集与发送线程
-        collectAndSendCommandBlockingQueue = new LinkedBlockingQueue<>();
-        collectAndSendWork = new CollectAndSendWork(collectAndSendCommandBlockingQueue);
         collectAndSendWork.setStarted(true);
         collectAndSendThread = new Thread(collectAndSendWork);
         collectAndSendThread.setDaemon(true);
         collectAndSendThread.start();
 
         //初始化并启动接收与播放线程
-        receiveAndPlayCommandBlockingQueue = new LinkedBlockingQueue<>();
-        receiveAndPlayWork = new ReceiveAndPlayWork(receiveAndPlayCommandBlockingQueue);
         receiveAndPlayWork.setStarted(true);
         receiveAndPlayThread = new Thread(receiveAndPlayWork);
         receiveAndPlayThread.setDaemon(true);

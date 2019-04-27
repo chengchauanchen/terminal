@@ -2,6 +2,7 @@ package cn.vsx.vc.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -24,7 +25,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -315,7 +315,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 MyApplication.instance.isClickVolumeToCall = false;
                 MyApplication.instance.isPttPress = false;
                 MyApplication.instance.stopIndividualCallService();
-                Process.killProcess(Process.myPid());
+                killAllProcess();
             },2000);
         }
     };
@@ -912,7 +912,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private TimerTask timerTask;
     private int width;
     private int height;
-
     private BackListener mBackListener;
 
     @Override
@@ -1153,6 +1152,20 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
         MyApplication.instance.stopIndividualCallService();
+        killAllProcess();
+    }
+
+    private void killAllProcess(){
+        ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if(null !=mActivityManager){
+            List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
+            for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList) {
+                if (runningAppProcessInfo.pid != android.os.Process.myPid()) {
+                    android.os.Process.killProcess(runningAppProcessInfo.pid);
+                }
+            }
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
     }
 
 

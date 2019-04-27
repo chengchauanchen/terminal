@@ -1,6 +1,7 @@
 package cn.vsx.vc.activity;
 
 import android.Manifest.permission;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
@@ -9,7 +10,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -34,6 +34,7 @@ import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -334,7 +335,20 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
         MyApplication.instance.stopIndividualCallService();
-        Process.killProcess(Process.myPid());
+        killAllProcess();
+    }
+
+    private void killAllProcess(){
+        ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if(null !=mActivityManager){
+            List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
+            for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList) {
+                if (runningAppProcessInfo.pid != android.os.Process.myPid()) {
+                    android.os.Process.killProcess(runningAppProcessInfo.pid);
+                }
+            }
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
     }
 
     /**

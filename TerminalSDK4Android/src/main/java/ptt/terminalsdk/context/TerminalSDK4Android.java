@@ -121,7 +121,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		//启动内部事件处理类
 		OperateReceiveHandlerUtil.getInstance().start();
 		putParam(Params.NETWORK_JITTER_CHECK_INTERVAL, 60 * 1000);//网络抖动检测间隔，60秒
-		putParam(Params.GPS_UPLOAD_INTERVAL, 5 * 60 * 1000);//GPS上传时间间隔，5分钟
+		putParam(Params.GPS_UPLOAD_INTERVAL, 30 * 1000);//GPS上传时间间隔，5分钟
 		locationStart();
 		getVideoProxy().start();
 		PromptManager.getInstance().start(application);

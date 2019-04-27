@@ -29,6 +29,8 @@ public class AudioProxy implements IAudioProxy{
 		audiomanage = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 		maxVolumeMusic = audiomanage.getStreamMaxVolume(AudioManager.STREAM_MUSIC);//获取媒体声音的最大音量
 		maxVolumeCall = audiomanage.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL);//获取通话声音的最大音量
+		realtimeAudio = new RealtimeAudio();
+		realtimeAudio.setVolume(TerminalFactory.getSDK().getParam(Params.VOLUME, IAudioProxy.VOLUME_DEFAULT));
 	}
 
 	@Override
@@ -137,9 +139,7 @@ public class AudioProxy implements IAudioProxy{
 
 	@Override
 	public void start(){
-		realtimeAudio = new RealtimeAudio();
 		realtimeAudio.start();
-		realtimeAudio.setVolume(TerminalFactory.getSDK().getParam(Params.VOLUME, IAudioProxy.VOLUME_DEFAULT));
 
 		record = new Record();
 	}

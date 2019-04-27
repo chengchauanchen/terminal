@@ -900,26 +900,26 @@ public class ReceiveHandlerService extends Service{
     };
 
     private ReceiveAirCraftStatusChangedHandler receiveAirCraftStatusChangedHandler = connected -> {
-
+        MyApplication.instance.aircraftConnected = connected;
         MyTerminalFactory.getSDK().getLiveManager().sendAircraftConnectStatus(connected);
         if(connected){
             Aircraft aircraft = AirCraftUtil.getAircraftInstance();
             if(aircraft == null){
                 ToastUtil.showToast(getApplicationContext(),"aircraft为null");
                 logger.error("aircraft为null");
-                return;
-            }
-            setConnectionFailBehavior();
-            myHandler.postDelayed(() -> checkBattery(aircraft),2000);
-            checkUploadState();
-            //无人机连上时自动位置
-            myHandler.postDelayed(updateAircraftLocation,uploadTime);
-            //无人机连上时自动上报
-            if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
-                Intent intent = new Intent(getApplicationContext(), AircraftPushService.class);
-                startService(intent);
             }else {
-                ToastUtil.showToast(getApplicationContext(),"没有图像上报的权限，不能自动上报");
+                setConnectionFailBehavior();
+                myHandler.postDelayed(() -> checkBattery(aircraft),2000);
+                checkUploadState();
+                //无人机连上时自动位置
+                myHandler.postDelayed(updateAircraftLocation,uploadTime);
+                //无人机连上时自动上报
+                if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
+                    Intent intent = new Intent(getApplicationContext(), AircraftPushService.class);
+                    startService(intent);
+                }else {
+                    ToastUtil.showToast(getApplicationContext(),"没有图像上报的权限，不能自动上报");
+                }
             }
 
         }else {

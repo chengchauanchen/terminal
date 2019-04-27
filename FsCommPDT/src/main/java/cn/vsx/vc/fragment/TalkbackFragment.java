@@ -34,6 +34,7 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import org.apache.http.util.TextUtils;
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 
@@ -1164,6 +1165,10 @@ public class TalkbackFragment extends BaseFragment {
             groupList =  TerminalFactory.getSDK().getConfigManager().getMonitorGroup();
         }else {
             groupList =  TerminalFactory.getSDK().getConfigManager().getCommonMonitorGroup();
+        }
+        if(groupList == null || groupList.isEmpty()){
+            groupList = new ArrayList<>();
+            groupList.add(DataUtil.getGroupByGroupNo(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)));
         }
         if (groupList.size() > 0) {
             change_group_view.setData(groupList, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));

@@ -65,7 +65,7 @@ public class ChangeGroupView extends FrameLayout{
 						worker.wait();
 					}
 					if(commandQueue.size() == 0 && onGroupChangedListener != null){
-						onGroupChangedListener.onGroupChanged(getGroupData(currentDataIndex).id, getGroupData(currentDataIndex).name);
+						onGroupChangedListener.onGroupChanged(getGroupData(currentDataIndex).getNo(), getGroupData(currentDataIndex).name);
 					}
 				} catch (InterruptedException e) {
 					e.printStackTrace();

@@ -119,7 +119,6 @@ public class YuvPlayer {
     private class PlayYuvDataTask implements Runnable{
         int yuvType;
         int playFps;
-        Surface surface;
         private long startPlayTime;
         private long remainTime;
         ArrayBlockingQueue<YuvData> yuvDataArrayBlockingQueue = new ArrayBlockingQueue<>(100);
@@ -136,7 +135,6 @@ public class YuvPlayer {
             try {
                 int mspf = 1000 / playFps;
                 YuvData yuvData;
-                init(surface);
                 setWidthHeight(surfaceWidth, surfaceHeight);
                 while ((yuvData = yuvDataArrayBlockingQueue.take()) != null){
                     try {
@@ -315,11 +313,13 @@ public class YuvPlayer {
                 h264Data.h264Data = null;
             }
         };
+        Surface surface;
         @Override
         public void run() {
             H264Data h264Data;
             byte[] outBuff = new byte[2097152];
             try {
+                init(surface);
                 while ((h264Data = h264DataArrayBlockingQueue.take()) != null){
                     try {
                         parse(h264Data.h264Data, h264Data.size, outBuff);
@@ -389,7 +389,6 @@ public class YuvPlayer {
         surfaceWidth = width;
         surfaceHeight = height;
         playYuvDataTask.yuvType = CV_FMT_NV12;
-        playYuvDataTask.surface = surface;
         playYuvDataTask._init();
         playYuvDataThread = new Thread(playYuvDataTask);
         playYuvDataThread.setDaemon(true);
@@ -397,6 +396,7 @@ public class YuvPlayer {
 
         //拆分H264数据线程
         parseH264DataTask = new ParseH264DataTask();
+        parseH264DataTask.surface = surface;
         parseH264DataThread = new Thread(parseH264DataTask);
         parseH264DataThread.setDaemon(true);
         parseH264DataThread.start();

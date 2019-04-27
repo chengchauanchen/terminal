@@ -1165,6 +1165,10 @@ public class TalkbackFragment extends BaseFragment {
         }else {
             groupList =  TerminalFactory.getSDK().getConfigManager().getCommonMonitorGroup();
         }
+        if(groupList == null || groupList.isEmpty()){
+            groupList = new ArrayList<>();
+            groupList.add(DataUtil.getGroupByGroupNo(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)));
+        }
         if (groupList.size() > 0) {
             change_group_view.setData(groupList, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
         }
