@@ -407,6 +407,10 @@ public class ReceiveHandlerService extends Service{
      */
     private ReceiveCurrentGroupIndividualCallHandler receiveCurrentGroupIndividualCallHandler = (member) -> {
         logger.info("当前呼叫对象:" + member);
+        if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
+            ToastUtil.showToast(ReceiveHandlerService.this,getString(R.string.text_personal_calling_can_not_do_others));
+            return;
+        }
         Intent intent = new Intent(ReceiveHandlerService.this, StartIndividualCallService.class);
         intent.putExtra(Constants.MEMBER_NAME, member.getName());
         intent.putExtra(Constants.MEMBER_ID, member.getNo());
