@@ -357,6 +357,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
 
             case R.id.iv_monitor:
+                if(userId == TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) ||
+                        (userId == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0))){
+                        return;
+                }
                 List<Integer> monitorGroups = new ArrayList<>();
                 monitorGroups.add(userId);
                 if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(userId)){
@@ -365,11 +369,15 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                     TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
                 }
                 break;
+            default:
+                break;
         }
     }
 
     private void setIvMonitorDrawable(){
-        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(userId)){
+        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(userId)
+            || userId == TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)
+            || userId == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
             iv_monitor.setImageResource(R.drawable.monitor_open);
         }else {
             iv_monitor.setImageResource(R.drawable.monitor_close);
