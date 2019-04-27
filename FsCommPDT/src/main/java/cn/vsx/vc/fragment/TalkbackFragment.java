@@ -420,7 +420,7 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public void handler(final boolean isVolumeOff, int status) {
             logger.info("是否静音的状态：receiveVolumeOffCallHandler " + isVolumeOff);
-            if (isVolumeOff || MyTerminalFactory.getSDK().getAudioProxy().getVolume() == 0) {
+            if (isVolumeOff ){
                 iv_volume_off_call.setImageResource(R.drawable.volume_off_call);
                 soundOff = true;
             } else {

@@ -236,7 +236,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
         @Override
         public void handler(boolean isVolumeOff,int status) {
-            if(isVolumeOff||MyTerminalFactory.getSDK().getAudioProxy().getVolume()==0){
+            if(isVolumeOff){
                 voice_image.setImageResource(R.drawable.volume_off_call);
                 soundOff=true;
             }else {
