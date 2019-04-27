@@ -45,6 +45,7 @@ public class MyApplication extends Application {
 
 	public int mAppStatus = Constants.FORCE_KILL;//App运行状态，是否被强杀
 	public boolean isBinded=false;
+	private boolean isBindedUVCCameraService = false;
 	public boolean isPttFlowPress = false;
 	public boolean isContactsIndividual = false;
 	public boolean isUpdatingAPP  = false;
@@ -200,11 +201,13 @@ public class MyApplication extends Application {
 
 	public void startUVCCameraService(){
 		Intent intent = new Intent(this,UVCCameraService.class);
-		bindService(intent,cameraconn,BIND_AUTO_CREATE);
+		isBindedUVCCameraService = bindService(intent,cameraconn,BIND_AUTO_CREATE);
 	}
 
 	public void stopUVCCameraService(){
-		unbindService(cameraconn);
+		if(isBindedUVCCameraService){
+			unbindService(cameraconn);
+		}
 	}
 
 	private UVCCameraService.MyBinder uvcBinder;
@@ -216,6 +219,7 @@ public class MyApplication extends Application {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			Log.e("MyApplication", "UVCCameraService服务断开了");
+			isBindedUVCCameraService = false;
 		}
 	};
 

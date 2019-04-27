@@ -217,9 +217,7 @@ public abstract class BaseService extends Service{
         if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
             MyTerminalFactory.getSDK().getLiveManager().ceaseLiving();
         }
-        if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
-            MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-        }
+        ceaseWatching();
         Log.d("BaseService", "MyApplication.instance.getIndividualState():" + MyApplication.instance.getIndividualState());
         if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
             MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
@@ -261,9 +259,7 @@ public abstract class BaseService extends Service{
         if (forbid) {
             mHandler.post(() -> {
                 PromptManager.getInstance().stopRing();
-                MyTerminalFactory.getSDK().getLiveManager().ceaseLiving();
-                MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-                MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
+                revertStateMachine();
                 removeView();
             });
         }
@@ -324,10 +320,7 @@ public abstract class BaseService extends Service{
         //强制上报
         if(emergencyType){
             SensorUtil.getInstance().unregistSensor();
-
-            if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
-                MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
-            }
+            ceaseWatching();
             Log.d("BaseService", "MyApplication.instance.getIndividualState():" + MyApplication.instance.getIndividualState());
             if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
                 MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
@@ -335,4 +328,22 @@ public abstract class BaseService extends Service{
             mHandler.post(this::removeView);
         }
     };
+
+    /**
+     * 清空观看的状态
+     */
+    private void ceaseWatching(){
+        if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+            if(BaseService.this instanceof PullLivingService){
+                PullLivingService service = (PullLivingService) BaseService.this;
+                if(service.liveMember!=null&&service.callId!=0){
+                    MyTerminalFactory.getSDK().getLiveManager().ceaseWatching(service.liveMember.id,service.callId,service.liveMember.getUniqueNo());
+                }else{
+                    MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
+                }
+            }else {
+                MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
+            }
+        }
+    }
 }

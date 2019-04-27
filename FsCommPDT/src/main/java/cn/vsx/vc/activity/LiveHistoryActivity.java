@@ -138,11 +138,7 @@ public class LiveHistoryActivity extends BaseActivity{
             String url = "http://"+serverIp+":"+serverPort+"/api/v1/query_records";
             Map<String,String> paramsMap = new HashMap<>();
             logger.info("消息："+terminalMessage);
-            String messagePath = terminalMessage.messagePath;
-            int index = messagePath.lastIndexOf("/");
-            int pointIndex = messagePath.lastIndexOf(".");
-            String id = messagePath.substring(index+1,pointIndex);
-            paramsMap.put("id",id);
+            paramsMap.put("id",getCallId(terminalMessage));
             logger.info("获取视频回放url："+url);
             String result = TerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
             logger.info("获取视频回放结果："+result);
@@ -169,6 +165,28 @@ public class LiveHistoryActivity extends BaseActivity{
             }
         });
 
+    }
+
+    /**
+     * 获取callId
+     * @param terminalMessage
+     * @return
+     */
+    private String getCallId(TerminalMessage terminalMessage){
+        String callId = "";
+        if(terminalMessage.messageBody!=null){
+            if(terminalMessage.messageBody.containsKey(JsonParam.CALLID)){
+                callId = terminalMessage.messageBody.getString(JsonParam.CALLID);
+            }else if(terminalMessage.messageBody.containsKey(JsonParam.EASYDARWIN_RTSP_URL)){
+                String url = terminalMessage.messageBody.getString(JsonParam.EASYDARWIN_RTSP_URL);
+                if(!TextUtils.isEmpty(url)&&url.contains("/")&&url.contains(".")){
+                    int index = url.lastIndexOf("/");
+                    int pointIndex = url.lastIndexOf(".");
+                    callId = url.substring(index+1,pointIndex);
+                }
+            }
+        }
+        return callId;
     }
 
     @Override

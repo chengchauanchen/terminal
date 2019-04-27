@@ -305,7 +305,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         mRvSelected.setAdapter(selectedListAdapter);
         selectedListAdapter.setItemClickListener(new MyItemDeleteClickListener());
 
-        TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), type);
+        TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), getTerminalType());
 
     }
 
@@ -1037,7 +1037,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         intent.putExtra(Constants.THEME, theme);
         intent.putExtra(Constants.TYPE, Constants.ACTIVE_PUSH);
         intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
-        intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList());
+        intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(getSelectMembersUniqueNo()));
         switch (type) {
             case Constants.PHONE_PUSH:
                 intent.setClass(this, PhonePushService.class);

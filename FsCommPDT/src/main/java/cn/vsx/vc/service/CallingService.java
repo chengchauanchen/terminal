@@ -94,7 +94,7 @@ public class CallingService extends BaseService{
 
     private static final int AUTOHANGUP = 0;
     //半双工个呼临时组id
-    private int tempGroupId;
+//    private int tempGroupId;
 
     public CallingService(){}
 
@@ -143,7 +143,6 @@ public class CallingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseIndividualCallAndTempGroupHandler);
         mLlIndividualCallRetractSpeaking.setOnClickListener(retractListener);
         mIvIndividualCallRetractHalfDuplex.setOnClickListener(retractListener);
         mIvIndividualCallHangupSpeaking.setOnClickListener(stopCallListener);
@@ -200,7 +199,6 @@ public class CallingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseIndividualCallAndTempGroupHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
 
@@ -391,13 +389,6 @@ public class CallingService extends BaseService{
         individualCallStopped();
     });
 
-    /**
-     * 半双工ptt的临时组id
-     */
-    private ReceiveResponseIndividualCallAndTempGroupHandler receiveResponseIndividualCallAndTempGroupHandler = (individualCallId,tempGroupId,uniqueNo) -> mHandler.post(() -> {
-        CallingService.this.tempGroupId = tempGroupId;
-    });
-
 
     private void stopCall(){
         MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
@@ -522,8 +513,9 @@ public class CallingService extends BaseService{
         }
         cancelAutoHangUpTimer();
         // FIXME: 2019/4/8 半双工发起组呼，是在临时组内
-        if(CallingService.this.tempGroupId!=0){
-            int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",CallingService.this.tempGroupId);
+        int tempGroupId = MyTerminalFactory.getSDK().getIndividualCallManager().getTempGroupId();
+        if(tempGroupId!=0){
+            int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",tempGroupId);
             if(resultCode == BaseCommonCode.SUCCESS_CODE){//允许组呼了
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);
                 MyApplication.instance.isPttPress = true;
@@ -538,7 +530,6 @@ public class CallingService extends BaseService{
         }else{
             logger.error(getString(R.string.no_get_temporary_group_id));
         }
-
 
     }
 

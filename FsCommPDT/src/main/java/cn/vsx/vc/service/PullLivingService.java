@@ -39,6 +39,7 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -104,10 +105,9 @@ public class PullLivingService extends BaseService{
     private int oddOffsetY = 0;
     private RelativeLayout mPopupMiniLive;
     private RelativeLayout mRlPullLive;
-    private Member liveMember;
+    public Member liveMember;
     //callId
-    private long callId;
-    private int tempGroupId;
+    public long callId;
 
     public PullLivingService(){}
 
@@ -124,7 +124,7 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseWatchLiveAndTempGroupMessageHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseWatchLiveAndTempGroupMessageHandler);
         mPopupMiniLive.setOnTouchListener(miniPopOnTouchListener);
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
@@ -244,7 +244,6 @@ public class PullLivingService extends BaseService{
         mTvLiveGroupName = rootView.findViewById(R.id.tv_live_groupName);
         mTvLiveSpeakingId = rootView.findViewById(R.id.tv_live_speakingId);
 
-        mBtnLiveLookPtt.setVisibility(View.GONE);
     }
 
     @Override
@@ -272,7 +271,7 @@ public class PullLivingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseWatchLiveAndTempGroupMessageHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseWatchLiveAndTempGroupMessageHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
     /**
@@ -403,17 +402,16 @@ public class PullLivingService extends BaseService{
         mHandler.post(this::finishVideoLive);
     };
 
-    /**
-     * 通知观看直播获取临时组id
-     **/
-    private ReceiveResponseWatchLiveAndTempGroupMessageHandler receiveResponseWatchLiveAndTempGroupMessageHandler = (callId,liveMemberId,liveMemberUniqueNo,tempGroupId,uniqueNo) -> {
-        mHandler.post(() -> {
-            if(PullLivingService.this.callId == callId){
-                PullLivingService.this.tempGroupId = tempGroupId;
-                mBtnLiveLookPtt.setVisibility(View.VISIBLE);
-            }
-        });
-    };
+//    /**
+//     * 通知观看直播获取临时组id
+//     **/
+//    private ReceiveResponseWatchLiveAndTempGroupMessageHandler receiveResponseWatchLiveAndTempGroupMessageHandler = (callId,liveMemberId,liveMemberUniqueNo,tempGroupId,uniqueNo) -> {
+//        mHandler.post(() -> {
+//            if(PullLivingService.this.callId == callId){
+//                PullLivingService.this.tempGroupId = tempGroupId;
+//            }
+//        });
+//    };
 
 
     /**
@@ -699,8 +697,9 @@ public class PullLivingService extends BaseService{
             return;
         }
         // FIXME: 2019/4/8 观看视频上报时发起组呼，是在临时组里
-        if(PullLivingService.this.tempGroupId!=0){
-            int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",PullLivingService.this.tempGroupId);
+        int tempGroupId = MyTerminalFactory.getSDK().getLiveManager().getTempGroupId();
+        if(tempGroupId!=0){
+            int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",tempGroupId);
             if(resultCode == BaseCommonCode.SUCCESS_CODE){//允许组呼了
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);
                 MyApplication.instance.isPttPress = true;
