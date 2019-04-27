@@ -2,6 +2,7 @@ package cn.vsx.vc.activity;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.Service;
@@ -25,7 +26,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -229,11 +229,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 MyApplication.instance.isChanging = false;
                 if (MyApplication.instance.isPttPress) {
                     logger.info("转组成功回调消息：isPttPress" + MyApplication.instance.isPttPress);
-//                    int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
-//                    if (resultCode != BaseCommonCode.SUCCESS_CODE) {
-//                        ToastUtil.groupCallFailToast(NewMainActivity.this, resultCode);
-//                    }
-//					MyTerminalFactory.getSDK().getGroupCallManager().requestCall();
+                    //                    int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("");
+                    //                    if (resultCode != BaseCommonCode.SUCCESS_CODE) {
+                    //                        ToastUtil.groupCallFailToast(NewMainActivity.this, resultCode);
+                    //                    }
+                    //					MyTerminalFactory.getSDK().getGroupCallManager().requestCall();
                 }
                 MyApplication.instance.notifyAll();
             }
@@ -326,12 +326,12 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 for (Activity activity : ActivityCollector.getAllActivity().values()) {
                     activity.finish();
                 }
-//                TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
-//                TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
+                //                TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
+                //                TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
                 MyApplication.instance.isClickVolumeToCall = false;
                 MyApplication.instance.isPttPress = false;
                 MyApplication.instance.stopIndividualCallService();
-                Process.killProcess(Process.myPid());
+                killAllProcess();
             },2000);
         }
     };
@@ -423,12 +423,12 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, searchFragment).commit();
             myHandler.postDelayed(() -> ll_content.setVisibility(View.GONE),500);
 
-//            LocalMemberSearchFragment localMemberSearchFragment = new LocalMemberSearchFragment();
-//            localMemberSearchFragment.setMemberList(memberList);
-//            localMemberSearchFragment.setType(type);
-//            fl_fragment_container_main.setVisibility(View.VISIBLE);
-//            getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, localMemberSearchFragment).commit();
-//            myHandler.postDelayed(() -> ll_content.setVisibility(View.GONE),500);
+            //            LocalMemberSearchFragment localMemberSearchFragment = new LocalMemberSearchFragment();
+            //            localMemberSearchFragment.setMemberList(memberList);
+            //            localMemberSearchFragment.setType(type);
+            //            fl_fragment_container_main.setVisibility(View.VISIBLE);
+            //            getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, localMemberSearchFragment).commit();
+            //            myHandler.postDelayed(() -> ll_content.setVisibility(View.GONE),500);
 
         }
     };
@@ -910,10 +910,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private static final int RECEIVEVOICECHANGED = 0;
     private static final int MSG_INFORM_ACTIVATION = 1;
     private static final int ACTIVATION_DALAY_TIME = 1000;
-    private AircraftBindingState.AircraftBindingStateListener bindingStateListener;
-
     private AtomicBoolean hasAppActivationListenerStarted = new AtomicBoolean(false);
     private AppActivationState.AppActivationStateListener appActivationStateListener;
+    private AircraftBindingState.AircraftBindingStateListener bindingStateListener;
     public Handler myHandler = new Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(Message msg){
@@ -936,8 +935,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private TimerTask timerTask;
     private int width;
     private int height;
-
     private BackListener mBackListener;
+    private AppActivationState appActivationState;
+    private AircraftBindingState bindingState;
 
     @Override
     public int getLayoutResId() {
@@ -1117,7 +1117,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
 
         judgePermission();
-        startSDKRegistration();
         NfcUtil.nfcCheck(this);
 
         //清理数据库
@@ -1178,6 +1177,20 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
         MyApplication.instance.stopIndividualCallService();
+        killAllProcess();
+    }
+
+    private void killAllProcess(){
+        ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        if(null !=mActivityManager){
+            List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
+            for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList) {
+                if (runningAppProcessInfo.pid != android.os.Process.myPid()) {
+                    android.os.Process.killProcess(runningAppProcessInfo.pid);
+                }
+            }
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
     }
 
 
@@ -1762,6 +1775,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,false);
             }
         }else {
+            NewMainActivity.this.bindingState = null;
+            NewMainActivity.this.appActivationState = null;
             MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,false);
         }
     }
@@ -1777,13 +1792,16 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     @Override
                     public void onUpdate(AppActivationState appActivationState) {
                         logger.info("AppActivationStateListener--onUpdate:"+appActivationState.name());
+                        NewMainActivity.this.appActivationState = appActivationState;
                         if (myHandler != null && myHandler.hasMessages(MSG_INFORM_ACTIVATION)) {
                             myHandler.removeMessages(MSG_INFORM_ACTIVATION);
                         }
                         if (appActivationState != AppActivationState.ACTIVATED) {
                             myHandler.sendEmptyMessageDelayed(MSG_INFORM_ACTIVATION, ACTIVATION_DALAY_TIME);
                         }else {
-                            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
+                            if(checkIsAircraftConnected()){
+                                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
+                            }
                         }
                     }
                 };
@@ -1792,6 +1810,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     @Override
                     public void onUpdate(final AircraftBindingState bindingState) {
                         logger.info("Binding State: " + bindingState);
+                        NewMainActivity.this.bindingState = bindingState;
+                        if(checkIsAircraftConnected()){
+                            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
+                        }
                     }
                 };
                 AppActivationManager.getInstance().addAppActivationStateListener(appActivationStateListener);
@@ -1800,6 +1822,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }else {
             MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
         }
+    }
+
+    private boolean checkIsAircraftConnected(){
+        return appActivationState == AppActivationState.ACTIVATED && bindingState == AircraftBindingState.BOUND;
     }
 
     private void loginToActivationIfNeeded() {
@@ -1828,4 +1854,5 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                             });
         }
     }
+
 }

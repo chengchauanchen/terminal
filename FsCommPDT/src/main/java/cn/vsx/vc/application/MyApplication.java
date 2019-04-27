@@ -1,5 +1,6 @@
 package cn.vsx.vc.application;
 
+import android.app.ActivityManager;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
@@ -81,6 +82,9 @@ public class MyApplication extends Application {
 
 	@Override
 	public void onCreate() {
+		if (!getPackageName().equals(getProcessName(getApplicationContext(), android.os.Process.myPid()))) {
+			return;
+		}
 		instance = this;
 		super.onCreate();
 		specificSDK = new SpecificSDK(this);
@@ -225,5 +229,23 @@ public class MyApplication extends Application {
 
 	public void setNfcBean(NFCBean nfcBean) {
 		this.nfcBean = nfcBean;
+	}
+
+	public String getProcessName(Context cxt, int pid) {
+		ActivityManager am = (ActivityManager) cxt.getSystemService(Context.ACTIVITY_SERVICE);
+		if (am == null) {
+			return null;
+		}
+
+		List<ActivityManager.RunningAppProcessInfo> runningApps = am.getRunningAppProcesses();
+		if (runningApps != null && !runningApps.isEmpty()) {
+			for (ActivityManager.RunningAppProcessInfo procInfo : runningApps) {
+				if (procInfo.pid == pid) {
+					return procInfo.processName;
+				}
+			}
+		}
+
+		return null;
 	}
 }

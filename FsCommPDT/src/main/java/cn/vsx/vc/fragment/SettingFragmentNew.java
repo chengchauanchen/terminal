@@ -3,6 +3,7 @@ package cn.vsx.vc.fragment;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -11,7 +12,6 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
-import android.os.Process;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -22,6 +22,7 @@ import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -454,7 +455,22 @@ public class SettingFragmentNew extends BaseFragment {
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
         MyApplication.instance.stopIndividualCallService();
-        Process.killProcess(Process.myPid());
+        killAllProcess();
+    }
+
+    private void killAllProcess(){
+        if(getActivity() !=null){
+            ActivityManager mActivityManager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
+            if(null !=mActivityManager){
+                List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
+                for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList) {
+                    if (runningAppProcessInfo.pid != android.os.Process.myPid()) {
+                        android.os.Process.killProcess(runningAppProcessInfo.pid);
+                    }
+                }
+                android.os.Process.killProcess(android.os.Process.myPid());
+            }
+        }
     }
 
 
