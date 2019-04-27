@@ -170,6 +170,19 @@ public class ReceiveHandlerService extends Service{
                     intent.putExtra(Constants.TERMINALMESSAGE,terminalMessage1);
                     startService(intent);
                     break;
+                case UPLOAD_UAV_LOCATION:
+                    myHandler.removeMessages(UPLOAD_UAV_LOCATION);
+                    if(MyApplication.instance.aircraftConnected){
+                        Aircraft aircraft = AirCraftUtil.getAircraftInstance();
+                        if(null != aircraft){
+                            LocationCoordinate3D location = aircraft.getFlightController().getState().getAircraftLocation();
+                            if(checkLocation(location.getLatitude()) && checkLocation(location.getAltitude())){
+                                sendLocationMessage(location.getLatitude(),location.getLongitude(),location.getAltitude());
+                            }
+                        }
+                        myHandler.sendEmptyMessageDelayed(UPLOAD_UAV_LOCATION,uploadTime);
+                    }
+                    break;
                 default:
                     break;
             }
@@ -265,20 +278,6 @@ public class ReceiveHandlerService extends Service{
             PromptManager.getInstance().stopRing();
         }
     }
-
-    private Runnable updateAircraftLocation = () -> {
-        if(MyApplication.instance.aircraftConnected){
-            Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-            if(null != aircraft){
-                LocationCoordinate3D location = aircraft.getFlightController().getState().getAircraftLocation();
-                logger.info("location.getLatitude():"+location.getLatitude());
-                logger.info("location.getLongitude():"+location.getLongitude());
-                logger.info("location.getAltitude():"+location.getAltitude());
-
-                updateAircraftLocation(location.getLatitude(),location.getLongitude(),location.getAltitude());
-            }
-        }
-    };
 
     private RegistrationCallback voipRegistrationCallback = new RegistrationCallback(){
         @Override
@@ -911,8 +910,8 @@ public class ReceiveHandlerService extends Service{
                 setConnectionFailBehavior();
                 myHandler.postDelayed(() -> checkBattery(aircraft),2000);
                 checkUploadState();
-                //无人机连上时自动位置
-                myHandler.postDelayed(updateAircraftLocation,uploadTime);
+                //无人机连上时自动上传位置
+                myHandler.sendEmptyMessageDelayed(UPLOAD_UAV_LOCATION,uploadTime);
                 //无人机连上时自动上报
                 if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
                     Intent intent = new Intent(getApplicationContext(), AircraftPushService.class);
@@ -1079,6 +1078,7 @@ public class ReceiveHandlerService extends Service{
      */
     private void checkUploadState() {
         //检查强制上传GPS信息的状态是否依然存在，若存在，则进行强制上传
+        // TODO: 2019/4/27 设置上传经纬度时间
         if (MyTerminalFactory.getSDK().getLocationManager().checkForceUploadState()) {
             logger.info("强制上传!");
             uploadTime = MyTerminalFactory.getSDK().getLocationManager().getUploadTime(false, false);
@@ -1087,15 +1087,6 @@ public class ReceiveHandlerService extends Service{
             uploadTime = MyTerminalFactory.getSDK().getLocationManager().getUploadTime(true, false);
             logger.info("普通上传!");
         }
-    }
-
-    private void updateAircraftLocation (double latitude,double longitude,double altitude){
-
-
-        //上传位置信息
-        sendLocationMessage(latitude,longitude,altitude);
-        myHandler.removeCallbacks(updateAircraftLocation);
-        myHandler.postDelayed(updateAircraftLocation,uploadTime);
     }
 
     private void sendLocationMessage(double latitude,double longitude,double altitude){
@@ -1122,5 +1113,9 @@ public class ReceiveHandlerService extends Service{
                 }
             });
         }
+    }
+
+    private boolean checkLocation(double latitude){
+        return latitude !=0.0 && !Double.isNaN(latitude);
     }
 }

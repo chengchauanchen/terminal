@@ -1022,9 +1022,7 @@ public class TalkbackFragment extends BaseFragment {
         } else {
             waitAndFinish();
         }
-        if (MyTerminalFactory.getSDK().isAllConfigUpdateComplete()) {
-            setChangeGroupView();
-        }
+        setChangeGroupView();
 
         speechSynthesizer = new SpeechSynthesizer(context, "holder", speechSynthesizerListener);
         // 此处需要将setApiKey方法的两个参数替换为你在百度开发者中心注册应用所得到的apiKey和secretKey
