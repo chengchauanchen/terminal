@@ -65,7 +65,7 @@ public abstract class BaseService extends Service{
 
 
     @SuppressLint("HandlerLeak")
-    protected Handler mHandler = new Handler(){
+    protected Handler mHandler = new Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(Message msg){
             handleMesage(msg);

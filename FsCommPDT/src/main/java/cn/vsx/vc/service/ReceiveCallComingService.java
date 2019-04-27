@@ -16,11 +16,14 @@ import android.widget.TextView;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerIndividualCallTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallStoppedHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.receiveHandle.ReceiveStopCallingServiceHandler;
+import cn.vsx.vc.receiveHandle.ReceiveStopStartReceiveCallServiceHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -115,6 +118,7 @@ public class ReceiveCallComingService extends BaseService{
         SensorUtil.getInstance().registSensor();
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveStopStartReceiveCallServiceHandler);
         mLlIndividualCallRefuse.setOnClickListener(refuseCallListener);
         mLlIndividualCallAccept.setOnClickListener(acceptCallListener);
         mIndividualCallRetractEmergency.setOnClickListener(retractOnClickListener);
@@ -155,6 +159,7 @@ public class ReceiveCallComingService extends BaseService{
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveStopStartReceiveCallServiceHandler);
     }
 
     /**
@@ -170,11 +175,23 @@ public class ReceiveCallComingService extends BaseService{
      */
     private ReceiveNotifyIndividualCallStoppedHandler receiveNotifyIndividualCallStoppedHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
         if(SignalServerErrorCode.getInstanceByCode(methodResult) != null){
-            ToastUtil.showToast(MyTerminalFactory.getSDK().getApplication().getApplicationContext(), SignalServerErrorCode.getInstanceByCode(methodResult).getErrorDiscribe());
+            ToastUtil.showToast(ReceiveCallComingService.this, SignalServerErrorCode.getInstanceByCode(methodResult).getErrorDiscribe());
         }else{
-            ToastUtil.showToast(MyTerminalFactory.getSDK().getApplication().getApplicationContext(), getResources().getString(R.string.other_cancel));
+            ToastUtil.showToast(ReceiveCallComingService.this, getResources().getString(R.string.other_cancel));
         }
+        //发送通知关闭CallingService(防止已经跳转到CallingService)
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveStopCallingServiceHandler.class);
+        mHandler.post(() -> {
+                mLlIndividualCallAccept.setEnabled(false);
+                mIndividualCallRetractEmergency.setEnabled(false);});
         mHandler.postDelayed(this::individualCallStopped,500);
+    });
+
+    /**
+     * 通知关闭ReceiveCallingService
+     */
+    private ReceiveStopStartReceiveCallServiceHandler receiveStopStartReceiveCallServiceHandler = () -> mHandler.post(() -> {
+        mHandler.postDelayed(this::removeView,500);
     });
 
     private View.OnClickListener refuseCallListener = v -> refuseCall();
@@ -239,7 +256,7 @@ public class ReceiveCallComingService extends BaseService{
         intent.putExtra(Constants.MEMBER_ID, memberId);
         startService(intent);
         mTimerView.onStop();
-        mHandler.postDelayed(this::removeView,500);
+//        mHandler.postDelayed(this::removeView,500);
     }
 
     private void retract(){

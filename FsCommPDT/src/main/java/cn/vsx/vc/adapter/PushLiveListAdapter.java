@@ -74,7 +74,7 @@ public class PushLiveListAdapter extends BaseAdapter {
         if(resultCode == 0) {//上报图像成功
             holder.ll_watch_success.setVisibility(View.VISIBLE);
             holder.ll_push_fail.setVisibility(View.GONE);
-            if(messageBody.getInteger(JsonParam.REMARK) == Remark.ACTIVE_VIDEO_LIVE) {//自己主动上报图像
+            if(messageBody.containsKey(JsonParam.REMARK)&&messageBody.getInteger(JsonParam.REMARK) == Remark.ACTIVE_VIDEO_LIVE) {//自己主动上报图像
                 holder.tv_push_type.setText(R.string.text_personal_image_reporting);
                 String title = messageBody.getString(JsonParam.TITLE);
                 if(TextUtils.isEmpty(title)) {
@@ -84,7 +84,7 @@ public class PushLiveListAdapter extends BaseAdapter {
                     holder.tv_title.setText(title);
                 }
             }
-            else if(messageBody.getInteger(JsonParam.REMARK) == Remark.ASK_VIDEO_LIVE) {//别人邀请我上报图像
+            else if(messageBody.containsKey(JsonParam.REMARK)&&messageBody.getInteger(JsonParam.REMARK) == Remark.ASK_VIDEO_LIVE) {//别人邀请我上报图像
 
                 holder.tv_push_type.setText(String.format(context.getString(R.string.text_people_request_report_name),messageBody.getString(JsonParam.QUERY_MEMBER_NAME)));
                 String title = messageBody.getString(JsonParam.TITLE);

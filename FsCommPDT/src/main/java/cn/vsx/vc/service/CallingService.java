@@ -41,6 +41,8 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.receiveHandle.ReceiveStopCallingServiceHandler;
+import cn.vsx.vc.receiveHandle.ReceiveStopStartReceiveCallServiceHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -143,12 +145,16 @@ public class CallingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveStopCallingServiceHandler);
         mLlIndividualCallRetractSpeaking.setOnClickListener(retractListener);
         mIvIndividualCallRetractHalfDuplex.setOnClickListener(retractListener);
         mIvIndividualCallHangupSpeaking.setOnClickListener(stopCallListener);
         mIvIndividualCallHangupHalfDuplex.setOnClickListener(stopCallListener);
         mBtnIndividualCallHalfDuplexPtt.setOnTouchListener(halfCallPTTOnTouchListener);
         mPopMinimize.setOnTouchListener(miniPopOnTouchListener);
+
+        //发送通知关闭StartIndividualCallService和ReceiveCallComingService
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveStopStartReceiveCallServiceHandler.class);
     }
 
     @Override
@@ -167,6 +173,8 @@ public class CallingService extends BaseService{
                 individualCallStopped();
                 break;
             case OFF_LINE:
+                //发送通知关闭StartIndividualCallService和ReceiveCallComingService
+//                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveStopStartReceiveCallServiceHandler.class);
                 mHandler.removeMessages(OFF_LINE);
                 mPopupICTVSpeakingTime.onPause();
                 mIctvSpeakingTimeSpeaking.onPause();
@@ -199,6 +207,7 @@ public class CallingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveStopCallingServiceHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
 
@@ -389,8 +398,14 @@ public class CallingService extends BaseService{
         individualCallStopped();
     });
 
+    /**
+     * 通知关闭CallingService
+     */
+    private ReceiveStopCallingServiceHandler receiveStopCallingServiceHandler = () -> mHandler.postDelayed(this::individualCallStopped,500);
+
 
     private void stopCall(){
+
         MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         mPopupICTVSpeakingTime.onStop();
         mIctvHalfDuplexTimeSpeaking.onStop();
@@ -401,6 +416,8 @@ public class CallingService extends BaseService{
     }
 
     private void retract(){
+//        //发送通知关闭StartIndividualCallService和ReceiveCallComingService
+//        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveStopStartReceiveCallServiceHandler.class);
         windowManager.removeView(rootView);
         windowManager.addView(rootView, layoutParams);
         hideAllView();
@@ -423,6 +440,8 @@ public class CallingService extends BaseService{
             mTvHalfDuplexPrompt.setText(getResources().getString(R.string.stop_talk));
         }
 
+        //发送通知关闭StartIndividualCallService和ReceiveCallComingService
+//        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveStopStartReceiveCallServiceHandler.class);
         PromptManager.getInstance().IndividualHangUpRing();
         PromptManager.getInstance().delayedStopRing();
         cancelAutoHangUpTimer();
@@ -557,6 +576,8 @@ public class CallingService extends BaseService{
                 return;
             }
             if(KILL_ACT_CALL.equals(intent.getAction())){
+                //发送通知关闭StartIndividualCallService和ReceiveCallComingService
+//                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveStopStartReceiveCallServiceHandler.class);
                 stopBusiness();
             }
         }

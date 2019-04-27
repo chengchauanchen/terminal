@@ -14,12 +14,16 @@ import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
+import cn.vsx.hamster.common.IndividualCallType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.receiveHandle.ReceiveStopCallingServiceHandler;
+import cn.vsx.vc.receiveHandle.ReceiveStopStartReceiveCallServiceHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -88,6 +92,7 @@ public class StartIndividualCallService extends BaseService{
     protected void initListener(){
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseStartLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveStopStartReceiveCallServiceHandler);
         mIvIndividualCallRetractRequest.setOnClickListener(retractOnClickListener);
         mLlIndividualCallHangupRequest.setOnClickListener(stopCallListener);
         mPopMinimize.setOnTouchListener(miniPopOnTouchListener);
@@ -152,6 +157,7 @@ public class StartIndividualCallService extends BaseService{
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseStartLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartIndividualCallHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveStopStartReceiveCallServiceHandler);
     }
 
     private View.OnClickListener retractOnClickListener = v -> showPopMiniView();
@@ -191,6 +197,11 @@ public class StartIndividualCallService extends BaseService{
                     windowManager.addView(rootView, layoutParams1);
                     MyApplication.instance.isMiniLive = false;
                     SensorUtil.getInstance().registSensor();
+                    mRlIndividualCallRequest.setVisibility(View.VISIBLE);
+                    mPopMinimize.setVisibility(View.GONE);
+                    mTvWaiting.setVisibility(View.GONE);
+                    mTimerView.setVisibility(View.VISIBLE);
+
                 }
                 break;
         }
@@ -208,6 +219,8 @@ public class StartIndividualCallService extends BaseService{
             mHandler.post(() -> callAnswer(individualCallType));
         }else{//对方拒绝
             ToastUtil.showToast(StartIndividualCallService.this, resultDesc);
+            //发送通知关闭CallingService(防止已经跳转到CallingService)
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveStopCallingServiceHandler.class);
             mHandler.postDelayed(() -> {
                 PromptManager.getInstance().IndividualHangUpRing();
                 PromptManager.getInstance().delayedStopRing();
@@ -227,6 +240,13 @@ public class StartIndividualCallService extends BaseService{
         stopBusiness();
     };
 
+    /**
+     * 通知关闭StartCallingService
+     */
+    private ReceiveStopStartReceiveCallServiceHandler receiveStopStartReceiveCallServiceHandler = () -> mHandler.post(() -> {
+        mHandler.postDelayed(this::removeView,500);
+    });
+
     private void callAnswer(int individualCallType){
         PromptManager.getInstance().stopRing();
         Intent intent = new Intent(this,CallingService.class);
@@ -235,7 +255,7 @@ public class StartIndividualCallService extends BaseService{
         intent.putExtra(Constants.MEMBER_ID,memberId);
         startService(intent);
         mTimerView.onStop();
-        mHandler.postDelayed(this::removeView,500);
+//        mHandler.postDelayed(this::removeView,500);
     }
 
     private void individualCallStopped(){
