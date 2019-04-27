@@ -98,7 +98,7 @@ public class OnlineService extends Service {
 		KeepLiveManager.getInstance().setServiceForeground(this);
 		try {
 			//如果全部更新完成，没有退出，就发送OnlineService开启的广播
-			if(MyTerminalFactory.getSDK().isAllConfigUpdateComplete() && !MyTerminalFactory.getSDK().isExit()){
+			if(!MyTerminalFactory.getSDK().isExit()){
 				logger.debug("发布online_services_started_broadcast");
 				Intent broadcast = new Intent(getResources().getString(R.string.online_services_started_broadcast));
 				sendBroadcast(broadcast);

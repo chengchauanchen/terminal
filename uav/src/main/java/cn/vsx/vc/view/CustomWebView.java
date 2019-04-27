@@ -18,11 +18,8 @@ import org.apache.log4j.Logger;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangePersonLocationHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.vc.utils.AirCraftUtil;
 import cn.vsx.vc.utils.ToastUtil;
-import dji.common.flightcontroller.LocationCoordinate3D;
-import dji.sdk.base.BaseProduct;
-import dji.sdk.products.Aircraft;
-import dji.sdk.sdkmanager.DJISDKManager;
 
 /**
  * 作者：ly-xuxiaolong
@@ -34,7 +31,7 @@ import dji.sdk.sdkmanager.DJISDKManager;
 public class CustomWebView extends WebView{
 
     private static final int UPDATE_AIRCRAFT_LOCATION = 0;
-    private static final int UPDATE_LOCATION = 1;
+    private static final long UPDATE_DALAY = 15*1000L;
     private Logger logger = Logger.getLogger(CustomWebView.class);
     private double uvLng = 114.41588661389632;
     private double uvLat = 30.55199833333333;
@@ -50,26 +47,14 @@ public class CustomWebView extends WebView{
             super.handleMessage(msg);
             switch(msg.what){
                 case UPDATE_AIRCRAFT_LOCATION:
-                BaseProduct mProduct = DJISDKManager.getInstance().getProduct();
-                if(mProduct instanceof Aircraft){
-                    LocationCoordinate3D location = ((Aircraft) mProduct).getFlightController().getState().getAircraftLocation();
-                    logger.info("location.getLatitude():"+location.getLatitude());
-                    logger.info("location.getLongitude():"+location.getLongitude());
-                    logger.info("location.getAltitude():"+location.getAltitude());
-                    uvLng = location.getLongitude();
-                    uvLat = location.getLatitude();
-                    if(uvLng !=0.0 && uvLat!=0.0){
-                        updateUavLocation(location.getLongitude(),location.getLatitude());
+                    if(AirCraftUtil.getAltitude() !=0.0 && AirCraftUtil.getLongitude() !=0.0){
+                        uvLat = AirCraftUtil.getAltitude();
+                        uvLng = AirCraftUtil.getLongitude();
+                        updateUavLocation(uvLng,uvLat);
                     }
-                    mhandler.sendEmptyMessageDelayed(UPDATE_AIRCRAFT_LOCATION,15*1000);
-                }
-                break;
-                case UPDATE_LOCATION:
-                    uvLng+=0.0008;
-                    uvLat+=0.0008;
-                    logger.info("uvLng"+uvLng+"---uvLat"+uvLat);
-                    updateUavLocation(uvLng,uvLat);
-                    mhandler.sendEmptyMessageDelayed(UPDATE_LOCATION,15*1000);
+                    mhandler.sendEmptyMessageDelayed(UPDATE_AIRCRAFT_LOCATION,UPDATE_DALAY);
+                    break;
+                default:
                     break;
             }
         }
@@ -87,7 +72,12 @@ public class CustomWebView extends WebView{
 
     private void init(){
         initWeb();
-        initAircraft();
+    }
+
+    @Override
+    protected void onAttachedToWindow(){
+        super.onAttachedToWindow();
+        mhandler.sendEmptyMessage(UPDATE_AIRCRAFT_LOCATION);
         TerminalFactory.getSDK().registReceiveHandler(receiveChangePersonLocationHandler);
     }
 
@@ -95,11 +85,7 @@ public class CustomWebView extends WebView{
     protected void onDetachedFromWindow(){
         super.onDetachedFromWindow();
         TerminalFactory.getSDK().unregistReceiveHandler(receiveChangePersonLocationHandler);
-    }
-
-    private void initAircraft(){
-        mhandler.sendEmptyMessage(UPDATE_AIRCRAFT_LOCATION);
-//        mhandler.sendEmptyMessage(UPDATE_LOCATION);
+        mhandler.removeCallbacksAndMessages(null);
     }
 
     public void initWeb(){

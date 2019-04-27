@@ -59,6 +59,7 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.utils.AirCraftUtil;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.CustomWebView;
@@ -179,7 +180,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
 
     private ReceiveResponseMyselfLiveHandler receiveResponseMyselfLiveHandler = (resultCode, resultDesc) -> {
         if(resultCode != BaseCommonCode.SUCCESS_CODE){
-            ToastUtil.showToast(getApplicationContext(), resultDesc);
+            ToastUtil.showToast(getApplicationContext(),resultDesc);
             stopBusiness();
         }
     };
@@ -188,7 +189,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
      * 自己发起直播的响应
      **/
     private ReceiveGetVideoPushUrlHandler receiveGetVideoPushUrlHandler = (streamMediaServerIp, streamMediaServerPort, callId) -> mHandler.postDelayed(() -> {
-        logger.info(TAG + "自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
+        logger.info(TAG+"自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
         ip = streamMediaServerIp;
         port = streamMediaServerPort + "";
         id = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "_" + callId;
@@ -205,7 +206,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
                 ToastUtil.showToast(getApplicationContext(), "没有组呼听的权限");
             }
             PromptManager.getInstance().groupCallCommingRing();
-            logger.info(TAG + "组呼来了");
+            logger.info(TAG+"组呼来了");
             mHandler.post(() -> {
                 //是组扫描的组呼,且当前组没人说话，变文件夹和组名字
                 mLlAircraftLiveGroupCall.setVisibility(View.VISIBLE);
@@ -226,15 +227,15 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
 
     private ReceiveUAVPatrolHandler receiveUAVPatrolHandler = new ReceiveUAVPatrolHandler(){
         @Override
-        public void handler(List<String> locations, float speed, float height){
+        public void handler(List<String> locations,float speed,float height){
             if(patrol){
-                ToastUtil.showToast(getApplicationContext(), "正在巡航中，请稍后再试");
+                ToastUtil.showToast(getApplicationContext(),"正在巡航中，请稍后再试");
                 return;
             }
-            if(speed != 0){
+            if(speed !=0){
                 mSpeed = speed;
             }
-            if(height != 0){
+            if(height !=0){
                 altitude = height;
             }
             autoFlight(locations);
@@ -244,7 +245,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
     private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler(){
         @Override
         public void handler(int reasonCode){
-            logger.info(TAG + "收到ReceiveGroupCallCeasedIndicationHandler");
+            logger.info(TAG+"收到ReceiveGroupCallCeasedIndicationHandler");
             mHandler.post(() -> mLlAircraftLiveGroupCall.setVisibility(View.GONE));
         }
     };
@@ -254,7 +255,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
      **/
     @SuppressLint("SimpleDateFormat")
     private ReceiveMemberJoinOrExitHandler receiveMemberJoinOrExitHandler = (memberName, memberId, joinOrExit) -> {
-        logger.info(TAG + "receiveMemberJoinOrExitHandler" + memberName + ",memberId:" + memberId);
+        logger.info(TAG+"receiveMemberJoinOrExitHandler" + memberName + ",memberId:" + memberId);
         mHandler.post(() -> {
             mLvAircraftLiveMemberInfo.setVisibility(View.VISIBLE);
             SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
@@ -282,6 +283,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         });
     };
 
+
     @SuppressLint("InvalidWakeLockTag")
     @Override
     protected void initWakeLock(){
@@ -293,9 +295,9 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
     }
 
     private View.OnClickListener onInviteMemberClickListener = v -> {
-//        Intent intent = new Intent(getApplicationContext(), UavInviteMemberService.class);
-//        intent.putExtra(Constants.WATCHING_MEMBERS, watchingMembers);
-//        startService(intent);
+        Intent intent = new Intent(getApplicationContext(), UavInviteMemberService.class);
+        intent.putExtra(Constants.WATCHING_MEMBERS, watchingMembers);
+        startService(intent);
     };
 
     private View.OnClickListener onMenuClickListener = v -> {
@@ -315,13 +317,13 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         }
     };
 
-    private View.OnClickListener setHomeLocationListener = v -> {
+    private View.OnClickListener setHomeLocationListener =  v ->{
         setHomeLocation();
     };
 
     private View.OnClickListener onGoHomeClickListener = v -> {
         Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-        if(aircraft != null && null != aircraft.getFlightController()){
+        if(aircraft !=null && null != aircraft.getFlightController()){
             if(aircraft.getFlightController().getState().isGoingHome()){
                 cancelGoHome();
             }else{
@@ -343,7 +345,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
                         btnCheckObstacle.setBackground(getResources().getDrawable(R.drawable.check_obstacle_open));
                         ToastUtil.showToast(getApplicationContext(), "防碰撞开启");
                     }
-                    logger.info(TAG + "防碰撞是否开启：" + aBoolean);
+                    logger.info(TAG+"防碰撞是否开启：" + aBoolean);
                     checkObstacle(!aBoolean);
                 }
 
@@ -375,7 +377,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         //        if(yuvPlayer.isPlaying()){
         //            yuvPlayer.stop();
         //        }
-        showPopMiniView();
+        showPopMiniView(false);
     };
 
     @SuppressLint("ClickableViewAccessibility")
@@ -489,6 +491,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
                         mAircraftLive.setVisibility(View.VISIBLE);
                         mPopupMiniLive.setVisibility(View.GONE);
                         MyApplication.instance.isMiniLive = false;
+                        setScreenWidth();
                     }
                 }
                 break;
@@ -537,7 +540,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
     private TextureView.SurfaceTextureListener surfaceTextureListener = new TextureView.SurfaceTextureListener(){
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int surfaceWidth, int surfaceHeight){
-            logger.info(TAG + "onSurfaceTextureAvailable");
+            logger.info(TAG+"onSurfaceTextureAvailable");
             //    private long count;
             Surface surface1 = new Surface(surface);
             initYuvPlayer();
@@ -557,7 +560,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surface){
-            logger.info(TAG + "onSurfaceTextureDestroyed");
+            logger.info(TAG+"onSurfaceTextureDestroyed");
             textureAvailableTime = 0L;
             stopYuvPlayer();
             return true;
@@ -581,7 +584,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         @Override
         public void onReceive(byte[] videoBuffer, int size){
             if(System.currentTimeMillis() - lastupdate > 1000){
-                //                logger.info(TAG+"camera recv video data size:" + size);
+//                logger.info(TAG+"camera recv video data size:" + size);
                 lastupdate = System.currentTimeMillis();
             }
             if(null != yuvPlayer){
@@ -648,33 +651,35 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
 
     private void initHomeLocationView(){
         Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-        if(aircraft != null){
+        if(aircraft !=null){
             aircraft.getFlightController().getHomeLocation(new CommonCallbacks.CompletionCallbackWith<LocationCoordinate2D>(){
                 @Override
                 public void onSuccess(LocationCoordinate2D locationCoordinate2D){
-                    logger.info(TAG + "获取返航位置成功：" + "--Latitude:" + locationCoordinate2D.getLatitude() + "--Longitude:" + locationCoordinate2D.getLongitude());
-                    if(locationCoordinate2D.getLatitude() != 0.0 && !Double.isNaN(locationCoordinate2D.getLatitude()) && locationCoordinate2D.getLongitude() != 0.0 && !Double.isNaN(locationCoordinate2D.getLongitude())){
+                    logger.info(TAG+"获取返航位置成功："+"--Latitude:"+locationCoordinate2D.getLatitude()+"--Longitude:"+locationCoordinate2D.getLongitude());
+                    if(locationCoordinate2D.getLatitude() != 0.0 && !Double.isNaN(locationCoordinate2D.getLatitude()) &&
+                            locationCoordinate2D.getLongitude() !=0.0 && !Double.isNaN(locationCoordinate2D.getLongitude())){
                         btnHomeLocation.setBackground(getResources().getDrawable(R.drawable.home_location_true));
-                    }else{
+                    }else {
                         btnHomeLocation.setBackground(getResources().getDrawable(R.drawable.home_location_false));
                     }
                 }
 
                 @Override
                 public void onFailure(DJIError djiError){
-                    logger.error(TAG + "获取返航位置失败：" + djiError);
+                    logger.error(TAG+"获取返航位置失败："+djiError);
                     btnHomeLocation.setBackground(getResources().getDrawable(R.drawable.home_location_false));
+
                 }
             });
-        }else{
-            logger.error(TAG + "获取返航位置失败：无人机连接异常");
+        }else {
+            logger.error(TAG+"获取返航位置失败：无人机连接异常");
             btnHomeLocation.setBackground(getResources().getDrawable(R.drawable.home_location_false));
         }
     }
 
     private void initGoHomeView(){
         Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-        if(aircraft != null){
+        if(aircraft !=null){
             if(aircraft.getFlightController().getState().isGoingHome()){
                 btnGoHome.setBackground(getResources().getDrawable(R.drawable.going_home));
             }else{
@@ -685,12 +690,12 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
 
     private void initObstacle(){
         Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-        if(aircraft != null){
-            if(null != aircraft.getFlightController() && null != aircraft.getFlightController().getFlightAssistant()){
+        if(aircraft!=null){
+            if(null != aircraft.getFlightController() && null !=aircraft.getFlightController().getFlightAssistant()){
                 aircraft.getFlightController().getFlightAssistant().getCollisionAvoidanceEnabled(new CommonCallbacks.CompletionCallbackWith<Boolean>(){
                     @Override
                     public void onSuccess(Boolean aBoolean){
-                        logger.info(TAG + "防碰撞是否开启：" + aBoolean);
+                        logger.info(TAG+"防碰撞是否开启：" + aBoolean);
                         if(aBoolean){
                             btnCheckObstacle.setBackground(getResources().getDrawable(R.drawable.check_obstacle_open));
                         }else{
@@ -700,7 +705,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
 
                     @Override
                     public void onFailure(DJIError djiError){
-                        logger.info(TAG + "获取防碰撞状态失败" + djiError);
+                        logger.info(TAG+"获取防碰撞状态失败" + djiError);
                     }
                 });
             }
@@ -718,7 +723,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         cameraSettingAdvancedPanel.initKey();
         //使用CameraKey.MODE就变成了拍照模式
         CameraKey cameraKey = CameraKey.create(CameraKey.VIDEO_STANDARD);
-        logger.info(TAG + "cameraKey:" + cameraKey);
+        logger.info(TAG+"cameraKey:" + cameraKey);
         cameraSettingAdvancedPanel.updateWidget(cameraKey);
     }
 
@@ -746,6 +751,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
             @Override
             public void onClick(View v){
                 List<String> locations = new ArrayList<>();
+
                 locations.add("30.4758019985,114.4150239528");
                 locations.add("30.4758489044,114.4155492583");
                 locations.add("30.4758950341,114.4159361981");
@@ -766,27 +772,28 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAirCraftStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseMyselfLiveHandler);
     }
-
     private void initFlightControllerState(){
         Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-        if(aircraft != null){
+        if (aircraft !=null) {
             mFlightController = aircraft.getFlightController();
-            if(mFlightController != null){
-                mFlightController.setStateCallback(new FlightControllerState.Callback(){
+
+            if (mFlightController != null) {
+                mFlightController.setStateCallback(new FlightControllerState.Callback() {
 
                     @Override
-                    public void onUpdate(FlightControllerState flightControllerState){
+                    public void onUpdate(FlightControllerState flightControllerState) {
                         if(flightControllerState.isGoingHome()){
                             // TODO: 2019/4/1 返航的提示
-                            logger.info(TAG + "正在返航");
+                            logger.info(TAG+"正在返航");
                         }else if(flightControllerState.isLandingConfirmationNeeded()){
                             // TODO: 2019/4/1 如果飞机和地面的间隙小于0.3米，则需要用户确认继续着陆
-                            ToastUtil.showToast(getApplicationContext(), "请确认是否着陆");
+                            ToastUtil.showToast(getApplicationContext(),"请确认是否着陆");
                         }
                     }
                 });
             }
         }
+
     }
 
     @Override
@@ -805,6 +812,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
 
     @Override
     protected void initView(Intent intent){
+        MyApplication.instance.aircraftPush = true;
         mAircraftLive.setVisibility(View.VISIBLE);
         mPopupMiniLive.setVisibility(View.GONE);
         if(MyTerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap().isEmpty()){
@@ -817,16 +825,17 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
 
     private void setVideoFeederListeners(){
         VideoFeeder instance = VideoFeeder.getInstance();
-        logger.info(TAG + "VideoFeeder:" + instance);
+        logger.info(TAG+"VideoFeeder:" + instance);
         ToastUtil.showToast(getApplicationContext(), "VideoFeeder:" + instance);
         if(VideoFeeder.getInstance() == null){
             return;
         }
         BaseProduct product = AirCraftUtil.getProductInstance();
+
         if(product != null){
             VideoFeeder.getInstance().getPrimaryVideoFeed().addVideoDataListener(mReceivedVideoDataListener);
-            logger.info(TAG + "product:" + product);
-        }else{
+            logger.info(TAG+"product:" + product);
+        }else {
             logger.error("product为null！！！");
         }
     }
@@ -836,7 +845,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
      */
     private void requestStartLive(){
         int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMyselfLive("", "");
-        logger.error(TAG + "上报图像：requestCode=" + requestCode);
+        logger.error(TAG+"上报图像：requestCode=" + requestCode);
         if(requestCode != BaseCommonCode.SUCCESS_CODE){
             ToastUtil.livingFailToast(getApplicationContext(), requestCode, TerminalErrorCode.LIVING_PUSHING.getErrorCode());
             mHandler.post(this::finishVideoLive);
@@ -852,7 +861,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         if(null != airCraftMediaStream){
             airCraftMediaStream.startStream(ip, port, id, pushCallback);
             String url = String.format("rtsp://%s:%s/%s.sdp", ip, port, id);
-            logger.info(TAG + "推送地址：" + url);
+            logger.info(TAG+"推送地址：" + url);
         }
     }
 
@@ -919,16 +928,16 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
     }
 
     private void stopAircraftPush(){
-        logger.info(TAG + "stopAircraftPush");
+        logger.info(TAG+"stopAircraftPush");
         if(null != airCraftMediaStream && airCraftMediaStream.isStreaming()){
-            logger.info(TAG + "结束无人机推流");
+            logger.info(TAG+"结束无人机推流");
             airCraftMediaStream.stopStream();
         }
         TerminalFactory.getSDK().getLiveManager().ceaseLiving();
     }
 
     @Override
-    protected void showPopMiniView(){
+    protected void showPopMiniView(boolean recentApps){
         //如果正在直播中或者观看直播，显示直播的小窗口
         if(MyApplication.instance.isMiniLive){
             return;
@@ -936,22 +945,47 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         if(System.currentTimeMillis() - textureAvailableTime < 3000){
             return;
         }else{
-            layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-            windowManager.removeView(rootView);
-            windowManager.addView(rootView, layoutParams);
-            mAircraftLive.setVisibility(View.GONE);
-            mPopupMiniLive.setVisibility(View.VISIBLE);
-            MyApplication.instance.isMiniLive = true;
-            mSvLivePop.getLayoutParams().width = 320;
-            mSvLivePop.getLayoutParams().height = 180;
-            mSvLivePop.requestLayout();
+            if(recentApps){
+                layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                windowManager.removeView(rootView);
+                windowManager.addView(rootView, layoutParams);
+                mAircraftLive.setVisibility(View.GONE);
+                mPopupMiniLive.setVisibility(View.VISIBLE);
+                MyApplication.instance.isMiniLive = true;
+                mSvLivePop.getLayoutParams().width = 320;
+                mSvLivePop.getLayoutParams().height = 180;
+                mSvLivePop.requestLayout();
+                setScreenWidth();
+                //            mHandler.postDelayed(()->{
+                //
+                //                mAircraftLive.setVisibility(View.GONE);
+                //                mPopupMiniLive.setVisibility(View.VISIBLE);
+                //                MyApplication.instance.isMiniLive = true;
+                //                mSvLivePop.getLayoutParams().width = 320;
+                //                mSvLivePop.getLayoutParams().height = 180;
+                //                mSvLivePop.requestLayout();
+                //                setScreenWidth();
+                //
+                //            },2000);
+            }else{
+                layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+                windowManager.removeView(rootView);
+                windowManager.addView(rootView, layoutParams);
+                mAircraftLive.setVisibility(View.GONE);
+                mPopupMiniLive.setVisibility(View.VISIBLE);
+                MyApplication.instance.isMiniLive = true;
+                mSvLivePop.getLayoutParams().width = 320;
+                mSvLivePop.getLayoutParams().height = 180;
+                mSvLivePop.requestLayout();
+                setScreenWidth();
+            }
         }
     }
 
     @Override
-    public void onDestroy(){
-        super.onDestroy();
+    protected void doOtherDestroy(){
         removeListener();
+        MyApplication.instance.aircraftPush = false;
         if(DJISDKManager.getInstance().getProduct() != null){
             VideoFeeder.getInstance().getPrimaryVideoFeed().removeVideoDataListener(mReceivedVideoDataListener);
         }
@@ -966,7 +1000,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseMyselfLiveHandler);
     }
 
-
+    @Override
     protected void onServerDisconnect(){
         //        releaseDecoder();
         stopAircraftPush();
@@ -1003,9 +1037,9 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
             @Override
             public void onResult(DJIError djiError){
                 if(djiError == null){
-                    logger.info(TAG + "设置焦点成功" + "--x:" + x + "--y" + y);
+                    logger.info(TAG+"设置焦点成功" + "--x:" + x + "--y" + y);
                 }else{
-                    logger.error(TAG + djiError.getDescription());
+                    logger.error(TAG+djiError.getDescription());
                 }
             }
         });
@@ -1013,22 +1047,21 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
 
     /**
      * 开启防碰撞
-     *
-     * @param open 是否开启
+     * @param open     是否开启
      */
     private void checkObstacle(boolean open){
         Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-        if(aircraft != null){
+        if(aircraft !=null){
             if(null != aircraft.getFlightController().getFlightAssistant()){
                 aircraft.getFlightController().getFlightAssistant().setCollisionAvoidanceEnabled(open, new CommonCallbacks.CompletionCallback(){
                     @Override
                     public void onResult(DJIError djiError){
                         if(null == djiError){
                             ToastUtil.showToast(getApplicationContext(), "开启或关闭防碰撞成功:" + open);
-                            logger.info(TAG + "开启或关闭防碰撞成功:" + open);
+                            logger.info(TAG+"开启或关闭防碰撞成功:" + open);
                         }else{
                             ToastUtil.showToast(getApplicationContext(), "开启或关闭防碰撞失败:--" + open + "-----" + djiError.getDescription());
-                            logger.info(TAG + "开启或关闭防碰撞失败:--" + open + "-----" + djiError.getDescription());
+                            logger.info(TAG+"开启或关闭防碰撞失败:--" + open + "-----" + djiError.getDescription());
                         }
                     }
                 });
@@ -1038,10 +1071,11 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
 
     /**
      * 取消自动返航
+     *
      */
     private void cancelGoHome(){
         Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-        if(aircraft != null){
+        if(aircraft !=null){
             aircraft.getFlightController().cancelGoHome(new CommonCallbacks.CompletionCallback(){
                 @Override
                 public void onResult(DJIError djiError){
@@ -1049,13 +1083,13 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
                         mHandler.post(() -> {
                             btnGoHome.setBackground(getResources().getDrawable(R.drawable.not_go_home));
                         });
-                        logger.info(TAG + "取消自动返航成功");
+                        logger.info(TAG+"取消自动返航成功");
                     }else{
                         mHandler.post(() -> {
                             btnGoHome.setBackground(getResources().getDrawable(R.drawable.going_home));
                             ToastUtil.showToast(getApplicationContext(), "取消自动返航失败");
                         });
-                        logger.error(TAG + "取消自动返航失败--" + djiError.getDescription());
+                        logger.error(TAG+"取消自动返航失败--" + djiError.getDescription());
                     }
                 }
             });
@@ -1075,14 +1109,14 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
                         mHandler.post(() -> {
                             btnGoHome.setBackground(getResources().getDrawable(R.drawable.going_home));
                         });
-                        logger.info(TAG + "自动返航成功");
+                        logger.info(TAG+"自动返航成功");
                         ToastUtil.showToast(getApplicationContext(), "自动返航成功");
                     }else{
                         mHandler.post(() -> {
                             btnGoHome.setBackground(getResources().getDrawable(R.drawable.not_go_home));
                             ToastUtil.showToast(getApplicationContext(), "自动返航失败");
                         });
-                        logger.error(TAG + "自动返航失败--" + djiError.getDescription());
+                        logger.error(TAG+"自动返航失败--" + djiError.getDescription());
                         ToastUtil.showToast(getApplicationContext(), "自动返航失败");
                     }
                 }
@@ -1094,28 +1128,43 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         setWayPoint(locations);
         configWayPointMission();
         uploadWayPointMission();
+
     }
 
     private void setWayPoint(List<String> locations){
+        //先把无人机自己的位置设置到航点里
+        double aircraftLatitude = AirCraftUtil.getLatitude();
+        double aircraftLongitude = AirCraftUtil.getLongitude();
+        if(aircraftLatitude !=0.0 && aircraftLongitude !=0.0){
+            Waypoint mWaypoint = new Waypoint(aircraftLatitude, aircraftLongitude, altitude);
+            //Add Waypoints to Waypoint arraylist;
+            addWaypoint(mWaypoint);
+        }
+
         for(String location : locations){
             if(!TextUtils.isEmpty(location) && location.contains(",")){
                 String[] split = location.split(",");
                 double latitude = Double.parseDouble(split[0]);
                 double longitude = Double.parseDouble(split[1]);
-                if(latitude != 0.0 && !Double.isNaN(latitude) && longitude != 0.0 && !Double.isNaN(longitude)){
+
+                if(AirCraftUtil.checkLatitude(latitude) && AirCraftUtil.checkLongitude(longitude)){
                     //每一个巡航点
                     Waypoint mWaypoint = new Waypoint(latitude, longitude, altitude);
                     //Add Waypoints to Waypoint arraylist;
-                    if(waypointMissionBuilder != null){
-                        waypointList.add(mWaypoint);
-                        waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
-                    }else{
-                        waypointMissionBuilder = new WaypointMission.Builder();
-                        waypointList.add(mWaypoint);
-                        waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
-                    }
+                    addWaypoint(mWaypoint);
                 }
             }
+        }
+    }
+
+    private void addWaypoint(Waypoint mWaypoint){
+        if(waypointMissionBuilder != null){
+            waypointList.add(mWaypoint);
+            waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
+        }else{
+            waypointMissionBuilder = new WaypointMission.Builder();
+            waypointList.add(mWaypoint);
+            waypointMissionBuilder.waypointList(waypointList).waypointCount(waypointList.size());
         }
     }
 
@@ -1125,18 +1174,18 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         }else{
             waypointMissionBuilder.finishedAction(mFinishedAction).headingMode(mHeadingMode).autoFlightSpeed(mSpeed).maxFlightSpeed(mSpeed).flightPathMode(WaypointMissionFlightPathMode.NORMAL);
         }
-        //        if(waypointMissionBuilder.getWaypointList().size() > 0){
-        //            for(int i = 0; i < waypointMissionBuilder.getWaypointList().size(); i++){
-        //                waypointMissionBuilder.getWaypointList().get(i).altitude = altitude;
-        //            }
-        //        }
-        logger.info(TAG + "Set Waypoint attitude successfully");
+//        if(waypointMissionBuilder.getWaypointList().size() > 0){
+//            for(int i = 0; i < waypointMissionBuilder.getWaypointList().size(); i++){
+//                waypointMissionBuilder.getWaypointList().get(i).altitude = altitude;
+//            }
+//        }
+        logger.info(TAG+"Set Waypoint attitude successfully");
         DJIError error = getWaypointMissionOperator().loadMission(waypointMissionBuilder.build());
         if(error == null){
-            logger.info(TAG + "loadWaypoint succeeded");
+            logger.info(TAG+"loadWaypoint succeeded");
         }else{
-            ToastUtil.showToast(getApplicationContext(), error.getDescription());
-            logger.error(TAG + "loadWaypoint failed " + error.getDescription());
+            ToastUtil.showToast(getApplicationContext(),error.getDescription());
+            logger.error(TAG+"loadWaypoint failed " + error.getDescription());
         }
     }
 
@@ -1151,22 +1200,23 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
 
         @Override
         public void onExecutionUpdate(WaypointMissionExecutionEvent executionEvent){
-            logger.info(TAG + "onExecutionUpdate--" + executionEvent);
+            logger.info(TAG+"onExecutionUpdate--"+executionEvent);
+
         }
 
         @Override
         public void onExecutionStart(){
-            logger.info(TAG + "--onExecutionStart");
+            logger.info(TAG+"--onExecutionStart");
             patrol = true;
-            ToastUtil.showToast(getApplicationContext(), "开始巡航");
+            ToastUtil.showToast(getApplicationContext(),"开始巡航");
         }
 
         @Override
         public void onExecutionFinish(@Nullable final DJIError error){
             waypointList.clear();
             patrol = false;
-            logger.error(TAG + "Execution finished: " + (error == null ? "Success!" : error.getDescription()));
-            ToastUtil.showToast(getApplicationContext(), "Execution finished: " + (error == null ? "Success!" : error.getDescription()));
+            logger.error(TAG+"Execution finished: " + (error == null ? "Success!" : error.getDescription()));
+            ToastUtil.showToast(getApplicationContext(),"Execution finished: " + (error == null ? "Success!" : error.getDescription()));
             //            setResultToToast();
         }
     };
@@ -1184,68 +1234,74 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         getWaypointMissionOperator().startMission(new CommonCallbacks.CompletionCallback(){
             @Override
             public void onResult(DJIError error){
-                logger.info(TAG + "Mission Start: " + (error == null ? "Successfully" : error.getDescription()));
-                //                ToastUtil.showToast(getApplicationContext(),"Mission Start: " + (error == null ? "Successfully" : error.getDescription()));
+                logger.info(TAG+"Mission Start: " + (error == null ? "Successfully" : error.getDescription()));
+//                ToastUtil.showToast(getApplicationContext(),"Mission Start: " + (error == null ? "Successfully" : error.getDescription()));
                 //                setResultToToast("Mission Start: " + (error == null ? "Successfully" : error.getDescription()));
-                if(error != null){
+                if(error !=null){
                     waypointList.clear();
-                    logger.info("开始巡航任务失败:" + error.getDescription());
+                    logger.info("开始巡航任务失败:"+error.getDescription());
                 }
             }
         });
     }
 
     private void uploadWayPointMission(){
-        getWaypointMissionOperator().uploadMission(new CommonCallbacks.CompletionCallback(){
+
+        getWaypointMissionOperator().uploadMission(new CommonCallbacks.CompletionCallback() {
             @Override
-            public void onResult(DJIError error){
-                if(error == null){
-                    logger.info(TAG + "--Mission upload successfully!");
-                    ToastUtil.showToast(getApplicationContext(), TAG + "--Mission upload successfully!");
+            public void onResult(DJIError error) {
+                if (error == null) {
+                    logger.info(TAG+"--Mission upload successfully!");
+                    ToastUtil.showToast(getApplicationContext(),TAG+"--Mission upload successfully!");
                     startWaypointMission();
-                }else{
-                    logger.info(TAG + "--Mission upload failed, error: " + error.getDescription() + " retrying...");
-                    waypointList.clear();
+                } else {
+                    logger.info(TAG+"--Mission upload failed, error: " + error.getDescription() + " retrying...");
                     getWaypointMissionOperator().retryUploadMission(null);
+                    waypointList.clear();
                 }
             }
         });
+
     }
 
     private void stopWaypointMission(){
-        getWaypointMissionOperator().stopMission(new CommonCallbacks.CompletionCallback(){
+
+        getWaypointMissionOperator().stopMission(new CommonCallbacks.CompletionCallback() {
             @Override
-            public void onResult(DJIError error){
-                logger.info(TAG + "Mission Stop: " + (error == null ? "Successfully" : error.getDescription()));
-                ToastUtil.showToast(getApplicationContext(), "Mission Stop: " + (error == null ? "Successfully" : error.getDescription()));
+            public void onResult(DJIError error) {
+                logger.info(TAG+"Mission Stop: " + (error == null ? "Successfully" : error.getDescription()));
+                ToastUtil.showToast(getApplicationContext(),"Mission Stop: " + (error == null ? "Successfully" : error.getDescription()));
                 waypointList.clear();
             }
         });
+
     }
 
     //Add Listener for WaypointMissionOperator
-    private void addListener(){
-        if(getWaypointMissionOperator() != null){
+    private void addListener() {
+        if (getWaypointMissionOperator() != null){
             getWaypointMissionOperator().addListener(eventNotificationListener);
         }
     }
 
-    private void removeListener(){
-        if(getWaypointMissionOperator() != null){
+    private void removeListener() {
+        if (getWaypointMissionOperator() != null) {
             getWaypointMissionOperator().removeListener(eventNotificationListener);
         }
     }
 
     private void setHomeLocation(){
         Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-        if(aircraft != null){
+        if(aircraft !=null){
             aircraft.getFlightController().setHomeLocationUsingAircraftCurrentLocation(djiError -> {
                 if(djiError == null){
-                    logger.info(TAG + "返航位置设置成功");
-                }else{
-                    logger.error(TAG + "返航位置设置失败：" + djiError);
+                    logger.info(TAG+"返航位置设置成功");
+                }else {
+                    logger.error(TAG+"返航位置设置失败："+djiError);
                 }
             });
         }
     }
+
+
 }
