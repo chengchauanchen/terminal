@@ -2048,6 +2048,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             transponMessage.messageType = MessageType.AUDIO.getCode();
             transponGroupCallMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
         }
+        if (transponMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()) {
+            transponShortTextMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
+        }
     }
 
     /**

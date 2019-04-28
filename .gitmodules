@@ -1,12 +1,12 @@
 [submodule "TerminalCommon"]
 	path = TerminalCommon
-	url = http://www.vsxin.com:4040/converged/TerminalCommon.git
+	url = http://106.12.21.229:4040/converged/TerminalCommon.git
 [submodule "common"]
 	path = common
-	url = http://www.vsxin.com:4040/converged/common.git
+	url = http://106.12.21.229:4040/converged/common.git
 [submodule "ProtoBuf"]
 	path = ProtoBuf
-	url = http://www.vsxin.com:4040/converged/ProtoBuf.git
+	url = http://106.12.21.229:4040/converged/ProtoBuf.git
 [submodule "DDPush"]
 	path = DDPush
-	url = http://www.vsxin.com:4040/converged/DDPush.git
+	url = http://106.12.21.229:4040/converged/DDPush.git

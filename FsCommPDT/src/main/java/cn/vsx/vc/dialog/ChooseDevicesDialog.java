@@ -108,7 +108,13 @@ public class ChooseDevicesDialog extends Dialog {
 
     public void showDialog() {
         if (list != null && !list.isEmpty()) {
-            show();
+            if(list.size() == 1){
+                if(mItemClickListener!=null){
+                    mItemClickListener.onItemClick(this,list.get(0));
+                }
+            }else{
+                show();
+            }
         }else{
             ToastUtil.showToast(getContext(),getContext().getString(R.string.no_use_devices));
         }
@@ -165,6 +171,7 @@ public class ChooseDevicesDialog extends Dialog {
             Member m = new Member();
             m.type = TerminalMemberType.TERMINAL_PHONE.getCode();
             m.setUniqueNo(0);
+            m.setPhone(account.getPhone());
             result.add(m);
         }
         return result;

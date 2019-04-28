@@ -6,6 +6,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.text.Editable;
 import android.text.InputType;
@@ -50,7 +51,7 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
     private AudioManager am = null;
     private String str="";
     private ProgressDialog myProgressDialog;
-    private Handler myHandler = new Handler(){
+    private Handler myHandler = new Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(Message msg){
             super.handleMessage(msg);
@@ -148,6 +149,7 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                 TerminalFactory.getSDK().getThreadPool().execute(() -> {
                     Account account = DataUtil.getAccountByMemberNo(callId,true);
                     myHandler.post(() -> {
+                        DialPopupwindow.this.dismiss();
                         dismissProgressDialog();
                         if(account == null){
                          ToastUtil.showToast(context,context.getString(R.string.text_has_no_found_this_user));
@@ -161,9 +163,10 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                 });
             } catch (NumberFormatException e) {
                 e.printStackTrace();
+                dismiss();
             }
 //                text.setText("");
-            dismiss();
+
         });
         btDiss.setOnClickListener(view -> dismiss());
         createProgressDialog();
