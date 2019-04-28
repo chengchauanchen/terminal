@@ -10,6 +10,7 @@ import android.os.Message;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
@@ -277,12 +278,20 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
     @Override
     public void goToWatch(TerminalMessage item) {
         if (isGroupVideoLiving) {
+            String callId = "";
+            if(item!=null&&item.messageBody!=null&&!TextUtils.isEmpty(item.messageBody.toJSONString())&&item.messageBody.containsKey(JsonParam.CALLID)){
+                callId = item.messageBody.getString(JsonParam.CALLID);
+            }else{
+                return;
+            }
+
+            String finalCallId = callId;
             MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
                 String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
                 int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
                 String url = "http://" + serverIp + ":" + serverPort + "/file/download/isLiving";
                 Map<String, String> paramsMap = new HashMap<>();
-                paramsMap.put("callId", "");
+                paramsMap.put("callId", finalCallId);
                 paramsMap.put("sign", SignatureUtil.sign(paramsMap));
 //             logger.info("查看视频播放是否结束url：" + url);
                 String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);

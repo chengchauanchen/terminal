@@ -388,6 +388,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         sendFailMap.put(userId + "", allFailMessageList);
         MyTerminalFactory.getSDK().putSerializable(Params.MESSAGE_SEND_FAIL, sendFailMap);
         groupCallList.removeOnLayoutChangeListener(myOnLayoutChangeListener);
+        handler.removeCallbacksAndMessages(null);
     }
 
 
