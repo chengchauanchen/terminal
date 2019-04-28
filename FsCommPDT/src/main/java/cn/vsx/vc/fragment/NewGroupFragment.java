@@ -144,14 +144,13 @@ public class NewGroupFragment extends BaseFragment{
         public void handler(int errorCode, String errorDesc){
             logger.info("收到转组消息：" + errorCode + "/" + errorDesc);
             if(errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()){
-                CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
-                //                myHandler.post(() -> {
-                //                    GroupResponse mGroupResponse = MyTerminalFactory.getSDK().getConfigManager().getAllGroupInfo();
-                //                    if(mGroupResponse == null){
-                //                        return;
-                //                    }
-                //                    groupAdapter.notifyDataSetChanged();
-                //                });
+                myHandler.post(new Runnable(){
+                    @Override
+                    public void run(){
+                        CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
+                        groupAdapter.notifyDataSetChanged();
+                    }
+                });
             }else{
                 ToastUtil.showToast(MyApplication.instance, errorDesc);
             }

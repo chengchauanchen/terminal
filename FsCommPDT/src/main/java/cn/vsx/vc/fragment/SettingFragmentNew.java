@@ -119,7 +119,7 @@ public class SettingFragmentNew extends BaseFragment {
     public void initView() {
         activity = getActivity();
         setVideoIcon();
-        setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
+        setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
         voice_image.setOnClickListener(view -> {
             if(!soundOff){
                 voice_image.setImageResource(R.drawable.volume_off_call);
@@ -306,7 +306,7 @@ public class SettingFragmentNew extends BaseFragment {
             mHandler.post(() -> {
                 speaking_name.setVisibility(View.GONE);
                 icon_laba.setVisibility(View.GONE);
-                setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
+                setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
             });
         }
     };
@@ -321,7 +321,7 @@ public class SettingFragmentNew extends BaseFragment {
                     logger.info("sjl_设置页面的组呼到来"+speaking_name.getVisibility()+",正在说话人的名字："+MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
                     String speakingName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
                     speaking_name.setText(speakingName);
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(groupId).name);
+                    setting_group_name.setText(DataUtil.getGroupName(groupId));
                 });
             }
 
@@ -330,7 +330,7 @@ public class SettingFragmentNew extends BaseFragment {
     private ReceiveChangeGroupHandler receiveChangeGroupHandler = new ReceiveChangeGroupHandler() {
         @Override
         public void handler(int errorCode, String errorDesc) {
-            mHandler.post(() -> setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name));
+            mHandler.post(() -> setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0))));
         }
     };
 
@@ -342,7 +342,7 @@ public class SettingFragmentNew extends BaseFragment {
         public void handler() {
             mHandler.post(() -> {
                 int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
+                setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
             });
         }
     };
@@ -369,7 +369,7 @@ public class SettingFragmentNew extends BaseFragment {
             }
             mHandler.post(() -> {
                 int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
+                setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
             });
         }
     };

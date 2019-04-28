@@ -1081,12 +1081,12 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUnreadMessageAdd1Handler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
         ptt.setOnTouchListener(new OnPttTouchListenerImplementation());
-        talkback_change_session.setOnClickListener(v -> GroupCallNewsActivity.startCurrentActivity(context, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0), DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name, speakingId, speakingName));
+        talkback_change_session.setOnClickListener(v -> GroupCallNewsActivity.startCurrentActivity(context, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0), DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)), speakingId, speakingName));
         to_current_group.setOnClickListener(view -> {
             if (DataUtil.isExistGroup(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0))) {
                 Intent intent = new Intent(MyApplication.instance, GroupMemberActivity.class);
                 intent.putExtra("groupId", MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
-                intent.putExtra("groupName", DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
+                intent.putExtra("groupName", DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
                 startActivity(intent);
             } else {
                 ToastUtil.showToast(context, getString(R.string.text_unkown_error_member_not_in_this_group));
@@ -1135,9 +1135,8 @@ public class TalkbackFragment extends BaseFragment {
     }
 
     private void setCurrentGroupView() {
-        tv_current_group.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
-
-        tv_current_folder.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).getDepartmentName());
+        tv_current_group.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
+        tv_current_folder.setText(DataUtil.getGroupDepartmentName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
         online_number = MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size();
         tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members),online_number));
     }
@@ -1153,8 +1152,8 @@ public class TalkbackFragment extends BaseFragment {
     }
 
     private void setCurrentGroupScanView(final int groupId) {
-        tv_current_group.setText(DataUtil.getGroupByGroupNo(groupId).name);
-        tv_current_folder.setText(DataUtil.getGroupByGroupNo(groupId).getDepartmentName());
+        tv_current_group.setText(DataUtil.getGroupName(groupId));
+        tv_current_folder.setText(DataUtil.getGroupDepartmentName(groupId));
     }
 
     private void setChangeGroupView() {

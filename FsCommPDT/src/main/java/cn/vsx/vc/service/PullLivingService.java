@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ResultReceiver;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.TextureView;
@@ -39,7 +38,6 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -54,7 +52,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberStopWatchMes
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseWatchLiveAndTempGroupMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
@@ -317,7 +314,7 @@ public class PullLivingService extends BaseService{
         }else{
             mHandler.post(() -> {
                 mLlLiveGroupCall.setVisibility(View.VISIBLE);
-                mTvLiveGroupName.setText(DataUtil.getGroupByGroupNo(groupId).name);
+                mTvLiveGroupName.setText(DataUtil.getGroupName(groupId));
                 mTvLiveSpeakingName.setText(memberName);
                 mTvLiveSpeakingId.setText(HandleIdUtil.handleId(memberId));
             });
@@ -789,7 +786,7 @@ public class PullLivingService extends BaseService{
                 mTvLiveSpeakingId.setText(HandleIdUtil.handleId(MyApplication.instance.groupCallMember.getId()));
             }
             if(MyApplication.instance.currentCallGroupId !=-1){
-                mTvLiveGroupName.setText(DataUtil.getGroupByGroupNo(MyApplication.instance.currentCallGroupId).name);
+                mTvLiveGroupName.setText(DataUtil.getGroupName(MyApplication.instance.currentCallGroupId));
             }
         }
     }

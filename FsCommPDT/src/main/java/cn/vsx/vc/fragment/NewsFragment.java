@@ -208,7 +208,7 @@ public class NewsFragment extends BaseFragment {
         if (groupMessageRecord.size() == 0) {
             terminalMessage = new TerminalMessage();
             terminalMessage.messageToId = groupId;
-            terminalMessage.messageToName = DataUtil.getGroupByGroupNo(terminalMessage.messageToId).name;
+            terminalMessage.messageToName = DataUtil.getGroupName(terminalMessage.messageToId);
             terminalMessage.messageCategory = MessageCategory.MESSAGE_TO_GROUP.getCode();
             saveMemberMap(terminalMessage);
         } else {
@@ -269,7 +269,7 @@ public class NewsFragment extends BaseFragment {
         if (groupMessageRecord.size() == 0) {
             terminalMessage = new TerminalMessage();
             terminalMessage.messageToId = MyTerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0);
-            terminalMessage.messageToName = DataUtil.getGroupByGroupNo(terminalMessage.messageToId).name;
+            terminalMessage.messageToName = DataUtil.getGroupName(terminalMessage.messageToId);
             terminalMessage.messageCategory = MessageCategory.MESSAGE_TO_GROUP.getCode();
             saveMemberMap(terminalMessage);
         } else {
@@ -329,7 +329,7 @@ public class NewsFragment extends BaseFragment {
     @Override
     public void initView() {
         setVideoIcon();
-        setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
+        setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
         voice_image.setOnClickListener(view -> {
             if(!soundOff){
                 voice_image.setImageResource(R.drawable.volume_off_call);
@@ -513,14 +513,14 @@ public class NewsFragment extends BaseFragment {
                 context.startActivity(intent);
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//进入组会话页
-                if (TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())) {
+                if (TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getTempGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())) {
                     combatFragmentCreate = true;
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveGoToHelpCombatHandler.class, false, false);
                 } else {
                     Intent intent = new Intent(context, GroupCallNewsActivity.class);
                     intent.putExtra("isGroup", true);
                     intent.putExtra("userId", terminalMessage.messageToId);//组id
-                    intent.putExtra("userName", DataUtil.getGroupByGroupNo(terminalMessage.messageToId).getName());
+                    intent.putExtra("userName", DataUtil.getGroupName(terminalMessage.messageToId));
                     intent.putExtra("speakingId",speakingId);
                     intent.putExtra("speakingName",speakingName);
                     context.startActivity(intent);
@@ -568,7 +568,7 @@ public class NewsFragment extends BaseFragment {
                     logger.info("sjl_消息页面的组呼到来"+speaking_name.getVisibility()+",正在说话人的名字："+MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
                     String speakingName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
                     showViewWhenGroupCall(speakingName);
-                    setting_group_name.setText(DataUtil.getGroupByGroupNo(groupId).name);
+                    setting_group_name.setText(DataUtil.getGroupName(groupId));
                 });
             }
 
@@ -581,8 +581,8 @@ public class NewsFragment extends BaseFragment {
             mHandler.post(() -> {
                 hideViewWhenStopGroupCall();
                 setViewEnable(true);
-                setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK()
-                        .getParam(Params.CURRENT_GROUP_ID, 0)).name);
+                setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK()
+                        .getParam(Params.CURRENT_GROUP_ID, 0)));
             });
         }
     };
@@ -601,10 +601,13 @@ public class NewsFragment extends BaseFragment {
                         && terminalMessage.resultCode==0) {
                     saveVideoMessage(terminalMessage,false);
                 }
-            }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())){
-                saveHelpCombatMessage(terminalMessage, false);
-                saveHelpCombatMessageToSql(terminalMessage);
+            }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
+                //合成作战组消息，只存一个条目
+                Group group = DataUtil.getTempGroupByGroupNo(terminalMessage.messageToId);
+                if(null !=group && TempGroupType.TO_HELP_COMBAT.toString().equals(group.getTempGroupType())){
+                    saveHelpCombatMessage(terminalMessage, false);
+                    saveHelpCombatMessageToSql(terminalMessage);
+                }
             }else {
                 saveMessageToList(terminalMessage,false);
             }
@@ -625,7 +628,7 @@ public class NewsFragment extends BaseFragment {
             while (iterator.hasNext()){
                 TerminalMessage next = iterator.next();
                 if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                        TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
+                        TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getTempGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
                         next.messageToId == terminalMessage.messageToId){
                     iterator.remove();
                     break;
@@ -644,7 +647,7 @@ public class NewsFragment extends BaseFragment {
             while (iterator.hasNext()){
                 TerminalMessage next = iterator.next();
                 if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                        TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
+                        TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getTempGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
                         next.messageToId == combatGroupId){
                     handleMessage = next;
                     iterator.remove();
@@ -669,7 +672,7 @@ public class NewsFragment extends BaseFragment {
         while (iterator.hasNext()){
             TerminalMessage next = iterator.next();
             if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType())){
+                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getTempGroupByGroupNo(next.messageToId)).getTempGroupType())){
                 unReadCount = next.unReadCount;
                 iterator.remove();
                 break;
@@ -877,7 +880,7 @@ public class NewsFragment extends BaseFragment {
         public void handler(boolean isActive, int responseGroupId){
             mHandler.post(() -> {
                 if(isActive){
-                    idNameMap.put(responseGroupId, DataUtil.getGroupByGroupNo(responseGroupId).getName());
+                    idNameMap.put(responseGroupId, DataUtil.getGroupName(responseGroupId));
                     //将当前相应组置顶
 //                    setFirstResponseMessage(responseGroupId);
                 }else {
@@ -1263,7 +1266,7 @@ public class NewsFragment extends BaseFragment {
                     Group targetGroup = DataUtil.getGroupByGroupNo(currentGroupId);
                     idNameMap.put(currentGroupId,targetGroup.getName());
                     TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
-                    setting_group_name.setText(targetGroup.getName());
+                    setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
 //                    sortMessageList();
                     sortFirstMessageList();
                 }
@@ -1280,7 +1283,7 @@ public class NewsFragment extends BaseFragment {
                 }
             }else {
                 int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                mHandler.post(()-> setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).getName()));
+                mHandler.post(()-> setting_group_name.setText(DataUtil.getGroupName(currentGroupId)));
                 //合成作战组处理完成后，刷新完成列表
                 if (TempGroupType.TO_HELP_COMBAT.equals(tempGroupType)) {
                     saveHistoryHelpCombatMessageToSql(tempGroupNo);
@@ -1298,7 +1301,7 @@ public class NewsFragment extends BaseFragment {
             }
             mHandler.post(() -> {
                 int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
+                setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
 //                sortMessageList();
                 sortFirstMessageList();
             });
@@ -1352,10 +1355,10 @@ public class NewsFragment extends BaseFragment {
         public void handler() {
             mHandler.post(() -> {
                 int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
+                setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
                 for (TerminalMessage terminalMessage : messageList) {
                     if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息
-                        terminalMessage.messageToName = DataUtil.getGroupByGroupNo(terminalMessage.messageToId).name;
+                        terminalMessage.messageToName = DataUtil.getGroupName(terminalMessage.messageToId);
                         saveMemberMap(terminalMessage);
                     }
                 }
@@ -1441,8 +1444,7 @@ public class NewsFragment extends BaseFragment {
                     iterator.remove();//消息列表中移除
                     removeMemberMap(next.messageToId);
                 }else {
-                    Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
-                    next.messageToName = groupInfo.name;
+                    next.messageToName = DataUtil.getGroupName(next.messageToId);
                     saveMemberMap(next);
                 }
             }

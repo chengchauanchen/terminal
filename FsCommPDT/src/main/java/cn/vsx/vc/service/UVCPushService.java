@@ -682,7 +682,7 @@ public class UVCPushService extends BaseService{
                 mTvUvcLiveSpeakingId.setText(HandleIdUtil.handleId(MyApplication.instance.groupCallMember.getId()));
             }
             if(MyApplication.instance.currentCallGroupId !=-1){
-                mTvUvcLiveGroupName.setText(DataUtil.getGroupByGroupNo(MyApplication.instance.currentCallGroupId).name);
+                mTvUvcLiveGroupName.setText(DataUtil.getGroupName(MyApplication.instance.currentCallGroupId));
             }
         }
     }

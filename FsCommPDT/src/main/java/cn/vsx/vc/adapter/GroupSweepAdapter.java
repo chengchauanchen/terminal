@@ -58,7 +58,7 @@ public class GroupSweepAdapter extends BaseAdapter {
         }else {
             viewHoder=(ViewHoder) view.getTag();
         }
-            viewHoder.tv_sweep_group.setText(DataUtil.getGroupByGroupNo(list.get(i)).name);
+            viewHoder.tv_sweep_group.setText(DataUtil.getGroupName(list.get(i)));
             viewHoder.iv_delete.setOnClickListener(view1 -> {
                 memberIds.clear();
                 memberIds.add(list.get(i));

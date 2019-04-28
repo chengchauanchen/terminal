@@ -533,13 +533,13 @@ public class LockScreenActivity extends BaseActivity {
     }
 
     private void setCurrentGroupView() {
-        tv_current_group.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
-        tv_current_folder.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).getDepartmentName());
+        tv_current_group.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
+        tv_current_folder.setText(DataUtil.getGroupDepartmentName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
     }
 
     private void setCurrentGroupScanView(final int groupId) {
-        tv_current_group.setText(DataUtil.getGroupByGroupNo(groupId).name);
-        tv_current_folder.setText(DataUtil.getGroupByGroupNo(groupId).getDepartmentName());
+        tv_current_group.setText(DataUtil.getGroupName(groupId));
+        tv_current_folder.setText(DataUtil.getGroupDepartmentName(groupId));
     }
 
     @Override

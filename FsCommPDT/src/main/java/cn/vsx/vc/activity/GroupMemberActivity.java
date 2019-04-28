@@ -1,7 +1,6 @@
 package cn.vsx.vc.activity;
 
 import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.Display;
@@ -140,31 +139,36 @@ public class GroupMemberActivity extends BaseActivity {
     public void initData() {
         groupId = getIntent().getIntExtra("groupId", 0);
         groupName = getIntent().getStringExtra("groupName");
-        Group group = DataUtil.getGroupByGroupNo(groupId);
-        isTemporaryGroup = group.getDeptId() == -1;
-        //只有自己创建的临时组才能添加和删除人
-        if(group.getCreatedMemberNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,-1) && isTemporaryGroup){
-            canAdd = true;
+        Group group =DataUtil.getTempGroupByGroupNo(groupId);
+        if(null ==group){
+            group = DataUtil.getGroupByGroupNo(groupId);
         }
-        rightBtn.setVisibility(View.GONE);
-        ok_btn.setVisibility(View.GONE);
-        logger.info( "是否为我创建的临时组:" + canAdd+"-----groupNo："+groupId);
-        if(isTemporaryGroup){
-            in_title_bar.setVisibility(View.GONE);
-            temp_title_bar.setVisibility(View.VISIBLE);
+        if(group != null){
+            isTemporaryGroup = group.getDeptId() == -1;
+            if(group.getCreatedMemberNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,-1) && isTemporaryGroup){
+                canAdd = true;
+            }
             rightBtn.setVisibility(View.GONE);
             ok_btn.setVisibility(View.GONE);
-            if(!canAdd){
-                add_btn.setVisibility(View.GONE);
-                delete_btn.setVisibility(View.GONE);
+            logger.info( "是否为我创建的临时组:" + canAdd+"-----groupNo："+groupId);
+            if(isTemporaryGroup){
+                in_title_bar.setVisibility(View.GONE);
+                temp_title_bar.setVisibility(View.VISIBLE);
+                rightBtn.setVisibility(View.GONE);
+                ok_btn.setVisibility(View.GONE);
+                if(!canAdd){
+                    add_btn.setVisibility(View.GONE);
+                    delete_btn.setVisibility(View.GONE);
+                }
+            }else {
+                in_title_bar.setVisibility(View.VISIBLE);
+                temp_title_bar.setVisibility(View.GONE);
             }
-        }else {
-            in_title_bar.setVisibility(View.VISIBLE);
-            temp_title_bar.setVisibility(View.GONE);
-        }
 
-        sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, false);
-        memberList.setAdapter(sortAdapter);
+            sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, false);
+            memberList.setAdapter(sortAdapter);
+            //只有自己创建的临时组才能添加和删除人
+        }
     }
 
     @Override
@@ -291,11 +295,17 @@ public class GroupMemberActivity extends BaseActivity {
                     return;
                 }
                 GroupMemberActivity.this.groupId = groupId;
-                Group group = DataUtil.getGroupByGroupNo(groupId);
-                isTemporaryGroup = group.getDeptId() == -1;
-                //只有自己创建的临时组才能添加和删除人
-                if(group.getCreatedMemberNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,-1) && isTemporaryGroup){
-                    canAdd = true;
+                Group group =DataUtil.getTempGroupByGroupNo(groupId);
+                if(null ==group){
+                    group = DataUtil.getGroupByGroupNo(groupId);
+                }
+                if(group !=null){
+                    isTemporaryGroup = group.getDeptId() == -1;
+                    //只有自己创建的临时组才能添加和删除人
+                    if(group.getCreatedMemberNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,-1) && isTemporaryGroup){
+                        canAdd = true;
+                    }
+
                 }
                 currentGroupMembers.clear();
                 currentGroupMembers.addAll(memberList);

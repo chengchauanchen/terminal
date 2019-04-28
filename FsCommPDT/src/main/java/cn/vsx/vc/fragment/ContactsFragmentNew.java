@@ -104,7 +104,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         setVideoIcon();
         childFragmentManager = getChildFragmentManager();
         initFragment();
-        setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
+        setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
         TextViewCompat.setTextAppearance(group_tv,R.style.contacts_title_checked_text);
         TextViewCompat.setTextAppearance(shoutai_tv,R.style.contacts_title_unchecked_text);
         TextViewCompat.setTextAppearance(jingwutong_tv,R.style.contacts_title_unchecked_text);
@@ -214,7 +214,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     private ReceiveChangeGroupHandler receiveChangeGroupHandler = new ReceiveChangeGroupHandler() {
         @Override
         public void handler(int errorCode, String errorDesc) {
-            mHandler.post(() -> setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name));
+            mHandler.post(() -> setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0))));
         }
     };
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
@@ -258,7 +258,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         @Override
         public void handler(int reasonCode) {
             mHandler.post(() -> {
-                setting_group_name.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
+                setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
                 speaking_name.setVisibility(View.GONE);
                 icon_laba.setVisibility(View.GONE);
             });
@@ -272,7 +272,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         public void handler() {
             mHandler.post(() -> {
                 int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
+                setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
             });
         }
     };
@@ -299,7 +299,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
             }
             mHandler.post(() -> {
                 int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                setting_group_name.setText(DataUtil.getGroupByGroupNo(currentGroupId).name);
+                setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
             });
         }
     };

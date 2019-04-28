@@ -541,7 +541,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
                         if (!MyApplication.instance.isPttViewPager || !MyApplication.instance.isTalkbackFragment) {
                             if (!ll_groupCall_prompt.isShown()) {
-                                tv_current_group.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
+                                tv_current_group.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
                                 ICTV_groupCall_time.start();
                             }
                         }
@@ -1669,7 +1669,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             }
         }else {
             // 如果是F25机型，返回到主通话界面
-            imgbtn_ptt.setText(DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).name);
+            imgbtn_ptt.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
         }
     }
 

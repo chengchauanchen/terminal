@@ -28,7 +28,6 @@ import org.easydarwin.push.MediaStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -292,7 +291,7 @@ public class PhonePushService extends BaseService{
         }else{
             mHandler.post(() -> {
                 mLlLiveGroupCall.setVisibility(View.VISIBLE);
-                mTvLiveGroupName.setText(DataUtil.getGroupByGroupNo(groupId).name);
+                mTvLiveGroupName.setText(DataUtil.getGroupName(groupId));
                 mTvLiveSpeakingName.setText(memberName);
                 mTvLiveSpeakingId.setText(HandleIdUtil.handleId(memberId));
             });
@@ -756,7 +755,7 @@ public class PhonePushService extends BaseService{
                 mTvLiveSpeakingId.setText(HandleIdUtil.handleId(MyApplication.instance.groupCallMember.getId()));
             }
             if(MyApplication.instance.currentCallGroupId !=-1){
-                mTvLiveGroupName.setText(DataUtil.getGroupByGroupNo(MyApplication.instance.currentCallGroupId).name);
+                mTvLiveGroupName.setText(DataUtil.getGroupName(MyApplication.instance.currentCallGroupId));
             }
         }
     }

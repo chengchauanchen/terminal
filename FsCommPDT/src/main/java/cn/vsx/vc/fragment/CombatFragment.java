@@ -148,7 +148,7 @@ public abstract class CombatFragment extends BaseFragment {
                 if(isAdd){
                     //有新的合成作战组,会在发送消息时弹出来
                     TerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod("", "",
-                            DataUtil.getGroupByGroupNo(tempGroupNo).getUniqueNo()+"", 0, 1);
+                            DataUtil.getTempGroupByGroupNo(tempGroupNo).getUniqueNo()+"", 0, 1);
                 }else {
                     //合成作战组完成,从处理列表移到历史列表
                     saveHistoryHelpCombatMessageToSql(tempGroupNo);
@@ -201,7 +201,7 @@ public abstract class CombatFragment extends BaseFragment {
             terminalMessageData.addAll(messageList);
             //合成作战组消息，只存一个条目
             if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() &&
-                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())){
+                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getTempGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())){
                 saveMessageToList(terminalMessage,false);
                 saveHelpCombatMessageToSql(terminalMessage);//来合成作战组消息了，刷新并保存列表
             }
@@ -219,7 +219,7 @@ public abstract class CombatFragment extends BaseFragment {
         while (iterator.hasNext()){
             TerminalMessage next = iterator.next();
             if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
+                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getTempGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
                     next.messageToId == terminalMessage.messageToId){
                 iterator.remove();
                 break;
@@ -236,7 +236,7 @@ public abstract class CombatFragment extends BaseFragment {
         while (iterator.hasNext()){
             TerminalMessage next = iterator.next();
             if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
+                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getTempGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
                     next.messageToId == combatGroupId){
                 handleMessage = next;
                 iterator.remove();
@@ -277,7 +277,7 @@ public abstract class CombatFragment extends BaseFragment {
                     iterator.remove();//消息列表中移除
                     removeMemberMap(next.messageToId);
                 }else {
-                    Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
+                    Group groupInfo = DataUtil.getTempGroupByGroupNo(next.messageToId);
                     next.messageToName = groupInfo.name;
                     saveMemberMap(next);
                 }
@@ -534,7 +534,7 @@ public abstract class CombatFragment extends BaseFragment {
             Intent intent = new Intent(context, GroupCallNewsActivity.class);
             intent.putExtra("isGroup", true);
             intent.putExtra("userId", terminalMessage.messageToId);//组id
-            intent.putExtra("userName", DataUtil.getGroupByGroupNo(terminalMessage.messageToId).getName());
+            intent.putExtra("userName", DataUtil.getGroupName(terminalMessage.messageToId));
             context.startActivity(intent);
         }
     }

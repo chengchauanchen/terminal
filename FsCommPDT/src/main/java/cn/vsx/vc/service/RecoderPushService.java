@@ -57,7 +57,6 @@ import cn.vsx.vc.adapter.MemberEnterAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
-import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.utils.Constants;
@@ -318,7 +317,7 @@ public class RecoderPushService extends BaseService{
         }else{
             mHandler.post(() -> {
                 mLlLiveGroupCall.setVisibility(View.VISIBLE);
-                mTvLiveGroupName.setText(DataUtil.getGroupByGroupNo(groupId).name);
+                mTvLiveGroupName.setText(DataUtil.getGroupName(groupId));
                 mTvLiveSpeakingName.setText(memberName);
                 mTvLiveSpeakingId.setText(HandleIdUtil.handleId(memberId));
             });
@@ -635,7 +634,7 @@ public class RecoderPushService extends BaseService{
                 mTvLiveSpeakingId.setText(HandleIdUtil.handleId(MyApplication.instance.groupCallMember.getId()));
             }
             if(MyApplication.instance.currentCallGroupId !=-1){
-                mTvLiveGroupName.setText(DataUtil.getGroupByGroupNo(MyApplication.instance.currentCallGroupId).name);
+                mTvLiveGroupName.setText(DataUtil.getGroupName(MyApplication.instance.currentCallGroupId));
             }
         }
     }

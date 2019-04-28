@@ -22,6 +22,7 @@ import java.util.regex.Pattern;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.NoCodec;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -35,6 +36,53 @@ public class DataUtil {
 	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(DataUtil.class);
 
+	public static String getGroupName(int groupNo){
+		List<Group> allTempGroup = TerminalFactory.getSDK().getConfigManager().getAllTempGroup();
+		for(Group group : allTempGroup){
+			if(groupNo == group.getNo()){
+				return group.getName();
+			}
+		}
+
+		List<Group> allGroups = TerminalFactory.getSDK().getConfigManager().getAllGroups();
+		for(Group group : allGroups){
+			if(groupNo == group.getNo()){
+				return group.getName();
+			}
+		}
+		return "";
+	}
+
+	public static String getGroupDepartmentName(int groupNo){
+		List<Group> allTempGroup = TerminalFactory.getSDK().getConfigManager().getAllTempGroup();
+		for(Group group : allTempGroup){
+			if(groupNo == group.getNo()){
+				return "临时组";
+			}
+		}
+
+		List<Group> allGroups = TerminalFactory.getSDK().getConfigManager().getAllGroups();
+		for(Group group : allGroups){
+			if(groupNo == group.getNo()){
+				return group.getDepartmentName();
+			}
+		}
+		return "";
+	}
+
+	public static Group getTempGroupByGroupNo(int groupNo){
+		List<Group> groupList=MyTerminalFactory.getSDK().getConfigManager().getAllTempGroup();
+		Group group = null;
+		if (null != groupList){
+			for (Group g:groupList){
+				if (groupNo==g.getNo()){
+					group=g;
+					break;
+				}
+			}
+		}
+		return group;
+	}
 
 	/**通过组id，获取到组的对象，id和name*/
 	public static Group getGroupByGroupNo(int groupNo) {
