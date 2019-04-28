@@ -23,7 +23,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +67,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
@@ -114,7 +114,6 @@ public class NewsFragment extends BaseFragment {
     //界面显示的消息列表
     private ArrayList<TerminalMessage> messageList = new ArrayList<>();
     @SuppressLint("UseSparseArrays")
-    private HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
     private boolean soundOff;//是否静音
     private boolean isFirstCall;
     private boolean combatFragmentCreate;
@@ -210,7 +209,6 @@ public class NewsFragment extends BaseFragment {
             terminalMessage.messageToId = groupId;
             terminalMessage.messageToName = DataUtil.getGroupName(terminalMessage.messageToId);
             terminalMessage.messageCategory = MessageCategory.MESSAGE_TO_GROUP.getCode();
-            saveMemberMap(terminalMessage);
         } else {
             //最后一条消息
             terminalMessage = groupMessageRecord.get(groupMessageRecord.size()-1);
@@ -239,7 +237,6 @@ public class NewsFragment extends BaseFragment {
                 clearData();
                 addData(currentResponseGroupMessage);
                 addData(temporaryList);
-                saveMemberMap(currentResponseGroupMessage);
             }
         }
 
@@ -271,7 +268,6 @@ public class NewsFragment extends BaseFragment {
             terminalMessage.messageToId = MyTerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0);
             terminalMessage.messageToName = DataUtil.getGroupName(terminalMessage.messageToId);
             terminalMessage.messageCategory = MessageCategory.MESSAGE_TO_GROUP.getCode();
-            saveMemberMap(terminalMessage);
         } else {
             //最后一条消息
             terminalMessage = groupMessageRecord.get(groupMessageRecord.size()-1);
@@ -309,7 +305,6 @@ public class NewsFragment extends BaseFragment {
             clearData();
             addData(currentGroupMessage);
             addData(temporaryList);
-            saveMemberMap(currentGroupMessage);
         }
 
         if(mMessageListAdapter != null){
@@ -377,7 +372,7 @@ public class NewsFragment extends BaseFragment {
     @Override
     public void initData() {
         loadMessages();
-        mMessageListAdapter = new MessageListAdapter(getContext(), messageList, idNameMap, true, false);
+        mMessageListAdapter = new MessageListAdapter(getContext(), messageList, true, false);
         newsList.setAdapter(mMessageListAdapter);
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(messageList));
     }
@@ -502,14 +497,9 @@ public class NewsFragment extends BaseFragment {
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
                 Intent intent = new Intent(context, IndividualNewsActivity.class);
-                intent.putExtra("isGroup", false);
-                if (isReceiver) {
-                    intent.putExtra("userId", terminalMessage.messageFromId);
-                    intent.putExtra("userName", idNameMap.get(terminalMessage.messageFromId));
-                } else {
-                    intent.putExtra("userId", terminalMessage.messageToId);
-                    intent.putExtra("userName", idNameMap.get(terminalMessage.messageToId));
-                }
+                intent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
+                intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
+                intent.putExtra("userName", TerminalMessageUtil.getName(terminalMessage));
                 context.startActivity(intent);
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//进入组会话页
@@ -518,9 +508,9 @@ public class NewsFragment extends BaseFragment {
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveGoToHelpCombatHandler.class, false, false);
                 } else {
                     Intent intent = new Intent(context, GroupCallNewsActivity.class);
-                    intent.putExtra("isGroup", true);
-                    intent.putExtra("userId", terminalMessage.messageToId);//组id
-                    intent.putExtra("userName", DataUtil.getGroupName(terminalMessage.messageToId));
+                    intent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
+                    intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
+                    intent.putExtra("userName", TerminalMessageUtil.getName(terminalMessage));
                     intent.putExtra("speakingId",speakingId);
                     intent.putExtra("speakingName",speakingName);
                     context.startActivity(intent);
@@ -590,8 +580,6 @@ public class NewsFragment extends BaseFragment {
     /**  接收消息 **/
     private ReceiveNotifyDataMessageHandler mReceiveNotifyDataMessageHandler = terminalMessage -> {
         synchronized(NewsFragment.this){
-            idNameMap.put(terminalMessage.messageFromId, terminalMessage.messageFromName);
-            idNameMap.put(terminalMessage.messageToId, terminalMessage.messageToName);
             terminalMessageData.clear();
             terminalMessageData.addAll(messageList);
             if (terminalMessage.messageFromId == terminalMessage.messageToId
@@ -680,22 +668,6 @@ public class NewsFragment extends BaseFragment {
         }
         terminalMessageData.add(terminalMessage);
         whetherUnReadAdd(unReadCount, terminalMessage,clearUnread,0);
-    }
-
-    /**
-     * 根据id保存名字
-     * @param terminalMessage 消息
-     */
-    @SuppressLint("UseSparseArrays")
-    private void saveMemberMap(TerminalMessage terminalMessage) {
-        idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>()));
-        if(terminalMessage.messageFromId !=0){
-            idNameMap.put(terminalMessage.messageFromId, terminalMessage.messageFromName);
-        }
-        if(terminalMessage.messageToId !=0){
-            idNameMap.put(terminalMessage.messageToId, terminalMessage.messageToName);
-        }
-        TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
     }
 
     /**  下载原图  **/
@@ -880,7 +852,6 @@ public class NewsFragment extends BaseFragment {
         public void handler(boolean isActive, int responseGroupId){
             mHandler.post(() -> {
                 if(isActive){
-                    idNameMap.put(responseGroupId, DataUtil.getGroupName(responseGroupId));
                     //将当前相应组置顶
 //                    setFirstResponseMessage(responseGroupId);
                 }else {
@@ -931,7 +902,6 @@ public class NewsFragment extends BaseFragment {
                 terminalMessageData.clear();
                 terminalMessageData.addAll(messageList);
                 for(TerminalMessage terminalMessage : messageRecord){
-                    saveMemberMap(terminalMessage);
                     if (terminalMessage.messageFromId == terminalMessage.messageToId
                             && terminalMessage.messageToId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//主动播的消息，存入视频助手
                         if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() &&
@@ -1264,8 +1234,6 @@ public class NewsFragment extends BaseFragment {
                 if (errorCode == BaseCommonCode.SUCCESS_CODE) {
                     int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
                     Group targetGroup = DataUtil.getGroupByGroupNo(currentGroupId);
-                    idNameMap.put(currentGroupId,targetGroup.getName());
-                    TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
                     setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
 //                    sortMessageList();
                     sortFirstMessageList();
@@ -1341,7 +1309,6 @@ public class NewsFragment extends BaseFragment {
                     terminalMessage.messageFromName = newMemberName;
                 }
             }
-            saveMemberMap(terminalMessage);
         }
 //        sortMessageList();
         sortFirstMessageList();
@@ -1359,7 +1326,6 @@ public class NewsFragment extends BaseFragment {
                 for (TerminalMessage terminalMessage : messageList) {
                     if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息
                         terminalMessage.messageToName = DataUtil.getGroupName(terminalMessage.messageToId);
-                        saveMemberMap(terminalMessage);
                     }
                 }
                 loadMessages();
@@ -1442,10 +1408,8 @@ public class NewsFragment extends BaseFragment {
                 if(!DataUtil.isExistGroup(next.messageToId)){
                     //说明组列表中没有这个组了
                     iterator.remove();//消息列表中移除
-                    removeMemberMap(next.messageToId);
                 }else {
                     next.messageToName = DataUtil.getGroupName(next.messageToId);
-                    saveMemberMap(next);
                 }
             }
         }
@@ -1463,20 +1427,11 @@ public class NewsFragment extends BaseFragment {
                 Member memberInfo = DataUtil.getMemberInfoByMemberNo(next.messageFromId);
                 if (memberInfo == null){//说明成员列表中没有这个人了
                     iterator.remove();//消息列表中移除
-                    removeMemberMap(next.messageFromId);
                 }else {
                     next.messageFromName = memberInfo.getName();
-                    saveMemberMap(next);
                 }
             }
         }
-    }
-
-    @SuppressLint("UseSparseArrays")
-    private void removeMemberMap(int id) {
-        idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>()));
-        idNameMap.remove(id);
-        TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
     }
 
     private void clearData(){
@@ -1521,7 +1476,6 @@ public class NewsFragment extends BaseFragment {
                         if(!DataUtil.isExistGroup(next.messageToId)){
                             //说明组列表中没有这个组了
                             iterator.remove();//消息列表中移除
-                            removeMemberMap(next.messageToId);
                             continue;
                         }
                         Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
@@ -1539,7 +1493,6 @@ public class NewsFragment extends BaseFragment {
                     if(!DataUtil.isExistGroup(next.messageToId)){
                         //说明组列表中没有这个组了
                         iterator.remove();//消息列表中移除
-                        removeMemberMap(next.messageToId);
                     }
                     //sortResponseGroup();
                 }
@@ -1559,7 +1512,6 @@ public class NewsFragment extends BaseFragment {
             if(!DataUtil.isExistGroup(next.messageToId)){
                 //说明组列表中没有这个组了
                 iterator.remove();//消息列表中移除
-                removeMemberMap(next.messageToId);
                 continue;
             }
             if(next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){

@@ -15,7 +15,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -60,7 +59,6 @@ public abstract class CombatFragment extends BaseFragment {
     protected boolean isGoToHistory;
     private MessageListAdapter mMessageListAdapter;
     @SuppressLint("UseSparseArrays")
-    private HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
     private ArrayList<TerminalMessage> messageList = new ArrayList<>();
     private List<TerminalMessage> terminalMessageData = new ArrayList<>();
     private Handler mHandler = new Handler();
@@ -112,7 +110,7 @@ public abstract class CombatFragment extends BaseFragment {
     @Override
     public void initData() {
         loadMessages();
-        mMessageListAdapter = new MessageListAdapter(getContext(), messageList, idNameMap, false, isGoToHistory);
+        mMessageListAdapter = new MessageListAdapter(getContext(), messageList, false, isGoToHistory);
         help_combat_list.setAdapter(mMessageListAdapter);
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(messageList));
     }
@@ -194,9 +192,7 @@ public abstract class CombatFragment extends BaseFragment {
     private ReceiveNotifyDataMessageHandler mReceiveNotifyDataMessageHandler = terminalMessage -> {
         if (isGoToHistory)//在历史界面，不监听消息
             return;
-        synchronized(this){
-            idNameMap.put(terminalMessage.messageFromId, terminalMessage.messageFromName);
-            idNameMap.put(terminalMessage.messageToId, terminalMessage.messageToName);
+        synchronized(CombatFragment.this){
             terminalMessageData.clear();
             terminalMessageData.addAll(messageList);
             //合成作战组消息，只存一个条目
@@ -275,32 +271,15 @@ public abstract class CombatFragment extends BaseFragment {
                 if(!DataUtil.isExistGroup(next.messageToId)){
                     //说明组列表中没有这个组了,合成作战组任务完成了；
                     iterator.remove();//消息列表中移除
-                    removeMemberMap(next.messageToId);
                 }else {
                     Group groupInfo = DataUtil.getTempGroupByGroupNo(next.messageToId);
                     next.messageToName = groupInfo.name;
-                    saveMemberMap(next);
                 }
             }
         }
     }
-    @SuppressLint("UseSparseArrays")
-    private void saveMemberMap(TerminalMessage terminalMessage) {
-        idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>()));
-        if(terminalMessage.messageFromId !=0){
-            idNameMap.put(terminalMessage.messageFromId, terminalMessage.messageFromName);
-        }
-        if(terminalMessage.messageToId !=0){
-            idNameMap.put(terminalMessage.messageToId, terminalMessage.messageToName);
-        }
-        TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
-    }
-    @SuppressLint("UseSparseArrays")
-    private void removeMemberMap(int id) {
-        idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>()));
-        idNameMap.remove(id);
-        TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
-    }
+
+
     private void saveMessageToList(TerminalMessage terminalMessage,boolean clearUnread){
         boolean isReceiver = terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);//是否为别人发的消息
         if (terminalMessageData.isEmpty()){

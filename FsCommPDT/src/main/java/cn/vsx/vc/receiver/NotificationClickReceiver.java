@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
-import java.util.HashMap;
-
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -17,6 +15,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.PushLiveMessageManageActivity;
+import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 import static android.content.Context.NOTIFICATION_SERVICE;
@@ -35,8 +34,6 @@ public class NotificationClickReceiver extends BroadcastReceiver {
         if(terminalMessage ==null){
             return;
         }
-        HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
-
 
         if(terminalMessage.messageFromId == terminalMessage.messageToId &&
                 terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) &&
@@ -49,17 +46,17 @@ public class NotificationClickReceiver extends BroadcastReceiver {
         else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
             Intent mIntent = new Intent(context, IndividualNewsActivity.class);
             mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mIntent.putExtra("isGroup", false);
-            mIntent.putExtra("userId", terminalMessage.messageFromId);
-            mIntent.putExtra("userName", idNameMap.get(terminalMessage.messageFromId));
+            mIntent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
+            mIntent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
+            mIntent.putExtra("userName", TerminalMessageUtil.getName(terminalMessage));
             context.startActivity(mIntent);
         }
         else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//进入组会话页
             Intent mIntent = new Intent(context, GroupCallNewsActivity.class);
             mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mIntent.putExtra("isGroup", true);
-            mIntent.putExtra("userId", terminalMessage.messageToId);//组id
-            mIntent.putExtra("userName", idNameMap.get(terminalMessage.messageToId));
+            mIntent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
+            mIntent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));//组id
+            mIntent.putExtra("userName", TerminalMessageUtil.getName(terminalMessage));
             mIntent.putExtra("speakingId",terminalMessage.messageFromId);
             mIntent.putExtra("speakingName",terminalMessage.messageFromName);
             context.startActivity(mIntent);

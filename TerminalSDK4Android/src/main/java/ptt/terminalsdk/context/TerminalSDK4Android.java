@@ -29,6 +29,12 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+
 import org.apache.log4j.Level;
 import org.ddpush.im.client.v1.ServerConnectionEstablishedHandler;
 import org.ddpush.im.util.StringUtil;
@@ -45,6 +51,10 @@ import java.io.Serializable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
@@ -226,43 +236,112 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	public double getParam(String param, double defaultValue){
 		return Double.longBitsToDouble(account.getLong(param, Double.doubleToLongBits(defaultValue)));
 	}
-	@SuppressWarnings("unchecked")
+
 	@Override
-	public <T extends Serializable> T getSerializable(String param, T defaultValue) {
-		// 拿出持久化数据  
-        T obj = null;
-        FileInputStream in = null;
-        ObjectInputStream oin = null;
-        try {
-            File file = new File(getSerializableDataDirectory(), param);
-			Util.createFileOrDirectoryIfNotExists(file);
-            in = new FileInputStream(file);
-            oin = new ObjectInputStream(in);
-            obj = (T) oin.readObject();
-            in.close();
-            oin.close();
-            return obj;
-        } catch (Exception e) {
+	public <V>void  putList(String param, List<V> value){
+		if(value == null ||value.isEmpty()){
+			return;
+		}
+		String type = value.get(0).getClass().getSimpleName();
+		JsonArray array = new JsonArray();
+		try {
+			switch (type) {
+				case "Boolean":
+					for (int i = 0; i < value.size(); i++) {
+						array.add((Boolean) value.get(i));
+					}
+					break;
+				case "Long":
+					for (int i = 0; i < value.size(); i++) {
+						array.add((Long) value.get(i));
+					}
+					break;
+				case "Float":
+					for (int i = 0; i < value.size(); i++) {
+						array.add((Float) value.get(i));
+					}
+					break;
+				case "String":
+					for (int i = 0; i < value.size(); i++) {
+						array.add((String) value.get(i));
+					}
+					break;
+				case "Integer":
+					for (int i = 0; i < value.size(); i++) {
+						array.add((Integer) value.get(i));
+					}
+					break;
+				default:
+					Gson gson = new Gson();
+					for (int i = 0; i < value.size(); i++) {
+						JsonElement obj = gson.toJsonTree(value.get(i));
+						array.add(obj);
+					}
+					break;
+			}
+			account.edit().putString(param, array.toString()).apply();
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-        finally{
-        	if(in != null){
-        		try {
-					in.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-        	}
-        	if(oin != null){
-        		try {
-        			oin.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-        	}
-        }
-    	return defaultValue;
 	}
+
+	@Override
+	public <V> List<V> getList(String param,List<V> defaultValue,Class<V> clazz){
+		List<V> list = new ArrayList<>();
+		String json = account.getString(param, "");
+		if (!TextUtils.isEmpty(json)) {
+			Gson gson = new Gson();
+			JsonArray array = new JsonParser().parse(json).getAsJsonArray();
+			for (JsonElement elem : array) {
+				list.add(gson.fromJson(elem, clazz));
+			}
+			return list;
+		}else {
+			return defaultValue;
+		}
+	}
+
+	@Override
+	public <K,V> void putHashMap(String param, HashMap<K,V> value){
+		Gson gson = new Gson();
+		//转换成json数据，再保存
+		String strJson = gson.toJson(value);
+		logger.info("param:"+param+"---putHashMap:"+strJson);
+		account.edit().putString(param,strJson).apply();
+	}
+
+	@Override
+	public <K,V> HashMap<K,V> getHashMap(String param,HashMap<K,V> defaultValue){
+		String strJson = account.getString(param, "");
+		logger.info("getHashMap:"+strJson);
+		if(TextUtils.isEmpty(strJson)){
+			return defaultValue;
+		}else {
+			Gson gson = new Gson();
+			Type type = new TypeToken<HashMap<K, V>>(){}.getType();
+			return gson.fromJson(strJson, type);
+		}
+	}
+
+	@Override
+    public <V> void putBean(String param, V value){
+        Gson gson = new Gson();
+        //转换成json数据，再保存
+        String strJson = gson.toJson(value);
+        account.edit().putString(param,strJson).apply();
+    }
+
+    @Override
+    public <V> V getBean(String param, V defaultValue,Class<V> clazz){
+        String strJson = account.getString(param, "");
+        if(TextUtils.isEmpty(strJson)){
+            return defaultValue;
+        }else {
+            Gson gson = new Gson();
+            return gson.fromJson(strJson, clazz);
+        }
+    }
+
 	@Override
 	public void putParam(String param, String value){
 		account.edit().putString(param, value).commit();
@@ -287,6 +366,44 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	public void putParam(String param, double value){
 		account.edit().putLong(param, Double.doubleToLongBits(value)).commit();
 	}
+
+    @Override
+    public <T extends Serializable> T getSerializable(String param, T defaultValue) {
+        // 拿出持久化数据
+        T obj = null;
+        FileInputStream in = null;
+        ObjectInputStream oin = null;
+        try {
+            File file = new File(getSerializableDataDirectory(), param);
+            Util.createFileOrDirectoryIfNotExists(file);
+            in = new FileInputStream(file);
+            oin = new ObjectInputStream(in);
+            obj = (T) oin.readObject();
+            in.close();
+            oin.close();
+            return obj;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        finally{
+            if(in != null){
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if(oin != null){
+                try {
+                    oin.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return defaultValue;
+    }
+
 	@Override
 	public <T extends Serializable> void putSerializable(String param, T value) {
 		ByteArrayOutputStream bout = null;

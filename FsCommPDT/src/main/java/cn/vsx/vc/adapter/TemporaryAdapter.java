@@ -7,7 +7,6 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
-import android.text.Html;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -15,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.ListAdapter;
@@ -52,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
@@ -62,11 +59,10 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.model.Account;
-import cn.vsx.hamster.terminalsdk.model.Group;
-import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.IndividualNewsActivity;
@@ -75,7 +71,6 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.TranspondDialog;
 import cn.vsx.vc.fragment.VideoPreviewItemFragment;
 import cn.vsx.vc.holder.ChatViewHolder;
-import cn.vsx.vc.model.ChatMember;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.TransponToBean;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
@@ -84,7 +79,6 @@ import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.AnimationsContainer;
-import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -133,8 +127,6 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
     FrameLayout fragment_contener;
 
-    private HashMap<Integer, String> idNameMap;
-
     private Logger logger = Logger.getLogger(getClass());
     List<TerminalMessage> chatMessageList;
     private boolean isGroupChat;
@@ -162,11 +154,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
     public Handler myHandler = new Handler(Looper.getMainLooper());
 
-    public TemporaryAdapter(List<TerminalMessage> chatMessageList, FragmentActivity activity, HashMap<Integer, String> idNameMap) {
+    public TemporaryAdapter(List<TerminalMessage> chatMessageList, FragmentActivity activity) {
         this.chatMessageList = chatMessageList;
         this.activity = activity;
         inflater = activity.getLayoutInflater();
-        this.idNameMap = idNameMap;
     }
 
     public void refreshPersonContactsAdapter(int mposition, List<TerminalMessage> terminalMessageList, boolean isPlaying, boolean isSameItem) {
@@ -862,16 +853,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             setViewVisibility(holder.tvNick, View.GONE);
         }
 
-        String nick = idNameMap.get(terminalMessage.messageFromId);
-        if (!TextUtils.isEmpty(nick)) {
-            if (isGroupChat && isReceiver(terminalMessage)) {
-                setText(holder.tvNick, nick);
-            }
-        } else {
-            if (isGroupChat && isReceiver(terminalMessage)) {
-                setText(holder.tvNick, terminalMessage.messageFromName);
-            }
-        }
+        setText(holder.tvNick, TerminalMessageUtil.getName(terminalMessage));
+
         /**  短文本  */
         if (terminalMessage.messageType == MessageType.SHORT_TEXT.getCode()) {
             setText(holder.tvContent, messageBody.getString(JsonParam.CONTENT));

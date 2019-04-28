@@ -106,12 +106,15 @@ public class NewPoliceAffairsFragment extends BaseFragment {
     private void initFrequentContacts(){
         allFrequentContacts.clear();
         List<Account> frequentContacts = TerminalFactory.getSDK().getConfigManager().getFrequentContacts();
+        logger.error("常用联系人："+frequentContacts);
         if(frequentContacts != null && !frequentContacts.isEmpty()){
             ContactItemBean memberCatalogBean = new ContactItemBean();
             memberCatalogBean.setName("常用联系人");
             memberCatalogBean.setType(Constants.TYPE_FREQUENT);
             allFrequentContacts.add(memberCatalogBean);
+
             for(Account account : frequentContacts){
+
                 ContactItemBean<Account> bean = new ContactItemBean<>();
                 bean.setType(Constants.TYPE_ACCOUNT);
                 bean.setBean(account);

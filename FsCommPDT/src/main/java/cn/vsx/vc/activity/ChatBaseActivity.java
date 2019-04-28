@@ -87,18 +87,15 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHa
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
+import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.TemporaryAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.NFCBindingDialog;
-import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.fragment.LocationFragment;
-import cn.vsx.vc.fragment.TransponFragment;
-import cn.vsx.vc.model.ChatMember;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.TransponSelectedBean;
-import cn.vsx.vc.receiveHandle.OnBackListener;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
@@ -106,7 +103,6 @@ import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowForwardMoreHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowWithDrawPopupHandler;
-import cn.vsx.vc.receiveHandle.ReceiverTransponHandler;
 import cn.vsx.vc.service.PullLivingService;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.DataUtil;
@@ -141,7 +137,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
 
     protected Logger logger = Logger.getLogger(getClass());
-    protected HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
 
     protected List<TerminalMessage> allFailMessageList = new ArrayList<>();//当前会话所有发送失败消息集合
     protected List<TerminalMessage> historyFailMessageList = new ArrayList<>();//当前会话历史发送失败消息集合
@@ -265,7 +260,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         }else{
             isEnoughPageCount = true;
         }
-        HashMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getSerializable(Params.MESSAGE_SEND_FAIL, new HashMap<>());
+        HashMap<String, List<TerminalMessage>> sendFailMap = TerminalFactory.getSDK().getHashMap(Params.MESSAGE_SEND_FAIL,new HashMap<>());
         if (sendFailMap != null) {
             List<TerminalMessage> list = sendFailMap.get(userId + "");
             if (list != null) {
@@ -295,7 +290,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         if (unFinishMsgList == null) {
             unFinishMsgList = new HashMap<>();
         }
-        temporaryAdapter = new TemporaryAdapter(chatMessageList, this, idNameMap);
+        temporaryAdapter = new TemporaryAdapter(chatMessageList, this);
         temporaryAdapter.setIsGroup(isGroup);
         temporaryAdapter.setFragment_contener(fl_fragment_container);
         groupCallList.setAdapter(temporaryAdapter);
@@ -384,9 +379,11 @@ public abstract class ChatBaseActivity extends BaseActivity{
 //        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverTransponHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverToFaceRecognitionHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSelectChatListHandler);
-        HashMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getSerializable(Params.MESSAGE_SEND_FAIL, new HashMap<>());
+
+        HashMap<String, List<TerminalMessage>> sendFailMap = TerminalFactory.getSDK().getHashMap(Params.MESSAGE_SEND_FAIL,new HashMap<>());
         sendFailMap.put(userId + "", allFailMessageList);
-        MyTerminalFactory.getSDK().putSerializable(Params.MESSAGE_SEND_FAIL, sendFailMap);
+        TerminalFactory.getSDK().putHashMap(Params.MESSAGE_SEND_FAIL,sendFailMap);
+
         groupCallList.removeOnLayoutChangeListener(myOnLayoutChangeListener);
         handler.removeCallbacksAndMessages(null);
     }
@@ -956,13 +953,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
         funcation.hideKey();
     }
 
-    private void saveMemberMap(TerminalMessage terminalMessage) {
-        idNameMap.putAll(TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>()));
-        idNameMap.put(terminalMessage.messageFromId, terminalMessage.messageFromName);
-        idNameMap.put(terminalMessage.messageToId, terminalMessage.messageToName);
-        TerminalFactory.getSDK().putSerializable(Params.ID_NAME_MAP, idNameMap);
-    }
-
     /**
      * 设置组呼消息是否未读
      **/
@@ -1199,13 +1189,8 @@ public abstract class ChatBaseActivity extends BaseActivity{
         public void handler(final TerminalMessage terminalMessage) {
             logger.info("接收到消息-----》" + terminalMessage.toString());
             handler.post(() -> {
-                saveMemberMap(terminalMessage);
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {//个人消息
-                    if (TextUtils.isEmpty(HandleIdUtil.handleName(idNameMap.get(userId)))) {
-                        newsBarGroupName.setText(HandleIdUtil.handleName(terminalMessage.messageFromName));
-                    } else {
-                        newsBarGroupName.setText(HandleIdUtil.handleName(idNameMap.get(userId)));
-                    }
+                    newsBarGroupName.setText(HandleIdUtil.handleName(TerminalMessageUtil.getName(terminalMessage)));
                 }
                 //转发
                 if (temporaryAdapter.transponMessage != null

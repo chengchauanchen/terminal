@@ -15,7 +15,6 @@ import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import butterknife.Bind;
@@ -43,15 +42,13 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 public class MessageListAdapter extends BaseAdapter {
     private final boolean isNewsFragment;
     private final boolean isGoToHistory;
-    private HashMap<Integer, String> idNameMap;
     private Context context;
     private List<TerminalMessage> messageList = new ArrayList<>();
     public Logger logger = Logger.getLogger(getClass());
 
-    public MessageListAdapter (Context context, List<TerminalMessage> messageList, HashMap<Integer, String> idNameMap, boolean isNewsFragment, boolean isGoToHistory) {
+    public MessageListAdapter (Context context, List<TerminalMessage> messageList, boolean isNewsFragment, boolean isGoToHistory) {
         this.context = context;
         this.messageList = messageList;
-        this.idNameMap = idNameMap;
         this.isNewsFragment = isNewsFragment;
         this.isGoToHistory = isGoToHistory;
     }
@@ -102,9 +99,9 @@ public class MessageListAdapter extends BaseAdapter {
             }
             else {
                 if (isReceiver) {//接受消息，显示对方名字
-                    viewHolder.tv_user_name.setText(HandleIdUtil.handleName(idNameMap.get(terminalMessage.messageFromId)));
+                    viewHolder.tv_user_name.setText(HandleIdUtil.handleName(terminalMessage.messageFromName));
                 } else {//自己发送的也显示对方名字
-                    viewHolder.tv_user_name.setText(HandleIdUtil.handleName(idNameMap.get(terminalMessage.messageToId)));
+                    viewHolder.tv_user_name.setText(HandleIdUtil.handleName(terminalMessage.messageToName));
                 }
             }
 //            viewHolder.tv_current_group.setVisibility(View.GONE);
@@ -172,7 +169,6 @@ public class MessageListAdapter extends BaseAdapter {
     }
 
     private void setMsg(final ViewHolder viewHolder, TerminalMessage terminalMessage) {
-        terminalMessage.messageFromName = idNameMap.get(terminalMessage.messageFromId);
         setLastMessage(viewHolder, terminalMessage);
 
     }

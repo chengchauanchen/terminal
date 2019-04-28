@@ -505,7 +505,7 @@ public class FileTransferOperation {
 //        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(getExternalUsableStorageDirectory())) {
         List<FileBean> list = new ArrayList<>();
         //获取保存的没有上传的文件目录信息
-        FileTreeBean fileTreeBean = TerminalFactory.getSDK().getSerializable(Params.UNUPLOAD_FILE_TREE_LIST,new FileTreeBean());
+        FileTreeBean fileTreeBean = TerminalFactory.getSDK().getBean(Params.UNUPLOAD_FILE_TREE_LIST,new FileTreeBean(),FileTreeBean.class);
         if(fileTreeBean.getFileTree()!=null){
             list.addAll(fileTreeBean.getFileTree());
         }
@@ -515,7 +515,7 @@ public class FileTransferOperation {
         }
         //保存没有上传的文件目录信息
         fileTreeBean.setFileTree(list);
-        TerminalFactory.getSDK().putSerializable(Params.UNUPLOAD_FILE_TREE_LIST,fileTreeBean);
+        TerminalFactory.getSDK().putBean(Params.UNUPLOAD_FILE_TREE_LIST,fileTreeBean);
         logger.info(TAG + "saveAndGetBITFileTreeBean:list:" + list);
         return list;
     }
@@ -524,7 +524,7 @@ public class FileTransferOperation {
      * 文件的目录信息上传成功之后删除保存的记录
      */
     private void deleteBITFileTreeBean(List<FileBean> list){
-        FileTreeBean fileTreeBean = TerminalFactory.getSDK().getSerializable(Params.UNUPLOAD_FILE_TREE_LIST,new FileTreeBean());
+        FileTreeBean fileTreeBean = TerminalFactory.getSDK().getBean(Params.UNUPLOAD_FILE_TREE_LIST,new FileTreeBean(),FileTreeBean.class);
         List<FileBean> allList =  fileTreeBean.getFileTree();
             if(allList != null && allList.size()>0){
                 if(list!=null&&list.size()>0){
@@ -534,7 +534,7 @@ public class FileTransferOperation {
                         }
                     }
                     fileTreeBean.setFileTree(allList);
-                    TerminalFactory.getSDK().putSerializable(Params.UNUPLOAD_FILE_TREE_LIST,fileTreeBean);
+                    TerminalFactory.getSDK().putBean(Params.UNUPLOAD_FILE_TREE_LIST,fileTreeBean);
                 }
             }
     }
@@ -727,7 +727,7 @@ public class FileTransferOperation {
      * 启动应用时保证48小时定时任务开启
      */
     public void checkStartExpireFileAlarm() {
-        BitStarFileRecord expireRecord = TerminalFactory.getSDK().getSerializable(Params.FILE_EXPIRE_RECORD, null);
+        BitStarFileRecord expireRecord = TerminalFactory.getSDK().getBean(Params.FILE_EXPIRE_RECORD, null,BitStarFileRecord.class);
         if (expireRecord != null) {
             uploadFileByExpire();
         }
@@ -747,11 +747,11 @@ public class FileTransferOperation {
      * @param record
      */
     private void saveExpireFileInfoForFirstTimes(BitStarFileRecord record) {
-        BitStarFileRecord expireRecord = TerminalFactory.getSDK().getSerializable(Params.FILE_EXPIRE_RECORD, null);
+        BitStarFileRecord expireRecord = TerminalFactory.getSDK().getBean(Params.FILE_EXPIRE_RECORD, null,BitStarFileRecord.class);
         if (expireRecord == null) {
             logger.info(TAG + "saveExpireFileInfoForFirstTimes:record" + record);
             //保存超过48小时对比文件信息
-            TerminalFactory.getSDK().putSerializable(Params.FILE_EXPIRE_RECORD, record);
+            TerminalFactory.getSDK().putBean(Params.FILE_EXPIRE_RECORD, record);
             //开启倒计时
             startFileExpireAlarmManager(record.getFileTime() + EXPIRE_TIME);
         }
@@ -764,14 +764,14 @@ public class FileTransferOperation {
         logger.info(TAG + "updateExpireFileInfo-record:" + record);
         if (record != null) {
             //保存超过48小时对比文件信息
-            TerminalFactory.getSDK().putSerializable(Params.FILE_EXPIRE_RECORD, record);
+            TerminalFactory.getSDK().putBean(Params.FILE_EXPIRE_RECORD, record);
             //关闭倒计时
             cancelFileExpireAlarmManager();
             //开启倒计时
             startFileExpireAlarmManager(record.getFileTime() + EXPIRE_TIME);
         }else{
             //清空超过48小时对比文件信息
-            TerminalFactory.getSDK().putSerializable(Params.FILE_EXPIRE_RECORD, null);
+            TerminalFactory.getSDK().putBean(Params.FILE_EXPIRE_RECORD, null);
             //关闭倒计时
             cancelFileExpireAlarmManager();
         }
