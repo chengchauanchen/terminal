@@ -123,7 +123,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     public static boolean isForeground = false;
     public static int mFromId;
-    private Member member;
+//    private Member member;
 
     public static void startCurrentActivity(Context context, int userId, String userName) {
         Intent intent = new Intent(context, IndividualNewsActivity.class);
@@ -184,9 +184,9 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     public void initData() {
         super.initData();
         mFromId = userId;
-        member = DataUtil.getMemberByMemberNo(userId);
+//        member = DataUtil.getMemberByMemberNo(userId);
         logger.info("userId：" + userId);
-        logger.info("member：" + member.toString());
+//        logger.info("member：" + member.toString());
         funcation.setFunction(false, userId);
     }
 

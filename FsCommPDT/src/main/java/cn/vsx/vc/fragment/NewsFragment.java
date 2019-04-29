@@ -503,7 +503,8 @@ public class NewsFragment extends BaseFragment {
                 context.startActivity(intent);
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//进入组会话页
-                if (TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getTempGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())) {
+                Group group = DataUtil.getTempGroupByGroupNo(terminalMessage.messageToId);
+                if (group!=null&&TextUtils.equals(group.getTempGroupType(),TempGroupType.TO_HELP_COMBAT.toString())) {
                     combatFragmentCreate = true;
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveGoToHelpCombatHandler.class, false, false);
                 } else {
