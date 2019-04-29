@@ -1762,7 +1762,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
         if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()){
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())) {
-                if (viewType == MESSAGE_VIDEO_LIVE_RECEIVED && terminalMessage.messageBody.getIntValue("remark") != 1) {
+                if ((viewType == MESSAGE_VIDEO_LIVE_RECEIVED || viewType == MESSAGE_VIDEO_LIVE_SEND) && terminalMessage.messageBody.getIntValue("remark") != 1) {
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverChatListItemClickHandler.class,
                             terminalMessage, isReceiver(terminalMessage));
 
