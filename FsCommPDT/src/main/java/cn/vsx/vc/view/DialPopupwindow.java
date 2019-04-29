@@ -158,7 +158,7 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                         new ChooseDevicesDialog(context,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account, (dialog,member) -> {
                         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
                         dialog.dismiss();
-                         }).show();
+                         }).showDialog();
                     });
                 });
             } catch (NumberFormatException e) {

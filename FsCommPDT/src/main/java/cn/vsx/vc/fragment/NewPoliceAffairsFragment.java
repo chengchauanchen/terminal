@@ -173,22 +173,22 @@ public class NewPoliceAffairsFragment extends BaseFragment {
 
         mContactAdapter.setCatalogItemClickListener((view, position) -> {
 
-            if(position == catalogNames.size()-2){
-                //返回到上一级
-                catalogNames.remove(catalogNames.size()-1);
-                mDatas.clear();
-                mDatas.addAll(lastGroupDatas);
-                if(mContactAdapter !=null){
-                    mContactAdapter.notifyDataSetChanged();
-                }
-
-                mRecyclerview.scrollToPosition(0);
-            }else {
+//            if(position == catalogNames.size()-2){
+//                //返回到上一级
+//                catalogNames.remove(catalogNames.size()-1);
+//                mDatas.clear();
+//                mDatas.addAll(lastGroupDatas);
+//                if(mContactAdapter !=null){
+//                    mContactAdapter.notifyDataSetChanged();
+//                }
+//
+//                mRecyclerview.scrollToPosition(0);
+//            }else {
                 List<CatalogBean> catalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
                 catalogNames.clear();
                 catalogNames.addAll(catalogBeans);
                 TerminalFactory.getSDK().getConfigManager().updatePoliceMember(catalogNames.get(position).getId(),catalogNames.get(position).getName());
-            }
+//            }
         });
 
 

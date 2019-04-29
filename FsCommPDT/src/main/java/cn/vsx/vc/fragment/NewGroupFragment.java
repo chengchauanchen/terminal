@@ -275,17 +275,17 @@ public class NewGroupFragment extends BaseFragment{
         });
 
         groupAdapter.setCatalogItemClickListener((view, isTempGroup, position) -> {
-            if(position == catalogNames.size()-2){
-                catalogNames.remove(catalogNames.size()-1);
-                datas.removeAll(commonGroupDatas);
-                commonGroupDatas.clear();
-                commonGroupDatas.addAll(lastGroupDatas);
-                datas.addAll(lastGroupDatas);
-                if(groupAdapter !=null){
-                    groupAdapter.notifyDataSetChanged();
-                }
-                groupRecyclerView.scrollToPosition(0);
-            }else {
+//            if(position == catalogNames.size()-2){
+//                catalogNames.remove(catalogNames.size()-1);
+//                datas.removeAll(commonGroupDatas);
+//                commonGroupDatas.clear();
+//                commonGroupDatas.addAll(lastGroupDatas);
+//                datas.addAll(lastGroupDatas);
+//                if(groupAdapter !=null){
+//                    groupAdapter.notifyDataSetChanged();
+//                }
+//                groupRecyclerView.scrollToPosition(0);
+//            }else {
                 //重新请求
                 synchronized(NewGroupFragment.this){
                     List<CatalogBean> groupCatalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
@@ -293,7 +293,7 @@ public class NewGroupFragment extends BaseFragment{
                     catalogNames.addAll(groupCatalogBeans);
                 }
                 TerminalFactory.getSDK().getConfigManager().updateGroup(catalogNames.get(position).getId(),catalogNames.get(position).getName());
-            }
+//            }
         });
         groupAdapter.setFolderClickListener((view, depId, name, isTempGroup) -> {
             saveLastGroupData();
