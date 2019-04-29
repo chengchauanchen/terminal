@@ -2,6 +2,7 @@ package cn.vsx.vc.adapter;
 
 import android.content.Context;
 import android.text.Html;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -106,7 +107,8 @@ public class MessageListAdapter extends BaseAdapter {
             }
 //            viewHolder.tv_current_group.setVisibility(View.GONE);
         } else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息，显示组名
-            if (TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getTempGroupByGroupNo(terminalMessage.messageToId)).getTempGroupType())) {//如果是合成作战组，上面显示合成作战组
+             Group group = DataUtil.getTempGroupByGroupNo(terminalMessage.messageToId);
+            if (group!=null&&TextUtils.equals(group.getTempGroupType(),TempGroupType.TO_HELP_COMBAT.toString())){//如果是合成作战组，上面显示合成作战组
                 viewHolder.tv_user_name.setText(context.getString(R.string.text_to_help_combat));
             } else {
                 viewHolder.tv_user_name.setText(DataUtil.getGroupName(terminalMessage.messageToId));

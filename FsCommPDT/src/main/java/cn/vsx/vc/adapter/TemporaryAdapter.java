@@ -292,7 +292,14 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         if(holder!=null){
             final TerminalMessage terminalMessage = chatMessageList.get(position);
             final int viewType = getItemViewType(position);
-            setData(position, terminalMessage, viewType, holder);
+            //消息撤回
+            if(terminalMessage.isWithDraw){
+                withDrawView(terminalMessage,holder);
+            }else{
+                setViewVisibility(holder.timeStamp, View.VISIBLE);
+                setViewVisibility(holder.reMain, View.VISIBLE);
+                setData(position, terminalMessage, viewType, holder);
+            }
         }
     }
 
@@ -396,11 +403,6 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     private void setData(int position, TerminalMessage terminalMessage, int viewType, ChatViewHolder holder) {
-        //消息撤回
-        if(terminalMessage.isWithDraw){
-            withDrawView(terminalMessage,holder);
-            return;
-        }
         handleData(holder, viewType, terminalMessage, position);
         setListener(viewType, holder, terminalMessage, position);
         aboutSend(holder, terminalMessage, viewType);
@@ -411,6 +413,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         }
         //合并转发
         forwardMore(terminalMessage,holder);
+
+
     }
 
     /**
@@ -449,9 +453,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
      * @param terminalMessage
      */
     private void withDrawView(TerminalMessage terminalMessage, ChatViewHolder holder) {
-        setText(holder.timeStamp, String.format(activity.getString(R.string.with_draw_content),isReceiver(terminalMessage)?terminalMessage.messageFromName:"您"));
-        setViewVisibility(holder.timeStamp, View.VISIBLE);
-        setViewVisibility(holder.reMain, View.GONE);
+            setText(holder.timeStamp, String.format(activity.getString(R.string.with_draw_content),isReceiver(terminalMessage)?terminalMessage.messageFromName:"您"));
+            setViewVisibility(holder.timeStamp, View.VISIBLE);
+            setViewVisibility(holder.reMain, View.GONE);
     }
 
     private void aboutSend(ChatViewHolder holder, TerminalMessage terminalMessage, int viewType) {

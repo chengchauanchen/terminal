@@ -147,7 +147,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> RegistActivity.this.runOnUiThread(() -> {
         if (!MyTerminalFactory.getSDK().getParam(Params.IS_FORBID, false)) {
             if (!connected) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_network_anomaly));
+//                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_network_anomaly));
             } else {
                 ToastUtil.closeToast();
                 if (TextUtils.isEmpty(MyTerminalFactory.getSDK().getParam(Params.REGIST_URL, ""))) {
