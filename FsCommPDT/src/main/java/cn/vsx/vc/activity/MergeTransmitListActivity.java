@@ -213,7 +213,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
         });
     }
     /**
-     * 获取组内直播历史列表
+     * 获取消息列表
      */
     private GetMessagesByIdsHandler getMessagesByIdsHandler = (resultCode, resultDesc,memberList) -> {
              handler.post(() -> layoutSrl.setRefreshing(false));
@@ -237,7 +237,6 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
         @Override
         public void handler(int postion) {
             mposition = postion;
-
             handler.post(() -> {
                 if (MyApplication.instance.getIndividualState() == IndividualCallState.IDLE &&
                         MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE &&
@@ -316,33 +315,33 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
 
         @Override
         public void handler(final float percent, TerminalMessage terminalMessage) {
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
-                        if (null != adapter.loadingView) {
-                            int percentInt = (int) (percent * 100);
-                            if (percentInt >= 100) {
-                                setViewVisibility(adapter.loadingView, View.GONE);
-                                adapter.loadingView = null;
-                            } else {
-                                setViewVisibility(adapter.loadingView, View.VISIBLE);
-                                adapter.loadingView.setProgerss(percentInt);
-                            }
+            handler.post(() -> {
+                if(!checkMessageIsHave(terminalMessage)){
+                    return;
+                }
+                if (terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
+                    if (null != adapter.loadingView) {
+                        int percentInt = (int) (percent * 100);
+                        if (percentInt >= 100) {
+                            setViewVisibility(adapter.loadingView, View.GONE);
+                            adapter.loadingView = null;
+                        } else {
+                            setViewVisibility(adapter.loadingView, View.VISIBLE);
+                            adapter.loadingView.setProgerss(percentInt);
                         }
-                    } else {
-                        if (adapter.downloadProgressBar != null
-                                && adapter.download_tv_progressBars != null) {
-                            int percentInt = (int) (percent * 100);
-                            adapter.downloadProgressBar.setProgress(percentInt);
-                            setText(adapter.download_tv_progressBars, percentInt + "%");
+                    }
+                } else {
+                    if (adapter.downloadProgressBar != null
+                            && adapter.download_tv_progressBars != null) {
+                        int percentInt = (int) (percent * 100);
+                        adapter.downloadProgressBar.setProgress(percentInt);
+                        setText(adapter.download_tv_progressBars, percentInt + "%");
 
-                            if (percentInt >= 100) {
-                                setViewVisibility(adapter.downloadProgressBar, View.GONE);
-                                setViewVisibility(adapter.download_tv_progressBars, View.GONE);
-                                adapter.downloadProgressBar = null;
-                                adapter.download_tv_progressBars = null;
-                            }
+                        if (percentInt >= 100) {
+                            setViewVisibility(adapter.downloadProgressBar, View.GONE);
+                            setViewVisibility(adapter.download_tv_progressBars, View.GONE);
+                            adapter.downloadProgressBar = null;
+                            adapter.download_tv_progressBars = null;
                         }
                     }
                 }
@@ -425,7 +424,9 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
             adapter.notifyDataSetChanged();
         }
         if (!has) {
-            contentView.scrollToPosition(chatMessageList.size() - 1);
+            if(contentView !=null){
+                contentView.scrollToPosition(chatMessageList.size() - 1);
+            }
         }
     }
 
@@ -436,7 +437,9 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
         if (resultCode == TerminalErrorCode.STOP_PLAY_RECORD.getErrorCode()) {
             MyApplication.instance.isPlayVoice = false;
             isSameItem = true;
-            adapter.refreshPersonContactsAdapter(mposition, chatMessageList, false, true);
+            if(adapter!=null){
+                adapter.refreshPersonContactsAdapter(mposition, chatMessageList, false, true);
+            }
 //            temporaryAdapter.notifyDataSetChanged();
         } else {
             logger.info("音频播放失败了！！errorCode=" + resultCode);
@@ -451,7 +454,9 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
         MyApplication.instance.isPlayVoice = false;
         isSameItem = true;
 //                    logger.error("录音播放完成的消息：" + chatMessageList.get(mposition).toString());
-        adapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+        if(adapter!=null){
+            adapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+        }
         setSmoothScrollToPosition(mposition);
 //        temporaryAdapter.notifyDataSetChanged();
 
@@ -481,7 +486,9 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
     }
 
     public void setSmoothScrollToPosition(int position) {
-        contentView.smoothScrollToPosition(position);
+        if(contentView!=null){
+            contentView.smoothScrollToPosition(position);
+        }
     }
 
     /**

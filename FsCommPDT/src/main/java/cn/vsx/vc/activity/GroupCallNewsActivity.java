@@ -359,6 +359,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             case R.id.iv_monitor:
                 if(userId == TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) ||
                         (userId == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0))){
+                    ToastUtil.showToast(GroupCallNewsActivity.this,getString(R.string.can_not_cancel_listener));
                         return;
                 }
                 List<Integer> monitorGroups = new ArrayList<>();
@@ -615,13 +616,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     private View.OnTouchListener mOnTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-
-
-            if (MyTerminalFactory.getSDK().getAuthManagerTwo().getLoginStatus() != AuthManagerTwo.ONLINE) {
-                ToastUtil.showToast(GroupCallNewsActivity.this, GroupCallNewsActivity.this.getResources().getString(R.string.net_work_disconnect));
-                return true;
-            }
-
+//            if (MyTerminalFactory.getSDK().getAuthManagerTwo().getLoginStatus() != AuthManagerTwo.ONLINE) {
+//                ToastUtil.showToast(GroupCallNewsActivity.this, GroupCallNewsActivity.this.getResources().getString(R.string.net_work_disconnect));
+//                return true;
+//            }
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
                     logger.info("ACTION_DOWN，ptt按钮按下，开始组呼：" + MyApplication.instance.folatWindowPress + MyApplication.instance.volumePress);
@@ -663,7 +661,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         @Override
         public void handler(int errorCode, String errorDesc){
             if(errorCode == BaseCommonCode.SUCCESS_CODE){
-                setIvMonitorDrawable();
+                handler.post(() -> setIvMonitorDrawable());
             }else {
                 ToastUtil.showToast(GroupCallNewsActivity.this,errorDesc);
             }
@@ -1084,12 +1082,20 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         handler.post(() -> {
             if(resultCode == BaseCommonCode.SUCCESS_CODE && !beanList.isEmpty()){
                 //正在上报的人
-                tv_living_number.setText(String.format(GroupCallNewsActivity.this.getString(R.string.group_living_number),beanList.size()));
-                ll_living.setVisibility(View.VISIBLE);
+                if(tv_living_number!=null){
+                    tv_living_number.setText(String.format(GroupCallNewsActivity.this.getString(R.string.group_living_number),beanList.size()));
+                }
+                if(ll_living!=null){
+                    ll_living.setVisibility(View.VISIBLE);
+                }
             }else{
                 //没有正在上报的人
-                tv_living_number.setText("");
-                ll_living.setVisibility(View.GONE);
+                if(tv_living_number!=null){
+                    tv_living_number.setText("");
+                }
+                if(ll_living!=null){
+                    ll_living.setVisibility(View.GONE);
+                }
             }
         });
         if(forNumber){

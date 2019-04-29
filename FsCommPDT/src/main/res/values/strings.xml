@@ -565,4 +565,5 @@
     <string name="transpond_fail">转发失败</string>
     
     <string name="no_get_temporary_group_id">没有获取到临时组id</string>
+    <string name="can_not_cancel_listener">不能取消监听</string>
 </resources>
