@@ -982,8 +982,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			messageService = Stub.asInterface(service);
 
 			clientChannel = null;
-			getClientChannel().start();
 			getClientChannel().registServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
+			getClientChannel().start();
 			startService();
 		}
 		@Override

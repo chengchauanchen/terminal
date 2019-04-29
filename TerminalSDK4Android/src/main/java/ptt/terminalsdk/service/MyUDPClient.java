@@ -109,6 +109,7 @@ public class MyUDPClient extends UDPClientBase {
         }
     }
     public void registServerConnectionEstablishedHandler(final ServerConnectionEstablishedHandlerAidl handler){
+        logger.info("MyUDPClient----registServerConnectionEstablishedHandler");
         this.handler = handler;
         registServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
     }

@@ -101,10 +101,13 @@ public class ClientChannel extends AbsClientChannel {
 	public void start() {
 		try {
 			if (!isStarted && messageService != null){
-				logger.info("注册handler成功!");
-				messageService.registMessageReceivedHandler(handler);
+				logger.info("ClientChannel  start成功!");
 				messageService.registServerConnectionEstablishedHandler(handlerAidl);
+				messageService.registMessageReceivedHandler(handler);
 				isStarted = true;
+			}else {
+				logger.error("ClientChannel  start失败");
+				isStarted = false;
 			}
 		} catch (RemoteException e) {
 			e.printStackTrace();

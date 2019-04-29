@@ -32,6 +32,7 @@ public class MessageService extends Service {
     private MyUDPClient myUDPClient;
     private String accessServerIpTemp;
     private int accessServerPortTemp;
+    private static final String TAG = "MessageService--";
 
     @Override
     public void onCreate() {
@@ -123,6 +124,7 @@ public class MessageService extends Service {
 
         @Override
         public void registMessageReceivedHandler(final ServerMessageReceivedHandlerAidl handler) throws RemoteException {
+            logger.info(TAG+"registMessageReceivedHandler");
             myUDPClient.registMessageReceivedHandler(handler);
         }
 
@@ -138,11 +140,13 @@ public class MessageService extends Service {
 
         @Override
         public void registServerConnectionEstablishedHandler(final ServerConnectionEstablishedHandlerAidl handler) throws RemoteException {
+            logger.info(TAG+"registServerConnectionEstablishedHandler");
             myUDPClient.registServerConnectionEstablishedHandler(handler);
         }
 
         @Override
         public void unregistServerConnectionEstablishedHandler(ServerConnectionEstablishedHandlerAidl handler) throws RemoteException {
+            logger.info(TAG+"unregistServerConnectionEstablishedHandler");
             myUDPClient.unregistServerConnectionEstablishedHandler(handler);
         }
 
