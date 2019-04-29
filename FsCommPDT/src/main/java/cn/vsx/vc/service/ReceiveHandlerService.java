@@ -80,6 +80,7 @@ import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.adapter.StackViewAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ProgressDialog;
+import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
@@ -834,28 +835,26 @@ public class ReceiveHandlerService extends Service{
 
 
     //接收到上报视频的回调
-    private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = (uniqueNo,isGroupPushLive) -> {
+    private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = (uniqueNoAndType,isGroupPushLive) -> {
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_report));
             return;
         }
-        logger.error("上报给：" + uniqueNo);
+        logger.error("上报给：" + uniqueNoAndType);
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_push_authority));
             return;
         }
-        if(uniqueNo == 0){//要弹出选择成员页
+        if(android.text.TextUtils.isEmpty(uniqueNoAndType)){//要弹出选择成员页
             Intent intent = new Intent(ReceiveHandlerService.this, InviteMemberService.class);
             intent.putExtra(Constants.TYPE, Constants.PUSH);
             intent.putExtra(Constants.PUSHING, false);
             intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
+            intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,new InviteMemberExceptList());
             startService(intent);
         }else{//直接上报了
-            ArrayList<Long> uniqueNos = new ArrayList<>();
-            //如果是组内上报
-            if(!isGroupPushLive){
-                uniqueNos.add(uniqueNo);
-            }
+            ArrayList<String> uniqueNos = new ArrayList<>();
+            uniqueNos.add(uniqueNoAndType);
             if(MyApplication.instance.usbAttached){
                 Intent intent = new Intent(ReceiveHandlerService.this,SwitchCameraService.class);
                 intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
@@ -904,6 +903,7 @@ public class ReceiveHandlerService extends Service{
             Intent intent = new Intent(ReceiveHandlerService.this, InviteMemberService.class);
             intent.putExtra(Constants.TYPE, Constants.PULL);
             intent.putExtra(Constants.PULLING, false);
+            intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,new InviteMemberExceptList());
             startService(intent);
 
         }else{//直接请求

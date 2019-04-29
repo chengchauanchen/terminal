@@ -89,7 +89,7 @@ public class UVCPushService extends BaseService{
     private MemberEnterAdapter enterOrExitMemberAdapter;
     private List<VideoMember> watchOrExitMembers;
     private ArrayList<VideoMember> watchMembers;
-    private List<Long> pushMemberList = new ArrayList<>();
+    private List<String> pushMemberList = new ArrayList<>();
     private PushCallback pushCallback;
     private static final int CURRENTTIME = 0;
     private static final int HIDELIVINGVIEW = 1;
@@ -402,7 +402,7 @@ public class UVCPushService extends BaseService{
         Intent intent = new Intent(UVCPushService.this, InviteMemberService.class);
         intent.putExtra(Constants.TYPE, Constants.PUSH);
         intent.putExtra(Constants.PUSHING, true);
-        intent.putExtra(Constants.WATCHING_MEMBERS, watchMembers);
+        intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,DataUtil.getInviteMemberExceptList(watchMembers));
         startService(intent);
     };
     

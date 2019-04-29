@@ -22,6 +22,7 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.OnClick;
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -263,7 +264,9 @@ public class UserInfoActivity extends BaseActivity {
             CheckMyPermission.permissionPrompt(UserInfoActivity.this, Manifest.permission.CAMERA);
             return;
         }
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, member.getUniqueNo(),false);
+
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,
+                cn.vsx.vc.utils.DataUtil.getPushInviteMemberData(member.getUniqueNo(), ReceiveObjectMode.MEMBER.toString()),false);
     }
 
 

@@ -35,6 +35,7 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberStopWatchMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.vc.R;
+import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -186,6 +187,7 @@ public class PullGB28181Service extends BaseService{
             Intent intent = new Intent(PullGB28181Service.this,InviteMemberService.class);
             intent.putExtra(Constants.TYPE,Constants.PULL);
             intent.putExtra(Constants.PULLING,true);
+            intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,new InviteMemberExceptList());
         }else{
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.text_no_video_push_authority));
         }

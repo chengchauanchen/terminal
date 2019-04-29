@@ -36,6 +36,7 @@ import java.util.List;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
@@ -43,6 +44,7 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Department;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
@@ -58,6 +60,7 @@ import cn.vsx.vc.adapter.SelectAdapter;
 import cn.vsx.vc.adapter.SelectedListAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSwitchCameraViewHandler;
 import cn.vsx.vc.utils.Constants;
@@ -95,9 +98,9 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private TextView mTvLiveSelectmemberTheme;
     private LinearLayout llSelect;
     private RecyclerView selectRecyclerview;
+    //tab
     private List<TextView> tabs = new ArrayList<>();
     private int[] tabIds = new int[]{R.id.pc_tv, R.id.jingwutong_tv, R.id.uav_tv, R.id.recoder_tv};
-
     private List<View> lines = new ArrayList<>();
     private int[] lineIds = new int[]{R.id.pc_line, R.id.jingwutong_line, R.id.uav_line, R.id.recoder_line};
 
@@ -117,8 +120,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private SelectAdapter selectAdapter;
     private SelectedListAdapter selectedListAdapter;
     private List<ContactItemBean> selectedMembers = new ArrayList<>();
-    private ArrayList<VideoMember> watchingmembers;
-    private int livingMemberId;
+    private  List<Integer> exceptList = new ArrayList<>();
     private boolean gb28181Pull;
     private boolean isGroupPushLive;
     private TerminalMessage oldTerminalMessage;
@@ -250,15 +252,34 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
 
     @Override
     protected void initView(Intent intent) {
-        gb28181Pull = intent.getBooleanExtra(Constants.GB28181_PULL, false);
+        //是请求图像还是上报图像
+        type = intent.getStringExtra(Constants.TYPE);
+        //是否正在上报图像
+        pushing = intent.getBooleanExtra(Constants.PUSHING, false);
+        //是否正在观看图像
+        pulling = intent.getBooleanExtra(Constants.PULLING, false);
+        //是否是组内上报图像
         isGroupPushLive = intent.getBooleanExtra(Constants.IS_GROUP_PUSH_LIVING, false);
+        //是否是观看GB28181
+        gb28181Pull = intent.getBooleanExtra(Constants.GB28181_PULL, false);
         if (gb28181Pull) {
             oldTerminalMessage = (TerminalMessage) intent.getSerializableExtra(Constants.TERMINALMESSAGE);
         }
-        filterMember(intent);
-        if (Constants.PULL.equals(type) || pushing) {
+        //获取不显示的设备
+        InviteMemberExceptList bean = (InviteMemberExceptList) intent.getSerializableExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO);
+        if(bean!=null&&bean.getList()!=null){
+            exceptList.clear();
+            exceptList.addAll(bean.getList());
+        }
+        //是否显示编辑主题
+        if (android.text.TextUtils.equals(type,Constants.PULL)|| pushing) {
             mLlLiveSelectmemberTheme.setVisibility(View.GONE);
         }
+        //根据类型和状态显示不同的布局
+        setTabTextView();
+
+        //获取选择列表
+        loadData(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0),true);
     }
 
     @Override
@@ -739,20 +760,6 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private void filterMember(Intent intent) {
-        type = intent.getStringExtra(Constants.TYPE);
-
-        setTabTextView(type);
-        pushing = intent.getBooleanExtra(Constants.PUSHING, false);
-        watchingmembers = (ArrayList<VideoMember>) intent.getSerializableExtra(Constants.WATCHING_MEMBERS);
-
-        pulling = intent.getBooleanExtra(Constants.PULLING, false);
-        livingMemberId = intent.getIntExtra(Constants.LIVING_MEMBER_ID, 0);
-
-        loadData(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0),true);
-    }
-
     /**
      * 加载数据
      */
@@ -864,10 +871,15 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     }
 
     /**
-     * 根据type设置tab文字信息
-     * @param type
+     * 根据类型和状态显示不同的布局
+     *
+     * 请求图像：警务通、无人机、执法记录仪
+     * 上报图像：组、PC、警务通
+     * 推送图像：组、PC、警务通、HDMI
+     *
+     * @param
      */
-    private void setTabTextView(String type) {
+    private void setTabTextView() {
         if(tabs.size()>0){
             TextView textView = tabs.get(tabs.size()-1);
             textView.setText(getString((android.text.TextUtils.equals(type,Constants.PUSH))?
@@ -900,6 +912,24 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             if(bean.getType() == Constants.TYPE_USER){
                 Member member = (Member) bean.getBean();
                 result.add(member.getUniqueNo());
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 获取通知观看成员的uniqueNo和类型
+     * @return
+     */
+    private ArrayList<String> getNotifyWatchMemberUniqueNoAndType(){
+        ArrayList<String> result = new ArrayList<>();
+        for (ContactItemBean bean:selectedMembers) {
+            if(bean.getType() == Constants.TYPE_USER){
+                Member member = (Member) bean.getBean();
+                result.add(DataUtil.getPushInviteMemberData(member.getUniqueNo(), ReceiveObjectMode.MEMBER.toString()));
+            }else if(bean.getType() == Constants.TYPE_GROUP){
+                Group group = (Group) bean.getBean();
+                result.add(DataUtil.getPushInviteMemberData(group.getUniqueNo(), ReceiveObjectMode.GROUP.toString()));
             }
         }
         return result;
@@ -1020,7 +1050,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             return;
         }
         if (!getSelectMembersUniqueNo().isEmpty()) {
-            MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(getSelectMembersUniqueNo(),
+            MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(getNotifyWatchMemberUniqueNoAndType(),
                     MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0),
                     TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l));
         }
@@ -1037,7 +1067,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         intent.putExtra(Constants.THEME, theme);
         intent.putExtra(Constants.TYPE, Constants.ACTIVE_PUSH);
         intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
-        intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(getSelectMembersUniqueNo()));
+        intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(getNotifyWatchMemberUniqueNoAndType()));
         switch (type) {
             case Constants.PHONE_PUSH:
                 intent.setClass(this, PhonePushService.class);

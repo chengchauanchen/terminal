@@ -113,5 +113,7 @@ public class Constants{
     public static int TRANSPON_TYPE_ONE = 1;
     public static int TRANSPON_TYPE_MORE = 2;
 
+    public static String INVITE_MEMBER_EXCEPT_UNIQUE_NO = "inviteMemberExceptUniqueNo";
+
 
 }

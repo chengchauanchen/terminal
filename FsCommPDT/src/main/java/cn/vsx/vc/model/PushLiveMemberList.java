@@ -7,20 +7,20 @@ import java.util.List;
  * 传递邀请观看成员的uniqueNo集合对象
  */
 public class PushLiveMemberList implements Serializable {
-    private List<Long> list;
+    private List<String> list;
 
     public PushLiveMemberList() {
     }
 
-    public PushLiveMemberList(List<Long> list) {
+    public PushLiveMemberList(List<String> list) {
         this.list = list;
     }
 
-    public List<Long> getList() {
+    public List<String> getList() {
         return list;
     }
 
-    public void setList(List<Long> list) {
+    public void setList(List<String> list) {
         this.list = list;
     }
 }

@@ -39,6 +39,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -51,6 +52,7 @@ import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
@@ -678,10 +680,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     @Override
     public void postVideo() {
-//        ToastUtil.showToast(GroupCallNewsActivity.this,"组内上报");
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, userId,true);
-        //发送组内观看视频消息
-
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,
+                DataUtil.getPushInviteMemberData(DataUtil.getGroupByGroupNoFromAllGroup(userId).getUniqueNo(), ReceiveObjectMode.GROUP.toString()) ,true);
     }
 
     /**

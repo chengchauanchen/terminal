@@ -27,6 +27,7 @@ import butterknife.Bind;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
@@ -437,7 +438,8 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
      * @param member
      */
     private void goToPushLive(Member member) {
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, member.getUniqueNo(),false);
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,
+                cn.vsx.vc.utils.DataUtil.getPushInviteMemberData(member.getUniqueNo(), ReceiveObjectMode.MEMBER.toString()),false);
     }
 
     /**

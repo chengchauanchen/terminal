@@ -94,7 +94,7 @@ public class RecoderPushService extends BaseService{
     private String port;
     private ArrayList<VideoMember> watchMembers;
     private ArrayList<VideoMember> watchOrExitMembers;
-    private List<Long> pushMemberList = new ArrayList<>();
+    private List<String> pushMemberList = new ArrayList<>();
     private MemberEnterAdapter enterOrExitMemberAdapter;
     private static final int CURRENTTIME = 0;
     private static final int HIDELIVINGVIEW = 1;
@@ -282,7 +282,7 @@ public class RecoderPushService extends BaseService{
         Intent intent = new Intent(this, InviteMemberService.class);
         intent.putExtra(Constants.TYPE, Constants.PUSH);
         intent.putExtra(Constants.PUSHING, true);
-        intent.putExtra(Constants.WATCHING_MEMBERS, watchMembers);
+        intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,DataUtil.getInviteMemberExceptList(watchMembers));
         startService(intent);
     };
 

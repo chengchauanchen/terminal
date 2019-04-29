@@ -51,6 +51,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MemberEnterAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
@@ -88,7 +89,7 @@ public class PhonePushService extends BaseService{
     private List<String> listResolution;
     private List<VideoMember> watchOrExitMembers;
     private ArrayList<VideoMember> watchMembers;
-    private List<Long> pushMemberList = new ArrayList<>();
+    private List<String> pushMemberList = new ArrayList<>();
     private PushCallback pushCallback;
     private String ip;
     private String port;
@@ -536,12 +537,13 @@ public class PhonePushService extends BaseService{
             Intent intent = new Intent(PhonePushService.this, InviteMemberService.class);
             intent.putExtra(Constants.TYPE, Constants.PUSH);
             intent.putExtra(Constants.PUSHING, true);
-            intent.putExtra(Constants.WATCHING_MEMBERS, watchMembers);
+            intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,DataUtil.getInviteMemberExceptList(watchMembers));
             startService(intent);
         }else{
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.text_no_video_push_authority));
         }
     };
+
 
     private TextureView.SurfaceTextureListener surfaceTextureListener = new TextureView.SurfaceTextureListener(){
         @Override

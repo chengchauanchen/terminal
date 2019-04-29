@@ -5,6 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.log4j.Logger;
@@ -25,9 +26,11 @@ import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.TransponToBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -104,6 +107,18 @@ public class DataUtil {
 			group.name = groupNo+"";
 		}
 
+		return group;
+	}
+
+	/**
+	 * 从所有组内根据组ID查找Group
+	 * @return
+	 */
+	public static Group  getGroupByGroupNoFromAllGroup(int groupNo){
+		Group group = DataUtil.getTempGroupByGroupNo(groupNo);
+		if (group == null) {
+			group = DataUtil.getGroupByGroupNo(groupNo);
+		}
 		return group;
 	}
 
@@ -634,4 +649,36 @@ public class DataUtil {
 
 		return toUniques;
 	}
+
+	/**
+	 *获取已经观看的成员的
+	 * @return
+	 */
+	public static InviteMemberExceptList getInviteMemberExceptList(ArrayList<VideoMember> watchMembers){
+		InviteMemberExceptList bean = new InviteMemberExceptList();
+		List<Integer> list = new ArrayList<>();
+		if(watchMembers!=null&&!watchMembers.isEmpty()){
+			for (VideoMember member: watchMembers) {
+				if(member!=null){
+					list.add((Integer) member.getId());
+				}
+			}
+		}
+		bean.setList(list);
+		return bean;
 	}
+
+	/**
+	 * 获取上报图像需要传的参数
+	 * @param uniqueNo
+	 * @param type
+	 * @return
+	 */
+	public static String getPushInviteMemberData(long uniqueNo,String type){
+		if(uniqueNo>0 && !TextUtils.isEmpty(type)){
+			return uniqueNo+"_"+type;
+		}
+		return "";
+	}
+
+}
