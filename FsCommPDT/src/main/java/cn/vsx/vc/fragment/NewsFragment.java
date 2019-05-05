@@ -596,6 +596,8 @@ public class NewsFragment extends BaseFragment {
                 if(null !=group && TempGroupType.TO_HELP_COMBAT.toString().equals(group.getTempGroupType())){
                     saveHelpCombatMessage(terminalMessage, false);
                     saveHelpCombatMessageToSql(terminalMessage);
+                }else{
+                    saveMessageToList(terminalMessage,false);
                 }
             }else {
                 saveMessageToList(terminalMessage,false);

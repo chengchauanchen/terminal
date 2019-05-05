@@ -31,6 +31,7 @@ import org.apache.http.util.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
@@ -49,9 +50,11 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetTerminalHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSearchMemberResultHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdateGroupHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MemberListAdapter;
@@ -99,6 +102,8 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private LinearLayout llSelect;
     private RecyclerView selectRecyclerview;
     //tab
+    private List<RelativeLayout> tabLayouts = new ArrayList<>();
+    private int[] tabLayoutIds = new int[]{R.id.is_pc, R.id.is_jingwutong, R.id.is_uav, R.id.is_recoder};
     private List<TextView> tabs = new ArrayList<>();
     private int[] tabIds = new int[]{R.id.pc_tv, R.id.jingwutong_tv, R.id.uav_tv, R.id.recoder_tv};
     private List<View> lines = new ArrayList<>();
@@ -125,19 +130,14 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private boolean isGroupPushLive;
     private TerminalMessage oldTerminalMessage;
 
-    //请求图像的类型
-    private List<String> pullTypes = Arrays.asList(TerminalMemberType.TERMINAL_PC.toString(), TerminalMemberType.TERMINAL_PHONE.toString(),
-                                                   TerminalMemberType.TERMINAL_UAV.toString(),TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
-    //上报图像的类型
-    private List<String> pushTypes = Arrays.asList(TerminalMemberType.TERMINAL_PC.toString(), TerminalMemberType.TERMINAL_PHONE.toString(),
-                                                   TerminalMemberType.TERMINAL_UAV.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
+    //根据不同的业务显示不同的tab类型
+    private List<String> tabTypes = new ArrayList<>();
 
-    //请求图像的搜索页面的类型
-    private List<Integer> pullSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_PC, Constants.TYPE_CHECK_SEARCH_POLICE,
-            Constants.TYPE_CHECK_SEARCH_UAV,Constants.TYPE_CHECK_SEARCH_RECODER);
-    //上报图像的搜索页面的类型
-    private List<Integer> pushSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_PC, Constants.TYPE_CHECK_SEARCH_POLICE,
-            Constants.TYPE_CHECK_SEARCH_UAV,Constants.TYPE_CHECK_SEARCH_HDMI);
+    //tab的文字类型
+    private List<String> tabText = new ArrayList<>();
+
+    //搜索页面的类型
+    private List<Integer> searchTypes = new ArrayList<>();
 
     private List<List<ContactItemBean>> mAllDatas = new ArrayList<>();
     private List<MemberListAdapter> contactAdapter = new ArrayList<>();
@@ -154,7 +154,6 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private int currentPage = 0;
     private static final int PAGE_SIZE = 20;
 
-    private static final int TAB_COUNT = 4;
     //当前显示的列表
     private int currentIndex = 0;
 
@@ -201,29 +200,8 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         mLlAllSelected = rootView.findViewById(R.id.ll_all_selected);
         mRvSelected = rootView.findViewById(R.id.rv_selected);
 
-        tabs.clear();
-        lines.clear();
-        srls.clear();
-        rls.clear();
-        for (int i = 0; i < TAB_COUNT; i++) {
-            TextView textView = rootView.findViewById(tabIds[i]);
-            textView.setOnClickListener(new MyTabOnClickListener(i));
-            tabs.add(textView);
-            lines.add(rootView.findViewById(lineIds[i]));
-            SwipeRefreshLayout srl = rootView.findViewById(srlIds[i]);
-            srl.setOnRefreshListener(new MySwipeRefreshLayoutOnRefreshListener(srl));
-            srls.add(srl);
-            rls.add(rootView.findViewById(rlIds[i]));
-
-        }
-        mAllDatas.add(mOneDatas);
-        mAllDatas.add(mTwoDatas);
-        mAllDatas.add(mThreeDatas);
-        mAllDatas.add(mFourDatas);
         //搜索布局
         layout_search = rootView.findViewById(R.id.ll_layout_search);
-        //设置tab切换之后view的改变
-        setTabView(currentIndex);
     }
 
     @Override
@@ -236,8 +214,10 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRemoveSwitchCameraViewHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetTerminalHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receivegUpdateGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSearchMemberResultHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberSelectedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupSelectedHandler);
 
         layout_search.setOnClickListener(searchOnClickListener);
 
@@ -277,9 +257,96 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         }
         //根据类型和状态显示不同的布局
         setTabTextView();
-
         //获取选择列表
         loadData(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0),true);
+    }
+
+    /**
+     * 根据类型和状态显示不同的布局
+     *
+     * 请求图像：警务通、无人机、执法记录仪
+     * 上报图像：组、PC、警务通
+     * 推送图像：组、PC、警务通、HDMI
+     *
+     * @param
+     */
+    private void setTabTextView() {
+        tabTypes.clear();
+        if (Constants.PUSH.equals(type)) {
+            if (pushing) {
+                //推送图像
+                tabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                        TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
+                tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_push_image));
+                searchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                        Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
+            } else {
+                //上报图像
+                tabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(), TerminalMemberType.TERMINAL_PHONE.toString());
+                tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_push));
+                searchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC, Constants.TYPE_CHECK_SEARCH_POLICE);
+            }
+        } else if (Constants.PULL.equals(type)) {
+            if (pulling) {
+                //推送图像
+                tabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                        TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
+                tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_push_image));
+                searchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                        Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
+            } else {
+                //请求图像
+                tabTypes = Arrays.asList(TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_UAV.toString(),TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
+                tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_pull));
+                searchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_POLICE,Constants.TYPE_CHECK_SEARCH_UAV, Constants.TYPE_CHECK_SEARCH_RECODER);
+            }
+        }
+        tabLayouts.clear();
+        tabs.clear();
+        lines.clear();
+        srls.clear();
+        rls.clear();
+        for (int i = 0; i < tabIds.length;i++) {
+            RelativeLayout relativeLayout = rootView.findViewById(tabLayoutIds[i]);
+            TextView textView = rootView.findViewById(tabIds[i]);
+            textView.setOnClickListener(new MyTabOnClickListener(i));
+            View line = rootView.findViewById(lineIds[i]);
+            SwipeRefreshLayout srl = rootView.findViewById(srlIds[i]);
+            srl.setOnRefreshListener(new MySwipeRefreshLayoutOnRefreshListener(srl));
+            RecyclerView recyclerView = rootView.findViewById(rlIds[i]);
+            if (i < tabTypes.size()) {
+                textView.setText(tabText.get(i));
+                tabs.add(textView);
+                lines.add(line);
+                srls.add(srl);
+                rls.add(recyclerView);
+                relativeLayout.setVisibility(View.VISIBLE);
+                srl.setVisibility(View.VISIBLE);
+                recyclerView.setVisibility(View.VISIBLE);
+            }else{
+                relativeLayout.setVisibility(View.GONE);
+                srl.setVisibility(View.GONE);
+                recyclerView.setVisibility(View.GONE);
+            }
+        }
+
+        mAllDatas.add(mOneDatas);
+        mAllDatas.add(mTwoDatas);
+        mAllDatas.add(mThreeDatas);
+        if(tabTypes.size() == tabIds.length){
+            mAllDatas.add(mFourDatas);
+        }
+        //设置tab切换之后view的改变
+        setTabView(currentIndex);
+
+        contactAdapter.clear();
+        for (int i = 0; i < rls.size(); i++) {
+            MemberListAdapter adapter = new MemberListAdapter(MyTerminalFactory.getSDK().application, mAllDatas.get(i));
+            adapter.setItemClickListener(new MyItemClickListener(i));
+            rls.get(i).setLayoutManager(new LinearLayoutManager(MyTerminalFactory.getSDK().application));
+            rls.get(i).setAdapter(adapter);
+            contactAdapter.add(adapter);
+        }
     }
 
     @Override
@@ -302,14 +369,6 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         selectRecyclerview.setLayoutManager(new LinearLayoutManager(MyTerminalFactory.getSDK().application, OrientationHelper.HORIZONTAL, false));
         selectAdapter = new SelectAdapter(this, selectedMembers);
         selectRecyclerview.setAdapter(selectAdapter);
-        contactAdapter.clear();
-        for (int i = 0; i < rls.size(); i++) {
-            MemberListAdapter adapter = new MemberListAdapter(MyTerminalFactory.getSDK().application, mAllDatas.get(i));
-            adapter.setItemClickListener(new MyItemClickListener(i));
-            rls.get(i).setLayoutManager(new LinearLayoutManager(MyTerminalFactory.getSDK().application));
-            rls.get(i).setAdapter(adapter);
-            contactAdapter.add(adapter);
-        }
 
         mLvSearchSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         mLvSearchSwipeRefreshLayout.setProgressViewOffset(false, 0, (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources().getDisplayMetrics()));
@@ -325,9 +384,6 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         selectedListAdapter = new SelectedListAdapter(this,selectedMembers);
         mRvSelected.setAdapter(selectedListAdapter);
         selectedListAdapter.setItemClickListener(new MyItemDeleteClickListener());
-
-        TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), getTerminalType());
-
     }
 
     @Override
@@ -341,8 +397,10 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRemoveSwitchCameraViewHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetTerminalHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receivegUpdateGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSearchMemberResultHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberSelectedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupSelectedHandler);
         mHandler.removeCallbacksAndMessages(null);
 
     }
@@ -445,6 +503,15 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private ReceiveGetTerminalHandler receiveGetTerminalHandler = (depId, type, departments, members) -> {
         mHandler.post(()-> updateData(depId,type, departments, members));
     };
+    /**
+     * 获取组数据
+     */
+    private ReceivegUpdateGroupHandler receivegUpdateGroupHandler = new ReceivegUpdateGroupHandler(){
+        @Override
+        public void handler(int depId, String depName, List<Department> departments, List<Group> groups){
+            mHandler.post(() -> updateData( depId, departments, groups));
+        }
+    };
 
     /**
      * tab点击事件
@@ -478,7 +545,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
 
         @Override
         public void itemClick(int adapterType, int position) {
-            if(adapterType == Constants.TYPE_USER){
+            if(adapterType == Constants.TYPE_USER||adapterType == Constants.TYPE_GROUP){
                 //请求图像只能选单个设备，上报图像可选多个
                 checkSelectSingleOrMultiple(index,position);
             }else if(adapterType == Constants.TYPE_FOLDER){
@@ -552,6 +619,8 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      * 点击搜索布局，显示搜索页面开始搜索
      */
     private View.OnClickListener searchOnClickListener = v -> {
+        currentPage = 0;
+        searchAdapter.loadMoreEnd(android.text.TextUtils.equals(tabTypes.get(currentIndex),Constants.TYPE_GROUP_STRING));
         mLlEditTheme.setVisibility(View.GONE);
         mLlSelectMember.setVisibility(View.GONE);
         mLlSearchMember.setVisibility(View.VISIBLE);
@@ -672,6 +741,41 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         });
     };
 
+    private ReceiveGroupSelectedHandler receiveGroupSelectedHandler = (group, selected) -> {
+        //不是同一个Group对象
+        group.setChecked(selected);
+        int index = -1;
+        for (int i = 0; i < selectedMembers.size(); i++) {
+            ContactItemBean bean = selectedMembers.get(i);
+            if(bean.getType() == Constants.TYPE_GROUP){
+                Group group1 = (Group) bean.getBean();
+                if(group1!=null&&group1.getNo() == group.getNo()){
+                    index = i;
+                    break;
+                }
+            }
+        }
+
+        if(index>=0&&index < selectedMembers.size()){
+            if(!group.isChecked()){
+                selectedMembers.remove(index);
+            }
+        }else{
+            if(group.isChecked()){
+                ContactItemBean bean = new ContactItemBean();
+                bean.setBean(group);
+                bean.setType(Constants.TYPE_GROUP);
+                selectedMembers.add(bean);
+            }
+        }
+        mHandler.post(() -> {
+            selectAdapter.notifyDataSetChanged();
+            refreshAllSelectedStatus();
+            fromSearchViewGoBackToSeletView();
+        });
+
+    };
+
     private ReceiveSearchMemberResultHandler receiveSearchMemberResultHandler = new ReceiveSearchMemberResultHandler() {
 
         @Override
@@ -744,7 +848,37 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      * 搜索
      */
     private void requestSearchData(String keyWord) {
-        TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,getTerminalType(),keyWord);
+        if (android.text.TextUtils.equals(tabTypes.get(currentIndex),Constants.TYPE_GROUP_STRING)) {
+            searchList.clear();
+            List<Group> groups = TerminalFactory.getSDK().getConfigManager().searchGroup(keyWord);
+            mLvSearchSwipeRefreshLayout.setRefreshing(false);
+            for(Group group : groups){
+                ContactItemBean<Group> contactItemBean = new ContactItemBean<>();
+                contactItemBean.setType(Constants.TYPE_CHECK_SEARCH_GROUP);
+                for(ContactItemBean bean : selectedMembers){
+                    if(bean.getType() ==  Constants.TYPE_GROUP){
+                        Group group1 = (Group) bean.getBean();
+                        if(group.getNo() == group1.getNo()){
+                            group.setChecked(true);
+                            break;
+                        }
+                    }
+                }
+                contactItemBean.setBean(group);
+                searchList.add(contactItemBean);
+            }
+            if(searchList.isEmpty()){
+                mTvSearchNothing.setVisibility(View.VISIBLE);
+                mRlSearchResult.setVisibility(View.GONE);
+            }else{
+                mTvSearchNothing.setVisibility(View.GONE);
+                mRlSearchResult.setVisibility(View.VISIBLE);
+                searchAdapter.notifyDataSetChanged();
+                searchAdapter.loadMoreEnd(true);
+            }
+        }else{
+            TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,getTerminalType(),keyWord);
+        }
     }
 
 
@@ -765,12 +899,16 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      */
     private void loadData(int depId,boolean isNeedCheck){
         if(checkDataIsNeedRequest(isNeedCheck)){
-            TerminalFactory.getSDK().getConfigManager().getTerminal(depId, getTerminalType());
+            if(android.text.TextUtils.equals(tabTypes.get(currentIndex),Constants.TYPE_GROUP_STRING)){
+                TerminalFactory.getSDK().getConfigManager().updateGroup(depId, "");
+            }else{
+                TerminalFactory.getSDK().getConfigManager().getTerminal(depId,tabTypes.get(currentIndex));
+            }
         }
     }
 
     /**
-     * 更新数据
+     * 更新数据（设备）
      * @param depId
      * @param type
      * @param departments
@@ -801,6 +939,36 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     }
 
     /**
+     * 更新数据（组）
+     * @param depId
+     * @param departments
+     * @param groups
+     */
+    private void updateData(int depId, List<Department> departments, List<Group> groups){
+        int index = 0;
+        if(android.text.TextUtils.equals(tabTypes.get(index),Constants.TYPE_GROUP_STRING)){
+            mAllDatas.get(index).clear();
+            for(Group group : groups){
+                ContactItemBean<Group> contactItemBean = new ContactItemBean<>();
+                contactItemBean.setBean(group);
+                contactItemBean.setType(Constants.TYPE_GROUP);
+                mAllDatas.get(index).add(contactItemBean);
+            }
+            for(Department department : departments){
+                ContactItemBean<Department> contactItemBean = new ContactItemBean<>();
+                contactItemBean.setBean(department);
+                contactItemBean.setType(Constants.TYPE_FOLDER);
+                mAllDatas.get(index).add(contactItemBean);
+            }
+            //还原选择状态
+            restoreSelectStatus(mAllDatas.get(index),index);
+            if(index<contactAdapter.size()&&contactAdapter.get(index)!=null){
+                contactAdapter.get(index).notifyDataSetChanged();
+            }
+        }
+    }
+
+    /**
      * 还原选择的状态
      * @param contactItemBeans
      */
@@ -809,6 +977,9 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             if(bean.getType() == Constants.TYPE_USER){
                 Member member = (Member) bean.getBean();
                 member.setChecked((getMemberListFromSelected().contains(member)));
+            }else if(bean.getType() == Constants.TYPE_GROUP){
+                Group group = (Group) bean.getBean();
+                group.setChecked((getGroupListFromSelected().contains(group)));
             }
         }
         if(index>=0&&index<contactAdapter.size()){
@@ -834,6 +1005,23 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     }
 
     /**
+     * 获取Group
+     * @return
+     */
+    private List<Group> getGroupListFromSelected(){
+        List<Group> list = new ArrayList<>();
+        for (ContactItemBean bean: selectedMembers) {
+            if(bean.getType() == Constants.TYPE_GROUP){
+                Group group = (Group) bean.getBean();
+                if(group!=null){
+                    list.add(group);
+                }
+            }
+        }
+        return list;
+    }
+
+    /**
      * 检查列表是否需要获取数据
      * @return
      */
@@ -846,7 +1034,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      * @return
      */
     private String getTerminalType(){
-        return ((android.text.TextUtils.equals(type,Constants.PULL))?pullTypes:pushTypes).get(currentIndex);
+        return tabTypes.get(currentIndex);
     }
 
     /**
@@ -854,7 +1042,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      * @return
      */
     private int getSearchTerminalType(){
-        return ((android.text.TextUtils.equals(type,Constants.PULL))?pullSearchTypes:pushSearchTypes).get(currentIndex);
+        return searchTypes.get(currentIndex);
     }
 
     /**
@@ -863,28 +1051,10 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      * @return
      */
     private int getTerminalTypeListByType(String type){
-        List<String> types = android.text.TextUtils.equals(type,Constants.PULL)?pullTypes:pushTypes;
-        if(types.contains(type)){
-            return types.indexOf(type);
+        if(tabTypes.contains(type)){
+            return tabTypes.indexOf(type);
         }
         return -1;
-    }
-
-    /**
-     * 根据类型和状态显示不同的布局
-     *
-     * 请求图像：警务通、无人机、执法记录仪
-     * 上报图像：组、PC、警务通
-     * 推送图像：组、PC、警务通、HDMI
-     *
-     * @param
-     */
-    private void setTabTextView() {
-        if(tabs.size()>0){
-            TextView textView = tabs.get(tabs.size()-1);
-            textView.setText(getString((android.text.TextUtils.equals(type,Constants.PUSH))?
-                    R.string.text_hdmi:R.string.text_recoder));
-        }
     }
 
     /**
@@ -897,6 +1067,9 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             if(bean.getType() == Constants.TYPE_USER){
                 Member member = (Member) bean.getBean();
                 result.add(member.getNo());
+            }else if(bean.getType() == Constants.TYPE_GROUP){
+                Group group = (Group) bean.getBean();
+                result.add(group.getNo());
             }
         }
         return result;
@@ -912,6 +1085,9 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             if(bean.getType() == Constants.TYPE_USER){
                 Member member = (Member) bean.getBean();
                 result.add(member.getUniqueNo());
+            }else if(bean.getType() == Constants.TYPE_GROUP){
+                Group group = (Group) bean.getBean();
+                result.add(group.getUniqueNo());
             }
         }
         return result;
@@ -954,7 +1130,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      * 刷新所有列表的选择状态
      */
     private void refreshAllSelectedStatus() {
-        for (int i = 0; i < TAB_COUNT; i++) {
+        for (int i = 0; i < tabTypes.size(); i++) {
             restoreSelectStatus(mAllDatas.get(i),i);
         }
     }
@@ -965,47 +1141,96 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      * @param position
      */
     private void checkSelectSingleOrMultiple(int index,int position) {
-        if(android.text.TextUtils.equals(type,Constants.PULL)){
+        if(mAllDatas.get(index).get(position).getType() == Constants.TYPE_USER){
             Member member = (Member) mAllDatas.get(index).get(position).getBean();
+            checkSelectMember(index,position,member);
+        }else if(mAllDatas.get(index).get(position).getType() == Constants.TYPE_GROUP){
+            Group group = (Group) mAllDatas.get(index).get(position).getBean();
+            checkSelectGroup(index,position,group);
+        }
+    }
+
+    /**
+     * 改变设备的选择状态
+     * @param index
+     * @param position
+     * @param member
+     */
+    private void checkSelectMember(int index,int position,Member member) {
+        if(android.text.TextUtils.equals(type,Constants.PULL)&& !pulling){
             //请求图像，只能选择单个设备
             if(selectedMembers.isEmpty()|| member.isChecked()){
                 //还没有选择设备
                 member.setChecked(!member.isChecked());
-                updateSelectMember(member);
+                updateSelect(member,null,member.isChecked,Constants.TYPE_USER);
             }else{
                 member.setChecked(false);
-                if(index>=0&&index<contactAdapter.size()){
+                if(index>=0 && index<contactAdapter.size()){
                     contactAdapter.get(index).notifyItemChanged(position);
                 }
                 ToastUtil.showToast(this,getString(R.string.only_choose_one_device));
             }
         }else{
             //上报图像，选择多个设备
-            Member member = (Member) mAllDatas.get(index).get(position).getBean();
             member.setChecked(!member.isChecked());
-            updateSelectMember(member);
+            updateSelect(member,null,member.isChecked,Constants.TYPE_USER);
         }
     }
 
     /**
-     *设置选择的成员
+     * 改变组的选择状态
+     * @param index
+     * @param position
+     * @param group
+     */
+    private void checkSelectGroup(int index, int position, Group group) {
+        if(android.text.TextUtils.equals(type,Constants.PULL)&& !pulling){
+            //请求图像，只能选择单个设备
+            if(selectedMembers.isEmpty()|| group.isChecked()){
+                //还没有选择设备
+                group.setChecked(!group.isChecked());
+                updateSelect(null,group,group.isChecked,Constants.TYPE_GROUP);
+            }else{
+                group.setChecked(false);
+                if(index>=0 && index<contactAdapter.size()){
+                    contactAdapter.get(index).notifyItemChanged(position);
+                }
+                ToastUtil.showToast(this,getString(R.string.only_choose_one_device));
+            }
+        }else{
+            //上报图像，选择多个设备
+            group.setChecked(!group.isChecked());
+            updateSelect(null,group,group.isChecked,Constants.TYPE_GROUP);
+        }
+    }
+
+    /**
+     *设置选择
      * @param member
      */
-    private void updateSelectMember(Member member) {
-        if(member.isChecked){
+    private void updateSelect(Member member,Group group,boolean isChecked,int type) {
+        if(isChecked){
             //添加
             ContactItemBean bean = new ContactItemBean();
-            bean.setType(Constants.TYPE_USER);
-            bean.setBean(member);
+            bean.setType(type);
+            bean.setBean((type == Constants.TYPE_USER)?member:group);
             selectedMembers.add(bean);
         }else{
             //删除
             for (ContactItemBean bean: selectedMembers) {
-                if(bean.getType() == Constants.TYPE_USER){
-                    Member member1 = (Member) bean.getBean();
-                    if(member1.getNo() == member.getNo()){
-                        selectedMembers.remove(bean);
-                        break;
+                if(bean.getType() == type){
+                    if(type == Constants.TYPE_USER){
+                        Member member1 = (Member) bean.getBean();
+                        if(member1.getNo() == member.getNo()){
+                            selectedMembers.remove(bean);
+                            break;
+                        }
+                    }else if(type == Constants.TYPE_GROUP){
+                        Group group1 = (Group) bean.getBean();
+                        if(group1.getNo() == group.getNo()){
+                            selectedMembers.remove(bean);
+                            break;
+                        }
                     }
                 }
             }
@@ -1095,7 +1320,6 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(member.getNo(), liveUniqueNo, "");
             logger.error("请求图像：requestCode=" + requestCode);
             if (requestCode == BaseCommonCode.SUCCESS_CODE) {
-
                 Intent intent = new Intent(InviteMemberService.this, LiveRequestService.class);
                 intent.putExtra(Constants.MEMBER_NAME, member.getName());
                 intent.putExtra(Constants.MEMBER_ID, member.getNo());

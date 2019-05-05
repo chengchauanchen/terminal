@@ -56,7 +56,8 @@ public class SelectedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
                 userViewHolder.tvId.setVisibility(View.VISIBLE);
             }else if(bean.getType() == Constants.TYPE_GROUP) {
                 Group group = (Group) bean.getBean();
-                userViewHolder.tvName.setText(group.getDepartmentName());
+                userViewHolder.ivLogo.setImageResource(R.drawable.group_photo);
+                userViewHolder.tvName.setText(group.getName());
                 userViewHolder.tvId.setVisibility(View.GONE);
             }
             userViewHolder.ivDelete.setOnClickListener(v -> {

@@ -44,6 +44,8 @@ public class Constants{
     public final static int TYPE_CHECK_SEARCH_UAV=114;
     public final static int TYPE_CHECK_SEARCH_PC=115;
 
+    public final static String TYPE_GROUP_STRING = "groupType";
+
     public final static int FORCE_KILL = 0;
     public final static int LOGINED = 1;
 

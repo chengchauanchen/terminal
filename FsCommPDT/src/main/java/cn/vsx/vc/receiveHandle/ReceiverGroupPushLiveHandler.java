@@ -1,5 +1,8 @@
 package cn.vsx.vc.receiveHandle;
 
+import java.util.List;
+
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 
 /**
@@ -7,5 +10,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverGroupPushLiveHandler extends ReceiveHandler {
-    void handler(String streamMediaServerIp, int streamMediaServerPort, long callId);
+    void handler(String streamMediaServerIp, int streamMediaServerPort, long callId, List<Group> list);
 }

@@ -97,7 +97,6 @@ import cn.vsx.vc.fragment.LocationFragment;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.TransponSelectedBean;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
-import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowForwardMoreHandler;
@@ -216,7 +215,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendDataMessageSuccessHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getHistoryMessageRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePersonMessageNotifyDateHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiverGroupPushLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRecallRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileCheckMessageHandler);
@@ -367,7 +365,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendDataMessageSuccessHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(getHistoryMessageRecordHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePersonMessageNotifyDateHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiverGroupPushLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseRecallRecordHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverChatListItemClickHandler);
@@ -2233,42 +2230,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         return canDo;
     }
 
-    /**
-     * 组内上报成功之后再组内发一条消息
-     */
-    private ReceiverGroupPushLiveHandler receiverGroupPushLiveHandler = (streamMediaServerIp, streamMediaServerPort, callId) -> {
-        int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-        long memberUniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
-        String memberName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
-        String url = "rtsp://"+streamMediaServerIp+":"+streamMediaServerPort+"/"+memberUniqueNo+"_"+callId+".sdp";
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
-        jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
-        jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
-        jsonObject.put(JsonParam.CALLID, String.valueOf(callId));
-        jsonObject.put(JsonParam.REMARK, 2);
-        jsonObject.put(JsonParam.LIVER, memberUniqueNo+"_"+memberName);
-        jsonObject.put(JsonParam.LIVERNO, memberId);
-        jsonObject.put(JsonParam.BACKUP, memberId+"_"+memberName);
-        jsonObject.put(JsonParam.EASYDARWIN_RTSP_URL, url);
-        TerminalMessage mTerminalMessage = new TerminalMessage();
-        mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-        mTerminalMessage.messageFromName = memberName;
-        mTerminalMessage.messageToId = userId;
-        mTerminalMessage.messageToName = userName;
-        mTerminalMessage.messageBody = jsonObject;
-        mTerminalMessage.sendTime = System.currentTimeMillis();
-        mTerminalMessage.messageType = MessageType.VIDEO_LIVE.getCode();
-        mTerminalMessage.messageUrl = url;
 
-        handler.post(() -> {
-            chatMessageList.add(mTerminalMessage);
-            setListSelection(chatMessageList.size() - 1);
-            if (temporaryAdapter != null) {
-                temporaryAdapter.notifyDataSetChanged();
-            }
-        });
-    };
 
     /**
      * 合并转发

@@ -20,23 +20,38 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 
+import com.alibaba.fastjson.JSONObject;
+
 import org.apache.log4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import cn.vsx.hamster.common.MessageSendStateEnum;
+import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.util.JsonParam;
+import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
+import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRemoveWindowViewHandler;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -345,5 +360,46 @@ public abstract class BaseService extends Service{
                 MyTerminalFactory.getSDK().getLiveManager().ceaseWatching();
             }
         }
+    }
+    /**
+     * 在组内发一条消息
+     */
+    public void sendGroupMessage(String streamMediaServerIp, int streamMediaServerPort, long callId,List<String> pushMemberList,boolean isGroupPushLive) {
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            List<Group> list = DataUtil.checkIsGroupPush(pushMemberList);
+            if(!list.isEmpty()){
+
+                int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+                long memberUniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
+                String memberName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
+                String url = "rtsp://"+streamMediaServerIp+":"+streamMediaServerPort+"/"+memberUniqueNo+"_"+callId+".sdp";
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
+                jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
+//        jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
+                jsonObject.put(JsonParam.CALLID, String.valueOf(callId));
+                jsonObject.put(JsonParam.REMARK, 2);
+                jsonObject.put(JsonParam.LIVER, memberUniqueNo+"_"+memberName);
+                jsonObject.put(JsonParam.LIVERNO, memberId);
+                jsonObject.put(JsonParam.BACKUP, memberId+"_"+memberName);
+                jsonObject.put(JsonParam.EASYDARWIN_RTSP_URL, url);
+                List<TerminalMessage> messages = new ArrayList<>();
+                for (Group group: list) {
+                    TerminalMessage mTerminalMessage = new TerminalMessage();
+                    mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+                    mTerminalMessage.messageFromName = memberName;
+                    mTerminalMessage.messageToId =NoCodec.encodeGroupNo(group.getNo());
+                    mTerminalMessage.messageToName = group.getName();
+                    mTerminalMessage.messageBody = jsonObject;
+                    mTerminalMessage.sendTime = System.currentTimeMillis();
+                    mTerminalMessage.messageType = MessageType.VIDEO_LIVE.getCode();
+                    mTerminalMessage.messageUrl = url;
+                    TerminalMessage terminalMessage1 = (TerminalMessage) mTerminalMessage.clone();
+                    MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1);
+//                    messages.add(mTerminalMessage);
+                }
+//                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverGroupPushLiveHandler.class, messages);
+            }
+        });
     }
 }

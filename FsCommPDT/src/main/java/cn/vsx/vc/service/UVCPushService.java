@@ -55,7 +55,6 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
-import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -319,9 +318,7 @@ public class UVCPushService extends BaseService{
         port = String.valueOf(streamMediaServerPort);
         id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "_" + callId;
         //如果是组内上报，在组内发送一条上报消息
-        if(isGroupPushLive){
-            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverGroupPushLiveHandler.class, streamMediaServerIp,streamMediaServerPort,callId);
-        }
+        sendGroupMessage(streamMediaServerIp,streamMediaServerPort,callId,pushMemberList,isGroupPushLive);
         startPush();
     }, 1000);
 
@@ -695,4 +692,5 @@ public class UVCPushService extends BaseService{
             mLlUvcInviteMember.setVisibility(View.VISIBLE);
         }
     }
+
 }

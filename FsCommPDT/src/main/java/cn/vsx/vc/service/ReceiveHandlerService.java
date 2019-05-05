@@ -70,6 +70,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHan
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
+import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.util.StateMachine.IState;
 import cn.vsx.vc.R;
@@ -547,17 +548,19 @@ public class ReceiveHandlerService extends Service{
                         cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(terminalMessage.messageFromId,true);
                     });
                 //判断是否是组内上报，组内上报不弹窗
+                if(!TerminalMessageUtil.isGroupMeaage(terminalMessage)){
+                    //延迟弹窗，否则判断是否在上报接口返回的是没有在上报
+                    myHandler.postDelayed(() -> {
+                        data.add(terminalMessage);
+                        showDialogView();
+                    }, 3000);
+                    //30s没观看就取消当前弹窗
+                    Message message = Message.obtain();
+                    message.what = DISSMISS_CURRENT_DIALOG;
+                    message.obj = terminalMessage;
+                    myHandler.sendMessageDelayed(message, 30 * 1000);
+                }
 
-                //延迟弹窗，否则判断是否在上报接口返回的是没有在上报
-                myHandler.postDelayed(() -> {
-                    data.add(terminalMessage);
-                    showDialogView();
-                }, 3000);
-                //30s没观看就取消当前弹窗
-                Message message = Message.obtain();
-                message.what = DISSMISS_CURRENT_DIALOG;
-                message.obj = terminalMessage;
-                myHandler.sendMessageDelayed(message, 30 * 1000);
             }
         }
         if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.LIVE_WATCHING_END || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.STOP_ASK_VIDEO_LIVE){

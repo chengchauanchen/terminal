@@ -104,6 +104,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 break;
             case Constants.TYPE_CHECK_SEARCH_GROUP:
                 Group group1 = (Group) item.getBean();
+                holder.setImageResource(R.id.shoutai_user_logo,R.drawable.group_photo);
                 holder.setText(R.id.shoutai_tv_member_name, group1.getName());
                 holder.setGone(R.id.shoutai_tv_member_id,false);
                 holder.setChecked(R.id.checkbox,group1.isChecked());

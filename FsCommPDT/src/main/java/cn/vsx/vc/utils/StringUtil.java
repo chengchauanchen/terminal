@@ -127,6 +127,24 @@ public class StringUtil{
         return 0f;
     }
 
+    /**
+     * String转Long
+     * @param data
+     * @return
+     */
+    public static long toLong(String data){
+        long result = 0L;
+        if(!TextUtils.isEmpty(data)){
+            try{
+                result = Long.valueOf(data);
+            }catch (Exception e){
+                e.printStackTrace();
+                result = 0L;
+            }
+        }
+        return result;
+    }
+
     /*
      * 将时间戳转换为时间
      */
