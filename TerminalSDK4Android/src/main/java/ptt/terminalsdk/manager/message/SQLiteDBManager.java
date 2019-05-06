@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -26,6 +27,7 @@ import cn.vsx.hamster.terminalsdk.model.Folder;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.model.WarningRecord;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 
 /**
@@ -46,6 +48,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     private final static String GROUP_DATA = "groupData";
     private final static String CALL_RECORD = "callRecord";
     private final static String BIT_STAR_FILE_RECORD = "bitStarFileRecord";
+    private final static String WARNING_RECORD = "warningRecord";
 
     private SQLiteDBManager(Context context) {
         this.context = context;
@@ -611,6 +614,131 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         return groupList;
     }
 
+    public void addWarningRecord(WarningRecord warningRecord){
+        SQLiteDatabase db = helper.getReadableDatabase();
+        ContentValues values = getWarningRecordContentValues(warningRecord);
+        db.replace(WARNING_RECORD, null, values);
+    }
+
+    @Override
+    public Map<String,Integer> getWarningRecordsNo(int page,int pageSize){
+        SQLiteDatabase db = helper.getReadableDatabase();
+        StringBuffer sql=new StringBuffer("select * from warningRecord ");
+        sql.append(" order by alarm_time limit "+pageSize+" offset "+(page-1)*pageSize);
+        Cursor cursor=db.rawQuery(sql.toString(), null);
+        //        Cursor cursor = db.query(WARNING_RECORD, new String[]{"alarm_no"}, null, null, null, null, "alarm_time",);
+        return getWarningRecordMap(db, cursor);
+    }
+
+    @Override
+    public void updateWarningRecord(WarningRecord warningRecord) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        ContentValues values = getWarningRecordContentValues(warningRecord);
+        db.update(WARNING_RECORD, values, "alarm_no = ?", new String[]{warningRecord.getAlarmNo() + ""});
+    }
+
+    @Override
+    public WarningRecord getWarningRecordByAlarmNo(String alarmNo) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        Cursor cursor = db.query(WARNING_RECORD, null, "alarm_no=?", new String[] { alarmNo }, null, null, null);
+        WarningRecord record =null;
+        while (cursor.moveToNext()) {
+            record = getWarningRecord(cursor);
+        }
+        cursor.close();
+        return record;
+    }
+
+    /**
+     *
+     * @param cursor
+     * @return
+     */
+    private WarningRecord getWarningRecord(Cursor cursor) {
+        WarningRecord record = new WarningRecord();
+        record.setAlarmNo(cursor.getString(cursor.getColumnIndex("alarm_no")));
+        record.setLevels(cursor.getInt(cursor.getColumnIndex("levels")));
+        record.setStatus(cursor.getInt(cursor.getColumnIndex("status")));
+        record.setAddress(cursor.getString(cursor.getColumnIndex("address")));
+        record.setApersonPhone(cursor.getString(cursor.getColumnIndex("apersonphone")));
+        record.setAperson(cursor.getString(cursor.getColumnIndex("aperson")));
+        record.setRecvperson(cursor.getString(cursor.getColumnIndex("recvperson")));
+        record.setRecvphone(cursor.getString(cursor.getColumnIndex("recvphone")));
+        record.setSummary(cursor.getString(cursor.getColumnIndex("summary")));
+        record.setAlarmTime(cursor.getString(cursor.getColumnIndex("alarm_time")));
+        record.setDate(cursor.getString(cursor.getColumnIndex("date")));
+        record.setUnRead(cursor.getInt(cursor.getColumnIndex("unread")));
+        return record;
+    }
+
+    private synchronized List<String> getWarningRecordList(SQLiteDatabase db, Cursor cursor){
+        List<String> warningRecordNoList = new ArrayList<>();
+
+        if (cursor != null && cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                if(!TextUtils.isEmpty(cursor.getString(cursor.getColumnIndex("alarm_no")))){
+                    warningRecordNoList.add(cursor.getString(cursor.getColumnIndex("alarm_no")));
+                }
+            }
+            cursor.close();
+        }
+        logger.info("查询本地数据库WarningRecord结果：" + warningRecordNoList);
+        return warningRecordNoList;
+    }
+
+    private synchronized Map<String,Integer> getWarningRecordMap(SQLiteDatabase db, Cursor cursor){
+        Map<String,Integer> map = new HashMap<>();
+        if (cursor != null && cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                if(!TextUtils.isEmpty(cursor.getString(cursor.getColumnIndex("alarm_no")))){
+                    map.put(cursor.getString(cursor.getColumnIndex("alarm_no")),
+                            cursor.getInt(cursor.getColumnIndex("unread")));
+                }
+            }
+            cursor.close();
+        }
+        logger.info("查询本地数据库getWarningRecordMap结果：" + map);
+        return map;
+    }
+
+    private  ContentValues  getWarningRecordContentValues(WarningRecord warningRecord){
+        ContentValues values = new ContentValues();
+        values.put("alarm_no", warningRecord.getAlarmNo());
+        if(warningRecord.getStatus()!= -1){
+            values.put("status",warningRecord.getStatus());
+        }
+        if(warningRecord.getLevels() !=-1){
+            values.put("levels", warningRecord.getLevels());
+        }
+        if(!TextUtils.isEmpty(warningRecord.getAlarmTime())){
+            values.put("alarm_time",warningRecord.getAlarmTime());
+        }
+        if(!TextUtils.isEmpty(warningRecord.getAddress())){
+            values.put("address",warningRecord.getAddress());
+        }
+        if(!TextUtils.isEmpty(warningRecord.getSummary())){
+            values.put("summary",warningRecord.getSummary());
+        }
+        if(!TextUtils.isEmpty(warningRecord.getApersonPhone())){
+            values.put("apersonphone",warningRecord.getApersonPhone());
+        }
+        if(!TextUtils.isEmpty(warningRecord.getAperson())){
+            values.put("aperson",warningRecord.getAperson());
+        }
+        if(!TextUtils.isEmpty(warningRecord.getRecvperson())){
+            values.put("recvperson",warningRecord.getRecvperson());
+        }
+        if(!TextUtils.isEmpty(warningRecord.getRecvphone())){
+            values.put("recvphone",warningRecord.getRecvphone());
+        }
+        if(!TextUtils.isEmpty(warningRecord.getDate())){
+            values.put("date",warningRecord.getDate());
+        }
+        if(warningRecord.getStatus()!= -1){
+            values.put("unread",warningRecord.getUnRead());
+        }
+        return values;
+    }
 
     private synchronized CopyOnWriteArrayList<Folder> getFolderList(SQLiteDatabase db, Cursor cursor) {
         CopyOnWriteArrayList<Folder> folderList;

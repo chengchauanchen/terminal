@@ -60,6 +60,8 @@ import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.model.WarningRecord;
+import cn.vsx.hamster.terminalsdk.receiveHandler.GetWarningMessageDetailHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyIndividualCallHandler;
@@ -78,6 +80,7 @@ import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.LiveHistoryActivity;
 import cn.vsx.vc.activity.NewMainActivity;
+import cn.vsx.vc.activity.WarningMessageDetailActivity;
 import cn.vsx.vc.adapter.StackViewAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ProgressDialog;
@@ -88,18 +91,20 @@ import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipConnectedHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipErrorHandler;
+import cn.vsx.vc.receiveHandle.ReceiveWarningReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.receiver.NotificationClickReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.service.KeepLiveManager;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
- * 作者：ly-xuxiaolong
+ * 作者：xuxiaolong
  * 版本：1.0
  * 创建日期：2019/1/4
  * 描述：
@@ -114,12 +119,16 @@ public class ReceiveHandlerService extends Service{
     private ReceiveHandlerBinder receiveHandlerBinder = new ReceiveHandlerBinder();
 
     private RelativeLayout video_dialog;
-    private StackViewAdapter stackViewAdapter;
+    private StackViewAdapter videoStackViewAdapter;
+    private StackViewAdapter warningStackViewAdapter;
+    private boolean videoDialogMoved;
+    private boolean warningDialogMoved;
 
     private static final int DISSMISS_CURRENT_DIALOG = 6;
     private static final int WATCH_LIVE = 7;
     private Logger logger = Logger.getLogger(this.getClass());
     private List<TerminalMessage> data = new ArrayList<>();
+    private List<TerminalMessage> warningData = new ArrayList<>();
     //记录紧急观看的CallId，防止PC端重复发送强制观看的消息
     private String emergencyCallId ;
 
@@ -127,7 +136,9 @@ public class ReceiveHandlerService extends Service{
 
     //弹窗
     @Bind(R.id.swipeFlingAdapterView)
-    SwipeFlingAdapterView swipeFlingAdapterView;
+    SwipeFlingAdapterView videoSwipeFlingAdapterView;
+    @Bind(R.id.warning_swipeFlingAdapterView)
+    SwipeFlingAdapterView warningSwipeFlingAdapterView;
 
     /**
      * 搜索到的结果集合
@@ -141,17 +152,17 @@ public class ReceiveHandlerService extends Service{
 
                 case DISSMISS_CURRENT_DIALOG:
                     TerminalMessage terminalMessage = (TerminalMessage) msg.obj;
-                    if(dialogAdded && null != stackViewAdapter && data.contains(terminalMessage)){
+                    if(dialogAdded && null != videoStackViewAdapter && data.contains(terminalMessage)){
                         data.remove(terminalMessage);
-                        stackViewAdapter.setData(data);
+                        videoStackViewAdapter.setData(data);
                     }
                     break;
                 case WATCH_LIVE:
                     TerminalMessage terminalMessage1 = (TerminalMessage) msg.obj;
                     int position = msg.arg1;
                     if(position>=0){
-                        data.remove(stackViewAdapter.getItem(position));
-                        stackViewAdapter.remove(position);
+                        data.remove(videoStackViewAdapter.getItem(position));
+                        videoStackViewAdapter.remove(position);
                         video_dialog.setVisibility(View.GONE);
                         if(data.size() ==0){
                             removeView();
@@ -317,29 +328,87 @@ public class ReceiveHandlerService extends Service{
     /**
      * 关闭当前弹窗
      */
-    private final class OnClickListenerCloseDialog implements StackViewAdapter.CloseDialogListener{
+    private final class OnVideoClickListenerCloseDialog implements StackViewAdapter.CloseDialogListener{
 
         @Override
         public void onCloseDialogClick(int position){
-            data.remove(stackViewAdapter.getItem(position));
-            stackViewAdapter.remove(position);
+            data.remove(videoStackViewAdapter.getItem(position));
+            videoStackViewAdapter.remove(position);
             if(data.isEmpty()){
                 removeView();
             }
         }
     }
 
+    private final class WarningCloseDialogClickListener implements StackViewAdapter.CloseDialogListener{
+        @Override
+        public void onCloseDialogClick(int position){
+            warningData.remove(warningStackViewAdapter.getItem(position));
+            warningStackViewAdapter.remove(position);
+            if(warningData.isEmpty()){
+                if(videoSwipeFlingAdapterView.getVisibility() == View.VISIBLE){
+                    revertDialog();
+                }else {
+                    removeView();
+                }
+            }
+
+        }
+    }
+
     /**
-     * 上报图像或者去看警情
+     * 上报图像
      **/
-    private final class OnClickListenerGoWatch implements StackViewAdapter.GoWatchListener{
+    private final class OnVideoClickListenerGoWatch implements StackViewAdapter.GoWatchListener{
         @Override
         public void onGoWatchClick(final int position){
             if(position > data.size() - 1){
                 return;
             }
-            final TerminalMessage terminalMessage = stackViewAdapter.getItem(position);
+            final TerminalMessage terminalMessage = videoStackViewAdapter.getItem(position);
             goToWatch(terminalMessage,position);
+        }
+    }
+
+    private final class goWarningDetailListener implements StackViewAdapter.GoWatchListener{
+
+        @Override
+        public void onGoWatchClick(int position){
+            if(position > warningData.size()-1){
+                return;
+            }
+            final TerminalMessage terminalMessage = warningStackViewAdapter.getItem(position);
+            if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
+                if(terminalMessage.messageBody.containsKey(JsonParam.DETAIL) && terminalMessage.messageBody.getBoolean(JsonParam.DETAIL)){
+                    warningData.clear();
+                    warningStackViewAdapter.clear();
+                    //                    warningData.remove(warningStackViewAdapter.getItem(position));
+                    //                    warningStackViewAdapter.remove(position);
+                    revertDialog();
+                    removeView();
+                    WarningRecord warningRecord = new WarningRecord();
+                    warningRecord.setAperson(terminalMessage.messageBody.getString(JsonParam.APERSON));
+                    warningRecord.setApersonPhone(terminalMessage.messageBody.getString(JsonParam.APERSON_PHONE));
+                    warningRecord.setRecvperson(terminalMessage.messageBody.getString(JsonParam.RECVPERSON));
+                    warningRecord.setRecvphone(terminalMessage.messageBody.getString(JsonParam.RECVPHONE));
+                    warningRecord.setAlarmTime(terminalMessage.messageBody.getString(JsonParam.ALARM_TIME));
+                    warningRecord.setAddress(terminalMessage.messageBody.getString(JsonParam.ADDRESS));
+                    warningRecord.setSummary(terminalMessage.messageBody.getString(JsonParam.SUMMARY));
+
+                    warningRecord.setAlarmNo(terminalMessage.messageBody.getString(JsonParam.ALARM_NO));
+                    warningRecord.setLevels(terminalMessage.messageBody.getIntValue(JsonParam.LEVELS));
+                    warningRecord.setStatus(terminalMessage.messageBody.getIntValue(JsonParam.STATUS));
+                    warningRecord.setUnRead(1);
+                    MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+                        MyTerminalFactory.getSDK().getSQLiteDBManager().updateWarningRecord(warningRecord);
+                    });
+                    Intent intent = new Intent(getApplicationContext(), WarningMessageDetailActivity.class);
+                    intent.putExtra("warningRecord",warningRecord);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveWarningReadCountChangedHandler.class);
+                }
+            }
         }
     }
 
@@ -499,7 +568,6 @@ public class ReceiveHandlerService extends Service{
         startService(intent);
     }
 
-
     private long lastNotifyTime = 0;
     /**
      * 接收到消息
@@ -511,61 +579,107 @@ public class ReceiveHandlerService extends Service{
             return;
         }
         //是否为别人发的消息
-        boolean isReceiver = terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-        if(!isReceiver){
+        if(!TerminalMessageUtil.isReceiver(terminalMessage)){
             return;
         }
-        //收到紧急观看的消息(国标、视频)
-        if((terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.EMERGENCY_INFORM_TO_WATCH_LIVE)||
-                (terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.EMERGENCY_INFORM_TO_WATCH_LIVE)){
-            //停止一切业务，开始观看
-            String callId = terminalMessage.messageBody.getString(JsonParam.CALLID);
-            //过滤重复收到强制观看的消息
-            if(android.text.TextUtils.isEmpty(emergencyCallId)||(!android.text.TextUtils.isEmpty(emergencyCallId)&&!android.text.TextUtils.equals(callId,emergencyCallId))){
-                emergencyCallId = callId;
-                Map<TerminalState, IState<?>> currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
-                if(currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PUSHING)
-                        ||currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PLAYING)
-                        || currentStateMap.containsKey(TerminalState.INDIVIDUAL_CALLING)){
-                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyEmergencyMessageHandler.class);
+        //警情消息
+        if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode() && !TerminalMessageUtil.isGroupMeaage(terminalMessage)){
+            MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable(){
+                @Override
+                public void run(){
+                    //判断视频上报弹窗是否添加
+                    Map<String,Integer> warningRecordList = new HashMap<>();
+                    warningRecordList.put(terminalMessage.messageBody.getString(JsonParam.ALARM_NO),0);
+                    List<WarningRecord> warningRecords = MyTerminalFactory.getSDK().getTerminalMessageManager().getWarningRecords(warningRecordList);
+                    if(!warningRecords.isEmpty()){
+                        WarningRecord warningRecord = warningRecords.get(0);
+                        terminalMessage.messageBody.put(JsonParam.LEVELS,warningRecord.getLevels());
+                        terminalMessage.messageBody.put(JsonParam.STATUS,warningRecord.getStatus());
+                        terminalMessage.messageBody.put(JsonParam.ADDRESS,warningRecord.getAddress());
+                        terminalMessage.messageBody.put(JsonParam.APERSON_PHONE,warningRecord.getApersonPhone());
+                        terminalMessage.messageBody.put(JsonParam.APERSON,warningRecord.getAperson());
+                        terminalMessage.messageBody.put(JsonParam.RECVPERSON,warningRecord.getRecvperson());
+                        terminalMessage.messageBody.put(JsonParam.RECVPHONE,warningRecord.getRecvphone());
+                        terminalMessage.messageBody.put(JsonParam.SUMMARY,warningRecord.getSummary());
+                        terminalMessage.messageBody.put(JsonParam.ALARM_TIME,warningRecord.getAlarmTime());
+                        terminalMessage.messageBody.put(JsonParam.ALARM_UNREAD,warningRecord.getUnRead());
+                        terminalMessage.messageBody.put(JsonParam.DETAIL,true);
+                        TerminalFactory.getSDK().getSQLiteDBManager().addWarningRecord(warningRecord);
+                        TerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessage(terminalMessage);
+                        TerminalFactory.getSDK().notifyReceiveHandler(GetWarningMessageDetailHandler.class,terminalMessage);
+                        myHandler.post(()->{
+                            //判断是否已经存在，没有就添加
+                            if(!warningData.contains(terminalMessage)){
+                                warningData.add(0,terminalMessage);
+                            }
+                            if(MyApplication.instance.getIndividualState() ==  IndividualCallState.IDLE &&!MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress) {
+                                showWarningDialog();
+                            }
+                        });
+                    }
+                    myHandler.postDelayed(() -> {
+                        if(dialogAdded && null != warningStackViewAdapter && warningData.contains(terminalMessage)){
+                            warningData.remove(terminalMessage);
+                            warningStackViewAdapter.setData(warningData);
+                            if(warningData.isEmpty()){
+                                revertDialog();
+                            }
+                        }
+                    },30*1000);
                 }
-                if(currentStateMap.containsKey(TerminalState.GROUP_CALL_LISTENING) || currentStateMap.containsKey(TerminalState.GROUP_CALL_SPEAKING)){
-                    TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
-                }
-                myHandler.post(() -> PromptManager.getInstance().startPlayByNotity());
-                myHandler.postDelayed(() -> goToWatch(terminalMessage,-1),1000);
-            }
-         return;
+            });
         }
 
-        //判断消息类型，是否弹窗
-        if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode() || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE){
-            if(!MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress){
-
-                int liverNo = Util.stringToInt(terminalMessage.messageBody.getString(JsonParam.LIVERNO));
-                TerminalFactory.getSDK().getThreadPool().execute(() -> {
+        //视频消息或者国标平台消息
+        if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() || terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+            //紧急观看
+            if(terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.EMERGENCY_INFORM_TO_WATCH_LIVE){
+                //停止一切业务，开始观看
+                String callId = terminalMessage.messageBody.getString(JsonParam.CALLID);
+                //过滤重复收到强制观看的消息
+                if(android.text.TextUtils.isEmpty(emergencyCallId)||(!android.text.TextUtils.isEmpty(emergencyCallId)&&!android.text.TextUtils.equals(callId,emergencyCallId))){
+                    emergencyCallId = callId;
+                    Map<TerminalState, IState<?>> currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
+                    if(currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PUSHING)
+                            ||currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PLAYING)
+                            || currentStateMap.containsKey(TerminalState.INDIVIDUAL_CALLING)){
+                        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyEmergencyMessageHandler.class);
+                    }
+                    if(currentStateMap.containsKey(TerminalState.GROUP_CALL_LISTENING) || currentStateMap.containsKey(TerminalState.GROUP_CALL_SPEAKING)){
+                        TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
+                    }
+                    myHandler.post(() -> PromptManager.getInstance().startPlayByNotity());
+                    myHandler.postDelayed(() -> goToWatch(terminalMessage,-1),1000);
+                }
+                return;
+            }else if(terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE){
+                //voip走的个呼状态机
+                if(MyApplication.instance.getIndividualState() ==  IndividualCallState.IDLE && !MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress){
+                    int liverNo = Util.stringToInt(terminalMessage.messageBody.getString(JsonParam.LIVERNO));
+                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
                         cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo,true);
                         cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(terminalMessage.messageFromId,true);
                     });
-                //判断是否是组内上报，组内上报不弹窗
-                if(!TerminalMessageUtil.isGroupMeaage(terminalMessage)){
-                    //延迟弹窗，否则判断是否在上报接口返回的是没有在上报
-                    myHandler.postDelayed(() -> {
-                        data.add(terminalMessage);
-                        showDialogView();
-                    }, 3000);
-                    //30s没观看就取消当前弹窗
-                    Message message = Message.obtain();
-                    message.what = DISSMISS_CURRENT_DIALOG;
-                    message.obj = terminalMessage;
-                    myHandler.sendMessageDelayed(message, 30 * 1000);
+                    //判断是否是组内上报，组内上报不弹窗
+                    if(!TerminalMessageUtil.isGroupMeaage(terminalMessage)){
+                        //延迟弹窗，否则判断是否在上报接口返回的是没有在上报
+                        myHandler.postDelayed(() -> {
+                            data.add(terminalMessage);
+                            showVideoDialogView();
+                        }, 3000);
+                        //30s没观看就取消当前弹窗
+                        Message message = Message.obtain();
+                        message.what = DISSMISS_CURRENT_DIALOG;
+                        message.obj = terminalMessage;
+                        myHandler.sendMessageDelayed(message, 30 * 1000);
+                    }
                 }
-
+            }else if(terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.LIVE_WATCHING_END ||
+                    terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.STOP_ASK_VIDEO_LIVE){
+                return;
             }
         }
-        if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.LIVE_WATCHING_END || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() && terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.STOP_ASK_VIDEO_LIVE){
-            return;
-        }
+
         String callId = terminalMessage.messageBody.getString(JsonParam.CALLID);
         //如果是个呼但是接通了
         if(terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() && !TextUtils.isEmpty(callId)){
@@ -809,34 +923,6 @@ public class ReceiveHandlerService extends Service{
     });
 
 
-    private void showDialogView(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if(!Settings.canDrawOverlays(ReceiveHandlerService.this)){
-                ToastUtil.showToast(ReceiveHandlerService.this, getString(R.string.open_overlay_permisson));
-                return;
-            }
-        }
-        logger.info("显示弹窗");
-        hideAllView();
-        // 如果已经添加了就只更新view
-        if(dialogAdded){
-            windowManager.updateViewLayout(view, layoutParams2);
-            video_dialog.setVisibility(View.VISIBLE);
-            stackViewAdapter.setData(data);
-        }else{
-            windowManager.addView(view, layoutParams2);
-            video_dialog.setVisibility(View.VISIBLE);
-            dialogAdded = true;
-            stackViewAdapter = new StackViewAdapter(MyTerminalFactory.getSDK().application);
-            stackViewAdapter.setData(data);
-            swipeFlingAdapterView.setFlingListener(new FlingListener());
-            stackViewAdapter.setCloseDialogListener(new OnClickListenerCloseDialog());
-            stackViewAdapter.setGoWatchListener(new OnClickListenerGoWatch());
-            swipeFlingAdapterView.setAdapter(stackViewAdapter);
-        }
-    }
-
-
     //接收到上报视频的回调
     private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = (uniqueNoAndType,isGroupPushLive) -> {
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
@@ -925,14 +1011,126 @@ public class ReceiveHandlerService extends Service{
         }
     };
 
-    private class FlingListener implements SwipeFlingAdapterView.onFlingListener{
+    private void showWarningDialog(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(ReceiveHandlerService.this)) {
+                cn.vsx.vc.utils.ToastUtil.showToast(ReceiveHandlerService.this, getResources().getString(R.string.open_overlay_permisson));
+            }
+        }
+        hideAllView();
+        // 如果已经添加了就只更新view
+        if (dialogAdded) {
+            windowManager.updateViewLayout(view, layoutParams2);
+            video_dialog.setVisibility(View.VISIBLE);
+            if(videoSwipeFlingAdapterView.getVisibility() == View.VISIBLE){
+                moveDialog();
+            }
+            if(warningStackViewAdapter == null){
+                initWarningStackViewAdapter();
+            }
+            warningStackViewAdapter.setData(warningData);
+            warningSwipeFlingAdapterView.setVisibility(View.VISIBLE);
+
+        } else {
+            windowManager.addView(view, layoutParams2);
+            video_dialog.setVisibility(View.VISIBLE);
+            warningSwipeFlingAdapterView.setVisibility(View.VISIBLE);
+            videoSwipeFlingAdapterView.setVisibility(View.GONE);
+            dialogAdded = true;
+            if(warningStackViewAdapter == null){
+                initWarningStackViewAdapter();
+            }else {
+                warningStackViewAdapter.setData(warningData);
+            }
+        }
+    }
+
+    private void showVideoDialogView(){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (!Settings.canDrawOverlays(ReceiveHandlerService.this)) {
+                cn.vsx.vc.utils.ToastUtil.showToast(ReceiveHandlerService.this, "请打开悬浮窗权限，否则私密呼叫和图像功能无法使用！");
+            }
+        }
+        // 如果已经添加了就只更新view
+        if (dialogAdded) {
+            windowManager.updateViewLayout(view, layoutParams2);
+            video_dialog.setVisibility(View.VISIBLE);
+            if(warningSwipeFlingAdapterView.getVisibility() == View.VISIBLE){
+                moveDialog();
+            }
+
+            if(null == videoStackViewAdapter){
+                initStackViewAdapter();
+            }
+            videoSwipeFlingAdapterView.setVisibility(View.VISIBLE);
+            videoStackViewAdapter.setData(data);
+
+        } else {
+            windowManager.addView(view, layoutParams2);
+            video_dialog.setVisibility(View.VISIBLE);
+            warningSwipeFlingAdapterView.setVisibility(View.GONE);
+            videoSwipeFlingAdapterView.setVisibility(View.VISIBLE);
+            dialogAdded = true;
+            if(null == videoStackViewAdapter){
+                initStackViewAdapter();
+            }else {
+                videoStackViewAdapter.setData(data);
+            }
+        }
+    }
+
+    private void initStackViewAdapter(){
+        videoStackViewAdapter = new StackViewAdapter(getApplicationContext());
+        videoStackViewAdapter.setData(data);
+        videoSwipeFlingAdapterView.setFlingListener(new VideoFlingListener());
+        videoStackViewAdapter.setCloseDialogListener(new OnVideoClickListenerCloseDialog());
+        videoStackViewAdapter.setGoWatchListener(new OnVideoClickListenerGoWatch() );
+        videoSwipeFlingAdapterView.setAdapter(videoStackViewAdapter);
+    }
+
+    private void initWarningStackViewAdapter(){
+        warningStackViewAdapter = new StackViewAdapter(getApplicationContext());
+        warningStackViewAdapter.setData(warningData);
+        warningSwipeFlingAdapterView.setFlingListener(new WarningFlingListener());
+        warningStackViewAdapter.setCloseDialogListener(new WarningCloseDialogClickListener());
+        warningStackViewAdapter.setGoWatchListener(new goWarningDetailListener());
+        warningSwipeFlingAdapterView.setAdapter(warningStackViewAdapter);
+    }
+
+    private void setLayoutY(View view, int y){
+        view.scrollBy(0,y);
+    }
+
+    private void moveDialog(){
+        if(!warningDialogMoved){
+            setLayoutY(warningSwipeFlingAdapterView, DensityUtil.dip2px(getApplicationContext(),120));
+            warningDialogMoved = true;
+        }
+        if(!videoDialogMoved){
+            setLayoutY(videoSwipeFlingAdapterView,DensityUtil.dip2px(getApplicationContext(),-120));
+            videoDialogMoved = true;
+        }
+    }
+
+    private void revertDialog(){
+        if(warningDialogMoved){
+            setLayoutY(warningSwipeFlingAdapterView,DensityUtil.dip2px(getApplicationContext(),-120));
+            warningDialogMoved = false;
+        }
+        if(videoDialogMoved){
+            setLayoutY(videoSwipeFlingAdapterView,DensityUtil.dip2px(getApplicationContext(),120));
+            videoDialogMoved = false;
+        }
+    }
+
+    private class VideoFlingListener implements SwipeFlingAdapterView.onFlingListener{
 
         @Override
         public void removeFirstObjectInAdapter(){
-            if(stackViewAdapter.getCount() == 1){
-                stackViewAdapter.remove(0);
+            if(videoStackViewAdapter.getCount() == 1){
+                videoStackViewAdapter.remove(0);
             }else{
-                stackViewAdapter.setLast(0);
+                videoStackViewAdapter.setLast(0);
             }
         }
 
@@ -946,7 +1144,47 @@ public class ReceiveHandlerService extends Service{
 
         @Override
         public void onAdapterAboutToEmpty(int itemsInAdapter){
-            removeView();
+            if(warningSwipeFlingAdapterView.getVisibility() == View.VISIBLE){
+                revertDialog();
+                videoSwipeFlingAdapterView.setVisibility(View.GONE);
+            }else {
+                removeView();
+            }
+        }
+
+        @Override
+        public void onScroll(float progress, float scrollXProgress){
+        }
+    }
+
+    private class WarningFlingListener implements SwipeFlingAdapterView.onFlingListener{
+
+        @Override
+        public void removeFirstObjectInAdapter(){
+            if(warningStackViewAdapter.getCount()==1){
+                warningData.remove(warningStackViewAdapter.getItem(0));
+                warningStackViewAdapter.remove(0);
+            }else {
+                warningStackViewAdapter.setLast(0);
+            }
+        }
+
+        @Override
+        public void onLeftCardExit(Object dataObject){
+        }
+
+        @Override
+        public void onRightCardExit(Object dataObject){
+        }
+
+        @Override
+        public void onAdapterAboutToEmpty(int itemsInAdapter){
+            if(videoSwipeFlingAdapterView.getVisibility() == View.VISIBLE){
+                revertDialog();
+                warningSwipeFlingAdapterView.setVisibility(View.GONE);
+            }else {
+                removeView();
+            }
         }
 
         @Override

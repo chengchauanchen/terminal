@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    
+    <LinearLayout
+        android:id="@+id/ll_time"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@color/warning_item_bg"
+        android:gravity="center_vertical">
+        
+        <TextView
+            android:id="@+id/tv_date"
+            style="@style/warning_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="2018-12-18" />
+        
+    </LinearLayout>
+    
+    <RelativeLayout
+        android:id="@+id/rl_warning_item"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y45"
+        android:background="@color/itemblue">
+        
+        <ImageView
+            android:id="@+id/iv_warning_icon"
+            android:layout_width="@dimen/y30"
+            android:layout_height="@dimen/y30"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/warning_item_icon" />
+        <View
+            android:id="@+id/v_status"
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="@drawable/badge_shape"
+            android:layout_marginLeft="@dimen/y32"
+            android:layout_marginTop="@dimen/x5"/>
+        <TextView
+            android:id="@+id/tv_summary"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginTop="15dp"
+            android:layout_toRightOf="@id/iv_warning_icon"
+            android:ellipsize="end"
+            android:maxEms="10"
+            android:maxLines="1"
+            android:text="起火啦"
+            android:textColor="@color/textview_color"
+            android:textSize="16sp" />
+        
+        <TextView
+            android:id="@+id/tv_alarm_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignLeft="@id/tv_summary"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="15dp"
+            android:text="2018-12-05  09:20"
+            android:textColor="@color/textview_color"
+            android:textSize="14sp" />
+        
+        <ImageView
+            android:id="@+id/iv_status"
+            android:layout_width="60dp"
+            android:layout_height="31dp"
+            android:src="@drawable/warning_dealing"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"/>
+        
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/diver_bg"
+            android:layout_alignParentBottom="true"
+            android:layout_marginTop="10dp"/>
+    </RelativeLayout>
+</LinearLayout>

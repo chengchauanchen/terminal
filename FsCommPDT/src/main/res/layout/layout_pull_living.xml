@@ -2,9 +2,8 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
-    android:id="@+id/volumeRelativeLayout">
-
+    android:background="@color/black">
+    
     <RelativeLayout
         android:id="@+id/rl_live_general_view"
         android:layout_width="match_parent"
@@ -13,7 +12,7 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:background="@color/black">
-
+        
         <TextureView
             android:id="@+id/sv_live"
             android:layout_width="match_parent"
@@ -21,28 +20,28 @@
             android:layout_centerInParent="true"
             android:keepScreenOn="true"
             android:visibility="visible" />
-
+        
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_55">
-
+            android:layout_height="55dp">
+            
             <View
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:alpha="0.6"
                 android:background="@color/black" />
-
+            
             <TextView
                 android:id="@+id/live_vedioTheme"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"
                 android:ellipsize="end"
-                android:maxEms="5"
+                android:maxEms="10"
                 android:maxLines="1"
-                android:text="@string/text_live_theme"
+                android:text="直播主题"
                 android:textColor="@color/white"
-                android:textSize="@dimen/sp_20" />
+                android:textSize="20sp" />
             <!--缩放-->
             <ImageView
                 android:id="@+id/iv_live_retract"
@@ -52,7 +51,7 @@
                 android:layout_centerVertical="true"
                 android:layout_marginRight="@dimen/x20"
                 android:background="@drawable/new_call_reset_icon" />
-
+            
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -60,45 +59,45 @@
                 android:layout_marginTop="@dimen/x5"
                 android:gravity="center"
                 android:orientation="horizontal">
-
+                
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content">
-
+                    
                     <ImageView
                         android:id="@+id/live_vedioIcon"
                         android:layout_width="@dimen/dp_40"
                         android:layout_height="@dimen/dp_40"
                         android:src="@drawable/member_icon" />
                 </LinearLayout>
-
+                
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center_vertical"
                     android:orientation="vertical">
-
+                    
                     <TextView
                         android:id="@+id/live_vedioName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/dp_5"
+                        android:layout_marginLeft="5dp"
                         android:text="pad"
                         android:textColor="@color/white"
-                        android:textSize="@dimen/sp_15" />
-
+                        android:textSize="15sp" />
+                    
                     <TextView
                         android:id="@+id/live_vedioId"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="@dimen/dp_5"
+                        android:layout_marginLeft="5dp"
                         android:text="123456"
                         android:textColor="@color/white"
                         android:textSize="@dimen/sp_12" />
                 </LinearLayout>
             </LinearLayout>
         </RelativeLayout>
-    
+        
         <LinearLayout
             android:id="@+id/ll_live_group_call"
             android:layout_width="wrap_content"
@@ -131,7 +130,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal"
                     android:orientation="horizontal">
-                
+                    
                     <TextView
                         android:id="@+id/tv_live_speakingName"
                         android:layout_width="wrap_content"
@@ -139,14 +138,14 @@
                         android:text="张三"
                         android:textColor="@color/white"
                         android:textSize="15sp" />
-                
+                    
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:text="|"
                         android:textColor="@color/white" />
-                
+                    
                     <TextView
                         android:id="@+id/tv_live_groupName"
                         android:layout_width="wrap_content"
@@ -158,12 +157,12 @@
                         android:textColor="@color/white"
                         android:textSize="12sp" />
                 </LinearLayout>
-            
+                
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center_horizontal">
-                
+                    
                     <TextView
                         android:id="@+id/tv_live_speakingId"
                         android:layout_width="wrap_content"
@@ -171,7 +170,7 @@
                         android:text="123456"
                         android:textSize="15sp"
                         android:textColor="@color/white" />
-                
+                    
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
@@ -179,70 +178,69 @@
                         android:src="@drawable/self_speaking" />
                 </LinearLayout>
             </LinearLayout>
-    
-    
+        
+        
         </LinearLayout>
         <!--推送图像-->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_above="@id/btn_live_look_ptt"
             android:layout_alignParentRight="true"
             android:layout_marginRight="@dimen/x24"
-            android:layout_marginBottom="@dimen/x80"
+            android:layout_centerVertical="true"
             android:orientation="vertical">
-
+            
             <LinearLayout
                 android:id="@+id/ll_live_look_hangup"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:orientation="vertical">
-
+                
                 <ImageView
-                    android:layout_width="@dimen/dp_60"
-                    android:layout_height="@dimen/dp_60"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
                     android:background="@drawable/look_phone" />
-
+                
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginTop="@dimen/dp_10"
-                    android:text="@string/text_call_hang_up"
+                    android:text="挂断"
                     android:textColor="@color/white"
                     android:textSize="@dimen/sp_16"
                     android:visibility="visible" />
             </LinearLayout>
-
+            
             <LinearLayout
                 android:id="@+id/ll_live_look_invite_member"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dp_40"
                 android:orientation="vertical">
-
+                
                 <ImageView
-                    android:layout_width="@dimen/dp_60"
-                    android:layout_height="@dimen/dp_60"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
                     android:background="@drawable/push_live" />
-
+                
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginTop="@dimen/dp_10"
-                    android:text="@string/text_push_image"
+                    android:text="推送图像"
                     android:textColor="@color/white"
                     android:textSize="@dimen/sp_16"
                     android:visibility="visible" />
             </LinearLayout>
-
+        
         </LinearLayout>
-
+        
         <Button
             android:id="@+id/btn_live_look_ptt"
-            android:layout_width="match_parent"
+            android:layout_width="@dimen/y240"
             android:layout_height="@dimen/y40"
             android:layout_alignParentBottom="true"
             android:layout_centerHorizontal="true"
@@ -251,9 +249,9 @@
             android:alpha="0.4"
             android:background="@drawable/rectangle_with_corners_shape_silence"
             android:gravity="center"
-            android:text="@string/text_ptt"
+            android:text="PTT"
             android:textColor="@color/white"
-            android:textSize="@dimen/sp_30"
+            android:textSize="30sp"
             android:visibility="visible" />
     </RelativeLayout>
 </RelativeLayout>

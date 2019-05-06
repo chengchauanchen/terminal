@@ -150,12 +150,16 @@
         android:layout_marginRight="@dimen/dp_10"
         android:layout_marginBottom="@dimen/dp_50"
         android:orientation="horizontal">
-
+    
+    
+        <View
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="@dimen/dp_70"/>
         <LinearLayout
             android:id="@+id/ll_live_chage_camera"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical">
 
@@ -175,12 +179,16 @@
                 android:textSize="@dimen/sp_16"
                 android:visibility="visible" />
         </LinearLayout>
+    
+        <View
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:layout_height="@dimen/dp_70"/>
 
         <LinearLayout
             android:id="@+id/ll_live_hangup_total"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             android:visibility="visible">
@@ -200,12 +208,16 @@
                 android:textSize="@dimen/sp_16"
                 android:visibility="visible" />
         </LinearLayout>
+    
+        <View
+            android:layout_width="0dp"
+            android:layout_weight="2"
+            android:layout_height="@dimen/dp_70"/>
 
         <LinearLayout
             android:id="@+id/ll_live_invite_member"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:gravity="center_horizontal"
             android:orientation="vertical"
             android:visibility="visible">
@@ -226,5 +238,9 @@
                 android:textSize="@dimen/sp_16"
                 android:visibility="visible" />
         </LinearLayout>
+        <View
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="@dimen/dp_70"/>
     </LinearLayout>
 </RelativeLayout>

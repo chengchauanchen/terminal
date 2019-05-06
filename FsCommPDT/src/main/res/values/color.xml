@@ -577,5 +577,7 @@
     <color name="green_27b">#27B382</color>
     <color name="green_32">#32B16C</color>
     <color name="green_47">#47B347</color>
-
+    
+    <color name="warning_title">#ffffff</color>
+    <color name="warning_item_bg">#111f3a</color>
 </resources>
