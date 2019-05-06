@@ -125,7 +125,7 @@ public class ChangeGroupActivity extends BaseActivity {
 //        }
 //        initGroupData();
 //        GroupCatalogBean catalog=new GroupCatalogBean();
-//        catalog.setName(topGroup.getName());
+//        catalog.setName(topGroup.getTitleName());
 //        catalog.setBean(topGroup);
 //        mInitGroupCatalogList.add(catalog);
 //
@@ -267,7 +267,7 @@ public class ChangeGroupActivity extends BaseActivity {
 //
 //                mInitGroupCatalogList.clear();
 //                GroupCatalogBean catalog=new GroupCatalogBean();
-//                catalog.setName(topGroup.getName());
+//                catalog.setName(topGroup.getTitleName());
 //                catalog.setBean(topGroup);
 //                mInitGroupCatalogList.add(catalog);
 //                updateData(mInitGroupCatalogList);

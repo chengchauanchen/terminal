@@ -107,16 +107,6 @@
             android:layout_weight="1" />
 
         <cn.vsx.vc.view.TabView
-            android:id="@+id/tab_pc"
-            app:tabView_selected="false"
-            app:tabView_text="@string/text_pc"
-            app:tabView_textSize="@dimen/sp_14"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:textColor="@color/contacts_line_blue" />
-
-        <cn.vsx.vc.view.TabView
             android:id="@+id/tab_police"
             app:tabView_selected="false"
             app:tabView_text="@string/text_police_service"

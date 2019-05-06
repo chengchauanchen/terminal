@@ -16,6 +16,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAccountSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
@@ -55,6 +56,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
         addItemType(Constants.TYPE_CHECK_SEARCH_HDMI, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_UAV, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_RECODER, R.layout.layout_item_user);
+        addItemType(Constants.TYPE_CHECK_SEARCH_ACCOUNT, R.layout.layout_item_user);
     }
 
     public void setFilterKeyWords(String keyWords){
@@ -130,6 +132,20 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 holder.setOnClickListener(R.id.checkbox, v -> {
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class,member,!member.isChecked());
                     member.setChecked(!member.isChecked());
+                    if(onItemClickListener !=null){
+                        onItemClickListener.onItemClick();
+                    }
+                });
+                break;
+            case Constants.TYPE_CHECK_SEARCH_ACCOUNT:
+                Account account1 = (Account) item.getBean();
+                holder.setImageResource(R.id.shoutai_user_logo,R.drawable.user_photo);
+                holder.setText(R.id.shoutai_tv_member_name, account1.getName());
+                holder.setText(R.id.shoutai_tv_member_id, String.valueOf(account1.getNo()));
+                holder.setChecked(R.id.checkbox,account1.isChecked());
+                holder.setOnClickListener(R.id.checkbox, v -> {
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveAccountSelectedHandler.class,account1,!account1.isChecked());
+                    account1.setChecked(!account1.isChecked());
                     if(onItemClickListener !=null){
                         onItemClickListener.onItemClick();
                     }

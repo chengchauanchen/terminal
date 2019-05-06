@@ -597,6 +597,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     public void stopRecord() {
         if (MyApplication.instance.isPlayVoice) {
             MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
+            MyApplication.instance.isPlayVoice = false;
         }
     }
 

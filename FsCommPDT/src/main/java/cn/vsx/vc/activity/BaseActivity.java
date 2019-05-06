@@ -80,7 +80,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 		List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
 		for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
 			if (appProcess.processName.equals(context.getPackageName())) {
-				logger.info("此app =" + appProcess.importance + ",context.getClass().getName()=" + context.getClass().getName());
+				logger.info("此app =" + appProcess.importance + ",context.getClass().getTitleName()=" + context.getClass().getName());
 				if (appProcess.importance != ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
 					logger.info("处于后台" + appProcess.processName);
 					return true;

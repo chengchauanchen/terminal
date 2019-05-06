@@ -12,6 +12,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
@@ -60,8 +61,21 @@ public class SelectedItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
         }else if(contactItemBean.getBean() instanceof Group){
             Group group = (Group) contactItemBean.getBean();
             if(group != null){
+                userViewHolder.ivLogo.setImageResource(R.drawable.group_photo);
                 userViewHolder.tvName.setText(group.getName());
                 userViewHolder.tvId.setVisibility(View.GONE);
+            }
+        }else if (contactItemBean.getBean() instanceof Account){
+            Account account = (Account) contactItemBean.getBean();
+            if(account != null){
+                userViewHolder.ivLogo.setImageResource(R.drawable.user_photo);
+                userViewHolder.tvName.setText(account.getName());
+                userViewHolder.tvId.setText(HandleIdUtil.handleId(account.getNo()));
+                userViewHolder.ivDelete.setOnClickListener(v -> {
+                    if(null != itemClickListener){
+                        itemClickListener.itemClick(position);
+                    }
+                });
             }
         }
         userViewHolder.ivDelete.setOnClickListener(v -> {

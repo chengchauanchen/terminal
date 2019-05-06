@@ -51,6 +51,7 @@ import cn.vsx.vc.adapter.MergeTransmitListAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.OnBackListener;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupMergeTransmitVoiceHandler;
+import cn.vsx.vc.record.MediaManager;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -245,6 +246,9 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
                     if (lastPosition == mposition) {//点击同一个条目
                         if (MyApplication.instance.isPlayVoice) {
                             MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
+                            MyApplication.instance.isPlayVoice = false;
+                            isSameItem = true;
+                            adapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
                         } else {
                             executorService.execute(() -> {
                                 if (mposition < chatMessageList.size() && mposition >= 0) {
@@ -260,7 +264,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
 
                         if (MyApplication.instance.isPlayVoice) {
                             MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
-
+                            MyApplication.instance.isPlayVoice = false;
                         }
 
                         //播放当前的
@@ -292,11 +296,11 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 if (lastPosition == mposition) {//点击同一个条目
                     isSameItem = true;
-                    MyApplication.instance.isPlayVoice = !MyApplication.instance.isPlayVoice;
+//                    MyApplication.instance.isPlayVoice = !MyApplication.instance.isPlayVoice;
                 } else {//点击不同条目
                     isSameItem = false;
-                    MyApplication.instance.isPlayVoice = false;
                 }
+                MyApplication.instance.isPlayVoice = true;
                 Collections.sort(chatMessageList);
                 if (adapter != null) {
                     adapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
@@ -453,15 +457,12 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
     private IAudioPlayComplateHandler audioPlayComplateHandler = () -> handler.post(() -> {
         MyApplication.instance.isPlayVoice = false;
         isSameItem = true;
-//                    logger.error("录音播放完成的消息：" + chatMessageList.get(mposition).toString());
+        chatMessageList.get(mposition).messageBody.put(JsonParam.UNREAD, false);
         if(adapter!=null){
             adapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
         }
         setSmoothScrollToPosition(mposition);
-//        temporaryAdapter.notifyDataSetChanged();
-
         autoPlay(mposition + 1);
-
     });
 
     //自动播放下一条语音
@@ -589,9 +590,8 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
      * 停止播放组呼录音
      */
     public void stopRecord() {
-        if (MyApplication.instance.isPlayVoice) {
             MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
-        }
+            MyApplication.instance.isPlayVoice = false;
     }
 
 }

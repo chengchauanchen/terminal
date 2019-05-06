@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -168,7 +169,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private NFCBindingDialog nfcBindingDialog;//nfc弹窗
     private boolean isActivity;//是否是显示
 
-    protected Handler handler = new Handler() {
+    protected Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -292,6 +293,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         temporaryAdapter.setIsGroup(isGroup);
         temporaryAdapter.setFragment_contener(fl_fragment_container);
         groupCallList.setAdapter(temporaryAdapter);
+        groupCallList.setItemAnimator(null);
         if (chatMessageList.size() > 0) {
             setListSelection(chatMessageList.size() - 1);
         }
@@ -1186,9 +1188,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
         public void handler(final TerminalMessage terminalMessage) {
             logger.info("接收到消息-----》" + terminalMessage.toString());
             handler.post(() -> {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {//个人消息
-                    newsBarGroupName.setText(HandleIdUtil.handleName(TerminalMessageUtil.getName(terminalMessage)));
-                }
+//                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {//个人消息
+//                    newsBarGroupName.setText(HandleIdUtil.handleName(TerminalMessageUtil.getTitleName(terminalMessage)));
+//                }
                 //转发
                 if (temporaryAdapter.transponMessage != null
                         && terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)
@@ -1759,7 +1761,12 @@ public abstract class ChatBaseActivity extends BaseActivity{
             if (temporaryAdapter != null) {
                 temporaryAdapter.notifyItemRangeInserted(0, position);
             }
-            groupCallList.smoothScrollBy(0, -DensityUtil.dip2px(ChatBaseActivity.this, 30));
+            if(tempPage == 1){
+                groupCallList.smoothScrollBy(0, 0);
+            }else{
+                groupCallList.smoothScrollBy(0, -DensityUtil.dip2px(ChatBaseActivity.this, 30));
+            }
+//            groupCallList.scrollBy(0, -DensityUtil.dip2px(ChatBaseActivity.this, 30));
             if (isStopRefresh) {
                 sflCallList.setRefreshing(false);
             }
@@ -2159,6 +2166,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
     public void setSmoothScrollToPosition(int position) {
         groupCallList.smoothScrollToPosition(position);
+//        groupCallList.scrollToPosition(position);
     }
 
     /**
@@ -2265,7 +2273,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
             mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
             mTerminalMessage.messageFromName = name;
 //            mTerminalMessage.messageToId = chatMember.getId();
-//            mTerminalMessage.messageToName = chatMember.getName();
+//            mTerminalMessage.messageToName = chatMember.getTitleName();
             mTerminalMessage.messageBody = jsonObject;
             mTerminalMessage.sendTime = System.currentTimeMillis();
             mTerminalMessage.messageType = MessageType.MERGE_TRANSMIT.getCode();

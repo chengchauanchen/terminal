@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
@@ -48,6 +49,9 @@ public class SelectAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }else if(bean.getType() == Constants.TYPE_GROUP){
             Group group = (Group) bean.getBean();
             viewHolder.mTvName.setText(group.getName());
+        }else if(bean.getType() == Constants.TYPE_ACCOUNT){
+            Account account = (Account) bean.getBean();
+            viewHolder.mTvName.setText(account.getName());
         }
 
     }

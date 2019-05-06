@@ -193,8 +193,8 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 //            if(group.getDepartmentId() !=-1){
 //                continue;
 //            }
-//            if(group.getName().contains("-")){
-//                String[] split = group.getName().split("-");
+//            if(group.getTitleName().contains("-")){
+//                String[] split = group.getTitleName().split("-");
 //                String name = split[0];
 //                if(name.startsWith("临时组") && name.length()>=3){
 //                    String s = name.substring(3);

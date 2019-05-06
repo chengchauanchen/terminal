@@ -115,7 +115,7 @@ public class PersonInfoLayout extends LinearLayout {
                 intent.putExtra("userId", MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
                 intent.putExtra("userName", userName.getText().toString().trim());
                 getContext().startActivity(intent);
-//                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPopupwindowHandler.class, ChangeNamePopupwindow.class.getName());
+//                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPopupwindowHandler.class, ChangeNamePopupwindow.class.getTitleName());
                 break;
         }
 

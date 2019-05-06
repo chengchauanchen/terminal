@@ -242,10 +242,10 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
             case Constants.TYPE_CONTRACT_PDT:
                 TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_PC.toString(), keywords);
                 break;
+            case Constants.TYPE_CHECK_SEARCH_ACCOUNT:
             case Constants.TYPE_CONTRACT_MEMBER:
                 TerminalFactory.getSDK().getConfigManager().searchAccount(currentPage,PAGE_SIZE, keywords);
                 break;
-
             case Constants.TYPE_CHECK_SEARCH_PC:
                 TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_PC.toString(), keywords);
                 break;
@@ -295,6 +295,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
             case Constants.TYPE_CHECK_SEARCH_RECODER:
             case Constants.TYPE_CHECK_SEARCH_HDMI:
             case Constants.TYPE_CHECK_SEARCH_UAV:
+            case Constants.TYPE_CHECK_SEARCH_ACCOUNT:
                 mTvSearchNothing.setText(getResources().getString(R.string.text_search_by_name_or_number));
 
                 break;

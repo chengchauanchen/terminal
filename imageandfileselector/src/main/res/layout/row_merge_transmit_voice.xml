@@ -91,7 +91,8 @@
             android:layout_marginLeft="@dimen/dp_10"
             android:layout_marginTop="@dimen/dp_3"
             android:layout_toRightOf="@id/tv_voice_length"
-            android:src="@drawable/voice_unread" />
+            android:src="@drawable/voice_unread"
+            android:visibility="gone"/>
 
         <View
             android:layout_width="match_parent"

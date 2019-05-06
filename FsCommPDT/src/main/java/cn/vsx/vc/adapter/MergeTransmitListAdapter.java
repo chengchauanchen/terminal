@@ -482,14 +482,14 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
             voiceLength = voiceLength > 60 ? 60 : voiceLength;
             setText(holder.tvDuration, voiceLength + "''");
             playGroupVoice(position, holder,terminalMessage);
-            if (isReceiver(terminalMessage)) {
-                if (messageBody.containsKey(JsonParam.UNREAD) &&
-                        messageBody.getBooleanValue(JsonParam.UNREAD)) {
-                    setViewVisibility(holder.ivUnread, View.VISIBLE);
-                } else {
-                    setViewVisibility(holder.ivUnread, View.INVISIBLE);
-                }
-            }
+//            if (isReceiver(terminalMessage)) {
+//                if (messageBody.containsKey(JsonParam.UNREAD) &&
+//                        messageBody.getBooleanValue(JsonParam.UNREAD)) {
+//                    setViewVisibility(holder.ivUnread, View.VISIBLE);
+//                } else {
+//                    setViewVisibility(holder.ivUnread, View.INVISIBLE);
+//                }
+//            }
         }
         /**  个呼条目  */
         if (terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode()) {
@@ -932,10 +932,10 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                     setUnread(position);
                     if (isSameItem) {
                         if (isPlaying) {
-                             AnimationsContainer.FramesSequenceAnimation animation = getVoiceAnimation(terminalMessage,holder.iv_voice_image_anim);
+                            AnimationsContainer.FramesSequenceAnimation animation = getVoiceAnimation(terminalMessage,holder.iv_voice_image_anim);
                             setViewVisibility(holder.ivVoice, View.GONE);
                             setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
-                            animation.stop();
+//                            animation.stop();
                             animation.start();
                         } else {
                             holder.iv_voice_image_anim.setImageResource(R.drawable.sound_blank);
@@ -946,7 +946,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                         AnimationsContainer.FramesSequenceAnimation animation = getVoiceAnimation(terminalMessage,holder.iv_voice_image_anim);
                         setViewVisibility(holder.ivVoice, View.GONE);
                         setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
-                        animation.stop();
+//                        animation.stop();
                         animation.start();
                     }
                 } else {
@@ -976,8 +976,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
      * @return
      */
     private  AnimationsContainer.FramesSequenceAnimation getVoiceAnimation(TerminalMessage terminalMessage, ImageView imageView){
-        return AnimationsContainer.getInstance(activity,isReceiver(terminalMessage) ?
-                R.array.received_voice_anim :R.array.sent_voice_anim, 3).createProgressDialogAnim(imageView);
+        return AnimationsContainer.getInstance(activity, R.array.received_voice_anim , 3).createProgressDialogAnim(imageView);
     }
 
     /**
@@ -1128,7 +1127,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
     public void individualNewsRecordItemClick(TerminalMessage terminalMessage, int position) {
         if (terminalMessage.messageType == MessageType.AUDIO.getCode()) {
             logger.error("个呼录音点击事件--->" + position);
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupMergeTransmitVoiceHandler.class, terminalMessage, position);
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupMergeTransmitVoiceHandler.class, position);
         }
     }
 

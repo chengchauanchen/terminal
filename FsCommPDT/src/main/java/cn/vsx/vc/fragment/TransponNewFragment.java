@@ -13,18 +13,15 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
-import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
-import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAccountSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupSelectedHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.SelectAdapter;
 import cn.vsx.vc.model.ContactItemBean;
@@ -49,14 +46,12 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
     private ImageView mIvSelect;
 
     private TabView mTabGroup;
-    private TabView mTabPc;
     private TabView mTabPolice;
 
     private LinearLayout mLl_search;
 
     private GroupListFragment groupFragment;
-    private MemberListFragment pcFragment;
-    private MemberListFragment policeFragment;
+    private AccountListFragment accountListFragment;
     private BaseFragment currentFragment;
 
     private ArrayList<ContactItemBean> selectedMembers;
@@ -105,7 +100,6 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
 
         //tabview
         mTabGroup = view.findViewById(R.id.tab_group);
-        mTabPc = view.findViewById(R.id.tab_pc);
         mTabPolice = view.findViewById(R.id.tab_police);
 
         mLl_search = view.findViewById(R.id.ll_search);
@@ -114,7 +108,6 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
 
     private void initTab(){
         mTabGroup.setChecked(true);
-        mTabPc.setChecked(false);
         mTabPolice.setChecked(false);
     }
 
@@ -123,12 +116,11 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
         newsBarReturn.setOnClickListener(this);
         okBtn.setOnClickListener(this);
         mTabGroup.setOnClickListener(this);
-        mTabPc.setOnClickListener(this);
         mTabPolice.setOnClickListener(this);
 
         mIvSelect.setOnClickListener(this);
         mLl_search.setOnClickListener(this);
-        TerminalFactory.getSDK().registReceiveHandler(receiveMemberSelectedHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiveAccountSelectedHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveGroupSelectedHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveRemoveSelectedMemberHandler);
     }
@@ -136,7 +128,7 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
     @Override
     public void onDestroy(){
         super.onDestroy();
-        TerminalFactory.getSDK().unregistReceiveHandler(receiveMemberSelectedHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveAccountSelectedHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveGroupSelectedHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveRemoveSelectedMemberHandler);
     }
@@ -161,7 +153,6 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
                 break;
             case R.id.tab_group:
                 mTabGroup.setChecked(true);
-                mTabPc.setChecked(false);
                 mTabPolice.setChecked(false);
                 if(groupFragment == null){
                     groupFragment = new GroupListFragment();
@@ -170,27 +161,15 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
                 currentFragment = groupFragment;
                 currentIndex = 0;
                 break;
-            case R.id.tab_pc:
-                mTabGroup.setChecked(false);
-                mTabPc.setChecked(true);
-                mTabPolice.setChecked(false);
-                if(pcFragment == null){
-                    pcFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_PC.toString());
-                }
-                switchFragment(pcFragment);
-                currentFragment = pcFragment;
-                currentIndex = 1;
-                break;
             case R.id.tab_police:
                 mTabGroup.setChecked(false);
-                mTabPc.setChecked(false);
                 mTabPolice.setChecked(true);
-                if(policeFragment == null){
-                    policeFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_PHONE.toString());
+                if(accountListFragment == null){
+                    accountListFragment = new AccountListFragment();
                 }
-                switchFragment(policeFragment);
-                currentFragment = policeFragment;
-                currentIndex = 2;
+                switchFragment(accountListFragment);
+                currentFragment = accountListFragment;
+                currentIndex = 1;
                 break;
             case R.id.ll_search:
                 showSearchFragment();
@@ -219,10 +198,7 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_GROUP,selectedMemberNos);
                 break;
             case 1:
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_PC,selectedMemberNos);
-                break;
-            case 2:
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_POLICE,selectedMemberNos);
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_ACCOUNT,selectedMemberNos);
                 break;
         }
     }
@@ -262,29 +238,29 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
     };
 
 
-    private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected) -> {
+    private ReceiveAccountSelectedHandler receiveAccountSelectedHandler = (account, selected) -> {
         //不是同一个member对象
         if(selected){
             ContactItemBean bean = new ContactItemBean();
-            bean.setType(Constants.TYPE_USER);
-            bean.setBean(member);
-            if(!selectedMemberNos.contains(member.getNo())){
+            bean.setType(Constants.TYPE_ACCOUNT);
+            bean.setBean(account);
+            if(!selectedMemberNos.contains(account.getNo())){
                 selectedMembers.add(bean);
-                selectedMemberNos.add(member.getNo());
+                selectedMemberNos.add(account.getNo());
             }
         }else{
-            if(selectedMemberNos.contains(member.getNo())){
+            if(selectedMemberNos.contains(account.getNo())){
                 Iterator<ContactItemBean> iterator = selectedMembers.iterator();
                 while(iterator.hasNext()){
                     ContactItemBean next = iterator.next();
-                    if(next.getType() == Constants.TYPE_USER){
-                        Member member1 = (Member) next.getBean();
-                        if(member1.getNo() == member.getNo()){
+                    if(next.getType() == Constants.TYPE_ACCOUNT){
+                        Account account1 = (Account) next.getBean();
+                        if(account1.getNo() == account.getNo()){
                             iterator.remove();
                         }
                     }
                 }
-                selectedMemberNos.remove((Integer) member.getNo());
+                selectedMemberNos.remove((Integer) account.getNo());
             }
         }
         mHandler.post(()->{
@@ -298,20 +274,20 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
     private ReceiveRemoveSelectedMemberHandler receiveRemoveSelectedMemberHandler = new ReceiveRemoveSelectedMemberHandler(){
         @Override
         public void handle(ContactItemBean contactItemBean){
-            if(contactItemBean.getBean() instanceof Member){
-                Member member = (Member) contactItemBean.getBean();
-                if(selectedMemberNos.contains(member.getNo())){
+            if(contactItemBean.getBean() instanceof Account){
+                Account account = (Account) contactItemBean.getBean();
+                if(selectedMemberNos.contains(account.getNo())){
                     Iterator<ContactItemBean> iterator = selectedMembers.iterator();
                     while(iterator.hasNext()){
                         ContactItemBean next = iterator.next();
-                        if(next.getType() == Constants.TYPE_USER){
-                            Member member1 = (Member) next.getBean();
-                            if(member1.getNo() == member.getNo()){
+                        if(next.getType() == Constants.TYPE_ACCOUNT){
+                            Account account1 = (Account) next.getBean();
+                            if(account1.getNo() == account.getNo()){
                                 iterator.remove();
                             }
                         }
                     }
-                    selectedMemberNos.remove((Integer) member.getNo());
+                    selectedMemberNos.remove((Integer) account.getNo());
                 }
             }else if(contactItemBean.getBean() instanceof Group){
                 Group group = (Group) contactItemBean.getBean();

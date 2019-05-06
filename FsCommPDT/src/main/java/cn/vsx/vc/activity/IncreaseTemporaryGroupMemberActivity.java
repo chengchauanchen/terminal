@@ -26,7 +26,7 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
         //        MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
         //        List<CatalogBean> catalogBeanList = new ArrayList<>();
         //        CatalogBean bean = new CatalogBean();
-        //        bean.setName(memberResponse.getName());
+        //        bean.setName(memberResponse.getTitleName());
         //        bean.setBean(memberResponse);
         //        catalogBeanList.add(bean);
         //        updateData(memberResponse,catalogBeanList);

@@ -857,7 +857,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             setViewVisibility(holder.tvNick, View.GONE);
         }
 
-        setText(holder.tvNick, TerminalMessageUtil.getName(terminalMessage));
+        setText(holder.tvNick, TerminalMessageUtil.getMemberName(terminalMessage));
 
         /**  短文本  */
         if (terminalMessage.messageType == MessageType.SHORT_TEXT.getCode()) {

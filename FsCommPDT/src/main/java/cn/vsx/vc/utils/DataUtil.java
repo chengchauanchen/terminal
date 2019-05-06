@@ -25,6 +25,7 @@ import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
@@ -616,10 +617,10 @@ public class DataUtil {
     public static List<Integer> getToIdsTranspon(ArrayList<ContactItemBean> list) {
         List<Integer> toIds = new ArrayList<>();
         for (ContactItemBean bean : list) {
-            if (bean.getType() == Constants.TYPE_USER) {
-                Member member = (Member) bean.getBean();
-                if (member != null) {
-                    toIds.add(NoCodec.encodeMemberNo(member.getNo()));
+            if (bean.getType() == Constants.TYPE_ACCOUNT) {
+                Account account = (Account) bean.getBean();
+                if (account != null) {
+                    toIds.add(NoCodec.encodeMemberNo(account.getNo()));
                 }
             } else if (bean.getType() == Constants.TYPE_GROUP) {
                 Group group = (Group) bean.getBean();
@@ -640,10 +641,10 @@ public class DataUtil {
     public static TransponToBean getToNamesTranspon(ArrayList<ContactItemBean> list) {
         TransponToBean result = null;
         for (ContactItemBean bean : list) {
-            if (bean.getType() == Constants.TYPE_USER) {
-                Member member = (Member) bean.getBean();
-                if (member != null) {
-                    result = new TransponToBean(NoCodec.encodeMemberNo(member.getNo()), member.getName());
+            if (bean.getType() == Constants.TYPE_ACCOUNT) {
+                Account account = (Account) bean.getBean();
+                if (account != null) {
+                    result = new TransponToBean(NoCodec.encodeMemberNo(account.getNo()), account.getName());
                     break;
                 }
             } else if (bean.getType() == Constants.TYPE_GROUP) {
@@ -666,11 +667,11 @@ public class DataUtil {
     public static List<Long> getToUniqueNoTranspon(ArrayList<ContactItemBean> list) {
         List<Long> toUniques = new ArrayList<>();
         for (ContactItemBean bean : list) {
-            if (bean.getType() == Constants.TYPE_USER) {
-                Member member = (Member) bean.getBean();
-                if (member != null) {
-                    toUniques.add(member.getUniqueNo());
-                }
+            if (bean.getType() == Constants.TYPE_ACCOUNT) {
+//                Account account = (Account) bean.getBean();
+//                if (account != null) {
+//                    toUniques.add(account.getUniqueNo());
+//                }
             } else if (bean.getType() == Constants.TYPE_GROUP) {
                 Group group = (Group) bean.getBean();
                 if (group != null) {

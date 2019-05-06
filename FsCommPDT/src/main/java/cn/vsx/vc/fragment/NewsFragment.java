@@ -485,7 +485,7 @@ public class NewsFragment extends BaseFragment {
                 Intent intent = new Intent(context, IndividualNewsActivity.class);
                 intent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
                 intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
-                intent.putExtra("userName", TerminalMessageUtil.getName(terminalMessage));
+                intent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
                 context.startActivity(intent);
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//进入组会话页
@@ -497,7 +497,7 @@ public class NewsFragment extends BaseFragment {
                     Intent intent = new Intent(context, GroupCallNewsActivity.class);
                     intent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
                     intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
-                    intent.putExtra("userName", TerminalMessageUtil.getName(terminalMessage));
+                    intent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
                     intent.putExtra("speakingId",speakingId);
                     intent.putExtra("speakingName",speakingName);
                     context.startActivity(intent);
@@ -575,6 +575,8 @@ public class NewsFragment extends BaseFragment {
                         (terminalMessage.messageBody.getIntValue("remark") == Remark.ACTIVE_VIDEO_LIVE || terminalMessage.messageBody.getIntValue("remark") == Remark.ASK_VIDEO_LIVE)
                         && terminalMessage.resultCode==0) {
                     saveVideoMessage(terminalMessage,false);
+//                }else{
+//                    saveMessageToList(terminalMessage,false);
                 }
             }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
                 //合成作战组消息，只存一个条目
