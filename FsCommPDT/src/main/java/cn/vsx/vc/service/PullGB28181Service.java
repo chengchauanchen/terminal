@@ -5,13 +5,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.ResultReceiver;
-import android.support.v4.content.LocalBroadcastManager;
 import android.view.LayoutInflater;
 import android.view.TextureView;
 import android.view.View;
@@ -40,7 +40,6 @@ import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
-import static cn.vsx.vc.receive.Actions.KILL_ACT_CALL;
 import static cn.vsx.vc.receive.Actions.KILL_LIVE_WATCH;
 import static org.easydarwin.config.Config.PLAYKEY;
 
@@ -69,6 +68,15 @@ public class PullGB28181Service extends BaseService{
     @Override
     protected void setRootView(){
         rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_gb28181_view, null);
+    }
+
+    @Override
+    protected void initWindow() {
+        super.initWindow();
+        //如果屏幕宽度小于高度就开启横屏
+        if(screenWidth < screenHeight){
+            layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+        }
     }
 
     @Override

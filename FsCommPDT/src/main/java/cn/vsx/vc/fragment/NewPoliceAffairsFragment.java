@@ -1,6 +1,7 @@
 package cn.vsx.vc.fragment;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -40,32 +41,34 @@ public class NewPoliceAffairsFragment extends BaseFragment {
     private List<CatalogBean> catalogNames=new ArrayList<>();
 
     private List<ContactItemBean> mDatas=new ArrayList<>();
+    private List<ContactItemBean> accountAndDeps=new ArrayList<>();
     private List<ContactItemBean> allFrequentContacts =new ArrayList<>();
     private List<ContactItemBean> lastGroupDatas=new ArrayList<>();
-    private Handler myHandler = new Handler();
+    private Handler myHandler = new Handler(Looper.getMainLooper());
 //    private CatalogAdapter mCatalogAdapter;
     private ContactAdapter mContactAdapter;
 
     private ReceiveUpdateFrequentMemberHandler receiveUpdateFrequentMemberHandler = new ReceiveUpdateFrequentMemberHandler(){
         @Override
         public void handle(){
-            updateFrequentMember();
+            updateFrequentContacts();
         }
     };
-
-    private void updateFrequentMember(){
-        initFrequentContacts();
-        myHandler.post(() -> {
-            if(mContactAdapter != null){
-                mContactAdapter.notifyDataSetChanged();
-            }
-        });
-    }
 
     private ReceivegUpdatePoliceMemberHandler receivegUpdatePoliceMemberHandler = new ReceivegUpdatePoliceMemberHandler(){
         @Override
         public void handler(int depId,String depName,List<Department> departments, List<Account> accounts){
-            updateData(depId,depName,departments,accounts);
+            updateData(departments,accounts);
+            myHandler.post(()->{
+                mDatas.clear();
+                if(depId == TerminalFactory.getSDK().getParam(Params.DEP_ID,0)){
+                    mDatas.addAll(allFrequentContacts);
+                }
+                mDatas.addAll(accountAndDeps);
+                if(mContactAdapter != null){
+                    mContactAdapter.notifyDataSetChanged();
+                }
+            });
         }
     };
 
@@ -96,54 +99,71 @@ public class NewPoliceAffairsFragment extends BaseFragment {
             catalogNames.add(memberCatalogBean);
             List<Department> deptList = mMemberResponse.getDeptList();
             List<Account> accountList = mMemberResponse.getAccountDtos();
-            updateData(TerminalFactory.getSDK().getParam(Params.DEP_ID,0),TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),deptList,accountList);
+            updateData(deptList,accountList);
+            myHandler.post(()->{
+                mDatas.clear();
+                mDatas.addAll(allFrequentContacts);
+                mDatas.addAll(accountAndDeps);
+                if(mContactAdapter != null){
+                    mContactAdapter.notifyDataSetChanged();
+                }
+            });
         }
+    }
+
+    private void updateFrequentContacts(){
+        initFrequentContacts();
+        myHandler.post(()->{
+            mDatas.clear();
+            mDatas.addAll(allFrequentContacts);
+            mDatas.addAll(accountAndDeps);
+            if(mContactAdapter != null){
+                mContactAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     /**
      * 添加常用联系人
      */
     private void initFrequentContacts(){
-        allFrequentContacts.clear();
-        List<Account> frequentContacts = TerminalFactory.getSDK().getConfigManager().getFrequentContacts();
-        logger.error("常用联系人："+frequentContacts);
-        if(frequentContacts != null && !frequentContacts.isEmpty()){
-            ContactItemBean memberCatalogBean = new ContactItemBean();
-            memberCatalogBean.setName("常用联系人");
-            memberCatalogBean.setType(Constants.TYPE_FREQUENT);
-            allFrequentContacts.add(memberCatalogBean);
+        myHandler.post(()->{
+            allFrequentContacts.clear();
+            List<Account> frequentContacts = TerminalFactory.getSDK().getConfigManager().getFrequentContacts();
+            logger.error("常用联系人："+frequentContacts);
+            if(frequentContacts != null && !frequentContacts.isEmpty()){
+                ContactItemBean memberCatalogBean = new ContactItemBean();
+                memberCatalogBean.setName("常用联系人");
+                memberCatalogBean.setType(Constants.TYPE_FREQUENT);
+                allFrequentContacts.add(memberCatalogBean);
 
-            for(Account account : frequentContacts){
-
-                ContactItemBean<Account> bean = new ContactItemBean<>();
-                bean.setType(Constants.TYPE_ACCOUNT);
-                bean.setBean(account);
-                allFrequentContacts.add(bean);
+                for(Account account : frequentContacts){
+                    ContactItemBean<Account> bean = new ContactItemBean<>();
+                    bean.setType(Constants.TYPE_ACCOUNT);
+                    bean.setBean(account);
+                    allFrequentContacts.add(bean);
+                }
             }
-        }
+        });
     }
 
     /**
      * 设置数据
      */
-    private void updateData(int depId,String depName,List<Department> deptList,List<Account> accountList){
-
-        mDatas.clear();
-        if(depId == TerminalFactory.getSDK().getParam(Params.DEP_ID,0)){
-            mDatas.addAll(allFrequentContacts);
-        }
+    private void updateData(List<Department> deptList,List<Account> accountList){
+        accountAndDeps.clear();
         //添加标题
         ContactItemBean<Object> Title = new ContactItemBean<>();
         Title.setType(Constants.TYPE_TITLE);
         Title.setBean(new Object());
-        mDatas.add(Title);
+        accountAndDeps.add(Title);
         if(null != accountList && !accountList.isEmpty()){
             //添加成员
             for(Account account : accountList){
                 ContactItemBean<Account> contactItemBean = new ContactItemBean<>();
                 contactItemBean.setType(Constants.TYPE_ACCOUNT);
                 contactItemBean.setBean(account);
-                mDatas.add(contactItemBean);
+                accountAndDeps.add(contactItemBean);
             }
         }
         if(null != deptList && !deptList.isEmpty()){
@@ -151,15 +171,9 @@ public class NewPoliceAffairsFragment extends BaseFragment {
                 ContactItemBean<Department> contactItemBean = new ContactItemBean<>();
                 contactItemBean.setType(Constants.TYPE_DEPARTMENT);
                 contactItemBean.setBean(department);
-                mDatas.add(contactItemBean);
+                accountAndDeps.add(contactItemBean);
             }
         }
-        myHandler.post(()->{
-            if(null != mContactAdapter){
-                mContactAdapter.notifyDataSetChanged();
-            }
-        });
-
     }
 
 

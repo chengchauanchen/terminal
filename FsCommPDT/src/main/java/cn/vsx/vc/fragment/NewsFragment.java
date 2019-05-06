@@ -121,20 +121,6 @@ public class NewsFragment extends BaseFragment {
     private void saveMessagesToSql(){
         synchronized(NewsFragment.this){
             logger.info("---------保存消息列表---------"+messageList);
-            if(messageList.size()>0){
-                int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-                List<TerminalMessage> frequentMember = new ArrayList<>(5);
-                for(int i = 0; i < messageList.size(); i++){
-                    TerminalMessage terminalMessage = messageList.get(i);
-                    if(terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()){
-                        frequentMember.add(terminalMessage);
-                    }
-                }
-                for(TerminalMessage terminalMessage : frequentMember){
-                    TerminalFactory.getSDK().getConfigManager().updateFrequentMember((terminalMessage.messageFromId != memberId)?terminalMessage.messageFromId:terminalMessage.messageToId);
-                }
-            }
-
             MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(messageList);
         }
     }
@@ -922,6 +908,7 @@ public class NewsFragment extends BaseFragment {
                     addData(terminalMessageData);
 //                    sortMessageList();
                     sortFirstMessageList();
+                    updateFrequentMembers();
                     unReadCountChanged();
                     //通知notification
                     for(int i = messageList.size()-1; 0 <=i; i--){
@@ -935,6 +922,28 @@ public class NewsFragment extends BaseFragment {
             }
         }
     };
+
+    private void updateFrequentMembers(){
+        if(messageList.size()>0){
+            List<Integer> frequentMemberNos = new ArrayList<>(5);
+            for(int i = 0; i < messageList.size(); i++){
+                TerminalMessage terminalMessage = messageList.get(i);
+                if(terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()){
+                    int no = TerminalMessageUtil.getNo(terminalMessage);
+                    if(no !=0){
+                        frequentMemberNos.add(no);
+                    }
+                }
+            }
+            //只取最后五个不重复的
+            if(cn.vsx.hamster.terminalsdk.tools.DataUtil.removeDuplicate(frequentMemberNos).size() > 5){
+                frequentMemberNos.subList(frequentMemberNos.size()-5,frequentMemberNos.size());
+            }
+            if(!frequentMemberNos.isEmpty()){
+                TerminalFactory.getSDK().getConfigManager().updateFrequentMember(frequentMemberNos);
+            }
+        }
+    }
 
     /**
      * 保存消息到列表，如果为空就直接添加

@@ -2,6 +2,7 @@ package cn.vsx.vc.service;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.os.Bundle;
@@ -107,6 +108,15 @@ public class PhonePushService extends BaseService{
     @Override
     protected void setRootView(){
         rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_phone_push, null);
+    }
+
+    @Override
+    protected void initWindow() {
+        super.initWindow();
+        //如果屏幕宽度小于高度就开启横屏
+        if(screenWidth < screenHeight){
+            layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+        }
     }
 
     @Override

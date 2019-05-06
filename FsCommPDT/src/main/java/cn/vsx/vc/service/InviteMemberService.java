@@ -2,6 +2,7 @@ package cn.vsx.vc.service;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Message;
@@ -31,7 +32,6 @@ import org.apache.http.util.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
@@ -48,7 +48,6 @@ import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
-import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetTerminalHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
@@ -254,6 +253,12 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         //是否显示编辑主题
         if (android.text.TextUtils.equals(type,Constants.PULL)|| pushing) {
             mLlLiveSelectmemberTheme.setVisibility(View.GONE);
+        }
+        if(pushing && pulling){
+            //如果屏幕宽度小于高度就开启横屏
+            if(screenWidth < screenHeight){
+                layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+            }
         }
         //根据类型和状态显示不同的布局
         setTabTextView();

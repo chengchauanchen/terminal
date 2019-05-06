@@ -61,7 +61,7 @@
             android:layout_marginRight="@dimen/dp_10"
             android:background="@drawable/change_group_button_shape"
             android:gravity="center"
-            android:text="@string/text_change_group"
+            android:text="@string/monitor"
             android:textColor="@color/change_group_text_bg"
             android:textSize="@dimen/sp_14"
             android:textStyle="normal" />

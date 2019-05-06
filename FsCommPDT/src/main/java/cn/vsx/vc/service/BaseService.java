@@ -72,6 +72,7 @@ public abstract class BaseService extends Service{
     protected WindowManager.LayoutParams layoutParams;
     protected WindowManager.LayoutParams layoutParams1;
     protected int screenWidth;
+    protected int screenHeight;
     protected PowerManager.WakeLock wakeLock;
     protected View rootView;
     protected boolean dialogAdd;//是否添加了弹窗
@@ -181,9 +182,14 @@ public abstract class BaseService extends Service{
                 WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON |
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 
+        setScreenWidth();
+    }
+
+    protected void setScreenWidth(){
         DisplayMetrics dm = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(dm);
         screenWidth = dm.widthPixels;
+        screenHeight = dm.heightPixels;
     }
 
     protected void initHomeBroadCastReceiver(){
