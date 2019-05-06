@@ -1321,7 +1321,6 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private void requestOtherStartLive() {
         Member member = getLiveMember();
         if (null != member) {
-
             int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(member.getNo(), member.getUniqueNo(), "");
             logger.error("请求图像：requestCode=" + requestCode);
             if (requestCode == BaseCommonCode.SUCCESS_CODE) {

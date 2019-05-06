@@ -182,5 +182,8 @@ public class CameraActivity extends BaseActivity {
         }
     };
 
-    private ReceiverRemoveWindowViewHandler mReceiverRemoveWindowViewHandler = className -> runOnUiThread(() -> hideBottomUIMenu());
+    private ReceiverRemoveWindowViewHandler mReceiverRemoveWindowViewHandler = className -> {
+        runOnUiThread(() -> hideBottomUIMenu());
+
+    };
 }
