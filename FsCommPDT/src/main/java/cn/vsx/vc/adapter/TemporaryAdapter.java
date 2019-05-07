@@ -23,6 +23,7 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.zectec.imageandfileselector.adapter.FaceRecognitionAdapter;
 import com.zectec.imageandfileselector.bean.FaceRecognitionBean;
 import com.zectec.imageandfileselector.bean.ImageBean;
@@ -1389,6 +1390,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     /***  播放组呼录音相关改变 **/
     private void playGroupVoice(int position, ChatViewHolder holder, TerminalMessage terminalMessage) {
         if(holder.iv_voice_image_anim != null){
+//            holder.ivVoice.setImageResource(isReceiver(terminalMessage)?R.drawable.sound_item:R.drawable.sound_item_right);
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 if (mposition == position) {
                     setUnread(position);
@@ -1397,7 +1399,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                              AnimationsContainer.FramesSequenceAnimation animation = getVoiceAnimation(terminalMessage,holder.iv_voice_image_anim);
                             setViewVisibility(holder.ivVoice, View.GONE);
                             setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
-                            animation.stop();
+//                            animation.stop();
                             animation.start();
                         } else {
                             holder.iv_voice_image_anim.setImageResource(R.drawable.sound_blank);
@@ -1408,7 +1410,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                         AnimationsContainer.FramesSequenceAnimation animation = getVoiceAnimation(terminalMessage,holder.iv_voice_image_anim);
                         setViewVisibility(holder.ivVoice, View.GONE);
                         setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
-                        animation.stop();
+//                        animation.stop();
                         animation.start();
                     }
                 } else {

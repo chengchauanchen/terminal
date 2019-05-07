@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.TypedValue;
@@ -452,7 +453,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     private int mposition = -1;
     private int lastPosition = -1;
     private boolean isSameItem = true;
-    private Handler myHandler = new Handler();
+    private Handler myHandler = new Handler(Looper.getMainLooper());
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
     /**
      * 点击个呼录音条目
@@ -491,6 +492,10 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                             });
                         }
                     } else {//点击不同条目
+                        if (MyApplication.instance.isPlayVoice) {
+                            MediaManager.release();
+
+                        }
                         //播放当前的
                         executorService.execute(new Runnable() {
                             public void run() {
@@ -559,7 +564,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                     MyApplication.instance.isPlayVoice = !MyApplication.instance.isPlayVoice;
                 } else {//点击不同条目
                     isSameItem = false;
-                    MyApplication.instance.isPlayVoice = false;
+                    MyApplication.instance.isPlayVoice = true;
                 }
                 Collections.sort(chatMessageList);
                 if (temporaryAdapter != null) {
@@ -657,5 +662,20 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         }
     };
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        stopRecord();
+    }
+
+    /**
+     * 停止播放组呼录音
+     */
+    public void stopRecord() {
+        if (MyApplication.instance.isPlayVoice) {
+            MediaManager.release();
+            MyApplication.instance.isPlayVoice = false;
+        }
+    }
 
 }

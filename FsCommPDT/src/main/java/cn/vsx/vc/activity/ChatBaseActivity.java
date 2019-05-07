@@ -73,6 +73,7 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetHistoryMessageRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
@@ -1746,7 +1747,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         long groupUniqueNo = isGroup ? MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupUniqueNo(userId) : 0l;
         long messageVersion = tempGetMessage != null ? tempGetMessage.messageVersion : 0l;
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
-            MyTerminalFactory.getSDK().getTerminalMessageManager().getHistoryMessageRecord(isGroup, 0, messageId, groupUniqueNo, messageVersion, messageCount);
+            MyTerminalFactory.getSDK().getTerminalMessageManager().getHistoryMessageRecord(isGroup, userId, messageId, groupUniqueNo, messageVersion, messageCount);
         });
     }
 

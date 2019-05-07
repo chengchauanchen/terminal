@@ -24,6 +24,7 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.zectec.imageandfileselector.adapter.FaceRecognitionAdapter;
 import com.zectec.imageandfileselector.bean.FaceRecognitionBean;
 import com.zectec.imageandfileselector.bean.FileInfo;
@@ -932,6 +933,9 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                     setUnread(position);
                     if (isSameItem) {
                         if (isPlaying) {
+//                            Glide.with(activity).load(isReceiver(terminalMessage)?R.drawable.icon_play_voice_left:R.drawable.icon_play_voice_right)
+//                                    .asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                                    .into(holder.iv_voice_image_anim);
                             AnimationsContainer.FramesSequenceAnimation animation = getVoiceAnimation(terminalMessage,holder.iv_voice_image_anim);
                             setViewVisibility(holder.ivVoice, View.GONE);
                             setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
@@ -943,6 +947,9 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                             setViewVisibility(holder.iv_voice_image_anim, View.GONE);
                         }
                     } else {//不同条目
+//                        Glide.with(activity).load(isReceiver(terminalMessage)?R.drawable.icon_play_voice_left:R.drawable.icon_play_voice_right)
+//                                .asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE)
+//                                .into(holder.iv_voice_image_anim);
                         AnimationsContainer.FramesSequenceAnimation animation = getVoiceAnimation(terminalMessage,holder.iv_voice_image_anim);
                         setViewVisibility(holder.ivVoice, View.GONE);
                         setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
