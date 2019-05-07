@@ -75,7 +75,7 @@ public class PullGB28181Service extends BaseService{
         super.initWindow();
         //如果屏幕宽度小于高度就开启横屏
         if(screenWidth < screenHeight){
-            layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
+            layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
         }
     }
 
