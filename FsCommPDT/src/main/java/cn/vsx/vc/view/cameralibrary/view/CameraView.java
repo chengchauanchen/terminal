@@ -27,7 +27,7 @@ public interface CameraView {
 
     boolean handlerFoucs(float x, float y);
 
-    void recordResult(Bitmap firstFrame, String url,boolean needSend);
+    void recordResult(Bitmap firstFrame, String url, boolean needSend);
 
     void onStop();
 

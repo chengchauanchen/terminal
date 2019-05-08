@@ -51,7 +51,7 @@ public class GroupCatalogBean implements Parcelable{
         this.id = in.readInt();
     }
 
-    public static final Parcelable.Creator<GroupCatalogBean> CREATOR = new Parcelable.Creator<GroupCatalogBean>(){
+    public static final Creator<GroupCatalogBean> CREATOR = new Creator<GroupCatalogBean>(){
         @Override
         public GroupCatalogBean createFromParcel(Parcel source){
             return new GroupCatalogBean(source);

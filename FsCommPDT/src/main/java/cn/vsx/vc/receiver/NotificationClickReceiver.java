@@ -30,7 +30,7 @@ public class NotificationClickReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         Bundle bundle = intent.getBundleExtra("bundle");
-        TerminalMessage terminalMessage = (cn.vsx.hamster.terminalsdk.model.TerminalMessage) bundle.getSerializable("TerminalMessage");
+        TerminalMessage terminalMessage = (TerminalMessage) bundle.getSerializable("TerminalMessage");
         if(terminalMessage ==null){
             return;
         }

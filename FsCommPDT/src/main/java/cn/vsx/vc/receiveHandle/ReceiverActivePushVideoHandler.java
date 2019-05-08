@@ -7,5 +7,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverActivePushVideoHandler extends ReceiveHandler {
-    void handler(String uniqueNoAndType,boolean isGroupPushLive);
+    void handler(String uniqueNoAndType, boolean isGroupPushLive);
 }

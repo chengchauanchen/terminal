@@ -70,7 +70,7 @@ public class ChooseDevicesAdapter extends RecyclerView.Adapter<ChooseDevicesAdap
     }
 
     public interface ItemClickListener {
-        void onItemClick( ChooseDevicesDialog dialog,Member member);
+        void onItemClick(ChooseDevicesDialog dialog, Member member);
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder {

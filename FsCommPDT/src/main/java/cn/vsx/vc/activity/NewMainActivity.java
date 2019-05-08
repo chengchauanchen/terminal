@@ -1052,7 +1052,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         MyTerminalFactory.getSDK().getVideoProxy().setActivity(this);
 
-        String machineType = android.os.Build.MODEL;
+        String machineType = Build.MODEL;
         MyTerminalFactory.getSDK().putParam(Params.ANDROID_BUILD_MODEL,machineType);
         logger.error("machineType :"+machineType);
         if (machineType.equals("PDC760")) {
@@ -1492,7 +1492,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         //6.0以下判断相机权限
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M  ){
             if(!SystemUtil.cameraIsCanUse()){
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.CAMERA}, CheckMyPermission.REQUEST_CAMERA);
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CheckMyPermission.REQUEST_CAMERA);
             }
         }else {
             if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.RECORD_AUDIO)){

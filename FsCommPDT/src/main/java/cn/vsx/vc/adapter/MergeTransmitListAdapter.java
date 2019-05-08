@@ -1353,7 +1353,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
             logger.info("sjl_:" + terminalMessage.messageType + "," + terminalMessage.messagePath);
             String path = terminalMessage.messagePath;
             File file = new File(path);
-            String content = com.zectec.imageandfileselector.utils.FileUtil.getStringFromFile(file);
+            String content = FileUtil.getStringFromFile(file);
             cmb.setText(content);
         }
         ToastUtil.showToast(activity.getString(R.string.text_replication_success), activity);
@@ -1424,8 +1424,8 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                     if (living) {
                         activity.runOnUiThread(() -> {
                             Intent intent = new Intent(activity, PullLivingService.class);
-                            intent.putExtra(cn.vsx.vc.utils.Constants.WATCH_TYPE, cn.vsx.vc.utils.Constants.ACTIVE_WATCH);
-                            intent.putExtra(cn.vsx.vc.utils.Constants.TERMINALMESSAGE, terminalMessage);
+                            intent.putExtra(Constants.WATCH_TYPE, Constants.ACTIVE_WATCH);
+                            intent.putExtra(Constants.TERMINALMESSAGE, terminalMessage);
                             activity.startService(intent);
                         });
                     } else {
@@ -1447,8 +1447,8 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
         /**  跳转到合并转发  **/
         if (terminalMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()) {
             Intent intent = new Intent(activity, MergeTransmitListActivity.class);
-            intent.putExtra(cn.vsx.vc.utils.Constants.IS_GROUP, isGroup);
-            intent.putExtra(cn.vsx.vc.utils.Constants.USER_ID, userId);
+            intent.putExtra(Constants.IS_GROUP, isGroup);
+            intent.putExtra(Constants.USER_ID, userId);
             intent.putExtra(Constants.TERMINALMESSAGE, terminalMessage);
             activity.startActivity(intent);
         }

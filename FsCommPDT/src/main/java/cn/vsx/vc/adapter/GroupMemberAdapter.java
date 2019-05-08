@@ -239,6 +239,6 @@ public class GroupMemberAdapter extends BaseAdapter {
         this.onItemClickListener = onItemClickListener;
     }
     public interface OnItemClickListener{
-        void onItemClick(View view,int position ,boolean checked,Member member);
+        void onItemClick(View view, int position, boolean checked, Member member);
     }
 }

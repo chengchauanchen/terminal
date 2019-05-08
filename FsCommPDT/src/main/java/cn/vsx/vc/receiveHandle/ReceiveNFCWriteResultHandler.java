@@ -7,5 +7,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  * 修订历史：
  */
 public interface ReceiveNFCWriteResultHandler extends ReceiveHandler{
-    void handler(int resultCode,String resultDec);
+    void handler(int resultCode, String resultDec);
 }

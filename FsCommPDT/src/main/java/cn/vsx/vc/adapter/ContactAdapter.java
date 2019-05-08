@@ -354,7 +354,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     public interface ItemClickListener{
-        void onItemClick(View view, int depId,String depName, int type);
+        void onItemClick(View view, int depId, String depName, int type);
     }
 
     public void setCatalogItemClickListener(CatalogItemClickListener catalogItemClickListener){
@@ -362,6 +362,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     public interface CatalogItemClickListener{
-        void onCatalogItemClick(View view,int position);
+        void onCatalogItemClick(View view, int position);
     }
 }

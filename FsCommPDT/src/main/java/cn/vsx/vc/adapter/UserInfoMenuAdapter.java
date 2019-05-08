@@ -55,7 +55,7 @@ public class UserInfoMenuAdapter  extends RecyclerView.Adapter<UserInfoMenuAdapt
     }
 
    public interface OnItemClickListener{
-        void onItemClick(int postion,Picture picture);
+        void onItemClick(int postion, Picture picture);
     }
 
     class MyViewHolder extends RecyclerView.ViewHolder{

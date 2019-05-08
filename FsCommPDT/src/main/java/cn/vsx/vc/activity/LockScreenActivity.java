@@ -549,7 +549,7 @@ public class LockScreenActivity extends BaseActivity {
 
     /**设置音量键为ptt键时的监听*/
     private final class OnPTTVolumeBtnStatusChangedListenerImp
-            implements BaseActivity.OnPTTVolumeBtnStatusChangedListener {
+            implements OnPTTVolumeBtnStatusChangedListener {
         @Override
         public void onPTTVolumeBtnStatusChange(GroupCallSpeakState groupCallSpeakState) {
             if (groupCallSpeakState == IDLE) {

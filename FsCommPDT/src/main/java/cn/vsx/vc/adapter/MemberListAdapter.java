@@ -160,6 +160,6 @@ public class MemberListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     }
 
     public interface ItemClickListener{
-        void itemClick(int type,int position);
+        void itemClick(int type, int position);
     }
 }

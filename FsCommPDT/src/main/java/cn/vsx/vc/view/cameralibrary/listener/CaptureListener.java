@@ -12,7 +12,7 @@ public interface CaptureListener {
 
     void recordStart();
 
-    void recordEnd(long time,boolean needSend);
+    void recordEnd(long time, boolean needSend);
 
     void recordZoom(float zoom);
 

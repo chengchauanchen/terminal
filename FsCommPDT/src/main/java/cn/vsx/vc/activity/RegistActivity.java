@@ -1271,7 +1271,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         }
     }
 
-    private IPstoreHandler.Response response = new Response() {
+    private Response response = new Response() {
         @Override
         public void onResponse(Bundle bundle) {
             Map<String, String> userInfo = UserInfo.getUserInfo(RegistActivity.this);

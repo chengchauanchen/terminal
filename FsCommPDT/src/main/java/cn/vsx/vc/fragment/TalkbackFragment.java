@@ -675,7 +675,7 @@ public class TalkbackFragment extends BaseFragment {
 
     }
 
-    private final class OnPttTouchListenerImplementation implements View.OnTouchListener {
+    private final class OnPttTouchListenerImplementation implements OnTouchListener {
 
         @Override
         public boolean onTouch(View v, MotionEvent event) {

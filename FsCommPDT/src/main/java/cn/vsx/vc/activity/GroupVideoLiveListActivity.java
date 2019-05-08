@@ -329,7 +329,7 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
     public void goToForward(TerminalMessage item) {
         transponMessage = item;
         Intent intent = new Intent(GroupVideoLiveListActivity.this, TransponActivity.class);
-        intent.putExtra(cn.vsx.vc.utils.Constants.TRANSPON_TYPE, Constants.TRANSPON_TYPE_ONE);
+        intent.putExtra(Constants.TRANSPON_TYPE, Constants.TRANSPON_TYPE_ONE);
         startActivityForResult(intent, CODE_TRANSPON_REQUEST);
     }
 
@@ -340,10 +340,10 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
         if (resultCode == RESULT_OK) {
             if (requestCode == CODE_TRANSPON_REQUEST) {
                 //转发返回结果
-                TransponSelectedBean bean = (TransponSelectedBean) data.getSerializableExtra(cn.vsx.vc.utils.Constants.TRANSPON_SELECTED_BEAN);
+                TransponSelectedBean bean = (TransponSelectedBean) data.getSerializableExtra(Constants.TRANSPON_SELECTED_BEAN);
                 if (bean != null && bean.getList() != null && !bean.getList().isEmpty()) {
-                    int type = data.getIntExtra(cn.vsx.vc.utils.Constants.TRANSPON_TYPE, cn.vsx.vc.utils.Constants.TRANSPON_TYPE_ONE);
-                    if (type == cn.vsx.vc.utils.Constants.TRANSPON_TYPE_ONE) {
+                    int type = data.getIntExtra(Constants.TRANSPON_TYPE, Constants.TRANSPON_TYPE_ONE);
+                    if (type == Constants.TRANSPON_TYPE_ONE) {
                         //单个转发
                         showProgressDialog();
                         TerminalFactory.getSDK().getThreadPool().execute(() -> {

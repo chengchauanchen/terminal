@@ -252,13 +252,13 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     }
 
     public interface CatalogItemClickListener{
-        void onCatalogItemClick(View view,boolean isTempGroup,int position);
+        void onCatalogItemClick(View view, boolean isTempGroup, int position);
     }
 
     public void setFolderClickListener(FolderClickListener folderClickListener){
         this.folderClickListener = folderClickListener;
     }
     public interface FolderClickListener{
-        void onFolderClick(View view,int depId,String name,boolean isTempGroup);
+        void onFolderClick(View view, int depId, String name, boolean isTempGroup);
     }
 }

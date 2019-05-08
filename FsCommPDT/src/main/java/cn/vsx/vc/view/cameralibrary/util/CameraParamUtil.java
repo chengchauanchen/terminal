@@ -126,8 +126,8 @@ public class CameraParamUtil {
     }
 
     public int getCameraDisplayOrientation(Context context, int cameraId) {
-        android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
-        android.hardware.Camera.getCameraInfo(cameraId, info);
+        Camera.CameraInfo info = new Camera.CameraInfo();
+        Camera.getCameraInfo(cameraId, info);
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         int rotation = wm.getDefaultDisplay().getRotation();
         int degrees = 0;

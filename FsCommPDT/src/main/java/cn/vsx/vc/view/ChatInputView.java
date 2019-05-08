@@ -1,4 +1,4 @@
-//package cn.zectec.ptt.view;
+package cn.vsx.vc.view;//package cn.zectec.ptt.view;
 //
 //import android.app.Activity;
 //import android.content.Context;

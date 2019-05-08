@@ -35,7 +35,7 @@ public class LiveRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     private List<ContactItemBean> mDatas;
     private String type;
     private int lastPosition = -1;
-    private LiveRecyclerViewAdapter.ItemClickListener listener;
+    private ItemClickListener listener;
     private ArrayList<Integer> selectMember = new ArrayList<>();//被选中的人
     private Member liveMember;
 
@@ -49,17 +49,17 @@ public class LiveRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
         if(viewType == TYPE_DEPARTMENT){
             View view = LayoutInflater.from(mContext).inflate(R.layout.item_department, parent, false);
-            return new LiveRecyclerViewAdapter.DepartmentViewHolder(view);
+            return new DepartmentViewHolder(view);
         }else{
             View view = LayoutInflater.from(mContext).inflate(R.layout.item_live_contract, parent, false);
-            return new LiveRecyclerViewAdapter.UserViewHolder(view);
+            return new UserViewHolder(view);
         }
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position){
         if(getItemViewType(position) == TYPE_DEPARTMENT){
-            LiveRecyclerViewAdapter.DepartmentViewHolder holder1 = (LiveRecyclerViewAdapter.DepartmentViewHolder) holder;
+            DepartmentViewHolder holder1 = (DepartmentViewHolder) holder;
             holder1.tvDepartment.setText(mDatas.get(position).getName());
             holder1.itemView.setOnClickListener(view -> {
                 if(listener != null){
@@ -67,7 +67,7 @@ public class LiveRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
                 }
             });
         }else{
-            LiveRecyclerViewAdapter.UserViewHolder userViewHolder = (LiveRecyclerViewAdapter.UserViewHolder) holder;
+            UserViewHolder userViewHolder = (UserViewHolder) holder;
             final Member member =(Member) mDatas.get(position).getBean();
             userViewHolder.tvName.setText(member.getName() + "");
             userViewHolder.tvId.setText(member.getNo() + "");
@@ -199,7 +199,7 @@ public class LiveRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
         }
     }
 
-    public void setOnItemClickListener(LiveRecyclerViewAdapter.ItemClickListener listener){
+    public void setOnItemClickListener(ItemClickListener listener){
         this.listener = listener;
     }
 

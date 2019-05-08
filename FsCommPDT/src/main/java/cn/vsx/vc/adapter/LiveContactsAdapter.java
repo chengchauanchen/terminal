@@ -246,6 +246,6 @@ public class LiveContactsAdapter extends BaseAdapter {
         this.onItemClickListener = onItemClickListener;
     }
     public interface OnItemClickListener{
-        void onItemClick(List<Member>pushMembers ,Member liveMember,boolean isPush);
+        void onItemClick(List<Member> pushMembers, Member liveMember, boolean isPush);
     }
 }

@@ -500,7 +500,7 @@ public abstract class CombatFragment extends BaseFragment {
         }
     }
 
-    private class CombatListOnItemClickListener implements android.widget.AdapterView.OnItemClickListener {
+    private class CombatListOnItemClickListener implements AdapterView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             TerminalMessage terminalMessage = messageList.get(position);
