@@ -1299,13 +1299,13 @@ public class MainActivity extends BaseActivity {
                         bean.getData().getLiveUniqueNo() + "_" + bean.getData().getCallId() + ".sdp";
                 jsonObject.put(JsonParam.EASYDARWIN_RTSP_URL, rtspUrl);
                 builder.setMessageBody(jsonObject.toString());
-            } else if (type == RotationImageType.OuterGB28121.getCode()) {
+            } else if (type == RotationImageType.OuterGB28181.getCode()) {
                 builder.setMessageType(MessageType.OUTER_GB28181_RECORD.getCode());
                 String deviceId = bean.getData().getDeviceId();
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put(JsonParam.DEVICE_ID, deviceId);
                 builder.setMessageBody(jsonObject.toString());
-            } else if (type == RotationImageType.GB28121.getCode()) {
+            } else if (type == RotationImageType.GB28181.getCode()) {
                 builder.setMessageType(MessageType.GB28181_RECORD.getCode());
                 String deviceId = bean.getData().getDeviceId();
                 String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);

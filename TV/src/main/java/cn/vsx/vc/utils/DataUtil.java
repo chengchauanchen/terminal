@@ -384,9 +384,9 @@ public class DataUtil {
                         if(d.length>2){
                             live.setCallId(d[2]);
                         }
-                    }else if(type == RotationImageType.OuterGB28121.getCode()){
+                    }else if(type == RotationImageType.OuterGB28181.getCode()){
                         live.setDeviceId(json);
-                    }else if(type == RotationImageType.GB28121.getCode()){
+                    }else if(type == RotationImageType.GB28181.getCode()){
                         live.setDeviceId(json);
                     }
                     bean.setData(live);
