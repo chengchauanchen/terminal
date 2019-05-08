@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_regist_all"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg"
+    android:orientation="vertical"
+    android:padding="@dimen/dp_10">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="@dimen/dp_20"
+        android:layout_marginBottom="@dimen/dp_10"
+        android:src="@drawable/icon_ucs" />
+
+    <View
+        android:id="@+id/view_pop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
+        android:weightSum="10">
+
+        <cn.vsx.vc.views.XCDropDownListView
+            android:id="@+id/xcd_available_ip"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.6"
+            android:gravity="center_vertical"
+            android:focusable="true">
+
+        </cn.vsx.vc.views.XCDropDownListView>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/dp_10"
+        android:paddingTop="@dimen/dp_10"
+        android:paddingBottom="@dimen/dp_10"
+        android:weightSum="10">
+
+        <LinearLayout
+            android:id="@+id/ll_regist"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.6"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <EditText
+                android:id="@+id/userOrg"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_register_input"
+                android:cursorVisible="true"
+                android:gravity="center"
+                android:hint="@string/regist_org_hint"
+                android:inputType="date"
+                android:maxLines="1"
+                android:padding="@dimen/dp_10"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white_40"
+                android:textSize="@dimen/sp_22"
+                android:focusable="true"
+                android:nextFocusDown="@id/userName">
+            </EditText>
+
+            <EditText
+                android:id="@+id/userName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_5"
+                android:background="@drawable/bg_register_input"
+                android:cursorVisible="true"
+                android:gravity="center"
+                android:hint="@string/regist_name_hint"
+                android:inputType="text"
+                android:maxLines="1"
+                android:padding="@dimen/dp_10"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white_40"
+                android:textCursorDrawable="@null"
+                android:textSize="@dimen/sp_22"
+                android:focusable="true"
+                android:nextFocusUp="@id/userOrg"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_reauth_info"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.6"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <EditText
+                android:id="@+id/account"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_register_input"
+                android:cursorVisible="true"
+                android:gravity="center"
+                android:hint="请输入警号"
+                android:inputType="text"
+                android:maxLines="1"
+                android:padding="@dimen/dp_10"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white_40"
+                android:textSize="@dimen/sp_22"
+                android:focusable="true"/>
+
+            <EditText
+                android:id="@+id/name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_5"
+                android:background="@drawable/bg_register_input"
+                android:cursorVisible="true"
+                android:gravity="center"
+                android:hint="请输入警员名称"
+                android:inputType="text"
+                android:maxLines="1"
+                android:padding="@dimen/dp_10"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white_40"
+                android:textSize="@dimen/sp_22"
+                android:focusable="true"/>
+
+            <EditText
+                android:id="@+id/departmentId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_5"
+                android:background="@drawable/bg_register_input"
+                android:cursorVisible="true"
+                android:gravity="center"
+                android:hint="请输入部门编号"
+                android:inputType="text"
+                android:maxLines="1"
+                android:padding="@dimen/dp_10"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white_40"
+                android:textSize="@dimen/sp_22"
+                android:focusable="true"/>
+
+            <EditText
+                android:id="@+id/departmentName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_5"
+                android:background="@drawable/bg_register_input"
+                android:cursorVisible="true"
+                android:gravity="center"
+                android:hint="请输入部门名称"
+                android:inputType="text"
+                android:maxLines="1"
+                android:padding="@dimen/dp_10"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white_40"
+                android:textSize="@dimen/sp_22"
+                android:focusable="true"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/dp_10"
+        android:paddingTop="@dimen/dp_10"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:layout_marginBottom="@dimen/dp_10"
+            android:weightSum="10"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/btn_addMember"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1.4"
+                android:background="@drawable/regist_button_shape"
+                android:paddingTop="@dimen/dp_5"
+                android:paddingBottom="@dimen/dp_5"
+                android:text="模拟警员"
+                android:textColor="@color/white_40"
+                android:textSize="@dimen/sp_22"
+                android:focusable="true" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:weightSum="10">
+
+            <Button
+                android:id="@+id/btn_confirm"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3.6"
+                android:background="@drawable/regist_button_shape"
+                android:paddingTop="@dimen/dp_5"
+                android:paddingBottom="@dimen/dp_5"
+                android:text="@string/regist_button"
+                android:textColor="@drawable/regist_button_text_color"
+                android:textSize="@dimen/sp_22"
+                android:focusable="true"/>
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_version_prompt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/dp_10"
+            android:gravity="center"
+            android:textColor="@color/icon_text"
+            android:textSize="@dimen/sp_12"
+            android:visibility="gone"/>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+
+    <TextureView
+        android:id="@+id/sv_live"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
+
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/dp_40"
+        android:layout_marginLeft="@dimen/dp_30"
+        android:textSize="@dimen/sp_20"
+        android:textColor="@color/white"
+        style="@style/ShadleStyle" />
+
+    <ImageView
+        android:id="@+id/bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg"
+        android:visibility="visible"/>
+
+    <ImageView
+        android:id="@+id/icon"
+        android:layout_width="400dp"
+        android:layout_height="174dp"
+        android:layout_centerHorizontal="true"
+        android:layout_above="@+id/ll_tempt"
+        android:layout_marginBottom="-30dp"
+        android:src="@drawable/icon_ucs" />
+
+    <LinearLayout
+        android:id="@+id/ll_tempt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:paddingTop="@dimen/dp_50"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/tv_nolive"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="@string/tv_nolive"
+            android:textSize="30sp"
+            style="@style/ShadleStyle"/>
+
+        <TextView
+            android:id="@+id/tv_connecting_to_other"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="尝试连接中..."
+            android:visibility="gone"
+            android:textSize="30sp"
+            style="@style/ShadleStyle"/>
+
+        <TextView
+            android:id="@+id/tv_connect_to_other_success"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="连接成功"
+            android:visibility="gone"
+            android:textSize="30sp"
+            style="@style/ShadleStyle"/>
+
+        <TextView
+            android:id="@+id/tv_connect_to_other_failed"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:text="连接失败"
+            android:visibility="gone"
+            android:textSize="30sp"
+            style="@style/ShadleStyle"/>
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/icon_vsxin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_40"
+        android:layout_marginLeft="@dimen/dp_30"
+        android:src="@drawable/icon_vsxin" />
+
+    <TextView
+        android:id="@+id/tv_user_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/sp_20"
+        android:textColor="@color/white"
+        android:layout_below="@+id/icon_vsxin"
+        android:layout_marginTop="@dimen/dp_20"
+        android:layout_marginLeft="@dimen/dp_30"
+        style="@style/ShadleStyle"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/tv_user_id"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/sp_20"
+        android:textColor="@color/white"
+        android:layout_below="@+id/tv_user_name"
+        android:layout_marginTop="@dimen/dp_10"
+        android:layout_marginLeft="@dimen/dp_30"
+        style="@style/ShadleStyle"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/tv_version_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/sp_20"
+        android:textColor="@color/white"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="@dimen/dp_40"
+        android:layout_marginRight="@dimen/dp_30"
+        android:focusable="true"
+        style="@style/ShadleStyle"/>
+
+    <TextView
+        android:id="@+id/tv_log_upload"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="日志上传"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_20"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="@dimen/dp_30"
+        android:layout_below="@id/tv_version_name"
+        android:layout_marginTop="@dimen/dp_10"
+        android:focusable="true"
+        style="@style/ShadleStyle"/>
+
+
+</RelativeLayout>

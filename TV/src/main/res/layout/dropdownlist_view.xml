@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/compound"
+    android:layout_width="match_parent"
+    android:layout_height="50dp"
+    android:background="@drawable/bg_register_input"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:focusable="true">
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:paddingLeft="60dp"
+        android:paddingRight="10dp"
+        android:singleLine="true"
+        android:text="文本文字"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_20" />
+
+    <ImageView
+        android:id="@+id/btn"
+        android:layout_width="50dp"
+        android:layout_height="match_parent"
+        android:layout_toRightOf="@+id/text"
+        android:padding="15dp"
+        android:src="@drawable/regist_down_arrowhead" />
+</LinearLayout>
