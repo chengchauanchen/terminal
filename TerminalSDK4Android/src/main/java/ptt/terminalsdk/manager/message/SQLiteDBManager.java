@@ -318,7 +318,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 terminalMessage.resultCode = cursor.getInt(cursor.getColumnIndex("result_code"));
                 terminalMessage.sendTime = cursor.getLong(cursor.getColumnIndex("send_time"));
                 int messageStatus = cursor.getInt(cursor.getColumnIndex("message_status"));
-                terminalMessage.messageStatus = (messageStatus == 1)?MessageStatus.MESSAGE_RECALL.toString():MessageStatus.MESSAGE_RECALL.toString();
+                terminalMessage.messageStatus = (messageStatus == 1)?MessageStatus.MESSAGE_RECALL.toString():MessageStatus.MESSAGE_NORMAL.toString();
                 //消息列表数据库才有unread_count这个字段
                 try {
                     if (cursor.getColumnIndex("unread_count") != -1) {
