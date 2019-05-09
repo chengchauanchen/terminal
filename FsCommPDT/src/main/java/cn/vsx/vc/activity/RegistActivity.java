@@ -67,6 +67,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRegistCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.JudgeWhetherConnect;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -78,10 +79,10 @@ import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.KeyboarUtils;
 import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.SetToListUtil;
+import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.XCDropDownListView;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -269,7 +270,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 }
                 //版本的文字提示：内网、西城、东城
                 logger.info("地点是：" + TerminalFactory.getSDK().getParam(Params.PLACE));
-                tvVersionPrompt.setText(String.format(getString(R.string.text_place_and_version),TerminalFactory.getSDK().getParam(Params.PLACE, "zectec"),DataUtil.getVersion(RegistActivity.this)));
+                tvVersionPrompt.setText(String.format(getString(R.string.text_place_and_version),TerminalFactory.getSDK().getParam(Params.PLACE, "zectec"), SystemUtil.getVersion(RegistActivity.this)));
             });
 
         }

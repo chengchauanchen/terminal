@@ -1,8 +1,6 @@
 package cn.vsx.vc.activity;
 
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,10 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONObject;
 import com.chad.library.adapter.base.BaseQuickAdapter;
@@ -31,12 +26,9 @@ import java.util.Map;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.model.GetGroupLivingBean;
-import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupLivingHistoryListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupLivingListHandler;
@@ -50,11 +42,9 @@ import cn.vsx.vc.model.TransponSelectedBean;
 import cn.vsx.vc.model.TransponToBean;
 import cn.vsx.vc.service.PullLivingService;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.DataUtil;
+import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
-
-import static cn.vsx.vc.utils.Constants.IS_GROUP_VIDEO_LIVING;
 
 public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener, BaseQuickAdapter.RequestLoadMoreListener, GroupVideoLiveListAdapter.OnItemClickListerner {
 
@@ -363,9 +353,9 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
     private void transponMessage(ArrayList<ContactItemBean> list, PushMessageSendResultHandler pushMessageSendResultHandler) {
         logger.info("转发消息，type:" + transponMessage.messageType);
         //单个转发
-        List<Integer> toIds = DataUtil.getToIdsTranspon(list);
-        TransponToBean bean = DataUtil.getToNamesTranspon(list);
-        List<Long> toUniqueNos = DataUtil.getToUniqueNoTranspon(list);
+        List<Integer> toIds = MyDataUtil.getToIdsTranspon(list);
+        TransponToBean bean = MyDataUtil.getToNamesTranspon(list);
+        List<Long> toUniqueNos = MyDataUtil.getToUniqueNoTranspon(list);
         if(bean!=null){
             transponMessage.messageToId = bean.getNo();
             transponMessage.messageToName = bean.getName();

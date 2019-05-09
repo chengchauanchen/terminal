@@ -48,11 +48,9 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
-import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
-import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
@@ -72,6 +70,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandl
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
@@ -79,8 +78,8 @@ import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
+import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
@@ -359,8 +358,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
 
             case R.id.iv_monitor:
-                if(userId == TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) ||
-                        (userId == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0))){
+                if(userId == TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)){
                     ToastUtil.showToast(GroupCallNewsActivity.this,getString(R.string.can_not_cancel_listener));
                         return;
                 }
@@ -369,7 +367,11 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(userId)){
                     TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
                 }else {
-                    TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
+                    if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().size()>= 5){
+                        ToastUtil.showToast(GroupCallNewsActivity.this,getResources().getString(R.string.monitor_more_than_five));
+                    }else {
+                        TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
+                    }
                 }
                 break;
             default:
@@ -378,13 +380,27 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     }
 
     private void setIvMonitorDrawable(){
-        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(userId)
-            || userId == TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)
-            || userId == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
+        if(checkIsMonitorGroup(userId)){
             iv_monitor.setImageResource(R.drawable.monitor_open);
         }else {
             iv_monitor.setImageResource(R.drawable.monitor_close);
         }
+    }
+
+    private boolean checkIsMonitorGroup(int groupNo){
+        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(groupNo)){
+            return true;
+        }
+        if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
+            return true;
+        }
+        if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
+            return true;
+        }
+        if(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) == groupNo){
+            return true;
+        }
+        return false;
     }
 
     private void stateView() {
@@ -682,7 +698,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     @Override
     public void postVideo() {
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,
-                DataUtil.getPushInviteMemberData(DataUtil.getGroupByGroupNoFromAllGroup(userId).getUniqueNo(), ReceiveObjectMode.GROUP.toString()) ,true);
+                MyDataUtil.getPushInviteMemberData(DataUtil.getGroupByGroupNoFromAllGroup(userId).getUniqueNo(), ReceiveObjectMode.GROUP.toString()) ,true);
     }
 
     /**

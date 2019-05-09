@@ -48,10 +48,9 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
-import cn.vsx.vc.receiveHandle.ReceiverGroupPushLiveHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRemoveWindowViewHandler;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.DataUtil;
+import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -372,7 +371,7 @@ public abstract class BaseService extends Service{
      */
     public void sendGroupMessage(String streamMediaServerIp, int streamMediaServerPort, long callId,List<String> pushMemberList,boolean isGroupPushLive) {
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
-            List<Group> list = DataUtil.checkIsGroupPush(pushMemberList);
+            List<Group> list = MyDataUtil.checkIsGroupPush(pushMemberList);
             if(!list.isEmpty()){
 
                 int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);

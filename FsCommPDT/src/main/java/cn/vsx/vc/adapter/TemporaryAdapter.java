@@ -62,6 +62,7 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -80,7 +81,7 @@ import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.AnimationsContainer;
-import cn.vsx.vc.utils.DataUtil;
+import cn.vsx.vc.utils.MyDataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -1468,8 +1469,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
      * 合并转发
      */
     public void transponForwardMoreMessage(TerminalMessage terminalMessage, ArrayList<ContactItemBean> list, PushMessageSendResultHandler pushMessageSendResultHandler) {
-        List<Integer> toIds = DataUtil.getToIdsTranspon(list);
-        List<Long> toUniqueNos = DataUtil.getToUniqueNoTranspon(list);
+        List<Integer> toIds = MyDataUtil.getToIdsTranspon(list);
+        List<Long> toUniqueNos = MyDataUtil.getToUniqueNoTranspon(list);
         TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
         terminalMessage1.messageToId = toIds.get(0);
         MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),toIds,toUniqueNos,pushMessageSendResultHandler);
@@ -1995,9 +1996,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     public void transponMessage(ArrayList<ContactItemBean> list, PushMessageSendResultHandler pushMessageSendResultHandler) {
         logger.info("转发消息，type:" + transponMessage.messageType);
             //单个转发
-        List<Integer> toIds = DataUtil.getToIdsTranspon(list);
-        TransponToBean bean = DataUtil.getToNamesTranspon(list);
-        List<Long> toUniqueNos = DataUtil.getToUniqueNoTranspon(list);
+        List<Integer> toIds = MyDataUtil.getToIdsTranspon(list);
+        TransponToBean bean = MyDataUtil.getToNamesTranspon(list);
+        List<Long> toUniqueNos = MyDataUtil.getToUniqueNoTranspon(list);
         if(bean!=null){
             transponMessage.messageToId = bean.getNo();
             transponMessage.messageToName = bean.getName();

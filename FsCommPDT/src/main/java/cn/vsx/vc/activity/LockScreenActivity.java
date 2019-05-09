@@ -53,11 +53,11 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConforma
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.service.LockScreenService;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.view.MyRelativeLayout;
 import cn.vsx.vc.view.TimerView;
 import cn.vsx.vc.view.VolumeViewLayout;

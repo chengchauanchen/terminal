@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.SparseBooleanArray;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +21,10 @@ import cn.vsx.hamster.terminalsdk.model.MemberGroupResponse;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdateGroupHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
@@ -58,7 +61,8 @@ public class NewGroupFragment extends BaseFragment{
 
     //临时组数据
     private List<Group> tempGroup = new ArrayList<>();
-
+    private SparseBooleanArray currentMonitorGroup = new SparseBooleanArray();
+    private int monitorGroupNo;
     private List<CatalogBean> catalogNames = new ArrayList<>();
     private List<CatalogBean> tempCatalogNames = new ArrayList<>();
     //    private HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
@@ -90,6 +94,32 @@ public class NewGroupFragment extends BaseFragment{
         });
 
     }
+
+    private ReceiveSetMonitorGroupListHandler receiveSetMonitorGroupListHandler = new ReceiveSetMonitorGroupListHandler(){
+        @Override
+        public void handler(int errorCode, String errorDesc){
+            if(errorCode == BaseCommonCode.SUCCESS_CODE){
+                //加入监听
+                if(currentMonitorGroup.get(monitorGroupNo)){
+                    TerminalFactory.getSDK().getGroupManager().changeGroup(monitorGroupNo);
+                }else {
+                    //移除监听
+                    if(monitorGroupNo == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
+                        //当前组被移除监听了切换到主组去
+                        TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
+                    }
+                }
+                if(groupAdapter !=null){
+                    myHandler.post(()->{
+                        groupAdapter.notifyDataSetChanged();
+                    });
+                }
+                monitorGroupNo = 0;
+            }else {
+                monitorGroupNo = 0;
+            }
+        }
+    };
 
     /**
      * 响应组是否显示
@@ -251,6 +281,7 @@ public class NewGroupFragment extends BaseFragment{
 
     @Override
     public void initListener(){
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupListHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivegUpdateGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
@@ -303,7 +334,42 @@ public class NewGroupFragment extends BaseFragment{
             catalogNames.add(groupCatalogBean);
             TerminalFactory.getSDK().getConfigManager().updateGroup(depId,name);
         });
+
+        groupAdapter.setMonitorOnClickListener(groupNo -> {
+            List<Integer> monitorGroups = new ArrayList<>();
+            monitorGroups.add(groupNo);
+            NewGroupFragment.this.monitorGroupNo = groupNo;
+            if(null != DataUtil.getTempGroupByGroupNo(groupNo)){
+                //是临时组
+                if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
+                    currentMonitorGroup.put(groupNo,false);
+                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
+                }else {
+                    currentMonitorGroup.put(groupNo,true);
+                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
+                }
+            }else {
+                //不是临时组
+                if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(groupNo)){
+                    if(groupNo == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
+                        //弹窗提示
+                    }
+                    currentMonitorGroup.put(groupNo,false);
+                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
+                }else {
+                    //判断有没有超过5个监听组
+                    if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().size()>=5){
+                        ToastUtil.showToast(getContext(),getResources().getString(R.string.monitor_more_than_five));
+                    }else {
+                        currentMonitorGroup.put(groupNo,true);
+                        MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
+                    }
+                }
+            }
+        });
     }
+
+
 
     private void saveLastGroupData(){
         lastGroupDatas.clear();
@@ -314,6 +380,7 @@ public class NewGroupFragment extends BaseFragment{
 
     @Override
     public void onDestroy(){
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupListHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivegUpdateGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);

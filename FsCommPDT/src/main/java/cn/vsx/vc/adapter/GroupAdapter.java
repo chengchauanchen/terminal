@@ -20,18 +20,17 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.common.GroupType;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.GroupAndDepartment;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
-import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * Created by Administrator on 2017/3/14 0014.
@@ -54,6 +53,7 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
     private CatalogItemClickListener catalogItemClickListener;
     private FolderClickListener folderClickListener;
+    private MonitorOnClickListener monitorOnClickListener;
     private long lastSearchTime;
     public GroupAdapter(Context context,List<GroupAndDepartment>allGroupAndDepartment,
                         List<Group>tempGroup,List<CatalogBean> mTempCatalogList,
@@ -148,12 +148,10 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             final Group group = (Group) allGroupAndDepartment.get(position).getBean();
             groupViewHolder.tvName.setText(group.getName());
             if (group.getNo()== MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)){
-                groupViewHolder.tvChangeGroup.setVisibility(View.INVISIBLE);
-                groupViewHolder.ivCurrentGroup.setVisibility(View.VISIBLE);
+//                groupViewHolder.ivCurrentGroup.setVisibility(View.VISIBLE);
             }else {
-                groupViewHolder.tvChangeGroup.setVisibility(View.VISIBLE);
                 groupViewHolder.ivMessage.setVisibility(View.VISIBLE);
-                groupViewHolder.ivCurrentGroup.setVisibility(View.INVISIBLE);
+//                groupViewHolder.ivCurrentGroup.setVisibility(View.INVISIBLE);
             }
             if(group.getGroupType().equals(GroupType.RESPONSE.toString())){
                 groupViewHolder.iv_group_logo.setImageResource(R.drawable.response_group_photo);
@@ -164,7 +162,11 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 TextViewCompat.setTextAppearance(groupViewHolder.tvName, R.style.normal_group_color);
                 groupViewHolder.iv_response_group_icon.setVisibility(View.GONE);
             }
-
+            if(checkIsMonitorGroup(group.getNo())){
+                groupViewHolder.ivMonitor.setImageResource(R.drawable.monitor_open);
+            }else {
+                groupViewHolder.ivMonitor.setImageResource(R.drawable.monitor_close);
+            }
             groupViewHolder.ivMessage.setOnClickListener(view -> {
                 Intent intent = new Intent(context, GroupCallNewsActivity.class);
                 intent.putExtra("isGroup", true);
@@ -175,14 +177,18 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 context.startActivity(intent);
             });
 
-            groupViewHolder.tvChangeGroup.setOnClickListener(view -> {
-                if(MyApplication.instance.isLocked){
-                    ToastUtil.showToast(context, context.getString(R.string.group_locked_can_not_change_group));
-                }else if(MyApplication.instance.isMiniLive){
-                    ToastUtil.showToast(context, context.getString(R.string.text_small_window_mode_can_not_change_group));
-                }else {
-                    MyTerminalFactory.getSDK().getGroupManager().changeGroup(group.getNo());
+            groupViewHolder.ivMonitor.setOnClickListener(view -> {
+                if(monitorOnClickListener !=null){
+                    monitorOnClickListener.onMonitorClick(group.getNo());
                 }
+//                if(MyApplication.instance.isLocked){
+//                    ToastUtil.showToast(context, context.getString(R.string.group_locked_can_not_change_group));
+//                }else if(MyApplication.instance.isMiniLive){
+//                    ToastUtil.showToast(context, context.getString(R.string.text_small_window_mode_can_not_change_group));
+//                }else {
+
+
+//                }
 
             });
             if(!tempGroup.isEmpty()){
@@ -195,6 +201,22 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 groupViewHolder.placeholder.setVisibility(View.GONE);
             }
         }
+    }
+
+    private boolean checkIsMonitorGroup(int groupNo){
+        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(groupNo)){
+            return true;
+        }
+        if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
+            return true;
+        }
+        if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
+            return true;
+        }
+        if(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) == groupNo){
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -227,12 +249,10 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     class GroupViewHolder extends RecyclerView.ViewHolder{
         @Bind(R.id.tv_name)
         TextView  tvName;
-        @Bind(R.id.tv_change_group)
-        TextView tvChangeGroup;
+        @Bind(R.id.iv_monitor)
+        ImageView ivMonitor;
         @Bind(R.id.iv_message)
         ImageView ivMessage;
-        @Bind(R.id.iv_current_group)
-        ImageView ivCurrentGroup;
         @Bind(R.id.placeholder)
         View placeholder;
         @Bind(R.id.iv_group_logo)
@@ -260,5 +280,13 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     }
     public interface FolderClickListener{
         void onFolderClick(View view, int depId, String name, boolean isTempGroup);
+    }
+
+    public void setMonitorOnClickListener(MonitorOnClickListener monitorOnClickListener){
+        this.monitorOnClickListener = monitorOnClickListener;
+    }
+
+    public interface MonitorOnClickListener{
+        void onMonitorClick(int groupNo);
     }
 }

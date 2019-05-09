@@ -31,13 +31,12 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
+import cn.vsx.hamster.terminalsdk.tools.DateUtils;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.BaseActivity;
-import cn.vsx.vc.activity.ChatBaseActivity;
 import cn.vsx.vc.receiveHandle.OnBackListener;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
-import static cn.vsx.vc.utils.DataUtil.getTime;
 
 /**
  * 看小视频fragment
@@ -86,7 +85,7 @@ public class VideoPreviewItemFragment extends BaseFragment implements TextureVie
                     Log.e("VideoPreviewItemFragmen", "--currentPosition:" + currentPosition+"--duration:"+duration+"--sMax:"+sMax+"--percent:"+percent);
                     if(percent < 1){
                         seek_bar.setProgress((int) (sMax * percent));
-                        tv_current_time.setText(getTime((int) currentPosition));
+                        tv_current_time.setText(DateUtils.getTime((int) currentPosition));
                         mHandler.sendEmptyMessageDelayed(UPDATE_PROGRESS, 1000);
                     }
                     break;
@@ -309,7 +308,7 @@ public class VideoPreviewItemFragment extends BaseFragment implements TextureVie
 
                     mMediaPlayer.start();
                     duration = mMediaPlayer.getDuration();
-                    tv_max_time.setText(getTime(duration));
+                    tv_max_time.setText(DateUtils.getTime(duration));
                     mHandler.sendEmptyMessage(UPDATE_PROGRESS);
                 }
             });

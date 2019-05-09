@@ -30,12 +30,12 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
+import cn.vsx.hamster.terminalsdk.tools.DateUtils;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.StringUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
-import static cn.vsx.vc.utils.DataUtil.getTime;
 
 public class PlayLiveHistoryActivity extends BaseActivity{
 
@@ -95,14 +95,14 @@ public class PlayLiveHistoryActivity extends BaseActivity{
                         Log.e("PlayLiveHistoryActivity", "position:" + position+"--percent:"+percent);
                         if(percent < 1){
                             seek_bar.setProgress((int) (sMax * percent));
-                            tv_current_time.setText(getTime((int) position));
+                            tv_current_time.setText(DateUtils.getTime((int) position));
                             mHandler.sendEmptyMessageDelayed(UPDATE_PROGRESS, 1000);
                         }
                     }
                     break;
                 case COMPLETE_PROGRESS:
                     seek_bar.setProgress(seek_bar.getMax());
-                    tv_current_time.setText(getTime(maxTime));
+                    tv_current_time.setText(DateUtils.getTime(maxTime));
                     if(null != mediaPlayer && mediaPlayer.isPlaying()){
                         mediaPlayer.pause();
                     }
@@ -410,7 +410,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
                         playFinish = false;
                         mediaPlayer.start();
                         //                        mediaPlayer.seekTo(msec);
-                        tv_max_time.setText(getTime(maxTime));
+                        tv_max_time.setText(DateUtils.getTime(maxTime));
                         mHandler.sendEmptyMessage(UPDATE_PROGRESS);
                     }
                 });

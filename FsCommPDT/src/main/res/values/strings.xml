@@ -156,6 +156,7 @@
     <string name="text_locked_time">锁定时间</string>
     <string name="text_change_group_auto">自动切组</string>
     <string name="whether_scan">是否扫描</string>
+    <string name="whether_monitor">是否监听</string>
     <string name="whether_listen_the_group">( 组员是否收听这个组 )</string>
     <string name="text_change_group_auto_tempt">( 将组员自动切换到所创建的组 )</string>
     <string name="text_sure_to_create_group">确定创建</string>
@@ -550,6 +551,7 @@
     <string name="get_data_now">正在获取数据...</string>
     <string name="please_input_other_no">请输入他人的编号</string>
     <string name="text_to_help_combat">合成作战组</string>
+    <string name="text_to_warning">警情</string>
     <string name="tv_close_combat">已关闭的组</string>
     <string name="tv_combat_group">合成作战组</string>
     <string name="tv_history_combat_group">历史组</string>
@@ -565,4 +567,5 @@
     
     <string name="no_get_temporary_group_id">没有获取到临时组id</string>
     <string name="can_not_cancel_listener">不能取消监听</string>
+    <string name="monitor_more_than_five">监听组已超过5个，请先取消别的监听组</string>
 </resources>

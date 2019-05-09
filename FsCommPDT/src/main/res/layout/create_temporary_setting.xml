@@ -83,7 +83,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/x15"
             android:layout_marginTop="@dimen/dp_10"
-            android:text="@string/whether_scan"
+            android:text="@string/whether_monitor"
             android:textColor="@color/textview_color"
             android:textSize="@dimen/sp_15" />
         

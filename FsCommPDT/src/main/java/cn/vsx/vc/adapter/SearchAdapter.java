@@ -3,7 +3,6 @@ package cn.vsx.vc.adapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseMultiItemQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -28,9 +27,9 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -125,7 +124,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
             case Constants.TYPE_CHECK_SEARCH_UAV:
                 Member member = (Member) item.getBean();
                 ImageView image = holder.getView(R.id.shoutai_user_logo);
-                image.setImageResource(DataUtil.getImageResourceByType(member.getType()));
+                image.setImageResource(BitmapUtil.getImageResourceByType(member.getType()));
                 holder.setText(R.id.shoutai_tv_member_name, member.getName());
                 holder.setText(R.id.shoutai_tv_member_id, String.valueOf(member.getNo()));
                 holder.setChecked(R.id.checkbox,member.isChecked());

@@ -3,7 +3,6 @@ package cn.vsx.vc.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -21,10 +20,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.IndividualNewsActivity;
@@ -32,8 +31,8 @@ import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.activity.VoipPhoneActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CallPhoneUtil;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -96,7 +95,7 @@ public class GroupMemberAdapter extends BaseAdapter {
 
         viewHolder.catagory.setVisibility(View.GONE);
 
-        viewHolder.userLogo.setImageResource(DataUtil.getImageResourceByType(member.type));
+        viewHolder.userLogo.setImageResource(BitmapUtil.getImageResourceByType(member.type));
         String no = HandleIdUtil.handleId(member.no);
         viewHolder.userName.setText(member.getName());
         String phoneNum = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no).phone;

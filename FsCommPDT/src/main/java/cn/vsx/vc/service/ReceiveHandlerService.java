@@ -216,6 +216,7 @@ public class ReceiveHandlerService extends Service{
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoHandler);//请求视频
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(getWarningMessageDetailHandler);
         //开启voip电话服务
         MyTerminalFactory.getSDK().getVoipCallManager().startService(MyTerminalFactory.getSDK().application);
         //监听voip来电
@@ -507,6 +508,7 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveNotifyDataMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(getWarningMessageDetailHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoHandler);
 
@@ -568,6 +570,32 @@ public class ReceiveHandlerService extends Service{
         startService(intent);
     }
 
+    //获取到警情详情
+    private GetWarningMessageDetailHandler getWarningMessageDetailHandler = terminalMessage -> {
+        if(!TerminalMessageUtil.isGroupMeaage(terminalMessage)){
+            //个人的警情消息需要弹窗显示
+            myHandler.post(()->{
+                //判断是否已经存在，没有就添加
+                if(!warningData.contains(terminalMessage)){
+                    warningData.add(0,terminalMessage);
+                }
+                if(MyApplication.instance.getIndividualState() ==  IndividualCallState.IDLE &&!MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress) {
+                    showWarningDialog();
+                }
+            });
+
+            myHandler.postDelayed(() -> {
+                if(dialogAdded && null != warningStackViewAdapter && warningData.contains(terminalMessage)){
+                    warningData.remove(terminalMessage);
+                    warningStackViewAdapter.setData(warningData);
+                    if(warningData.isEmpty()){
+                        revertDialog();
+                    }
+                }
+            },30*1000);
+        }
+    };
+
     private long lastNotifyTime = 0;
     /**
      * 接收到消息
@@ -583,51 +611,10 @@ public class ReceiveHandlerService extends Service{
             return;
         }
         //警情消息
-        if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode() && !TerminalMessageUtil.isGroupMeaage(terminalMessage)){
-            MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable(){
-                @Override
-                public void run(){
-                    //判断视频上报弹窗是否添加
-                    Map<String,Integer> warningRecordList = new HashMap<>();
-                    warningRecordList.put(terminalMessage.messageBody.getString(JsonParam.ALARM_NO),0);
-                    List<WarningRecord> warningRecords = MyTerminalFactory.getSDK().getTerminalMessageManager().getWarningRecords(warningRecordList);
-                    if(!warningRecords.isEmpty()){
-                        WarningRecord warningRecord = warningRecords.get(0);
-                        terminalMessage.messageBody.put(JsonParam.LEVELS,warningRecord.getLevels());
-                        terminalMessage.messageBody.put(JsonParam.STATUS,warningRecord.getStatus());
-                        terminalMessage.messageBody.put(JsonParam.ADDRESS,warningRecord.getAddress());
-                        terminalMessage.messageBody.put(JsonParam.APERSON_PHONE,warningRecord.getApersonPhone());
-                        terminalMessage.messageBody.put(JsonParam.APERSON,warningRecord.getAperson());
-                        terminalMessage.messageBody.put(JsonParam.RECVPERSON,warningRecord.getRecvperson());
-                        terminalMessage.messageBody.put(JsonParam.RECVPHONE,warningRecord.getRecvphone());
-                        terminalMessage.messageBody.put(JsonParam.SUMMARY,warningRecord.getSummary());
-                        terminalMessage.messageBody.put(JsonParam.ALARM_TIME,warningRecord.getAlarmTime());
-                        terminalMessage.messageBody.put(JsonParam.ALARM_UNREAD,warningRecord.getUnRead());
-                        terminalMessage.messageBody.put(JsonParam.DETAIL,true);
-                        TerminalFactory.getSDK().getSQLiteDBManager().addWarningRecord(warningRecord);
-                        TerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessage(terminalMessage);
-                        TerminalFactory.getSDK().notifyReceiveHandler(GetWarningMessageDetailHandler.class,terminalMessage);
-                        myHandler.post(()->{
-                            //判断是否已经存在，没有就添加
-                            if(!warningData.contains(terminalMessage)){
-                                warningData.add(0,terminalMessage);
-                            }
-                            if(MyApplication.instance.getIndividualState() ==  IndividualCallState.IDLE &&!MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress) {
-                                showWarningDialog();
-                            }
-                        });
-                    }
-                    myHandler.postDelayed(() -> {
-                        if(dialogAdded && null != warningStackViewAdapter && warningData.contains(terminalMessage)){
-                            warningData.remove(terminalMessage);
-                            warningStackViewAdapter.setData(warningData);
-                            if(warningData.isEmpty()){
-                                revertDialog();
-                            }
-                        }
-                    },30*1000);
-                }
-            });
+        if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
+            if(!TerminalMessageUtil.isGroupMeaage(terminalMessage)){
+                return;
+            }
         }
 
         //视频消息或者国标平台消息

@@ -51,6 +51,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyOtherStopVideoMess
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MemberEnterAdapter;
@@ -59,8 +60,8 @@ import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
+import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -281,7 +282,7 @@ public class RecoderPushService extends BaseService{
         Intent intent = new Intent(this, InviteMemberService.class);
         intent.putExtra(Constants.TYPE, Constants.PUSH);
         intent.putExtra(Constants.PUSHING, true);
-        intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,DataUtil.getInviteMemberExceptList(watchMembers));
+        intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO, MyDataUtil.getInviteMemberExceptList(watchMembers));
         startService(intent);
     };
 

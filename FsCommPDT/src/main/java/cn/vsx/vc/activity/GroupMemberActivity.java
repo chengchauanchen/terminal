@@ -29,11 +29,11 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupCurrentOnlineMemberListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseAddMemberToTempGroupMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRemoveMemberToTempGroupMessageHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupMemberAdapter;
 import cn.vsx.vc.fragment.PersonSearchFragment;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -139,7 +139,7 @@ public class GroupMemberActivity extends BaseActivity {
     public void initData() {
         groupId = getIntent().getIntExtra("groupId", 0);
         groupName = getIntent().getStringExtra("groupName");
-        Group group =DataUtil.getTempGroupByGroupNo(groupId);
+        Group group = DataUtil.getTempGroupByGroupNo(groupId);
         if(null ==group){
             group = DataUtil.getGroupByGroupNo(groupId);
         }

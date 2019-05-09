@@ -64,6 +64,7 @@ import cn.vsx.vc.record.AudioRecordButton;
 import cn.vsx.vc.record.MediaManager;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
+import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
@@ -440,7 +441,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
      */
     private void goToPushLive(Member member) {
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,
-                cn.vsx.vc.utils.DataUtil.getPushInviteMemberData(member.getUniqueNo(), ReceiveObjectMode.MEMBER.toString()),false);
+                MyDataUtil.getPushInviteMemberData(member.getUniqueNo(), ReceiveObjectMode.MEMBER.toString()),false);
     }
 
     /**

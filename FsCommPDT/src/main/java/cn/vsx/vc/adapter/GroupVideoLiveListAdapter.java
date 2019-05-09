@@ -10,11 +10,9 @@ import java.util.ArrayList;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.JsonParam;
-import cn.vsx.hamster.terminalsdk.model.GetGroupLivingBean;
-import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.vc.R;
-import cn.vsx.vc.utils.DataUtil;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.StringUtil;
 
 public class GroupVideoLiveListAdapter extends BaseQuickAdapter<TerminalMessage, BaseViewHolder> {
@@ -34,7 +32,7 @@ public class GroupVideoLiveListAdapter extends BaseQuickAdapter<TerminalMessage,
             item.messageUrl = "";
             //图标
             helper.setImageResource(R.id.iv_user_photo,
-                    DataUtil.getImageResourceByType(TerminalMemberType.valueOf(item.terminalMemberType).getCode()));
+                    BitmapUtil.getImageResourceByType(TerminalMemberType.valueOf(item.terminalMemberType).getCode()));
             JSONObject messageBody = item.messageBody;
             if (messageBody!=null&&!TextUtils.isEmpty(messageBody.toJSONString())) {
                 //姓名

@@ -25,12 +25,12 @@ import cn.vsx.hamster.terminalsdk.model.CallRecord;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
+import cn.vsx.hamster.terminalsdk.tools.DateUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipConnectedHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipErrorHandler;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.IndividualCallView;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -145,7 +145,7 @@ public class VoipPhoneActivity extends BaseActivity{
             @Override
             public void run() {
                 if(status.equals("0")){
-                    status="呼出 " + DataUtil.secToTime(linphoneCall.getCallLog().getCallDuration());
+                    status="呼出 " + DateUtils.secToTime(linphoneCall.getCallLog().getCallDuration());
                 }
 
                 CallRecord callRecord = new CallRecord();
@@ -153,7 +153,7 @@ public class VoipPhoneActivity extends BaseActivity{
                 callRecord.setMemberName(userName);
                 callRecord.setPhone(phone);
                 callRecord.setCallRecords(status);
-                callRecord.setTime(DataUtil.getNowTime());
+                callRecord.setTime(DateUtils.getNowTime());
                 String url = MyTerminalFactory.getSDK().getParam(Params.DOWNLOAD_VOIP_FILE_URL,"") +"?callId="+callRecord.getCallId();
                 callRecord.setPath(url);
 
@@ -202,7 +202,7 @@ public class VoipPhoneActivity extends BaseActivity{
                 callRecord.setCallId(linphoneCall.getCallLog().getCallId());
                 callRecord.setMemberName(userName);
                 callRecord.setPhone(phone);
-                callRecord.setTime(DataUtil.getNowTime());
+                callRecord.setTime(DateUtils.getNowTime());
                 callRecord.setCallRecords(status);
 
                 CopyOnWriteArrayList<CallRecord> callRecords = MyTerminalFactory.getSDK().getSQLiteDBManager().getCallRecords();

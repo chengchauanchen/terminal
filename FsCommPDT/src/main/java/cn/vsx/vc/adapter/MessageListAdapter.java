@@ -2,7 +2,7 @@ package cn.vsx.vc.adapter;
 
 import android.content.Context;
 import android.text.Html;
-import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -15,7 +15,6 @@ import com.zectec.imageandfileselector.utils.FileUtil;
 import org.apache.log4j.Logger;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
@@ -23,15 +22,15 @@ import butterknife.ButterKnife;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.ResponseGroupType;
-import cn.vsx.hamster.common.TempGroupType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -44,10 +43,11 @@ public class MessageListAdapter extends BaseAdapter {
     private final boolean isNewsFragment;
     private final boolean isGoToHistory;
     private Context context;
-    private List<TerminalMessage> messageList = new ArrayList<>();
+    private List<TerminalMessage> messageList;
     public Logger logger = Logger.getLogger(getClass());
 
     public MessageListAdapter (Context context, List<TerminalMessage> messageList, boolean isNewsFragment, boolean isGoToHistory) {
+        Log.e("MessageListAdapter", "messageList:" + messageList+"---isNewsFragment:"+isNewsFragment+"---isGoToHistory:"+isGoToHistory);
         this.context = context;
         this.messageList = messageList;
         this.isNewsFragment = isNewsFragment;
@@ -106,11 +106,17 @@ public class MessageListAdapter extends BaseAdapter {
                 }
             }
 //            viewHolder.tv_current_group.setVisibility(View.GONE);
-        } else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息，显示组名
-             Group group = DataUtil.getTempGroupByGroupNo(terminalMessage.messageToId);
-            if (group!=null&&TextUtils.equals(group.getTempGroupType(),TempGroupType.TO_HELP_COMBAT.toString())){//如果是合成作战组，上面显示合成作战组
-                viewHolder.tv_user_name.setText(context.getString(R.string.text_to_help_combat));
-            } else {
+        } else if (TerminalMessageUtil.isGroupMeaage(terminalMessage)){//组消息，显示组名
+            //如果是合成作战组，上面显示合成作战组
+            if (TerminalMessageUtil.isCombatGroup(terminalMessage)){
+                if(isNewsFragment){
+                    viewHolder.tv_user_name.setText(context.getString(R.string.text_to_help_combat));
+                }else {
+                    viewHolder.tv_user_name.setText(terminalMessage.messageToName);
+                }
+            } else if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
+                viewHolder.tv_user_name.setText(context.getString(R.string.text_to_warning));
+            }else {
                 viewHolder.tv_user_name.setText(DataUtil.getGroupName(terminalMessage.messageToId));
             }
         }
@@ -133,7 +139,7 @@ public class MessageListAdapter extends BaseAdapter {
             Group groupInfo = DataUtil.getGroupByGroupNo(terminalMessage.messageToId);
             if(groupInfo.getResponseGroupType()!=null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
                 viewHolder.iv_user_photo.setBackgroundResource(R.drawable.response_group_photo);
-            }else if (groupInfo.getTempGroupType()!=null && groupInfo.getTempGroupType().equals(TempGroupType.TO_HELP_COMBAT.toString())){
+            }else if (TerminalMessageUtil.isCombatGroup(terminalMessage)){
                 if (isNewsFragment) {
                     viewHolder.iv_user_photo.setBackgroundResource(R.drawable.message_alertgroup);
                 } else{
@@ -267,9 +273,9 @@ public class MessageListAdapter extends BaseAdapter {
                 }
             }
             if(terminalMessage.messageType ==  MessageType.WARNING_INSTANCE.getCode()) {
-                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
-                    viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_warning_),terminalMessage.messageFromName));
-                } else {
+                if(TerminalMessageUtil.hasWarningDetail(terminalMessage)){
+                    viewHolder.tv_last_msg.setText(terminalMessage.messageBody.getString(JsonParam.SUMMARY));
+                }else {
                     viewHolder.tv_last_msg.setText(R.string.text_message_list_warning);
                 }
             }

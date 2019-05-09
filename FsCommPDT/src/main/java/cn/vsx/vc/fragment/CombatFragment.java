@@ -32,6 +32,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.GetAllMessageRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
@@ -42,7 +43,6 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiveGoToHelpCombatHandler;
 import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
 import cn.vsx.vc.utils.ActivityCollector;
-import cn.vsx.vc.utils.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public abstract class CombatFragment extends BaseFragment {
@@ -169,7 +169,7 @@ public abstract class CombatFragment extends BaseFragment {
     };
     private GetAllMessageRecordHandler getAllMessageRecordHandler = messageRecord -> {
         //加上同步，防止更新消息时又来新的消息，导致错乱
-        synchronized(this){
+        synchronized(CombatFragment.this){
             //更新未读消息和聊天界面
             if(messageRecord.isEmpty()){
                 return;
@@ -251,7 +251,7 @@ public abstract class CombatFragment extends BaseFragment {
     private void sortMessageList(){
         synchronized(this){
             if(!messageList.isEmpty()){
-                setNewGroupList();
+//                setNewGroupList();
                 //再按照时间来排序
                 Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
                 //再保存到数据库

@@ -3,6 +3,8 @@ package cn.vsx.vc.utils;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Point;
 import android.hardware.Camera;
@@ -182,5 +184,17 @@ public class SystemUtil {
             }
         }
         return false;
+    }
+
+    public static String getVersion(Context context) {
+        String version = "";
+        try {
+            PackageManager pManager = context.getPackageManager();
+            PackageInfo info = pManager.getPackageInfo(context.getPackageName(), 0);
+            version = info.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return version;
     }
 }

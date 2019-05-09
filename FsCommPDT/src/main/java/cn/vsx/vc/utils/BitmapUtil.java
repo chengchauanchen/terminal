@@ -16,6 +16,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.vc.R;
+
 public class BitmapUtil {
 	
 	/**
@@ -187,5 +190,27 @@ public class BitmapUtil {
 			}
 		}
 		return bitmap;
+	}
+
+	/**
+	 * 根据设备类型获取设备对应的图标
+	 *
+	 * @param type
+	 * @return
+	 */
+	public static int getImageResourceByType(int type) {
+		if (type == TerminalMemberType.TERMINAL_PC.getCode()) {
+			return R.drawable.icon_pc;
+		} else if (type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()) {
+			return R.drawable.icon_record;
+		} else if (type == TerminalMemberType.TERMINAL_UAV.getCode()) {
+			return R.drawable.icon_uav;
+		} else if (type == TerminalMemberType.TERMINAL_HDMI.getCode()) {
+			return R.drawable.icon_hdmi;
+		} else if (type == TerminalMemberType.TERMINAL_LTE.getCode()) {
+			return R.drawable.icon_lte;
+		} else {
+			return R.drawable.icon_phone;
+		}
 	}
 }

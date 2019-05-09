@@ -97,6 +97,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
@@ -121,7 +122,6 @@ import cn.vsx.vc.receiveHandle.ReceiverShowPopupwindowHandler;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SensorUtil;
@@ -488,6 +488,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 if (newsFragment == null) {
                     newsFragment = new NewsFragment();
                 }
+
                 switchFragment(currentFragment, newsFragment);
             } else {
                 if (isGoToHistory) {

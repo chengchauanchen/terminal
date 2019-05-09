@@ -73,7 +73,6 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
-import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetHistoryMessageRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
@@ -89,7 +88,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHa
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
-import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.TemporaryAdapter;
@@ -106,7 +104,6 @@ import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowWithDrawPopupHandler;
 import cn.vsx.vc.service.PullLivingService;
 import cn.vsx.vc.utils.BitmapUtil;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.FileUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -589,9 +586,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private void sendPhotoFromCamera(Intent data) {
         int photoNum = MyTerminalFactory.getSDK().getParam(Params.PHOTO_NUM, 0);
         File file = new File(MyTerminalFactory.getSDK().getPhotoRecordDirectory(), "image" + photoNum + ".jpg");
-        logger.debug(file.getPath() + "," + file.getName() + DataUtil.getFileSize(file));
+        logger.debug(file.getPath() + "," + file.getName() + FileUtil.getFileSize(file));
         if (file.exists()) {
-            addPhotoToList(file.getPath(), file.getName(), DataUtil.getFileSize(file) + "", 0);
+            addPhotoToList(file.getPath(), file.getName(), FileUtil.getFileSize(file) + "", 0);
             temporaryAdapter.notifyDataSetChanged();
             setListSelection(chatMessageList.size() - 1);
             temporaryAdapter.uploadFileDelay();
@@ -621,7 +618,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
             e.printStackTrace();
         }
         if (file.exists()) {
-            addVideoToList(file.getPath(), file.getName(), DataUtil.getFileSize(file), videoTime);
+            addVideoToList(file.getPath(), file.getName(), FileUtil.getFileSize(file), videoTime);
             temporaryAdapter.notifyDataSetChanged();
             setListSelection(chatMessageList.size() - 1);
             temporaryAdapter.uploadFileDelay();

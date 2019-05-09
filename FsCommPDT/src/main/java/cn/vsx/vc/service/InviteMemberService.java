@@ -54,6 +54,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSearchMemberResultHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdateGroupHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MemberListAdapter;
@@ -66,8 +67,8 @@ import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSwitchCameraViewHandler;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
+import cn.vsx.vc.utils.MyDataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -1107,10 +1108,10 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         for (ContactItemBean bean:selectedMembers) {
             if(bean.getType() == Constants.TYPE_USER){
                 Member member = (Member) bean.getBean();
-                result.add(DataUtil.getPushInviteMemberData(member.getUniqueNo(), ReceiveObjectMode.MEMBER.toString()));
+                result.add(MyDataUtil.getPushInviteMemberData(member.getUniqueNo(), ReceiveObjectMode.MEMBER.toString()));
             }else if(bean.getType() == Constants.TYPE_GROUP){
                 Group group = (Group) bean.getBean();
-                result.add(DataUtil.getPushInviteMemberData(group.getUniqueNo(), ReceiveObjectMode.GROUP.toString()));
+                result.add(MyDataUtil.getPushInviteMemberData(group.getUniqueNo(), ReceiveObjectMode.GROUP.toString()));
             }
         }
         return result;
