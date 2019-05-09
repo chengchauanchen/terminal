@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -34,6 +35,7 @@ import butterknife.ButterKnife;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MessageCategory;
+import cn.vsx.hamster.common.MessageStatus;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.ResponseGroupType;
@@ -111,7 +113,7 @@ public class NewsFragment extends BaseFragment {
 
     private int deletePos = -1 ;
     private MessageListAdapter mMessageListAdapter;
-    private Handler mHandler = new Handler();
+    private Handler mHandler = new Handler(Looper.getMainLooper());
     //消息列表，在子线程中使用
     private List<TerminalMessage> terminalMessageData = new ArrayList<>();
     //界面显示的消息列表
@@ -1416,39 +1418,40 @@ public class NewsFragment extends BaseFragment {
     /**
      * 撤回消息
      **/
-    private ReceiveResponseRecallRecordHandler mReceiveResponseRecallRecordHandler = (resultCode, resultDesc, messageId) -> {
+    private ReceiveResponseRecallRecordHandler mReceiveResponseRecallRecordHandler = (resultCode, resultDesc, messageId,messageBodyId) -> {
         if(resultCode == 0){
-            updataMessageWithDrawState(messageId);
+            updataMessageWithDrawState(messageId,messageBodyId);
         }
     };
 
     /**
      * 收到别人撤回消息的通知
      **/
-    private ReceiveNotifyRecallRecordHandler mNotifyRecallRecordMessageHandler = (version, messageId) -> {
-         updataMessageWithDrawState(messageId);
+    private ReceiveNotifyRecallRecordHandler mNotifyRecallRecordMessageHandler = (version, messageId,messageBodyId) -> {
+         updataMessageWithDrawState(messageId,messageBodyId);
     };
 
     /**
      * 更新消息的撤回状态
      * @param messageId
      */
-    private void updataMessageWithDrawState(long messageId){
-        TerminalMessage message = new TerminalMessage();
-        message.messageId = messageId;
-        if(messageList.contains(message)){
-            int index =  messageList.indexOf(message);
-            TerminalMessage message1 = messageList.get(index);
-            message1.isWithDraw = true;
-            //更新UI
-            mHandler.post(() ->{
-                if (mMessageListAdapter != null) {
-                    mMessageListAdapter.notifyDataSetChanged();
-                }
-            });
+    private void updataMessageWithDrawState(long messageId,String messageBodyId){
+        if(TextUtils.isEmpty(messageBodyId)){
+            return;
         }
+        for (TerminalMessage message1: messageList) {
+            if(TextUtils.equals(messageBodyId,message1.messageBodyId)){
+                message1.messageStatus = MessageStatus.MESSAGE_RECALL.toString();
+            }
+        }
+        //更新UI
+        mHandler.post(() ->{
+            if (mMessageListAdapter != null) {
+                mMessageListAdapter.notifyDataSetChanged();
+            }
+        });
         //更新消息的撤回状态
-        TerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessageWithDraw(messageId,true);
+        TerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessageWithDraw(messageBodyId,MessageStatus.MESSAGE_RECALL.getCode());
     }
 
     /**

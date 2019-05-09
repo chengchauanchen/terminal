@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.vsx.hamster.common.MessageCategory;
+import cn.vsx.hamster.common.MessageStatus;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.message.ISQLiteDBManager;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileRecord;
@@ -70,6 +71,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         ContentValues values = new ContentValues();
         values.put("current_member_id",TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
         values.put("message_id", terminalMessage.messageId);
+        values.put("message_body_id", terminalMessage.messageBodyId);
         values.put("message_body", terminalMessage.messageBody.toJSONString());
         values.put("message_url", terminalMessage.messageUrl);
         values.put("message_path", terminalMessage.messagePath);
@@ -82,7 +84,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         values.put("message_version", terminalMessage.messageVersion);
         values.put("result_code", terminalMessage.resultCode);
         values.put("send_time", terminalMessage.sendTime);
-        values.put("message_with_draw", (terminalMessage.isWithDraw)?1:0);
+        values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
         db.replace(TABLE_TERMINAL_MESSAGE, null, values);
 //        db.close();
     }
@@ -129,15 +131,15 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     /**
      * 更新消息的撤回状态
-     * @param message_id
-     * @param isWithDraw
+     * @param messageBodyId
+     * @param messageStatus
      */
     @Override
-    public synchronized void updateTerminalMessageWithDraw(long message_id,boolean isWithDraw) {
+    public synchronized void updateTerminalMessageWithDraw(String messageBodyId,int messageStatus) {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("message_with_draw", (isWithDraw)?1:0);
-        db.update(TABLE_TERMINAL_MESSAGE, values, "message_id = ?", new String[]{message_id + ""});
+        values.put("message_status", messageStatus);
+        db.update(TABLE_TERMINAL_MESSAGE, values, "message_body_id = ?", new String[]{messageBodyId + ""});
 //        db.close();
     }
 
@@ -302,6 +304,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 TerminalMessage terminalMessage = new TerminalMessage();
 
                 terminalMessage.messageId = cursor.getLong(cursor.getColumnIndex("message_id"));
+                terminalMessage.messageBodyId = cursor.getString(cursor.getColumnIndex("message_body_id"));
                 terminalMessage.messageFromId = cursor.getInt(cursor.getColumnIndex("message_from_id"));
                 terminalMessage.messageFromName = cursor.getString(cursor.getColumnIndex("message_from_name"));
                 terminalMessage.messageToId = cursor.getInt(cursor.getColumnIndex("message_to_id"));
@@ -314,8 +317,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 terminalMessage.messageVersion = cursor.getLong(cursor.getColumnIndex("message_version"));
                 terminalMessage.resultCode = cursor.getInt(cursor.getColumnIndex("result_code"));
                 terminalMessage.sendTime = cursor.getLong(cursor.getColumnIndex("send_time"));
-                int message_with_draw = cursor.getInt(cursor.getColumnIndex("message_with_draw"));
-                terminalMessage.isWithDraw = (message_with_draw == 1) ;
+                int messageStatus = cursor.getInt(cursor.getColumnIndex("message_status"));
+                terminalMessage.messageStatus = (messageStatus == 1)?MessageStatus.MESSAGE_RECALL.toString():MessageStatus.MESSAGE_RECALL.toString();
                 //消息列表数据库才有unread_count这个字段
                 try {
                     if (cursor.getColumnIndex("unread_count") != -1) {
@@ -343,6 +346,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 ContentValues values = new ContentValues();
                 values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
                 values.put("message_id", terminalMessage.messageId);
+                values.put("message_body_id", terminalMessage.messageBodyId);
                 values.put("message_body", terminalMessage.messageBody == null ? null : terminalMessage.messageBody.toJSONString());
                 values.put("message_url", terminalMessage.messageUrl);
                 values.put("message_path", terminalMessage.messagePath);
@@ -356,7 +360,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("result_code", terminalMessage.resultCode);
                 values.put("send_time", terminalMessage.sendTime);
                 values.put("unread_count", terminalMessage.unReadCount);
-                values.put("message_with_draw", (terminalMessage.isWithDraw)?1:0);
+                values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
                 db.replace(MESSAGE_LIST, null, values);
             }
             db.setTransactionSuccessful();  //设置事务成功完成
@@ -383,6 +387,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 ContentValues values = new ContentValues();
                 values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
                 values.put("message_id", terminalMessage.messageId);
+                values.put("message_body_id", terminalMessage.messageBodyId);
                 values.put("message_body", terminalMessage.messageBody == null ? null : terminalMessage.messageBody.toJSONString());
                 values.put("message_url", terminalMessage.messageUrl);
                 values.put("message_path", terminalMessage.messagePath);
@@ -396,7 +401,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("result_code", terminalMessage.resultCode);
                 values.put("send_time", terminalMessage.sendTime);
                 values.put("unread_count", terminalMessage.unReadCount);
-                values.put("message_with_draw", (terminalMessage.isWithDraw)?1:0);
+                values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
                 db.replace(COMBAT_MESSAGE_LIST, null, values);
             }
             db.setTransactionSuccessful();  //设置事务成功完成
@@ -423,6 +428,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 ContentValues values = new ContentValues();
                 values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
                 values.put("message_id", terminalMessage.messageId);
+                values.put("message_body_id", terminalMessage.messageBodyId);
                 values.put("message_body", terminalMessage.messageBody == null ? null : terminalMessage.messageBody.toJSONString());
                 values.put("message_url", terminalMessage.messageUrl);
                 values.put("message_path", terminalMessage.messagePath);
@@ -436,7 +442,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("result_code", terminalMessage.resultCode);
                 values.put("send_time", terminalMessage.sendTime);
                 values.put("unread_count", terminalMessage.unReadCount);
-                values.put("message_with_draw", (terminalMessage.isWithDraw)?1:0);
+                values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
                 db.replace(HISTORY_COMBAT_MESSAGE_LIST, null, values);
             }
             db.setTransactionSuccessful();  //设置事务成功完成

@@ -152,7 +152,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
         this.chatMessageList = terminalMessageList;
         this.isPlaying = isPlaying;
         this.isSameItem = isSameItem;
-        Collections.sort(terminalMessageList);
+//        Collections.sort(terminalMessageList);
         notifyDataSetChanged();
     }
 
@@ -1190,11 +1190,12 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                 setViewVisibility(download_tv_progressBars, View.VISIBLE);
                 MyTerminalFactory.getSDK().download(terminalMessage, true);
             }else {
+//                activity.openPhoto
                 setViewVisibility(fragment_contener, View.VISIBLE);
                 ImagePreviewItemFragment imagePreviewItemFragment = ImagePreviewItemFragment.getInstance(mImgList, currentPos);
 
                 imagePreviewItemFragment.setFragment_contener(fragment_contener);
-                activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, imagePreviewItemFragment).commit();
+                activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, imagePreviewItemFragment).commitAllowingStateLoss();
             }
         }
     }
@@ -1257,7 +1258,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
         ImagePreviewItemFragment imagePreviewItemFragment = ImagePreviewItemFragment.getInstance(mImgList, currentPos);
 
         imagePreviewItemFragment.setFragment_contener(fragment_contener);
-        activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, imagePreviewItemFragment).commit();
+        activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, imagePreviewItemFragment).commitAllowingStateLoss();
     }
 
     public void openVideo(TerminalMessage terminalMessage,File file){
@@ -1266,7 +1267,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                 setViewVisibility(fragment_contener, View.VISIBLE);
                 VideoPreviewItemFragment videoPreviewItemFragment = VideoPreviewItemFragment.newInstance(file.getAbsolutePath());
                 videoPreviewItemFragment.setFragment_contener(fragment_contener);
-                activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, videoPreviewItemFragment).commit();
+                activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, videoPreviewItemFragment).commitAllowingStateLoss();
             }else {
                 ToastUtil.showToast(activity,activity.getString(R.string.text_down_load_video_fail));
             }
@@ -1286,7 +1287,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
             setViewVisibility(fragment_contener, View.VISIBLE);
             VideoPreviewItemFragment videoPreviewItemFragment = VideoPreviewItemFragment.newInstance(file.getAbsolutePath());
             videoPreviewItemFragment.setFragment_contener(fragment_contener);
-            activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, videoPreviewItemFragment).commit();
+            activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, videoPreviewItemFragment).commitAllowingStateLoss();
         }else if(terminalMessage.messageType == MessageType.FILE.getCode()){
             OpenFileUtils.openFile(file,activity);
         }
@@ -1336,7 +1337,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                 mImgUrlList.add(msg.messagePath);
             }
         }
-        notifyDataSetChanged();
+//        notifyDataSetChanged();
         return mImgList;
     }
 
@@ -1378,7 +1379,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                 } else {
                     LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
                     locationFragment.setFragment_contener(fragment_contener);
-                    activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commit();
+                    activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commitAllowingStateLoss();
                 }
             } else {
                 setViewVisibility(fragment_contener, View.VISIBLE);
@@ -1388,7 +1389,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                 } else {
                     LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
                     locationFragment.setFragment_contener(fragment_contener);
-                    activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commit();
+                    activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commitAllowingStateLoss();
                 }
             }
         }
@@ -1400,7 +1401,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
             fileInfo.setFilePath(terminalMessage.messagePath);
             List<FileInfo> images = new ArrayList<>();
             images.add(fileInfo);
-            activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, new ImagePreviewFragment(images)).commit();
+            activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, new ImagePreviewFragment(images)).commitAllowingStateLoss();
         }
 
         /**  上报图像  **/

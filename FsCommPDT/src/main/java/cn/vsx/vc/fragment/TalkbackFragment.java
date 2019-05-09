@@ -1000,12 +1000,12 @@ public class TalkbackFragment extends BaseFragment {
         iv_volume_off_call.setOnClickListener(view -> {
             if (!soundOff) {
                 iv_volume_off_call.setImageResource(R.drawable.volume_off_call);
-                TerminalFactory.getSDK().getAudioProxy().volumeQuiet();
+                MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true, 1);
                 soundOff = true;
             } else {
                 iv_volume_off_call.setImageResource(R.drawable.volume_silence);
-                TerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+                MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false, 1);
                 soundOff = false;
             }
@@ -1276,7 +1276,7 @@ public class TalkbackFragment extends BaseFragment {
         layoutDefault();
         ll_show_area.setVisibility(View.VISIBLE);
         allViewDefault();
-        MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+//        MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
         String speakMemberName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
         if (!TextUtils.isEmpty(speakMemberName)) {
             //设置说话人名字,在组呼来的handler中设置
@@ -1547,7 +1547,9 @@ public class TalkbackFragment extends BaseFragment {
     //PTT抬起以后
     private void  pttUpDoThing() {
         logger.info("ptt.pttUpDoThing执行了 isPttPress：" + MyApplication.instance.isPttPress);
-
+        if(MyTerminalFactory.getSDK().getAudioProxy().getVolume()!=0){
+            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+        }
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
             return;
         }

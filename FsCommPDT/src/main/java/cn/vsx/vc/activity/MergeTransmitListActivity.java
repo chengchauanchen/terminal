@@ -16,6 +16,8 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.zectec.imageandfileselector.bean.ImageBean;
+import com.zectec.imageandfileselector.fragment.ImagePreviewItemFragment;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.io.File;
@@ -301,7 +303,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
                     isSameItem = false;
                 }
                 MyApplication.instance.isPlayVoice = true;
-                Collections.sort(chatMessageList);
+                Collections.reverse(chatMessageList);
                 if (adapter != null) {
                     adapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
                 }
@@ -423,7 +425,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
         if (has) {
             chatMessageList.add(newTerminalMessage);
         }
-        Collections.sort(chatMessageList);
+        Collections.reverse(chatMessageList);
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
@@ -520,6 +522,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
      */
     private void setMessagePath(List<TerminalMessage> memberList) {
         for (TerminalMessage message: memberList) {
+//            TerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(message, true);
             TerminalFactory.getSDK().getTerminalMessageManager().downloadOrSetMessage(message);
         }
     }
@@ -592,6 +595,11 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
     public void stopRecord() {
             MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
             MyApplication.instance.isPlayVoice = false;
+    }
+
+    public void openPhoto(List<ImageBean> mImgList,int currentPos){
+
+
     }
 
 }

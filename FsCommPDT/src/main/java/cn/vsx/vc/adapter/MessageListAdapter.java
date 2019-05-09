@@ -20,6 +20,7 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.vsx.hamster.common.MessageCategory;
+import cn.vsx.hamster.common.MessageStatus;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -322,7 +323,7 @@ public class MessageListAdapter extends BaseAdapter {
                 }
             }
             //消息撤回
-            if(terminalMessage.isWithDraw){
+            if(MessageStatus.valueOf(terminalMessage.messageStatus).getCode() == MessageStatus.MESSAGE_RECALL.getCode()){
                 if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
                     viewHolder.tv_last_msg.setText(String.format(context.getString(R.string.text_message_list_with_draw_),terminalMessage.messageFromName));
                 }else{

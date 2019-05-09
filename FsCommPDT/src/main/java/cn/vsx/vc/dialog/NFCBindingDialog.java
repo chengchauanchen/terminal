@@ -103,10 +103,10 @@ public class NFCBindingDialog extends Dialog implements DialogInterface.OnDismis
     /**
      * 显示NFC弹窗
      */
-    public void showDialog(){
+    public void showDialog(int groupId,String policeSentimentId){
         if(type == TYPE_WAIT){
             //设置刷NFC需要传的数据
-            MyApplication.instance.setNfcBean(new NFCBean(TerminalFactory.getSDK().getUuid()));
+            MyApplication.instance.setNfcBean(new NFCBean(TerminalFactory.getSDK().getUuid(),groupId,policeSentimentId));
             MyTerminalFactory.getSDK().registReceiveHandler(receiveNFCWriteResultHandler);
         }
         show();

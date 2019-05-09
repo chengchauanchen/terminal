@@ -12,7 +12,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
 
     public SQLiteDB(Context context) {
-        super(context, "4gptt.db", null, 17);
+        super(context, "4gptt.db", null, 18);
     }
 
     @Override
@@ -20,19 +20,23 @@ public class SQLiteDB extends SQLiteOpenHelper {
         //会话列表
         db.execSQL("CREATE TABLE IF NOT EXISTS terminalMessage (_id INTEGER primary key autoincrement, current_member_id INTEGER, message_version LONG, send_time LONG, " +
                 "message_id INTEGER, message_from_id INTEGER, message_from_name varchar, message_url varchar, message_path varchar, message_body TEXT, " +
-                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_with_draw INTEGER, unique(message_version))");
+                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_status INTEGER, " +
+                "message_body_id varchar, unique(message_version))");
         //消息列表
         db.execSQL("CREATE TABLE IF NOT EXISTS messageList (_id INTEGER primary key autoincrement, current_member_id INTEGER,message_version LONG, send_time LONG, unread_count INTEGER," +
                 "message_id INTEGER, message_from_id INTEGER, message_from_name varchar, message_url varchar, message_path varchar, message_body TEXT, " +
-                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_with_draw INTEGER)");
+                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_status INTEGER," +
+                "message_body_id varchar)");
         //合成作战组消息列表
         db.execSQL("CREATE TABLE IF NOT EXISTS combatMessageList (_id INTEGER primary key autoincrement, current_member_id INTEGER,message_version LONG, send_time LONG, unread_count INTEGER," +
                 "message_id INTEGER, message_from_id INTEGER, message_from_name varchar, message_url varchar, message_path varchar, message_body TEXT, " +
-                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_with_draw INTEGER)");
+                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_status INTEGER," +
+                "message_body_id varchar)");
         //已完成合成作战组消息列表
         db.execSQL("CREATE TABLE IF NOT EXISTS historyCombatMessageList (_id INTEGER primary key autoincrement, current_member_id INTEGER,message_version LONG, send_time LONG, unread_count INTEGER," +
                 "message_id INTEGER, message_from_id INTEGER, message_from_name varchar, message_url varchar, message_path varchar, message_body TEXT, " +
-                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_with_draw INTEGER)");
+                "message_type INTEGER, message_to_id INTEGER, message_to_name varchar, result_code INTEGER, message_category INTEGER,message_status INTEGER," +
+                "message_body_id varchar)");
         //成员列表
         db.execSQL("CREATE TABLE IF NOT EXISTS member (_id INTEGER primary key autoincrement, member_id INTEGER, member_name varchar, " +
                 "member_pinyin varchar, member_phone varchar, department_name varchar, unique(member_id))");

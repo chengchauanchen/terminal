@@ -52,6 +52,7 @@ import java.util.Map;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageSendStateEnum;
+import cn.vsx.hamster.common.MessageStatus;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -295,7 +296,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             final TerminalMessage terminalMessage = chatMessageList.get(position);
             final int viewType = getItemViewType(position);
             //消息撤回
-            if(terminalMessage.isWithDraw){
+            if(MessageStatus.valueOf(terminalMessage.messageStatus).getCode() == MessageStatus.MESSAGE_RECALL.getCode()){
                 withDrawView(terminalMessage,holder);
             }else{
                 setViewVisibility(holder.timeStamp, View.VISIBLE);

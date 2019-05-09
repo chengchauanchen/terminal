@@ -64,6 +64,7 @@ import java.util.Set;
 import cn.vsx.hamster.common.Constants;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageSendStateEnum;
+import cn.vsx.hamster.common.MessageStatus;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -1550,14 +1551,14 @@ public abstract class ChatBaseActivity extends BaseActivity{
      * 撤回消息
      **/
     private ReceiverShowWithDrawPopupHandler mReceiverShowWithDrawPopupHandler = terminalMessage -> handler.post(() -> {
-        TerminalFactory.getSDK().getTerminalMessageManager().requestRecallRecordMessage(terminalMessage.messageId);
+        TerminalFactory.getSDK().getTerminalMessageManager().requestRecallRecordMessage(terminalMessage.messageId,terminalMessage.messageBodyId);
     });
     /**
      * 撤回消息
      **/
-    private ReceiveResponseRecallRecordHandler mReceiveResponseRecallRecordHandler = (resultCode, resultDesc, messageId) -> {
+    private ReceiveResponseRecallRecordHandler mReceiveResponseRecallRecordHandler = (resultCode, resultDesc, messageId,messageBodyId) -> {
         if(resultCode == 0){
-            updataMessageWithDrawState(messageId);
+            updataMessageWithDrawState(messageId,messageBodyId);
         }else{
          ToastUtil.showToast(ChatBaseActivity.this,resultDesc);
         }
@@ -1566,28 +1567,28 @@ public abstract class ChatBaseActivity extends BaseActivity{
     /**
      * 收到别人撤回消息的通知
      **/
-    private ReceiveNotifyRecallRecordHandler mNotifyRecallRecordMessageHandler = (version,messageId) -> {
-        updataMessageWithDrawState(messageId);
+    private ReceiveNotifyRecallRecordHandler mNotifyRecallRecordMessageHandler = (version,messageId,messageBodyId) -> {
+        updataMessageWithDrawState(messageId,messageBodyId);
     };
 
     /**
      * 更新消息的撤回状态
      * @param messageId
      */
-    private void updataMessageWithDrawState(long messageId){
-        TerminalMessage message = new TerminalMessage();
-        message.messageId = messageId;
-        if(chatMessageList.contains(message)){
-            int index =  chatMessageList.indexOf(message);
-            TerminalMessage message1 = chatMessageList.get(index);
-            message1.isWithDraw = true;
-            //更新UI
-            handler.post(() ->{
-                if (temporaryAdapter != null) {
-                    temporaryAdapter.notifyItemChanged(index);
-                }
-            });
+    private void updataMessageWithDrawState(long messageId,String messageBodyId){
+        if(android.text.TextUtils.isEmpty(messageBodyId)){
+            return;
         }
+        for (TerminalMessage message1: chatMessageList) {
+            if(android.text.TextUtils.equals(messageBodyId,message1.messageBodyId)){
+                message1.messageStatus = MessageStatus.MESSAGE_RECALL.toString();
+            }
+        }
+        handler.post(() ->{
+            if (temporaryAdapter != null) {
+                temporaryAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     /**
@@ -1664,7 +1665,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
      */
     private void showNFCDialog() {
         nfcBindingDialog = new NFCBindingDialog(ChatBaseActivity.this,NFCBindingDialog.TYPE_WAIT);
-        nfcBindingDialog.showDialog();
+        nfcBindingDialog.showDialog(userId,"123456789");
     }
 
     @Override
