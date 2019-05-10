@@ -339,30 +339,36 @@ public class NewGroupFragment extends BaseFragment{
             List<Integer> monitorGroups = new ArrayList<>();
             monitorGroups.add(groupNo);
             NewGroupFragment.this.monitorGroupNo = groupNo;
-            if(null != DataUtil.getTempGroupByGroupNo(groupNo)){
-                //是临时组
-                if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
-                    currentMonitorGroup.put(groupNo,false);
-                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
-                }else {
-                    currentMonitorGroup.put(groupNo,true);
-                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
-                }
+            //如果是当前组，取消当前组
+            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
+                currentMonitorGroup.put(groupNo,false);
+                MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
             }else {
-                //不是临时组
-                if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(groupNo)){
-                    if(groupNo == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
-                        //弹窗提示
-                    }
-                    currentMonitorGroup.put(groupNo,false);
-                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
-                }else {
-                    //判断有没有超过5个监听组
-                    if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().size()>=5){
-                        ToastUtil.showToast(getContext(),getResources().getString(R.string.monitor_more_than_five));
+                if(null != DataUtil.getTempGroupByGroupNo(groupNo)){
+                    //是临时组
+                    if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
+                        currentMonitorGroup.put(groupNo,false);
+                        MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
                     }else {
                         currentMonitorGroup.put(groupNo,true);
                         MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
+                    }
+                }else {
+                    //不是临时组
+                    if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(groupNo)){
+                        if(groupNo == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
+                            //弹窗提示
+                        }
+                        currentMonitorGroup.put(groupNo,false);
+                        MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
+                    }else {
+                        //判断有没有超过5个监听组
+                        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().size()>=5){
+                            ToastUtil.showToast(getContext(),getResources().getString(R.string.monitor_more_than_five));
+                        }else {
+                            currentMonitorGroup.put(groupNo,true);
+                            MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
+                        }
                     }
                 }
             }
