@@ -41,14 +41,13 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.model.NFCBean;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
@@ -57,7 +56,6 @@ import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receiveHandle.ReceiverAudioButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverClearAccountHandler;
 import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
-import cn.vsx.vc.receiveHandle.ReceiverStartAuthHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
@@ -102,6 +100,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiverClearAccountHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
         setPttVolumeChangedListener();
     }
 
@@ -335,6 +334,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiverClearAccountHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
 
             if (mBroadcastReceiv != null) {
                 LocalBroadcastManager.getInstance(BaseActivity.this).unregisterReceiver(
@@ -648,7 +648,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
      */
     private ReceiverClearAccountHandler receiverClearAccountHandler = showMessage -> {
         ToastUtil.showToast(BaseActivity.this,"账号信息已过期，请重新登录");
-        clearAccount();
+        myHandler.post(this::clearAccount);
     };
 
     /**
@@ -672,6 +672,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                     MyApplication.instance.startAccountValidClock();
                     //保存NFC信息
                     DataUtil.saveNFCBean(bean);
+                    //清空自动上报标记
+                    updateNormalPushingState(false);
                     //跳转
                     goJump();
                 }
@@ -680,6 +682,18 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 break;
         }
     }
+
+    /**
+     * 临时组解散的通知
+     */
+    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = (isAdd, isLocked, isScan, isSwitch, tempGroupNo, tempGroupName, tempGroupType) -> {
+        if(!isAdd){
+          NFCBean bean = DataUtil.getNFCBean();
+          if(bean!=null&&bean.getGroupId()!=0&&bean.getGroupId() == tempGroupNo){
+              myHandler.post(this::clearAccount);
+          }
+        }
+    };
 
     /**
      * 清除账号信息
@@ -699,7 +713,9 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     private void goJump(){
         if(BaseActivity.this instanceof RegistNFCActivity){
             //等待登录页面
-            TerminalFactory.getSDK().notifyReceiveHandler(ReceiverStartAuthHandler.class,false);
+            RegistNFCActivity activity = (RegistNFCActivity) BaseActivity.this;
+            activity.judgePermission();
+//            TerminalFactory.getSDK().notifyReceiveHandler(ReceiverStartAuthHandler.class,false);
         }else{
             //停止业务
             loginOut();
@@ -728,23 +744,10 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     }
 
     /**
-     * 切组
-     * @param bean
+     * 更新 是否是正常操作停止上报，（如果是再次进入应用不再自动上报，如果不是弹窗提示）
+     * @param state
      */
-    private void changeGroup(final NFCBean bean){
-//        int result = MyTerminalFactory.getSDK().getGroupManager().changeGroup(bean.getGroupId());
-//        if (result == BaseCommonCode.SUCCESS_CODE) {
-//            isFromNFCToChangeGroup = true;
-//            //转组成功重新请求在线人数
-//            myHandler.postDelayed(new Runnable() {
-//                @Override
-//                public void run() {
-//                    MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(bean.getGroupId(), false);
-//                }
-//            }, 500);
-//        } else {
-//            ToastUtil.groupChangedFailToast(MainActivity.this, result);
-//        }
+    public void updateNormalPushingState(boolean state){
+        TerminalFactory.getSDK().putParam(Params.PUSH_LIVE_STATE,state);
     }
-
 }

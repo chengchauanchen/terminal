@@ -333,7 +333,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
     /**
      * 必须要有SD卡和读取电话状态的权限，APP才能使用
      */
-    private void judgePermission() {
+    public void judgePermission() {
         if (CheckMyPermission.selfPermissionGranted(this, permission.WRITE_EXTERNAL_STORAGE)) {//SD卡读写权限
             if (CheckMyPermission.selfPermissionGranted(this, permission.READ_PHONE_STATE)) {//手机权限，获取uuid
                 MyApplication.instance.getSpecificSDK().configLogger();
@@ -393,12 +393,12 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
     }
 
     private void start() {
+        //发送认证消息，uuid到注册服务器，判断是注册还是登录
+        if(DataUtil.getNFCBean() != null){
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
             MyTerminalFactory.getSDK().start();
             PromptManager.getInstance().start();
         });
-        //发送认证消息，uuid到注册服务器，判断是注册还是登录
-        if(DataUtil.getNFCBean() != null){
             changeProgressMsg("正在获取信息");
             ll_regist.setVisibility(View.GONE);
             sendUuid(null, null);

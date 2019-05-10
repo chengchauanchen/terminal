@@ -90,6 +90,7 @@ import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.APPStateUtil;
+import cn.vsx.vc.utils.BITDialogUtil;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.PhotoUtils;
 import cn.vsx.vc.utils.SystemUtil;
@@ -105,7 +106,7 @@ import ptt.terminalsdk.tools.SDCardUtil;
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 import static cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory.USB;
 
-public class MainActivity extends BaseActivity   {
+public class MainActivity extends BaseActivity {
     //没有网络的提示
     @Bind(R.id.ll_no_network)
     LinearLayout llNoNetwork;
@@ -151,7 +152,6 @@ public class MainActivity extends BaseActivity   {
     private WindowManager windowManager;
     private int pushcount;
     private boolean isPushing;//正在上报
-    private boolean isFromNFCToChangeGroup;//是否是来自nfc的转组，（如果是 需要上报图像和录像）
     private boolean isPassiveReport;//是否是被动上报(用于区分提示音)
     private String id;//自己发起直播返回的callId和member拼接
     private PushCallback pushCallback;
@@ -432,7 +432,6 @@ public class MainActivity extends BaseActivity   {
             MainActivity.this.runOnUiThread(() -> {
                 if (!connected) {
                     llNoNetwork.setVisibility(View.VISIBLE);
-                    MyApplication.instance.isPopupWindowShow = false;
                 } else {
 //                            initMediaStream(svLive.getSurfaceTexture());
 //                            //判断是否之前在上报中，如果上报中请求继续上报
@@ -480,8 +479,10 @@ public class MainActivity extends BaseActivity   {
 //                            MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(pushMemberList,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
 //                        }
                     isPushing = true;
+                    updateNormalPushingState(isPushing);
                 }else {
                     isPushing = false;
+                    updateNormalPushingState(isPushing);
                     ToastUtil.showToast(getApplicationContext(),resultDesc);
                     finishVideoLive();
                 }
@@ -494,6 +495,7 @@ public class MainActivity extends BaseActivity   {
      **/
     private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc) -> {
         ToastUtil.showToast(getApplicationContext(),resultDesc);
+        updateNormalPushingState(false);
         finishVideoLive();
     };
 
@@ -502,6 +504,7 @@ public class MainActivity extends BaseActivity   {
      **/
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> {
         ToastUtil.showToast(getApplicationContext(),"上报已结束");
+        updateNormalPushingState(false);
         finishVideoLive();
     };
 
@@ -510,6 +513,7 @@ public class MainActivity extends BaseActivity   {
      **/
     private ReceiveAnswerLiveTimeoutHandler receiveAnswerLiveTimeoutHandler = () -> {
         ToastUtil.showToast(getApplicationContext(),"对方已取消");
+        updateNormalPushingState(false);
         finishVideoLive();
     };
 
@@ -599,6 +603,7 @@ public class MainActivity extends BaseActivity   {
                 //录像  （判断当前的状态，如果已经在录像，停止录像）
                 if(mMediaStream!=null) {
                     if(mMediaStream.isStreaming()){
+                        updateNormalPushingState(false);
                         stopPush();
                         ToastUtil.showToast(MainActivity.this, "停止上报");
                     }else if (mMediaStream.isRecording()) {
@@ -1184,13 +1189,13 @@ public class MainActivity extends BaseActivity   {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CheckMyPermission.REQUEST_CAMERA);
             }else {
                 startLiveService();
-                requestStartLive();
+                autoStartLive();
             }
         } else {
             if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.RECORD_AUDIO)) {
                 if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.CAMERA)) {
                     startLiveService();
-                    requestStartLive();
+                    autoStartLive();
                     if (!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                         CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
                     }else{
@@ -1208,7 +1213,7 @@ public class MainActivity extends BaseActivity   {
                 if (onRecordAudioDenied) {
                     if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.CAMERA)) {
                         startLiveService();
-                        requestStartLive();
+                        autoStartLive();
                         if (!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                             CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
                         }else{
@@ -1233,6 +1238,20 @@ public class MainActivity extends BaseActivity   {
                     CheckMyPermission.permissionPrompt(this, Manifest.permission.RECORD_AUDIO);
                 }
             }
+        }
+    }
+
+    /**
+     * 进入应用自动上报图像
+     */
+    private void autoStartLive() {
+        boolean isContains = TerminalFactory.getSDK().contains(Params.PUSH_LIVE_STATE);
+        boolean state = TerminalFactory.getSDK().getParam(Params.PUSH_LIVE_STATE,false);
+        if(isContains && state){
+            //弹窗提示
+            showPushLiveDialog();
+        }else{
+            myHandler.postDelayed(this::requestStartLive,1000);
         }
     }
 
@@ -1343,6 +1362,7 @@ public class MainActivity extends BaseActivity   {
             mExitFlag = true;
             new Handler().postDelayed(() -> mExitFlag = false, CLICK_EXIT_TIME);
         } else {
+            updateNormalPushingState(false);
             moveTaskToBack(true);//把程序变成后台的
         }
     }
@@ -1424,5 +1444,31 @@ public class MainActivity extends BaseActivity   {
                 }
             }
         });
+    }
+
+    /**
+     * 弹窗提示是否自动上报
+     */
+    private void showPushLiveDialog() {
+        new BITDialogUtil() {
+            @Override
+            public CharSequence getMessage() {
+                return "是否继续上报?";
+            }
+
+            @Override
+            public Context getContext() {
+                return MainActivity.this;
+            }
+
+            @Override
+            public void doConfirmThings() {
+                requestStartLive();
+            }
+
+            @Override
+            public void doCancelThings() {
+            }
+        }.showDialog();
     }
 }

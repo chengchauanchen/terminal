@@ -58,7 +58,6 @@ public class MyApplication extends Application {
 	public boolean isLockScreenCreat = false;
 	public boolean isClickVolumeToCall = false;
 	public boolean isPttPress = false;
-	public boolean isPopupWindowShow = false;
 	public static List<Integer> catchGroupIdList = new ArrayList<>();
 	public static MyApplication instance;
 	public SpecificSDK specificSDK;
