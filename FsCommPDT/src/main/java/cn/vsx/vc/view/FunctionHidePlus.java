@@ -25,13 +25,19 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.log4j.Logger;
 
+import java.util.HashMap;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.common.util.JsonParam;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
+import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GridViewAdapter;
@@ -387,8 +393,12 @@ public class FunctionHidePlus extends LinearLayout {
         this.isGroupFunction = isGroupFunction;
         String unsendMessage = context.getSharedPreferences("unsendMessage", MODE_PRIVATE).getString(String.valueOf(userId),"");
         if(isGroupFunction){//组消息界面
-//            setNoVideo();
-            setHasNFC();
+            HashMap<Integer,String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP,new HashMap<Integer,String>());
+            if(GroupUtils.isCombatGroup(userId) && hashMap.containsKey( userId)&&!TextUtils.isEmpty(hashMap.get( userId))){
+                setHasNFC();
+            }else{
+                setNoVideo();
+            }
             groupCallNewsKeyboard.setBackgroundResource(R.drawable.soft_keyboard);
             groupCallNewsEt.setVisibility(GONE);
             v_edit_line.setVisibility(GONE);

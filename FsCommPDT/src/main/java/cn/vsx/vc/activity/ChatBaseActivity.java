@@ -87,6 +87,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRecallRecordHand
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageFailedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
+import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -1288,7 +1289,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                         lastVersion = terminalMessage.messageVersion;
                     }
 
-                    Collections.sort(chatMessageList);
+//                    Collections.sort(chatMessageList);
                     setListSelection(chatMessageList.size() - 1);
 
 
@@ -1665,7 +1666,10 @@ public abstract class ChatBaseActivity extends BaseActivity{
      */
     private void showNFCDialog() {
         nfcBindingDialog = new NFCBindingDialog(ChatBaseActivity.this,NFCBindingDialog.TYPE_WAIT);
-        nfcBindingDialog.showDialog(userId,"123456789");
+        HashMap<Integer,String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP,new HashMap<Integer,String>());
+        if(hashMap.containsKey(userId)&&!android.text.TextUtils.isEmpty(hashMap.get(userId))){
+            nfcBindingDialog.showDialog(userId,hashMap.get(userId));
+        }
     }
 
     @Override
