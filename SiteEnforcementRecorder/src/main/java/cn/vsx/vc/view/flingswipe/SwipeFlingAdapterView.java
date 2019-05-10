@@ -382,7 +382,7 @@ public class SwipeFlingAdapterView extends BaseFlingAdapterView {
 
 
     @Override
-    public ViewGroup.LayoutParams generateLayoutParams(AttributeSet attrs) {
+    public LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new FrameLayout.LayoutParams(getContext(), attrs);
     }
 

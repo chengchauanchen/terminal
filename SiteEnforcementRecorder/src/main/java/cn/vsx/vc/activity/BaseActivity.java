@@ -238,7 +238,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             //插入耳机时的电源锁
             wakeLockScreen = powerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP
                     | PowerManager.SCREEN_DIM_WAKE_LOCK, "wakeLock");
-            registerHeadsetPlugReceiver();
+
         }
 
     }
@@ -299,6 +299,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     @Override
     protected void onResume() {
         super.onResume();
+        registerHeadsetPlugReceiver();
         //nfc
         if(mNFCUtil!=null&&mNFCUtil.getmNfcAdapter()!=null){
             mNFCUtil.getmNfcAdapter().enableForegroundDispatch(this, mNFCUtil.getmPendingIntent(), mNFCUtil.getmIntentFilter(), mNFCUtil.getmTechList());
@@ -315,6 +316,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     @Override
     protected void onPause() {
         super.onPause();
+        unregisterHeadsetPlugReceiver();
         if(mNFCUtil!=null&&mNFCUtil.getmNfcAdapter()!=null){
             mNFCUtil.getmNfcAdapter().disableForegroundDispatch(this);
         }
@@ -327,7 +329,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             doOtherDestroy();
             ButterKnife.unbind(this);//解除绑定，官方文档只对fragment做了解绑
             ActivityCollector.removeActivity(this);
-            unregisterHeadsetPlugReceiver();
+
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);

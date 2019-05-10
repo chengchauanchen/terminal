@@ -118,8 +118,10 @@ public class ClientChannel extends AbsClientChannel {
 	public void stop() {
 		try {
 			logger.info("注销handler，并把对象置空。");
-			messageService.unregistMessageReceivedHandler(handler);
-			messageService.unregistServerConnectionEstablishedHandler(handlerAidl);
+			if(messageService!=null){
+				messageService.unregistMessageReceivedHandler(handler);
+				messageService.unregistServerConnectionEstablishedHandler(handlerAidl);
+			}
 			serverConnectionEstablishedHandlers.clear();
 			messageService = null;
 			isStarted = false;

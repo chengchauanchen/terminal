@@ -177,8 +177,7 @@
         <action android:name="android.intent.action.BOOT_COMPLETED"/>
       </intent-filter>
     </receiver>
-    <receiver android:name=".receiver.AccountValidReceiver"
-        android:process=":accountvalid">
+    <receiver android:name=".receiver.AccountValidReceiver">
       <intent-filter >
         <action android:name="vsxin.action.accountvalid" />
       </intent-filter>
@@ -200,7 +199,6 @@
       </intent-filter>
     </service>
     <service android:name=".service.AccountValidService"
-        android:process=":accountvalid"
         android:enabled="true"/>
     <!--                service end               -->
 

@@ -84,7 +84,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
     private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> RegistNFCActivity.this.runOnUiThread(() -> {
         if (!MyTerminalFactory.getSDK().getParam(Params.IS_FORBID, false)) {
             if (!connected) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "网络异常");
+//                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "网络异常");
             } else {
                 ToastUtil.closeToast();
                 if (TextUtils.isEmpty(MyTerminalFactory.getSDK().getParam(Params.REGIST_URL, ""))) {
@@ -103,7 +103,9 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
                         if (isRegisted) {//卸载后重装，应该显示注册过了,直接去登录
                             ll_regist.setVisibility(View.GONE);
                             changeProgressMsg("正在登入...");
+//                            if(MyTerminalFactory.getSDK().isServerConnected()){
 //                                login();
+//                            }
                         } else {//没注册
                             MyTerminalFactory.getSDK().putParam(Params.MESSAGE_VERSION, 0l);
                             if (availableIPlist.size() < 1) {
@@ -167,7 +169,9 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         if (errorCode == BaseCommonCode.SUCCESS_CODE) {//注册成功，直接登录
             logger.info("注册完成的回调----注册成功，直接登录");
             changeProgressMsg("正在登入...");
-//                        login();
+//            if(MyTerminalFactory.getSDK().isServerConnected()){
+//                login();
+//            }
         } else {//注册失败，提示并关界面
 
             if (errorCode == TerminalErrorCode.REGISTER_PARAMETER_ERROR.getErrorCode()) {
@@ -192,18 +196,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         logger.info("RegistActivity---收到登录的消息---resultCode:" + resultCode + "     resultDesc:" + resultDesc);
         myHandler.post(() -> {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                if (!MyTerminalFactory.getSDK().getParam(Params.IS_FIRST_LOGIN, true)
-                        && !MyTerminalFactory.getSDK().getParam(Params.IS_UPDATE_DATA, true)) {
-                    logger.info("不是第一次登录，也不需要更新数据，直接进入主界面");
-                    MyTerminalFactory.getSDK().putParam(Params.FORBID, false);
-                    MyTerminalFactory.getSDK().getConfigManager().updateMemberConfig();
-                    goOn();
-                } else {
-                    logger.info("第一次登录，更新所有数据");
-                    updateData();
-                }
-                //登录响应成功，把第一次登录标记置为false；
-                MyTerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, false);
+                updateData();
             } else {
                 changeProgressMsg(resultDesc);
                 myHandler.postDelayed(() -> {
@@ -221,7 +214,6 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         if (errorCode == BaseCommonCode.SUCCESS_CODE) {
             logger.info("更新数据成功！");
             goOn();
-            MyTerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, false);//数据更新成功，把是否要更新数据的标记置为false；
         } else {
             changeProgressMsg("更新数据时：" + errorDesc);
             timer.schedule(new TimerTask() {
@@ -433,7 +425,8 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
 
     @Override
     public void initData() {
-
+         //开启解绑倒计时
+        MyApplication.instance.startAccountValidClock();
     }
 
     @Override

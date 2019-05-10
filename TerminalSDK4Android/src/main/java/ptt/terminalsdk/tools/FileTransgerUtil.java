@@ -13,6 +13,8 @@ import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.FileBean;
+import cn.vsx.hamster.terminalsdk.model.NFCBean;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -56,6 +58,28 @@ public class FileTransgerUtil {
      */
     public static int getPoliceIdInt() {
         return TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+    }
+
+    /**
+     * 获取UniqueNo
+     *
+     * @return
+     */
+    public static long getPoliceUniqueNo() {
+        return TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
+    }
+
+    /**
+     * 获取WarningId
+     *
+     * @return
+     */
+    public static String getWarningId() {
+        NFCBean bean = DataUtil.getNFCBean();
+        if(bean!=null){
+             return bean.getWarningId();
+        }
+        return "";
     }
 
     /**
@@ -197,6 +221,8 @@ public class FileTransgerUtil {
     public static FileBean getFileInfo(String path,File file) {
         FileBean bean = new FileBean();
         bean.setTerminalMemberNo(getPoliceIdInt());
+        bean.setTerminalUniqueNo(getPoliceUniqueNo());
+        bean.setWarningId(getWarningId());
         bean.setName(getFileName(path));
         String type =  getBITFileType(path);
         bean.setType(type);

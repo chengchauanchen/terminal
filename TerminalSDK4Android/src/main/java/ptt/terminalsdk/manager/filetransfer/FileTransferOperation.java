@@ -115,7 +115,7 @@ public class FileTransferOperation {
 
                 if (list != null && list.size() > 0) {
                     //从数据库中获取文件的信息,并上传
-                    uploadFileByPaths(getRecordsByNames(list), message.getRequestMemberId(), false);
+                    uploadFileByPaths(getRecordsByNames(list), message.getRequestMemberId(),message.getRequestUniqueNo(), false);
                     //推送视频文件到流媒体服务器
 //                    pushStreamOfVideoFile(list);
                 }
@@ -279,7 +279,7 @@ public class FileTransferOperation {
      * @param requestMemberId
      * @param isDelete        是否在上传成功之后删除文件
      */
-    public void uploadFileByPath(final String path, final int requestMemberId, final boolean isDelete) {
+    public void uploadFileByPath(final String path, final int requestMemberId,final long requestUniqueNo, final boolean isDelete) {
         if (!isConnected(context)) {
             logger.info(TAG + "uploadFileByPath:isConnected:" + isConnected(context));
             return;
@@ -294,8 +294,10 @@ public class FileTransferOperation {
                     Map<String, String> paramsMap = new HashMap<>();
                     paramsMap.put("name", fileName);
                     paramsMap.put("memberId", FileTransgerUtil.getPoliceIdInt() + "");
-                    if (requestMemberId != 0) {
+                    paramsMap.put("uniqueNo", FileTransgerUtil.getPoliceUniqueNo() + "");
+                    if (requestMemberId != 0 && requestUniqueNo!=0) {
                         paramsMap.put("requestMemberId", requestMemberId + "");
+                        paramsMap.put("requestUniqueNo", requestUniqueNo + "");
                     }
                     long startTime = System.currentTimeMillis();
                     String result = TerminalFactory.getSDK().getHttpClient().postFile(getUploadFileServerUrl() + UPLOAD_FILE_SERVER_PATH, file, paramsMap);
@@ -339,12 +341,12 @@ public class FileTransferOperation {
      * @param records
      * @param isDelete 是否在上传成功之后删除文件
      */
-    public synchronized void uploadFileByPaths(CopyOnWriteArrayList<BitStarFileRecord> records, int requestMemberId, boolean isDelete) {
+    public synchronized void uploadFileByPaths(CopyOnWriteArrayList<BitStarFileRecord> records, int requestMemberId,final long requestUniqueNo, boolean isDelete) {
         if (records != null && records.size() > 0) {
             for (BitStarFileRecord record : records) {
                 //上传文件
 //                isDelete?FileTransgerUtil.isOutOf48Hours(record.getFileTime()):如果确认删除 也只是删除48小时之前的文件
-                uploadFileByPath(record.getFilePath(), requestMemberId, isDelete);
+                uploadFileByPath(record.getFilePath(), requestMemberId,requestUniqueNo, isDelete);
             }
         }
     }
@@ -373,7 +375,7 @@ public class FileTransferOperation {
                     }
                     if (uploadList.size() > 0) {
                         //有超过48小时未上传的文件
-                        uploadFileByPaths(uploadList, 0, false);
+                        uploadFileByPaths(uploadList, 0, 0L,false);
                         showToast("有48小时未上传的文件，开始上传");
                     } else {
                         //没有超过48小时未上传的文件，就把未上传的最早的一条文件信息记录并打开定时任务
@@ -672,7 +674,7 @@ public class FileTransferOperation {
                 CopyOnWriteArrayList<BitStarFileRecord> noList = getRecordByState(FileTransferOperation.UPLOAD_STATE_NO);
                 logger.info(TAG + "externNoStorageOperation:no_upload:" + noList);
                 //上传文件,删除
-                uploadFileByPaths(noList, 0, true);
+                uploadFileByPaths(noList, 0, 0L,true);
             }
         });
     }

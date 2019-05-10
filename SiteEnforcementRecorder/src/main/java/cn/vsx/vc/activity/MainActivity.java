@@ -10,7 +10,6 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -19,7 +18,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.PowerManager;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -33,6 +31,8 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.LinearLayout;
+
+import com.alibaba.fastjson.JSONObject;
 
 import org.apache.log4j.Logger;
 import org.easydarwin.easypusher.BITBackgroundCameraService;
@@ -51,11 +51,17 @@ import java.util.TimerTask;
 
 import butterknife.Bind;
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.CallMode;
+import cn.vsx.hamster.common.MessageSendStateEnum;
+import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.util.JsonParam;
+import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
+import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.model.NFCBean;
+import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerLiveTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
@@ -139,6 +145,7 @@ public class MainActivity extends BaseActivity   {
     List<String> listResolutionName;
 
     private BITBackgroundCameraService mService;
+    public boolean isBinded=false;
     int width = 640, height = 480;
 
     private WindowManager windowManager;
@@ -237,6 +244,12 @@ public class MainActivity extends BaseActivity   {
 
     @Override
     public void initView() {
+        NFCBean bean = cn.vsx.hamster.terminalsdk.tools.DataUtil.getNFCBean();
+        if( bean!= null&&bean.getGroupId()!=0){
+            List<Integer> monitorGroups = new ArrayList<>();
+            monitorGroups.add(bean.getGroupId());
+            TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
+        }
     }
 
     @Override
@@ -325,12 +338,8 @@ public class MainActivity extends BaseActivity   {
         PromptManager.getInstance().stopRing();
 
         stopService(new Intent(MainActivity.this, LockScreenService.class));
-        MyApplication.instance.stopUVCCameraService();
         MyTerminalFactory.getSDK().getVideoProxy().start().unregister(this);
-        if (conn != null) {
-            unbindService(conn);
-        }
-        stopService(new Intent(MainActivity.this, BITBackgroundCameraService.class));
+        stopLiveService();
     }
 
     public Handler myHandler = new Handler(Looper.getMainLooper()) {
@@ -378,12 +387,12 @@ public class MainActivity extends BaseActivity   {
 //                if (MyApplication.instance.isPttPress) {
                     logger.info("转组成功回调消息：isPttPress" + MyApplication.instance.isPttPress);
                     //来自NFC消息转组，需要上报图像，录像
-                    if(isFromNFCToChangeGroup){
-                        isFromNFCToChangeGroup = false;
-                        //上报,先停止上报，再开始主动上报,并录像。
-                        finishVideoLive();
-                        requestStartLive();
-                    }
+//                    if(isFromNFCToChangeGroup){
+//                        isFromNFCToChangeGroup = false;
+//                        //上报,先停止上报，再开始主动上报,并录像。
+//                        finishVideoLive();
+//                        requestStartLive();
+//                    }
 //                }
                 MyApplication.instance.notifyAll();
             }
@@ -448,8 +457,10 @@ public class MainActivity extends BaseActivity   {
             myHandler.postDelayed(() -> {
                 logger.info("自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
                 String port = streamMediaServerPort + "";
-                id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0) + "_" + callId;
-                    startPush(streamMediaServerIp, port, id);
+                id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "_" + callId;
+                //如果是组内上报，在组内发送一条上报消息
+                sendGroupMessage(streamMediaServerIp,streamMediaServerPort,callId);
+                startPush(streamMediaServerIp, port, id);
             }, 1000);
         }
     };
@@ -707,9 +718,9 @@ public class MainActivity extends BaseActivity   {
             if (position != -1) {
                 watchLiveList.remove(position);
             }
-            if(watchLiveList.size()<1){
-                stopPush();
-            }
+//            if(watchLiveList.size()<1){
+//                stopPush();
+//            }
         }
     });
 
@@ -725,7 +736,7 @@ public class MainActivity extends BaseActivity   {
                     PromptManager.getInstance().startExternNoStorage();
                     if(mService!=null&&mService.getMediaStream()!=null){
                         //停止上报
-                        stopPush();
+//                        stopPush();
                         //停止录像
                         mService.getMediaStream().stopRecord();
                     }
@@ -889,7 +900,7 @@ public class MainActivity extends BaseActivity   {
             }
         };
         //BIND_AUTO_CREATE  如果没有服务就自己创建一个，执行onCreate()；
-        bindService(new Intent(this, BITBackgroundCameraService.class), conn, BIND_AUTO_CREATE);
+        isBinded = bindService(new Intent(this, BITBackgroundCameraService.class), conn, BIND_AUTO_CREATE);
     }
 
 
@@ -1173,11 +1184,13 @@ public class MainActivity extends BaseActivity   {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CheckMyPermission.REQUEST_CAMERA);
             }else {
                 startLiveService();
+                requestStartLive();
             }
         } else {
             if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.RECORD_AUDIO)) {
                 if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.CAMERA)) {
                     startLiveService();
+                    requestStartLive();
                     if (!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                         CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
                     }else{
@@ -1195,6 +1208,7 @@ public class MainActivity extends BaseActivity   {
                 if (onRecordAudioDenied) {
                     if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.CAMERA)) {
                         startLiveService();
+                        requestStartLive();
                         if (!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                             CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
                         }else{
@@ -1362,5 +1376,53 @@ public class MainActivity extends BaseActivity   {
                 mMediaStream.stopRecord();
             }
         }
+    }
+
+    private void stopLiveService(){
+        if (conn != null) {
+            if (isBinded) {
+                unbindService(conn);
+                isBinded=false;
+            }
+            stopService(new Intent(this, BITBackgroundCameraService.class));
+        }
+    }
+    /**
+     * 在组内发一条消息
+     */
+    public void sendGroupMessage(String streamMediaServerIp, int streamMediaServerPort, long callId) {
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            NFCBean bean = cn.vsx.hamster.terminalsdk.tools.DataUtil.getNFCBean();
+            if( bean!=null && bean.getGroupId()!=0 ){
+                Group group = cn.vsx.hamster.terminalsdk.tools.DataUtil.getGroupByGroupNoFromAllGroup(bean.getGroupId());
+                if (group!=null) {
+                    int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+                    long memberUniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
+                    String memberName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
+                    String url = "rtsp://"+streamMediaServerIp+":"+streamMediaServerPort+"/"+memberUniqueNo+"_"+callId+".sdp";
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
+                    jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
+//                  jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
+                    jsonObject.put(JsonParam.CALLID, String.valueOf(callId));
+                    jsonObject.put(JsonParam.REMARK, 2);
+                    jsonObject.put(JsonParam.LIVER, memberUniqueNo+"_"+memberName);
+                    jsonObject.put(JsonParam.LIVERNO, memberId);
+                    jsonObject.put(JsonParam.BACKUP, memberId+"_"+memberName);
+                    jsonObject.put(JsonParam.EASYDARWIN_RTSP_URL, url);
+                    TerminalMessage mTerminalMessage = new TerminalMessage();
+                    mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+                    mTerminalMessage.messageFromName = memberName;
+                    mTerminalMessage.messageToId = NoCodec.encodeGroupNo(group.getNo());
+                    mTerminalMessage.messageToName = group.getName();
+                    mTerminalMessage.messageBody = jsonObject;
+                    mTerminalMessage.sendTime = System.currentTimeMillis();
+                    mTerminalMessage.messageType = MessageType.VIDEO_LIVE.getCode();
+                    mTerminalMessage.messageUrl = url;
+                    TerminalMessage terminalMessage1 = (TerminalMessage) mTerminalMessage.clone();
+                    MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1);
+                }
+            }
+        });
     }
 }

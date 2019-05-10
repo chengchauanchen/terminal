@@ -210,7 +210,7 @@ public class NfcUtil {
      * 写入数据结果的回调
      */
     public interface OnReadListener{
-        void onReadResult(int resultCode,String readType, String resultDescribe,NFCBean bean);
+        void onReadResult(int resultCode, String readType, String resultDescribe, NFCBean bean);
     }
 
     public NfcAdapter getmNfcAdapter() {

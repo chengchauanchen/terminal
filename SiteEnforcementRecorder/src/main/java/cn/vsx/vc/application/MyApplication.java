@@ -33,7 +33,9 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.vc.receiveHandle.ReceiverClearAccountHandler;
 import cn.vsx.vc.receiver.AccountValidReceiver;
 import cn.vsx.vc.service.PTTButtonEventService;
 import cn.vsx.vc.utils.CommonGroupUtil;
@@ -72,6 +74,7 @@ public class MyApplication extends Application {
 	private PendingIntent accountValidPendingIntent;
 	//通知账号有效的间隔时间
 	public static final long ACCOUNT_VALID_TIME = 8 * 60 * 60 * 1000;
+//	public static final long ACCOUNT_VALID_TIME =  30 * 1000;
 
 	@Override
 	public void onCreate() {
@@ -97,8 +100,7 @@ public class MyApplication extends Application {
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
 		//保存录像，录音，照片的存储路径
 		MyTerminalFactory.getSDK().getFileTransferOperation().initExternalUsableStorage();
-		//开启账号解绑的倒计时
-		startAccountValidClock();
+
 	}
 
 
@@ -255,7 +257,14 @@ public class MyApplication extends Application {
 		MyApplication.instance.cancelAccountValidAlarmManager();
 		long time = TerminalFactory.getSDK().getParam(Params.NFC_BEAN_TIME, 0L);
 		if(time != 0){
-			startAccountValidAlarmManager(time + ACCOUNT_VALID_TIME);
+			if(time+ACCOUNT_VALID_TIME<=System.currentTimeMillis()){
+				//保存账号解绑时间信息
+				TerminalFactory.getSDK().putParam(Params.NFC_BEAN_TIME, 0L);
+				//清空账号信息
+				DataUtil.clearNFCBean();
+			}else{
+				startAccountValidAlarmManager(time + ACCOUNT_VALID_TIME);
+			}
 		}
 	}
 }
