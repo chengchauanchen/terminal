@@ -75,27 +75,51 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
     public TextView tv_title;//标题
     public TextView tv_content;//标题
 
-    public ChatViewHolder(View itemView, boolean isReceiver) {
+    //警情
+    public TextView mTvAperson;
+    public TextView mTvApersonPhone;
+    public TextView mTvRecePerson;
+    public TextView mTvRecePersonPhone;
+    public TextView mTvAlarmTime;
+    public TextView mTvAddress;
+    public TextView mTvSummary;
+    //公告
+    public TextView tv_bubble;
+
+    public ChatViewHolder(View itemView, boolean isReceiver,boolean isWarning,boolean isAffiche) {
         super(itemView);
-        reBubble = (RelativeLayout) itemView.findViewById(R.id.bubble);
-        ivAvatar = (ImageView) itemView.findViewById(R.id.iv_userhead);
-        timeStamp = (TextView) itemView.findViewById(R.id.timestamp);
-        reMain = (RelativeLayout) itemView.findViewById(R.id.re_main);
+        if(isAffiche){
+            afficheFindViewById(itemView);
+        }else if(isWarning){
+            warningFindViewById(itemView);
+        }else {
+            reBubble = (RelativeLayout) itemView.findViewById(R.id.bubble);
+            ivAvatar = (ImageView) itemView.findViewById(R.id.iv_userhead);
+            timeStamp = (TextView) itemView.findViewById(R.id.timestamp);
+            reMain = (RelativeLayout) itemView.findViewById(R.id.re_main);
 
-        cbForward = (CheckBox) itemView.findViewById(R.id.cb_forward);
-        placeHolder = itemView.findViewById(R.id.placeholder);
-        if (isReceiver) {
-            tvNick = (TextView) itemView.findViewById(R.id.tv_userid);
-            progressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar);
-        } else {
-            tv_ack_msg = (TextView) itemView.findViewById(R.id.tv_ack_msg);
-            tv_delivered = (TextView) itemView.findViewById(R.id.tv_delivered);
+            cbForward = (CheckBox) itemView.findViewById(R.id.cb_forward);
+            placeHolder = itemView.findViewById(R.id.placeholder);
 
-            ivMsgStatus = (ImageView) itemView.findViewById(R.id.msg_status);
-            progressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar);
-            tv_error_delete = (TextView) itemView.findViewById(R.id.tv_error);
+            if (isReceiver) {
+                tvNick = (TextView) itemView.findViewById(R.id.tv_userid);
+                progressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar);
+            } else {
+                tv_ack_msg = (TextView) itemView.findViewById(R.id.tv_ack_msg);
+                tv_delivered = (TextView) itemView.findViewById(R.id.tv_delivered);
+
+                ivMsgStatus = (ImageView) itemView.findViewById(R.id.msg_status);
+                progressBar = (ProgressBar) itemView.findViewById(R.id.progress_bar);
+                tv_error_delete = (TextView) itemView.findViewById(R.id.tv_error);
+            }
         }
     }
+
+    private void afficheFindViewById(View itemView){
+        timeStamp = itemView.findViewById(R.id.timestamp);
+        tv_bubble = itemView.findViewById(R.id.bubble);
+    }
+
     //文本
     public void textFindViewById(View itemView,boolean isReceiver){
         tvContent = (TextView) itemView.findViewById(R.id.tv_chatcontent);
@@ -181,52 +205,63 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
         tv_content = (TextView) itemView.findViewById(R.id.tv_content);
     }
 
+    private void warningFindViewById(View itemView){
+        timeStamp = itemView.findViewById(R.id.timestamp);
+        mTvAperson = itemView.findViewById(R.id.tv_aperson);
+        mTvApersonPhone = itemView.findViewById(R.id.tv_aperson_phone);
+        mTvRecePerson = itemView.findViewById(R.id.tv_rece_person);
+        mTvRecePersonPhone = itemView.findViewById(R.id.tv_rece_person_phone);
+        mTvAlarmTime = itemView.findViewById(R.id.tv_alarm_time);
+        mTvAddress = itemView.findViewById(R.id.tv_address);
+        mTvSummary = itemView.findViewById(R.id.tv_summary);
+    }
+
     public static class TextReceivedHolder extends ChatViewHolder {
         public TextReceivedHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             textFindViewById(itemView,isReceiver);
         }
     }
     public static class TextSendHolder extends ChatViewHolder {
         public TextSendHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             textFindViewById(itemView,isReceiver);
         }
     }
     public static class ImageReceivedHolder extends ChatViewHolder {
         public ImageReceivedHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             imageFindViewById(itemView,isReceiver);
         }
     }
     public static class ImageSendHolder extends ChatViewHolder {
         public ImageSendHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             imageFindViewById(itemView,isReceiver);
         }
     }
 
     public static class VideoReceivedHolder extends ChatViewHolder {
         public VideoReceivedHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             videoFindViewById(itemView,isReceiver);
         }
     }
     public static class VideoSendHolder extends ChatViewHolder {
         public VideoSendHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             videoFindViewById(itemView,isReceiver);
         }
     }
     public static class PrivateCallReceivedHolder extends ChatViewHolder {
         public PrivateCallReceivedHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             privateCallFindViewById(itemView,isReceiver);
         }
     }
     public static class PrivateCallSendHolder extends ChatViewHolder {
         public PrivateCallSendHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             privateCallFindViewById(itemView,isReceiver);
         }
     }
@@ -239,25 +274,25 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
     }
     public static class VoiceSendHolder extends ChatViewHolder {
         public VoiceSendHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             groupCallFindViewById(itemView,isReceiver);
         }
     }
     public static class LocationReceivedHolder extends ChatViewHolder {
         public LocationReceivedHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             locationFindViewById(itemView,isReceiver);
         }
     }
     public static class LocationSendHolder extends ChatViewHolder {
         public LocationSendHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             locationFindViewById(itemView,isReceiver);
         }
     }
     public static class FileReceivedHolder extends ChatViewHolder {
         public FileReceivedHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             fileFindViewById(itemView,isReceiver);
         }
     }
@@ -276,28 +311,40 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
     }
     public static class LiveSendHolder extends ChatViewHolder {
         public LiveSendHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             videoLiveFindViewById(itemView,isReceiver);
         }
     }
 
     public static class HyperlinkReceivedHolder extends ChatViewHolder {
         public HyperlinkReceivedHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             hyperlinkFindViewById(itemView,isReceiver);
         }
     }
     public static class HyperlinkSendHolder extends ChatViewHolder {
         public HyperlinkSendHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             hyperlinkFindViewById(itemView,isReceiver);
         }
     }
 
     public static class TextMergeTransmitHolder extends ChatViewHolder {
         public TextMergeTransmitHolder(View itemView,boolean isReceiver) {
-            super(itemView,isReceiver);
+            super(itemView,isReceiver,false,false);
             mergeTransmitFindViewById(itemView,isReceiver);
+        }
+    }
+
+    public static class WarningHolder extends ChatViewHolder{
+        public WarningHolder(View itemView){
+            super(itemView,false,true,false);
+        }
+    }
+
+    public static class AfficheHolder extends ChatViewHolder{
+        public AfficheHolder(View itemView){
+            super(itemView,false,false,true);
         }
     }
 }

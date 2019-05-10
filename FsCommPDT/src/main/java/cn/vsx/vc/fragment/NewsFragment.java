@@ -76,14 +76,15 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.CombatGroupActivity;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
+import cn.vsx.vc.activity.HistoryCombatGroupActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.PhoneAssistantManageActivity;
 import cn.vsx.vc.activity.PushLiveMessageManageActivity;
 import cn.vsx.vc.adapter.MessageListAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.DeleteMessageDialog;
-import cn.vsx.vc.receiveHandle.ReceiveGoToHelpCombatHandler;
 import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverDeleteMessageHandler;
 import cn.vsx.vc.receiver.NotificationClickReceiver;
@@ -468,11 +469,9 @@ public class NewsFragment extends BaseFragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             TerminalMessage terminalMessage = messageList.get(position);
-            if(terminalMessage.unReadCount!=0){
-                terminalMessage.unReadCount = 0;
-                unReadCountChanged();//未读消息数变了，通知tab
-                saveMessagesToSql();
-            }
+            terminalMessage.unReadCount = 0;
+            unReadCountChanged();//未读消息数变了，通知tab
+            saveMessagesToSql();
             // 进入图像助手
             if(terminalMessage.messageFromId == terminalMessage.messageToId &&
                     terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) &&
@@ -493,8 +492,8 @@ public class NewsFragment extends BaseFragment {
                 context.startActivity(intent);
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//进入组会话页
-                if(terminalMessage.messageBody.containsKey(JsonParam.COMBAT_GROUP) && terminalMessage.messageBody.getBooleanValue(JsonParam.COMBAT_GROUP)){
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveGoToHelpCombatHandler.class, false, false);
+                if(TerminalMessageUtil.isCombatGroup(terminalMessage)){
+                    context.startActivity(new Intent(context, CombatGroupActivity.class));
                 }else {
                     Intent intent = new Intent(context, GroupCallNewsActivity.class);
                     intent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
@@ -570,11 +569,19 @@ public class NewsFragment extends BaseFragment {
         @Override
         public void handle(TerminalMessage terminalMessage){
             //组的警情消息都是合成作战组消息
+            for(TerminalMessage next : terminalMessageData){
+                if(TerminalMessageUtil.isSameGroupMessage(next, terminalMessage) || TerminalMessageUtil.isSameMemberMessage(next, terminalMessage)){
+                    if(next.messageVersion >= terminalMessage.messageVersion){
+                        return;
+                    }
+                }
+            }
             if(TerminalMessageUtil.isGroupMeaage(terminalMessage)){
+
                 //添加到合成作战组
                 if(GroupUtils.isCombatGroup(terminalMessage.messageToId)){
-                    terminalMessage.messageBody.put(JsonParam.COMBAT_GROUP,true);
                     //如果是合成作战组存一下标记
+                    terminalMessage.messageBody.put(JsonParam.COMBAT_GROUP,true);
                     saveHelpCombatMessage(terminalMessage, false);
                     saveHelpCombatMessageToSql(terminalMessage);
                 }else {
@@ -587,7 +594,6 @@ public class NewsFragment extends BaseFragment {
             mHandler.post(() -> {
                 clearData();
                 addData(terminalMessageData);
-                //来一条消息的时候不用删除响应组
                 sortMessageList();
                 unReadCountChanged();
             });
@@ -599,6 +605,13 @@ public class NewsFragment extends BaseFragment {
         synchronized(NewsFragment.this){
             terminalMessageData.clear();
             terminalMessageData.addAll(messageList);
+            for(TerminalMessage next : terminalMessageData){
+                if(TerminalMessageUtil.isSameGroupMessage(next, terminalMessage) || TerminalMessageUtil.isSameMemberMessage(next, terminalMessage)){
+                    if(next.messageVersion >= terminalMessage.messageVersion){
+                        return;
+                    }
+                }
+            }
             if (terminalMessage.messageFromId == terminalMessage.messageToId
                     && terminalMessage.messageToId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//主动播的消息，存入视频助手
                 if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() &&
@@ -619,6 +632,9 @@ public class NewsFragment extends BaseFragment {
                     }else {
                         saveMessageToList(terminalMessage,false);
                     }
+                }else {
+                    //组的警情消息会在警情详情那里处理
+                    return;
                 }
             }else {
                 if(terminalMessage.messageType != MessageType.WARNING_INSTANCE.getCode()){
@@ -638,18 +654,45 @@ public class NewsFragment extends BaseFragment {
     private void saveHelpCombatMessageToSql(TerminalMessage terminalMessage) {
         List<TerminalMessage> combatMessageList = TerminalFactory.getSDK().getTerminalMessageManager().getCombatMessageList();
         Iterator<TerminalMessage> iterator = combatMessageList.iterator();
+        boolean remove = false;
         while (iterator.hasNext()){
             TerminalMessage next = iterator.next();
-            if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getTempGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
+            if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() &&
+                    terminalMessage.messageBody.containsKey(JsonParam.COMBAT_GROUP) &&
+                    terminalMessage.messageBody.getBooleanValue(JsonParam.COMBAT_GROUP)&&
                     next.messageToId == terminalMessage.messageToId){
+                setCombatMessageUnreadCount(next,terminalMessage);
                 iterator.remove();
+                remove = true;
                 break;
             }
+        }
+        if(!remove){
+            terminalMessage.unReadCount+=1;
         }
         combatMessageList.add(terminalMessage);
         MyTerminalFactory.getSDK().getTerminalMessageManager().updateCombatMessageList(combatMessageList);
     }
+
+    /**
+     * 设置合成作战组某一条消息未读数量
+     * @param lastMessage 以前的消息
+     * @param terminalMessage 新消息
+     */
+    private void setCombatMessageUnreadCount(TerminalMessage lastMessage,TerminalMessage terminalMessage){
+
+        if(terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){
+            //组呼消息，判断组是否被监听
+            if(GroupUtils.getAllMonitorGroups().contains(terminalMessage.messageToId)){
+                terminalMessage.unReadCount = lastMessage.unReadCount;
+            }else {
+                terminalMessage.unReadCount = lastMessage.unReadCount+1;
+            }
+        }else {
+            terminalMessage.unReadCount = lastMessage.unReadCount+1;
+        }
+    }
+
     private void saveHistoryHelpCombatMessageToSql(int combatGroupId) {
         TerminalMessage handleMessage = null;
         //从处理中变为处理完成；从处理列表移除
@@ -658,7 +701,7 @@ public class NewsFragment extends BaseFragment {
         while (iterator.hasNext()){
             TerminalMessage next = iterator.next();
             if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                    TempGroupType.TO_HELP_COMBAT.toString().equals((DataUtil.getTempGroupByGroupNo(next.messageToId)).getTempGroupType()) &&
+                    TerminalMessageUtil.isCombatGroup(next)&&
                     next.messageToId == combatGroupId){
                 handleMessage = next;
                 iterator.remove();
@@ -668,7 +711,6 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().getTerminalMessageManager().updateCombatMessageList(combatMessageList);
         //添加到历史列表
         if (handleMessage != null){
-            //从处理中变为处理完成；从处理列表移除
             List<TerminalMessage> historyCombatMessageList = TerminalFactory.getSDK().getTerminalMessageManager().getHistoryCombatMessageList();
             historyCombatMessageList.add(handleMessage);
             MyTerminalFactory.getSDK().getTerminalMessageManager().updateHistoryCombatMessageList(historyCombatMessageList);
@@ -682,14 +724,16 @@ public class NewsFragment extends BaseFragment {
         while (iterator.hasNext()){
             TerminalMessage next = iterator.next();
             if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode() && //合成作战组消息，只存一个条目
-                    next.messageBody.containsKey(JsonParam.COMBAT_GROUP) && next.messageBody.getBooleanValue(JsonParam.COMBAT_GROUP)){
+                    next.messageBody !=null && next.messageBody.containsKey(JsonParam.COMBAT_GROUP) && next.messageBody.getBooleanValue(JsonParam.COMBAT_GROUP)){
                 unReadCount = next.unReadCount;
                 iterator.remove();
                 break;
             }
         }
-        terminalMessageData.add(terminalMessage);
-        whetherUnReadAdd(unReadCount, terminalMessage,clearUnread,0);
+        TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
+        //是否往消息列表里未读消息+1
+        whetherUnReadAdd(unReadCount, terminalMessage1,clearUnread,0);
+        terminalMessageData.add(terminalMessage1);
     }
 
     /**  下载原图  **/
@@ -754,7 +798,12 @@ public class NewsFragment extends BaseFragment {
                         setGroupMessageUnReadCount(unReadCount, terminalMessage,tempGroupMessageVersion);
                     }
                 }else {//组会话页关闭， 通知
-                    setGroupMessageUnReadCount(unReadCount, terminalMessage,tempGroupMessageVersion);
+                    if(ActivityCollector.isActivityExist(CombatGroupActivity.class) ||
+                            ActivityCollector.isActivityExist(HistoryCombatGroupActivity.class)){
+                        terminalMessage.unReadCount = 0;
+                    }else {
+                        setGroupMessageUnReadCount(unReadCount, terminalMessage,tempGroupMessageVersion);
+                    }
                 }
             }
         }

@@ -84,6 +84,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         values.put("message_version", terminalMessage.messageVersion);
         values.put("result_code", terminalMessage.resultCode);
         values.put("send_time", terminalMessage.sendTime);
+        values.put("message_to_unique_no",terminalMessage.messageToUniqueNo);
+        values.put("message_from_unique_no",terminalMessage.messageFromUniqueNo);
         values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
         db.replace(TABLE_TERMINAL_MESSAGE, null, values);
 //        db.close();
@@ -317,6 +319,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 terminalMessage.messageVersion = cursor.getLong(cursor.getColumnIndex("message_version"));
                 terminalMessage.resultCode = cursor.getInt(cursor.getColumnIndex("result_code"));
                 terminalMessage.sendTime = cursor.getLong(cursor.getColumnIndex("send_time"));
+                terminalMessage.messageFromUniqueNo = cursor.getLong(cursor.getColumnIndex("message_from_unique_no"));
+                terminalMessage.messageToUniqueNo = cursor.getLong(cursor.getColumnIndex("message_to_unique_no"));
                 int messageStatus = cursor.getInt(cursor.getColumnIndex("message_status"));
                 terminalMessage.messageStatus = (messageStatus == 1)?MessageStatus.MESSAGE_RECALL.toString():MessageStatus.MESSAGE_NORMAL.toString();
                 //消息列表数据库才有unread_count这个字段
@@ -337,6 +341,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public synchronized void updateMessageList(List<TerminalMessage> terminalMessages) {
+        logger.info("保存消息列表数据:"+terminalMessages);
         SQLiteDatabase db = helper.getWritableDatabase();
         //开始事务
         db.beginTransaction();
@@ -360,6 +365,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("result_code", terminalMessage.resultCode);
                 values.put("send_time", terminalMessage.sendTime);
                 values.put("unread_count", terminalMessage.unReadCount);
+                values.put("message_to_unique_no",terminalMessage.messageToUniqueNo);
+                values.put("message_from_unique_no",terminalMessage.messageFromUniqueNo);
                 values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
                 db.replace(MESSAGE_LIST, null, values);
             }
@@ -378,11 +385,12 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public synchronized void updateCombatMessageList(List<TerminalMessage> terminalMessages) {
+        logger.info("保存合成作战组列表数据:"+terminalMessages);
         SQLiteDatabase db = helper.getWritableDatabase();
         //开始事务
         db.beginTransaction();
         try{
-            db.execSQL("DELETE FROM messageList");
+            db.execSQL("DELETE FROM combatMessageList");
             for (TerminalMessage terminalMessage : terminalMessages) {
                 ContentValues values = new ContentValues();
                 values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
@@ -401,6 +409,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("result_code", terminalMessage.resultCode);
                 values.put("send_time", terminalMessage.sendTime);
                 values.put("unread_count", terminalMessage.unReadCount);
+                values.put("message_to_unique_no",terminalMessage.messageToUniqueNo);
+                values.put("message_from_unique_no",terminalMessage.messageFromUniqueNo);
                 values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
                 db.replace(COMBAT_MESSAGE_LIST, null, values);
             }
@@ -419,11 +429,12 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public synchronized void updateHistoryCombatMessageList(List<TerminalMessage> terminalMessages) {
+        logger.info("保存合成作战组历史列表数据:"+terminalMessages);
         SQLiteDatabase db = helper.getWritableDatabase();
         //开始事务
         db.beginTransaction();
         try{
-            db.execSQL("DELETE FROM messageList");
+            db.execSQL("DELETE FROM historyCombatMessageList");
             for (TerminalMessage terminalMessage : terminalMessages) {
                 ContentValues values = new ContentValues();
                 values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
@@ -442,6 +453,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("result_code", terminalMessage.resultCode);
                 values.put("send_time", terminalMessage.sendTime);
                 values.put("unread_count", terminalMessage.unReadCount);
+                values.put("message_to_unique_no",terminalMessage.messageToUniqueNo);
+                values.put("message_from_unique_no",terminalMessage.messageFromUniqueNo);
                 values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
                 db.replace(HISTORY_COMBAT_MESSAGE_LIST, null, values);
             }
@@ -462,21 +475,27 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     public synchronized List<TerminalMessage> getMessageList() {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(MESSAGE_LIST, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
-        return getTerminalMessageList(db, cursor);
+        List<TerminalMessage> terminalMessageList = getTerminalMessageList(db, cursor);
+        logger.info("查询消息列表数据："+terminalMessageList);
+        return terminalMessageList;
     }
 
     @Override
     public synchronized List<TerminalMessage> getCombatMessageList() {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(COMBAT_MESSAGE_LIST, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
-        return getTerminalMessageList(db, cursor);
+        List<TerminalMessage> terminalMessageList = getTerminalMessageList(db, cursor);
+        logger.info("查询合成作战组消息列表数据："+terminalMessageList);
+        return terminalMessageList;
     }
 
     @Override
     public synchronized List<TerminalMessage> getHistoryCombatMessageList() {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(HISTORY_COMBAT_MESSAGE_LIST, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
-        return getTerminalMessageList(db, cursor);
+        List<TerminalMessage> terminalMessageList = getTerminalMessageList(db, cursor);
+        logger.info("查询合成作战组历史消息列表数据："+terminalMessageList);
+        return terminalMessageList;
     }
 
     @Override

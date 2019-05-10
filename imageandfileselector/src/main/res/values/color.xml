@@ -52,6 +52,7 @@
     <color name="black_01">#010101</color>
     <color name="black_">#0000</color>
     <color name="diver_bg">#0d182b</color>
-
-
+    
+    <color name="textview_color">#637e9e</color>
+    <color name="edittext_textcolor">#34B4FF</color>
 </resources>

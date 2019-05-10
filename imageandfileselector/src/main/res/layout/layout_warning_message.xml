@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_horizontal"
+    android:paddingTop="@dimen/dp_13">
+    <TextView
+        android:id="@+id/timestamp"
+        style="@style/chat_text_date_style"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+        
+        <TextView
+            style="@style/chat_warning_common_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="报  警  人 :" />
+        
+        <TextView
+            android:id="@+id/tv_aperson"
+            style="@style/warning_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="张晋" />
+        
+        <TextView
+            android:id="@+id/tv_aperson_phone"
+            style="@style/warning_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="13100715231" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+        
+        <TextView
+            style="@style/chat_warning_common_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="派  警  人 :" />
+        
+        <TextView
+            android:id="@+id/tv_rece_person"
+            style="@style/warning_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="张晋" />
+        
+        <TextView
+            android:id="@+id/tv_rece_person_phone"
+            style="@style/warning_name_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="027-51253652" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+        
+        <TextView
+            style="@style/chat_warning_common_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="报警时间 :" />
+        
+        <TextView
+            android:id="@+id/tv_alarm_time"
+            style="@style/chat_warning_common_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="2019.01.02 20:02" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+        
+        <TextView
+            style="@style/chat_warning_common_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="案发地点 :" />
+        
+        <TextView
+            android:id="@+id/tv_address"
+            style="@style/chat_warning_common_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:text="光谷大道" />
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_marginTop="10dp"
+        android:orientation="horizontal">
+        
+        <TextView
+            style="@style/chat_warning_common_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="报警内容 :" />
+        
+        <TextView
+            android:id="@+id/tv_summary"
+            style="@style/chat_warning_common_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp" />
+    </LinearLayout>
+</LinearLayout>

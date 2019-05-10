@@ -103,9 +103,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.application.UpdateManager;
 import cn.vsx.vc.fragment.ContactsFragmentNew;
-import cn.vsx.vc.fragment.CurrentCombatFragment;
 import cn.vsx.vc.fragment.GroupSearchFragment;
-import cn.vsx.vc.fragment.HistoryCombatFragment;
 import cn.vsx.vc.fragment.NewsFragment;
 import cn.vsx.vc.fragment.PersonSearchFragment;
 import cn.vsx.vc.fragment.SearchFragment;
@@ -113,7 +111,6 @@ import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
-import cn.vsx.vc.receiveHandle.ReceiveGoToHelpCombatHandler;
 import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
@@ -481,40 +478,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
     };
 
-    private ReceiveGoToHelpCombatHandler mReceiveGoToHelpCombatHandler = new ReceiveGoToHelpCombatHandler() {
-        @Override
-        public void handler(boolean isGoToHistory, boolean isGoToNewsFragment) {
-            if (isGoToNewsFragment) {
-                if (newsFragment == null) {
-                    newsFragment = new NewsFragment();
-                }
-
-                switchFragment(currentFragment, newsFragment);
-            } else {
-                if (isGoToHistory) {
-                    if (currentCombatFragment == null) {
-                        currentCombatFragment = new CurrentCombatFragment(true);
-                    }
-                    currentCombatFragment.isGoToHistory(isGoToHistory);
-                    switchFragment(currentFragment, currentCombatFragment);
-                } else {
-                    if (historyCombatFragment == null) {
-                        historyCombatFragment = new HistoryCombatFragment(false);
-                    }
-                    historyCombatFragment.isGoToHistory(isGoToHistory);
-                    switchFragment(currentFragment, historyCombatFragment);
-                }
-            }
-            mCurrentFragmentCode=2;
-            MyApplication.instance.isTalkbackFragment = false;
-            showFolatWindow();
-            bv_talk_back.setSelected(false);
-            bv_person_contacts.setSelected(true);
-            bv_group_contacts.setSelected(false);
-            bv_setting.setSelected(false);
-        }
-    };
-
     /**
      * 主动方请求组呼的消息
      */
@@ -590,8 +553,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     /**=====================================================================================================Listener================================================================================================================================**/
     private CallManager callManager;
     private UpdateManager updateManager;
-    private CurrentCombatFragment currentCombatFragment;
-    private HistoryCombatFragment historyCombatFragment;
 
     /**
      * 视频来了，关闭提示框
@@ -961,7 +922,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowPersonFragmentHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowGroupFragmentHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverFragmentDestoryHandler);
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiveGoToHelpCombatHandler);
         //
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
@@ -1229,17 +1189,18 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 break;
 
             case R.id.bv_person_contacts:
-                if (newsFragment == null) {
-                    newsFragment = new NewsFragment();
-                }
-                switchFragment(currentFragment, newsFragment);
-                mCurrentFragmentCode=2;
-                MyApplication.instance.isTalkbackFragment = false;
-                showFolatWindow();
-                bv_talk_back.setSelected(false);
-                bv_person_contacts.setSelected(true);
-                bv_group_contacts.setSelected(false);
-                bv_setting.setSelected(false);
+                 if (newsFragment == null) {
+                     newsFragment = new NewsFragment();
+                 }
+                 switchFragment(currentFragment, newsFragment);
+                 mCurrentFragmentCode=2;
+                 MyApplication.instance.isTalkbackFragment = false;
+                 showFolatWindow();
+                 bv_talk_back.setSelected(false);
+                 bv_person_contacts.setSelected(true);
+                 bv_group_contacts.setSelected(false);
+                 bv_setting.setSelected(false);
+
                 break;
             case R.id.bv_group_contacts:
                 if (contactsFragmentNew == null) {
@@ -1583,7 +1544,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowGroupFragmentHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverFragmentDestoryHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiveGoToHelpCombatHandler);
 
         if(timerTask != null){
             timerTask.cancel();

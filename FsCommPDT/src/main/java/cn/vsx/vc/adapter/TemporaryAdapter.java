@@ -124,8 +124,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private static final int MESSAGE_HYPERLINK_SEND = 27;//超链接
     private static final int MESSAGE_GB28181_RECODE_SEND = 28;//视频平台
     private static final int MESSAGE_MERGE_TRANSMIT_SEND = 29;//合并转发
+    private static final int MESSAGE_AFFICHE= 30;//公告
 
-    public static final int MIN_CLICK_DELAY_TIME = 1000;
+    private static final int MIN_CLICK_DELAY_TIME = 1000;
     private long lastClickTime = 0;
 
     FrameLayout fragment_contener;
@@ -258,15 +259,17 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             case MESSAGE_LOCATION_SEND:
                 holder =   new ChatViewHolder.LocationSendHolder(getViewByType(viewType, parent),false);
                 break;
-            case MESSAGE_WARNING_INSTANCE_RECEIVED:
             case MESSAGE_VIDEO_LIVE_RECEIVED:
             case MESSAGE_GB28181_RECODE_RECEIVED:
                 holder =   new ChatViewHolder.LiveReceivedHolder(getViewByType(viewType, parent),true);
                 break;
-            case MESSAGE_WARNING_INSTANCE_SEND:
             case MESSAGE_VIDEO_LIVE_SEND:
             case MESSAGE_GB28181_RECODE_SEND:
                 holder =   new ChatViewHolder.LiveSendHolder(getViewByType(viewType, parent),false);
+                break;
+            case MESSAGE_WARNING_INSTANCE_RECEIVED:
+            case MESSAGE_WARNING_INSTANCE_SEND:
+                holder = new ChatViewHolder.WarningHolder(getViewByType(viewType,parent));
                 break;
             case MESSAGE_PRIVATE_CALL_RECEIVED:
                 holder =   new ChatViewHolder.PrivateCallReceivedHolder(getViewByType(viewType, parent),true);
@@ -286,6 +289,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             case MESSAGE_MERGE_TRANSMIT_SEND:
                 holder =   new ChatViewHolder.TextMergeTransmitHolder(getViewByType(viewType, parent),false);
                 break;
+            case MESSAGE_AFFICHE:
+                holder = new ChatViewHolder.AfficheHolder(getViewByType(viewType,parent));
+                break;
         }
         return holder;
     }
@@ -296,7 +302,11 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             final TerminalMessage terminalMessage = chatMessageList.get(position);
             final int viewType = getItemViewType(position);
             //消息撤回
-            if(MessageStatus.valueOf(terminalMessage.messageStatus).getCode() == MessageStatus.MESSAGE_RECALL.getCode()){
+            if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
+                setWarningData(terminalMessage,position,holder);
+            }else if(terminalMessage.messageType == MessageType.AFFICHE.getCode()){
+                // TODO: 2019/5/9 公告
+            }else if(MessageStatus.valueOf(terminalMessage.messageStatus).getCode() == MessageStatus.MESSAGE_RECALL.getCode()){
                 withDrawView(terminalMessage,holder);
             }else{
                 setViewVisibility(holder.timeStamp, View.VISIBLE);
@@ -308,6 +318,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
+        if(chatMessageList.get(position).messageType == MessageType.AFFICHE.getCode()){
+            return MESSAGE_AFFICHE;
+        }
         if (isReceiver(chatMessageList.get(position))) {//接收
             if (chatMessageList.get(position).messageType == MessageType.SHORT_TEXT.getCode()) {
                 return MESSAGE_SHORT_TEXT_RECEIVED;
@@ -451,6 +464,22 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         }
     }
 
+    /**
+     * 设置警情UI
+     */
+    private void setWarningData(TerminalMessage terminalMessage, int positon ,ChatViewHolder holder){
+        if(terminalMessage.messageBody.containsKey(JsonParam.DETAIL) && terminalMessage.messageBody.getBooleanValue(JsonParam.DETAIL)){
+            JSONObject messageBody = terminalMessage.messageBody;
+            handlerTime(terminalMessage,positon,holder);
+            holder.mTvAperson.setText(messageBody.getString(JsonParam.APERSON));
+            holder.mTvApersonPhone.setText(messageBody.getString(JsonParam.APERSON_PHONE));
+            holder.mTvRecePerson.setText(messageBody.getString(JsonParam.RECVPERSON));
+            holder.mTvRecePersonPhone.setText(messageBody.getString(JsonParam.RECVPHONE));
+            holder.mTvAlarmTime.setText(messageBody.getString(JsonParam.ALARM_TIME));
+            holder.mTvAddress.setText(messageBody.getString(JsonParam.ADDRESS));
+            holder.mTvSummary.setText(messageBody.getString(JsonParam.SUMMARY));
+        }
+    }
     /**
      * 设置撤回UI
      * @param terminalMessage
@@ -1838,14 +1867,17 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 return inflater.inflate(R.layout.row_received_location, parent, false);
             case MESSAGE_LOCATION_SEND:
                 return inflater.inflate(R.layout.row_sent_location, parent, false);
-            case MESSAGE_WARNING_INSTANCE_RECEIVED:
+
             case MESSAGE_VIDEO_LIVE_RECEIVED:
             case MESSAGE_GB28181_RECODE_RECEIVED:
                 return inflater.inflate(R.layout.row_receiver_live, parent, false);
-            case MESSAGE_WARNING_INSTANCE_SEND:
+
             case MESSAGE_VIDEO_LIVE_SEND:
             case MESSAGE_GB28181_RECODE_SEND:
                 return inflater.inflate(R.layout.row_send_live, parent, false);
+            case MESSAGE_WARNING_INSTANCE_RECEIVED:
+            case MESSAGE_WARNING_INSTANCE_SEND:
+                return inflater.inflate(R.layout.layout_warning_message,parent,false);
             case MESSAGE_PRIVATE_CALL_RECEIVED:
                 return inflater.inflate(R.layout.row_receiver_private_call, parent, false);
             case MESSAGE_PRIVATE_CALL_SEND:
@@ -1858,6 +1890,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 return inflater.inflate(R.layout.row_receiver_merge_transmit, parent, false);
             case MESSAGE_MERGE_TRANSMIT_SEND:
                 return inflater.inflate(R.layout.row_send_merge_transmit, parent, false);
+            case MESSAGE_AFFICHE:
+                return inflater.inflate(R.layout.layout_affiche_message, parent, false);
             default:
                 return inflater.inflate(R.layout.row_sent_message, parent, false);
         }

@@ -1,5 +1,4 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-
     <!--
         Base application theme, dependent on API level. This theme is replaced
         by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
@@ -11,8 +10,6 @@
             backward-compatibility can go here.
         -->
     </style>
-
-
     <!-- Application theme. -->
     <style name="AppTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
@@ -20,15 +17,12 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
-
+    
     <style name="wrap_content_style">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">center</item>
     </style>
-    
-
-    
     <!-- 对讲界面顶部图标 -->
     <style name="image_wrap_content_style">
         <item name="android:layout_width">20dp</item>
@@ -40,13 +34,11 @@
         <item name="android:textColor">@color/new_call_gruop_number</item>
         <item name="android:textSize">@dimen/x15</item>
     </style>
-    
     <!-- 显示当前文件夹的文本样式 -->
     <style name="current_folder" parent="wrap_content_style">
         <item name="android:textColor">@color/new_call_current_folder</item>
         <item name="android:textSize">@dimen/x20</item>
     </style>
-    
     <!-- 显示当前组的文本样式 -->
     <style name="current_group" parent="wrap_content_style">
         <item name="android:textColor">@color/new_call_gruop_name</item>
@@ -58,48 +50,42 @@
         <item name="android:text">@string/silence_text</item>
         <item name="android:textSize">@dimen/x15</item>
     </style>
-    
-     <!-- 我正在说话 -->
+    <!-- 我正在说话 -->
     <style name="speaking_text" parent="wrap_content_style">
         <item name="android:textColor">#fcc236</item>
         <item name="android:text">@string/i_am_speaking</item>
     </style>
-    
     <!-- 当前说话人 -->
     <style name="current_speaker" parent="wrap_content_style">
         <item name="android:textColor">#fcc236</item>
         <item name="android:textSize">@dimen/current_speaker_text_size</item>
         <item name="android:layout_marginRight">@dimen/x9</item>
     </style>
-    
     <!-- 准备说话-->
     <style name="pre_speaking_text" parent="wrap_content_style">
         <item name="android:textColor">#fcc236</item>
         <item name="android:text">@string/pre_speaking</item>
     </style>
-
-
     <!-- 切组两边的圆圈 -->
     <style name="change_group_circle" parent="wrap_content_style">
         <item name="android:textColor">@color/white</item>
         <item name="android:background">@drawable/change_group_circle_shape</item>
         <item name="android:textStyle">normal</item>
     </style>
+    
     <style name="setting_text_style">
         <item name="android:textSize">@dimen/x12</item>
         <item name="android:textColor">#313131</item>
         <item name="android:textStyle">normal</item>
     </style>
-
+    
     <style name="setting_text_style_left">
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">@color/setting_text</item>
         <item name="android:textStyle">normal</item>
         <item name="android:layout_marginLeft">@dimen/x18</item>
     </style>
-
-
-
+    
     <style name="setting_MToggleButton">
         <item name="android:layout_width">@dimen/x44</item>
         <item name="android:layout_height">@dimen/y12</item>
@@ -111,18 +97,13 @@
         <item name="mtogglebutton_button_off">@drawable/mtogglebutton_button_off</item>
         <item name="mtogglebutton_button_on">@drawable/mtogglebutton_button_on</item>
     </style>
-
     <!-- PTT按钮 -->
-    <style name="ptt_button" >
+    <style name="ptt_button">
         <item name="android:layout_width">280dp</item>
         <item name="android:layout_height">280dp</item>
         <item name="android:background">@drawable/ptt_silence</item>
         <item name="android:layout_gravity">top</item>
     </style>
-    
-
-
-    
     <!-- 进度条样式 -->
     <style name="progress_dialog" parent="@android:style/Theme.Dialog">
         <item name="android:windowFrame">@null</item> <!-- Dialog的windowFrame框为无 -->
@@ -132,7 +113,6 @@
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
-    
     <!-- 改名dialog样式 -->
     <style name="change_name_dialog" parent="@android:style/Theme.Dialog">
         <item name="android:windowFrame">@null</item> <!-- Dialog的windowFrame框为无 -->
@@ -143,14 +123,11 @@
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
     </style>
-
+    
     <style name="TRM_ANIM_STYLE">
         <item name="android:windowEnterAnimation">@anim/trm_popup_enter</item>
         <item name="android:windowExitAnimation">@anim/trm_popup_exit</item>
     </style>
-
-
-
     <!--群组界面-组名style-->
     <style name="group_name">
         <item name="android:layout_width">wrap_content</item>
@@ -159,25 +136,23 @@
         <item name="android:textColor">@color/group_text_gray</item>
         <item name="android:textSize">@dimen/x12</item>
     </style>
-
     <!--<style name="LiveAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         &lt;!&ndash; Customize your theme here. &ndash;&gt;
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
     </style>-->
-
-    <style name="dialog_style"  parent="android:Theme.Dialog">
+    <style name="dialog_style" parent="android:Theme.Dialog">
         <item name="android:windowNoTitle">true</item><!--除去title-->
         <item name="android:windowBackground">@null</item><!--除去背景色-->
     </style>
-
+    
     <style name="mypopwindow_anim_style">
         <item name="android:windowEnterAnimation">@anim/push_bottom_in</item>
         <!-- 指定显示的动画xml -->
-
         <item name="android:windowExitAnimation">@anim/push_buttom_out</item>
         <!-- 指定消失的动画xml -->
     </style>
+    
     <style name="TranslucentTheme" parent="AppBaseTheme">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
@@ -194,42 +169,47 @@
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:backgroundDimEnabled">false</item>
     </style>
-
+    
     <style name="pttSilenceText">
         <item name="android:textColor">@color/ptt_silence_text</item>
     </style>
+    
     <style name="pttPreSpeakText">
         <item name="android:textColor">@color/ptt_pre_speak_text</item>
     </style>
+    
     <style name="pttSpeakingText">
         <item name="android:textColor">@color/ptt_speaking_text</item>
     </style>
+    
     <style name="pttWaitingText">
         <item name="android:textColor">@color/ptt_waiting_text</item>
     </style>
+    
     <style name="contacts_title_checked_text">
         <item name="android:textColor">@color/contacts_title_checked_text</item>
     </style>
+    
     <style name="contacts_title_unchecked_text">
         <item name="android:textColor">@color/contacts_title_unchecked_text</item>
     </style>
-
+    
     <style name="funcation_top_btn_text">
         <item name="android:textColor">@color/funcation_top_btn_text</item>
     </style>
-
+    
     <style name="function_wait_text">
         <item name="android:textColor">@color/function_wait_text</item>
     </style>
-
+    
     <style name="ptt_gray">
         <item name="android:textColor">@color/ptt_gray</item>
     </style>
-
+    
     <style name="white">
         <item name="android:textColor">@color/white</item>
     </style>
-
+    
     <style name="red">
         <item name="android:textColor">@color/red</item>
     </style>
@@ -249,7 +229,7 @@
     <style name="normal_group_color">
         <item name="android:textColor">@color/group_text_gray</item>
     </style>
-
+    
     <style name="ble_connect_tv">
         <item name="android:textColor">@color/device_name_connect</item>
     </style>
@@ -261,27 +241,32 @@
     <style name="temp_group_checked">
         <item name="android:textColor">@color/textview_checked</item>
     </style>
+    
     <style name="temp_group_unchecked">
         <item name="android:textColor">@color/textview_unchecked</item>
     </style>
+    
     <style name="tab_checked">
         <item name="android:textColor">@color/contacts_line_blue</item>
         <item name="android:textSize">@dimen/sp_14</item>
     </style>
+    
     <style name="tab_unchecked">
         <item name="android:textColor">@color/chat_title</item>
         <item name="android:textSize">@dimen/sp_14</item>
     </style>
-    <style name="warning_common_tv">
-        <item name="android:textColor">@color/textview_color</item>
-        <item name="android:textSize">15sp</item>
-    </style>
-    <style name="warning_name_tv">
-        <item name="android:textColor">@color/edittext_textcolor</item>
-        <item name="android:textSize">15sp</item>
-    </style>
+    
     <style name="no_split_motion_events" parent="AppTheme">
         <item name="android:windowEnableSplitTouch">false</item>
         <item name="android:splitMotionEvents">false</item>
     </style>
+    
+    <style name="AppTheme.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
+    
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
+    
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 </resources>

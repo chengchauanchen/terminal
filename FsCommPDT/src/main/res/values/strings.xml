@@ -564,7 +564,6 @@
     <string name="please_choose_one">请选择一个</string>
     <string name="transpond_success">转发成功</string>
     <string name="transpond_fail">转发失败</string>
-    
     <string name="no_get_temporary_group_id">没有获取到临时组id</string>
     <string name="can_not_cancel_listener">不能取消监听</string>
     <string name="monitor_more_than_five">监听组已超过5个，请先取消别的监听组</string>

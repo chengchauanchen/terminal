@@ -82,4 +82,18 @@
         <item name="android:shadowDy">0</item>
         <item name="android:shadowRadius">10</item>
     </style>
+    
+    <style name="chat_warning_common_tv">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+    
+    <style name="warning_common_tv">
+        <item name="android:textColor">@color/textview_color</item>
+        <item name="android:textSize">15sp</item>
+    </style>
+    <style name="warning_name_tv">
+        <item name="android:textColor">@color/edittext_textcolor</item>
+        <item name="android:textSize">15sp</item>
+    </style>
 </resources>

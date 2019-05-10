@@ -1825,12 +1825,17 @@ public abstract class ChatBaseActivity extends BaseActivity{
             if (resultCode == TerminalErrorCode.OPTION_EXECUTE_ERROR.getErrorCode()&&!isEnoughPageCount) {
                 handler.post(() -> {
                     sflCallList.setRefreshing(false);
+
+
                 });
             } else {
                 stopRefreshAndToast(resultDes);
             }
             refreshing = false;
+        }else {
+
         }
+        handler.post(()-> temporaryAdapter.notifyDataSetChanged());
     };
 
 //    /**  获取百度地图定位的信息  **/

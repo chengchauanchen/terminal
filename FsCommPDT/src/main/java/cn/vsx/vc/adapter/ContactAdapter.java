@@ -239,7 +239,6 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
             ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
         }else{
-            // TODO: 2019/4/15弹窗拨打个呼
             new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account, (dialog, member) -> {
                 activeIndividualCall(member);
                 dialog.dismiss();
