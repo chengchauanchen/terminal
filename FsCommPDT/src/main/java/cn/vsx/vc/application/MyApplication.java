@@ -102,7 +102,7 @@ public class MyApplication extends Application {
 			e.printStackTrace();
 		}
 		MyTerminalFactory.getSDK().getAuthManagerTwo().initIp();
-		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_PHONE.toString());
+		setTerminalMemberType();
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
 		//保存录像，录音，照片的存储路径
 		MyTerminalFactory.getSDK().getFileTransferOperation().initExternalUsableStorage();
@@ -116,7 +116,9 @@ public class MyApplication extends Application {
 
 	}
 
-
+	public void setTerminalMemberType(){
+		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_UAV.toString());
+	}
 
 	public void setIsContactsPersonal(boolean isContactsIndividual){
 		this.isContactsIndividual = isContactsIndividual;
@@ -167,6 +169,7 @@ public class MyApplication extends Application {
 	protected void attachBaseContext(Context base) {
 		super.attachBaseContext(base);
 		MultiDex.install(this);
+		com.secneo.sdk.Helper.install(this);
 	}
 	public enum TYPE{
 		RECODERPUSH,

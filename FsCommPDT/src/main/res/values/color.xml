@@ -580,4 +580,5 @@
     
     <color name="warning_title">#ffffff</color>
     <color name="warning_item_bg">#111f3a</color>
+    <color name="transparent_10">#1A000000</color>
 </resources>

@@ -94,6 +94,17 @@ android {
         exclude 'org/cyberneko/html/res/HTMLspecial.properties'
         exclude 'org/cyberneko/html/res/XMLbuiltin.properties'
         exclude 'org/cyberneko/html/res/HTMLsymbol.properties'
+
+        doNotStrip "*/*/libdjivideo.so"
+        doNotStrip "*/*/libSDKRelativeJNI.so"
+        doNotStrip "*/*/libFlyForbid.so"
+        doNotStrip "*/*/libduml_vision_bokeh.so"
+        doNotStrip "*/*/libyuv2.so"
+        doNotStrip "*/*/libGroudStation.so"
+        doNotStrip "*/*/libFRCorkscrew.so"
+        doNotStrip "*/*/libUpgradeVerify.so"
+        doNotStrip "*/*/libFR.so"
+        exclude 'META-INF/rxjava.properties'
     }
 
 
@@ -171,8 +182,16 @@ dependencies {
     //时间选择器
     implementation 'com.contrarywind:Android-PickerView:3.2.7'
     implementation files('libs/HyteraSDK2.0.jar')
-    /*添加依赖*/
+    /*二维码*/
     implementation 'com.github.yuzhiqiang1993:zxing:2.2.8'
+
+    implementation ('com.dji:dji-sdk:4.9', {
+//             Uncomment the following line if your app does not need Anti Distortion for
+//             Mavic 2 Pro and Mavic 2 Zoom. It will greatly reducing the size of the APK:
+        exclude module: 'library-anti-distortion'
+    })
+    compileOnly 'com.dji:dji-sdk-provided:4.9'
+    implementation 'com.dji:dji-uxsdk:4.9'
 }
 
 

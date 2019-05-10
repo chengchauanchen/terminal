@@ -30,6 +30,7 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.Gson;
 import com.xuchongyang.easyphone.callback.PhoneCallback;
 import com.xuchongyang.easyphone.callback.RegistrationCallback;
 import com.zectec.imageandfileselector.utils.FileUtil;
@@ -62,6 +63,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.model.WarningRecord;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetWarningMessageDetailHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyIndividualCallHandler;
@@ -96,9 +98,16 @@ import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.receiver.NotificationClickReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
+import cn.vsx.vc.utils.AirCraftUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView;
+import dji.common.battery.BatteryState;
+import dji.common.error.DJIError;
+import dji.common.flightcontroller.ConnectionFailSafeBehavior;
+import dji.common.util.CommonCallbacks;
+import dji.sdk.battery.Battery;
+import dji.sdk.products.Aircraft;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.service.KeepLiveManager;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -126,6 +135,7 @@ public class ReceiveHandlerService extends Service{
 
     private static final int DISSMISS_CURRENT_DIALOG = 6;
     private static final int WATCH_LIVE = 7;
+    private static final int UPLOAD_UAV_LOCATION = 9;
     private Logger logger = Logger.getLogger(this.getClass());
     private List<TerminalMessage> data = new ArrayList<>();
     private List<TerminalMessage> warningData = new ArrayList<>();
@@ -139,7 +149,7 @@ public class ReceiveHandlerService extends Service{
     SwipeFlingAdapterView videoSwipeFlingAdapterView;
     @Bind(R.id.warning_swipeFlingAdapterView)
     SwipeFlingAdapterView warningSwipeFlingAdapterView;
-
+    private long uploadTime = 30*1000;
     /**
      * 搜索到的结果集合
      */
@@ -172,6 +182,17 @@ public class ReceiveHandlerService extends Service{
                     intent.putExtra(Constants.WATCH_TYPE,Constants.ACTIVE_WATCH);
                     intent.putExtra(Constants.TERMINALMESSAGE,terminalMessage1);
                     startService(intent);
+                    break;
+                case UPLOAD_UAV_LOCATION:
+                    myHandler.removeMessages(UPLOAD_UAV_LOCATION);
+                    String aircraftLocation = AirCraftUtil.getAircraftLocation();
+                    double latitude = AirCraftUtil.getLatitude(aircraftLocation);
+                    double longitude = AirCraftUtil.getLongitude(aircraftLocation);
+                    float altitude = AirCraftUtil.getAltitude(aircraftLocation);
+                    if(latitude !=0.0 && longitude !=0.0){
+                        sendLocationMessage(latitude,longitude,altitude);
+                    }
+                    myHandler.sendEmptyMessageDelayed(UPLOAD_UAV_LOCATION,uploadTime);
                     break;
                 default:
                     break;
@@ -217,6 +238,7 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getWarningMessageDetailHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveAirCraftStatusChangedHandler);
         //开启voip电话服务
         MyTerminalFactory.getSDK().getVoipCallManager().startService(MyTerminalFactory.getSDK().application);
         //监听voip来电
@@ -509,6 +531,7 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveNotifyDataMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(getWarningMessageDetailHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAirCraftStatusChangedHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoHandler);
 
@@ -570,6 +593,33 @@ public class ReceiveHandlerService extends Service{
         startService(intent);
     }
 
+    private ReceiveAirCraftStatusChangedHandler receiveAirCraftStatusChangedHandler = connected -> {
+        MyTerminalFactory.getSDK().getLiveManager().sendAircraftConnectStatus(connected);
+        if(connected){
+            Aircraft aircraft = AirCraftUtil.getAircraftInstance();
+            if(aircraft == null){
+                ToastUtil.showToast(getApplicationContext(),"aircraft为null");
+                logger.error("aircraft为null");
+            }else {
+                setConnectionFailBehavior();
+                myHandler.postDelayed(() -> checkBattery(aircraft),2000);
+                setUploadTime();
+                //无人机连上时自动位置
+                myHandler.sendEmptyMessageDelayed(UPLOAD_UAV_LOCATION,uploadTime);
+                //无人机连上时自动上报
+                if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
+                    Intent intent = new Intent(getApplicationContext(), AircraftPushService.class);
+                    startService(intent);
+                }else {
+                    ToastUtil.showToast(getApplicationContext(),"没有图像上报的权限，不能自动上报");
+                }
+            }
+
+        }else {
+            myHandler.removeMessages(UPLOAD_UAV_LOCATION);
+        }
+    };
+
     //获取到警情详情
     private GetWarningMessageDetailHandler getWarningMessageDetailHandler = terminalMessage -> {
         if(!TerminalMessageUtil.isGroupMeaage(terminalMessage)){
@@ -595,6 +645,25 @@ public class ReceiveHandlerService extends Service{
             },30*1000);
         }
     };
+
+    /**
+     * 设置遥控器和飞机失联动作
+     */
+    private void setConnectionFailBehavior(){
+        Aircraft aircraft = AirCraftUtil.getAircraftInstance();
+        if(aircraft !=null){
+            aircraft.getFlightController().setConnectionFailSafeBehavior(ConnectionFailSafeBehavior.GO_HOME, new CommonCallbacks.CompletionCallback(){
+                @Override
+                public void onResult(DJIError djiError){
+                    if(djiError == null){
+                        logger.error("设置失联自动返航成功");
+                    }else {
+                        logger.error("设置失联自动返航失败:"+djiError.getDescription());
+                    }
+                }
+            });
+        }
+    }
 
     private long lastNotifyTime = 0;
     /**
@@ -1177,5 +1246,99 @@ public class ReceiveHandlerService extends Service{
         @Override
         public void onScroll(float progress, float scrollXProgress){
         }
+    }
+
+    /**
+     * 监听电量
+     */
+    private void checkBattery(Aircraft aircraft){
+        // TODO: 2019/4/25 有的飞机有多个电池
+        //测试一下如果只有单个电池会不会走下面代码
+        List<Battery> batteries = aircraft.getBatteries();
+        if(batteries !=null && !batteries.isEmpty()){
+            logger.info("电池个数："+batteries.size());
+            Battery battery = batteries.get(0);
+            battery.setStateCallback(new BatteryState.Callback(){
+                @Override
+                public void onUpdate(BatteryState batteryState){
+                    //电池电量小于等于10%时自动返航
+                    //                logger.info("无人机电池电量:"+batteryState.getChargeRemainingInPercent());
+                    if(batteryState.getChargeRemainingInPercent() == 10){
+                        if(!aircraft.getFlightController().getState().isGoingHome()){
+                            //自动返航代码
+                            autoGoHome();
+                        }
+                    }
+                }
+            });
+        }
+
+        //        if(mProduct.getBattery() !=null){
+        //
+        //            mProduct.getBattery().setStateCallback(new BatteryState.Callback(){
+        //                @Override
+        //                public void onUpdate(BatteryState batteryState){
+        //                    //电池电量小于等于10%时自动返航
+        //                    //                logger.info("无人机电池电量:"+batteryState.getChargeRemainingInPercent());
+        //                    if(batteryState.getChargeRemainingInPercent() == 10){
+        //                        if(!((Aircraft) mProduct).getFlightController().getState().isGoingHome()){
+        //                            //自动返航代码
+        //                            autoGoHome(mProduct);
+        //                        }
+        //                    }
+        //                }
+        //            });
+        //        }
+    }
+
+    /**
+     * 自动返航
+     */
+    private void autoGoHome(){
+        Aircraft aircraft = AirCraftUtil.getAircraftInstance();
+        if(null != aircraft){
+            aircraft.getFlightController().startGoHome(new CommonCallbacks.CompletionCallback(){
+                @Override
+                public void onResult(DJIError djiError){
+                    if(djiError == null ){
+                        logger.info("自动返航成功");
+                    }else {
+                        logger.error("autoGoHome--"+djiError.getDescription());
+                    }
+                }
+            });
+        }
+    }
+
+    private void sendLocationMessage(double latitude,double longitude,double altitude){
+        String ip = MyTerminalFactory.getSDK().getParam(Params.GPS_IP);
+        int port = MyTerminalFactory.getSDK().getParam(Params.GPS_PORT,0);
+        //			final String url = "http://192.168.1.174:6666/save";
+        final String url = "http://"+ip+":"+port+"/save";
+        Map<String,Object> params = new HashMap<>();
+        params.put("terminalno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
+        params.put("memberuniqueno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0l));
+        params.put("longitude",longitude);
+        params.put("latitude",latitude);
+        params.put("speed",0.0f);
+        params.put("bearing",0.0f);
+        params.put("altitude",altitude);
+
+        Gson gson = new Gson();
+        final String json = gson.toJson(params);
+        MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable(){
+            @Override
+            public void run(){
+                MyTerminalFactory.getSDK().getHttpClient().postJson(url,"gps="+json);
+            }
+        });
+    }
+
+    /**
+     * 检查上传位置信息的状态
+     * 优先级：强制上传 > Gps开关打开 > 普通上传
+     */
+    private void setUploadTime() {
+        uploadTime = 10*1000;
     }
 }

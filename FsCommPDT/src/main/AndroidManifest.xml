@@ -51,7 +51,8 @@
     <uses-feature
         android:name="android.hardware.nfc.hce"
         android:required="true" />
-    <uses-feature android:name="android.hardware.camera" />
+    <uses-permission android:name="android.permission.GET_TASKS"/>
+    <uses-permission android:name="android.permission.REORDER_TASKS"/>
     <uses-feature
         android:name="android.hardware.usb.host"
         android:required="true" />
@@ -60,6 +61,11 @@
         android:required="true" /> <!-- apk只有在具有bluetooth_le属性的系统里运行 -->
     <uses-feature
         android:name="android.hardware.bluetooth_le"
+        android:required="true" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature
+        android:name="android.hardware.usb.accessory"
         android:required="true" />
     <application
         android:name=".application.MyApplication"
@@ -70,6 +76,27 @@
         android:persistent="true"
         android:theme="@style/AppTheme"
         tools:replace="label, theme">
+        <!-- DJI SDK -->
+        <uses-library android:name="com.android.future.usb.accessory" />
+        <activity
+            android:name="dji.sdk.sdkmanager.DJIAoaControllerActivity"
+            android:theme="@android:style/Theme.Translucent">
+            <intent-filter>
+                <action android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED" />
+            </intent-filter>
+            <meta-data
+                android:name="android.hardware.usb.action.USB_ACCESSORY_ATTACHED"
+                android:resource="@xml/accessory_filter" />
+        </activity>
+        <service android:name="dji.sdk.sdkmanager.DJIGlobalService" /> <!-- DJI SDK -->
+        <!--
+           ADD API_KEY HERE and make sure you
+           are connected to the Internet before
+           the app is launched
+        -->
+        <meta-data
+            android:name="com.dji.sdk.API_KEY"
+            android:value="3b2b5e01ba3b8716c4b2ce8c" />
         
         <meta-data
             android:name="APKTYPE"
@@ -288,6 +315,9 @@
             android:name=".service.ReceiveVoipService"
             android:enabled="true"
             android:exported="false" />
+        <service android:name=".service.AircraftPushService"
+            android:enabled="true"
+            android:exported="false"/>
         <service
             android:name=".service.MultipartyCallService"
             android:enabled="true"

@@ -18,6 +18,7 @@ import android.gesture.GestureOverlayView;
 import android.gesture.Prediction;
 import android.hardware.SensorManager;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -63,6 +64,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import butterknife.Bind;
 import cn.vsx.hamster.common.Authority;
@@ -77,6 +79,7 @@ import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
@@ -118,6 +121,7 @@ import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowPopupwindowHandler;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.ActivityCollector;
+import cn.vsx.vc.utils.AirCraftUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.NfcUtil;
@@ -127,6 +131,18 @@ import cn.vsx.vc.view.BottomView;
 import cn.vsx.vc.view.IndividualCallTimerView;
 import cn.vsx.vc.view.TimerView;
 import cn.vsx.vc.view.custompopupwindow.ChangeNamePopupwindow;
+import dji.common.error.DJIError;
+import dji.common.error.DJISDKError;
+import dji.common.realname.AircraftBindingState;
+import dji.common.realname.AppActivationState;
+import dji.common.useraccount.UserAccountState;
+import dji.common.util.CommonCallbacks;
+import dji.sdk.base.BaseComponent;
+import dji.sdk.base.BaseProduct;
+import dji.sdk.products.Aircraft;
+import dji.sdk.realname.AppActivationManager;
+import dji.sdk.sdkmanager.DJISDKManager;
+import dji.sdk.useraccount.UserAccountManager;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
@@ -860,6 +876,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             super.handleMessage(msg);
             if(msg.what == RECEIVEVOICECHANGED){
                 ll_sliding_chenge_volume.setVisibility(View.GONE);
+            }else if(msg.what == MSG_INFORM_ACTIVATION){
+                loginToActivationIfNeeded();
             }
         }
     };
@@ -875,6 +893,13 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private int width;
     private int height;
     private BackListener mBackListener;
+    private AppActivationState appActivationState;
+    private AircraftBindingState bindingState;
+    private AircraftBindingState.AircraftBindingStateListener bindingStateListener;
+    private AtomicBoolean hasAppActivationListenerStarted = new AtomicBoolean(false);
+    private AppActivationState.AppActivationStateListener appActivationStateListener;
+    private static final int MSG_INFORM_ACTIVATION = 1;
+    private static final int ACTIVATION_DALAY_TIME = 1000;
 
     @Override
     public int getLayoutResId() {
@@ -1053,6 +1078,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
 
         judgePermission();
+        startSDKRegistration();
         NfcUtil.nfcCheck(this);
 
         //清理数据库
@@ -1640,5 +1666,154 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
     public interface BackListener{
         void onBack();
+    }
+
+    private AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);
+    private void startSDKRegistration() {
+        if (isRegistrationInProgress.compareAndSet(false, true)) {
+            AsyncTask.execute(new Runnable() {
+                @Override
+                public void run() {
+                    //                    ToastUtil.showToast(getApplicationContext(),"registering, pls wait...");
+                    DJISDKManager.getInstance().registerApp(getApplicationContext(), new DJISDKManager.SDKManagerCallback() {
+                        @Override
+                        public void onRegister(DJIError djiError) {
+                            if (djiError == DJISDKError.REGISTRATION_SUCCESS) {
+                                //                                ToastUtil.showToast(getApplicationContext(),"Register Success");
+                                DJISDKManager.getInstance().startConnectionToProduct();
+                            } else {
+                                ToastUtil.showToast(getApplicationContext(),"大疆SDK注册失败");
+                            }
+                            Log.e(TAG, "注册大疆sdk："+djiError.getDescription());
+                        }
+
+                        @Override
+                        public void onProductDisconnect() {
+                            Log.d(TAG, "onProductDisconnect");
+                            //                            ToastUtil.showToast(getApplicationContext(),"Product Disconnected");
+                            notifyStatusChange(false);
+
+                        }
+                        @Override
+                        public void onProductConnect(BaseProduct baseProduct) {
+                            Log.d(TAG, String.format("onProductConnect newProduct:%s", baseProduct));
+                            notifyStatusChange(true);
+
+                        }
+                        @Override
+                        public void onComponentChange(BaseProduct.ComponentKey componentKey, BaseComponent oldComponent,
+                                                      BaseComponent newComponent) {
+
+                            if (newComponent != null) {
+                                newComponent.setComponentListener(new BaseComponent.ComponentListener() {
+
+                                    @Override
+                                    public void onConnectivityChange(boolean isConnected) {
+                                        Log.d(TAG, "onComponentConnectivityChanged: " + isConnected);
+                                        notifyStatusChange(isConnected);
+                                    }
+                                });
+                            }
+                            Log.d(TAG,
+                                    String.format("onComponentChange key:%s, oldComponent:%s, newComponent:%s",
+                                            componentKey,
+                                            oldComponent,
+                                            newComponent));
+
+                        }
+                    });
+                }
+            });
+        }
+    }
+
+    private void notifyStatusChange(boolean connect){
+        if(connect){
+            Aircraft aircraft= AirCraftUtil.getAircraftInstance();
+            if (null != aircraft ) {
+                addAppActivationListenerIfNeeded();
+                //                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
+            } else {
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,false);
+            }
+        }else {
+            NewMainActivity.this.bindingState = null;
+            NewMainActivity.this.appActivationState = null;
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,false);
+        }
+    }
+
+    private void addAppActivationListenerIfNeeded() {
+        AppActivationState appActivationState = AppActivationManager.getInstance().getAppActivationState();
+        logger.info("addAppActivationListenerIfNeeded状态："+appActivationState);
+        if (appActivationState != AppActivationState.ACTIVATED) {
+            myHandler.sendEmptyMessageDelayed(MSG_INFORM_ACTIVATION, ACTIVATION_DALAY_TIME);
+            if (hasAppActivationListenerStarted.compareAndSet(false, true)) {
+                appActivationStateListener = new AppActivationState.AppActivationStateListener() {
+
+                    @Override
+                    public void onUpdate(AppActivationState appActivationState) {
+                        logger.info("AppActivationStateListener--onUpdate:"+appActivationState.name());
+                        NewMainActivity.this.appActivationState = appActivationState;
+                        if (myHandler != null && myHandler.hasMessages(MSG_INFORM_ACTIVATION)) {
+                            myHandler.removeMessages(MSG_INFORM_ACTIVATION);
+                        }
+                        if (appActivationState != AppActivationState.ACTIVATED) {
+                            myHandler.sendEmptyMessageDelayed(MSG_INFORM_ACTIVATION, ACTIVATION_DALAY_TIME);
+                        }else {
+                            if(checkIsAircraftConnected()){
+                                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
+                            }
+                        }
+                    }
+                };
+                bindingStateListener = new AircraftBindingState.AircraftBindingStateListener() {
+
+                    @Override
+                    public void onUpdate(final AircraftBindingState bindingState) {
+                        logger.info("Binding State: " + bindingState);
+                        NewMainActivity.this.bindingState = bindingState;
+                        if(checkIsAircraftConnected()){
+                            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
+                        }
+                    }
+                };
+                AppActivationManager.getInstance().addAppActivationStateListener(appActivationStateListener);
+                AppActivationManager.getInstance().addAircraftBindingStateListener(bindingStateListener);
+            }
+        }else {
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
+        }
+    }
+
+    private boolean checkIsAircraftConnected(){
+        return appActivationState == AppActivationState.ACTIVATED && bindingState == AircraftBindingState.BOUND;
+    }
+
+    private void loginToActivationIfNeeded() {
+
+        AppActivationState appActivationState = AppActivationManager.getInstance().getAppActivationState();
+        logger.info("AppActivationManager.getInstance().getAppActivationState():" + appActivationState);
+        if (AppActivationManager.getInstance().getAppActivationState() == AppActivationState.LOGIN_REQUIRED) {
+            UserAccountManager.getInstance()
+                    .logIntoDJIUserAccount(NewMainActivity.this,
+                            new CommonCallbacks.CompletionCallbackWith<UserAccountState>() {
+                                @Override
+                                public void onSuccess(UserAccountState userAccountState) {
+                                    ToastUtil.showToast(getApplicationContext(),"Login Successed!");
+                                    logger.info("大疆账号登陆成功");
+                                    MyTerminalFactory.getSDK().putParam(Params.DJ_LOGINED,true);
+                                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
+                                }
+
+                                @Override
+                                public void onFailure(DJIError djiError) {
+                                    ToastUtil.showToast(getApplicationContext(),"Login Successed!");
+                                    logger.info("大疆账号登陆失败"+djiError);
+                                    MyTerminalFactory.getSDK().putParam(Params.DJ_LOGINED,false);
+                                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,false);
+                                }
+                            });
+        }
     }
 }

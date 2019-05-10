@@ -20,6 +20,7 @@ import java.util.Map;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.channel.ServerMessageReceivedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangePersonLocationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGPSLocationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
@@ -332,7 +333,7 @@ public class LocationManager {
                 !TerminalFactory.getSDK().isExit() && System.currentTimeMillis() - lastUpLocationTime > 5000) {//配置要求GPS打开，时间间隔大于5秒
             logger.info(TAG + "开始上传位置信息---Longitude:" + location.getLongitude() + "---Latitude：" + location.getLatitude());
             lastUpLocationTime = System.currentTimeMillis();
-
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveChangePersonLocationHandler.class,location.getLatitude(),location.getLongitude());
             String ip = MyTerminalFactory.getSDK().getParam(Params.GPS_IP);
             int port = MyTerminalFactory.getSDK().getParam(Params.GPS_PORT,0);
 //			final String url = "http://192.168.1.174:6666/save";

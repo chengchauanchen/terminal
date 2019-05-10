@@ -41,7 +41,6 @@ import java.util.TimerTask;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import cn.com.cybertech.pdk.UserInfo;
-import cn.com.cybertech.pdk.api.IPstoreHandler;
 import cn.com.cybertech.pdk.api.IPstoreHandler.Response;
 import cn.com.cybertech.pdk.api.PstoreAPIImpl;
 import cn.com.cybertech.pdk.api.UserObject;
@@ -53,7 +52,6 @@ import cn.com.cybertech.pdk.exception.PstoreAuthException;
 import cn.com.cybertech.pdk.exception.PstoreException;
 import cn.com.cybertech.pdk.exception.PstoreUserException;
 import cn.com.cybertech.pdk.utils.GsonUtils;
-import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
@@ -762,7 +760,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     @Override
     public void initView() {
-        MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_PHONE.toString());
         if (!this.isTaskRoot()) { //判断该Activity是不是任务空间的源Activity，“非”也就是说是被系统重新实例化出来
             //如果你就放在launcher Activity中话，这里可以直接return了
             Intent mainIntent = getIntent();
@@ -1189,7 +1186,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 DeleteData.deleteAllData();
             }
             TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK,true);
-            MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_PHONE.toString());
+            MyApplication.instance.setTerminalMemberType();
             MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, userInfo.get("account") + "");
             MyTerminalFactory.getSDK().putParam(UrlParams.NAME, userInfo.get("name") + "");
             MyTerminalFactory.getSDK().putParam(UrlParams.PHONE, userInfo.get("phone") + "");
@@ -1284,7 +1281,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             logger.error("请求user0：" + bundle.toString());
             UserObject user = UserObject.fromBundle(bundle);
             logger.info("请求user1：" + user);
-            MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_PHONE.toString());
+            MyApplication.instance.setTerminalMemberType();
             MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, user.getAccount());
             MyTerminalFactory.getSDK().putParam(UrlParams.NAME, user.getName());
             MyTerminalFactory.getSDK().putParam(UrlParams.PHONE, user.getPhone());
