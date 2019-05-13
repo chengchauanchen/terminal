@@ -4,27 +4,23 @@ import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
-import android.view.View;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.Bind;
-import butterknife.OnClick;
+import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
-import cn.vsx.hamster.terminalsdk.model.MemberResponse;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateLTEMemberHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetTerminalHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
-import cn.vsx.vc.adapter.CatalogAdapter;
-import cn.vsx.vc.adapter.LteListAdapter;
+import cn.vsx.vc.adapter.ContactAdapter;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
-import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -41,47 +37,18 @@ public class LteFragment extends BaseFragment{
     RecyclerView mRecyclerview;
 
     private NewMainActivity mActivity;
-    private List<CatalogBean> mCatalogList=new ArrayList<>();
+    private List<CatalogBean> catalogNames=new ArrayList<>();
 
     private List<ContactItemBean> mDatas=new ArrayList<>();
+    private List<ContactItemBean> lastGroupDatas=new ArrayList<>();
     private Handler myHandler = new Handler();
-    private CatalogAdapter mCatalogAdapter;
-    private LteListAdapter mLteListAdapter;
-    private List<CatalogBean> mInitCatalogList=new ArrayList<>();
+    private ContactAdapter mContactAdapter;
 
     //更新警务通成员信息
-    private ReceiveUpdateLTEMemberHandler receiveUpdateLTEMemberHandler = new ReceiveUpdateLTEMemberHandler() {
+    private ReceiveGetTerminalHandler receiveGetTerminalHandler = new ReceiveGetTerminalHandler() {
         @Override
-        public void handler(List<Member> lteMember) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-//                    MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getLTEMemeberInfo();
-
-                }
-            });
-        }
-    };
-
-    /**
-     * 更新配置信息
-     */
-    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler(){
-        @Override
-        public void handler(){//更新当前组
-            CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
-            myHandler.post(new Runnable(){
-                @Override
-                public void run(){
-//                    MemberResponse memberResponse = TerminalFactory.getSDK().getConfigManager().getLTEMemeberInfo();
-//                    List<CatalogBean> catalogBeanList = new ArrayList<>();
-//                    CatalogBean bean = new CatalogBean();
-//                    bean.setName(memberResponse.getName());
-//                    bean.setBean(memberResponse);
-//                    catalogBeanList.add(bean);
-//                    updateData(memberResponse,catalogBeanList);
-                }
-            });
+        public void handler(int depId, String type, List<Department> departments,List<Member> members) {
+            updateData(departments,members);
         }
     };
 
@@ -92,176 +59,108 @@ public class LteFragment extends BaseFragment{
 
     @Override
     public void initView() {
-        mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity(), OrientationHelper.HORIZONTAL,false));
-        mCatalogAdapter=new CatalogAdapter(getActivity(),mCatalogList);
-        mCatalogRecyclerview.setAdapter(mCatalogAdapter);
-
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mLteListAdapter=new LteListAdapter(getActivity(),mDatas);
-        mRecyclerview.setAdapter(mLteListAdapter);
-
+        mContactAdapter = new ContactAdapter(getActivity(), mDatas,catalogNames,Constants.TYPE_CONTRACT_LTE);
+        mRecyclerview.setAdapter(mContactAdapter);
     }
 
     @Override
     public void initData() {
         mActivity= (NewMainActivity) getActivity();
-//        MemberResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getLTEMemeberInfo();
-//        if(mMemberResponse ==null){
-//            return;
-//        }
-//        CatalogBean catalog=new CatalogBean();
-//        catalog.setName(mMemberResponse.getName());
-////        catalog.setBean(mMemberResponse);
-//        mInitCatalogList.add(catalog);
-//
-//        updateData(mMemberResponse,mInitCatalogList);
+        catalogNames.clear();
+        CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+        catalogNames.add(memberCatalogBean);
+        TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), TerminalMemberType.TERMINAL_LTE.toString());
     }
-
 
     /**
      * 设置数据
      */
-    private void updateData(MemberResponse memberResponse, List<CatalogBean> catalogBeanList){
+    private void updateData(List<Department> deptList,List<Member> memberList){
         mDatas.clear();
-        mCatalogList.clear();
-        mCatalogList.addAll(catalogBeanList);
-        addData(memberResponse);
-        mLteListAdapter.notifyDataSetChanged();
-        mCatalogAdapter.notifyDataSetChanged();
-        mCatalogRecyclerview.scrollToPosition(mCatalogList.size() - 1);
+        ContactItemBean<Object> Title = new ContactItemBean<>();
+        Title.setType(Constants.TYPE_TITLE);
+        Title.setBean(new Object());
+        mDatas.add(Title);
+        if(null != memberList && !memberList.isEmpty()){
 
-    }
-
-    private void addData(MemberResponse memberResponse){
-        if (memberResponse != null){
-            addItemMember(memberResponse);
-            addItemDepartment(memberResponse);
-        }
-    }
-
-    /**
-     * 添加子成员
-     */
-    @SuppressWarnings("unchecked")
-    private void addItemMember(MemberResponse memberResponse){
-        //子成员
-        List<Member> memberList = memberResponse.getMembers();
-        //添加子成员
-        if(memberList != null && !memberList.isEmpty()){
-            List<ContactItemBean> itemMemberList = new ArrayList<>();
+            //添加成员
             for(Member member : memberList){
-                if(member.getName()==null){
-                    continue;
-                }
-                ContactItemBean<Member> bean = new ContactItemBean<>();
-                bean.setBean(member);
-                bean.setType(Constants.TYPE_USER);
-                itemMemberList.add(bean);
-            }
-            //            Collections.sort(itemMemberList);
-            mDatas.addAll(itemMemberList);
-        }
-    }
-
-    /**
-     * 添加子部门
-     */
-    @SuppressWarnings("unchecked")
-    private void addItemDepartment(MemberResponse memberResponse){
-        List<MemberResponse> data = memberResponse.getChildren();
-        if(data!=null && !data.isEmpty()){
-            for(MemberResponse next : data){
-                if(next.getName() ==null){
-                    continue;
-                }
-                ContactItemBean<MemberResponse> bean = new ContactItemBean<>();
-                bean.setType(Constants.TYPE_DEPARTMENT);
-                bean.setName(next.getName());
-                bean.setBean(next);
-                mDatas.add(bean);
-                //                Collections.sort(mDatas);
+                ContactItemBean<Member> contactItemBean = new ContactItemBean<>();
+                contactItemBean.setType(Constants.TYPE_LTE);
+                contactItemBean.setBean(member);
+                mDatas.add(contactItemBean);
             }
         }
+        if(null != deptList && !deptList.isEmpty()){
+            for(Department department : deptList){
+                ContactItemBean<Department> contactItemBean = new ContactItemBean<>();
+                contactItemBean.setType(Constants.TYPE_DEPARTMENT);
+                contactItemBean.setBean(department);
+                mDatas.add(contactItemBean);
+            }
+        }
+        myHandler.post(()->{
+            if(mContactAdapter !=null){
+                mContactAdapter.notifyDataSetChanged();
+            }
+        });
     }
-
 
     @Override
     public void initListener() {
-
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateLTEMemberHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
-
-        mCatalogAdapter.setOnItemClick(new CatalogAdapter.ItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-//                MemberResponse memberResponse=mCatalogList.get(position).getBean();
-
-                List<CatalogBean> catalogList=new ArrayList<>();
-                catalogList.addAll(mCatalogList.subList(0,position+1));
-
-//                updateData(memberResponse,catalogList);
-
-            }
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGetTerminalHandler);
+        mContactAdapter.setCatalogItemClickListener((view, position) -> {
+//            if(position == catalogNames.size()-2){
+//                //返回到上一级
+//                catalogNames.remove(catalogNames.size()-1);
+//                mDatas.clear();
+//                mDatas.addAll(lastGroupDatas);
+//                if(mContactAdapter !=null){
+//                    mContactAdapter.notifyDataSetChanged();
+//                }
+//
+//                mRecyclerview.scrollToPosition(0);
+//            }else {
+            List<CatalogBean> catalogBeans = new ArrayList<>(catalogNames.subList(0, position+1));
+            catalogNames.clear();
+            catalogNames.addAll(catalogBeans);
+            TerminalFactory.getSDK().getConfigManager().getTerminal(catalogNames.get(position).getId(), TerminalMemberType.TERMINAL_LTE.toString());
+//            }
         });
 
-
-        mLteListAdapter.setOnItemClickListener(new LteListAdapter.ItemClickListener() {
-            @Override
-            public void onItemClick(View view, int postion, int type) {
-                if (type== Constants.TYPE_DEPARTMENT){
-                    MemberResponse memberResponse= (MemberResponse) mDatas.get(postion).getBean();
-                    CatalogBean catalog=new CatalogBean();
-                    catalog.setName(memberResponse.getName());
-//                    catalog.setBean(memberResponse);
-                    mCatalogList.add(catalog);
-
-                    List<CatalogBean> catalogBeanList=new ArrayList<>();
-                    catalogBeanList.addAll(mCatalogList);
-
-                    updateData(memberResponse,catalogBeanList);
-                }
+        mContactAdapter.setOnItemClickListener((view, depId,depName, type) -> {
+            if (type == Constants.TYPE_DEPARTMENT) {
+                saveLastGroupData();
+                CatalogBean memberCatalogBean = new CatalogBean(depName,depId);
+                catalogNames.add(memberCatalogBean);
+                TerminalFactory.getSDK().getConfigManager().getTerminal(depId, TerminalMemberType.TERMINAL_LTE.toString());
             }
         });
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            catalogNames.clear();
+            CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+            catalogNames.add(memberCatalogBean);
+            TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), TerminalMemberType.TERMINAL_LTE.toString());
+            myHandler.postDelayed(() -> {
+                // 加载完数据设置为不刷新状态，将下拉进度收起来
+                swipeRefreshLayout.setRefreshing(false);
+                // 加载完数据设置为不刷新状态，将下拉进度收起来
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-//                TerminalFactory.getSDK().getConfigManager().updateLTEMemberInfo();
-                myHandler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        // 加载完数据设置为不刷新状态，将下拉进度收起来
-                        swipeRefreshLayout.setRefreshing(false);
-                        // 加载完数据设置为不刷新状态，将下拉进度收起来
-
-                    }
-                }, 1200);
-            }
+            }, 1200);
         });
     }
 
-    private long lastSearchTime;
-    /**
-     * 搜索
-     */
-    @OnClick(R.id.iv_search)
-    public void onViewClicked() {
-        if(System.currentTimeMillis() - lastSearchTime<1000){
-            return;
+    private void saveLastGroupData(){
+        lastGroupDatas.clear();
+        for(ContactItemBean contactItemBean : mDatas){
+            lastGroupDatas.add((ContactItemBean) contactItemBean.clone());
         }
-//        List<Member> memberList= TerminalFactory.getSDK().getConfigManager().getLTEMembers();
-//        if (memberList!=null && !memberList.isEmpty()) {
-//            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class, memberList);
-//        }else {
-//            ToastUtil.showToast(getActivity(),"暂无LTE用户");
-//        }
-        lastSearchTime = System.currentTimeMillis();
     }
 
     @Override
     public void onDestroy() {
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateLTEMemberHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetTerminalHandler);
         super.onDestroy();
     }
 
@@ -269,17 +168,17 @@ public class LteFragment extends BaseFragment{
      * 返回操作
      */
     public void onBack(){
-        if (mCatalogList.size() > 1) {
-//            MemberResponse memberResponse = mCatalogList.get(mCatalogList.size() - 2).getBean();
+        if(catalogNames.size() > 1){
+            //返回到上一级
+            catalogNames.remove(catalogNames.size()-1);
+            mDatas.clear();
+            mDatas.addAll(lastGroupDatas);
+            if(mContactAdapter !=null){
+                mContactAdapter.notifyDataSetChanged();
+            }
+            mRecyclerview.scrollToPosition(0);
 
-            mCatalogList.remove(mCatalogList.size() - 1);
-
-            List<CatalogBean> catalogBeanList = new ArrayList<>();
-            catalogBeanList.addAll(mCatalogList);
-
-//            updateData(memberResponse, catalogBeanList);
-
-        } else {
+        }else{
             mActivity.exit();
         }
     }

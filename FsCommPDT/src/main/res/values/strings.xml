@@ -177,6 +177,7 @@
     <string name="text_group">群组</string>
     <string name="text_radio_station">电台</string>
     <string name="text_police_service">警务通</string>
+    <string name="text_lte">LTE</string>
     <string name="text_pc">PC</string>
     <string name="text_recoder">执法记录仪</string>
     <string name="text_hdmi">HDMI</string>

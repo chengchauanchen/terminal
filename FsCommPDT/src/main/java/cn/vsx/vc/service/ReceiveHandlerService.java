@@ -53,6 +53,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
@@ -1052,17 +1053,29 @@ public class ReceiveHandlerService extends Service{
             startService(intent);
 
         }else{//直接请求
-            int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(member.getNo(),member.getUniqueNo(), "");
-
-            if(requestCode == BaseCommonCode.SUCCESS_CODE){
-
-                Intent intent = new Intent(ReceiveHandlerService.this, LiveRequestService.class);
-                intent.putExtra(Constants.MEMBER_NAME, member.getName());
-                intent.putExtra(Constants.MEMBER_ID, member.getNo());
-                intent.putExtra(Constants.UNIQUE_NO, member.getUniqueNo());
-                startService(intent);
+            if(member.getType() == TerminalMemberType.TERMINAL_LTE.getCode()){
+                //LTE
+                String gb28181No = member.getGb28181No();
+                String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
+                String gb28181RtspUrl = gateWayUrl+"DevAor="+gb28181No;
+                TerminalMessage terminalMessage = new TerminalMessage();
+                terminalMessage.messageBody = new JSONObject();
+                terminalMessage.messageBody.put(JsonParam.GB28181_RTSP_URL,gb28181RtspUrl);
+                terminalMessage.messageBody.put(JsonParam.DEVICE_NAME,member.getName());
+                terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_NAME,member.getDepartmentName());
+                terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_ID,member.getDeptId());
+                goWatchGB28121(terminalMessage);
             }else{
-                ToastUtil.livingFailToast(ReceiveHandlerService.this, requestCode, TerminalErrorCode.LIVING_REQUEST.getErrorCode());
+                int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(member.getNo(),member.getUniqueNo(), "");
+                if(requestCode == BaseCommonCode.SUCCESS_CODE){
+                    Intent intent = new Intent(ReceiveHandlerService.this, LiveRequestService.class);
+                    intent.putExtra(Constants.MEMBER_NAME, member.getName());
+                    intent.putExtra(Constants.MEMBER_ID, member.getNo());
+                    intent.putExtra(Constants.UNIQUE_NO, member.getUniqueNo());
+                    startService(intent);
+                }else{
+                    ToastUtil.livingFailToast(ReceiveHandlerService.this, requestCode, TerminalErrorCode.LIVING_REQUEST.getErrorCode());
+                }
             }
         }
     };

@@ -49,6 +49,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
         addItemType(Constants.TYPE_CONTRACT_GROUP, R.layout.item_group_search);
         addItemType(Constants.TYPE_CONTRACT_MEMBER, R.layout.item_search_contacts);
         addItemType(Constants.TYPE_CONTRACT_PDT, R.layout.item_search_pdt);
+        addItemType(Constants.TYPE_CONTRACT_LTE, R.layout.item_search_lte);
         addItemType(Constants.TYPE_CHECK_SEARCH_GROUP, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_PC, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_POLICE, R.layout.layout_item_user);
@@ -102,6 +103,28 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                         activeIndividualCall(contractpdt);
                     }
                 });
+                break;
+
+            case Constants.TYPE_CONTRACT_LTE:
+                Member contractLte = (Member) item.getBean();
+                holder.setText(R.id.tv_member_name,HandleIdUtil.handleName(contractLte.getName()));
+                holder.setText(R.id.tv_member_id, HandleIdUtil.handleId(contractLte.getNo()));
+
+                //发送消息
+                holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractLte.getNo(), contractLte.getName()));
+
+                //拉流
+                holder.setOnClickListener(R.id.shoutai_live_to, v ->  OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, contractLte));
+
+                //拨打个呼
+                holder.setOnClickListener(R.id.iv_search_call, v -> {
+                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                        ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
+                    }else{
+                        activeIndividualCall(contractLte);
+                    }
+                });
+
                 break;
             case Constants.TYPE_CHECK_SEARCH_GROUP:
                 Group group1 = (Group) item.getBean();

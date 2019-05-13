@@ -84,7 +84,7 @@ public class NewPoliceAffairsFragment extends BaseFragment {
 //        mCatalogRecyclerview.setAdapter(mCatalogAdapter);
 
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mContactAdapter=new ContactAdapter(getActivity(),mDatas,catalogNames,true);
+        mContactAdapter=new ContactAdapter(getActivity(),mDatas,catalogNames,Constants.TYPE_CONTRACT_MEMBER);
         mRecyclerview.setAdapter(mContactAdapter);
 
     }

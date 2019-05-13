@@ -56,13 +56,13 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private List<CatalogBean> catalogNames;
     private ItemClickListener listener;
     private CatalogItemClickListener catalogItemClickListener;
-    private boolean isPoliceAffairs;//是否为警务通界面
+    private int contractType;
 
-    public ContactAdapter(Context context, List<ContactItemBean> datas,List<CatalogBean> catalogNames, boolean isPoliceAffairs){
+    public ContactAdapter(Context context, List<ContactItemBean> datas,List<CatalogBean> catalogNames, int contractType){
         this.mContext = context;
         this.mDatas = datas;
         this.catalogNames = catalogNames;
-        this.isPoliceAffairs = isPoliceAffairs;
+        this.contractType = contractType;
     }
 
     @Override
@@ -103,11 +103,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if(System.currentTimeMillis() - lastSearchTime<1000){
                     return;
                 }
-                if(isPoliceAffairs){
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class, Constants.TYPE_CONTRACT_MEMBER);
-                }else {
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class,Constants.TYPE_CONTRACT_PDT);
-                }
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class, contractType);
                 lastSearchTime = System.currentTimeMillis();
             });
         }
@@ -164,7 +160,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 userViewHolder.llCallTo.setVisibility(View.VISIBLE);
             }
             //电话按钮，是否显示
-            if(isPoliceAffairs && account.getNo() != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
+            if(contractType == Constants.TYPE_CONTRACT_MEMBER && account.getNo() != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
                 userViewHolder.llDialTo.setVisibility(View.VISIBLE);
                 userViewHolder.llLiveTo.setVisibility(View.VISIBLE);
             }else{
@@ -217,13 +213,56 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 userViewHolder.llCallTo.setVisibility(View.VISIBLE);
             }
             //电话按钮，是否显示
-            if(isPoliceAffairs && member.getNo() != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
+            if(contractType == Constants.TYPE_CONTRACT_MEMBER && member.getNo() != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
                 userViewHolder.llDialTo.setVisibility(View.VISIBLE);
                 userViewHolder.llLiveTo.setVisibility(View.VISIBLE);
             }else{
                 //电台不显示电话
                 userViewHolder.llDialTo.setVisibility(View.GONE);
                 userViewHolder.llLiveTo.setVisibility(View.GONE);
+            }
+        }else if(getItemViewType(position) == Constants.TYPE_LTE){
+            //LTE
+            UserViewHolder userViewHolder = (UserViewHolder) holder;
+            final Member member = (Member) mDatas.get(position).getBean();
+            if(!TextUtils.isEmpty(member.getName())){
+                userViewHolder.tvName.setText(member.getName() + "");
+            }
+            userViewHolder.tvId.setText(member.getNo() + "");
+            userViewHolder.llDialTo.setVisibility(View.GONE);
+
+            userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName()));
+            userViewHolder.llCallTo.setOnClickListener(view -> {
+                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
+                }else{
+                    activeIndividualCall(member);
+                }
+            });
+            //请求图像
+            userViewHolder.llLiveTo.setOnClickListener(view -> {
+                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
+                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
+                }else{
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
+                }
+            });
+            //个人信息页面
+            userViewHolder.ivLogo.setOnClickListener(view -> {
+                Intent intent = new Intent(mContext, UserInfoActivity.class);
+                intent.putExtra("userId", member.getNo());
+                intent.putExtra("userName", member.getName());
+                mContext.startActivity(intent);
+            });
+            //如果是自己的不显示业务按钮
+            if(member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
+                userViewHolder.llMessageTo.setVisibility(View.GONE);
+                userViewHolder.llCallTo.setVisibility(View.GONE);
+                userViewHolder.llLiveTo.setVisibility(View.GONE);
+            }else{
+                userViewHolder.llMessageTo.setVisibility(View.VISIBLE);
+                userViewHolder.llCallTo.setVisibility(View.VISIBLE);
+                userViewHolder.llLiveTo.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -282,6 +321,8 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             return Constants.TYPE_USER;
         }else if(bean.getType() == Constants.TYPE_DEPARTMENT){
             return Constants.TYPE_DEPARTMENT;
+        }else if(bean.getType() == Constants.TYPE_LTE){
+            return Constants.TYPE_LTE;
         }else{
             return -1;
         }

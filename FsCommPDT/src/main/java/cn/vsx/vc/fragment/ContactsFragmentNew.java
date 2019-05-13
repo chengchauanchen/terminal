@@ -62,6 +62,8 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     View shoutai_line;
     @Bind(R.id.jingwutong_line)
     View jingwutong_line;
+    @Bind(R.id.lte_line)
+    View lte_line;
     @Bind(R.id.contacts_viewPager)
     FrameLayout viewPager;
     @Bind(R.id.icon_laba)
@@ -74,6 +76,8 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     TextView group_tv;
     @Bind(R.id.jingwutong_tv)
     TextView jingwutong_tv;
+    @Bind(R.id.lte_tv)
+    TextView lte_tv;
     @Bind(R.id.shoutai_tv)
     TextView shoutai_tv;
     @Bind(R.id.imgbtn_dial)
@@ -85,6 +89,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     private NewPoliceAffairsFragment policeAffairsFragment;
     //    private HandPlatformFragment handPlatformFragment;
     private NewHandPlatformFragment handPlatformFragment;
+    private LteFragment lteFragment;
     private FragmentManager childFragmentManager;
     NewMainActivity activity;
     private Handler mHandler = new Handler();
@@ -108,9 +113,11 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         TextViewCompat.setTextAppearance(group_tv,R.style.contacts_title_checked_text);
         TextViewCompat.setTextAppearance(shoutai_tv,R.style.contacts_title_unchecked_text);
         TextViewCompat.setTextAppearance(jingwutong_tv,R.style.contacts_title_unchecked_text);
+        TextViewCompat.setTextAppearance(lte_tv,R.style.contacts_title_unchecked_text);
         group_tv .setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
         shoutai_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         jingwutong_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+        lte_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         dialPopupwindow = new DialPopupwindow(context);
         voice_image.setOnClickListener(view -> {
             if(!soundOff){
@@ -151,8 +158,10 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                     groupFragmentNew.onBack();
                 }else if (handPlatformFragment.isVisible()){
                     handPlatformFragment.onBack();
-                }else {
+                }else if(policeAffairsFragment.isVisible()){
                     policeAffairsFragment.onBack();
+                }else{
+                    lteFragment.onBack();
                 }
         });
 
@@ -316,11 +325,16 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         if (handPlatformFragment == null){
             handPlatformFragment = new NewHandPlatformFragment();
         }
+        if (lteFragment == null) {
+            lteFragment = new LteFragment();
+        }
         transaction.add(R.id.contacts_viewPager, groupFragmentNew)
                 .add(R.id.contacts_viewPager, policeAffairsFragment)
                 .add(R.id.contacts_viewPager, handPlatformFragment)
+                .add(R.id.contacts_viewPager, lteFragment)
                 .hide(policeAffairsFragment)
                 .hide(handPlatformFragment)
+                .hide(lteFragment)
                 .show(groupFragmentNew);
         transaction.commit();
 
@@ -347,7 +361,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         super.onDestroy();
     }
 
-    @OnClick({R.id.is_group, R.id.is_jingwutong,R.id.is_shoutai})
+    @OnClick({R.id.is_group, R.id.is_jingwutong,R.id.is_shoutai,R.id.is_lte})
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -360,13 +374,16 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                 TextViewCompat.setTextAppearance(group_tv,R.style.contacts_title_checked_text);
                 TextViewCompat.setTextAppearance(shoutai_tv,R.style.contacts_title_unchecked_text);
                 TextViewCompat.setTextAppearance(jingwutong_tv,R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(lte_tv,R.style.contacts_title_unchecked_text);
                 group_tv .setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
                 shoutai_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
                 jingwutong_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                lte_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
                 switchFragment(currentFragment, groupFragmentNew);
                 groupLine.setVisibility(View.VISIBLE);
                 shoutai_line.setVisibility(View.INVISIBLE);
                 jingwutong_line.setVisibility(View.INVISIBLE);
+                lte_line.setVisibility(View.INVISIBLE);
                 imgbtn_dial.setVisibility(View.GONE);
                 MyApplication.instance.setIsContactsPersonal(false);
                 break;
@@ -379,13 +396,16 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                 TextViewCompat.setTextAppearance(group_tv,R.style.contacts_title_unchecked_text);
                 TextViewCompat.setTextAppearance(shoutai_tv,R.style.contacts_title_checked_text);
                 TextViewCompat.setTextAppearance(jingwutong_tv,R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(lte_tv,R.style.contacts_title_unchecked_text);
                 group_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
                 shoutai_tv .setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
                 jingwutong_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                lte_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
                 switchFragment(currentFragment, handPlatformFragment);
                 groupLine.setVisibility(View.INVISIBLE);
                 shoutai_line.setVisibility(View.VISIBLE);
                 jingwutong_line.setVisibility(View.INVISIBLE);
+                lte_line.setVisibility(View.INVISIBLE);
                 imgbtn_dial.setVisibility(View.VISIBLE);
                 MyApplication.instance.setIsContactsPersonal(true);
                 break;
@@ -398,13 +418,38 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                 TextViewCompat.setTextAppearance(group_tv,R.style.contacts_title_unchecked_text);
                 TextViewCompat.setTextAppearance(shoutai_tv,R.style.contacts_title_unchecked_text);
                 TextViewCompat.setTextAppearance(jingwutong_tv,R.style.contacts_title_checked_text);
+                TextViewCompat.setTextAppearance(lte_tv,R.style.contacts_title_unchecked_text);
                 group_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
                 shoutai_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
                 jingwutong_tv .setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+                lte_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
                 switchFragment(currentFragment, policeAffairsFragment);
                 jingwutong_line.setVisibility(View.VISIBLE);
                 groupLine.setVisibility(View.INVISIBLE);
                 shoutai_line.setVisibility(View.INVISIBLE);
+                lte_line.setVisibility(View.INVISIBLE);
+                imgbtn_dial.setVisibility(View.VISIBLE);
+                MyApplication.instance.setIsContactsPersonal(true);
+                break;
+            case R.id.is_lte:
+                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
+                    return;
+                if (lteFragment == null) {
+                    lteFragment = new LteFragment();
+                }
+                TextViewCompat.setTextAppearance(group_tv,R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(shoutai_tv,R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(jingwutong_tv,R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(lte_tv,R.style.contacts_title_checked_text);
+                group_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                shoutai_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                jingwutong_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                lte_tv .setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+                switchFragment(currentFragment, lteFragment);
+                jingwutong_line.setVisibility(View.INVISIBLE);
+                groupLine.setVisibility(View.INVISIBLE);
+                shoutai_line.setVisibility(View.INVISIBLE);
+                lte_line.setVisibility(View.VISIBLE);
                 imgbtn_dial.setVisibility(View.VISIBLE);
                 MyApplication.instance.setIsContactsPersonal(true);
                 break;

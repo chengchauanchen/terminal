@@ -88,7 +88,7 @@ public class NewHandPlatformFragment extends BaseFragment {
 //        mCatalogRecyclerview.setAdapter(mCatalogAdapter);
 
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mContactAdapter = new ContactAdapter(getActivity(), mDatas,catalogNames,false);
+        mContactAdapter = new ContactAdapter(getActivity(), mDatas,catalogNames,Constants.TYPE_CONTRACT_PDT);
         mRecyclerview.setAdapter(mContactAdapter);
 
     }
