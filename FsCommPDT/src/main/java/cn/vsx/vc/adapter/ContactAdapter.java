@@ -384,8 +384,8 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
         TitleViewHolder(View rootView){
             super(rootView);
-            RecyclerView parent_recyclerview = itemView.findViewById(R.id.parent_recyclerview);
-            ImageView iv_search = itemView.findViewById(R.id.iv_search);
+            parent_recyclerview = itemView.findViewById(R.id.parent_recyclerview);
+            iv_search = itemView.findViewById(R.id.iv_search);
         }
     }
 

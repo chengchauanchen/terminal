@@ -87,7 +87,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRecallRecordHand
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageFailedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
-import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -259,7 +258,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         }else{
             isEnoughPageCount = true;
         }
-        HashMap<String, List<TerminalMessage>> sendFailMap = TerminalFactory.getSDK().getHashMap(Params.MESSAGE_SEND_FAIL,new HashMap<>());
+        HashMap<String, List<TerminalMessage>> sendFailMap = TerminalFactory.getSDK().getListHashMap(Params.MESSAGE_SEND_FAIL,new HashMap<>(),String.class,List.class);
         if (sendFailMap != null) {
             List<TerminalMessage> list = sendFailMap.get(userId + "");
             if (list != null) {
@@ -379,9 +378,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverToFaceRecognitionHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSelectChatListHandler);
 
-        HashMap<String, List<TerminalMessage>> sendFailMap = TerminalFactory.getSDK().getHashMap(Params.MESSAGE_SEND_FAIL,new HashMap<>());
+        HashMap<String, List<TerminalMessage>> sendFailMap = TerminalFactory.getSDK().getListHashMap(Params.MESSAGE_SEND_FAIL,new HashMap<>(),String.class,List.class);
         sendFailMap.put(userId + "", allFailMessageList);
-        TerminalFactory.getSDK().putHashMap(Params.MESSAGE_SEND_FAIL,sendFailMap);
+        TerminalFactory.getSDK().putListHashMap(Params.MESSAGE_SEND_FAIL,sendFailMap);
 
         groupCallList.removeOnLayoutChangeListener(myOnLayoutChangeListener);
         handler.removeCallbacksAndMessages(null);

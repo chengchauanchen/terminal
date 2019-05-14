@@ -117,7 +117,7 @@ public class MyApplication extends Application {
 	}
 
 	public void setTerminalMemberType(){
-		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_PHONE.toString());
+		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_UAV.toString());
 	}
 
 	public void setIsContactsPersonal(boolean isContactsIndividual){

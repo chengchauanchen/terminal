@@ -53,7 +53,7 @@ import static android.content.Context.MODE_PRIVATE;
  * Created by zckj on 2017/3/14.
  */
 
-public class FunctionHidePlus extends LinearLayout {
+public class FunctionHidePlus extends LinearLayout implements View.OnClickListener{
 
 
     GridView gv_function_bottom;
@@ -141,7 +141,10 @@ public class FunctionHidePlus extends LinearLayout {
         v_edit_line = view.findViewById(R.id.v_edit_line);
         bt_merge_transmit = view.findViewById(R.id.bt_merge_transmit);
 
-
+        view.findViewById(R.id.hide_function).setOnClickListener(this);
+        view.findViewById(R.id.group_call_news_keyboard).setOnClickListener(this);
+        view.findViewById(R.id.bt_send).setOnClickListener(this);
+        view.findViewById(R.id.bt_merge_transmit).setOnClickListener(this);
         ll_function_hide_plus_bottom.setVisibility(GONE);
         bt_merge_transmit.setVisibility(GONE);
     }

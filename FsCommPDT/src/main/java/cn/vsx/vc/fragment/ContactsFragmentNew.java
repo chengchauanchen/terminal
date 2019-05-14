@@ -116,7 +116,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         isGroup = (RelativeLayout) mRootView.findViewById(R.id.is_group);
         add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
         setting_group_name = (TextView) mRootView.findViewById(R.id.setting_group_name);
-        lte_line = (TextView) mRootView.findViewById(R.id.lte_line);
+        lte_line =  mRootView.findViewById(R.id.lte_line);
         lte_tv = (TextView) mRootView.findViewById(R.id.lte_tv);
         activity = (NewMainActivity) getActivity();
         mRootView.findViewById(R.id.is_shoutai).setOnClickListener(this);

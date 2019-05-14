@@ -29,9 +29,12 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
@@ -54,7 +57,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
@@ -239,50 +244,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 	@Override
 	public <V>void  putList(String param, List<V> value){
-		if(value == null ||value.isEmpty()){
-			return;
-		}
-		String type = value.get(0).getClass().getSimpleName();
-		JsonArray array = new JsonArray();
-		try {
-			switch (type) {
-				case "Boolean":
-					for (int i = 0; i < value.size(); i++) {
-						array.add((Boolean) value.get(i));
-					}
-					break;
-				case "Long":
-					for (int i = 0; i < value.size(); i++) {
-						array.add((Long) value.get(i));
-					}
-					break;
-				case "Float":
-					for (int i = 0; i < value.size(); i++) {
-						array.add((Float) value.get(i));
-					}
-					break;
-				case "String":
-					for (int i = 0; i < value.size(); i++) {
-						array.add((String) value.get(i));
-					}
-					break;
-				case "Integer":
-					for (int i = 0; i < value.size(); i++) {
-						array.add((Integer) value.get(i));
-					}
-					break;
-				default:
-					Gson gson = new Gson();
-					for (int i = 0; i < value.size(); i++) {
-						JsonElement obj = gson.toJsonTree(value.get(i));
-						array.add(obj);
-					}
-					break;
-			}
-			account.edit().putString(param, array.toString()).apply();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		String result = list2String(value);
+		account.edit().putString(param, result).apply();
 	}
 
 	@Override
@@ -299,6 +262,24 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}else {
 			return defaultValue;
 		}
+	}
+
+	@Override
+	public <K,V> void putListHashMap(String param, HashMap<K,List<V>> value){
+		//转换成json数据，再保存
+		Gson gson = new Gson();
+		List<String> resultList = new ArrayList<>();
+		for(Map.Entry<K, List<V>> next : value.entrySet()){
+			List<V> list = next.getValue();
+			K key = next.getKey();
+			String elementList = list2String(list);
+			Map<K, String> elementMap = new HashMap<>();
+			elementMap.put(key, elementList);
+			String json = gson.toJson(elementMap);
+			resultList.add(json);
+		}
+		String result = gson.toJson(resultList);
+		account.edit().putString(param,result).apply();
 	}
 
 	@Override
@@ -321,6 +302,90 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			Type type = new TypeToken<HashMap<K, V>>(){}.getType();
 			return gson.fromJson(strJson, type);
 		}
+	}
+
+	/**
+	 * Return the type of map with the {@code keyType} and {@code valueType}.
+	 *
+	 * @param keyType   The type of key.
+	 * @param valueType The type of value.
+	 * @return the type of map with the {@code keyType} and {@code valueType}
+	 */
+	public static Type getHashMapType(final Type keyType, final Type valueType) {
+		return TypeToken.getParameterized(HashMap.class, keyType, valueType).getType();
+	}
+
+	@Override
+	public <K,V> HashMap<K,List<V>> getListHashMap(String param, HashMap<K,List<V>> defaultValue, Class keyClazz, Class valueClazz){
+		String strJson = account.getString(param, "");
+		logger.info("getListHashMap:"+strJson);
+		if(TextUtils.isEmpty(strJson)){
+			return defaultValue;
+		}else {
+			Gson gson = new Gson();
+//			Type type = getHashMapType(keyClazz,valueClazz);
+//			List<String> results = gson.fromJson(strJson, List<String>.class);
+			HashMap<K,List<V>> resultMap = new HashMap<>();
+//			for(String result : results){
+//				HashMap<K,String> elementMap = gson.fromJson(result, HashMap<K,String>.class);
+//				for(Map.Entry<K, String> kStringEntry : elementMap.entrySet()){
+//					String value = kStringEntry.getValue();
+//					K key = kStringEntry.getKey();
+//					List<V> vs = gson.fromJson(value, List<V>.class);
+//					resultMap.put(key,vs);
+//				}
+//			}
+			return defaultValue;
+		}
+	}
+
+	public <K> String list2String(List<K> list){
+		String result = "";
+		if(list !=null && !list.isEmpty()){
+			String type = list.get(0).getClass().getSimpleName();
+			JsonArray array = new JsonArray();
+			try{
+				switch(type){
+					case "Boolean":
+						for(int i = 0; i < list.size(); i++){
+							array.add((Boolean) list.get(i));
+						}
+						break;
+					case "Long":
+						for(int i = 0; i < list.size(); i++){
+							array.add((Long) list.get(i));
+						}
+						break;
+					case "Float":
+						for(int i = 0; i < list.size(); i++){
+							array.add((Float) list.get(i));
+						}
+						break;
+					case "String":
+						for(int i = 0; i < list.size(); i++){
+							array.add((String) list.get(i));
+						}
+						break;
+					case "Integer":
+						for(int i = 0; i < list.size(); i++){
+							array.add((Integer) list.get(i));
+						}
+						break;
+					default:
+						Gson gson = new Gson();
+						for(int i = 0; i < list.size(); i++){
+							JsonElement obj = gson.toJsonTree(list.get(i));
+							array.add(obj);
+						}
+						break;
+				}
+				result =  array.toString();
+			}catch(Exception e){
+				e.printStackTrace();
+			}
+
+		}
+		return result;
 	}
 
 	@Override
