@@ -287,7 +287,7 @@ public class SpecificSDK extends TerminalSDK4Android {
     private static void setAppKey(Application application){
         try{
             ApplicationInfo appInfo = application.getPackageManager().getApplicationInfo(application.getPackageName(), PackageManager.GET_META_DATA);
-            String platformKey=appInfo.metaData.getString("platform_key");
+            String platformKey=appInfo.metaData.getString("cn.vsx.sdk.API_KEY");
             Log.d(TAG, "platform_key == " + platformKey);
             TerminalFactory.getSDK().putParam(Params.PLATFORM_KEY,platformKey);
         }catch(PackageManager.NameNotFoundException e){

@@ -101,6 +101,10 @@
         <meta-data
             android:name="APKTYPE"
             android:value="${apk_type}" />
+        <!--平台KEY-->
+        <meta-data
+            android:name="cn.vsx.sdk.API_KEY"
+            android:value="" />
         
         <activity
             android:name=".activity.RegistActivity"
