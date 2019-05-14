@@ -9,8 +9,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.vc.R;
 
@@ -76,13 +76,14 @@ public class MemberEnterAdapter extends BaseAdapter {
     }
 
     static class ViewHolder {
-        @Bind(R.id.tv_live_member_enter)
+
         TextView tvLiveMemberEnter;
-        @Bind(R.id.ll_live_member_enter_bg)
+
         LinearLayout llLiveMemberEnterBg;
 
         ViewHolder(View view) {
-            ButterKnife.bind(this, view);
+            tvLiveMemberEnter = view.findViewById(R.id.tv_live_member_enter);
+            llLiveMemberEnterBg = view.findViewById(R.id.ll_live_member_enter_bg);
         }
     }
 

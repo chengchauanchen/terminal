@@ -16,8 +16,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import java.util.HashMap;
 import java.util.Map;
 
-import butterknife.Bind;
-import butterknife.OnClick;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
@@ -31,26 +29,26 @@ import cn.vsx.vc.utils.StringUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
-public class LiveHistoryActivity extends BaseActivity{
+public class LiveHistoryActivity extends BaseActivity implements View.OnClickListener{
 
 
-    @Bind(R.id.iv_close)
+
     ImageView iv_close;
-    @Bind(R.id.tv_theme)
+
     TextView tv_theme;
-    @Bind(R.id.tv_live_start_time)
+
     TextView tv_live_start_time;
-    @Bind(R.id.iv_live_image)
+
     ImageView iv_live_image;
-    @Bind(R.id.iv_play)
+
     ImageView iv_play;
-    @Bind(R.id.tv_live_duration)
+
     TextView tv_live_duration;
-    @Bind(R.id.ll_volume)
+
     LinearLayout ll_volume;
-    @Bind(R.id.iv_volume)
+
     ImageView iv_volume;
-    @Bind(R.id.tv_volume)
+
     TextView tv_volume;
     private static final int GET_URL = 0;
     private static final int RECEIVEVOICECHANGED = 2;
@@ -91,6 +89,17 @@ public class LiveHistoryActivity extends BaseActivity{
 
     @Override
     public void initView(){
+        tv_volume = (TextView) findViewById(R.id.tv_volume);
+        iv_volume = (ImageView) findViewById(R.id.iv_volume);
+        ll_volume = (LinearLayout) findViewById(R.id.ll_volume);
+        tv_live_duration = (TextView) findViewById(R.id.tv_live_duration);
+        iv_play = (ImageView) findViewById(R.id.iv_play);
+        iv_live_image = (ImageView) findViewById(R.id.iv_live_image);
+        tv_live_start_time = (TextView) findViewById(R.id.tv_live_start_time);
+        tv_theme = (TextView) findViewById(R.id.tv_theme);
+        iv_close = (ImageView) findViewById(R.id.iv_close);
+        findViewById(R.id.iv_play).setOnClickListener(this);
+        findViewById(R.id.iv_close).setOnClickListener(this);
     }
 
     @Override
@@ -193,12 +202,12 @@ public class LiveHistoryActivity extends BaseActivity{
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
     }
 
-    @OnClick(R.id.iv_close)
+
     public void close(){
         finish();
     }
 
-    @OnClick(R.id.iv_play)
+
     public void play(){
         if(liveUrl==null){
             ToastUtil.showToast(LiveHistoryActivity.this,getString(R.string.text_can_not_find_video_invalided));
@@ -225,4 +234,15 @@ public class LiveHistoryActivity extends BaseActivity{
         }
     };
 
+    @Override
+    public void onClick(View v){
+        switch(v.getId()){
+            case R.id.iv_play:
+                play();
+            break;
+            case R.id.iv_close:
+                close();
+                break;
+        }
+    }
 }

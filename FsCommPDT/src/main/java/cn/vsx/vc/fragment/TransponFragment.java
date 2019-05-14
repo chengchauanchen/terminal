@@ -11,9 +11,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.OnClick;
-import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
@@ -27,8 +24,8 @@ import ptt.terminalsdk.context.MyTerminalFactory;
  * Created by gt358 on 2017/10/20.
  */
 
-public class TransponFragment extends BaseFragment{
-    @Bind(R.id.lv_chat_member)
+public class TransponFragment extends BaseFragment implements View.OnClickListener{
+
     ListView lv_chat_member;
 
     private List<ChatMember> chatLists = new ArrayList<>();
@@ -59,7 +56,9 @@ public class TransponFragment extends BaseFragment{
 
     @Override
     public void initView() {
+        lv_chat_member = (ListView) mRootView.findViewById(R.id.lv_chat_member);
         userId = getArguments().getInt("userId");
+        mRootView.findViewById(R.id.news_bar_return).setOnClickListener(this);
         messageType = getArguments().getInt("messageType");
         transponListAdapter = new TransponListAdapter(chatLists, context);
         lv_chat_member.setAdapter(transponListAdapter);
@@ -116,7 +115,7 @@ public class TransponFragment extends BaseFragment{
         transponListAdapter.notifyDataSetChanged();
     }
 
-    @OnClick({R.id.news_bar_return})
+
     public void onClick (View view) {
         switch (view.getId()) {
             case R.id.news_bar_return:

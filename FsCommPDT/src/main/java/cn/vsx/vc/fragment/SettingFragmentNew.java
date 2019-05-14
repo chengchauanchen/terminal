@@ -26,9 +26,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -71,41 +68,41 @@ import skin.support.SkinCompatManager;
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 
 @SuppressLint("ValidFragment")
-public class SettingFragmentNew extends BaseFragment {
+public class SettingFragmentNew extends BaseFragment implements View.OnClickListener{
     Activity activity;
-    @Bind(R.id.add_icon)
+
     ImageView add_icon;
-    @Bind(R.id.btn_lock_screen_setting)
+
     MToggleButton btn_lock_screen_setting;
-    @Bind(R.id.setting_group_name)
+
     TextView setting_group_name;
-    @Bind(R.id.ll_video_resolution_setting)
+
     LinearLayout ll_video_resolution_setting;
-    @Bind(R.id.changemaingrouplayout)
+
     ChangeMainGroupLayout changemaingrouplayout;
-    @Bind(R.id.VolumeChangLayout)
+
     VolumeChangLayout volumeChangLayout;
-    @Bind(R.id.personinfolayout)
+
     PersonInfoLayout personinfolayout;
-    @Bind(R.id.voice_image)
+
     ImageView voice_image;
-    @Bind(R.id.ll_log_upload)
+
     LinearLayout ll_log_upload;
-    @Bind(R.id.physicalButtonPTT)
+
     PhysicalButtonSet4PTT physicalButtonSet4PTT;
     private Handler mHandler = new Handler();
     private sendPttState sendPttState;
     private Timer timer = new Timer();
     private AlertDialog dialog;
 
-    @Bind(R.id.icon_laba)
+
     ImageView icon_laba;
-    @Bind(R.id.speaking_name)
+
     TextView speaking_name;
     private boolean soundOff;//是否静音
-    @Bind(R.id.btn_daytime_mode)
+
     MToggleButton btn_daytime_mode;
-    @Bind(R.id.tv_ble_name)
+
     TextView tv_ble_name;
 
     private static final int DISABLE_KEYGUARD = 0;
@@ -117,7 +114,26 @@ public class SettingFragmentNew extends BaseFragment {
 
     @Override
     public void initView() {
+        tv_ble_name = (TextView) mRootView.findViewById(R.id.tv_ble_name);
+        btn_daytime_mode = (MToggleButton) mRootView.findViewById(R.id.btn_daytime_mode);
+        speaking_name = (TextView) mRootView.findViewById(R.id.speaking_name);
+        icon_laba = (ImageView) mRootView.findViewById(R.id.icon_laba);
+        physicalButtonSet4PTT = (PhysicalButtonSet4PTT) mRootView.findViewById(R.id.physicalButtonPTT);
+        ll_log_upload = (LinearLayout) mRootView.findViewById(R.id.ll_log_upload);
+        voice_image = (ImageView) mRootView.findViewById(R.id.voice_image);
+        personinfolayout = (PersonInfoLayout) mRootView.findViewById(R.id.personinfolayout);
+        volumeChangLayout = (VolumeChangLayout) mRootView.findViewById(R.id.VolumeChangLayout);
+        changemaingrouplayout = (ChangeMainGroupLayout) mRootView.findViewById(R.id.changemaingrouplayout);
+        ll_video_resolution_setting = (LinearLayout) mRootView.findViewById(R.id.ll_video_resolution_setting);
+        setting_group_name = (TextView) mRootView.findViewById(R.id.setting_group_name);
+        btn_lock_screen_setting = (MToggleButton) mRootView.findViewById(R.id.btn_lock_screen_setting);
+        add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
         activity = getActivity();
+        mRootView.findViewById(R.id.rl_ble).setOnClickListener(this);
+        mRootView.findViewById(R.id.ll_helpAndfeedback).setOnClickListener(this);
+        mRootView.findViewById(R.id.ll_log_upload).setOnClickListener(this);
+        mRootView.findViewById(R.id.ll_exit).setOnClickListener(this);
+        mRootView.findViewById(R.id.about).setOnClickListener(this);
         setVideoIcon();
         setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
         voice_image.setOnClickListener(view -> {
@@ -218,7 +234,7 @@ public class SettingFragmentNew extends BaseFragment {
 
     @Override
     public void onDestroyView() {
-        ButterKnife.unbind(this);
+
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
@@ -374,7 +390,7 @@ public class SettingFragmentNew extends BaseFragment {
         }
     };
 
-    @OnClick({R.id.about, R.id.ll_exit,R.id.ll_log_upload,R.id.ll_helpAndfeedback})
+
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.about:
@@ -602,7 +618,7 @@ public class SettingFragmentNew extends BaseFragment {
         context.unregisterReceiver(exitPstoreReceiver);
     }
 
-    @OnClick(R.id.rl_ble)
+
     public void bleClick(){
         Intent intent = new Intent(getContext(),BleActivity.class);
         startActivity(intent);

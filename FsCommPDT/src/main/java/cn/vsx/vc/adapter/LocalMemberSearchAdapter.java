@@ -23,8 +23,8 @@ import org.apache.log4j.Logger;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -221,26 +221,43 @@ public class LocalMemberSearchAdapter extends BaseAdapter {
     }
 
     public static class ViewHolder {
-        @Bind(R.id.ll_person_search_item)
+
         LinearLayout ll_person_search_item;
-        @Bind(R.id.catagory)
+
         LinearLayout ll_item_person_contacts;
-        @Bind(R.id.tv_catagory)
+
         TextView tv_pinyin;
-        @Bind(R.id.tv_member_name)
+
         TextView tv_member_name;
-        @Bind(R.id.tv_member_id)
+
         TextView tv_member_id;
-        @Bind(R.id.message_to)
+
         LinearLayout iv_individual_msg;
-        @Bind(R.id.call_to)
+
         LinearLayout iv_individual_call;
-        @Bind(R.id.shoutai_dial_to)
+
         LinearLayout llDialTo;
-        @Bind(R.id.user_logo)
+
         ImageView ivUserLogo;
         public ViewHolder(View rootView) {
-            ButterKnife.bind(this,rootView);
+            ll_person_search_item = rootView.findViewById(R.id.ll_person_search_item);
+
+            ll_item_person_contacts = rootView.findViewById(R.id.catagory);
+
+            tv_pinyin = rootView.findViewById(R.id.tv_catagory);
+
+            tv_member_name = rootView.findViewById(R.id.tv_member_name);
+
+            tv_member_id = rootView.findViewById(R.id.tv_member_id);
+
+            iv_individual_msg = rootView.findViewById(R.id.message_to);
+
+            iv_individual_call = rootView.findViewById(R.id.call_to);
+
+            llDialTo = rootView.findViewById(R.id.shoutai_dial_to);
+
+            ivUserLogo = rootView.findViewById(R.id.user_logo);
+
         }
     }
 }

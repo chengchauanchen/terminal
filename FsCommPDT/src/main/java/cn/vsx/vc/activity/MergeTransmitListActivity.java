@@ -1,7 +1,6 @@
 package cn.vsx.vc.activity;
 
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -17,7 +16,6 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.zectec.imageandfileselector.bean.ImageBean;
-import com.zectec.imageandfileselector.fragment.ImagePreviewItemFragment;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.io.File;
@@ -28,10 +26,6 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -53,21 +47,20 @@ import cn.vsx.vc.adapter.MergeTransmitListAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.OnBackListener;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupMergeTransmitVoiceHandler;
-import cn.vsx.vc.record.MediaManager;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
-public class MergeTransmitListActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener, BaseQuickAdapter.RequestLoadMoreListener {
+public class MergeTransmitListActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener, BaseQuickAdapter.RequestLoadMoreListener, View.OnClickListener{
 
 
-    @Bind(R.id.bar_title)
+
     TextView barTitle;
-    @Bind(R.id.layout_srl)
+
     SwipeRefreshLayout layoutSrl;
-    @Bind(R.id.contentView)
+
     RecyclerView contentView;
-    @Bind(R.id.fl_fragment_container)
+
     FrameLayout fl_fragment_container;
 
     private MergeTransmitListAdapter adapter;
@@ -99,20 +92,18 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
     };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        // TODO: add setContentView(...) invocation
-        ButterKnife.bind(this);
-    }
-
-    @Override
     public int getLayoutResId() {
         return R.layout.activity_merge_transmit_list;
     }
 
     @Override
     public void initView() {
+        fl_fragment_container = (FrameLayout) findViewById(R.id.fl_fragment_container);
+        contentView = (RecyclerView) findViewById(R.id.contentView);
+        layoutSrl = (SwipeRefreshLayout) findViewById(R.id.layout_srl);
+        barTitle = (TextView) findViewById(R.id.bar_title);
         Intent intent = getIntent();
+        findViewById(R.id.news_bar_back).setOnClickListener(this);
         terminalMessage = (TerminalMessage) intent.getSerializableExtra(Constants.TERMINALMESSAGE);
         isGroup = getIntent().getBooleanExtra(Constants.IS_GROUP, false);
         userId = getIntent().getIntExtra(Constants.USER_ID, 0);
@@ -182,7 +173,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
         handler.removeCallbacksAndMessages(null);
     }
 
-    @OnClick({R.id.news_bar_back})
+
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.news_bar_back:

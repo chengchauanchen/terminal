@@ -9,7 +9,7 @@ import android.util.SparseBooleanArray;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
+
 import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
@@ -41,9 +41,9 @@ import ptt.terminalsdk.tools.ToastUtil;
  */
 public class NewGroupFragment extends BaseFragment{
 
-    @Bind(R.id.swipeRefreshLayout)
+
     SwipeRefreshLayout swipeRefreshLayout;
-    @Bind(R.id.group_recyclerView)
+
     RecyclerView groupRecyclerView;
 
     private NewMainActivity mActivity;
@@ -201,6 +201,8 @@ public class NewGroupFragment extends BaseFragment{
 
     @Override
     public void initView(){
+        swipeRefreshLayout = (SwipeRefreshLayout) mRootView.findViewById(R.id.swipeRefreshLayout);
+        groupRecyclerView = (RecyclerView) mRootView.findViewById(R.id.group_recyclerView);
         groupRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         groupAdapter = new GroupAdapter(getContext(), datas, tempGroup, tempCatalogNames, catalogNames);
         groupRecyclerView.setAdapter(groupAdapter);

@@ -10,8 +10,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.ChatMember;
 
@@ -66,13 +66,11 @@ public class TransponListAdapter extends BaseAdapter {
     }
 
     class ViewHolder {
-        @Bind(R.id.iv_user_logo)
         ImageView iv_user_logo;
-        @Bind(R.id.tv_user_name)
         TextView tv_user_name;
-
         ViewHolder (View view) {
-            ButterKnife.bind(this, view);
+            iv_user_logo = view.findViewById(R.id.iv_user_logo);
+            tv_user_name = view.findViewById(R.id.tv_user_name);
         }
 
     }

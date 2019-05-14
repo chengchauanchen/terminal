@@ -14,8 +14,8 @@ import org.apache.http.util.TextUtils;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -183,28 +183,28 @@ public class PushLiveListAdapter extends BaseAdapter {
     }
 
     class ViewHolder {
+
+
+        TextView tv_message_time;
+        LinearLayout ll_watch_success;
+        TextView tv_push_type;
+        TextView tv_title;
+        TextView tv_watch_time;
+        LinearLayout ll_push_fail;
+        TextView tv_push_type_fail;
+        TextView tv_push_state;
         public ViewHolder (View view) {
-            ButterKnife.bind(this, view);
+            tv_message_time = view.findViewById(R.id.tv_message_time);
+            ll_watch_success = view.findViewById(R.id.ll_watch_success);
+            tv_push_type = view.findViewById(R.id.tv_push_type);
+            tv_title = view.findViewById(R.id.tv_title);
+            tv_watch_time = view.findViewById(R.id.tv_watch_time);
+            ll_push_fail = view.findViewById(R.id.ll_push_fail);
+            tv_push_type_fail = view.findViewById(R.id.tv_push_type_fail);
+            tv_push_state = view.findViewById(R.id.tv_push_state);
+
         }
 
-        @Bind(R.id.tv_message_time)
-        TextView tv_message_time;
 
-        @Bind(R.id.ll_watch_success)
-        LinearLayout ll_watch_success;
-        @Bind(R.id.tv_push_type)
-        TextView tv_push_type;
-        @Bind(R.id.tv_title)
-        TextView tv_title;
-        @Bind(R.id.tv_watch_time)
-        TextView tv_watch_time;
-
-
-        @Bind(R.id.ll_push_fail)
-        LinearLayout ll_push_fail;
-        @Bind(R.id.tv_push_type_fail)
-        TextView tv_push_type_fail;
-        @Bind(R.id.tv_push_state)
-        TextView tv_push_state;
     }
 }

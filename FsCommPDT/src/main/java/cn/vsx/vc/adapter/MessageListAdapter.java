@@ -17,8 +17,8 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageStatus;
 import cn.vsx.hamster.common.MessageType;
@@ -334,21 +334,23 @@ public class MessageListAdapter extends BaseAdapter {
     }
 
     public static class ViewHolder {
-        @Bind(R.id.iv_user_photo)
+
         ImageView iv_user_photo;
-        @Bind(R.id.tv_unread_msg_num)
+
         TextView tv_unread_msg_num;
-        @Bind(R.id.tv_user_name)
+
         TextView tv_user_name;
-//        @Bind(R.id.tv_current_group)
-//        TextView tv_current_group;
-        @Bind(R.id.tv_last_msg)
+
         TextView tv_last_msg;
-        @Bind(R.id.tv_last_msg_time)
+
         TextView tv_last_msg_time;
 
         public ViewHolder (View view) {
-            ButterKnife.bind(this, view);
+            iv_user_photo = view.findViewById(R.id.iv_user_photo);
+            tv_unread_msg_num = view.findViewById(R.id.tv_unread_msg_num);
+            tv_user_name = view.findViewById(R.id.tv_user_name);
+            tv_last_msg = view.findViewById(R.id.tv_last_msg);
+            tv_last_msg_time = view.findViewById(R.id.tv_last_msg_time);
         }
     }
 

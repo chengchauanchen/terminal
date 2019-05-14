@@ -52,6 +52,7 @@ import butterknife.ButterKnife;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.MountType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -1336,7 +1337,7 @@ public class ReceiveHandlerService extends Service{
         params.put("speed",0.0f);
         params.put("bearing",0.0f);
         params.put("altitude",altitude);
-
+        params.put("mountType", MountType.MOUNT_UAV.toString());
         Gson gson = new Gson();
         final String json = gson.toJson(params);
         MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable(){

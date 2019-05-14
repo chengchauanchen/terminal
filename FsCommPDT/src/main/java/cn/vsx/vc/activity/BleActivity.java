@@ -27,18 +27,16 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.OnClick;
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.MyBleDevice;
 import cn.vsx.vc.utils.StringUtil;
@@ -46,18 +44,19 @@ import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.MToggleButton;
 import ptt.terminalsdk.service.BluetoothLeService;
 
-public class BleActivity extends BaseActivity{
+public class BleActivity extends BaseActivity implements View.OnClickListener{
 
-    @Bind(R.id.switch_ble)
+
     MToggleButton switch_ble;
-    @Bind(R.id.ble_list)
+
     ListView bleList;
-    @Bind(R.id.tv_close_ble)
+
     TextView tv_close_ble;
-    @Bind(R.id.iv_connecting)
+
     ImageView iv_connecting;
-    @Bind(R.id.rl_usable_device)
+    private ImageView news_bar_back;
     RelativeLayout rl_usable_device;
+    private LinearLayout ll_connecting;
     private BluetoothAdapter mBluetoothAdapter;
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private Handler mHandler = new Handler();
@@ -81,10 +80,20 @@ public class BleActivity extends BaseActivity{
 
     @Override
     public void initView(){
+        switch_ble = findViewById(R.id.switch_ble);
+        bleList = findViewById(R.id.ble_list);
+        tv_close_ble = findViewById(R.id.tv_close_ble);
+        iv_connecting = findViewById(R.id.iv_connecting);
+        rl_usable_device = findViewById(R.id.rl_usable_device);
+        news_bar_back = findViewById(R.id.news_bar_back);
+        ll_connecting = findViewById(R.id.ll_connecting);
+
     }
 
     @Override
     public void initListener(){
+        news_bar_back.setOnClickListener(this);
+        ll_connecting.setOnClickListener(this);
         switch_ble.setOnBtnClick(currState -> {
             if(currState){
                 //打开蓝牙
@@ -112,6 +121,8 @@ public class BleActivity extends BaseActivity{
                 }
             }
         });
+
+
     }
 
     @Override
@@ -300,7 +311,17 @@ public class BleActivity extends BaseActivity{
         onBack();
     }
 
-    @OnClick(R.id.news_bar_back)
+    @Override
+    public void onClick(View v){
+        switch(v.getId()){
+            case R.id.news_bar_back:
+                onBack();
+                break;
+            case R.id.ll_connecting:
+                refreshDevice();
+                break;
+        }
+    }
     public void onBack(){
         if(mScanning){
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
@@ -311,7 +332,7 @@ public class BleActivity extends BaseActivity{
         finish();
     }
 
-    @OnClick(R.id.ll_connecting)
+
     public void refreshDevice(){
         if(mScanning){
             scanLeDevice(false);

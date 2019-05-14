@@ -16,8 +16,8 @@ import org.apache.log4j.Logger;
 import java.util.Iterator;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
@@ -126,15 +126,17 @@ public class PoliceSimpleExpandableListViewAdapter extends BaseExpandableListAda
         return true;
     }
     public static class ViewHolderShiJu {
-        @Bind(R.id.shuju_name)
+
         TextView shijuName;
-        @Bind(R.id.shuju_group_size)
+
         TextView shuju_group_size;
-        @Bind(R.id.is_jingwutong_shiju)
+
         ImageView is_jingwutong_shiju;
 
         public ViewHolderShiJu(View rootView) {
-            ButterKnife.bind(this, rootView);
+            shijuName = rootView.findViewById(R.id.shuju_name);
+            shuju_group_size = rootView.findViewById(R.id.shuju_group_size);
+            is_jingwutong_shiju = rootView.findViewById(R.id.is_jingwutong_shiju);
         }
     }
 

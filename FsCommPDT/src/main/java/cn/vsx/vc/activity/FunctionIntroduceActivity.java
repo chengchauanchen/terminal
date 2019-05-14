@@ -14,7 +14,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import butterknife.Bind;
-import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -22,18 +21,17 @@ import ptt.terminalsdk.tools.ToastUtil;
 
 public class FunctionIntroduceActivity extends FragmentActivity{
 
-    @Bind(R.id.webview)
     WebView webView;
-    @Bind(R.id.ll_pb)
     LinearLayout ll_pb;
-    @Bind(R.id.pb_refresh)
     ProgressBar pb_refresh;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_function_introduce);
-        ButterKnife.bind(this);
+        webView = findViewById(R.id.webview);
+        ll_pb = findViewById(R.id.ll_pb);
+        pb_refresh = findViewById(R.id.pb_refresh);
         initData();
     }
 

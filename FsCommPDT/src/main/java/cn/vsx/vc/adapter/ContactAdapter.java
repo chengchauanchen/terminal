@@ -18,8 +18,8 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
@@ -348,36 +348,44 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     class UserViewHolder extends RecyclerView.ViewHolder{
-        @Bind(R.id.shoutai_user_logo)
+
         ImageView ivLogo;
-        @Bind(R.id.shoutai_tv_member_name)
+
         TextView tvName;
-        @Bind(R.id.shoutai_tv_member_id)
+
         TextView tvId;
-        @Bind(R.id.shoutai_dial_to)
+
         LinearLayout llDialTo;
-        @Bind(R.id.shoutai_message_to)
+
         LinearLayout llMessageTo;
-        @Bind(R.id.shoutai_call_to)
+
         LinearLayout llCallTo;
-        @Bind(R.id.shoutai_live_to)
+
         LinearLayout llLiveTo;
 
         public UserViewHolder(View itemView){
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            ivLogo = itemView.findViewById(R.id.shoutai_user_logo);
+            tvName = itemView.findViewById(R.id.shoutai_tv_member_name);
+            tvId = itemView.findViewById(R.id.shoutai_tv_member_id);
+            llDialTo = itemView.findViewById(R.id.shoutai_dial_to);
+            llMessageTo = itemView.findViewById(R.id.shoutai_message_to);
+            llCallTo = itemView.findViewById(R.id.shoutai_call_to);
+            llLiveTo = itemView.findViewById(R.id.shoutai_live_to);
+
         }
     }
 
     class TitleViewHolder extends RecyclerView.ViewHolder{
-        @Bind(R.id.parent_recyclerview)
+
         RecyclerView parent_recyclerview;
-        @Bind(R.id.iv_search)
+
         ImageView iv_search;
 
         TitleViewHolder(View rootView){
             super(rootView);
-            ButterKnife.bind(this, itemView);
+            RecyclerView parent_recyclerview = itemView.findViewById(R.id.parent_recyclerview);
+            ImageView iv_search = itemView.findViewById(R.id.iv_search);
         }
     }
 

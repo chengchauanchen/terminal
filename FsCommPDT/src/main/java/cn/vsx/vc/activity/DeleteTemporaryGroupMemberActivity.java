@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import butterknife.Bind;
+
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdatePhoneMemberHandler;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -35,29 +35,29 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements View.OnClickListener {
 
-    @Bind(R.id.create_temporary_select_member)
+
     LinearLayout create_temporary_select_member;
-    @Bind(R.id.iv_create_temporary_selectmember_return)
+
     ImageView iv_create_temporary_selectmember_return;
-    @Bind(R.id.btn_create_temporary_selectmember_start)
+
     Button btn_create_temporary_selectmember_start;
-    @Bind(R.id.et_search_allcontacts)
+
     EditText et_search_allcontacts;
-    @Bind(R.id.tv_checktext)
+
     TextView tv_checktext;
-    @Bind(R.id.horizonMenu)
+
     HorizontalScrollView horizonMenu;
-    @Bind(R.id.search_select)
+
     ImageView search_select;
-    @Bind(R.id.ll_no_info)
+
     LinearLayout ll_no_info;
-    @Bind(R.id.tv_no_user)
+
     TextView tv_no_user;
-    @Bind(R.id.img_cencle)
+
     ImageView img_cencle;
-    @Bind(R.id.txt_create_temporary_selectmember_title)
+
     TextView txt_create_temporary_selectmember_title;
-    @Bind(R.id.lv_create_temporary_select_member_listview)
+
     ListView lv_create_temporary_select_member_listview;
 
     private List<Member> memberList = new ArrayList<>();
@@ -76,7 +76,19 @@ public class DeleteTemporaryGroupMemberActivity extends BaseActivity implements 
 
     @Override
     public void initView() {
+        create_temporary_select_member = (LinearLayout) findViewById(R.id.create_temporary_select_member);
+        iv_create_temporary_selectmember_return = (ImageView) findViewById(R.id.iv_create_temporary_selectmember_return);
+        btn_create_temporary_selectmember_start = (Button) findViewById(R.id.btn_create_temporary_selectmember_start);
+        et_search_allcontacts = (EditText) findViewById(R.id.et_search_allcontacts);
+        tv_checktext = (TextView) findViewById(R.id.tv_checktext);
+        horizonMenu = (HorizontalScrollView) findViewById(R.id.horizonMenu);
+        search_select = (ImageView) findViewById(R.id.search_select);
+        ll_no_info = (LinearLayout) findViewById(R.id.ll_no_info);
+        tv_no_user = (TextView) findViewById(R.id.tv_no_user);
+        img_cencle = (ImageView) findViewById(R.id.img_cencle);
         instance=this;
+        txt_create_temporary_selectmember_title = (TextView) findViewById(R.id.txt_create_temporary_selectmember_title);
+        lv_create_temporary_select_member_listview = (ListView) findViewById(R.id.lv_create_temporary_select_member_listview);
         type = getIntent().getIntExtra("type",-1);
         WindowManager windowManager = (WindowManager) this.getSystemService(WINDOW_SERVICE);
         DisplayMetrics dm = new DisplayMetrics();

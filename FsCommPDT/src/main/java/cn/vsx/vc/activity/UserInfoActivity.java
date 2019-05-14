@@ -19,8 +19,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.OnClick;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -50,32 +48,32 @@ import ptt.terminalsdk.tools.ToastUtil;
  * Created by Administrator on 2017/3/16 0016.
  */
 
-public class UserInfoActivity extends BaseActivity {
-    @Bind(R.id.ok_btn)
+public class UserInfoActivity extends BaseActivity implements View.OnClickListener{
+
     Button btnOk;
-    @Bind(R.id.user_logo)
+
     ImageView userLogo;
-    @Bind(R.id.user_name)
+
     TextView user_Name;
-    @Bind(R.id.user_no)
+
     TextView user_no;
-    @Bind(R.id.user_address)
+
     LinearLayout userAddress;
-    @Bind(R.id.user_phone)
+
     TextView userPhone;
-    @Bind(R.id.news_bar_back)
+
     ImageView newsBarBack;
-    @Bind(R.id.bar_title)
+
     TextView barTitle;
-    @Bind(R.id.right_btn)
+
     ImageView rightBtn;
-    @Bind(R.id.add_note)
+
     TextView add_note;
-    @Bind(R.id.volume_layout)
+
     VolumeViewLayout volumeViewLayout;
-    @Bind(R.id.recyclerview)
+
     RecyclerView mRecyclerView;
-    @Bind(R.id.tv_unit)
+
     TextView tvUnit;
 
 
@@ -92,7 +90,22 @@ public class UserInfoActivity extends BaseActivity {
 
     @Override
     public void initView() {
+        tvUnit = (TextView) findViewById(R.id.tv_unit);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        volumeViewLayout = (VolumeViewLayout) findViewById(R.id.volume_layout);
+        add_note = (TextView) findViewById(R.id.add_note);
+        rightBtn = (ImageView) findViewById(R.id.right_btn);
+        barTitle = (TextView) findViewById(R.id.bar_title);
+        newsBarBack = (ImageView) findViewById(R.id.news_bar_back);
+        userPhone = (TextView) findViewById(R.id.user_phone);
+        userAddress = (LinearLayout) findViewById(R.id.user_address);
+        user_no = (TextView) findViewById(R.id.user_no);
+        user_Name = (TextView) findViewById(R.id.user_name);
+        userLogo = (ImageView) findViewById(R.id.user_logo);
+        btnOk = (Button) findViewById(R.id.ok_btn);
         barTitle.setText(R.string.text_personal_information);
+        findViewById(R.id.news_bar_back).setOnClickListener(this);
+        findViewById(R.id.add_note).setOnClickListener(this);
         rightBtn.setVisibility(View.GONE);
         btnOk.setVisibility(View.GONE);
     }
@@ -298,7 +311,7 @@ public class UserInfoActivity extends BaseActivity {
         }
     }
 
-    @OnClick({R.id.add_note,  R.id.news_bar_back})
+
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.news_bar_back:

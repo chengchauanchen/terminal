@@ -51,8 +51,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLogFileUploadCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
@@ -69,11 +69,10 @@ import ptt.terminalsdk.tools.ToastUtil;
 
 public class HelpWordActivity extends FragmentActivity implements View.OnTouchListener, AdapterView.OnItemClickListener{
 
-    @Bind(R.id.content_view)
     RelativeLayout content_view;
-    @Bind(R.id.wv_help)
+
     WebView wv_help;
-    @Bind(R.id.ll_pb)
+
     LinearLayout ll_pb;
 
     private Logger logger = Logger.getLogger(getClass());
@@ -99,7 +98,11 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
             hookWebView();
         }
         setContentView(R.layout.help_word);
-        ButterKnife.bind(this);
+
+        content_view = findViewById(R.id.content_view);
+        wv_help = findViewById(R.id.wv_help);
+        ll_pb = findViewById(R.id.ll_pb);
+
         initWeb();
         initDialog();
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler );
@@ -397,7 +400,7 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLogFileUploadCompleteHandler);
-        ButterKnife.unbind(this);
+
         super.onDestroy();
 
     }

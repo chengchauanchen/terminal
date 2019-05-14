@@ -12,9 +12,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.log4j.Logger;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.vc.R;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -23,12 +20,12 @@ import ptt.terminalsdk.context.MyTerminalFactory;
  * 设置界面的“音量改变和静音”组件
  * Created by gt358 on 2017/8/9.
  */
-public class VolumeChangLayout extends LinearLayout{
+public class VolumeChangLayout extends LinearLayout implements View.OnClickListener{
 //    @Bind(R.id.btn_isNoVoice)
 //    MToggleButton btnIsNoVoice;
-    @Bind(R.id.voice_num)
+
     TextView voiceNum;
-    @Bind(R.id.no_voice_text)
+
     TextView noVoiceText;
 
     private Context context;
@@ -58,7 +55,10 @@ public class VolumeChangLayout extends LinearLayout{
         LayoutInflater layoutInflater;
         layoutInflater =  (LayoutInflater) getContext().getSystemService(infServie);
         View view = layoutInflater.inflate(R.layout.layout_volumechange, this, true);
-        ButterKnife.bind(this, view);
+        voiceNum = view.findViewById(R.id.voice_num);
+        noVoiceText = view.findViewById(R.id.no_voice_text);
+        findViewById(R.id.voice_cut).setOnClickListener(this);
+        findViewById(R.id.voice_add).setOnClickListener(this);
     }
 
     private void initData () {
@@ -75,7 +75,7 @@ public class VolumeChangLayout extends LinearLayout{
     }
 
     /**点击事件*/
-    @OnClick({R.id.voice_cut, R.id.voice_add})
+
     public void onClick(View view) {
         voice = Integer.parseInt(voiceNum.getText().toString());
         switch (view.getId()) {

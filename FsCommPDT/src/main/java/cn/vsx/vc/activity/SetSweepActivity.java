@@ -9,8 +9,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.OnClick;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetScanGroupListResultHandler;
@@ -24,10 +22,10 @@ import ptt.terminalsdk.tools.ToastUtil;
 /**
  * Created by Administrator on 2017/3/16 0016.
  */
-public class SetSweepActivity extends BaseActivity {
-    @Bind(R.id.group_num)
+public class SetSweepActivity extends BaseActivity implements View.OnClickListener{
+
     TextView groupNum;
-    @Bind(R.id.group_list)
+
     ListView groupList;
     private Handler myHandler = new Handler();
     private GroupSweepAdapter adapter;
@@ -40,8 +38,10 @@ public class SetSweepActivity extends BaseActivity {
 
     @Override
     public void initView() {
-
-
+        groupList = (ListView) findViewById(R.id.group_list);
+        groupNum = (TextView) findViewById(R.id.group_num);
+        findViewById(R.id.right_add).setOnClickListener(this);
+        findViewById(R.id.news_bar_back).setOnClickListener(this);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class SetSweepActivity extends BaseActivity {
         TerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
     }
 
-    @OnClick({R.id.news_bar_back, R.id.right_add})
+
     public void onClick(View view) {
             switch (view.getId()) {
             case R.id.news_bar_back:

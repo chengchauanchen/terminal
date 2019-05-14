@@ -22,7 +22,6 @@ import ptt.terminalsdk.tools.ToastUtil;
 public class SweepGroupLayout extends LinearLayout {
     private Boolean IsOpenSweep = false;
     private Context context;
-    @Bind(R.id.open_sweep)
     MToggleButton openSweep;
     public SweepGroupLayout(Context context) {
         this(context, null);
@@ -45,7 +44,7 @@ public class SweepGroupLayout extends LinearLayout {
         LayoutInflater layoutInflater;
         layoutInflater =  (LayoutInflater) getContext().getSystemService(infServie);
         View view = layoutInflater.inflate(R.layout.layout_sweepgroup, this, true);
-        ButterKnife.bind(this, view);
+        openSweep = view.findViewById(R.id.open_sweep);
     }
 
     private void initData () {

@@ -9,8 +9,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.vc.R;
 
 /**
@@ -61,13 +61,14 @@ public class SweepAdapter extends BaseAdapter {
 
 
     static class ViewHolder {
-        @Bind(R.id.group_name)
+
         TextView groupName;
-        @Bind(R.id.group_del)
+
         ImageView groupDel;
 
         ViewHolder(View view) {
-            ButterKnife.bind(this, view);
+            groupName = view.findViewById(R.id.group_name);
+            groupDel = view.findViewById(R.id.group_del);
         }
     }
 }

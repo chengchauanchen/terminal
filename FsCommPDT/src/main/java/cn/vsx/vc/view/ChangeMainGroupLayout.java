@@ -12,8 +12,8 @@ import android.widget.TextView;
 
 import org.apache.log4j.Logger;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import butterknife.OnClick;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.GroupScanType;
@@ -37,13 +37,13 @@ import skin.support.widget.SkinCompatLinearLayout;
  */
 public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
 
-    @Bind(R.id.rl_start_group_sweep)
+
     RelativeLayout rl_start_group_sweep;
-    @Bind(R.id.open_sweep)
+
     MToggleButton openSweep;
-    @Bind(R.id.tv_start_group_sweep)
+
     TextView tv_start_group_sweep;
-    @Bind(R.id.rl_group_sweep_setting)
+
     RelativeLayout rl_group_sweep_setting;
 
     private Context context;
@@ -71,7 +71,10 @@ public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
         LayoutInflater layoutInflater;
         layoutInflater =  (LayoutInflater) getContext().getSystemService(infServie);
         View view = layoutInflater.inflate(R.layout.layout_changemaingroup, this, true);
-        ButterKnife.bind(this, view);
+        rl_start_group_sweep = view.findViewById(R.id.rl_start_group_sweep);
+        openSweep = view.findViewById(R.id.open_sweep);
+        tv_start_group_sweep = view.findViewById(R.id.tv_start_group_sweep);
+        rl_group_sweep_setting = view.findViewById(R.id.rl_group_sweep_setting);
     }
 
     private void initData () {

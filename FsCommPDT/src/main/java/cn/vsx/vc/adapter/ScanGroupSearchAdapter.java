@@ -13,8 +13,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
@@ -116,15 +116,17 @@ public class ScanGroupSearchAdapter extends BaseAdapter{
 
 
     class ViewHolder {
-        @Bind(R.id.tv_name)
+
         TextView tvName;
-        @Bind(R.id.tv_add_scan_group)
+
         TextView tvAddScanGroup;
-        @Bind(R.id.iv_scan_group)
+
         ImageView ivScanGroup;
 
         private ViewHolder(View rootView) {
-            ButterKnife.bind(this, rootView);
+            tvName = rootView.findViewById(R.id.tv_name);
+            tvAddScanGroup = rootView.findViewById(R.id.tv_add_scan_group);
+            ivScanGroup = rootView.findViewById(R.id.iv_scan_group);
         }
     }
 }

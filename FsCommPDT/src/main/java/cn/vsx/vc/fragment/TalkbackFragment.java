@@ -38,7 +38,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 
-import butterknife.Bind;
+
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.GroupScanType;
@@ -883,76 +883,76 @@ public class TalkbackFragment extends BaseFragment {
         this.activity = activity;
     }
 
-    @Bind(R.id.talkback_change_session)
+
     ImageView talkback_change_session;
-    @Bind(R.id.to_current_group)
+
     ImageView to_current_group;
-    @Bind(R.id.ptt)
+
     Button ptt;
 
-    @Bind(R.id.ll_show_area)
+
     LinearLayout ll_show_area;//主页上半部分总布局
-    @Bind(R.id.talkback_time_progress)
+
     TextView talkback_time_progress;//时间进度数字
-    @Bind(R.id.ll_status_bar)
+
     LinearLayout ll_status_bar;//最上边四个状态显示
-    @Bind(R.id.iv_volume_off_call)
+
     ImageView iv_volume_off_call;//听筒静音
 
-    @Bind(R.id.iv_open_group_scan)
+
     ImageView iv_open_group_scan;//组扫描
-    @Bind(R.id.tv_group_scan)
+
     TextView tv_group_scan;
-    @Bind(R.id.iv_environment_monitor)
+
     ImageView iv_environment_monitor;//环境监听
 
-    @Bind(R.id.ll_scanGroup_speak)
+
     LinearLayout ll_scanGroup_speak;//组扫描时，说话时的布局
-    @Bind(R.id.tv_scanGroup_speak)
+
     TextView tv_scanGroup_speak;//组扫描时，说话时的组
-    @Bind(R.id.ll_folder)
+
     LinearLayout ll_folder;//文件夹
-    @Bind(R.id.tv_current_folder)
+
     TextView tv_current_folder;//当前文件夹名
-    @Bind(R.id.tv_current_online)//当前组在线人数
+
     TextView tv_current_online;
 
-    @Bind(R.id.tv_current_group)
+
     TextView tv_current_group;//当前组名
-    @Bind(R.id.talkback_add_icon)
+
     ImageView talkback_add_icon;
-    @Bind(R.id.ll_speak_state)
+
     LinearLayout ll_speak_state;//当前语音状态
-    @Bind(R.id.ll_speaking)
+
     LinearLayout ll_speaking;//我正在说话
-    @Bind(R.id.tv_speak_text_me)
+
     TextView tv_speak_text_me;
-    @Bind(R.id.ll_listening)
+
     LinearLayout ll_listening;//别人在说话
-    @Bind(R.id.incomming_call_current_speaker)
+
     TextView incomming_call_current_speaker;//说话人名字
-    @Bind(R.id.ll_pre_speaking)
+
     LinearLayout ll_pre_speaking;//准备说话
-    @Bind(R.id.ll_silence)
+
     LinearLayout ll_silence;//静默状态
-    @Bind(R.id.ll_forbid)
+
     LinearLayout ll_forbid;//禁言禁听状态
-    @Bind(R.id.ll_waiting)
+
     LinearLayout ll_waiting;//排队中状态
 
-    @Bind(R.id.change_group_show_area)
+
     LinearLayout change_group_show_area;//转组区域
-    @Bind(R.id.change_group_view)
+
     ChangeGroupView change_group_view;//转组控件
 
 
-    @Bind(R.id.ll_sliding_chenge_volume)
+
     LinearLayout ll_sliding_chenge_volume;
-    @Bind(R.id.iv_volume_fw)
+
     ImageView iv_volume_fw;
-    @Bind(R.id.tv_volume_fw)
+
     TextView tv_volume_fw;
-    @Bind(R.id.title_bar)
+
     RelativeLayout title_bar;
 //    private GestureDetector mGestureDetector;
     private Logger logger = Logger.getLogger(getClass());
@@ -987,6 +987,38 @@ public class TalkbackFragment extends BaseFragment {
     public void initView() {
 
         //电源键监听
+        title_bar = (RelativeLayout) mRootView.findViewById(R.id.title_bar);
+        tv_volume_fw = (TextView) mRootView.findViewById(R.id.tv_volume_fw);
+        iv_volume_fw = (ImageView) mRootView.findViewById(R.id.iv_volume_fw);
+        ll_sliding_chenge_volume = (LinearLayout) mRootView.findViewById(R.id.ll_sliding_chenge_volume);
+        change_group_view = (ChangeGroupView)mRootView.findViewById(R.id.change_group_view);
+        change_group_show_area = (LinearLayout)mRootView.findViewById(R.id.change_group_show_area);
+        ll_waiting = (LinearLayout)mRootView.findViewById(R.id.ll_waiting);
+        ll_forbid = (LinearLayout)mRootView.findViewById(R.id.ll_forbid);
+        ll_silence = (LinearLayout)mRootView.findViewById(R.id.ll_silence);
+        ll_pre_speaking = (LinearLayout)mRootView.findViewById(R.id.ll_pre_speaking);
+        incomming_call_current_speaker = (TextView)mRootView.findViewById(R.id.incomming_call_current_speaker);
+        ll_listening = (LinearLayout)mRootView.findViewById(R.id.ll_listening);
+        tv_speak_text_me = (TextView) mRootView.findViewById(R.id.tv_speak_text_me);
+        ll_speaking = (LinearLayout)mRootView.findViewById(R.id.ll_speaking);
+        ll_speak_state = (LinearLayout)mRootView.findViewById(R.id.ll_speak_state);
+        talkback_add_icon = (ImageView) mRootView.findViewById(R.id.talkback_add_icon);
+        tv_current_group = (TextView)mRootView.findViewById(R.id.tv_current_group);
+        tv_current_online = (TextView) mRootView.findViewById(R.id.tv_current_online);
+        tv_current_folder = (TextView)mRootView.findViewById(R.id.tv_current_folder);
+        ll_folder = (LinearLayout)mRootView.findViewById(R.id.ll_folder);
+        tv_scanGroup_speak = (TextView)mRootView.findViewById(R.id.tv_scanGroup_speak);
+        ll_scanGroup_speak = (LinearLayout)mRootView.findViewById(R.id.ll_scanGroup_speak);
+        iv_environment_monitor = (ImageView)mRootView.findViewById(R.id.iv_environment_monitor);
+        tv_group_scan = (TextView) mRootView.findViewById(R.id.tv_group_scan);
+        iv_open_group_scan = (ImageView)mRootView.findViewById(R.id.iv_open_group_scan);
+        iv_volume_off_call = (ImageView)mRootView.findViewById(R.id.iv_volume_off_call);
+        ll_status_bar = (LinearLayout)mRootView.findViewById(R.id.ll_status_bar);
+        talkback_time_progress = (TextView)mRootView.findViewById(R.id.talkback_time_progress);
+        ll_show_area = (LinearLayout)mRootView.findViewById(R.id.ll_show_area);
+        ptt = (Button) mRootView.findViewById(R.id.ptt);
+        to_current_group = (ImageView) mRootView.findViewById(R.id.to_current_group);
+        talkback_change_session = (ImageView) mRootView.findViewById(R.id.talkback_change_session);
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         getContext().registerReceiver(mBatInfoReceiver, filter);
         //GH880手机按键服务

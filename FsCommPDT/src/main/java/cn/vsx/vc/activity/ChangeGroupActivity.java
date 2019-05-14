@@ -13,8 +13,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.OnClick;
 import cn.vsx.hamster.common.GroupType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Group;
@@ -36,19 +34,19 @@ import ptt.terminalsdk.tools.ToastUtil;
  * Created by Administrator on 2017/3/16 0016.
  */
 
-public class ChangeGroupActivity extends BaseActivity {
+public class ChangeGroupActivity extends BaseActivity implements View.OnClickListener{
 
-    @Bind(R.id.catalog_recyclerview)
+
     RecyclerView mCatalogRecyclerview;
-    @Bind(R.id.recyclerview)
+
     RecyclerView mRecyclerview;
-    @Bind(R.id.bar_title)
+
     TextView barTitle;
-    @Bind(R.id.right_btn)
+
     ImageView rightBtn;
-    @Bind(R.id.ok_btn)
+
     Button okBtn;
-    @Bind(R.id.fl_fragment_container_main)
+
     FrameLayout fl_fragment_container_main;
 
     private static Handler myHandler = new Handler();
@@ -69,7 +67,15 @@ public class ChangeGroupActivity extends BaseActivity {
 
     @Override
     public void initView() {
+        mCatalogRecyclerview = (RecyclerView) findViewById(R.id.catalog_recyclerview);
+        mRecyclerview = (RecyclerView) findViewById(R.id.recyclerview);
+        barTitle = (TextView) findViewById(R.id.bar_title);
+        rightBtn = (ImageView) findViewById(R.id.right_btn);
+        okBtn = (Button) findViewById(R.id.ok_btn);
         barTitle.setText(R.string.text_add_scan_group);
+        fl_fragment_container_main = (FrameLayout) findViewById(R.id.fl_fragment_container_main);
+        findViewById(R.id.iv_search).setOnClickListener(ChangeGroupActivity.this);
+        findViewById(R.id.news_bar_back).setOnClickListener(ChangeGroupActivity.this);
         rightBtn.setVisibility(View.GONE);
         okBtn.setVisibility(View.GONE);
 
@@ -278,7 +284,7 @@ public class ChangeGroupActivity extends BaseActivity {
 
 
     /**====================================================handler===============================================================================**/
-    @OnClick({R.id.news_bar_back,R.id.iv_search})
+
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.news_bar_back://返回

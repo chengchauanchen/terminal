@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import butterknife.Bind;
+
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.vc.R;
@@ -21,13 +21,13 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 public class HistoryCombatGroupActivity extends BaseActivity implements View.OnClickListener{
 
 
-    @Bind(R.id.help_combat_list)
+
     ListView help_combat_list;
-    @Bind(R.id.iv_return)
+
     ImageView iv_return;
-    @Bind(R.id.tv_title)
+
     TextView tv_title;
-    @Bind(R.id.tv_close_combat)
+
     TextView tv_close_combat;
 
     private MessageListAdapter mMessageListAdapter;
@@ -42,8 +42,12 @@ public class HistoryCombatGroupActivity extends BaseActivity implements View.OnC
 
     @Override
     public void initView(){
-        tv_title.setText(getResources().getString(R.string.tv_close_combat));
+        help_combat_list = (ListView) findViewById(R.id.help_combat_list);
+        iv_return = (ImageView) findViewById(R.id.iv_return);
+        tv_title = (TextView) findViewById(R.id.tv_title);
+        tv_close_combat = (TextView) findViewById(R.id.tv_close_combat);
         tv_close_combat.setVisibility(View.GONE);
+        tv_title.setText(getResources().getString(R.string.tv_close_combat));
     }
 
     @Override

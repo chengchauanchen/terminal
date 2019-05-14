@@ -25,7 +25,6 @@ import org.apache.log4j.Logger;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
@@ -164,17 +163,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 			//重走应用流程
 			protectApp();
 		}else {
-			ButterKnife.bind(this);
-			try {
-				ButterKnife.ViewBinder e = (ButterKnife.ViewBinder) findViewBinderForClassMethod.invoke(null, BaseActivity.class);
-				if(e != null) {
-					e.bind(ButterKnife.Finder.ACTIVITY, this, this);
-				}
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-			}
+
 
 			regBroadcastRecv(ACT_SHOW_FULL_SCREEN,ACT_DISMISS_FULL_SCREEN,STOP_INDIVDUALCALL_SERVEIC);
 			ActivityCollector.addActivity(this,getClass());
@@ -245,7 +234,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 	protected void onDestroy() {
 		try{
 			doOtherDestroy();
-			ButterKnife.unbind(this);//解除绑定，官方文档只对fragment做了解绑
+
 			ActivityCollector.removeActivity(this);
 
 			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);

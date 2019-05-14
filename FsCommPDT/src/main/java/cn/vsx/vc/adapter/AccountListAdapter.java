@@ -11,8 +11,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
@@ -117,31 +117,36 @@ public class AccountListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     class GroupViewHolder extends RecyclerView.ViewHolder{
-        @Bind(R.id.shoutai_user_logo)
+
         ImageView ivLogo;
-        @Bind(R.id.shoutai_tv_member_name)
+
         TextView tvName;
-        @Bind(R.id.checkbox)
+
         CheckBox checkbox;
         public GroupViewHolder(View itemView){
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            ivLogo = itemView.findViewById(R.id.shoutai_user_logo);
+            tvName = itemView.findViewById(R.id.shoutai_tv_member_name);
+            CheckBox checkbox = itemView.findViewById(R.id.checkbox);
         }
     }
 
     class UserViewHolder extends RecyclerView.ViewHolder{
-        @Bind(R.id.shoutai_user_logo)
+
         ImageView ivLogo;
-        @Bind(R.id.shoutai_tv_member_name)
+
         TextView tvName;
-        @Bind(R.id.shoutai_tv_member_id)
+
         TextView tvId;
-        @Bind(R.id.checkbox)
+
         CheckBox checkbox;
 
         public UserViewHolder(View itemView){
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            ivLogo = itemView.findViewById(R.id.shoutai_user_logo);
+            tvName = itemView.findViewById(R.id.shoutai_tv_member_name);
+            tvId = itemView.findViewById(R.id.shoutai_tv_member_id);
+            checkbox = itemView.findViewById(R.id.checkbox);
         }
     }
 

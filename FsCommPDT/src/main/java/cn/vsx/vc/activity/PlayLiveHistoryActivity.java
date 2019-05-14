@@ -19,8 +19,6 @@ import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
-import butterknife.Bind;
-import butterknife.OnClick;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -36,33 +34,32 @@ import cn.vsx.vc.utils.StringUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
-
-public class PlayLiveHistoryActivity extends BaseActivity{
+public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClickListener{
 
     private final String TAG = this.getClass().getName();
-    @Bind(R.id.texture_view)
+
     TextureView textureView;
-    @Bind(R.id.iv_pause_continue)
+
     ImageView iv_pause_continue;
-    @Bind(R.id.tv_current_time)
+
     TextView tv_current_time;
-    @Bind(R.id.seek_bar)
+
     SeekBar seek_bar;
-    @Bind(R.id.tv_max_time)
+
     TextView tv_max_time;
-    @Bind(R.id.iv_close)
+
     ImageView iv_close;
-    @Bind(R.id.tv_theme)
+
     TextView tv_theme;
-    @Bind(R.id.iv_pause)
+
     ImageView iv_pause;
-    @Bind(R.id.ll_seek_bar)
+
     LinearLayout ll_seek_bar;
-    @Bind(R.id.ll_volume)
+
     LinearLayout ll_volume;
-    @Bind(R.id.iv_volume)
+
     ImageView iv_volume;
-    @Bind(R.id.tv_volume)
+
     TextView tv_volume;
     private MediaPlayer mediaPlayer;
     private int currentPosition;
@@ -92,7 +89,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
                         float sMax = seek_bar.getMax();
                         //播放比例
                         float percent = position / maxTime;
-                        Log.e("PlayLiveHistoryActivity", "position:" + position+"--percent:"+percent);
+                        Log.e("PlayLiveHistoryActivity", "position:" + position + "--percent:" + percent);
                         if(percent < 1){
                             seek_bar.setProgress((int) (sMax * percent));
                             tv_current_time.setText(DateUtils.getTime((int) position));
@@ -129,6 +126,21 @@ public class PlayLiveHistoryActivity extends BaseActivity{
 
     @Override
     public void initView(){
+        tv_volume = (TextView) findViewById(R.id.tv_volume);
+        iv_volume = (ImageView) findViewById(R.id.iv_volume);
+        ll_volume = (LinearLayout) findViewById(R.id.ll_volume);
+        ll_seek_bar = (LinearLayout) findViewById(R.id.ll_seek_bar);
+        iv_pause = (ImageView) findViewById(R.id.iv_pause);
+        tv_theme = (TextView) findViewById(R.id.tv_theme);
+        iv_close = (ImageView) findViewById(R.id.iv_close);
+        tv_max_time = (TextView) findViewById(R.id.tv_max_time);
+        seek_bar = (SeekBar) findViewById(R.id.seek_bar);
+        tv_current_time = (TextView) findViewById(R.id.tv_current_time);
+        iv_pause_continue = (ImageView) findViewById(R.id.iv_pause_continue);
+        textureView = (TextureView) findViewById(R.id.texture_view);
+        findViewById(R.id.iv_close).setOnClickListener(this);
+        findViewById(R.id.iv_pause).setOnClickListener(this);
+        findViewById(R.id.iv_pause_continue).setOnClickListener(this);
     }
 
     @Override
@@ -254,7 +266,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
 
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler(){
         @Override
-        public void handler(String mainMemberName, int mainMemberId,boolean emergencyType){
+        public void handler(String mainMemberName, int mainMemberId, boolean emergencyType){
             if(mediaPlayer != null && mediaPlayer.isPlaying()){
                 mediaPlayer.pause();
                 iv_pause_continue.setImageResource(R.drawable.on_pause);
@@ -343,7 +355,6 @@ public class PlayLiveHistoryActivity extends BaseActivity{
         }
     }
 
-    @OnClick({R.id.iv_pause_continue, R.id.iv_pause})
     public void pauseOrContinue(){
         try{
             if(isNetConnected){
@@ -355,7 +366,7 @@ public class PlayLiveHistoryActivity extends BaseActivity{
                 }else{
                     if(playFinish){
                         play(0);
-                    }else {
+                    }else{
                         if(null != mediaPlayer){
                             mediaPlayer.start();
                         }
@@ -373,7 +384,6 @@ public class PlayLiveHistoryActivity extends BaseActivity{
         }
     }
 
-    @OnClick(R.id.iv_close)
     public void close(){
         mHandler.removeCallbacksAndMessages(null);
         try{
@@ -451,13 +461,27 @@ public class PlayLiveHistoryActivity extends BaseActivity{
                         mediaPlayer.reset();
                         mediaPlayer.release();
                         mediaPlayer = null;
-
                         return false;
                     }
                 });
             }catch(Exception e){
                 logger.error(e);
             }
+        }
+    }
+
+    @Override
+    public void onClick(View v){
+        switch(v.getId()){
+            case R.id.iv_close:
+                close();
+                break;
+            case R.id.iv_pause:
+                pauseOrContinue();
+                break;
+            case R.id.iv_pause_continue:
+                pauseOrContinue();
+                break;
         }
     }
 }

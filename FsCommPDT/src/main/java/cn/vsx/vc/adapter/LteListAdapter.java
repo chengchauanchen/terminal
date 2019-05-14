@@ -15,8 +15,8 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -192,22 +192,33 @@ public class LteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     class UserViewHolder extends RecyclerView.ViewHolder{
-        @Bind(R.id.shoutai_user_logo)
+
         ImageView ivLogo;
-        @Bind(R.id.shoutai_tv_member_name)
+
         TextView tvName;
-        @Bind(R.id.shoutai_tv_member_id)
+
         TextView tvId;
-        @Bind(R.id.ll_lte_live)
+
         LinearLayout ll_lte_live;
-        @Bind(R.id.shoutai_message_to)
+
         LinearLayout llMessageTo;
-        @Bind(R.id.shoutai_call_to)
+
         LinearLayout llCallTo;
 
         public UserViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            ivLogo = itemView.findViewById(R.id.shoutai_user_logo);
+
+            tvName = itemView.findViewById(R.id.shoutai_tv_member_name);
+
+            tvId = itemView.findViewById(R.id.shoutai_tv_member_id);
+
+            ll_lte_live = itemView.findViewById(R.id.ll_lte_live);
+
+            llMessageTo = itemView.findViewById(R.id.shoutai_message_to);
+
+            llCallTo = itemView.findViewById(R.id.shoutai_call_to);
+
 
         }
     }

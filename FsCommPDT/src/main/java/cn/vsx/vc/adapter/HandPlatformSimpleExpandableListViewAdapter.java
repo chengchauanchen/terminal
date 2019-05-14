@@ -12,8 +12,7 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.ShouTaiBean;
 import cn.vsx.vc.model.ShouTaiBean.BuMenBean;
@@ -105,23 +104,24 @@ public class HandPlatformSimpleExpandableListViewAdapter extends BaseExpandableL
         return true;
     }
     public static class ViewHolderShiJu {
-        @Bind(R.id.shoutai_shuju_name)
+
         TextView shoutai_shuju_name;
-        @Bind(R.id.shoutai_group_size)
+
         TextView shoutai_group_size;
-        @Bind(R.id.is_shoutai_shiju)
+
         ImageView is_shoutai_shiju;
 
         public ViewHolderShiJu(View rootView) {
-            ButterKnife.bind(this, rootView);
+            shoutai_shuju_name = rootView.findViewById(R.id.shoutai_shuju_name);
+            shoutai_group_size = rootView.findViewById(R.id.shoutai_group_size);
+            is_shoutai_shiju = rootView.findViewById(R.id.is_shoutai_shiju);
         }
     }
     public static class ViewHolderBuMen {
-        @Bind(R.id.shoutai_bumen_name)
         TextView shoutai_bumen_name;
 
         public ViewHolderBuMen(View rootView) {
-            ButterKnife.bind(this, rootView);
+            shoutai_bumen_name = rootView.findViewById(R.id.shoutai_bumen_name);
         }
     }
 

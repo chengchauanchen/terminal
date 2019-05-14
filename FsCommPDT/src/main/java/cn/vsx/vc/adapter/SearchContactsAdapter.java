@@ -19,8 +19,8 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -185,29 +185,38 @@ public class SearchContactsAdapter extends BaseAdapter  {
 	}
 
 	public static class ViewHolder {
-		@Bind(R.id.iv_member_portrait)
+
 		ImageView iv_member_portrait;
-		@Bind(R.id.tv_member_name)
+
 		TextView tv_member_name;
-		@Bind(R.id.tv_member_id)
+
 		TextView tv_member_id;
-		@Bind(R.id.iv_search_call)
+
 		LinearLayout iv_search_call;
-		@Bind(R.id.iv_search_msg)
+
 		LinearLayout iv_search_msg;
-		@Bind(R.id.iv_search_add_remove)
+
 		ImageView iv_search_add_remove;
-		@Bind(R.id.ll_item_search_contacts)
+
 		LinearLayout ll_item_search_contacts;
-		@Bind(R.id.ll_search_add_remove)
+
 		LinearLayout ll_search_add_remove;
-		@Bind(R.id.me)
+
 		TextView tv_me;
-		@Bind(R.id.shoutai_dial_to)
+
 		LinearLayout llDialTo;
 
 		public ViewHolder(View rootView) {
-			ButterKnife.bind(this,rootView);
+			iv_member_portrait = rootView.findViewById(R.id.iv_member_portrait);
+			tv_member_name = rootView.findViewById(R.id.tv_member_name);
+			tv_member_id = rootView.findViewById(R.id.tv_member_id);
+			iv_search_call = rootView.findViewById(R.id.iv_search_call);
+			iv_search_msg = rootView.findViewById(R.id.iv_search_msg);
+			iv_search_add_remove = rootView.findViewById(R.id.iv_search_add_remove);
+			ll_item_search_contacts = rootView.findViewById(R.id.ll_item_search_contacts);
+			ll_search_add_remove = rootView.findViewById(R.id.ll_search_add_remove);
+			tv_me = rootView.findViewById(R.id.me);
+			llDialTo = rootView.findViewById(R.id.shoutai_dial_to);
 		}
 	}
 

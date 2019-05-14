@@ -9,20 +9,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import butterknife.Bind;
+
 import butterknife.OnClick;
 import cn.vsx.vc.R;
 
 public class AboutActivity extends BaseActivity {
 
 
-    @Bind(R.id.bar_title)
+
     TextView barTitle;
-    @Bind(R.id.right_btn)
+
     ImageView rightBtn;
-    @Bind(R.id.ok_btn)
+
     Button ok_btn;
-    @Bind(R.id.tv_version)
+
     TextView tv_version;
 
     @Override
@@ -32,9 +32,13 @@ public class AboutActivity extends BaseActivity {
 
     @Override
     public void initView() {
-        barTitle.setText(getResources().getString(R.string.text_about_app));
+        barTitle = (TextView) findViewById(R.id.bar_title);
+        rightBtn = (ImageView) findViewById(R.id.right_btn);
+        ok_btn = (Button) findViewById(R.id.ok_btn);
+        tv_version = (TextView) findViewById(R.id.tv_version);
         rightBtn.setVisibility(View.INVISIBLE);
         ok_btn.setVisibility(View.GONE);
+        barTitle.setText(getResources().getString(R.string.text_about_app));
         tv_version.setText(String.format(getResources().getString(R.string.activity_about_version),getVersionName()));
     }
 

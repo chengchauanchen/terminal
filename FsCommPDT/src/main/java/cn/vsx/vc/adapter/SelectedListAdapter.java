@@ -10,8 +10,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
@@ -79,18 +79,21 @@ public class SelectedListAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
     class UserViewHolder extends RecyclerView.ViewHolder{
-        @Bind(R.id.shoutai_user_logo)
+
         ImageView ivLogo;
-        @Bind(R.id.shoutai_tv_member_name)
+
         TextView tvName;
-        @Bind(R.id.shoutai_tv_member_id)
+
         TextView tvId;
-        @Bind(R.id.iv_delete)
+
         ImageView ivDelete;
 
         public UserViewHolder(View itemView){
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            ivLogo = itemView.findViewById(R.id.shoutai_user_logo);
+            tvName = itemView.findViewById(R.id.shoutai_tv_member_name);
+            tvId = itemView.findViewById(R.id.shoutai_tv_member_id);
+            ivDelete = itemView.findViewById(R.id.iv_delete);
         }
     }
 

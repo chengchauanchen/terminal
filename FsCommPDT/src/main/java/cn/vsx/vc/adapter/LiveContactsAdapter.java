@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -222,23 +222,36 @@ public class LiveContactsAdapter extends BaseAdapter {
     }
 
     static class ViewHolder {
-        @Bind(R.id.catagory)
+
         LinearLayout ll_item_person_contacts;
-        @Bind(R.id.tv_catagory)
+
         TextView tv_pinyin;
-        @Bind(R.id.iv_selectmember_headsculpture)
+
         ImageView ivSelectmemberHeadsculpture;
-        @Bind(R.id.tv_selectmember_id)
+
         TextView tv_selectmember_id;
-        @Bind(R.id.tv_selectmember_name)
+
         TextView tvSelectmemberName;
-        @Bind(R.id.iv_select)
+
         CheckBox iv_select;
-        @Bind(R.id.img_terminalMemberType)
+
         ImageView img_terminalMemberType;
 
         ViewHolder(View view) {
-            ButterKnife.bind(this, view);
+            ll_item_person_contacts = view.findViewById(R.id.catagory);
+
+            tv_pinyin = view.findViewById(R.id.tv_catagory);
+
+            ivSelectmemberHeadsculpture = view.findViewById(R.id.iv_selectmember_headsculpture);
+
+            tv_selectmember_id = view.findViewById(R.id.tv_selectmember_id);
+
+            tvSelectmemberName = view.findViewById(R.id.tv_selectmember_name);
+
+            iv_select = view.findViewById(R.id.iv_select);
+
+            img_terminalMemberType = view.findViewById(R.id.img_terminalMemberType);
+
         }
     }
 

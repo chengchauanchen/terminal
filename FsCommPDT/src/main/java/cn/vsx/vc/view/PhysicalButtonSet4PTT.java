@@ -7,8 +7,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -22,20 +22,20 @@ import skin.support.widget.SkinCompatLinearLayout;
  */
 
 public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
-    @Bind(R.id.ll_voice)
+
     LinearLayout ll_voice;
-    @Bind(R.id.ppt_button_add)
+
     MToggleButton pptButtonAdd;
-    @Bind(R.id.ppt_button_cut)
+
     MToggleButton pptButtonCut;
-    @Bind(R.id.btn_pttphysicalset)
+
     MToggleButton btn_pttphysicalset;
 
-    @Bind(R.id.tv_pttphysicalset)
+
     TextView tv_pttphysicalset;
-    @Bind(R.id.up_ptt)
+
     TextView up_ptt;
-    @Bind(R.id.down_ptt)
+
     TextView down_ptt;
 
     private Context context;
@@ -65,7 +65,14 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
         LayoutInflater layoutInflater = LayoutInflater.from(context);
 
         View view = layoutInflater.inflate(R.layout.layout_physicalset, this, true);
-        ButterKnife.bind(this, view);
+        ll_voice = view.findViewById(R.id.ll_voice);
+        pptButtonAdd = view.findViewById(R.id.ppt_button_add);
+        pptButtonCut = view.findViewById(R.id.ppt_button_cut);
+        btn_pttphysicalset = view.findViewById(R.id.btn_pttphysicalset);
+        tv_pttphysicalset = view.findViewById(R.id.tv_pttphysicalset);
+        up_ptt = view.findViewById(R.id.up_ptt);
+        down_ptt = view.findViewById(R.id.down_ptt);
+
     }
 
     private void initData () {

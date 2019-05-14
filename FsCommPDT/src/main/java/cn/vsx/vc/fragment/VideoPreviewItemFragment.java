@@ -22,8 +22,6 @@ import android.widget.Toast;
 
 import java.io.File;
 
-import butterknife.Bind;
-import butterknife.OnClick;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -41,23 +39,23 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 /**
  * 看小视频fragment
  */
-public class VideoPreviewItemFragment extends BaseFragment implements TextureView.SurfaceTextureListener{
+public class VideoPreviewItemFragment extends BaseFragment implements TextureView.SurfaceTextureListener, View.OnClickListener{
 
-    @Bind(R.id.rl_live_general_view)
+
     RelativeLayout rl_live_general_view;
-    @Bind(R.id.texture_view)
+
     TextureView mTextureView;
-    @Bind(R.id.tv_current_time)
+
     TextView tv_current_time;
-    @Bind(R.id.seek_bar)
+
     SeekBar seek_bar;
-    @Bind(R.id.tv_max_time)
+
     TextView tv_max_time;
-    @Bind(R.id.ll_seek_bar)
+
     LinearLayout ll_seek_bar;
-    @Bind(R.id.iv_pause)
+
     ImageView iv_pause;
-    @Bind(R.id.iv_pause_continue)
+
     ImageView iv_pause_continue;
 
     private MediaPlayer mMediaPlayer;
@@ -117,6 +115,14 @@ public class VideoPreviewItemFragment extends BaseFragment implements TextureVie
 
     @Override
     public void initView(){
+        iv_pause_continue = (ImageView) mRootView.findViewById(R.id.iv_pause_continue);
+        iv_pause = (ImageView) mRootView.findViewById(R.id.iv_pause);
+        ll_seek_bar = (LinearLayout) mRootView.findViewById(R.id.ll_seek_bar);
+        tv_max_time = (TextView) mRootView.findViewById(R.id.tv_max_time);
+        seek_bar = (SeekBar) mRootView.findViewById(R.id.seek_bar);
+        tv_current_time = (TextView) mRootView.findViewById(R.id.tv_current_time);
+        mTextureView = (TextureView) mRootView.findViewById(R.id.texture_view);
+        rl_live_general_view = (RelativeLayout) mRootView.findViewById(R.id.rl_live_general_view);
         ((BaseActivity) getActivity()).setBackListener(new OnBackListener(){
             @Override
             public void onBack(){
@@ -128,6 +134,9 @@ public class VideoPreviewItemFragment extends BaseFragment implements TextureVie
                 }
             }
         });
+        mRootView.findViewById(R.id.iv_pause).setOnClickListener(this);
+        mRootView.findViewById(R.id.iv_pause_continue).setOnClickListener(this);
+        mRootView.findViewById(R.id.iv_close).setOnClickListener(this);
     }
 
     @Override
@@ -137,12 +146,12 @@ public class VideoPreviewItemFragment extends BaseFragment implements TextureVie
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyDataMessageHandler);
     }
 
-    @OnClick(R.id.iv_close)
+
     public void close(){
         popBack();
     }
 
-    @OnClick({R.id.iv_pause_continue,R.id.iv_pause})
+
     public void playOrContinue(){
         try{
             if(mMediaPlayer.isPlaying()){
@@ -346,5 +355,20 @@ public class VideoPreviewItemFragment extends BaseFragment implements TextureVie
 
     @Override
     public void onSurfaceTextureUpdated(SurfaceTexture surface){
+    }
+
+    @Override
+    public void onClick(View v){
+        switch(v.getId()){
+            case R.id.iv_pause:
+                playOrContinue();
+                break;
+            case R.id.iv_pause_continue:
+                playOrContinue();
+                break;
+            case R.id.iv_close:
+                close();
+                break;
+        }
     }
 }

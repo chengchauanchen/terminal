@@ -13,8 +13,8 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
@@ -143,29 +143,34 @@ public class PoliceAffairsAdapter extends BaseExpandableListAdapter {
         return false;
     }
     public static class ViewHolder {
-        @Bind(R.id.jingwutong_bumen_name)
+
         TextView jingwutong_bumenName;
-        @Bind(R.id.jingwutong_group_size)
+
         TextView jingwutong_group_size;
-        @Bind(R.id.is_jingwutong_img)
+
         ImageView is_jingwutong_img;
 
         public ViewHolder(View rootView) {
-            ButterKnife.bind(this, rootView);
+            jingwutong_bumenName = rootView.findViewById(R.id.jingwutong_bumen_name);
+            jingwutong_group_size = rootView.findViewById(R.id.jingwutong_group_size);
+            is_jingwutong_img = rootView.findViewById(R.id.is_jingwutong_img);
         }
     }
     public static class ViewHolderPerson {
-        @Bind(R.id.jingwutong_call_to)
+
         LinearLayout jingwutong_call_to;
-        @Bind(R.id.jingwutong_message_to)
+
         LinearLayout jingwutong_message_to;
-        @Bind(R.id.jingwutong_tv_member_name)
+
         TextView jingwutong_tv_member_name;
-        @Bind(R.id.jingwutong_tv_member_id)
+
         TextView jingwutong_tv_member_id;
 
         public ViewHolderPerson(View rootView) {
-            ButterKnife.bind(this, rootView);
+            jingwutong_call_to = rootView.findViewById(R.id.jingwutong_call_to);
+            jingwutong_message_to = rootView.findViewById(R.id.jingwutong_message_to);
+            jingwutong_tv_member_name = rootView.findViewById(R.id.jingwutong_tv_member_name);
+            jingwutong_tv_member_id = rootView.findViewById(R.id.jingwutong_tv_member_id);
         }
     }
     /**

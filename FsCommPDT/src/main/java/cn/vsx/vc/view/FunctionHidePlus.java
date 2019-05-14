@@ -27,13 +27,9 @@ import org.apache.log4j.Logger;
 
 import java.util.HashMap;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.TerminalMemberType;
-import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
@@ -59,31 +55,31 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class FunctionHidePlus extends LinearLayout {
 
-    @Bind(R.id.gv_function_bottom)
+
     GridView gv_function_bottom;
-    @Bind(R.id.rl_function_hide_plus_top)
+
     RelativeLayout top;
-    @Bind(R.id.group_call_news_et)
+
     EditText groupCallNewsEt;
-    @Bind(R.id.hide_function)
+
     ImageView hideFunction;
-    @Bind(R.id.group_call_news_keyboard)
+
     ImageView groupCallNewsKeyboard;
-    @Bind(R.id.btn_ptt)
+
     Button btn_ptt;
-    @Bind(R.id.btn_record)
+
     AudioRecordButton btn_record;
-    @Bind(R.id.bt_send)
+
     Button send;
 
-    @Bind(R.id.ll_function_hide_plus_bottom)
+
     LinearLayout ll_function_hide_plus_bottom;
-    @Bind(R.id.v_edit_line)
+
     View v_edit_line;
 
-    //合并转发
-    @Bind(R.id.bt_merge_transmit)
     Button bt_merge_transmit;
+    //合并转发
+
 
     private Context context;
     private Logger logger = Logger.getLogger(DataUtil.class);
@@ -132,7 +128,20 @@ public class FunctionHidePlus extends LinearLayout {
         LayoutInflater layoutInflater;
         layoutInflater =  (LayoutInflater) getContext().getSystemService(infServie);
         View view = layoutInflater.inflate(R.layout.layout_functionhideplus, this, true);
-        ButterKnife.bind(this, view);
+
+        gv_function_bottom = view.findViewById(R.id.gv_function_bottom);
+        top = view.findViewById(R.id.rl_function_hide_plus_top);
+        groupCallNewsEt = view.findViewById(R.id.group_call_news_et);
+        hideFunction = view.findViewById(R.id.hide_function);
+        groupCallNewsKeyboard = view.findViewById(R.id.group_call_news_keyboard);
+        btn_ptt = view.findViewById(R.id.btn_ptt);
+        btn_record = view.findViewById(R.id.btn_record);
+        send = view.findViewById(R.id.bt_send);
+        ll_function_hide_plus_bottom = view.findViewById(R.id.ll_function_hide_plus_bottom);
+        v_edit_line = view.findViewById(R.id.v_edit_line);
+        bt_merge_transmit = view.findViewById(R.id.bt_merge_transmit);
+
+
         ll_function_hide_plus_bottom.setVisibility(GONE);
         bt_merge_transmit.setVisibility(GONE);
     }
@@ -210,7 +219,7 @@ public class FunctionHidePlus extends LinearLayout {
             R.drawable.file_selector,R.drawable.position,
             R.drawable.push_video,R.drawable.pull_video
     };
-    @OnClick({R.id.hide_function, R.id.group_call_news_keyboard, R.id.bt_send,R.id.bt_merge_transmit})
+
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.hide_function:

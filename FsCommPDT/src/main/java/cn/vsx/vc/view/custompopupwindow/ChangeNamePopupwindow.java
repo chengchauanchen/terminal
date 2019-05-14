@@ -8,9 +8,6 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.PopupWindow;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -22,9 +19,9 @@ import ptt.terminalsdk.tools.ToastUtil;
  * Created by gt358 on 2017/9/26.
  */
 
-public class ChangeNamePopupwindow extends PopupWindow {
+public class ChangeNamePopupwindow extends PopupWindow implements View.OnClickListener{
 
-    @Bind(R.id.et_change_name)
+
     EditText et_change_name;
 
     private Context context;
@@ -35,9 +32,10 @@ public class ChangeNamePopupwindow extends PopupWindow {
 
     private void initView (Context context) {
         View popupWindowView = View.inflate(context, R.layout.popu_change_name, null);
-
         setContentView(popupWindowView);
-        ButterKnife.bind(this, popupWindowView);
+        et_change_name = popupWindowView.findViewById(R.id.et_change_name);
+        popupWindowView.findViewById(R.id.ib_back_change_name).setOnClickListener(this);
+        popupWindowView.findViewById(R.id.tv_save).setOnClickListener(this);
         setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
         setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
         //是否响应touch事件
@@ -77,7 +75,7 @@ public class ChangeNamePopupwindow extends PopupWindow {
         });
     }
 
-    @OnClick({R.id.ib_back_change_name, R.id.tv_save})
+
     public void onClick (View view) {
         switch (view.getId()) {
             case R.id.ib_back_change_name:

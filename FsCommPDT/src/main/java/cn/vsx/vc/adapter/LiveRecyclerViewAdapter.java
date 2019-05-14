@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.ContactItemBean;
@@ -184,18 +184,25 @@ public class LiveRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.V
     }
 
     class UserViewHolder extends RecyclerView.ViewHolder{
-        @Bind(R.id.shoutai_user_logo)
+
         ImageView ivLogo;
-        @Bind(R.id.shoutai_tv_member_name)
+
         TextView tvName;
-        @Bind(R.id.shoutai_tv_member_id)
+
         TextView tvId;
-        @Bind(R.id.iv_select)
+
         CheckBox iv_select;
 
         public UserViewHolder(View itemView){
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            ivLogo = itemView.findViewById(R.id.shoutai_user_logo);
+
+            tvName = itemView.findViewById(R.id.shoutai_tv_member_name);
+
+            tvId = itemView.findViewById(R.id.shoutai_tv_member_id);
+
+            iv_select = itemView.findViewById(R.id.iv_select);
+
         }
     }
 

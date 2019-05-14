@@ -20,8 +20,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TimerTask;
 
-import butterknife.Bind;
-import butterknife.OnClick;
 import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Group;
@@ -42,36 +40,36 @@ import ptt.terminalsdk.context.MyTerminalFactory;
  * Created by Administrator on 2017/3/15 0015.
  */
 
-public class GroupMemberActivity extends BaseActivity {
+public class GroupMemberActivity extends BaseActivity implements View.OnClickListener{
 
-    @Bind(R.id.news_bar_back)
+
     ImageView newsBarBack;
-    @Bind(R.id.news_bar_back_temp)
+
     ImageView newsBarBackTemp;
-    @Bind(R.id.bar_title)
+
     TextView barTitle;
-    @Bind(R.id.in_title_bar)
+
     LinearLayout in_title_bar;
-    @Bind(R.id.right_btn)
+
     ImageView rightBtn;
-    @Bind(R.id.ok_btn)
+
     Button ok_btn;
 
-    @Bind(R.id.temp_title_bar)
+
     LinearLayout temp_title_bar;
-    @Bind(R.id.add_btn)
+
     ImageView add_btn;
-    @Bind(R.id.delete_btn)
+
     ImageView delete_btn;
-    @Bind(R.id.cancel_text)
+
     TextView cancel_text;
-    @Bind(R.id.delete_text)
+
     TextView delete_text;
-    @Bind(R.id.member_num)
+
     TextView memberNum;
-    @Bind(R.id.member_list)
+
     ListView memberList;
-    @Bind(R.id.volume_layout)
+
     VolumeViewLayout volumeViewLayout;
     private GroupMemberAdapter sortAdapter;
     private Handler myHandler = new Handler();
@@ -112,7 +110,28 @@ public class GroupMemberActivity extends BaseActivity {
     @Override
     public void initView() {
         // 获取屏幕宽度
+        newsBarBack = (ImageView) findViewById(R.id.news_bar_back);
+        newsBarBackTemp = (ImageView) findViewById(R.id.news_bar_back_temp);
+        barTitle = (TextView) findViewById(R.id.bar_title);
+        in_title_bar = (LinearLayout) findViewById(R.id.in_title_bar);
+        rightBtn = (ImageView) findViewById(R.id.right_btn);
+        ok_btn = (Button) findViewById(R.id.ok_btn);
+        temp_title_bar = (LinearLayout) findViewById(R.id.temp_title_bar);
+        add_btn = (ImageView) findViewById(R.id.add_btn);
+        delete_btn = (ImageView) findViewById(R.id.delete_btn);
+        cancel_text = (TextView) findViewById(R.id.cancel_text);
+        delete_text = (TextView) findViewById(R.id.delete_text);
+        memberNum = (TextView) findViewById(R.id.member_num);
+        memberList = (ListView) findViewById(R.id.member_list);
+        volumeViewLayout = (VolumeViewLayout) findViewById(R.id.volume_layout);
         WindowManager windowManager = (WindowManager) this.getSystemService(WINDOW_SERVICE);
+        findViewById(R.id.delete_text).setOnClickListener(this);
+        findViewById(R.id.cancel_text).setOnClickListener(this);
+        findViewById(R.id.add_btn).setOnClickListener(this);
+        findViewById(R.id.delete_btn).setOnClickListener(this);
+        findViewById(R.id.news_bar_back_temp).setOnClickListener(this);
+        findViewById(R.id.right_btn).setOnClickListener(this);
+        findViewById(R.id.news_bar_back).setOnClickListener(this);
         DisplayMetrics dm = new DisplayMetrics();
         windowManager.getDefaultDisplay().getMetrics(dm);
     }
@@ -183,7 +202,7 @@ public class GroupMemberActivity extends BaseActivity {
 
     private long lastSearchTime=0;
 
-    @OnClick({R.id.news_bar_back, R.id.right_btn,R.id.news_bar_back_temp,R.id.delete_btn,R.id.add_btn,R.id.cancel_text,R.id.delete_text})
+
     public void onClick(View view) {
         long currentTime = System.currentTimeMillis();
         if( currentTime - lastSearchTime<1000){

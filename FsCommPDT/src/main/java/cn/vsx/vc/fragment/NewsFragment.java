@@ -30,8 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MessageCategory;
@@ -99,17 +99,17 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
 @SuppressLint("ValidFragment")
 public class NewsFragment extends BaseFragment {
 
-    @Bind(R.id.news_list)
+
     ListView newsList;
-    @Bind(R.id.add_icon)
+
     ImageView add_icon;
-    @Bind(R.id.setting_group_name)
+
     TextView setting_group_name;
-    @Bind(R.id.icon_laba)
+
     ImageView icon_laba;
-    @Bind(R.id.speaking_name)
+
     TextView speaking_name;
-    @Bind(R.id.voice_image)
+
     ImageView voice_image;
 
     private int deletePos = -1 ;
@@ -314,6 +314,12 @@ public class NewsFragment extends BaseFragment {
 
     @Override
     public void initView() {
+        voice_image = (ImageView) mRootView.findViewById(R.id.voice_image);
+        speaking_name = (TextView) mRootView.findViewById(R.id.speaking_name);
+        icon_laba = (ImageView) mRootView.findViewById(R.id.icon_laba);
+        setting_group_name = (TextView) mRootView.findViewById(R.id.setting_group_name);
+        add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
+        newsList = (ListView) mRootView.findViewById(R.id.news_list);
         setVideoIcon();
         setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
         voice_image.setOnClickListener(view -> {
@@ -384,7 +390,7 @@ public class NewsFragment extends BaseFragment {
     }
     @Override
     public void onDestroyView() {
-        ButterKnife.unbind(this);
+
         mHandler.removeCallbacksAndMessages(null);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePersonMessageNotifyDateHandler);

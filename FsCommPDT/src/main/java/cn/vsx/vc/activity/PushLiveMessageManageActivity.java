@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.OnClick;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -30,13 +28,13 @@ import ptt.terminalsdk.context.MyTerminalFactory;
  * Created by gt358 on 2017/9/28.
  */
 
-public class PushLiveMessageManageActivity extends BaseActivity{
+public class PushLiveMessageManageActivity extends BaseActivity implements View.OnClickListener{
 
-    @Bind(R.id.pull_refresh_layout)
+
     PullToRefreshLayout pull_refresh_layout;
-    @Bind(R.id.pl_video_send)
+
     PullableListView pl_video_send;
-    @Bind(R.id.volume_layout)
+
     VolumeViewLayout volumeViewLayout;
     private PushLiveListAdapter mPushLiveListAdapter;
 
@@ -49,7 +47,11 @@ public class PushLiveMessageManageActivity extends BaseActivity{
 
     @Override
     public void initView() {
+        volumeViewLayout = (VolumeViewLayout) findViewById(R.id.volume_layout);
+        pl_video_send = (PullableListView) findViewById(R.id.pl_video_send);
+        pull_refresh_layout = (PullToRefreshLayout) findViewById(R.id.pull_refresh_layout);
         mPushLiveListAdapter = new PushLiveListAdapter(this, mLiveMessageList);
+        findViewById(R.id.iv_back).setOnClickListener(this);
         pl_video_send.setAdapter(mPushLiveListAdapter);
         pl_video_send.setOnItemClickListener((parent, view, position, id) -> {
             Intent intent = new Intent(PushLiveMessageManageActivity.this,LiveHistoryActivity.class);
@@ -151,7 +153,7 @@ public class PushLiveMessageManageActivity extends BaseActivity{
         }
     };
 
-    @OnClick({R.id.iv_back})
+
     public void onClick (View view) {
         switch (view.getId()) {
             case R.id.iv_back:

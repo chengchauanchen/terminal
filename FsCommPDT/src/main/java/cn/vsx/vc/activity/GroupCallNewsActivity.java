@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import butterknife.Bind;
+
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
@@ -95,55 +95,55 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
  */
 
 public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnClickListener {
-    @Bind(R.id.noNetWork)
+
     LinearLayout noNetWork;
-    @Bind(R.id.news_bar_return)
+
     ImageView newsBarReturn;
-    @Bind(R.id.group_live_history)
+
     ImageView groupLiveHistory;
-    @Bind(R.id.group_call_activity_member_info)
+
     ImageView groupCallActivityMemberInfo;
-    @Bind(R.id.tv_speaker)
+
     TextView tv_speaker;
-    @Bind(R.id.group_call_time_progress)
+
     RoundProgressBarWidthNumber groupCallTimeProgress;
-    @Bind(R.id.progress_group_call)
+
     RelativeLayout progressGroupCall;
-    @Bind(R.id.ll_individual_call_come)
+
     LinearLayout ll_individual_call_come;
-    @Bind(R.id.ll_living)
+
     LinearLayout ll_living;
-    @Bind(R.id.tv_living_number)
+
     TextView tv_living_number;
-    @Bind(R.id.ll_speaker)
+
     LinearLayout ll_speaker;
-    @Bind(R.id.group_call_activity_help)
+
     ImageView group_call_activity_help;
-    @Bind(R.id.tv_pre_speak)
+
     TextView tv_pre_speak;
 
-    @Bind(R.id.tv_chat_name)
+
     TextView newsBarGroupName;
-    @Bind(R.id.btn_ptt)
+
     Button ptt;
 
-    @Bind(R.id.sfl_call_list)
+
     SwipeRefreshLayout sflCallList;
-    @Bind(R.id.group_call_list)
+
     FixedRecyclerView groupCallList;
-    @Bind(R.id.fl_fragment_container)
+
     FrameLayout fl_fragment_container;
-    @Bind(R.id.group_call_news_et)
+
     EditText groupCallNewsEt;
-    @Bind(R.id.funcation)
+
     FunctionHidePlus funcation;
-    @Bind(R.id.tv_scan)
+
     TextView tv_scan;
-    @Bind(R.id.img_scan)
+
     ImageView img_scan;
-    @Bind(R.id.volume_layout)
+
     VolumeViewLayout volumeViewLayout;
-    @Bind(R.id.iv_monitor)
+
     ImageView iv_monitor;
     //组Id
     public static int mGroupId;
@@ -185,6 +185,30 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     @SuppressLint("WrongConstant")
     @Override
     public void initView() {
+        noNetWork = (LinearLayout) findViewById(R.id.noNetWork);
+        newsBarReturn = (ImageView) findViewById(R.id.news_bar_return);
+        groupLiveHistory = (ImageView) findViewById(R.id.group_live_history);
+        groupCallActivityMemberInfo = (ImageView) findViewById(R.id.group_call_activity_member_info);
+        tv_speaker = (TextView) findViewById(R.id.tv_speaker);
+        groupCallTimeProgress = (RoundProgressBarWidthNumber) findViewById(R.id.group_call_time_progress);
+        progressGroupCall = (RelativeLayout) findViewById(R.id.progress_group_call);
+        ll_individual_call_come = (LinearLayout) findViewById(R.id.ll_individual_call_come);
+        ll_living = (LinearLayout) findViewById(R.id.ll_living);
+        tv_living_number = (TextView) findViewById(R.id.tv_living_number);
+        ll_speaker = (LinearLayout) findViewById(R.id.ll_speaker);
+        group_call_activity_help = (ImageView) findViewById(R.id.group_call_activity_help);
+        tv_pre_speak = (TextView) findViewById(R.id.tv_pre_speak);
+        newsBarGroupName = (TextView) findViewById(R.id.tv_chat_name);
+        ptt = (Button) findViewById(R.id.btn_ptt);
+        sflCallList = (SwipeRefreshLayout) findViewById(R.id.sfl_call_list);
+        groupCallList = (FixedRecyclerView) findViewById(R.id.group_call_list);
+        fl_fragment_container = (FrameLayout) findViewById(R.id.fl_fragment_container);
+        groupCallNewsEt = (EditText) findViewById(R.id.group_call_news_et);
+        funcation = (FunctionHidePlus) findViewById(R.id.funcation);
+        tv_scan = (TextView) findViewById(R.id.tv_scan);
+        img_scan = (ImageView) findViewById(R.id.img_scan);
+        volumeViewLayout = (VolumeViewLayout) findViewById(R.id.volume_layout);
+        iv_monitor = (ImageView) findViewById(R.id.iv_monitor);
         sflCallList.setColorSchemeResources(R.color.colorPrimary);
         sflCallList.setProgressViewOffset(false, 0, (int) TypedValue
                 .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources()

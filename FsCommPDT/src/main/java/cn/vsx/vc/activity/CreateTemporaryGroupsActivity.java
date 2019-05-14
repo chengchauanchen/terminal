@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 
-import butterknife.Bind;
+
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginForUIOperationHandler;
@@ -34,32 +34,32 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 public class CreateTemporaryGroupsActivity extends BaseActivity implements View.OnClickListener {
 
 
-    @Bind(R.id.news_bar_back)
+
     ImageView news_bar_back;
-    @Bind(R.id.bar_title)
+
     TextView bar_title;
-    @Bind(R.id.ok_btn)
+
     Button ok_btn;
-    @Bind(R.id.right_btn)
+
     ImageView right_btn;
-    @Bind(R.id.left_btn)
+
     ImageView left_btn;
 
-    @Bind(R.id.create_temporary_group_name)
+
     EditText create_temporary_group_name;
 
-    @Bind(R.id.btn_create_temporary_group)
+
     Button btn_create_temporary_group;
-    @Bind(R.id.iv_scan)
+
     ImageView iv_scan;
-    @Bind(R.id.iv_unscan)
+
     ImageView iv_unscan;
-    @Bind(R.id.exist_time)
+
     TextView exist_time;
 
-    @Bind(R.id.tv_scan)
+
     TextView tv_scan;
-    @Bind(R.id.tv_unscan)
+
     TextView tv_unscan;
 
     private Handler myHandler = new Handler();
@@ -82,6 +82,18 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
     @Override
     public void initView() {
+        news_bar_back = (ImageView) findViewById(R.id.news_bar_back);
+        bar_title = (TextView) findViewById(R.id.bar_title);
+        ok_btn = (Button) findViewById(R.id.ok_btn);
+        right_btn = (ImageView) findViewById(R.id.right_btn);
+        left_btn = (ImageView) findViewById(R.id.left_btn);
+        create_temporary_group_name = (EditText) findViewById(R.id.create_temporary_group_name);
+        btn_create_temporary_group = (Button) findViewById(R.id.btn_create_temporary_group);
+        iv_scan = (ImageView) findViewById(R.id.iv_scan);
+        iv_unscan = (ImageView) findViewById(R.id.iv_unscan);
+        exist_time = (TextView) findViewById(R.id.exist_time);
+        tv_scan = (TextView) findViewById(R.id.tv_scan);
+        tv_unscan = (TextView) findViewById(R.id.tv_unscan);
         bar_title.setText(R.string.text_create_temporary_groups);
         right_btn.setVisibility(View.GONE);
         left_btn.setVisibility(View.GONE);

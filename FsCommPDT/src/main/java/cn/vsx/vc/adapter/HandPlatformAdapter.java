@@ -13,8 +13,8 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
@@ -138,30 +138,37 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
     }
 
     public static class ViewHolder {
-        @Bind(R.id.shoutai_bumen_name)
+
         TextView shoutai_bumen_name;
-        @Bind(R.id.shoutai_group_size)
+
         TextView shoutai_group_size;
-        @Bind(R.id.is_shoutai)
+
         ImageView is_shoutai;
 
         public ViewHolder(View rootView) {
-            ButterKnife.bind(this, rootView);
+            shoutai_bumen_name = rootView.findViewById(R.id.shoutai_bumen_name);
+            shoutai_group_size = rootView.findViewById(R.id.shoutai_group_size);
+            is_shoutai = rootView.findViewById(R.id.is_shoutai);
+
         }
     }
 
     public static class ViewHolderPerson {
-        @Bind(R.id.shoutai_call_to)
+
         LinearLayout shoutai_call_to;
-        @Bind(R.id.shoutai_message_to)
+
         LinearLayout shoutai_message_to;
-        @Bind(R.id.shoutai_tv_member_name)
+
         TextView shoutai_tv_member_name;
-        @Bind(R.id.shoutai_tv_member_id)
+
         TextView shoutai_tv_member_id;
 
         public ViewHolderPerson(View rootView) {
-            ButterKnife.bind(this, rootView);
+            shoutai_call_to = rootView.findViewById(R.id.shoutai_call_to);
+            shoutai_message_to = rootView.findViewById(R.id.shoutai_message_to);
+            shoutai_tv_member_name = rootView.findViewById(R.id.shoutai_tv_member_name);
+            shoutai_tv_member_id = rootView.findViewById(R.id.shoutai_tv_member_id);
+
         }
     }
 

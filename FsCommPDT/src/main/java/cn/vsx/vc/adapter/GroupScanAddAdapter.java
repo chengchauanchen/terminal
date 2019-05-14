@@ -8,13 +8,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.GroupItemBean;
@@ -119,26 +116,23 @@ public class GroupScanAddAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
 
     class FolderViewHolder extends RecyclerView.ViewHolder{
-        @Bind(R.id.tv_department)
         TextView tvFolder;
 
         public FolderViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
         }
     }
 
     class GroupViewHolder extends RecyclerView.ViewHolder{
-        @Bind(R.id.tv_name)
         TextView  tvName;
-        @Bind(R.id.tv_add_scan_group)
         TextView tvAddScanGroup;
-        @Bind(R.id.iv_scan_group)
         ImageView ivScanGroup;
 
         public GroupViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            tvName = itemView.findViewById(R.id.tv_name);
+            tvAddScanGroup = itemView.findViewById(R.id.tv_add_scan_group);
+            ivScanGroup = itemView.findViewById(R.id.iv_scan_group);
 
         }
     }

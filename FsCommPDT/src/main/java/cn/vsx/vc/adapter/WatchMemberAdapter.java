@@ -9,8 +9,8 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.vc.R;
 
@@ -65,17 +65,20 @@ public class WatchMemberAdapter extends BaseAdapter {
     }
 
     static class ViewHolder {
-        @Bind(R.id.iv_watch_item_photo)
+
         ImageView ivWatchItemPhoto;
-        @Bind(R.id.tv_watch_item_name)
+
         TextView tvWatchItemName;
-        @Bind(R.id.tv_watch_item_living)
+
         TextView tvWatchItemLiving;
-        @Bind(R.id.tv_watch_item_time)
+
         TextView tvWatchItemTime;
 
         ViewHolder(View view) {
-            ButterKnife.bind(this, view);
+            ivWatchItemPhoto = view.findViewById(R.id.iv_watch_item_photo);
+            tvWatchItemName = view.findViewById(R.id.tv_watch_item_name);
+            tvWatchItemLiving = view.findViewById(R.id.tv_watch_item_living);
+            tvWatchItemTime = view.findViewById(R.id.tv_watch_item_time);
         }
     }
 

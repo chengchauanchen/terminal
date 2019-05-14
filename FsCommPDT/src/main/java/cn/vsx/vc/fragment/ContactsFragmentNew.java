@@ -48,39 +48,35 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
 
 @SuppressLint("ValidFragment")
 public class ContactsFragmentNew extends BaseFragment implements View.OnClickListener {
-    @Bind(R.id.setting_group_name)
+
     TextView setting_group_name;
-    @Bind(R.id.add_icon)
+
     ImageView add_icon;
-    @Bind(R.id.is_group)
+
     RelativeLayout isGroup;
-    @Bind(R.id.is_jingwutong)
+
     RelativeLayout is_jingwutong;
-    @Bind(R.id.group_line)
+
     View groupLine;
-    @Bind(R.id.shoutai_line)
+
     View shoutai_line;
-    @Bind(R.id.jingwutong_line)
+
     View jingwutong_line;
-    @Bind(R.id.lte_line)
     View lte_line;
-    @Bind(R.id.contacts_viewPager)
     FrameLayout viewPager;
-    @Bind(R.id.icon_laba)
+
     ImageView icon_laba;
-    @Bind(R.id.voice_image)
+
     ImageView voice_image;
-    @Bind(R.id.speaking_name)
+
     TextView speaking_name;
-    @Bind(R.id.group_tv)
+
     TextView group_tv;
-    @Bind(R.id.jingwutong_tv)
+
     TextView jingwutong_tv;
-    @Bind(R.id.lte_tv)
     TextView lte_tv;
-    @Bind(R.id.shoutai_tv)
     TextView shoutai_tv;
-    @Bind(R.id.imgbtn_dial)
+
     ImageButton imgbtn_dial;
 
     private Fragment currentFragment;
@@ -105,7 +101,28 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     @Override
     public void initView() {
+        imgbtn_dial = (ImageButton) mRootView.findViewById(R.id.imgbtn_dial);
+        shoutai_tv = (TextView) mRootView.findViewById(R.id.shoutai_tv);
+        jingwutong_tv = (TextView) mRootView.findViewById(R.id.jingwutong_tv);
+        group_tv = (TextView) mRootView.findViewById(R.id.group_tv);
+        speaking_name = (TextView) mRootView.findViewById(R.id.speaking_name);
+        voice_image = (ImageView) mRootView.findViewById(R.id.voice_image);
+        icon_laba = (ImageView) mRootView.findViewById(R.id.icon_laba);
+        viewPager = (FrameLayout) mRootView.findViewById(R.id.contacts_viewPager);
+        jingwutong_line = (View) mRootView.findViewById(R.id.jingwutong_line);
+        shoutai_line = (View) mRootView.findViewById(R.id.shoutai_line);
+        groupLine = (View) mRootView.findViewById(R.id.group_line);
+        is_jingwutong = (RelativeLayout) mRootView.findViewById(R.id.is_jingwutong);
+        isGroup = (RelativeLayout) mRootView.findViewById(R.id.is_group);
+        add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
+        setting_group_name = (TextView) mRootView.findViewById(R.id.setting_group_name);
+        lte_line = (TextView) mRootView.findViewById(R.id.lte_line);
+        lte_tv = (TextView) mRootView.findViewById(R.id.lte_tv);
         activity = (NewMainActivity) getActivity();
+        mRootView.findViewById(R.id.is_shoutai).setOnClickListener(this);
+        mRootView.findViewById(R.id.is_jingwutong).setOnClickListener(this);
+        mRootView.findViewById(R.id.is_group).setOnClickListener(this);
+        mRootView.findViewById(R.id.is_lte).setOnClickListener(this);
         setVideoIcon();
         childFragmentManager = getChildFragmentManager();
         initFragment();
@@ -205,7 +222,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     }
     @Override
     public void onDestroyView() {
-        ButterKnife.unbind(this);
+
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
@@ -361,7 +378,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         super.onDestroy();
     }
 
-    @OnClick({R.id.is_group, R.id.is_jingwutong,R.id.is_shoutai,R.id.is_lte})
+
     @Override
     public void onClick(View v) {
         switch (v.getId()) {

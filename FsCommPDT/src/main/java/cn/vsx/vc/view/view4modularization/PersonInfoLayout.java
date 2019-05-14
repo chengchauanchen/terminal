@@ -15,9 +15,6 @@ import com.bumptech.glide.Glide;
 
 import org.apache.log4j.Logger;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -36,11 +33,11 @@ import ptt.terminalsdk.context.MyTerminalFactory;
  */
 
 public class PersonInfoLayout extends LinearLayout {
-    @Bind(R.id.user_logo)
+
     ImageView userLogo;
-    @Bind(R.id.user_name)
+
     TextView userName;
-    @Bind(R.id.user_id)
+
     TextView userId;
     private Logger logger = Logger.getLogger(getClass());
     private Handler myHandler = new Handler();
@@ -63,7 +60,9 @@ public class PersonInfoLayout extends LinearLayout {
         LayoutInflater layoutInflater;
         layoutInflater =  (LayoutInflater) getContext().getSystemService(infServie);
         View view = layoutInflater.inflate(R.layout.layout_personinfo, this, true);
-        ButterKnife.bind(this, view);
+        userLogo = view.findViewById(R.id.user_logo);
+        userName = view.findViewById(R.id.user_name);
+        userId = view.findViewById(R.id.user_id);
         userId.setText("警号:"+ HandleIdUtil.handleId(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)));
         userName.setText(MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""));
         logger.info("用户头像："+TerminalFactory.getSDK().getParam(UrlParams.AVATAR_URL));
@@ -106,7 +105,7 @@ public class PersonInfoLayout extends LinearLayout {
         }
     };
 
-    @OnClick(R.id.ll_user_info)
+
     public void toUserInfoActivity (View view) {
         switch (view.getId()) {
             case R.id.ll_user_info:

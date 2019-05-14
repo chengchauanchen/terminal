@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import butterknife.Bind;
+
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.MessageType;
@@ -85,41 +85,41 @@ import ptt.terminalsdk.context.MyTerminalFactory;
  */
 
 public class IndividualNewsActivity extends ChatBaseActivity implements View.OnClickListener {
-    @Bind(R.id.news_bar_return)
+
     ImageView newsBarReturn;
-    @Bind(R.id.individual_news_phone)
+
     ImageView individualNewsPhone;
-    @Bind(R.id.individual_news_info)
+
     ImageView individualNewsInfo;
-    @Bind(R.id.individual_news_help)
+
     ImageView individual_news_help;
-    @Bind(R.id.noNetWork)
+
     LinearLayout noNetWork;
-    @Bind(R.id.volume_layout)
+
     VolumeViewLayout volumeViewLayout;
-    @Bind(R.id.tv_chat_name)
+
     TextView newsBarGroupName;
-    @Bind(R.id.btn_ptt)
+
     Button ptt;
-    @Bind(R.id.funcation)
+
     FunctionHidePlus funcation;
-    @Bind(R.id.btn_record)
+
     AudioRecordButton record;
     //    @Bind(R.id.rl_include_listview)
     //    RelativeLayout rl_include_listview;
 
-    @Bind(R.id.sfl_call_list)
+
     SwipeRefreshLayout sflCallList;
-    @Bind(R.id.group_call_list)
+
     FixedRecyclerView groupCallList;
 
-    @Bind(R.id.fl_fragment_container)
+
     FrameLayout fl_fragment_container;
-    @Bind(R.id.group_call_news_et)
+
     EditText groupCallNewsEt;
-    @Bind(R.id.group_call_news_keyboard)
+
     ImageView group_call_news_keyboard;
-    @Bind(R.id.iv_call)
+
     ImageView ivCall;
     private static int VOIP=0;
     private static int TELEPHONE=1;
@@ -144,6 +144,22 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     @Override
     public void initView() {
+        ivCall = (ImageView) findViewById(R.id.iv_call);
+        group_call_news_keyboard = (ImageView) findViewById(R.id.group_call_news_keyboard);
+        groupCallNewsEt = (EditText) findViewById(R.id.group_call_news_et);
+        fl_fragment_container = (FrameLayout) findViewById(R.id.fl_fragment_container);
+        groupCallList = (FixedRecyclerView) findViewById(R.id.group_call_list);
+        sflCallList = (SwipeRefreshLayout) findViewById(R.id.sfl_call_list);
+        record = (AudioRecordButton) findViewById(R.id.btn_record);
+        funcation = (FunctionHidePlus) findViewById(R.id.funcation);
+        ptt = (Button) findViewById(R.id.btn_ptt);
+        newsBarGroupName = (TextView) findViewById(R.id.tv_chat_name);
+        volumeViewLayout = (VolumeViewLayout) findViewById(R.id.volume_layout);
+        noNetWork = (LinearLayout) findViewById(R.id.noNetWork);
+        individual_news_help = (ImageView) findViewById(R.id.individual_news_help);
+        individualNewsInfo = (ImageView) findViewById(R.id.individual_news_info);
+        individualNewsPhone = (ImageView) findViewById(R.id.individual_news_phone);
+        newsBarReturn = (ImageView) findViewById(R.id.news_bar_return);
         sflCallList.setColorSchemeResources(R.color.colorPrimary);
         sflCallList.setProgressViewOffset(false, 0, (int) TypedValue
                 .applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24, getResources()

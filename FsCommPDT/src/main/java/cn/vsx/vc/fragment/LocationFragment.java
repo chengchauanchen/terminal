@@ -24,11 +24,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.BaseActivity;
-import cn.vsx.vc.activity.ChatBaseActivity;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -38,16 +35,16 @@ import ptt.terminalsdk.tools.ToastUtil;
 
 @SuppressLint("ValidFragment")
 public class LocationFragment extends Fragment{
-    @Bind(R.id.wv_help)
+
     WebView wv_help;
-    @Bind(R.id.ll_pb)
+
     LinearLayout ll_pb;
 
-    @Bind(R.id.ll_top_bar)
+
     LinearLayout ll_top_bar;
-    @Bind(R.id.iv_back_face)
+
     ImageView iv_back_face;
-    @Bind(R.id.tv_name_face)
+
     TextView tv_name_face;
 
     private FrameLayout frameLayout;
@@ -81,8 +78,8 @@ public class LocationFragment extends Fragment{
             hookWebView();
         }
         View mRootView = inflater.inflate(getContentViewId(), container, false);
-        ButterKnife.bind(this, mRootView);//绑定framgent
-        initView();
+
+        initView(mRootView);
         return mRootView;
     }
 
@@ -90,7 +87,12 @@ public class LocationFragment extends Fragment{
         return R.layout.help_word;
     }
 
-    public void initView(){
+    public void initView(View mRootView){
+        tv_name_face = (TextView) mRootView.findViewById(R.id.tv_name_face);
+        iv_back_face = (ImageView) mRootView.findViewById(R.id.iv_back_face);
+        ll_top_bar = (LinearLayout) mRootView.findViewById(R.id.ll_top_bar);
+        ll_pb = (LinearLayout) mRootView.findViewById(R.id.ll_pb);
+        wv_help = (WebView) mRootView.findViewById(R.id.wv_help);
         url = getArguments().getString("url");
         isLocation = getArguments().getBoolean("isLocation");
         name = getArguments().getString("name");

@@ -28,7 +28,7 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
+
 import cn.vsx.hamster.common.MemberAddressList;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -54,21 +54,21 @@ import ptt.terminalsdk.tools.ToastUtil;
 
 public class LocalMemberSearchFragment extends BaseFragment{
 
-    @Bind(R.id.ll_search_pop)
+
     LinearLayout ll_search_pop;
-    @Bind(R.id.iv_goback_contacts)
+
     ImageView iv_goback_contacts;
-    @Bind(R.id.iv_delete_edittext)
+
     ImageView iv_delete_edittext;
-    @Bind(R.id.btn_search_allcontacts)
+
     Button btn_search_allcontacts;
-    @Bind(R.id.tv_search_nothing)
+
     TextView tv_search_nothing;
-    @Bind(R.id.rl_search_result)
+
     RelativeLayout rl_search_result;
-    @Bind(R.id.lv_search_allcontacts)
+
     ListView lv_search_allcontacts;
-    @Bind(R.id.et_search_allcontacts)
+
     EditText et_search_allcontacts;
 
     String keyWord;
@@ -92,6 +92,14 @@ public class LocalMemberSearchFragment extends BaseFragment{
 
     @Override
     public void initView() {
+        et_search_allcontacts = (EditText) mRootView.findViewById(R.id.et_search_allcontacts);
+        lv_search_allcontacts = (ListView) mRootView.findViewById(R.id.lv_search_allcontacts);
+        rl_search_result = (RelativeLayout) mRootView.findViewById(R.id.rl_search_result);
+        tv_search_nothing = (TextView) mRootView.findViewById(R.id.tv_search_nothing);
+        btn_search_allcontacts = (Button) mRootView.findViewById(R.id.btn_search_allcontacts);
+        iv_delete_edittext = (ImageView) mRootView.findViewById(R.id.iv_delete_edittext);
+        iv_goback_contacts = (ImageView) mRootView.findViewById(R.id.iv_goback_contacts);
+        ll_search_pop = (LinearLayout) mRootView.findViewById(R.id.ll_search_pop);
         personContactsAdapter = new LocalMemberSearchAdapter(getContext(), searchList);
         lv_search_allcontacts.setAdapter(personContactsAdapter);
     }

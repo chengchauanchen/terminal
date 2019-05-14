@@ -38,8 +38,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
+
+
 import cn.com.cybertech.pdk.UserInfo;
 import cn.com.cybertech.pdk.api.IPstoreHandler.Response;
 import cn.com.cybertech.pdk.api.PstoreAPIImpl;
@@ -91,33 +91,33 @@ import ptt.terminalsdk.tools.DialogUtil;
 public class RegistActivity extends BaseActivity implements RecvCallBack, Actions {
 
     private AlertDialog netWorkDialog;
-    @Bind(R.id.userOrg)
+
     EditText userOrg;
-    @Bind(R.id.userName)
+
     EditText userName;
-    @Bind(R.id.ll_reauth_info)
+
     LinearLayout llreAuthInfo;
-    @Bind(R.id.btn_addMember)
+
     Button btnAddMember;
-    @Bind(R.id.account)
+
     EditText account;
-    @Bind(R.id.name)
+
     EditText edtName;
-    @Bind(R.id.departmentId)
+
     EditText departmentId;
-    @Bind(R.id.departmentName)
+
     EditText departmentName;
-    @Bind(R.id.btn_confirm)
+
     Button btn_confirm;
-    @Bind(R.id.btn_reauth)
+
     Button btn_reAuth;
-    @Bind(R.id.tv_version_prompt)
+
     TextView tvVersionPrompt;
-    @Bind(R.id.xcd_available_ip)
+
     XCDropDownListView xcd_available_ip;
-    @Bind(R.id.ll_regist)
+
     LinearLayout ll_regist;
-    @Bind(R.id.view_pop)
+
     View view_pop;
     private int reAuthCount;
     private Timer timer = new Timer();
@@ -760,6 +760,20 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     @Override
     public void initView() {
+        userOrg = (EditText) findViewById(R.id.userOrg);
+        userName = (EditText) findViewById(R.id.userName);
+        llreAuthInfo = (LinearLayout) findViewById(R.id.ll_reauth_info);
+        btnAddMember = (Button) findViewById(R.id.btn_addMember);
+        account = (EditText) findViewById(R.id.account);
+        edtName = (EditText) findViewById(R.id.name);
+        departmentId = (EditText) findViewById(R.id.departmentId);
+        departmentName = (EditText) findViewById(R.id.departmentName);
+        btn_confirm = (Button) findViewById(R.id.btn_confirm);
+        btn_reAuth = (Button) findViewById(R.id.btn_reauth);
+        tvVersionPrompt = (TextView) findViewById(R.id.tv_version_prompt);
+        xcd_available_ip = (XCDropDownListView) findViewById(R.id.xcd_available_ip);
+        ll_regist = (LinearLayout) findViewById(R.id.ll_regist);
+        view_pop = (View) findViewById(R.id.view_pop);
         if (!this.isTaskRoot()) { //判断该Activity是不是任务空间的源Activity，“非”也就是说是被系统重新实例化出来
             //如果你就放在launcher Activity中话，这里可以直接return了
             Intent mainIntent = getIntent();
@@ -1115,25 +1129,32 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     static class ViewHolder {
-        @Bind(R.id.userUnit)
+
         EditText userUnit;
-        @Bind(R.id.userIP)
+
         EditText userIP;
-        @Bind(R.id.userPort)
+
         EditText userPort;
-        @Bind(R.id.btn_custom_ip_ok)
+
         Button btnCustomIpOk;
-        @Bind(R.id.ll_regist_return)
+
         LinearLayout ll_regist_return;
-        @Bind(R.id.rl_regist_connect_efficacy)
+
         RelativeLayout rl_regist_connect_efficacy;
-        @Bind(R.id.tv_regist_connect_efficacy)
+
         TextView tv_regist_connect_efficacy;
-        @Bind(R.id.iv_regist_connect_efficacy_ok)
+
         ImageView iv_regist_connect_efficacy_ok;
 
         ViewHolder(View view) {
-            ButterKnife.bind(this, view);
+            userUnit = (EditText) view.findViewById(R.id.userUnit);
+            userIP = (EditText) view.findViewById(R.id.userIP);
+            userPort = (EditText) view.findViewById(R.id.userPort);
+            btnCustomIpOk = (Button) view.findViewById(R.id.btn_custom_ip_ok);
+            ll_regist_return = (LinearLayout) view.findViewById(R.id.ll_regist_return);
+            rl_regist_connect_efficacy = (RelativeLayout) view.findViewById(R.id.rl_regist_connect_efficacy);
+            tv_regist_connect_efficacy = (TextView) view.findViewById(R.id.tv_regist_connect_efficacy);
+            iv_regist_connect_efficacy_ok = (ImageView) view.findViewById(R.id.iv_regist_connect_efficacy_ok);
         }
     }
 

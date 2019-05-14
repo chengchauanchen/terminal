@@ -23,9 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -46,14 +43,14 @@ import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
-public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener, BaseQuickAdapter.RequestLoadMoreListener, GroupVideoLiveListAdapter.OnItemClickListerner {
+public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener, BaseQuickAdapter.RequestLoadMoreListener, GroupVideoLiveListAdapter.OnItemClickListerner, View.OnClickListener{
 
 
-    @Bind(R.id.bar_title)
+
     TextView barTitle;
-    @Bind(R.id.layout_srl)
+
     SwipeRefreshLayout layoutSrl;
-    @Bind(R.id.contentView)
+
     RecyclerView contentView;
     private GroupVideoLiveListAdapter adapter;
 
@@ -83,7 +80,7 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // TODO: add setContentView(...) invocation
-        ButterKnife.bind(this);
+
     }
 
     @Override
@@ -93,7 +90,11 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
 
     @Override
     public void initView() {
+        barTitle = (TextView) findViewById(R.id.bar_title);
+        layoutSrl = (SwipeRefreshLayout) findViewById(R.id.layout_srl);
+        contentView = (RecyclerView) findViewById(R.id.contentView);
         Intent intent = getIntent();
+        findViewById(R.id.news_bar_back).setOnClickListener(this);
         isGroupVideoLiving = intent.getBooleanExtra(Constants.IS_GROUP_VIDEO_LIVING, false);
         groupId = getIntent().getIntExtra(Constants.GROUP_ID, 0);
         barTitle.setText(getResources().getString((isGroupVideoLiving) ? R.string.living_list : R.string.living_history));
@@ -134,7 +135,7 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
         handler.removeCallbacksAndMessages(null);
     }
 
-    @OnClick({R.id.news_bar_back})
+
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.news_bar_back:

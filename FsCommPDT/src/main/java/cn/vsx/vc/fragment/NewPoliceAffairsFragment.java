@@ -9,7 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
+
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
@@ -32,9 +32,9 @@ public class NewPoliceAffairsFragment extends BaseFragment {
 
 //    @Bind(R.id.catalog_recyclerview)
 //    RecyclerView mCatalogRecyclerview;
-    @Bind(R.id.swipeRefreshLayout)
+
     SwipeRefreshLayout swipeRefreshLayout;
-    @Bind(R.id.recyclerview)
+
     RecyclerView mRecyclerview;
 
     private NewMainActivity mActivity;
@@ -82,7 +82,8 @@ public class NewPoliceAffairsFragment extends BaseFragment {
 //        mCatalogRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity(), OrientationHelper.HORIZONTAL,false));
 //        mCatalogAdapter=new CatalogAdapter(getActivity(),catalogNames);
 //        mCatalogRecyclerview.setAdapter(mCatalogAdapter);
-
+        mRecyclerview = (RecyclerView) mRootView.findViewById(R.id.recyclerview);
+        swipeRefreshLayout = (SwipeRefreshLayout) mRootView.findViewById(R.id.swipeRefreshLayout);
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
         mContactAdapter=new ContactAdapter(getActivity(),mDatas,catalogNames,Constants.TYPE_CONTRACT_MEMBER);
         mRecyclerview.setAdapter(mContactAdapter);

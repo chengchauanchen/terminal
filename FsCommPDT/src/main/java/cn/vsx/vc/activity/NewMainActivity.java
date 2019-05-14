@@ -66,7 +66,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import butterknife.Bind;
+
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MessageType;
@@ -783,65 +783,65 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
 
     //其他页面组呼圆形按钮
-    @Bind(R.id.main_page)
+
     RelativeLayout rl_main_activity;
-    @Bind(R.id.imgbtn_ptt)
+
     Button imgbtn_ptt;
-    @Bind(R.id.ll_sliding_chenge_volume)
+
     LinearLayout ll_sliding_chenge_volume;
-    @Bind(R.id.tv_volume_fw)
+
     TextView tv_volume_fw;
-    @Bind(R.id.my_view)
+
     View my_view;//popuwindow依附的view
-    @Bind(R.id.pop_view)
+
     View pop_view;
-    @Bind(R.id.no_network)
+
     LinearLayout noNetwork;
 
     //紧急呼叫提示风格
-    @Bind(R.id.ll_emergency_prompt)
+
     LinearLayout ll_emergency_prompt;
-    @Bind(R.id.ICTV_emergency_time)
+
     IndividualCallTimerView ICTV_emergency_time;
-    @Bind(R.id.tv_emergency_member)
+
     TextView tv_emergency_member;
 
     //其他页面组呼提示
-    @Bind(R.id.ll_groupCall_prompt)
+
     LinearLayout ll_groupCall_prompt;
-    @Bind(R.id.tv_current_group)
+
     TextView tv_current_group;
-    @Bind(R.id.incomming_call_current_speaker)
+
     TextView incomming_call_current_speaker;
-    @Bind(R.id.ICTV_groupCall_time)
+
     TimerView ICTV_groupCall_time;
 
     //视频来了提示
-    @Bind(R.id.rl_livecome)
+
     RelativeLayout rl_livecome;
-    @Bind(R.id.tv_live_theme)
+
     TextView tv_live_theme;
-    @Bind(R.id.lv_live_return)
+
     ImageView lv_live_return;
-    @Bind(R.id.tv_live_name)
+
     TextView tv_live_name;
-    @Bind(R.id.btn_live_gowatch)
+
     Button btn_live_gowatch;
-    @Bind(R.id.noNetWork)
+
     LinearLayout noNetWork;
 
-    @Bind(R.id.fl_fragment_container_main)
+
     FrameLayout fl_fragment_container_main;
 
-    @Bind(R.id.bv_talk_back)
+
     BottomView bv_talk_back;
-    @Bind(R.id.bv_person_contacts)
+
     BottomView bv_person_contacts;
-    @Bind(R.id.bv_group_contacts)
+
     BottomView bv_group_contacts;
-    @Bind(R.id.bv_setting)
+
     BottomView bv_setting;
-    @Bind(R.id.ll_content)
+
     LinearLayout ll_content;
     public static boolean isForeground=false;
 
@@ -910,6 +910,32 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     public void initView() {
 
         // 设置底部导航图片的大小
+        ll_content = (LinearLayout) findViewById(R.id.ll_content);
+        bv_setting = (BottomView) findViewById(R.id.bv_setting);
+        bv_group_contacts = (BottomView) findViewById(R.id.bv_group_contacts);
+        bv_person_contacts = (BottomView) findViewById(R.id.bv_person_contacts);
+        bv_talk_back = (BottomView) findViewById(R.id.bv_talk_back);
+        fl_fragment_container_main = (FrameLayout) findViewById(R.id.fl_fragment_container_main);
+        noNetWork = (LinearLayout) findViewById(R.id.noNetWork);
+        btn_live_gowatch = (Button) findViewById(R.id.btn_live_gowatch);
+        tv_live_name = (TextView) findViewById(R.id.tv_live_name);
+        lv_live_return = (ImageView) findViewById(R.id.lv_live_return);
+        tv_live_theme = (TextView) findViewById(R.id.tv_live_theme);
+        rl_livecome = (RelativeLayout) findViewById(R.id.rl_livecome);
+        ICTV_groupCall_time = (TimerView) findViewById(R.id.ICTV_groupCall_time);
+        incomming_call_current_speaker = (TextView) findViewById(R.id.incomming_call_current_speaker);
+        tv_current_group = (TextView) findViewById(R.id.tv_current_group);
+        ll_groupCall_prompt = (LinearLayout) findViewById(R.id.ll_groupCall_prompt);
+        tv_emergency_member = (TextView) findViewById(R.id.tv_emergency_member);
+        ICTV_emergency_time = (IndividualCallTimerView) findViewById(R.id.ICTV_emergency_time);
+        ll_emergency_prompt = (LinearLayout) findViewById(R.id.ll_emergency_prompt);
+        noNetwork = (LinearLayout) findViewById(R.id.no_network);
+        pop_view = (View) findViewById(R.id.pop_view);
+
+        tv_volume_fw = (TextView) findViewById(R.id.tv_volume_fw);
+        ll_sliding_chenge_volume = (LinearLayout) findViewById(R.id.ll_sliding_chenge_volume);
+        imgbtn_ptt = (Button) findViewById(R.id.imgbtn_ptt);
+        rl_main_activity = (RelativeLayout) findViewById(R.id.main_page);
         initBottomImage();
         //        initBadgeView();
         fragmentManager = getSupportFragmentManager();

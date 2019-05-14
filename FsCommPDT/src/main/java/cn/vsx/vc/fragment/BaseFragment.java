@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 
 import org.apache.log4j.Logger;
 
-import butterknife.ButterKnife;
+
 
 public abstract class BaseFragment extends Fragment {
 	
@@ -24,7 +24,7 @@ public abstract class BaseFragment extends Fragment {
 		
 		mRootView =inflater.inflate(getContentViewId(),container,false);  
 		
-		ButterKnife.bind(this,mRootView);//绑定framgent  
+
         
         initView();
         
@@ -74,7 +74,7 @@ public abstract class BaseFragment extends Fragment {
 
 	@Override  
     public void onDestroyView() {  
-		ButterKnife.unbind(this);//解绑
+
 		unRegistListener();
 //		RefWatcher refWatcher = MyApplication.getRefWatcher(getActivity());
 //		refWatcher.watch(this);

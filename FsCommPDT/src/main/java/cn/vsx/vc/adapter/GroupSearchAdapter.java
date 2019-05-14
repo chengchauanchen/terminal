@@ -14,8 +14,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -151,21 +149,26 @@ public class GroupSearchAdapter extends BaseAdapter {
     }
 
     public static class ViewHolderGroup {
-        @Bind(R.id.ll_group)
+
         LinearLayout ll_group;
-        @Bind(R.id.group_child_name)
+
         TextView groupChildName;
-        @Bind(R.id.is_current_group_tv)
+
         TextView isCurrentGroupTv;
-        @Bind(R.id.change_group)
+
         TextView changeGroup;
-        @Bind(R.id.to_group)
+
         ImageView toGroup;
-        @Bind(R.id.lay_line)
+
         View line;
 
         public ViewHolderGroup(View rootView) {
-            ButterKnife.bind(this, rootView);
+            ll_group = rootView.findViewById(R.id.ll_group);
+            groupChildName = rootView.findViewById(R.id.group_child_name);
+            isCurrentGroupTv = rootView.findViewById(R.id.is_current_group_tv);
+            changeGroup = rootView.findViewById(R.id.change_group);
+            toGroup = rootView.findViewById(R.id.to_group);
+            line = rootView.findViewById(R.id.lay_line);
         }
     }
 
