@@ -1136,12 +1136,12 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
 		if(!TextUtils.isEmpty(deviceType)){
 			if(!TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_HDMI.toString())){
-				if(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString())){
+//				if(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString())){
 					getLocationManager().start();
-				}else{
-					getBDGPSManager().start();
-					getGpsManager().start();
-				}
+//				}else{
+//					getBDGPSManager().start();
+//					getGpsManager().start();
+//				}
 			}
 		}
 	}
@@ -1152,12 +1152,12 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
 		if(!TextUtils.isEmpty(deviceType)){
 			if(!TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_HDMI.toString())){
-				if(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString())){
+//				if(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString())){
 					getLocationManager().stop();
-				}else{
-					getGpsManager().stop();
-					getBDGPSManager().stop();
-				}
+//				}else{
+//					getGpsManager().stop();
+//					getBDGPSManager().stop();
+//				}
 			}
 		}
 	}

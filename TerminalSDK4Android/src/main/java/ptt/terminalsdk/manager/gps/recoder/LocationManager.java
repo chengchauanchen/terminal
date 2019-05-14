@@ -337,7 +337,7 @@ public class LocationManager {
             TerminalFactory.getSDK().notifyReceiveHandler(ReceiveChangePersonLocationHandler.class,location.getLatitude(),location.getLongitude());
             String ip = MyTerminalFactory.getSDK().getParam(Params.GPS_IP);
             int port = MyTerminalFactory.getSDK().getParam(Params.GPS_PORT,0);
-//			final String url = "http://192.168.1.174:6666/save";
+//			final String url = "http://192.168.1.187:6666/save";
             final String url = "http://"+ip+":"+port+"/save";
             Map<String,Object> params = new HashMap<>();
             params.put("terminalno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
