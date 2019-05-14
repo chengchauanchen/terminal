@@ -3,8 +3,11 @@ package cn.vsx.SpecificSDK;
 import android.annotation.SuppressLint;
 import android.app.Application;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.wifi.WifiManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -30,8 +33,16 @@ import ptt.terminalsdk.context.TerminalSDK4Android;
 
 public class SpecificSDK extends TerminalSDK4Android {
 
-    public SpecificSDK(Application mapplication) {
+    private static SpecificSDK specificSDK;
+    private static final String TAG = "SpecificSDK";
+
+    private SpecificSDK(Application mapplication) {
         super(mapplication);
+        MyTerminalFactory.setTerminalSDK(this);
+    }
+
+    public static SpecificSDK getInstance(){
+        return specificSDK;
     }
 
     @SuppressLint("MissingPermission")
@@ -262,5 +273,29 @@ public class SpecificSDK extends TerminalSDK4Android {
      */
     public void unregistHandler(ReceiveHandler handler){
         MyTerminalFactory.getSDK().unregistReceiveHandler(handler);
+    }
+
+    /**
+     * 提供给第三方用户的初始化入口
+     */
+    public static void init(Application application){
+        specificSDK = new SpecificSDK(application);
+        MyTerminalFactory.getSDK().setLoginFlag();
+        setAppKey(application);
+    }
+
+    private static void setAppKey(Application application){
+        try{
+            ApplicationInfo appInfo = application.getPackageManager().getApplicationInfo(application.getPackageName(), PackageManager.GET_META_DATA);
+            String platformKey=appInfo.metaData.getString("platform_key");
+            Log.d(TAG, "platform_key == " + platformKey);
+            TerminalFactory.getSDK().putParam(Params.PLATFORM_KEY,platformKey);
+        }catch(PackageManager.NameNotFoundException e){
+            e.printStackTrace();
+        }
+    }
+
+    public static void setTerminalMemberType(String type){
+        MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, type);
     }
 }

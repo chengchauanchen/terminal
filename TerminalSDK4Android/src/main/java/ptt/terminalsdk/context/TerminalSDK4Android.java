@@ -1161,5 +1161,4 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			}
 		}
 	}
-
 }

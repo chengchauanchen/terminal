@@ -52,6 +52,7 @@ import cn.com.cybertech.pdk.exception.PstoreAuthException;
 import cn.com.cybertech.pdk.exception.PstoreException;
 import cn.com.cybertech.pdk.exception.PstoreUserException;
 import cn.com.cybertech.pdk.utils.GsonUtils;
+import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
@@ -849,7 +850,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private void judgePermission() {
         if (CheckMyPermission.selfPermissionGranted(this, permission.WRITE_EXTERNAL_STORAGE)) {//SD卡读写权限
             if (CheckMyPermission.selfPermissionGranted(this, permission.READ_PHONE_STATE)) {//手机权限，获取uuid
-                MyApplication.instance.getSpecificSDK().configLogger();
+                SpecificSDK.getInstance().configLogger();
                 checkIfAuthorize();
             } else {
                 CheckMyPermission.permissionPrompt(this, permission.READ_PHONE_STATE);

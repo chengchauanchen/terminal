@@ -66,7 +66,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-
+import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MessageType;
@@ -1021,7 +1021,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     .loadLabel(MyApplication.instance.getPackageManager()) + File.separator + "logs"
                     + File.separator + "log.txt");
             if (!file.exists()) {
-                MyApplication.instance.getSpecificSDK().configLogger();
+                SpecificSDK.getInstance().configLogger();
             }
         } catch (Exception e) {
             e.printStackTrace();

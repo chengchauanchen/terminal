@@ -192,7 +192,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         logger.info(TAG+"自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
         ip = streamMediaServerIp;
         port = streamMediaServerPort + "";
-        id = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "_" + callId;
+        id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "_" + callId;
         startAircraftPush();
     }, 1000);
 

@@ -20,7 +20,6 @@ import java.util.List;
 
 import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.TerminalMemberType;
-import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenStateMachine;
@@ -64,7 +63,6 @@ public class MyApplication extends Application {
 	public boolean isPlayVoice = false;
 	//	public boolean isScanGroupSearch=false;//区分扫描组搜索和正常搜索
 	public static MyApplication instance;
-	public SpecificSDK specificSDK;
 
 	public boolean folatWindowPress = false; //记录悬浮按钮是否按下
 	public boolean volumePress = false; //记录音量是否按下
@@ -88,21 +86,12 @@ public class MyApplication extends Application {
 		}
 		instance = this;
 		super.onCreate();
-		specificSDK = new SpecificSDK(this);
-		MyTerminalFactory.setTerminalSDK(specificSDK);
-		MyTerminalFactory.getSDK().setLoginFlag();
-		registerActivityLifecycleCallbacks(new SimpleActivityLifecycle());
-
-		try{
-			ApplicationInfo appInfo = this.getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
-			String apkType=appInfo.metaData.getString("APKTYPE");
-			Log.d("MyApplication", " APKTYPE == " + apkType);
-			MyTerminalFactory.getSDK().putParam(Params.APK_TYPE,apkType);
-		}catch(PackageManager.NameNotFoundException e){
-			e.printStackTrace();
-		}
-		MyTerminalFactory.getSDK().getAuthManagerTwo().initIp();
+		SpecificSDK.init(this);
 		setTerminalMemberType();
+		registerActivityLifecycleCallbacks(new SimpleActivityLifecycle());
+		setApkType();
+		MyTerminalFactory.getSDK().getAuthManagerTwo().initIp();
+
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
 		//保存录像，录音，照片的存储路径
 		MyTerminalFactory.getSDK().getFileTransferOperation().initExternalUsableStorage();
@@ -116,15 +105,23 @@ public class MyApplication extends Application {
 
 	}
 
+	private void setApkType(){
+		try{
+			ApplicationInfo appInfo = this.getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
+			String apkType=appInfo.metaData.getString("APKTYPE");
+			Log.d("MyApplication", " APKTYPE == " + apkType);
+			MyTerminalFactory.getSDK().putParam(Params.APK_TYPE,apkType);
+		}catch(PackageManager.NameNotFoundException e){
+			e.printStackTrace();
+		}
+	}
+
 	public void setTerminalMemberType(){
-		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_UAV.toString());
+		SpecificSDK.setTerminalMemberType(TerminalMemberType.TERMINAL_PHONE.toString());
 	}
 
 	public void setIsContactsPersonal(boolean isContactsIndividual){
 		this.isContactsIndividual = isContactsIndividual;
-	}
-	public SpecificSDK getSpecificSDK(){
-		return specificSDK;
 	}
 
 	public VideoLivePlayingState getVideoLivePlayingState(){
