@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.internal.LinkedTreeMap;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 import com.zectec.imageandfileselector.base.Constant;
 import com.zectec.imageandfileselector.bean.FileInfo;
@@ -258,7 +259,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
         }else{
             isEnoughPageCount = true;
         }
-        HashMap<String, List<TerminalMessage>> sendFailMap = TerminalFactory.getSDK().getListHashMap(Params.MESSAGE_SEND_FAIL,new HashMap<>(),String.class,List.class);
+
+        LinkedTreeMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getTerminalMessageListMap(Params.MESSAGE_SEND_FAIL,new LinkedTreeMap<String, List<TerminalMessage>>());
+
         if (sendFailMap != null) {
             List<TerminalMessage> list = sendFailMap.get(userId + "");
             if (list != null) {
@@ -378,9 +381,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverToFaceRecognitionHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSelectChatListHandler);
 
-        HashMap<String, List<TerminalMessage>> sendFailMap = TerminalFactory.getSDK().getListHashMap(Params.MESSAGE_SEND_FAIL,new HashMap<>(),String.class,List.class);
+        LinkedTreeMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getTerminalMessageListMap(Params.MESSAGE_SEND_FAIL,new LinkedTreeMap<String, List<TerminalMessage>>());
         sendFailMap.put(userId + "", allFailMessageList);
-        TerminalFactory.getSDK().putListHashMap(Params.MESSAGE_SEND_FAIL,sendFailMap);
+        MyTerminalFactory.getSDK().putTerminalMessageListMap(Params.MESSAGE_SEND_FAIL,sendFailMap);
 
         groupCallList.removeOnLayoutChangeListener(myOnLayoutChangeListener);
         handler.removeCallbacksAndMessages(null);
@@ -528,7 +531,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     break;
                 case ReceiverSendFileHandler.LOCATION:
                     MyTerminalFactory.getSDK().registReceiveHandler(mReceiveGetGPSLocationHandler);
-                    MyTerminalFactory.getSDK().getBDGPSManager().myListener.baiduUpdate();
+                    MyTerminalFactory.getSDK().getLocationManager().requestLocationByChat();
                     sendLocation(0, 0, TEMP_TOKEN_ID, false, false);
                     break;
                 case ReceiverSendFileHandler.VOICE:
@@ -1665,9 +1668,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
      */
     private void showNFCDialog() {
         nfcBindingDialog = new NFCBindingDialog(ChatBaseActivity.this,NFCBindingDialog.TYPE_WAIT);
-        HashMap<Integer,String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP,new HashMap<Integer,String>());
-        if(hashMap.containsKey(userId)&&!android.text.TextUtils.isEmpty(hashMap.get(userId))){
-            nfcBindingDialog.showDialog(userId,hashMap.get(userId));
+        HashMap<String,String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP,new HashMap<String,String>());
+        if(hashMap.containsKey(userId+"")&&!android.text.TextUtils.isEmpty(hashMap.get(userId+""))){
+            nfcBindingDialog.showDialog(userId,hashMap.get(userId+""));
         }
     }
 

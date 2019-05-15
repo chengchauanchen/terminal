@@ -25,17 +25,17 @@ import android.os.StatFs;
 import android.os.storage.StorageManager;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.blankj.utilcode.util.GsonUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.log4j.Level;
@@ -57,7 +57,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -265,25 +264,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	}
 
 	@Override
-	public <K,V> void putListHashMap(String param, HashMap<K,List<V>> value){
-		//转换成json数据，再保存
-		Gson gson = new Gson();
-		List<String> resultList = new ArrayList<>();
-		for(Map.Entry<K, List<V>> next : value.entrySet()){
-			List<V> list = next.getValue();
-			K key = next.getKey();
-			String elementList = list2String(list);
-			Map<K, String> elementMap = new HashMap<>();
-			elementMap.put(key, elementList);
-			String json = gson.toJson(elementMap);
-			resultList.add(json);
-		}
-		String result = gson.toJson(resultList);
-		account.edit().putString(param,result).apply();
-	}
-
-	@Override
-	public <K,V> void putHashMap(String param, HashMap<K,V> value){
+	public <V> void putHashMap(String param, HashMap<String,V> value){
 		Gson gson = new Gson();
 		//转换成json数据，再保存
 		String strJson = gson.toJson(value);
@@ -292,50 +273,36 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	}
 
 	@Override
-	public <K,V> HashMap<K,V> getHashMap(String param,HashMap<K,V> defaultValue){
+	public <V> HashMap<String,V> getHashMap(String param,HashMap<String,V> defaultValue){
 		String strJson = account.getString(param, "");
 		logger.info("getHashMap:"+strJson);
 		if(TextUtils.isEmpty(strJson)){
 			return defaultValue;
 		}else {
 			Gson gson = new Gson();
-			Type type = new TypeToken<HashMap<K, V>>(){}.getType();
+			Type type = new TypeToken<HashMap<String, V>>(){}.getType();
 			return gson.fromJson(strJson, type);
 		}
 	}
 
-	/**
-	 * Return the type of map with the {@code keyType} and {@code valueType}.
-	 *
-	 * @param keyType   The type of key.
-	 * @param valueType The type of value.
-	 * @return the type of map with the {@code keyType} and {@code valueType}
-	 */
-	public static Type getHashMapType(final Type keyType, final Type valueType) {
-		return TypeToken.getParameterized(HashMap.class, keyType, valueType).getType();
-	}
+    public void putTerminalMessageListMap(String param, Map<String,List<TerminalMessage>> value){
+        //转换成json数据，再保存
+        Gson gson = new Gson();
+        String result = gson.toJson(value);
+        Log.d("TerminalSDK4Android","保存hashMap结果"+result);
+        account.edit().putString(param,result).apply();
+    }
 
-	@Override
-	public <K,V> HashMap<K,List<V>> getListHashMap(String param, HashMap<K,List<V>> defaultValue, Class keyClazz, Class valueClazz){
+	public LinkedTreeMap<String,List<TerminalMessage>> getTerminalMessageListMap(String param,LinkedTreeMap<String, List<TerminalMessage>> defaultValue){
 		String strJson = account.getString(param, "");
 		logger.info("getListHashMap:"+strJson);
 		if(TextUtils.isEmpty(strJson)){
 			return defaultValue;
 		}else {
-			Gson gson = new Gson();
-//			Type type = getHashMapType(keyClazz,valueClazz);
-//			List<String> results = gson.fromJson(strJson, List<String>.class);
-			HashMap<K,List<V>> resultMap = new HashMap<>();
-//			for(String result : results){
-//				HashMap<K,String> elementMap = gson.fromJson(result, HashMap<K,String>.class);
-//				for(Map.Entry<K, String> kStringEntry : elementMap.entrySet()){
-//					String value = kStringEntry.getValue();
-//					K key = kStringEntry.getKey();
-//					List<V> vs = gson.fromJson(value, List<V>.class);
-//					resultMap.put(key,vs);
-//				}
-//			}
-			return defaultValue;
+            Type type = new TypeToken<Map<String, List<TerminalMessage>>>(){}.getType();
+            LinkedTreeMap<String, List<TerminalMessage>> resultMap = GsonUtils.fromJson(strJson, type);
+			Log.d("TerminalSDK4Android","获取hashMap结果"+resultMap);
+			return resultMap;
 		}
 	}
 
