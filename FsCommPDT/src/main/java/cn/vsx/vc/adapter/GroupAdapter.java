@@ -19,7 +19,7 @@ import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
-import cn.vsx.hamster.common.GroupType;
+import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
@@ -153,7 +153,7 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 groupViewHolder.ivMessage.setVisibility(View.VISIBLE);
 //                groupViewHolder.ivCurrentGroup.setVisibility(View.INVISIBLE);
             }
-            if(group.getGroupType().equals(GroupType.RESPONSE.toString())){
+            if(group.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
                 groupViewHolder.iv_group_logo.setImageResource(R.drawable.response_group_photo);
                 TextViewCompat.setTextAppearance(groupViewHolder.tvName, R.style.group_name_color);
                 groupViewHolder.iv_response_group_icon.setVisibility(View.VISIBLE);
