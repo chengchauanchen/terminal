@@ -49,6 +49,7 @@ import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
@@ -322,7 +323,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     }
 
     private void refreshPtt(){
-        if(TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(mGroupId)){
+        Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(userId);
+        if(!groupByGroupNo.isHighUser()){
+            change2Forbid();
+        }else if(TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(mGroupId)){
             change2Forbid();
         }
     }
