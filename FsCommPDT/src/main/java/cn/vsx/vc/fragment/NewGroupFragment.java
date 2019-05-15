@@ -9,8 +9,6 @@ import android.util.SparseBooleanArray;
 import java.util.ArrayList;
 import java.util.List;
 
-
-import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -20,7 +18,6 @@ import cn.vsx.hamster.terminalsdk.model.GroupAndDepartment;
 import cn.vsx.hamster.terminalsdk.model.MemberGroupResponse;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdateGroupHandler;
@@ -121,32 +118,6 @@ public class NewGroupFragment extends BaseFragment{
         }
     };
 
-    /**
-     * 响应组是否显示
-     */
-    private ReceiveResponseGroupActiveHandler receiveResponseGroupActiveHandler = new ReceiveResponseGroupActiveHandler(){
-        @Override
-        public void handler(boolean isActive, int responseGroupId){
-            logger.info("ReceiveResponseGroupActiveHandler---" + "isActive:" + isActive);
-            if(TerminalFactory.getSDK().getParam(Params.USER_TYPE, "").equals(UserType.USER_HIGH.toString())){
-                return;
-            }
-            if(isActive){
-            }else{
-                //普通用户响应组时间到了，并且当前组是响应组，需要切换到之前的组
-                if(TerminalFactory.getSDK().getParam(Params.USER_TYPE).equals(UserType.USER_NORMAL.toString()) && TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0) == responseGroupId){
-                    if(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0) != 0){
-                        TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0));
-                    }else{
-                        TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0));
-                    }
-                }
-                myHandler.post(() -> {
-                    groupAdapter.notifyDataSetChanged();
-                });
-            }
-        }
-    };
     /**
      * 更新配置信息
      */
@@ -285,7 +256,6 @@ public class NewGroupFragment extends BaseFragment{
     public void initListener(){
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupListHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivegUpdateGroupHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
@@ -390,7 +360,6 @@ public class NewGroupFragment extends BaseFragment{
     public void onDestroy(){
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupListHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivegUpdateGroupHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);

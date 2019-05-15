@@ -38,12 +38,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 
-
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.GroupScanType;
 import cn.vsx.hamster.common.MemberChangeType;
-import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -68,6 +66,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
@@ -120,6 +119,16 @@ public class TalkbackFragment extends BaseFragment {
                 }
                 setViewEnable(true);
             });
+        }
+    };
+
+    private ReceiveResponseGroupActiveHandler receiveResponseGroupActiveHandler = new ReceiveResponseGroupActiveHandler(){
+        @Override
+        public void handler(boolean isActive, int responseGroupId){
+            //如果时间到了，还在响应组会话界面，将PTT禁止
+            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == responseGroupId && !isActive){
+                change2Forbid();
+            }
         }
     };
 
@@ -285,12 +294,15 @@ public class TalkbackFragment extends BaseFragment {
                 });
 
             } else {
-
-                CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
+                int currentGroup = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                CommonGroupUtil.setCatchGroupIdList(currentGroup);
 
                 myHandler.post(() -> {
                     setCurrentGroupView();
                     setChangeGroupView();
+                    if(TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(currentGroup)){
+                        change2Forbid();
+                    }
                 });
             }
         }
@@ -1107,6 +1119,7 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
@@ -1190,11 +1203,7 @@ public class TalkbackFragment extends BaseFragment {
 
     private void setChangeGroupView() {
         List<Group> groupList;
-        if(TerminalFactory.getSDK().getParam(Params.USER_TYPE, "").equals(UserType.USER_HIGH.toString())){
-            groupList =  TerminalFactory.getSDK().getConfigManager().getMonitorGroup();
-        }else {
-            groupList =  TerminalFactory.getSDK().getConfigManager().getCommonMonitorGroup();
-        }
+        groupList =  TerminalFactory.getSDK().getConfigManager().getMonitorGroup();
         if(groupList == null || groupList.isEmpty()){
             groupList = new ArrayList<>();
             groupList.add(DataUtil.getGroupByGroupNo(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)));
@@ -1294,7 +1303,7 @@ public class TalkbackFragment extends BaseFragment {
         allViewDefault();
         ll_forbid.setVisibility(View.VISIBLE);
         tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members),online_number));
-        ptt.setText(R.string.button_press_to_line_up);
+        ptt.setText(R.string.text_no_group_calls);
         TextViewCompat.setTextAppearance(ptt,R.style.pttWaitingText);
         ptt.setBackgroundResource(R.drawable.ptt_listening);
         logger.info("主界面，ptt被禁了  isPttPress：" + MyApplication.instance.isPttPress);
@@ -1451,6 +1460,7 @@ public class TalkbackFragment extends BaseFragment {
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUnreadMessageAdd1Handler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseGroupActiveHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);

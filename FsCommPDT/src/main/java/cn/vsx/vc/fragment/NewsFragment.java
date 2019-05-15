@@ -27,10 +27,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.TimerTask;
-
-
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
@@ -40,7 +36,6 @@ import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.TempGroupType;
-import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
@@ -64,7 +59,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyRecallRecordHandle
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePersonMessageNotifyDateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRecallRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
@@ -135,30 +129,11 @@ public class NewsFragment extends BaseFragment {
             terminalMessageData.clear();
             clearData();
             List<TerminalMessage> messageList = TerminalFactory.getSDK().getTerminalMessageManager().getMessageList();
-            removeResponseGroupMessage();
             logger.info("从数据库取出消息列表："+messageList);
             addData(messageList);
         }
     }
 
-    private void removeResponseGroupMessage(){
-        if(TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_NORMAL.toString())){
-            //查看定时任务中有没有对应的响应组倒计时，如果有说明该组还在激活状态，不能删除，如果没有就删除掉。
-            Map<Integer,TimerTask> timerTaskMap  = TerminalFactory.getSDK().getGroupCallManager().getTimerTaskMap();
-            //普通用户不显示响应组消息
-            Iterator<TerminalMessage> iterator = messageList.iterator();
-            while(iterator.hasNext()){
-                TerminalMessage next = iterator.next();
-                if(next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
-                    Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
-                    if(groupInfo.getResponseGroupType()!=null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())
-                    &&!timerTaskMap.containsKey(groupInfo.id)){
-                        iterator.remove();
-                    }
-                }
-            }
-        }
-    }
 
     /**
      * 保证第一条消息是当前组消息
@@ -341,7 +316,6 @@ public class NewsFragment extends BaseFragment {
     public void initListener() {
         newsList.setOnItemClickListener(new OnItemClickListenerImp());
 //        newsList.setOnItemLongClickListener(new OnItemLongClickListenerImp());
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getAllMessageRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUnreadMessageChangedHandler);
@@ -392,7 +366,6 @@ public class NewsFragment extends BaseFragment {
     public void onDestroyView() {
 
         mHandler.removeCallbacksAndMessages(null);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(getAllMessageRecordHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUnreadMessageChangedHandler);
@@ -918,23 +891,6 @@ public class NewsFragment extends BaseFragment {
             }
         }
     }
-
-    private ReceiveResponseGroupActiveHandler receiveResponseGroupActiveHandler = new ReceiveResponseGroupActiveHandler(){
-        @Override
-        public void handler(boolean isActive, int responseGroupId){
-            mHandler.post(() -> {
-                if(isActive){
-                    //将当前相应组置顶
-//                    setFirstResponseMessage(responseGroupId);
-                }else {
-                    //普通用户将当前响应组从列表移除
-                    if(TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_NORMAL.toString())){
-                        removeCurrentResponseMessage(responseGroupId);
-                    }
-                }
-            });
-        }
-    };
 
     private void removeCurrentResponseMessage(int responseGroupId){
         synchronized(NewsFragment.this){
@@ -1576,44 +1532,6 @@ public class NewsFragment extends BaseFragment {
         }
     }
 
-    private void setResponseGroupList(){
-        synchronized(NewsFragment.this){
-            //普通用户不显示响应组
-            if(TerminalFactory.getSDK().getParam(Params.USER_TYPE, "").equals(UserType.USER_NORMAL.toString())){
-                Iterator<TerminalMessage> iterator = messageList.iterator();
-                //查看定时任务中有没有对应的响应组倒计时，如果有说明该组还在激活状态，不能删除，如果没有就删除掉。
-                Map<Integer,TimerTask> timerTaskMap  = TerminalFactory.getSDK().getGroupCallManager().getTimerTaskMap();
-                while(iterator.hasNext()){
-                    TerminalMessage next = iterator.next();
-                    if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
-                        if(!DataUtil.isExistGroup(next.messageToId)){
-                            //说明组列表中没有这个组了
-                            iterator.remove();//消息列表中移除
-                            continue;
-                        }
-                        Group groupInfo = DataUtil.getGroupByGroupNo(next.messageToId);
-                        if(groupInfo.getResponseGroupType() != null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())
-                                &&!timerTaskMap.containsKey(groupInfo.id)){
-                            iterator.remove();
-                        }
-                    }
-                }
-                Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
-            }else{
-                Iterator<TerminalMessage> iterator = messageList.iterator();
-                while(iterator.hasNext()){
-                    TerminalMessage next = iterator.next();
-                    if(!DataUtil.isExistGroup(next.messageToId)){
-                        //说明组列表中没有这个组了
-                        iterator.remove();//消息列表中移除
-                    }
-                    //sortResponseGroup();
-                }
-            }
-        }
-
-    }
-
     /**
      * 给响应组排序
      */
@@ -1646,7 +1564,7 @@ public class NewsFragment extends BaseFragment {
      */
     private void sortFirstMessageList(){
         if(!messageList.isEmpty()){
-            setResponseGroupList();
+            setNewGroupList();
             Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
             setFirstMessage();
             //再保存到数据库

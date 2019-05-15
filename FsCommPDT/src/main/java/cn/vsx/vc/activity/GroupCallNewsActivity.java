@@ -34,14 +34,12 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.TerminalMemberStatusEnum;
-import cn.vsx.hamster.common.UserType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
@@ -320,6 +318,13 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         TerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(userId, TerminalMemberStatusEnum.ONLINE.toString() );
         //获取组内正在上报的人数
         getGroupLivingList();
+        refreshPtt();
+    }
+
+    private void refreshPtt(){
+        if(TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(mGroupId)){
+            change2Forbid();
+        }
     }
 
     @Override
@@ -614,7 +619,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     private void change2Forbid() {//禁止组呼，不是遥毙
 
         ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-        ptt.setText(R.string.button_press_to_speak);
+        ptt.setText(R.string.text_no_group_calls);
         TextViewCompat.setTextAppearance(ptt, R.style.function_wait_text);
         logger.info("主界面，ptt被禁了  isPttPress：" + MyApplication.instance.isPttPress);
         ptt.setEnabled(false);
@@ -1111,11 +1116,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     };
 
     private ReceiveResponseGroupActiveHandler receiveResponseGroupActiveHandler = (isActive, responseGroupId) -> {
-        if(TerminalFactory.getSDK().getParam(Params.USER_TYPE,"").equals(UserType.USER_HIGH.toString())){
-            return;
-        }
+
+        //如果时间到了，还在响应组会话界面，将PTT禁止
         if(userId == responseGroupId && !isActive){
-            finish();
+            change2Forbid();
         }
     };
     /**
