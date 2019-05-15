@@ -203,9 +203,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity: isRegisted" + isRegisted);
                 if (isRegisted) {//注册过，在后台登录，session超时也走这
-                    TerminalFactory.getSDK().getAuthManagerTwo().login();
+                    if(MyTerminalFactory.getSDK().isServerConnected()){
+                        TerminalFactory.getSDK().getAuthManagerTwo().login();
+                    }
                     logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity中登录了");
-                    MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
+//                    MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
                 } else {//没注册过，关掉主界面，去注册界面
                     startActivity(new Intent(NewMainActivity.this, RegistActivity.class));
                     NewMainActivity.this.finish();
@@ -311,25 +313,27 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
     protected ReceiveExitHandler receiveExitHandler = new ReceiveExitHandler() {
         @Override
-        public void handle(String msg){
-            cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this,msg);
-            myHandler.postDelayed(() -> {
-                Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
-                stoppedCallIntent.putExtra("stoppedResult","0");
-                SendRecvHelper.send(getApplicationContext(),stoppedCallIntent);
+        public void handle(String msg,boolean isExit){
+            if(isExit){
+                cn.vsx.vc.utils.ToastUtil.showToast(NewMainActivity.this,msg);
+                myHandler.postDelayed(() -> {
+                    Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
+                    stoppedCallIntent.putExtra("stoppedResult","0");
+                    SendRecvHelper.send(getApplicationContext(),stoppedCallIntent);
 
-                MyTerminalFactory.getSDK().exit();//停止服务
-                PromptManager.getInstance().stop();
-                for (Activity activity : ActivityCollector.getAllActivity().values()) {
-                    activity.finish();
-                }
+                    MyTerminalFactory.getSDK().exit();//停止服务
+                    PromptManager.getInstance().stop();
+                    for (Activity activity : ActivityCollector.getAllActivity().values()) {
+                        activity.finish();
+                    }
 //                TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
 //                TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
-                MyApplication.instance.isClickVolumeToCall = false;
-                MyApplication.instance.isPttPress = false;
-                MyApplication.instance.stopIndividualCallService();
-                killAllProcess();
-            },2000);
+                    MyApplication.instance.isClickVolumeToCall = false;
+                    MyApplication.instance.isPttPress = false;
+                    MyApplication.instance.stopIndividualCallService();
+                    killAllProcess();
+                },2000);
+            }
         }
     };
 

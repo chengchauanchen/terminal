@@ -104,7 +104,7 @@ public class PullGB28181Service extends BaseService{
 
     @Override
     protected void initListener(){
-        mIvLiveLookAddmember.setOnClickListener(inviteMemberOnClickListener);
+//        mIvLiveLookAddmember.setOnClickListener(inviteMemberOnClickListener);
         mSvGb28181.setSurfaceTextureListener(GB28181SurfaceTextureListener);
         mIvClose.setOnClickListener(closeOnClickListener);
         mLlInviteMember.setOnClickListener(inviteOnClickListener);
@@ -195,19 +195,25 @@ public class PullGB28181Service extends BaseService{
             Intent intent = new Intent(PullGB28181Service.this,InviteMemberService.class);
             intent.putExtra(Constants.TYPE,Constants.PULL);
             intent.putExtra(Constants.PULLING,true);
-            intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,new InviteMemberExceptList());
+            intent.putExtra(Constants.GB28181_PULL,true);
+            intent.putExtra(Constants.TERMINALMESSAGE,terminalMessage);
+            startService(intent);
         }else{
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.text_no_video_push_authority));
         }
     };
 
     private View.OnClickListener inviteMemberOnClickListener = v -> {
-        Intent intent = new Intent(PullGB28181Service.this,InviteMemberService.class);
-        intent.putExtra(Constants.TYPE,Constants.PULL);
-        intent.putExtra(Constants.PULLING,true);
-        intent.putExtra(Constants.GB28181_PULL,true);
-        intent.putExtra(Constants.TERMINALMESSAGE,terminalMessage);
-        startService(intent);
+        if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())) {
+            Intent intent = new Intent(PullGB28181Service.this,InviteMemberService.class);
+            intent.putExtra(Constants.TYPE,Constants.PULL);
+            intent.putExtra(Constants.PULLING,true);
+            intent.putExtra(Constants.GB28181_PULL,true);
+            intent.putExtra(Constants.TERMINALMESSAGE,terminalMessage);
+            startService(intent);
+        }else{
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.text_no_video_push_authority));
+        }
     };
 
     private View.OnClickListener closeOnClickListener = v -> {

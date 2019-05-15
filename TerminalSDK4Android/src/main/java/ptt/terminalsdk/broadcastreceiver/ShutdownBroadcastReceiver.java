@@ -19,7 +19,7 @@ public class ShutdownBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (null != intent.getAction() && intent.getAction().equals(ACTION_SHUTDOWN)) {
-            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveExitHandler.class, "关机");
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveExitHandler.class, "关机",true);
         }
     }
 }

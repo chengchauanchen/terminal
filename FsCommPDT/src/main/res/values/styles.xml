@@ -16,6 +16,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <!--<item name="android:configChanges">keyboardHidden|orientation|screenSize</item>-->
     </style>
     
     <style name="wrap_content_style">

@@ -159,7 +159,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     private ReceiveExitHandler receiveExitHandler = new ReceiveExitHandler(){
         @Override
-        public void handle(String msg){
+        public void handle(String msg,boolean isExit){
             exit();
         }
     };

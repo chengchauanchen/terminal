@@ -62,6 +62,7 @@ import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.InviteMemberExceptList;
+import cn.vsx.vc.model.InviteMemberLiverMember;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -552,13 +553,16 @@ public class PullLivingService extends BaseService{
 
     private View.OnClickListener inviteMemberOnClickListener = v -> {
         if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())) {
-            Intent intent = new Intent(PullLivingService.this, InviteMemberService.class);
-            intent.putExtra(Constants.TYPE, Constants.PULL);
-            intent.putExtra(Constants.PULLING, true);
-            List<Integer> list = new ArrayList<>();
-            list.add((Integer)liveMember.getNo());
-            intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,new InviteMemberExceptList(list));
-            startService(intent);
+            if(liveMember!=null){
+               Intent intent = new Intent(PullLivingService.this, InviteMemberService.class);
+               intent.putExtra(Constants.TYPE, Constants.PULL);
+               intent.putExtra(Constants.PULLING, true);
+               intent.putExtra(Constants.LIVE_MEMBER,new InviteMemberLiverMember(liveMember.getNo(),liveMember.getUniqueNo()));
+               List<Integer> list = new ArrayList<>();
+               list.add((Integer)liveMember.getNo());
+               intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,new InviteMemberExceptList(list));
+               startService(intent);
+            }
         }else{
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.text_no_video_push_authority));
         }

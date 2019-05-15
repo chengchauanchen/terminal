@@ -64,6 +64,7 @@ import cn.vsx.vc.adapter.SelectedListAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.InviteMemberExceptList;
+import cn.vsx.vc.model.InviteMemberLiverMember;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSwitchCameraViewHandler;
 import cn.vsx.vc.utils.Constants;
@@ -128,6 +129,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private  List<Integer> exceptList = new ArrayList<>();
     private boolean gb28181Pull;
     private boolean isGroupPushLive;
+    private InviteMemberLiverMember liverMember;
     private TerminalMessage oldTerminalMessage;
 
     //根据不同的业务显示不同的tab类型
@@ -244,6 +246,10 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         gb28181Pull = intent.getBooleanExtra(Constants.GB28181_PULL, false);
         if (gb28181Pull) {
             oldTerminalMessage = (TerminalMessage) intent.getSerializableExtra(Constants.TERMINALMESSAGE);
+        }
+        //观看时上报人的信息
+        if(pulling){
+            liverMember = (InviteMemberLiverMember) intent.getSerializableExtra(Constants.LIVE_MEMBER);
         }
         //获取不显示的设备
         InviteMemberExceptList bean = (InviteMemberExceptList) intent.getSerializableExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO);
@@ -1281,9 +1287,14 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             return;
         }
         if (!getSelectMembersUniqueNo().isEmpty()) {
+            int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+            long uniqueNo = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l);
+            if(pulling&&liverMember!=null){
+                memberId = liverMember.memberNo;
+                uniqueNo = liverMember.getUniqueNo();
+            }
             MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(getNotifyWatchMemberUniqueNoAndType(),
-                    MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0),
-                    TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l));
+                    memberId, uniqueNo);
         }
         removeView();
     }
