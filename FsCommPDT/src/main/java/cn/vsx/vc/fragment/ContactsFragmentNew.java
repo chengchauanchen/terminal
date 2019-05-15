@@ -40,6 +40,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.view.DialPopupwindow;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -136,6 +137,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         jingwutong_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         lte_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         dialPopupwindow = new DialPopupwindow(context);
+        voice_image.setImageResource(BitmapUtil.getVolumeImageResourceByValue(false));
         voice_image.setOnClickListener(view -> {
             if(!soundOff){
                 voice_image.setImageResource(R.drawable.volume_off_call);

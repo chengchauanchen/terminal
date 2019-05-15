@@ -80,6 +80,7 @@ import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.GroupMemberActivity;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.view.ChangeGroupView;
 import cn.vsx.vc.view.ChangeGroupView.OnGroupChangedListener;
@@ -1040,7 +1041,7 @@ public class TalkbackFragment extends BaseFragment {
 //        mGestureDetector = new GestureDetector(context, gestureListener);
 
         iv_volume_off_call.setVisibility(View.VISIBLE);
-        iv_volume_off_call.setImageResource(R.drawable.volume_silence);
+        iv_volume_off_call.setImageResource(BitmapUtil.getVolumeImageResourceByValue(true));
         iv_volume_off_call.setOnClickListener(view -> {
             if (!soundOff) {
                 iv_volume_off_call.setImageResource(R.drawable.volume_off_call);

@@ -53,6 +53,7 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.utils.ActivityCollector;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.ChangeMainGroupLayout;
 import cn.vsx.vc.view.MToggleButton;
@@ -136,6 +137,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         mRootView.findViewById(R.id.about).setOnClickListener(this);
         setVideoIcon();
         setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
+        voice_image.setImageResource(BitmapUtil.getVolumeImageResourceByValue(false));
         voice_image.setOnClickListener(view -> {
             if(!soundOff){
                 voice_image.setImageResource(R.drawable.volume_off_call);

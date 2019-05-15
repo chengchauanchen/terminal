@@ -221,7 +221,7 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
                     adapter.getData().clear();
                     adapter.loadMoreEnd(true);
                     adapter.setEnableLoadMore(!(beanList.size() < mPageSize));
-                    ToastUtil.showToast(GroupVideoLiveListActivity.this, resultDesc);
+//                    ToastUtil.showToast(GroupVideoLiveListActivity.this, resultDesc);
                 } else {
                     adapter.loadMoreComplete();
                     if (beanList.size() < mPageSize) {

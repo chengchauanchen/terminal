@@ -152,7 +152,7 @@
         <!-- android:windowSoftInputMode="adjustPan" /> -->
         <activity
             android:name=".activity.IndividualNewsActivity"
-            android:configChanges="keyboardHidden"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity

@@ -18,6 +18,7 @@ import java.io.IOException;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.vc.R;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class BitmapUtil {
 	
@@ -212,5 +213,14 @@ public class BitmapUtil {
 		} else {
 			return R.drawable.icon_phone;
 		}
+	}
+
+	/**
+	 * 根据Volume 显示是否静音的图标
+	 * @return
+	 */
+	public static int getVolumeImageResourceByValue(boolean isBlue){
+		int value = MyTerminalFactory.getSDK().getAudioProxy().getVolume();
+		return (value <=0)?R.drawable.volume_off_call:(isBlue)?R.drawable.volume_silence:R.drawable.horn;
 	}
 }

@@ -83,6 +83,7 @@ import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverDeleteMessageHandler;
 import cn.vsx.vc.receiver.NotificationClickReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -297,6 +298,7 @@ public class NewsFragment extends BaseFragment {
         newsList = (ListView) mRootView.findViewById(R.id.news_list);
         setVideoIcon();
         setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
+        voice_image.setImageResource(BitmapUtil.getVolumeImageResourceByValue(false));
         voice_image.setOnClickListener(view -> {
             if(!soundOff){
                 voice_image.setImageResource(R.drawable.volume_off_call);
