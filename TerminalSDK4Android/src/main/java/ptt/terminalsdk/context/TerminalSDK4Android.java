@@ -68,12 +68,14 @@ import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
 import cn.vsx.hamster.terminalsdk.manager.channel.AbsClientChannel;
 import cn.vsx.hamster.terminalsdk.manager.http.IHttpClient;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.OperateReceiveHandlerUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -1127,5 +1129,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 //				}
 			}
 		}
+	}
+
+	@Override
+	public Group getGroupByGroupNo(int no){
+		return DataUtil.getGroupByGroupNo(no);
 	}
 }

@@ -28,7 +28,6 @@ import org.apache.log4j.Logger;
 import java.util.HashMap;
 
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -223,25 +222,17 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
             R.drawable.push_video,R.drawable.pull_video
     };
 
+    @Override
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.hide_function:
-                //如果是响应组，不能点击
-                if(isGroupFunction  &&
-                    null != DataUtil.getGroupByGroupNo(userId).getResponseGroupType() &&
-                        DataUtil.getGroupByGroupNo(userId).getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
-                    return;
-                }
+
                 showOrHideBottom();
                 break;
 
             case R.id.group_call_news_keyboard:
                     if(isGroupFunction){
-                        //如果是响应组，不能点击
-                        if(null != DataUtil.getGroupByGroupNo(userId).getResponseGroupType() &&
-                                DataUtil.getGroupByGroupNo(userId).getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
-                            return;
-                        }
+
                         btn_record.setVisibility(View.GONE);
                         if(groupCallNewsEt.getVisibility() == View.VISIBLE) {
                             showVoiceView(true);
