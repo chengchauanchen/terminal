@@ -200,6 +200,7 @@ public class MediaStream {
             });
             return;
         }
+        logger.info("createCamera");
         if (!enanleVideo) {
             return;
         }
@@ -366,6 +367,7 @@ public class MediaStream {
             });
             return;
         }
+        logger.info("------>>>>startPreview");
         if(audioStream == null){
             audioStream = new AudioStream();
         }

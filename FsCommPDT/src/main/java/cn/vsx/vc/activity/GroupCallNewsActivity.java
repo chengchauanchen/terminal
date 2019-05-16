@@ -39,6 +39,7 @@ import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.ReceiveObjectMode;
+import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -309,6 +310,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     }
 
 
+    @Override
     public void initData() {
         super.initData();
         mGroupId = userId;
@@ -324,7 +326,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     private void refreshPtt(){
         Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(userId);
-        if(!groupByGroupNo.isHighUser()){
+        if(groupByGroupNo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString()) && !groupByGroupNo.isHighUser()){
             change2Forbid();
         }else if(TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(mGroupId)){
             change2Forbid();
@@ -634,8 +636,9 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     private void allViewDefault() {
         mHandler.removeMessages(1);
-        if (tv_pre_speak == null)
+        if (tv_pre_speak == null){
             return;
+        }
         tv_pre_speak.setVisibility(View.GONE);
         progressGroupCall.setVisibility(View.GONE);
         groupCallTimeProgress.setProgress(605);

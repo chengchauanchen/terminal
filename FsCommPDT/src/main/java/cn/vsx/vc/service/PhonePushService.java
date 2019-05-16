@@ -504,7 +504,7 @@ public class PhonePushService extends BaseService{
     private View.OnClickListener changeCameraOnClickListener = v -> changeCamera();
 
     private View.OnClickListener svOnClickListener = v->{
-        if(null != mMediaStream && mMediaStream.isStreaming()){
+        if(null != mMediaStream && mMediaStream.isStreaming() && null != mMediaStream.getCamera()){
             mMediaStream.getCamera().autoFocus(null);//屏幕聚焦
         }
         showLivingView();
@@ -706,7 +706,6 @@ public class PhonePushService extends BaseService{
         mMediaStream.setDgree(getDgree());
         mMediaStream.createCamera();
         mMediaStream.startPreview();
-        logger.info("------>>>>startCamera");
         startRecord();
         if(mMediaStream.isStreaming()){
             ToastUtil.showToast(PhonePushService.this, getResources().getString(R.string.pushing_stream));
