@@ -65,17 +65,15 @@ public class PcLoginActivity extends BaseActivity implements View.OnClickListene
         handler.removeCallbacksAndMessages(null);
     }
 
+    @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.iv_back:
-                finish();
-                break;
-            case R.id.tv_confirm:
-                TerminalFactory.getSDK().getAuthManagerTwo().pcLogin(result);
-                break;
-            case R.id.tv_cancel:
-                finish();
-                break;
+        int id = view.getId();
+        if(id == R.id.iv_back){
+            finish();
+        }else if(id == R.id.tv_confirm){
+            TerminalFactory.getSDK().getAuthManagerTwo().pcLogin(result);
+        }else if(id == R.id.tv_cancel){
+            finish();
         }
     }
 

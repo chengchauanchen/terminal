@@ -7,9 +7,7 @@ import com.baidu.location.BDLocation;
 
 import org.apache.log4j.Logger;
 
-
 import java.util.List;
-import java.util.TimerTask;
 
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.CoordTransformUtils;

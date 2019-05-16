@@ -40,3 +40,12 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile(name:'liblinphone-android-sdk', ext:'aar')
 }
+
+//task makeJar(type: Copy){
+//    delete 'build/libs/easylinphone.jar'
+//    from('build/intermediates/bundles/release/')
+//    into('build/outputs')
+//    include('classes.jar')
+//    rename('classes.jar','easylinphone.jar')
+//}
+//makeJar.dependsOn(build)

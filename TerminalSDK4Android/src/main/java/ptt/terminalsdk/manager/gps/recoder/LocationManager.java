@@ -63,12 +63,15 @@ public class LocationManager {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case HANDLER_WHAT_LOCATION_CHECK:
+                    removeMessages(HANDLER_WHAT_LOCATION_CHECK);
                     checkUploadState();
                     break;
                 case HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT:
+                    removeMessages(HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT);
                     setLocationUpdate(false, true);
                     break;
                 case HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT_TIMEOUT:
+                    removeMessages(HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT);
                     isChatSendLocation = false;
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetGPSLocationHandler.class, 0, 0);
                     //检查上传位置信息的状态（状态切换有可能时间间隔不同，有可能已经不需要上传位置信息）

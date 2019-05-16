@@ -30,7 +30,6 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
@@ -462,12 +461,15 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 				}
 				break;
 			case KeyEvent.ACTION_UP:
-				logger.info("音量的抬起事件 " + MyApplication.instance.volumePress + (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING) +
-						(MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING));
+				logger.info("音量的抬起事件 " + MyApplication.instance.volumePress + "--组呼说状态："+MyApplication.instance.getGroupSpeakState() +
+						"---组呼听状态："+MyApplication.instance.getGroupListenenState());
+
 				if(MyApplication.instance.volumePress){
 					MyApplication.instance.isClickVolumeToCall = false;
 					if (onPTTVolumeBtnStatusChangedListener != null) {
-						onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(GroupCallSpeakState.END);
+						if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE){
+							onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(GroupCallSpeakState.END);
+						}
 					}
 					MyApplication.instance.volumePress = false;
 				}
