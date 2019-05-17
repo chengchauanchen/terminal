@@ -114,6 +114,7 @@ import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
+import cn.vsx.vc.receiveHandle.ReceiveSwitchMainFrgamentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
@@ -236,9 +237,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 }
                 MyApplication.instance.notifyAll();
             }
-            if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
-                myHandler.post(() -> setTabSelection(R.id.bv_talk_back));
-            }
+//            if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
+//                myHandler.post(() -> setTabSelection(R.id.bv_talk_back));
+//            }
         }
     };
 
@@ -457,6 +458,28 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler() {
             fl_fragment_container_main.setVisibility(View.GONE);
+        }
+    };
+
+    private ReceiveSwitchMainFrgamentHandler receiveSwitchMainFrgamentHandler = new ReceiveSwitchMainFrgamentHandler(){
+        @Override
+        public void handler(int position){
+            myHandler.post(()->{
+                if(position == 0){
+                    if (talkbackFragment == null) {
+                        talkbackFragment = new TalkbackFragment(NewMainActivity.this);
+                    }
+                    ll_sliding_chenge_volume.setVisibility(View.GONE);
+                    switchFragment(currentFragment, talkbackFragment);
+                    mCurrentFragmentCode=1;
+                    MyApplication.instance.isTalkbackFragment = true;
+                    showFolatWindow();
+                    bv_talk_back.setSelected(true);
+                    bv_person_contacts.setSelected(false);
+                    bv_group_contacts.setSelected(false);
+                    bv_setting.setSelected(false);
+                }
+            });
         }
     };
 
@@ -974,6 +997,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceivePopBackStackHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendDataMessageSuccessHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveSwitchMainFrgamentHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowPersonFragmentHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowGroupFragmentHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverFragmentDestoryHandler);
@@ -1594,6 +1618,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         //外置摄像头是否连接通知
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUVCCameraConnectChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendDataMessageSuccessHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSwitchMainFrgamentHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveUnReadCountChangedHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowPopupwindowHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowPersonFragmentHandler);

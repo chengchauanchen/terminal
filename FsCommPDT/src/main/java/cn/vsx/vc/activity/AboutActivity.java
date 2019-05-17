@@ -8,6 +8,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.UpdateManager;
@@ -69,8 +70,10 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener{
                 startActivity(new Intent(this,FunctionIntroduceActivity.class));
                 break;
             case R.id.tv_update:
-                UpdateManager manager = new UpdateManager(this);
-                manager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL,""),true);
+                TerminalFactory.getSDK().getThreadPool().execute(()->{
+                    UpdateManager manager = new UpdateManager(this);
+                    manager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL,""),true);
+                });
 //                Toast.makeText(this, getResources().getString(R.string.text_is_the_latest_version), Toast.LENGTH_SHORT).show();
                 break;
             case R.id.news_bar_back:

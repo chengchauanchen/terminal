@@ -28,6 +28,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.model.CatalogBean;
+import cn.vsx.vc.receiveHandle.ReceiveSwitchMainFrgamentHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -181,15 +182,12 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 if(monitorOnClickListener !=null){
                     monitorOnClickListener.onMonitorClick(group.getNo());
                 }
-//                if(MyApplication.instance.isLocked){
-//                    ToastUtil.showToast(context, context.getString(R.string.group_locked_can_not_change_group));
-//                }else if(MyApplication.instance.isMiniLive){
-//                    ToastUtil.showToast(context, context.getString(R.string.text_small_window_mode_can_not_change_group));
-//                }else {
-
-
-//                }
-
+            });
+            groupViewHolder.tvName.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveSwitchMainFrgamentHandler.class,0);
+                }
             });
             if(!tempGroup.isEmpty()){
                 if(position == tempGroup.size()){
