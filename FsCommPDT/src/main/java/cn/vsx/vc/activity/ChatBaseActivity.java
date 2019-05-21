@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.bumptech.glide.Glide;
 import com.google.gson.internal.LinkedTreeMap;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 import com.zectec.imageandfileselector.base.Constant;
@@ -88,6 +89,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRecallRecordHand
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageFailedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -387,6 +389,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
         groupCallList.removeOnLayoutChangeListener(myOnLayoutChangeListener);
         handler.removeCallbacksAndMessages(null);
+        Glide.with(MyApplication.instance.getApplicationContext()).onDestroy();
     }
 
 
@@ -1254,17 +1257,21 @@ public abstract class ChatBaseActivity extends BaseActivity{
                         && terminalMessage.messageType != MessageType.GROUP_CALL.getCode()
                         && terminalMessage.messageType != MessageType.PRIVATE_CALL.getCode()
                         && terminalMessage.messageType != MessageType.VIDEO_LIVE.getCode()*/true) {
-
                     boolean isSendFail = false;
-                    Iterator<TerminalMessage> it = chatMessageList.iterator();
-                    while (it.hasNext()) {
-                        TerminalMessage next = it.next();
-                        if (next.messageBody.containsKey(JsonParam.TOKEN_ID) && terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
-                                next.messageBody.getIntValue(JsonParam.TOKEN_ID) == terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
-                            it.remove();
-                            isSendFail = true;
+                    //如果是自己发送的消息，删除
+                    if(!DataUtil.isReceiver(terminalMessage)){
+                        Iterator<TerminalMessage> it = chatMessageList.iterator();
+                        while (it.hasNext()) {
+                            TerminalMessage next = it.next();
+                            //是自己发送的消息，并且是没有消息Id的
+                            if (!DataUtil.isReceiver(next)&&next.messageId == 0&&next.messageBody.containsKey(JsonParam.TOKEN_ID) && terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
+                                    next.messageBody.getIntValue(JsonParam.TOKEN_ID) == terminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
+                                it.remove();
+                                isSendFail = true;
+                            }
                         }
                     }
+
                     if (terminalMessage.messageType == MessageType.HYPERLINK.getCode()) {//人脸识别
                         int code = terminalMessage.messageBody.getIntValue(JsonParam.CODE);
                         if (code != 0) {

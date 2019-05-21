@@ -573,4 +573,6 @@
     <string name="no_get_temporary_group_id">没有获取到临时组id</string>
     <string name="can_not_cancel_listener">不能取消监听</string>
     <string name="monitor_more_than_five">监听组达到上限，请取消一个后再添加</string>
+    <string name="down_loading">下载中...</string>
+    <string name="play_audio">播放录音</string>
 </resources>

@@ -410,8 +410,10 @@ public class PullLivingService extends BaseService{
      * 通知终端停止观看直播
      **/
     private ReceiveNotifyMemberStopWatchMessageHandler receiveNotifyMemberStopWatchMessageHandler = message -> {
-        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.force_stop_watch));
-        mHandler.post(this::finishVideoLive);
+        if(callId!=0&&message.getCallId() == callId){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.force_stop_watch));
+            mHandler.post(this::finishVideoLive);
+        }
     };
 
 //    /**

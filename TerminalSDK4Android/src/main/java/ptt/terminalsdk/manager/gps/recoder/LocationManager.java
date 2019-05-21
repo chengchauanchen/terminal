@@ -53,6 +53,12 @@ public class LocationManager {
     private final int HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT = 1;
     //聊天页面的获取位置信息-超时处理
     private final int HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT_TIMEOUT = 2;
+//    //选择定位方式的防止频繁调用
+//    private final int HANDLER_WHAT_LOCATION_CHECK_TIMEOUT = 3;
+    //延时时间
+    private final int DELAYED_TIME = 300;
+//    //防止频繁调用的时间
+//    private final int CHECK_TIME = 5*1000;
 
     public LocationManager(Context context) {
         this.context = context;
@@ -71,7 +77,7 @@ public class LocationManager {
                     setLocationUpdate(false, true);
                     break;
                 case HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT_TIMEOUT:
-                    removeMessages(HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT);
+                    removeMessages(HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT_TIMEOUT);
                     isChatSendLocation = false;
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetGPSLocationHandler.class, 0, 0);
                     //检查上传位置信息的状态（状态切换有可能时间间隔不同，有可能已经不需要上传位置信息）
@@ -88,7 +94,6 @@ public class LocationManager {
      */
     public void start() {
         logger.info(TAG + "开启了");
-
         MyTerminalFactory.getSDK().getRecorderBDGPSManager().init(0);
         MyTerminalFactory.getSDK().getRecorderGPSManager().init();
 
@@ -112,7 +117,6 @@ public class LocationManager {
 
         MyTerminalFactory.getSDK().getRecorderGPSManager().stop();
         MyTerminalFactory.getSDK().getRecorderBDGPSManager().stop();
-
         mHandler.removeCallbacksAndMessages(null);
         logger.info(TAG + "销毁了");
     }
@@ -127,7 +131,7 @@ public class LocationManager {
             TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
                 @Override
                 public void run() {
-                    mHandler.sendEmptyMessage(HANDLER_WHAT_LOCATION_CHECK);
+                    mHandler.sendEmptyMessageDelayed(HANDLER_WHAT_LOCATION_CHECK,DELAYED_TIME);
                 }
             });
         }
@@ -144,7 +148,7 @@ public class LocationManager {
             MyTerminalFactory.getSDK().putParam(Params.GPS_FORCE_UPLOAD_INTERVAL, message.getUploadRate());
             MyTerminalFactory.getSDK().putParam(Params.GPS_FORCE_UPLOAD_HOLD_TIME, message.getHoldTime());
             MyTerminalFactory.getSDK().putParam(Params.GPS_FORCE_UPLOAD_START_TIME, System.currentTimeMillis());
-            mHandler.sendEmptyMessage(HANDLER_WHAT_LOCATION_CHECK);
+            mHandler.sendEmptyMessageDelayed(HANDLER_WHAT_LOCATION_CHECK,DELAYED_TIME);
         }
     };
     /**
@@ -157,7 +161,7 @@ public class LocationManager {
             TerminalFactory.getSDK().putParam(Params.GPS_STATE, message.getGpsEnable());//gps开关状态,打开还是关闭，默认为关闭
             TerminalFactory.getSDK().putParam(Params.GPS_UPLOAD_INTERVAL, message.getDefaultGpsFrequency());
             TerminalFactory.getSDK().putParam(Params.GPS_FORCE_UPLOAD_INTERVAL, message.getActiveGpsFrequency());
-            mHandler.sendEmptyMessage(HANDLER_WHAT_LOCATION_CHECK);
+            mHandler.sendEmptyMessageDelayed(HANDLER_WHAT_LOCATION_CHECK,DELAYED_TIME);
         }
     };
 
@@ -188,6 +192,8 @@ public class LocationManager {
             logger.info(TAG +"网络连接状态:" + connected);
             if(!connected){
                 stopUpload();
+            }else{
+                mHandler.sendEmptyMessageDelayed(HANDLER_WHAT_LOCATION_CHECK,DELAYED_TIME);
             }
         }
     };
@@ -311,7 +317,7 @@ public class LocationManager {
         TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
             @Override
             public void run() {
-                mHandler.sendEmptyMessage(HANDLER_WHAT_LOCATION_CHECK);
+                mHandler.sendEmptyMessageDelayed(HANDLER_WHAT_LOCATION_CHECK,DELAYED_TIME);
             }
         });
     }

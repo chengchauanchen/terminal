@@ -33,6 +33,7 @@ import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
@@ -55,6 +56,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
+import cn.vsx.vc.model.PlayType;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
@@ -239,6 +241,8 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
             volumeViewLayout.unRegistLintener();
         }
         MediaManager.release();
+        MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
+        MyApplication.instance.isPlayVoice = false;
         super.doOtherDestroy();
     }
 
@@ -331,7 +335,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                                 resultDes[0] = getString(R.string.text_audio_history_not_find_or_server_no_response);
                                 logger.error("历史音频未找到，或服务器无响应！");
                             }
-                            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0]);
+                            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0],terminalMessage);
                         }
                     });
                 } else {
@@ -339,19 +343,19 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                     resultDes[0] = getString(R.string.text_get_audio_success_from_local_ready_to_play);
                     logger.info("从本地音频文件，播放录音");
                     MediaManager.playSound(terminalMessage.messagePath, onCompletionListener);
-                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0]);
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0],terminalMessage);
                 }
             } else {
                 resultCode[0] = TerminalErrorCode.PARAMETER_ERROR.getErrorCode();
                 resultDes[0] = getString(R.string.text_get_audio_history_paramter_wrongful);
                 logger.error("获取历史音频参数不合法！");
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0]);
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0],terminalMessage);
             }
         } catch (Exception e) {
             resultDes[0] = getString(R.string.text_get_audio_messge_fail);
             resultCode[0] = TerminalErrorCode.PARAMETER_ERROR.getErrorCode();
             logger.error("获得语音消息失败！", e);
-            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0]);
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0],terminalMessage);
         }
 
 
@@ -478,7 +482,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     private ReceiverReplayIndividualChatVoiceHandler mReceiverReplayIndividualChatVoiceHandler = new ReceiverReplayIndividualChatVoiceHandler() {
 
         @Override
-        public void handler(final TerminalMessage terminalMessage, int postion) {
+        public void handler(final TerminalMessage terminalMessage, int postion,int type) {
             mposition = postion;
             isReject=false;
             myHandler.post(() -> {
@@ -489,7 +493,11 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                     if (lastPosition == mposition) {//点击同一个条目
                         if (MyApplication.instance.isPlayVoice) {
                             logger.error("点击同一条目，停止录音，停止动画");
-                            MediaManager.release();
+                            if(type == PlayType.PLAY_PRIVATE_CALL.getCode()){
+                                MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
+                            }else{
+                                MediaManager.release();
+                            }
                             MyApplication.instance.isPlayVoice = false;
                             isSameItem = true;
                             temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
@@ -500,7 +508,15 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                                 public void run() {
                                     if (mposition < chatMessageList.size() && mposition >= 0) {
                                         try {
-                                            downloadRecordFileOrPlay(terminalMessage, onCompletionListener);
+                                            if(type == PlayType.PLAY_PRIVATE_CALL.getCode()){
+                                                myHandler.post(() -> {
+                                                    terminalMessage.isDownLoadAudio = true;
+                                                    temporaryAdapter.notifyItemChanged(postion);
+                                                });
+                                                MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
+                                            }else{
+                                                downloadRecordFileOrPlay(terminalMessage, onCompletionListener);
+                                            }
                                         } catch (IndexOutOfBoundsException e) {
                                             logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
                                         }
@@ -510,15 +526,23 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                         }
                     } else {//点击不同条目
                         if (MyApplication.instance.isPlayVoice) {
+                            MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
                             MediaManager.release();
-
                         }
                         //播放当前的
                         executorService.execute(new Runnable() {
                             public void run() {
                                 if (mposition < chatMessageList.size() && mposition >= 0) {
                                     try {
-                                        downloadRecordFileOrPlay(terminalMessage, onCompletionListener);
+                                        if(type == PlayType.PLAY_PRIVATE_CALL.getCode()){
+                                            myHandler.post(() -> {
+                                                terminalMessage.isDownLoadAudio = true;
+                                                temporaryAdapter.notifyItemChanged(postion);
+                                            });
+                                            MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
+                                        }else{
+                                            downloadRecordFileOrPlay(terminalMessage, onCompletionListener);
+                                        }
                                     } catch (IndexOutOfBoundsException e) {
                                         logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
                                     }
@@ -547,6 +571,27 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         });
         autoPlay(mposition+1);
     };
+
+    /**
+     * 录音播放完成的消息
+     */
+    private IAudioPlayComplateHandler audioPlayComplateHandler = new IAudioPlayComplateHandler() {
+        @Override
+        public void handle() {
+            myHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    MyApplication.instance.isPlayVoice = false;
+                    isSameItem = true;
+//                    logger.error("录音播放完成的消息：" + chatMessageList.get(mposition).toString());
+                    temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+                    setSmoothScrollToPosition(mposition);
+                    temporaryAdapter.notifyDataSetChanged();
+                }
+            });
+        }
+    };
+
     private boolean isReject=false;
     //自动播放下一条语音
     private void autoPlay(int index){
@@ -558,7 +603,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
             }else {
                 if (chatMessageList.get(index).messageBody.containsKey(JsonParam.UNREAD) &&
                         chatMessageList.get(index).messageBody.getBooleanValue(JsonParam.UNREAD) && !MediaManager.isPlaying() && !isReject) {
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayIndividualChatVoiceHandler.class, chatMessageList.get(index), index);
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayIndividualChatVoiceHandler.class, chatMessageList.get(index), index, PlayType.PLAY_AUDIO.getCode());
                 } else {
                     logger.error("点击消息以下的未读消息已播放完成");
                 }
@@ -572,7 +617,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     /**
      * 开始播放或停止播放的回调
      */
-    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = (resultCode, resultDes) -> {
+    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = (resultCode, resultDes,message) -> {
         logger.info("ReceiveMultimediaMessageCompleteHandler   "+resultCode+"/"+resultDes);
         myHandler.post(() -> {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
@@ -583,6 +628,9 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                     isSameItem = false;
                     MyApplication.instance.isPlayVoice = true;
                 }
+                if(message!=null&&message.messageId!=0){
+                    message.isDownLoadAudio = false;
+                }
                 Collections.sort(chatMessageList);
                 if (temporaryAdapter != null) {
                     temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
@@ -592,6 +640,12 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
             } else {
                 logger.info("开始播放或停止播放的回调" + resultDes);
                 ToastUtil.showToast(IndividualNewsActivity.this, resultDes);
+                if(message!=null){
+                    message.isDownLoadAudio = false;
+                    if (temporaryAdapter != null) {
+                        temporaryAdapter.notifyDataSetChanged();
+                    }
+                }
             }
         });
     };
@@ -642,7 +696,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         isReject=true;
         MediaManager.release();
         MyApplication.instance.isPlayVoice=true;
-        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, 0, "");
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, 0, "",new TerminalMessage());
     });
 
     /**
@@ -659,7 +713,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
             isReject=true;
             MediaManager.release();
             MyApplication.instance.isPlayVoice=true;
-            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, 0, "");
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, 0, "",new TerminalMessage());
         });
     };
 

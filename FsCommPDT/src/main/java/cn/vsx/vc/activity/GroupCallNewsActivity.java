@@ -998,7 +998,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     /**
      * 开始播放或停止播放的回调
      */
-    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = (resultCode, resultDes) -> {
+    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = (resultCode, resultDes,message) -> {
         logger.error("开始播放或者停止播放的回调");
         myHandler.post(() -> {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {

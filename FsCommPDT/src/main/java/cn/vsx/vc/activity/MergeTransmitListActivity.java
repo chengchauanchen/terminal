@@ -283,7 +283,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
     /**
      * 开始播放或停止播放的回调
      */
-    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = (resultCode, resultDes) -> {
+    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = (resultCode, resultDes,message) -> {
         logger.info("ReceiveMultimediaMessageCompleteHandler   "+resultCode+"/"+resultDes);
         handler.post(() -> {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {

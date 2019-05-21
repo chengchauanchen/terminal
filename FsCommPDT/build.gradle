@@ -3,7 +3,6 @@ Properties props = new Properties()
 props.load(project.rootProject.file('local.properties').newDataInputStream())
 
 android {
-
     compileSdkVersion 26
     buildToolsVersion '28.0.3'
     flavorDimensions "default"
@@ -36,11 +35,15 @@ android {
     }
 
     buildTypes {
-
         release {
-            debuggable false
             minifyEnabled true
             shrinkResources true//去掉不用资源
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            minifyEnabled false
+            shrinkResources false//去掉不用资源
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
             signingConfig signingConfigs.release
         }

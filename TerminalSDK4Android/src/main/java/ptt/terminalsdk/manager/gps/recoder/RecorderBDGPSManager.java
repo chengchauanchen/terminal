@@ -15,7 +15,8 @@ import ptt.terminalsdk.manager.gps.MyLocationListener;
 
 public class RecorderBDGPSManager {
     public Application application;
-    public RecorderBDGPSManager(Application application){
+
+    public RecorderBDGPSManager(Application application) {
         this.application = application;
     }
 
@@ -23,16 +24,17 @@ public class RecorderBDGPSManager {
     public Logger logger = Logger.getLogger(getClass());
 
     public MyRecorderLocationListener myListener = new MyRecorderLocationListener();
+
     //BDAbstractLocationListener为7.2版本新增的Abstract类型的监听接口，原有BDLocationListener接口暂时同步保留。具体介绍请参考后文中的说明
-    public void init(int span){
-        logger.info(LocationManager.TAG+"BDGPSManager初始化了");
+    public void init(int span) {
+        logger.info(LocationManager.TAG + "BDGPSManager初始化了");
         mLocationClient = new LocationClient(application);
         //声明LocationClient类
         mLocationClient.registerLocationListener(myListener);
         initLocation(span);
     }
 
-    private void initLocation(int span){
+    private void initLocation(int span) {
 
         LocationClientOption option = new LocationClientOption();
         option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
@@ -67,17 +69,17 @@ public class RecorderBDGPSManager {
     }
 
 
-
     /**
      * 获取位置信息
+     *
      * @param uploadInterval
      */
-    public void requestLocationInfo(long uploadInterval){
+    public void requestLocationInfo(long uploadInterval) {
         int interval = (int) uploadInterval;
-        if(mLocationClient == null){
-            init((interval>=0)?interval:0);
-        }else{
-            initLocation((interval>=0)?interval:0);
+        if (mLocationClient == null) {
+            init((interval >= 0) ? interval : 0);
+        } else {
+            initLocation((interval >= 0) ? interval : 0);
         }
         mLocationClient.start();
     }
@@ -85,8 +87,8 @@ public class RecorderBDGPSManager {
     /**
      * 去掉监听事件
      */
-    public void removelocationListener(){
-        if (mLocationClient!=null) {
+    public void removelocationListener() {
+        if (mLocationClient != null) {
             mLocationClient.unRegisterLocationListener(myListener);
         }
     }
@@ -94,10 +96,10 @@ public class RecorderBDGPSManager {
     /**
      * 停止定位
      */
-    public void stop(){
-        logger.info(LocationManager.TAG+"BDGPSManager销毁了");
+    public void stop() {
+        logger.info(LocationManager.TAG + "BDGPSManager销毁了");
 //        removelocationListener();
-        if(mLocationClient!=null){
+        if (mLocationClient != null) {
             mLocationClient.stop();
         }
 

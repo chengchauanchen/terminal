@@ -38,9 +38,10 @@ public class MyRecorderLocationListener extends BDAbstractLocationListener {
         if (longitude != 0 && latitude != 0) {
             //停止GPS定位的监听
             MyTerminalFactory.getSDK().getRecorderGPSManager().removelocationListener();
+
+            //到LocationManager中分发位置信息
+            MyTerminalFactory.getSDK().getLocationManager().dispatchCommitLocation(bdTransformLocation(location,longitude,latitude));
         }
-        //到LocationManager中分发位置信息
-        MyTerminalFactory.getSDK().getLocationManager().dispatchCommitLocation(bdTransformLocation(location,longitude,latitude));
     }
 
     public double getBDLongitude(BDLocation location) {

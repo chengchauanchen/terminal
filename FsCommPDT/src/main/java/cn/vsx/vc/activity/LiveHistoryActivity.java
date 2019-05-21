@@ -149,6 +149,7 @@ public class LiveHistoryActivity extends BaseActivity implements View.OnClickLis
             paramsMap.put("id",getCallId(terminalMessage));
             logger.info("获取视频回放url："+url);
             String result = TerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
+//            result = "{\"msg\":\"success\",\"code\":0,\"data\":{\"list\":[{\"name\":\"88045832_6540978884229379386\",\"start_time\":\"20190517154511\",\"duration\":\"13.598\",\"hls\":\"/hls/88045832_6540978884229379386/20190517/20190517154511/88045832_6540978884229379386_record.m3u8\"}]}}";
             logger.info("获取视频回放结果："+result);
             if(!Util.isEmpty(result)){
                 JSONObject jsonResult = JSONObject.parseObject(result);
