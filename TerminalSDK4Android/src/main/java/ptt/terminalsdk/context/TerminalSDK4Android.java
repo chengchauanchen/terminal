@@ -977,13 +977,14 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			bindService = application.bindService(messageService, messageServiceConn, BIND_AUTO_CREATE);
 			logger.info("开始绑定服务MessageService"+bindService);
 		}
-		//IP、端口存在的话，启动一下，连到信令服务
 		if (uuidByte.length != 0 && accessServerIp.length() != 0 && accessServerPort != 0) {
 			messageService.putExtra("uuid", uuidByte);
 			messageService.putExtra("accessServerIp", accessServerIp);
 			messageService.putExtra("accessServerPort", accessServerPort);
 			application.startService(messageService);
 			logger.info("开始启动服务MessageService, 连接到信令服务");
+		}else {
+			logger.error("接入服务地址不对！！不能出现这种情况");
 		}
 
 	}
@@ -1012,7 +1013,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private ServiceConnection messageServiceConn = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			logger.error("messageServiceConn服务连接成功");
+			logger.error("MessageService连接成功");
 			messageService = Stub.asInterface(service);
 
 			clientChannel = null;
@@ -1022,7 +1023,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			logger.error("mssageServiceConn服务断开连接");
+			logger.error("MessageService服务断开连接");
 			connectToServer();
 		}
 	};

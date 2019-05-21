@@ -318,9 +318,9 @@ public class ReceiveHandlerService extends Service{
             int code = TerminalFactory.getSDK().getTerminalStateManager().openFunction(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.IDLE);
             if(code == BaseCommonCode.SUCCESS_CODE){
                 //将个呼状态机移动到响铃中
-                if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.RINGING)) {
-                    TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.RINGING);
-                }
+//                if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.RINGING)) {
+//                    TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.RINGING);
+//                }
                 MyApplication.instance.linphoneCall = linphoneCall;
                 Intent intent = new Intent(ReceiveHandlerService.this,ReceiveVoipService.class);
                 LinphoneAddress from = linphoneCall.getCallLog().getFrom();

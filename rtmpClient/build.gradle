@@ -35,3 +35,11 @@ dependencies {
     implementation "com.android.support:support-v4:$support_version"
 //    compile 'com.android.support:appcompat-v7:26.1.0'
 }
+//task makeJar(type: Copy){
+//    delete 'build/libs/rtmpClient.jar'
+//    from('build/intermediates/bundles/release/')
+//    into('build/outputs')
+//    include('classes.jar')
+//    rename('classes.jar','rtmpClient.jar')
+//}
+//makeJar.dependsOn(build)

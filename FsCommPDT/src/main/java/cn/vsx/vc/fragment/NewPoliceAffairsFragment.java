@@ -9,11 +9,9 @@ import android.support.v7.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
-import cn.vsx.hamster.terminalsdk.model.NewMemberResponse;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFrequentMemberHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdatePoliceMemberHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -93,23 +91,10 @@ public class NewPoliceAffairsFragment extends BaseFragment {
     @Override
     public void initData() {
         mActivity= (NewMainActivity) getActivity();
-        NewMemberResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getPhoneMemeberInfo();
-        if(null != mMemberResponse){
-            initFrequentContacts();
-            CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
-            catalogNames.add(memberCatalogBean);
-            List<Department> deptList = mMemberResponse.getDeptList();
-            List<Account> accountList = mMemberResponse.getAccountDtos();
-            updateData(deptList,accountList);
-            myHandler.post(()->{
-                mDatas.clear();
-                mDatas.addAll(allFrequentContacts);
-                mDatas.addAll(accountAndDeps);
-                if(mContactAdapter != null){
-                    mContactAdapter.notifyDataSetChanged();
-                }
-            });
-        }
+        TerminalFactory.getSDK().getConfigManager().updataPhoneMemberInfo();
+        initFrequentContacts();
+        CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+        catalogNames.add(memberCatalogBean);
     }
 
     private void updateFrequentContacts(){
@@ -154,10 +139,10 @@ public class NewPoliceAffairsFragment extends BaseFragment {
     private void updateData(List<Department> deptList,List<Account> accountList){
         accountAndDeps.clear();
         //添加标题
-        ContactItemBean<Object> Title = new ContactItemBean<>();
-        Title.setType(Constants.TYPE_TITLE);
-        Title.setBean(new Object());
-        accountAndDeps.add(Title);
+        ContactItemBean<Object> title = new ContactItemBean<>();
+        title.setType(Constants.TYPE_TITLE);
+        title.setBean(new Object());
+        accountAndDeps.add(title);
         if(null != accountList && !accountList.isEmpty()){
             //添加成员
             for(Account account : accountList){

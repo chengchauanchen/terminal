@@ -241,19 +241,7 @@
                 android:layout_marginTop="@dimen/y15"
                 android:gravity="center_horizontal"
                 android:weightSum="10">
-
-
-                <Button
-                    android:visibility="gone"
-                    android:id="@+id/btn_reauth"
-                    android:layout_width="0dp"
-                    android:layout_height="@dimen/y32"
-                    android:layout_weight="8"
-                    android:background="@drawable/regist_button_shape"
-                    android:text="@string/reauth_button"
-                    android:textSize="@dimen/sp_18"
-                    android:textColor="@color/regist_button" />
-
+                
             </LinearLayout>
 
 

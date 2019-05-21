@@ -39,7 +39,6 @@ import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
@@ -107,7 +106,7 @@ public class LockScreenActivity extends BaseActivity {
     private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = (resultCode, resultDesc, isRegisted) -> {
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {
             if(isRegisted){
-                TerminalFactory.getSDK().getAuthManagerTwo().login();
+//                TerminalFactory.getSDK().getAuthManagerTwo().login();
                 logger.info("信令服务器通知NotifyForceRegisterMessage消息，在LockScreenActivity中登录了");
             }else {
                 runOnUiThread(() -> LockScreenActivity.this.finish());

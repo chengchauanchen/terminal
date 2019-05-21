@@ -69,10 +69,7 @@ public class VoipPhoneActivity extends BaseActivity{
         //将状态机至于正在个呼状态
         int code = TerminalFactory.getSDK().getTerminalStateManager().openFunction(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.IDLE);
         if(code == BaseCommonCode.SUCCESS_CODE){
-            if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.RINGING)){
-                //将个呼状态机移动到响铃状态
-                TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.RINGING);
-            }
+//            MyTerminalFactory.getSDK().getVoipCallManager().calling();
         }else {
             finish();
             return;
@@ -123,15 +120,15 @@ public class VoipPhoneActivity extends BaseActivity{
         mHandler.post(new Runnable(){
             @Override
             public void run(){
-                if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().getCurrentState() == IndividualCallState.RINGING){
-                    if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.SPEAKING)){
-                        //将状态机移动到说话状态
-                        TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.SPEAKING);
-                        voipCallRequest.setVisibility(View.GONE);
-                        voipCallSpeaking.setVisibility(View.VISIBLE);
-                        ictVspeakingTimeSpeaking.onStart();
-                    }
-                }
+//                if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().getCurrentState() == IndividualCallState.RINGING){
+//                    if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.SPEAKING)){
+//                        //将状态机移动到说话状态
+//                        TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.SPEAKING);
+//                        voipCallRequest.setVisibility(View.GONE);
+//                        voipCallSpeaking.setVisibility(View.VISIBLE);
+//                        ictVspeakingTimeSpeaking.onStart();
+//                    }
+//                }
             }
         });
 

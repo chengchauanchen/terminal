@@ -1063,11 +1063,11 @@ public class TalkbackFragment extends BaseFragment {
         } else {
             iv_environment_monitor.setVisibility(View.GONE);
         }
-        if (MyTerminalFactory.getSDK().isRegisted()) {
+//        if (MyTerminalFactory.getSDK().isRegisted()) {
             setCurrentGroupView();
-        } else {
-            waitAndFinish();
-        }
+//        } else {
+//            waitAndFinish();
+//        }
         setChangeGroupView();
 
         speechSynthesizer = new SpeechSynthesizer(context, "holder", speechSynthesizerListener);

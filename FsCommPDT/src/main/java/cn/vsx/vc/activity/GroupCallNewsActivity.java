@@ -736,7 +736,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     @Override
     public void postVideo() {
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,
-                MyDataUtil.getPushInviteMemberData(DataUtil.getGroupByGroupNoFromAllGroup(userId).getUniqueNo(), ReceiveObjectMode.GROUP.toString()) ,true);
+                MyDataUtil.getPushInviteMemberData(userId, ReceiveObjectMode.GROUP.toString()) ,true);
     }
 
     /**

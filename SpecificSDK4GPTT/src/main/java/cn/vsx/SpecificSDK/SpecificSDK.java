@@ -282,6 +282,7 @@ public class SpecificSDK extends TerminalSDK4Android {
         specificSDK = new SpecificSDK(application);
         MyTerminalFactory.getSDK().setLoginFlag();
         setAppKey(application);
+        MyTerminalFactory.getSDK().start();
     }
 
     private static void setAppKey(Application application){

@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallStateMachine;
 import cn.vsx.hamster.terminalsdk.model.CallRecord;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -35,7 +36,12 @@ import okio.Okio;
 public class VoipManager{
     private Logger logger = Logger.getLogger(getClass());
     private static final OkHttpClient mOkHttpClient = new OkHttpClient();
+    private final IndividualCallStateMachine individualCallStateMachine;
 
+    public VoipManager(){
+
+        individualCallStateMachine = new IndividualCallStateMachine();
+    }
     /**
      * 下载录音文件
      *
@@ -168,4 +174,24 @@ public class VoipManager{
     public void clearCache(){
         EasyLinphone.getLC().clearAuthInfos();
     }
+
+//    public void moveToRing(){
+//        if(individualCallStateMachine.moveToState(IndividualCallState.RINGING)){
+//            //将个呼状态机移动到响铃状态
+//            TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.RINGING);
+//        }
+//    }
+
+//    public void moveToSpeaking(){
+//
+//        if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().getCurrentState() == IndividualCallState.RINGING){
+//            if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.SPEAKING)){
+//                //将状态机移动到说话状态
+//                TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.SPEAKING);
+//                voipCallRequest.setVisibility(View.GONE);
+//                voipCallSpeaking.setVisibility(View.VISIBLE);
+//                ictVspeakingTimeSpeaking.onStart();
+//            }
+//        }
+//    }
 }

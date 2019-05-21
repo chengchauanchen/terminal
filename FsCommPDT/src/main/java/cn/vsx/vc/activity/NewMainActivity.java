@@ -204,11 +204,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity: isRegisted" + isRegisted);
                 if (isRegisted) {//注册过，在后台登录，session超时也走这
-                    if(MyTerminalFactory.getSDK().isServerConnected()){
-                        TerminalFactory.getSDK().getAuthManagerTwo().login();
-                    }
                     logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity中登录了");
-//                    MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
                 } else {//没注册过，关掉主界面，去注册界面
                     startActivity(new Intent(NewMainActivity.this, RegistActivity.class));
                     NewMainActivity.this.finish();
@@ -259,7 +255,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
         @Override
         public void handler(final boolean connected) {
-            logger.info("主界面收到服务是否连接的通知ServerConnectionEstablishedHandler" + connected);
+            logger.info("主界面收到服务是否连接的通知ReceiveOnLineStatusChangedHandler" + connected);
             if (!connected) {
                 myHandler.post(new Runnable(){
                     @Override

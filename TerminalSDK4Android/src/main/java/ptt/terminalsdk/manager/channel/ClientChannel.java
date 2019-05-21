@@ -75,7 +75,8 @@ public class ClientChannel extends AbsClientChannel {
 					}
 				});
 			} catch (Exception e) {
-				e.printStackTrace();
+				logger.error("发送命令失败！！"+e);
+				handler.handler(false, null);
 			}
 
 			byte[] bytes = PTTMsgCodec.INSTANCE.getEncode().encodeMessage(message, messageFun);
@@ -111,6 +112,8 @@ public class ClientChannel extends AbsClientChannel {
 			}
 		} catch (RemoteException e) {
 			e.printStackTrace();
+			//start失败，重新start，直到成功
+			start();
 		}
 	}
 

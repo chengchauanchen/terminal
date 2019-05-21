@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import de.mindpipe.android.logging.log4j.LogConfigurator;
 import ptt.terminalsdk.IMessageService;
 import ptt.terminalsdk.IMessageService.Stub;
@@ -32,6 +34,7 @@ public class MessageService extends Service {
     private MyUDPClient myUDPClient;
     private String accessServerIpTemp;
     private int accessServerPortTemp;
+    private Handler mHandler = new Handler();
     private static final String TAG = "MessageService--";
 
     @Override
@@ -76,15 +79,32 @@ public class MessageService extends Service {
                     accessServerIpTemp = accessServerIp;
                     accessServerPortTemp = accessServerPort;
                 }
+
                 myUDPClient.setUuid(uuid);
                 myUDPClient.setServerIp(accessServerIp);
                 myUDPClient.setServerPort(accessServerPort);
-                myUDPClient.start();
-                logger.info("MessageService连接到信令服务器，调用了UDPClientBase的start()");
+                //延时启动，否则有时注册连接的通知还没启动
+                mHandler.postDelayed(new Runnable(){
+                    @Override
+                    public void run(){
+                        try{
+                            myUDPClient.start();
+                        }catch(Exception e){
+                            e.printStackTrace();
+                            logger.error("连接到信令服务器时，出现异常", e);
+                            TerminalFactory.getSDK().connectToServer();
+                        }
+                        logger.info("MessageService连接到信令服务器，调用了UDPClientBase的start()");
+                    }
+                },200);
+            }else {
+                logger.error("接入服务地址不对！！不能出现这种情况！");
             }
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("连接到信令服务器时，出现异常", e);
+            //连接失败继续重连
+            TerminalFactory.getSDK().connectToServer();
         }
         return START_STICKY;
     }

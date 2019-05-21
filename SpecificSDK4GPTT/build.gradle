@@ -43,3 +43,12 @@ dependencies {
         exclude module: 'appcompat-v7'
     }
 }
+
+//task makeJar(type: Copy){
+//    delete 'build/libs/SpecificSDK4GPTT.jar'
+//    from('build/intermediates/bundles/release/')
+//    into('build/outputs')
+//    include('classes.jar')
+//    rename('classes.jar','SpecificSDK4GPTT.jar')
+//}
+//makeJar.dependsOn(build)

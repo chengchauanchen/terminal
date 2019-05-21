@@ -19,7 +19,6 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.GroupAndDepartment;
-import cn.vsx.hamster.terminalsdk.model.MemberGroupResponse;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyAboutGroupChangeMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
@@ -210,22 +209,9 @@ public class NewGroupFragment extends BaseFragment{
     @Override
     public void initData(){
         mActivity = (NewMainActivity) getActivity();
-
+        TerminalFactory.getSDK().getConfigManager().updateAllGroups();
         CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
         catalogNames.add(groupCatalogBean);
-        MemberGroupResponse tempGroupResponse = TerminalFactory.getSDK().getConfigManager().getTempGroupResponse();
-        if(null != tempGroupResponse){
-            List<Department> deptList = tempGroupResponse.getDeptList();
-            List<Group> groupList = tempGroupResponse.getGroupList();
-            updateData(-1,"临时组",deptList,groupList);
-        }
-
-        MemberGroupResponse depGroupResponse = TerminalFactory.getSDK().getConfigManager().getDepGroupResponse();
-        if(null != depGroupResponse){
-            List<Department> deptList = depGroupResponse.getDeptList();
-            List<Group> groupList = depGroupResponse.getGroupList();
-            updateData(TerminalFactory.getSDK().getParam(Params.DEP_ID,0),TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),deptList,groupList);
-        }
     }
 
     public synchronized void updateData(int depId, String depName, List<Department> departments, List<Group> groups){

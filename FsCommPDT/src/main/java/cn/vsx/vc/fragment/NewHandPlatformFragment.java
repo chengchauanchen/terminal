@@ -8,14 +8,11 @@ import android.support.v7.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
-import cn.vsx.hamster.terminalsdk.model.NewPDTResponse;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdatePDTMemberHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdatePDTMemberHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
@@ -51,18 +48,12 @@ public class NewHandPlatformFragment extends BaseFragment {
     private List<ContactItemBean> lastGroupDatas=new ArrayList<>();
 
 
-    private ReceivegUpdatePDTMemberHandler receivegUpdatePDTMemberHandler = new ReceivegUpdatePDTMemberHandler(){
+    private ReceiveUpdatePDTMemberHandler receiveUpdatePDTMemberHandler = new ReceiveUpdatePDTMemberHandler(){
         @Override
         public void handler(int depId,String depName,List<Department> departments, List<Member> members){
             updateData(depId,depName,departments,members);
         }
     };
-
-    //更新成员信息
-    private ReceiveUpdatePDTMemberHandler receiveUpdatePDTMemberHandler = PDTMember -> myHandler.post(() -> {
-
-
-    });
 
     /**
      * 更新配置信息
@@ -97,15 +88,9 @@ public class NewHandPlatformFragment extends BaseFragment {
     @Override
     public void initData() {
         mActivity = (NewMainActivity) getActivity();
-        NewPDTResponse mMemberResponse = TerminalFactory.getSDK().getConfigManager().getPDTMemeberInfo();
-        if(mMemberResponse ==null){
-            return;
-        }
-        List<Department> deptList = mMemberResponse.getDeptList();
-        List<Member> memberList = mMemberResponse.getMemberDtoList();
+        TerminalFactory.getSDK().getConfigManager().updataPDTMemberInfo();
         CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
         catalogNames.add(memberCatalogBean);
-        updateData(TerminalFactory.getSDK().getParam(Params.DEP_ID,0),TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),deptList,memberList);
     }
 
 
@@ -147,7 +132,7 @@ public class NewHandPlatformFragment extends BaseFragment {
     @Override
     public void initListener() {
 
-        MyTerminalFactory.getSDK().registReceiveHandler(receivegUpdatePDTMemberHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdatePDTMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdatePDTMemberHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         mContactAdapter.setCatalogItemClickListener((view, position) -> {
@@ -204,7 +189,7 @@ public class NewHandPlatformFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receivegUpdatePDTMemberHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdatePDTMemberHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdatePDTMemberHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
 
