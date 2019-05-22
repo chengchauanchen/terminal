@@ -30,6 +30,8 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ToastUtils;
+
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -160,9 +162,15 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     }
                 }else{
                     if(!isRegisted){
-                        changeProgressMsg(getResources().getString(R.string.please_regist_account));
+                        ToastUtils.showShort(R.string.please_regist_account);
+                        ll_regist.setVisibility(View.VISIBLE);
+                        hideProgressDialog();
                     }else{
                         changeProgressMsg(resultDesc);
+                        myHandler.postDelayed(()->{
+                            ll_regist.setVisibility(View.VISIBLE);
+                            hideProgressDialog();
+                        },2000);
                     }
                 }
             });

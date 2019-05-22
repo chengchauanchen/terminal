@@ -74,6 +74,7 @@ import cn.vsx.hamster.common.StopGroupCallReason;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Group;
@@ -1115,6 +1116,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             }catch(SDKException e){
                 e.printStackTrace();
             }
+
+        }
+        //不是平台线上包打开自动更新
+        String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
+        if(!AuthManagerTwo.POLICESTORE.equals(apkType)){
             //版本自动更新检测
             if (MyTerminalFactory.getSDK().getParam(Params.IS_AUTO_UPDATE, false) && !MyApplication.instance.isUpdatingAPP) {
                 updateManager = new UpdateManager(NewMainActivity.this);
