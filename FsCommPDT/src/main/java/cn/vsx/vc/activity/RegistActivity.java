@@ -53,6 +53,7 @@ import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
 import cn.vsx.hamster.terminalsdk.manager.auth.LoginModel;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetNameByOrgHandler;
@@ -790,11 +791,27 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         //进入注册界面了，先判断有没有注册服务地址
         String authUrl = TerminalFactory.getSDK().getParam(Params.IDENTITY_URL, "");
         if(TextUtils.isEmpty(authUrl)){
-            //没用注册服务地址，去探测地址
-            TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
+            //平台包的话直接用AuthManager中的地址
+            String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
+            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)){
+                String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
+                if(defaultAddress.length>=2){
+                    int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0],defaultAddress[1]);
+                    if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                        changeProgressMsg(getString(R.string.authing));
+                    }else {
+                        //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                    }
+                }else {
+                    //没有注册服务地址，去探测地址
+                    TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
+                }
+            }else {
+                //没有注册服务地址，去探测地址
+                TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
+            }
         }else {
             //有注册服务地址，去认证
-
             int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP,""),TerminalFactory.getSDK().getParam(Params.REGIST_PORT,""));
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
                 changeProgressMsg(getString(R.string.authing));
