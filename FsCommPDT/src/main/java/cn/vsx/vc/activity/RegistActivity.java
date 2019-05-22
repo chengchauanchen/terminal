@@ -396,8 +396,11 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_invitation_code_not_correct));
                 } else {
                     if (s.length() == 6) {//长度是六的时候，请求名字
-                        logger.info("邀请码输入六位完成；开始到服务器拿名字");
-                        TerminalFactory.getSDK().getAuthManagerTwo().getNameByOrg(s + "");
+                        String registUrl = TerminalFactory.getSDK().getParam(Params.REGIST_URL,"");
+                        if(!TextUtils.isEmpty(registUrl)){
+                            logger.info("邀请码输入六位完成；开始到服务器拿名字");
+                            TerminalFactory.getSDK().getAuthManagerTwo().getNameByOrg(s + "");
+                        }
                     }
                 }
             }
@@ -796,7 +799,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     private void start() {
-        //进入注册界面了，先判断有没有注册服务地址
+        //进入注册界面了，先判断有没有认证地址
         String authUrl = TerminalFactory.getSDK().getParam(Params.IDENTITY_URL, "");
         if(TextUtils.isEmpty(authUrl)){
             //平台包的话直接用AuthManager中的地址
