@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.antfortune.freeline'
 Properties props = new Properties()
 props.load(project.rootProject.file('local.properties').newDataInputStream())
 

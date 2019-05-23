@@ -271,11 +271,9 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType){
             myHandler.post(()->{
-                if(isAdd && isLocked|| isScan){
+                if(isAdd && isLocked){
                     //加入临时租，被锁定
                     MyApplication.instance.isLocked = true;
-                    tv_current_group.setText(tempGroupName);
-                    tv_current_folder.setText(getString(R.string.text_temporary_group));
                 }
                 if(!isAdd){
                     MyApplication.instance.isLocked = false;
@@ -1176,9 +1174,10 @@ public class TalkbackFragment extends BaseFragment {
 
         MyApplication.instance.isPttViewPager = true;
         online_number = MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size();
-
+        tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members),online_number));
         startTimerToLock();
         setVideoIcon();//设置视频回传上报相关图标
+
 //        setScanGroupIcon();//设置组扫描相关图标
     }
 

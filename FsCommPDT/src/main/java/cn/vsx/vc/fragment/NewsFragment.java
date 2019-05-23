@@ -1318,17 +1318,19 @@ public class NewsFragment extends BaseFragment {
         @Override
         public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType){
             mHandler.post(()->{
-                if(isAdd){
-                    if(isLocked || isSwitch || isScan){
-                        mHandler.post(()-> setting_group_name.setText(tempGroupName));
-                    }
+                if(!TempGroupType.ACTIVITY_TEAM_GROUP.toString().equals(tempGroupType)){
+                    if(isAdd){
+                        if(isLocked || isSwitch || isScan){
+                            mHandler.post(()-> setting_group_name.setText(tempGroupName));
+                        }
 
-                }else {
-                    int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                    mHandler.post(()-> setting_group_name.setText(DataUtil.getGroupName(currentGroupId)));
-                    //合成作战组处理完成后，刷新完成列表
-                    if (TempGroupType.TO_HELP_COMBAT.toString().equals(tempGroupType)) {
-                        saveHistoryHelpCombatMessageToSql(tempGroupNo);
+                    }else {
+                        int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                        mHandler.post(()-> setting_group_name.setText(DataUtil.getGroupName(currentGroupId)));
+                        //合成作战组处理完成后，刷新完成列表
+                        if (TempGroupType.TO_HELP_COMBAT.toString().equals(tempGroupType)) {
+                            saveHistoryHelpCombatMessageToSql(tempGroupNo);
+                        }
                     }
                 }
             });

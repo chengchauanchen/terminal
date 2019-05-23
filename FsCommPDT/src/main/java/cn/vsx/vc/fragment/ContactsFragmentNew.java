@@ -20,6 +20,7 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
+import cn.vsx.hamster.common.TempGroupType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
@@ -309,13 +310,15 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         @Override
         public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType){
             mHandler.post(()->{
-                if(isAdd ){
-                    if(isLocked || isSwitch||isScan){
-                        setting_group_name.setText(tempGroupName);
+                if(!TempGroupType.ACTIVITY_TEAM_GROUP.toString().equals(tempGroupType)){
+                    if(isAdd ){
+                        if(isLocked || isSwitch||isScan){
+                            setting_group_name.setText(tempGroupName);
+                        }
+                    }else {
+                        int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                        setting_group_name.setText(DataUtil.getMemberByMemberNo(currentGroupId).getName());
                     }
-                }else {
-                    int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                    setting_group_name.setText(DataUtil.getMemberByMemberNo(currentGroupId).getName());
                 }
             });
         }
