@@ -45,6 +45,7 @@ public class HWConsumer extends Thread implements VideoConsumer{
 
     @Override
     public void onVideoStart(int width, int height) throws IOException{
+        Log.e(TAG,"onVideoStart");
         newFormat = null;
         this.mWidth = width;
         this.mHeight = height;
@@ -185,6 +186,7 @@ public class HWConsumer extends Thread implements VideoConsumer{
 
     @Override
     public void onVideoStop() {
+        Log.e(TAG,"onVideoStop");
         do {
             newFormat = null;
             mVideoStarted = false;

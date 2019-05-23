@@ -115,6 +115,7 @@ public class PhonePushService extends BaseService{
     protected void initWindow() {
         super.initWindow();
         //如果屏幕宽度小于高度就开启横屏
+//        mSvLive.setRotation(90.0f);
         if(screenWidth < screenHeight){
             layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
         }
@@ -158,8 +159,8 @@ public class PhonePushService extends BaseService{
 
 
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
-        mSvLive.setOnClickListener(svOnClickListener);
-//        mSvLive.setOnTouchListener(svOnTouchListener);
+//        mSvLive.setOnClickListener(svOnClickListener);
+        mSvLive.setOnTouchListener(svOnTouchListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
         mIvLiveAddmember.setOnClickListener(inviteMemberOnClickListener);
         mLlLiveHangupTotal.setOnClickListener(hangUpOnClickListener);
@@ -205,11 +206,17 @@ public class PhonePushService extends BaseService{
 
     @Override
     protected void showPopMiniView(){
+        layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
         windowManager.removeView(rootView);
         windowManager.addView(rootView, layoutParams);
+//        windowManager.updateViewLayout(rootView,layoutParams);
         hideAllView();
         MyApplication.instance.isMiniLive = true;
         mPopupMiniLive.setVisibility(View.VISIBLE);
+        mSvLivePop.setRotation(90.0f);
+//        mSvLivePop.getLayoutParams().width = DensityUtil.dip2px(getApplicationContext(),90);
+//        mSvLivePop.getLayoutParams().height = DensityUtil.dip2px(getApplicationContext(),160);
+//        mSvLivePop.requestLayout();
     }
 
     @Override
@@ -245,8 +252,10 @@ public class PhonePushService extends BaseService{
         }
     }
 
+    @Override
     protected void initBroadCastReceiver(){}
 
+    @Override
     protected void initData(){
         listResolution = new ArrayList<>(Arrays.asList("1920x1080", "1280x720", "640x480", "320x240"));
         watchOrExitMembers = new ArrayList<>();
@@ -527,9 +536,9 @@ public class PhonePushService extends BaseService{
                     float newDist = getFingerSpacing(event);
                     if(Math.abs(newDist-oldDist) > 5f){
                         if (newDist > oldDist) {
-                            handleZoom(true);
-                        } else if (newDist < oldDist) {
                             handleZoom(false);
+                        } else if (newDist < oldDist) {
+                            handleZoom(true);
                         }
                         oldDist = newDist;
                     }
@@ -603,6 +612,9 @@ public class PhonePushService extends BaseService{
                 int newOffsetX = layoutParams.x;
                 int newOffsetY = layoutParams.y;
                 if(Math.abs(newOffsetX - oddOffsetX) <= 30 && Math.abs(newOffsetY - oddOffsetY) <= 30){
+                    if(screenWidth < screenHeight){
+                        layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                    }
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverCloseKeyBoardHandler.class);
                     windowManager.removeView(rootView);
                     windowManager.addView(rootView,layoutParams1);
@@ -635,6 +647,9 @@ public class PhonePushService extends BaseService{
         if(null != mMediaStream && mMediaStream.isStreaming()){
             camera.autoFocus(null);//屏幕聚焦
         }
+        showLivingView();
+        mHandler.removeMessages(HIDELIVINGVIEW);
+        mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
     }
 
     private void handleZoom(boolean isScale){
@@ -666,12 +681,12 @@ public class PhonePushService extends BaseService{
     private void pushStream(SurfaceTexture surface){
         if(mMediaStream != null){    // switch from background to front
             mMediaStream.stopPreview();
-            if(mMediaStream.isRecording()){
-                mMediaStream.stopRecord();
-            }
+//            if(mMediaStream.isRecording()){
+//                mMediaStream.stopRecord();
+//            }
             mMediaStream.setSurfaceTexture(surface);
             mMediaStream.startPreview();
-            startRecord();
+//            startRecord();
             if(mMediaStream.isStreaming()){
                 ToastUtil.showToast(PhonePushService.this, getResources().getString(R.string.pushing_stream));
             }

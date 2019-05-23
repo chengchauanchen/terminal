@@ -139,6 +139,7 @@ public class MediaStream {
                         //叠加水印
                         //overlay.overlay(data, txt);
                     }
+//                    logger.info(TAG+"----PreviewCallback");
                     mVC.onVideo(data, NV21);
                     mCamera.addCallbackBuffer(data);
                 }
@@ -325,7 +326,7 @@ public class MediaStream {
             if (mVC == null || audioStream == null) {
                 throw new IllegalStateException("you need to start preview before startRecord!");
             }
-
+            logger.info(TAG + "---setMuxer");
             mVC.setMuxer(mMuxer);
             audioStream.setMuxer(mMuxer);
         }
@@ -426,21 +427,21 @@ public class MediaStream {
 
             overlay = new TxtOverlay(mApplicationContext);
             try {
-                if(mVC == null){
-                    if (mSWCodec) {
-                        mVC = new SWConsumer(mApplicationContext, mEasyPusher);
-                    } else {
-                        mVC = new HWConsumer(mApplicationContext, mEasyPusher);
-                    }
 
-                    if (!rotate) {
-                        mVC.onVideoStart(previewSize.width, previewSize.height);
-                        overlay.init(previewSize.width, previewSize.height, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath(), 12);
-                    } else {
-                        mVC.onVideoStart(previewSize.height, previewSize.width);
-                        overlay.init(previewSize.height, previewSize.width, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath(), 12);
-                    }
+                if (mSWCodec) {
+                    mVC = new SWConsumer(mApplicationContext, mEasyPusher);
+                } else {
+                    mVC = new HWConsumer(mApplicationContext, mEasyPusher);
                 }
+
+                if (!rotate) {
+                    mVC.onVideoStart(previewSize.width, previewSize.height);
+                    overlay.init(previewSize.width, previewSize.height, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath(), 12);
+                } else {
+                    mVC.onVideoStart(previewSize.height, previewSize.width);
+                    overlay.init(previewSize.height, previewSize.width, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath(), 12);
+                }
+
             } catch (IOException ex) {
                 ex.printStackTrace();
             } catch (IllegalArgumentException ex) {

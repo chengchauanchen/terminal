@@ -2,9 +2,11 @@ package cn.vsx.vc.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.TypedValue;
@@ -16,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.io.File;
@@ -23,7 +26,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MemberChangeType;
@@ -746,6 +748,17 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         if (MyApplication.instance.isPlayVoice) {
             MediaManager.release();
             MyApplication.instance.isPlayVoice = false;
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == REQUEST_RECORD_CODE){
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            }else {
+                ToastUtils.showShort(R.string.no_record_perssion);
+            }
         }
     }
 

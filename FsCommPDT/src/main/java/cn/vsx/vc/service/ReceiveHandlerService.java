@@ -2,6 +2,7 @@ package cn.vsx.vc.service;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+import android.app.KeyguardManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -84,6 +85,7 @@ import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.LiveHistoryActivity;
 import cn.vsx.vc.activity.NewMainActivity;
+import cn.vsx.vc.activity.TransparentActivity;
 import cn.vsx.vc.activity.WarningMessageDetailActivity;
 import cn.vsx.vc.adapter.StackViewAdapter;
 import cn.vsx.vc.application.MyApplication;
@@ -971,6 +973,17 @@ public class ReceiveHandlerService extends Service{
      */
     @SuppressWarnings("unchecked")
     private ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler receiveNotifyEmergencyVideoLiveIncommingMessageHandler = message -> myHandler.post(() -> {
+        //判断是否锁屏
+        KeyguardManager mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        boolean flag = mKeyguardManager.inKeyguardRestrictedInputMode();
+        if(flag){
+            //                //无屏保界面
+            if(MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0) != 1){
+                Intent intent = new Intent(ReceiveHandlerService.this, TransparentActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                startActivity(intent);
+            }
+        }
         Map<TerminalState, IState<?>> currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
         //观看上报图像,个呼
         if(currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PLAYING)|| currentStateMap.containsKey(TerminalState.INDIVIDUAL_CALLING)){

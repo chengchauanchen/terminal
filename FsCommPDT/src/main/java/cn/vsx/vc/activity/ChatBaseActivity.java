@@ -137,7 +137,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private static final int CODE_FNC_REQUEST = 0x15;
     private static final int CODE_TRANSPON_REQUEST=0x16;//转发
 
-
+    protected static final int REQUEST_RECORD_CODE = 999;
     protected Logger logger = Logger.getLogger(getClass());
 
     protected List<TerminalMessage> allFailMessageList = new ArrayList<>();//当前会话所有发送失败消息集合

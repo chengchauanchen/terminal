@@ -259,6 +259,7 @@ public abstract class BaseService extends Service{
         PromptManager.getInstance().stopRing();
         MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverRemoveWindowViewHandler.class,this.getClass().getSimpleName());
         stopSelf();
+        finishTransparentActivity();
     }
 
     /**
@@ -406,5 +407,10 @@ public abstract class BaseService extends Service{
 //                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverGroupPushLiveHandler.class, messages);
             }
         });
+    }
+
+    private void finishTransparentActivity(){
+        Intent intent = new Intent("FINISH_TRANSPARENT");
+        sendBroadcast(intent);
     }
 }

@@ -1,5 +1,6 @@
 package cn.vsx.vc.record;
 
+import android.Manifest;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
@@ -7,6 +8,7 @@ import android.os.Vibrator;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileHandler;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
@@ -14,6 +16,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.ToastUtil;
 
 //录音按钮核心类，包括点击、响应、与弹出对话框交互等操作。
@@ -210,6 +213,9 @@ public class AudioRecordButton extends android.support.v7.widget.AppCompatButton
         int y = (int) event.getY();
         switch (action) {
             case MotionEvent.ACTION_DOWN:
+                if (!CheckMyPermission.selfPermissionGranted(getContext(), Manifest.permission.RECORD_AUDIO)){
+                    ToastUtils.showShort(R.string.no_record_perssion);
+                }
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
                     ToastUtil.showToast(mContext,mContext.getString(R.string.text_has_no_send_message_authority));
                     reset();

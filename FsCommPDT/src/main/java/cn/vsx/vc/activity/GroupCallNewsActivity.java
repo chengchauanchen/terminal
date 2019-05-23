@@ -6,9 +6,12 @@ import android.app.IGotaKeyHandler;
 import android.app.IGotaKeyMonitor;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -24,6 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.http.util.TextUtils;
@@ -666,6 +670,16 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         temporaryAdapter.setEnable(isEnable);
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode == REQUEST_RECORD_CODE){
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+            }else {
+                ToastUtils.showShort(R.string.no_record_perssion);
+            }
+        }
+    }
 
     /**
      * ptt按钮触摸监听
@@ -679,9 +693,15 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 //            }
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    logger.info("ACTION_DOWN，ptt按钮按下，开始组呼：" + MyApplication.instance.folatWindowPress + MyApplication.instance.volumePress);
-                    if (!MyApplication.instance.folatWindowPress && !MyApplication.instance.volumePress) {
-                        pttDownDoThing();
+                    //先判断有没有录音的权限，没有就申请
+                    if (!CheckMyPermission.selfPermissionGranted(GroupCallNewsActivity.this, Manifest.permission.RECORD_AUDIO)){
+                        ActivityCompat.requestPermissions(GroupCallNewsActivity.this,
+                                new String[] {Manifest.permission.RECORD_AUDIO},REQUEST_RECORD_CODE);
+                    }else {
+                        logger.info("ACTION_DOWN，ptt按钮按下，开始组呼：" + MyApplication.instance.folatWindowPress + MyApplication.instance.volumePress);
+                        if (!MyApplication.instance.folatWindowPress && !MyApplication.instance.volumePress) {
+                            pttDownDoThing();
+                        }
                     }
 
                     break;
@@ -691,7 +711,9 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                         logger.info("ACTION_MOVE，ptt按钮移动，停止组呼：" + MyApplication.instance.isPttPress);
 
                         if (MyApplication.instance.isPttPress) {
-                            pttUpDoThing();
+                            if (CheckMyPermission.selfPermissionGranted(GroupCallNewsActivity.this, Manifest.permission.RECORD_AUDIO)){
+                                pttUpDoThing();
+                            }
                         }
                     }
                     break;
