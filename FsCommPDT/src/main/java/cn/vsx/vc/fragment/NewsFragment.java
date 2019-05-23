@@ -50,6 +50,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeNameHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupByNoHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
@@ -336,6 +337,7 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveDownloadFinishHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGetGroupByNoHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRecallRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mNotifyRecallRecordMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverDeleteMessageHandler);
@@ -379,6 +381,7 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetGroupByNoHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeNameHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
@@ -1314,21 +1317,30 @@ public class NewsFragment extends BaseFragment {
     private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler(){
         @Override
         public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType){
-            if(isAdd){
-                if(isLocked || isSwitch){
-                    mHandler.post(()-> setting_group_name.setText(tempGroupName));
-                }
+            mHandler.post(()->{
+                if(isAdd){
+                    if(isLocked || isSwitch || isScan){
+                        mHandler.post(()-> setting_group_name.setText(tempGroupName));
+                    }
 
-            }else {
-                int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                mHandler.post(()-> setting_group_name.setText(DataUtil.getGroupName(currentGroupId)));
-                //合成作战组处理完成后，刷新完成列表
-                if (TempGroupType.TO_HELP_COMBAT.toString().equals(tempGroupType)) {
-                    saveHistoryHelpCombatMessageToSql(tempGroupNo);
+                }else {
+                    int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                    mHandler.post(()-> setting_group_name.setText(DataUtil.getGroupName(currentGroupId)));
+                    //合成作战组处理完成后，刷新完成列表
+                    if (TempGroupType.TO_HELP_COMBAT.toString().equals(tempGroupType)) {
+                        saveHistoryHelpCombatMessageToSql(tempGroupNo);
+                    }
                 }
-            }
+            });
         }
     };
+
+    private ReceiveGetGroupByNoHandler receiveGetGroupByNoHandler = group -> mHandler.post(new Runnable(){
+        @Override
+        public void run(){
+            setting_group_name.setText(group.getName());
+        }
+    });
 
     /**强制切组*/
     private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {

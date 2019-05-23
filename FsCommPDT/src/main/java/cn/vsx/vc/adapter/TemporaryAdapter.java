@@ -8,7 +8,10 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
+import android.text.Spannable;
+import android.text.SpannableString;
 import android.text.TextUtils;
+import android.text.style.ForegroundColorSpan;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -16,7 +19,6 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -25,7 +27,6 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.zectec.imageandfileselector.adapter.FaceRecognitionAdapter;
 import com.zectec.imageandfileselector.bean.FaceRecognitionBean;
 import com.zectec.imageandfileselector.bean.ImageBean;
@@ -84,7 +85,6 @@ import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
 import cn.vsx.vc.utils.ActivityCollector;
-import cn.vsx.vc.utils.AnimationsContainer;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.MyDataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -309,7 +309,17 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
                 setWarningData(terminalMessage,position,holder);
             }else if(terminalMessage.messageType == MessageType.AFFICHE.getCode()){
-                // TODO: 2019/5/9 公告
+                JSONObject messageBody = terminalMessage.messageBody;
+                String noticeContent = messageBody.getString("noticeContent");
+                String msg = String.format(activity.getString(R.string.join_temp_group), noticeContent);
+                SpannableString spanString = new SpannableString(msg);
+                //再构造一个改变字体颜色的Span
+                ForegroundColorSpan span = new ForegroundColorSpan(activity.getColor(R.color.grey_b5));
+                //将这个Span应用于指定范围的字体
+                spanString.setSpan(span, msg.length()-5, msg.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
+                holder.tv_bubble.setText(spanString);
+
+                handlerTime(terminalMessage,position,holder);
             }else if(MessageStatus.valueOf(terminalMessage.messageStatus).getCode() == MessageStatus.MESSAGE_RECALL.getCode()){
                 withDrawView(terminalMessage,holder);
             }else{

@@ -34,6 +34,7 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupByNoHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLogFileUploadCompleteHandler;
@@ -207,6 +208,8 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGetGroupByNoHandler);
 //        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
     }
@@ -247,7 +250,8 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
-//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetGroupByNoHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
         if (changemaingrouplayout != null)
             changemaingrouplayout.unRegistListener();
@@ -368,16 +372,25 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler(){
         @Override
         public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType){
-            if(isAdd){
-                if(isLocked || isSwitch){
-                    mHandler.post(() -> setting_group_name.setText(tempGroupName));
+            mHandler.post(()->{
+                if(isAdd){
+                    if(isLocked || isSwitch|| isScan){
+                        mHandler.post(() -> setting_group_name.setText(tempGroupName));
+                    }
+                }else {
+                    int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                    setting_group_name.setText(DataUtil.getMemberByMemberNo(currentGroupId).getName());
                 }
-            }else {
-                int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                setting_group_name.setText(DataUtil.getMemberByMemberNo(currentGroupId).getName());
-            }
+            });
         }
     };
+
+    private ReceiveGetGroupByNoHandler receiveGetGroupByNoHandler = group -> mHandler.post(new Runnable(){
+        @Override
+        public void run(){
+            setting_group_name.setText(group.getName());
+        }
+    });
 
     private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
         @Override

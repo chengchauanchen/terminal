@@ -5,8 +5,8 @@
     android:layout_height="wrap_content">
 
     <RelativeLayout
-        android:layout_width="@dimen/dp_78"
-        android:layout_height="@dimen/dp_100"
+        android:layout_width="@dimen/dp_100"
+        android:layout_height="@dimen/dp_78"
         android:background="@drawable/individual_call_button_off_shape">
 
         <TextureView

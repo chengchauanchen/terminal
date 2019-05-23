@@ -75,6 +75,7 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/x60"
         android:layout_marginTop="@dimen/x10"
+        android:visibility="gone"
         android:background="@color/about_item_background">
         
         <TextView

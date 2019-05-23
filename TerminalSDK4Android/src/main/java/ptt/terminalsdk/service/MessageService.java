@@ -83,20 +83,14 @@ public class MessageService extends Service {
                 myUDPClient.setUuid(uuid);
                 myUDPClient.setServerIp(accessServerIp);
                 myUDPClient.setServerPort(accessServerPort);
-                //延时启动，否则有时注册连接的通知还没启动
-                mHandler.postDelayed(new Runnable(){
-                    @Override
-                    public void run(){
-                        try{
-                            myUDPClient.start();
-                        }catch(Exception e){
-                            e.printStackTrace();
-                            logger.error("连接到信令服务器时，出现异常", e);
-                            TerminalFactory.getSDK().connectToServer();
-                        }
-                        logger.info("MessageService连接到信令服务器，调用了UDPClientBase的start()");
-                    }
-                },200);
+                try{
+                    myUDPClient.start();
+                    logger.info("MessageService连接到信令服务器，调用了UDPClientBase的start()");
+                }catch(Exception e){
+                    e.printStackTrace();
+                    logger.error("连接到信令服务器时，出现异常", e);
+                    TerminalFactory.getSDK().connectToServer();
+                }
             }else {
                 logger.error("接入服务地址不对！！不能出现这种情况！");
             }

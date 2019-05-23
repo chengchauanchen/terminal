@@ -300,6 +300,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         groupCallList.setItemAnimator(null);
         if (chatMessageList.size() > 0) {
             setListSelection(chatMessageList.size() - 1);
+            temporaryAdapter.notifyDataSetChanged();
         }
     }
 
@@ -1828,6 +1829,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
             } else {
                 setData(messageRecord, true);
             }
+            handler.post(()-> temporaryAdapter.notifyDataSetChanged());
         }
     };
     /**
@@ -1848,6 +1850,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         }else {
 
         }
+        logger.info("====="+chatMessageList);
         handler.post(()-> temporaryAdapter.notifyDataSetChanged());
     };
 

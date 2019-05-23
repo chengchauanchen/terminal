@@ -1126,7 +1126,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
         //如果时间到了，还在响应组会话界面，将PTT禁止
         if(userId == responseGroupId && !isActive){
-            change2Forbid();
+            mHandler.post(this::change2Forbid);
+
         }
     };
     /**

@@ -154,6 +154,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     alerDialog.show();
                 }else if(resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()){
                     if(reAuthCount < 3){
+                        reAuthCount++;
                         //发生异常的时候重试几次，因为网络原因经常导致一个io异常
                         TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP,""),TerminalFactory.getSDK().getParam(Params.REGIST_PORT,""));
                     }else{

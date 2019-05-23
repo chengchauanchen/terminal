@@ -54,6 +54,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandle
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupByNoHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupScanResultHandler;
@@ -97,6 +98,23 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.I
 @SuppressLint("ValidFragment")
 public class TalkbackFragment extends BaseFragment {
 
+    @SuppressWarnings("HandlerLeak")
+    private Handler myHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == 1) {
+                timeProgress--;
+                if(timeProgress<=0){
+                    myHandler.removeMessages(1);
+                    pttUpDoThing();
+                }else {
+                    talkback_time_progress.setText(String.valueOf(timeProgress));
+                    myHandler.sendEmptyMessageDelayed(1,1000);
+                }
+            }
+        }
+    };
+
     /**
      * 主动方停止组呼的消息
      */
@@ -133,10 +151,19 @@ public class TalkbackFragment extends BaseFragment {
         }
     };
 
+    private ReceiveGetGroupByNoHandler receiveGetGroupByNoHandler = group -> myHandler.post(new Runnable(){
+        @Override
+        public void run(){
+            tv_current_group.setText(group.getName());
+            tv_current_folder.setText(group.getDepartmentName());
+        }
+    });
+
     private ReceiveUnreadMessageAdd1Handler receiveUnreadMessageAdd1Handler = isAdd -> {
 
     };
     private boolean soundOff;
+
 
 
     /**
@@ -243,13 +270,17 @@ public class TalkbackFragment extends BaseFragment {
     private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler(){
         @Override
         public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType){
-            if(isAdd && isLocked){
-                //加入临时租，被锁定
-                MyApplication.instance.isLocked = true;
-            }
-            if(!isAdd){
-                MyApplication.instance.isLocked = false;
-            }
+            myHandler.post(()->{
+                if(isAdd && isLocked|| isScan){
+                    //加入临时租，被锁定
+                    MyApplication.instance.isLocked = true;
+                    tv_current_group.setText(tempGroupName);
+                    tv_current_folder.setText(getString(R.string.text_temporary_group));
+                }
+                if(!isAdd){
+                    MyApplication.instance.isLocked = false;
+                }
+            });
         }
     };
 
@@ -974,22 +1005,7 @@ public class TalkbackFragment extends BaseFragment {
     private int groupScanId;
     private boolean isFlex = false;
     private TimerTask timerTaskLock;
-    @SuppressWarnings("HandlerLeak")
-    private Handler myHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == 1) {
-                timeProgress--;
-                if(timeProgress<=0){
-                    myHandler.removeMessages(1);
-                    pttUpDoThing();
-                }else {
-                    talkback_time_progress.setText(String.valueOf(timeProgress));
-                    myHandler.sendEmptyMessageDelayed(1,1000);
-                }
-            }
-        }
-    };
+
 
     @Override
     public int getContentViewId() {
@@ -1123,6 +1139,7 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGetGroupByNoHandler);
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUnreadMessageAdd1Handler);
@@ -1182,8 +1199,15 @@ public class TalkbackFragment extends BaseFragment {
     }
 
     private void setCurrentGroupView() {
-        tv_current_group.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
-        tv_current_folder.setText(DataUtil.getGroupDepartmentName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
+        int currentGroupNo = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+        String groupName = DataUtil.getGroupName(currentGroupNo);
+        String groupDepartmentName = DataUtil.getGroupDepartmentName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
+        if(android.text.TextUtils.isEmpty(groupName)|| android.text.TextUtils.isEmpty(groupDepartmentName)){
+            TerminalFactory.getSDK().getDataManager().getGroupByNo(currentGroupNo);
+        }else {
+            tv_current_group.setText(groupName);
+            tv_current_folder.setText(groupDepartmentName);
+        }
         online_number = MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size();
         tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members),online_number));
     }
@@ -1460,6 +1484,7 @@ public class TalkbackFragment extends BaseFragment {
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
 
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetGroupByNoHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUnreadMessageAdd1Handler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseGroupActiveHandler);

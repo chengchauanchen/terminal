@@ -1015,7 +1015,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			logger.error("MessageService连接成功");
 			messageService = Stub.asInterface(service);
-
+			// TODO: 2019/5/22 onServiceConnected时间比MessageServiceOnstartCommon慢，有时可能会出现注册比UDP启动慢的情况，导致连接的回调慢
 			clientChannel = null;
 			getClientChannel().registServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
 			getClientChannel().start();

@@ -701,12 +701,14 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         public void handler(boolean isVolumeOff,int status) {
             logger.info("sjl_:"+status);
             myHandler.removeMessages(RECEIVEVOICECHANGED);
-            if (status == 0){
-                ll_sliding_chenge_volume.setVisibility(View.GONE);
-            }else if (status ==1){
-                ll_sliding_chenge_volume.setVisibility(View.VISIBLE);
-            }
-            tv_volume_fw.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "%");
+            myHandler.post(()->{
+                if (status == 0){
+                    ll_sliding_chenge_volume.setVisibility(View.GONE);
+                }else if (status ==1){
+                    ll_sliding_chenge_volume.setVisibility(View.VISIBLE);
+                }
+                tv_volume_fw.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "%");
+            });
             myHandler.sendEmptyMessageDelayed(RECEIVEVOICECHANGED,2000);
         }
     };

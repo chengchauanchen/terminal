@@ -104,14 +104,12 @@ public class VolumeChangLayout extends LinearLayout implements View.OnClickListe
 
                 @Override
                 public void handler(boolean isVolumeOff,int status) {
-//                    if(MyTerminalFactory.getSDK().getAudioProxy().getVolume() > 0 && isNoVoice){
-//                        btnIsNoVoice.initToggleState(false);
-//                        noVoiceText.setTextColor(context.getResources().getColor(R.color.setting_text_gray));
-//                    }
-                    voiceNum.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "");
-                    if(isVolumeOff){
-                        voiceNum.setText(0 + "");
-                    }
+                    post(()->{
+                        voiceNum.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "");
+                        if(isVolumeOff){
+                            voiceNum.setText(0 + "");
+                        }
+                    });
                 }
             };
 

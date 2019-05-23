@@ -575,4 +575,5 @@
     <string name="monitor_more_than_five">监听组达到上限，请取消一个后再添加</string>
     <string name="down_loading">下载中...</string>
     <string name="play_audio">播放录音</string>
+    <string name="join_temp_group">%1$s&#160;加入群组</string>
 </resources>
