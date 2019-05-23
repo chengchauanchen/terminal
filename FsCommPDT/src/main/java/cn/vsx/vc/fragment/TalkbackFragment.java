@@ -1615,9 +1615,7 @@ public class TalkbackFragment extends BaseFragment {
     //PTT抬起以后
     private void  pttUpDoThing() {
         logger.info("ptt.pttUpDoThing执行了 isPttPress：" + MyApplication.instance.isPttPress);
-        if(MyTerminalFactory.getSDK().getAudioProxy().getVolume()!=0){
-            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
-        }
+        MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
             return;
         }

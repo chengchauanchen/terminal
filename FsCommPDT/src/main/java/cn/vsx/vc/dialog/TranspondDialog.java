@@ -10,6 +10,7 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
@@ -57,6 +58,7 @@ public class TranspondDialog  extends Dialog {
         }
         //只有自己才撤回，并且是两分钟之内的消息
         if(terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)&&
+                DataUtil.isSendedMessage(terminalMessage)&&
                 isShowWithDrawBySendTime(terminalMessage.sendTime)){
             tv_withdraw.setVisibility(View.VISIBLE);
         }else{

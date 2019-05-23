@@ -762,7 +762,7 @@ public class PullLivingService extends BaseService{
 
     private void requestToWatchLiving(TerminalMessage terminalMessage){
         PTTProtolbuf.NotifyDataMessage.Builder builder = PTTProtolbuf.NotifyDataMessage.newBuilder();
-        builder.setMessageUrl(terminalMessage.messageUrl);
+        builder.setMessageUrl(TextUtils.isEmpty(terminalMessage.messageUrl)?"":terminalMessage.messageUrl);
         builder.setMessageFromName(terminalMessage.messageFromName);
         builder.setMessageFromNo(terminalMessage.messageFromId);
         builder.setMessageFromUniqueNo(terminalMessage.messageFromUniqueNo);

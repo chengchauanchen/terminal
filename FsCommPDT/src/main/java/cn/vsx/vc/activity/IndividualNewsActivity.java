@@ -495,7 +495,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                     if (lastPosition == mposition) {//点击同一个条目
                         if (MyApplication.instance.isPlayVoice) {
                             logger.error("点击同一条目，停止录音，停止动画");
-                            if(type == PlayType.PLAY_PRIVATE_CALL.getCode()){
+                            if(type == PlayType.PLAY_PRIVATE_CALL.getCode()||type == PlayType.PLAY_GROUP_CALL.getCode()){
                                 MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
                             }else{
                                 MediaManager.release();
@@ -510,7 +510,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                                 public void run() {
                                     if (mposition < chatMessageList.size() && mposition >= 0) {
                                         try {
-                                            if(type == PlayType.PLAY_PRIVATE_CALL.getCode()){
+                                            if(type == PlayType.PLAY_PRIVATE_CALL.getCode()||type == PlayType.PLAY_GROUP_CALL.getCode()){
                                                 myHandler.post(() -> {
                                                     terminalMessage.isDownLoadAudio = true;
                                                     temporaryAdapter.notifyItemChanged(postion);
@@ -536,7 +536,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
                             public void run() {
                                 if (mposition < chatMessageList.size() && mposition >= 0) {
                                     try {
-                                        if(type == PlayType.PLAY_PRIVATE_CALL.getCode()){
+                                        if(type == PlayType.PLAY_PRIVATE_CALL.getCode()||type == PlayType.PLAY_GROUP_CALL.getCode()){
                                             myHandler.post(() -> {
                                                 terminalMessage.isDownLoadAudio = true;
                                                 temporaryAdapter.notifyItemChanged(postion);

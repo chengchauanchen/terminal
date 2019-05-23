@@ -67,6 +67,7 @@
                 android:layout_height="@dimen/dp_25"
                 android:layout_centerVertical="true"
                 android:layout_marginLeft="@dimen/dp_8"
+                android:background="@drawable/voice_history_play_anim"
                 android:visibility="gone" />
 
         </RelativeLayout>

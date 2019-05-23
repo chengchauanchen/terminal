@@ -46,7 +46,7 @@
             android:textColor="@color/contacts_line_blue"
             app:tabView_selected="true"
             app:tabView_text="@string/text_pc"
-            app:tabView_textSize="@dimen/sp_14" />
+            app:tabView_textSize="14px" />
         
         <cn.vsx.vc.view.TabView
             android:id="@+id/tab_police"
@@ -55,7 +55,7 @@
             android:layout_weight="1"
             app:tabView_selected="false"
             app:tabView_text="@string/text_police_service"
-            app:tabView_textSize="@dimen/sp_14" />
+            app:tabView_textSize="14px" />
         
         <cn.vsx.vc.view.TabView
             android:id="@+id/tab_recoder"
@@ -64,7 +64,7 @@
             android:layout_weight="1"
             app:tabView_selected="false"
             app:tabView_text="@string/text_recoder"
-            app:tabView_textSize="@dimen/sp_14" />
+            app:tabView_textSize="14px" />
         
         <cn.vsx.vc.view.TabView
             android:id="@+id/tab_uav"
@@ -73,7 +73,7 @@
             android:layout_weight="1"
             app:tabView_selected="false"
             app:tabView_text="@string/text_uav"
-            app:tabView_textSize="@dimen/sp_14" />
+            app:tabView_textSize="14px" />
     </LinearLayout>
     
     <View

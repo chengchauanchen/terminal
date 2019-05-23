@@ -35,8 +35,11 @@ import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupVideoLiveListAdapter;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.model.InviteMemberExceptList;
+import cn.vsx.vc.model.InviteMemberLiverMember;
 import cn.vsx.vc.model.TransponSelectedBean;
 import cn.vsx.vc.model.TransponToBean;
+import cn.vsx.vc.service.InviteMemberService;
 import cn.vsx.vc.service.PullLivingService;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.MyDataUtil;
@@ -319,9 +322,32 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
     @Override
     public void goToForward(TerminalMessage item) {
         transponMessage = item;
-        Intent intent = new Intent(GroupVideoLiveListActivity.this, TransponActivity.class);
-        intent.putExtra(Constants.TRANSPON_TYPE, Constants.TRANSPON_TYPE_ONE);
-        startActivityForResult(intent, CODE_TRANSPON_REQUEST);
+        if(isGroupVideoLiving){
+            if(item!=null&&item.messageBody!=null){
+                JSONObject messageBody = item.messageBody;
+                String liver = messageBody.getString(JsonParam.LIVER);
+                int liverNo = Util.stringToInt(messageBody.getString(JsonParam.LIVERNO));
+                long uniqueNo = 0L;
+                if (!TextUtils.isEmpty(liver)) {
+                    String[] split = liver.split("_");
+                    if(split.length>0){
+                        uniqueNo = Util.stringToLong(split[0]);
+                    }
+                }
+                Intent intent = new Intent(GroupVideoLiveListActivity.this, InviteMemberService.class);
+                intent.putExtra(Constants.TYPE, Constants.PULL);
+                intent.putExtra(Constants.PULLING, true);
+                intent.putExtra(Constants.LIVE_MEMBER,new InviteMemberLiverMember(liverNo,uniqueNo));
+                List<Integer> list = new ArrayList<>();
+                list.add((Integer)liverNo);
+                intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,new InviteMemberExceptList(list));
+                startService(intent);
+            }
+        }else{
+            Intent intent = new Intent(GroupVideoLiveListActivity.this, TransponActivity.class);
+            intent.putExtra(Constants.TRANSPON_TYPE, Constants.TRANSPON_TYPE_ONE);
+            startActivityForResult(intent, CODE_TRANSPON_REQUEST);
+        }
     }
 
     @Override

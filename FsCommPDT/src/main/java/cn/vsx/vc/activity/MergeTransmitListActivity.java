@@ -1,6 +1,7 @@
 package cn.vsx.vc.activity;
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -19,8 +20,10 @@ import com.zectec.imageandfileselector.bean.ImageBean;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -41,14 +44,25 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMultimediaFailHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMultimediaMessageCompleteHandler;
+import cn.vsx.hamster.terminalsdk.tools.MessageComparator;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MergeTransmitListAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.model.PlayType;
 import cn.vsx.vc.receiveHandle.OnBackListener;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupMergeTransmitVoiceHandler;
+import cn.vsx.vc.record.MediaManager;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.ToastUtil;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okio.BufferedSink;
+import okio.BufferedSource;
+import okio.Okio;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class MergeTransmitListActivity extends BaseActivity implements SwipeRefreshLayout.OnRefreshListener, BaseQuickAdapter.RequestLoadMoreListener, View.OnClickListener{
@@ -81,6 +95,8 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
     private int mPage = 1;
     //每页显示条数
     private static final int mPageSize = 10;
+
+    private MessageComparator messageComparator = new MessageComparator();
 
     protected Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -215,6 +231,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
                 chatMessageList.clear();
                 setMessagePath(memberList);
                 chatMessageList.addAll(memberList);
+                Collections.sort(chatMessageList,messageComparator);
                 handler.post(() -> adapter.notifyDataSetChanged());
             } else {
                 if (mPage > 1) {
@@ -229,7 +246,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
      **/
     private ReceiverReplayGroupMergeTransmitVoiceHandler mReceiverReplayGroupMergeTransmitVoiceHandler = new ReceiverReplayGroupMergeTransmitVoiceHandler() {
         @Override
-        public void handler(int postion) {
+        public void handler(final TerminalMessage terminalMessage,int postion,int type) {
             mposition = postion;
             handler.post(() -> {
                 if (MyApplication.instance.getIndividualState() == IndividualCallState.IDLE &&
@@ -239,6 +256,11 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
                     if (lastPosition == mposition) {//点击同一个条目
                         if (MyApplication.instance.isPlayVoice) {
                             MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
+                            if(type == PlayType.PLAY_PRIVATE_CALL.getCode()||type == PlayType.PLAY_GROUP_CALL.getCode()){
+                                MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
+                            }else{
+                                MediaManager.release();
+                            }
                             MyApplication.instance.isPlayVoice = false;
                             isSameItem = true;
                             adapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
@@ -246,7 +268,15 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
                             executorService.execute(() -> {
                                 if (mposition < chatMessageList.size() && mposition >= 0) {
                                     try {
-                                        MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
+                                        if(type == PlayType.PLAY_PRIVATE_CALL.getCode()||type == PlayType.PLAY_GROUP_CALL.getCode()){
+                                            handler.post(() -> {
+                                                terminalMessage.isDownLoadAudio = true;
+                                                adapter.notifyItemChanged(postion);
+                                            });
+                                            MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
+                                        }else{
+                                            downloadRecordFileOrPlay(terminalMessage, onCompletionListener);
+                                        }
                                     } catch (IndexOutOfBoundsException e) {
                                         logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
                                     }
@@ -257,14 +287,22 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
 
                         if (MyApplication.instance.isPlayVoice) {
                             MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
-                            MyApplication.instance.isPlayVoice = false;
+                            MediaManager.release();
                         }
 
                         //播放当前的
                         executorService.execute(() -> {
                             if (mposition < chatMessageList.size() && mposition >= 0) {
                                 try {
-//                                            logger.error("当前播放的条目是：" + mposition);
+                                        if(type == PlayType.PLAY_PRIVATE_CALL.getCode()||type == PlayType.PLAY_GROUP_CALL.getCode()){
+                                            handler.post(() -> {
+                                                terminalMessage.isDownLoadAudio = true;
+                                                adapter.notifyItemChanged(postion);
+                                            });
+                                            MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
+                                        }else{
+                                            downloadRecordFileOrPlay(terminalMessage, onCompletionListener);
+                                        }
                                     MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
                                 } catch (IndexOutOfBoundsException e) {
                                     logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
@@ -281,6 +319,86 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
     };
 
     /**
+     * 下载录音文件并播放
+     */
+    public void downloadRecordFileOrPlay(final TerminalMessage terminalMessage, final MediaPlayer.OnCompletionListener onCompletionListener) {
+        //        logger.info("准备播放个呼音频数据");
+        final int[] resultCode = {TerminalErrorCode.UNKNOWN_ERROR.getErrorCode()};
+        final String[] resultDes = {""};
+        File file = null;
+        try {
+            if (terminalMessage != null) {
+                //如果已经播放过
+                file = new File(terminalMessage.messagePath);
+                //如果播放过没找到文件，或者未播放 则去服务器请求数据
+                if (file == null || !file.exists() || file.length() <= 0) {
+                    logger.info("请求录音时URL：" + terminalMessage.messagePath);
+                    OkHttpClient mOkHttpClient = new OkHttpClient();
+                    MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
+                    Request request = new Request.Builder()
+                            .url(terminalMessage.messagePath)
+                            .build();
+                    mOkHttpClient.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            BufferedSource source = response.body().source();
+
+                            File outFile = MyTerminalFactory.getSDK().getTerminalMessageManager().createFile(terminalMessage);
+                            BufferedSink sink = Okio.buffer(Okio.sink(outFile));
+                            source.readAll(sink);
+                            sink.flush();
+                            source.close();
+
+                            if (outFile.length() <= 0) {
+                                logger.error("请求到的音频数据是null，直接return！");
+                            } else {
+                                terminalMessage.messagePath = TerminalFactory.getSDK().getAudioRecordDirectory() + terminalMessage.messageVersion;
+                                MyTerminalFactory.getSDK().getTerminalMessageManager().updateTerminalMessage(terminalMessage);
+                            }
+
+                            //播放
+                            logger.info("获得音频文件为：file=" + outFile.length() + "---文件的路径---" + outFile.getAbsolutePath());
+                            if (outFile.exists() && outFile.length() > 0) {
+                                resultCode[0] = BaseCommonCode.SUCCESS_CODE;
+                                resultDes[0] = getString(R.string.text_get_audio_success_ready_to_play);
+                                logger.info("URL获得音频文件，播放录音");
+                                MediaManager.playSound(terminalMessage.messagePath, onCompletionListener);
+                            } else {
+                                resultCode[0] = TerminalErrorCode.SERVER_NOT_RESPONSE.getErrorCode();
+                                resultDes[0] = getString(R.string.text_audio_history_not_find_or_server_no_response);
+                                logger.error("历史音频未找到，或服务器无响应！");
+                            }
+                            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0],terminalMessage);
+                        }
+                    });
+                } else {
+                    resultCode[0] = BaseCommonCode.SUCCESS_CODE;
+                    resultDes[0] = getString(R.string.text_get_audio_success_from_local_ready_to_play);
+                    logger.info("从本地音频文件，播放录音");
+                    MediaManager.playSound(terminalMessage.messagePath, onCompletionListener);
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0],terminalMessage);
+                }
+            } else {
+                resultCode[0] = TerminalErrorCode.PARAMETER_ERROR.getErrorCode();
+                resultDes[0] = getString(R.string.text_get_audio_history_paramter_wrongful);
+                logger.error("获取历史音频参数不合法！");
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0],terminalMessage);
+            }
+        } catch (Exception e) {
+            resultDes[0] = getString(R.string.text_get_audio_messge_fail);
+            resultCode[0] = TerminalErrorCode.PARAMETER_ERROR.getErrorCode();
+            logger.error("获得语音消息失败！", e);
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0],terminalMessage);
+        }
+
+
+    }
+
+    /**
      * 开始播放或停止播放的回调
      */
     private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = (resultCode, resultDes,message) -> {
@@ -294,7 +412,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
                     isSameItem = false;
                 }
                 MyApplication.instance.isPlayVoice = true;
-                Collections.reverse(chatMessageList);
+                Collections.sort(chatMessageList,messageComparator);
                 if (adapter != null) {
                     adapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
                 }
@@ -402,29 +520,28 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
      * 将列表中的terminalMessage替换成新的terminalMessage
      **/
     private void replaceMessage(TerminalMessage newTerminalMessage) {
-        boolean has = false;
-        Iterator<TerminalMessage> it = chatMessageList.iterator();
-        while (it.hasNext()) {
-            TerminalMessage next = it.next();
-            if (next.messageBody.containsKey(JsonParam.TOKEN_ID) && newTerminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
-                    next.messageBody.getIntValue(JsonParam.TOKEN_ID) == newTerminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
-                it.remove();
-                has = true;
-                break;
-            }
+//        Iterator<TerminalMessage> it = chatMessageList.iterator();
+//        while (it.hasNext()) {
+//            TerminalMessage next = it.next();
+//            if (next.messageBody.containsKey(JsonParam.TOKEN_ID) && newTerminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID) &&
+//                    next.messageBody.getIntValue(JsonParam.TOKEN_ID) == newTerminalMessage.messageBody.getIntValue(JsonParam.TOKEN_ID)) {
+//            }
+//        }
+        if(chatMessageList.contains(newTerminalMessage)){
+            int index = chatMessageList.indexOf(newTerminalMessage);
+            TerminalMessage message = chatMessageList.get(index);
+            Collections.replaceAll(chatMessageList, message, newTerminalMessage);
         }
-        if (has) {
-            chatMessageList.add(newTerminalMessage);
-        }
-        Collections.reverse(chatMessageList);
+
+        Collections.sort(chatMessageList,messageComparator);
         if (adapter != null) {
             adapter.notifyDataSetChanged();
         }
-        if (!has) {
-            if(contentView !=null){
-                contentView.scrollToPosition(chatMessageList.size() - 1);
-            }
-        }
+//        if (!has) {
+//            if(contentView !=null){
+//                contentView.scrollToPosition(chatMessageList.size() - 1);
+//            }
+//        }
     }
 
     /**
@@ -457,6 +574,21 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
         setSmoothScrollToPosition(mposition);
         autoPlay(mposition + 1);
     });
+
+    /**
+     * 录音播放完成的消息
+     */
+    private MediaPlayer.OnCompletionListener onCompletionListener = mediaPlayer -> {
+        handler.post(() -> {
+            //                    logger.error("播放完成的回调触发了========> "+lastPosition+"/"+mposition+"/"+chatMessageList.size());
+            MyApplication.instance.isPlayVoice = false;
+            isSameItem = true;
+            chatMessageList.get(mposition).messageBody.put(JsonParam.UNREAD, false);
+            adapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+//            temporaryAdapter.notifyDataSetChanged();
+        });
+        autoPlay(mposition+1);
+    };
 
     //自动播放下一条语音
     private void autoPlay(int index) {
@@ -585,6 +717,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
      */
     public void stopRecord() {
             MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
+            MediaManager.release();
             MyApplication.instance.isPlayVoice = false;
     }
 

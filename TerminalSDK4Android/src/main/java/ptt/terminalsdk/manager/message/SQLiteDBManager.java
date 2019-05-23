@@ -20,6 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageStatus;
+import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.message.ISQLiteDBManager;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileRecord;
@@ -189,11 +190,11 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         SQLiteDatabase db = helper.getWritableDatabase();
         Cursor cursor;
         if (sendTime == 0) {
-            String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ?AND message_to_id = ? AND message_from_id = ? ORDER BY send_time DESC LIMIT 0,10";
-            cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",memberId + "", memberId + ""});
+            String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ?AND message_to_id = ? AND message_from_id = ? AND message_type = ? ORDER BY send_time DESC LIMIT 0,10";
+            cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",memberId + "", memberId + "", MessageType.VIDEO_LIVE.getCode()+""});
         } else {
-            String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ?AND send_time <= ? AND message_to_id = ? AND message_from_id = ? ORDER BY send_time DESC LIMIT 0,10";
-            cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",sendTime + "", memberId + "", memberId + ""});
+            String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ?AND send_time <= ? AND message_to_id = ? AND message_from_id = ? AND message_type = ? ORDER BY send_time DESC LIMIT 0,10";
+            cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",sendTime + "", memberId + "", memberId + "",MessageType.VIDEO_LIVE.getCode()+""});
         }
         return getTerminalMessageList(db, cursor);
     }

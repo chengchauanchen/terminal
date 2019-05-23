@@ -89,10 +89,10 @@ public class TabView extends RelativeLayout{
 
     public void setChecked(boolean selected){
         if(selected){
-            TextViewCompat.setTextAppearance(mtvName,R.style.tab_checked);
+            TextViewCompat.setTextAppearance(mtvName,R.style.contacts_title_checked_text);
             showIndicator();
         }else {
-            TextViewCompat.setTextAppearance(mtvName,R.style.tab_unchecked);
+            TextViewCompat.setTextAppearance(mtvName,R.style.contacts_title_unchecked_text);
             hideIndicator();
         }
     }

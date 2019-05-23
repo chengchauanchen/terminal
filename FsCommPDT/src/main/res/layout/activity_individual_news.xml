@@ -93,20 +93,25 @@
         android:layout_below="@+id/rl_topbar"
         >
 
-        <android.support.v4.widget.SwipeRefreshLayout
-            android:id="@+id/sfl_call_list"
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:background="@drawable/group_call_news_listview_bg">
 
-            <cn.vsx.vc.view.FixedRecyclerView
-                android:id="@+id/group_call_list"
+            <android.support.v4.widget.SwipeRefreshLayout
+                android:id="@+id/sfl_call_list"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/transparent"
-                android:overScrollMode="never" />
-        </android.support.v4.widget.SwipeRefreshLayout>
+                android:layout_height="match_parent">
+
+                <cn.vsx.vc.view.FixedRecyclerView
+                    android:id="@+id/group_call_list"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:overScrollMode="never" />
+            </android.support.v4.widget.SwipeRefreshLayout>
+        </RelativeLayout>
 
         <cn.vsx.vc.view.FunctionHidePlus
             android:id="@+id/funcation"

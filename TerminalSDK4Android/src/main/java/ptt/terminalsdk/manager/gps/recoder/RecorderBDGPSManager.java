@@ -81,7 +81,9 @@ public class RecorderBDGPSManager {
         } else {
             initLocation((interval >= 0) ? interval : 0);
         }
-        mLocationClient.start();
+        if(! mLocationClient.isStarted()){
+            mLocationClient.start();
+        }
     }
 
     /**

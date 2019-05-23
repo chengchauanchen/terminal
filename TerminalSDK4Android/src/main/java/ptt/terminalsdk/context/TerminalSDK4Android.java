@@ -266,7 +266,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	}
 
 	@Override
-	public <V> void putHashMap(String param, HashMap<String,V> value){
+	public void putHashMap(String param, HashMap<String,String> value){
 		Gson gson = new Gson();
 		//转换成json数据，再保存
 		String strJson = gson.toJson(value);
@@ -275,14 +275,14 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	}
 
 	@Override
-	public <V> HashMap<String,V> getHashMap(String param,HashMap<String,V> defaultValue){
+	public  HashMap<String,String> getHashMap(String param,HashMap<String,String> defaultValue){
 		String strJson = account.getString(param, "");
 		logger.info("getHashMap:"+strJson);
 		if(TextUtils.isEmpty(strJson)){
 			return defaultValue;
 		}else {
 			Gson gson = new Gson();
-			Type type = new TypeToken<HashMap<String, V>>(){}.getType();
+			Type type = new TypeToken<HashMap<String, String>>(){}.getType();
 			return gson.fromJson(strJson, type);
 		}
 	}

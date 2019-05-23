@@ -101,7 +101,7 @@
             android:id="@+id/tab_group"
             app:tabView_selected="true"
             app:tabView_text="@string/text_group"
-            app:tabView_textSize="@dimen/sp_14"
+            app:tabView_textSize="14px"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1" />
@@ -110,7 +110,7 @@
             android:id="@+id/tab_police"
             app:tabView_selected="false"
             app:tabView_text="@string/text_police_service"
-            app:tabView_textSize="@dimen/sp_14"
+            app:tabView_textSize="14px"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1" />

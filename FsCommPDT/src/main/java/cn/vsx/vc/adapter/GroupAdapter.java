@@ -166,7 +166,7 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             if(checkIsMonitorGroup(group.getNo())){
                 groupViewHolder.ivMonitor.setImageResource(R.drawable.monitor_open);
             }else {
-                groupViewHolder.ivMonitor.setImageResource(R.drawable.monitor_close);
+                groupViewHolder.ivMonitor.setImageResource(R.drawable.monitor_close_blue);
             }
             groupViewHolder.ivMessage.setOnClickListener(view -> {
                 Intent intent = new Intent(context, GroupCallNewsActivity.class);

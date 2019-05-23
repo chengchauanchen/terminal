@@ -7,7 +7,8 @@ import java.util.Map;
 
 public enum PlayType implements Serializable{
 	PLAY_AUDIO("录音", 1),
-	PLAY_PRIVATE_CALL("个呼", 2);
+	PLAY_PRIVATE_CALL("个呼", 2),
+	PLAY_GROUP_CALL("组呼", 3);
 
 	private static final long serialVersionUID = 2L;
 

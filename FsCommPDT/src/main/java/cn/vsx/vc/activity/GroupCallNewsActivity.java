@@ -552,9 +552,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         logger.info("pttUpDoThing执行了 isPttPress：" + MyApplication.instance.isPttPress);
         if (MyApplication.instance.isPttPress) {
             MyApplication.instance.isPttPress = false;
-            if(MyTerminalFactory.getSDK().getAudioProxy().getVolume()!=0){
-                MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
-            }
+            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
             //没有组呼权限
             if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
                 return;

@@ -217,6 +217,7 @@
     
     <style name="bottom_unselect_text_color">
         <item name="android:textColor">@color/bottom_textcolor1</item>
+        <item name="android:textSize">@dimen/sp_14</item>
     </style>
     
     <style name="bottom_select_text_color">

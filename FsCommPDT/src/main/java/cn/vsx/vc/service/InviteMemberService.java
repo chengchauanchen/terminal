@@ -934,7 +934,10 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
                 ContactItemBean<Member> contactItemBean = new ContactItemBean<>();
                 contactItemBean.setBean(member);
                 contactItemBean.setType(Constants.TYPE_USER);
-                mAllDatas.get(index).add(contactItemBean);
+                //过滤自己
+                if(!DataUtil.isMyself(member)){
+                    mAllDatas.get(index).add(contactItemBean);
+                }
             }
             for(Department department : departments){
                 ContactItemBean<Department> contactItemBean = new ContactItemBean<>();
@@ -942,6 +945,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
                 contactItemBean.setType(Constants.TYPE_FOLDER);
                 mAllDatas.get(index).add(contactItemBean);
             }
+
             //还原选择状态
             restoreSelectStatus(mAllDatas.get(index),index);
             if(index<contactAdapter.size()&&contactAdapter.get(index)!=null){

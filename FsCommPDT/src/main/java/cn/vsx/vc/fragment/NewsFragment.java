@@ -602,8 +602,8 @@ public class NewsFragment extends BaseFragment {
                         (terminalMessage.messageBody.getIntValue("remark") == Remark.ACTIVE_VIDEO_LIVE || terminalMessage.messageBody.getIntValue("remark") == Remark.ASK_VIDEO_LIVE)
                         && terminalMessage.resultCode==0) {
                     saveVideoMessage(terminalMessage,false);
-//                }else{
-//                    saveMessageToList(terminalMessage,false);
+                }else{
+                    saveMessageToList(terminalMessage,false);
                 }
             }else if (TerminalMessageUtil.isGroupMeaage(terminalMessage)) {
                 if(terminalMessage.messageType != MessageType.WARNING_INSTANCE.getCode()){
@@ -942,6 +942,8 @@ public class NewsFragment extends BaseFragment {
                                         || terminalMessage.messageBody.getIntValue("remark") == Remark.ASK_VIDEO_LIVE)
                                 && terminalMessage.resultCode==0) {
                             saveVideoMessage(terminalMessage,true);
+                        }else{
+                            saveMessageToList(terminalMessage,true);
                         }
                     }else {
                         saveMessageToList(terminalMessage,true);

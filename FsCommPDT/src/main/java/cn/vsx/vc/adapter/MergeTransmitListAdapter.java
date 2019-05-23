@@ -3,6 +3,7 @@ package cn.vsx.vc.adapter;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.AnimationDrawable;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
@@ -74,6 +75,7 @@ import cn.vsx.vc.fragment.LocationFragment;
 import cn.vsx.vc.fragment.VideoPreviewItemFragment;
 import cn.vsx.vc.holder.ChatViewHolder;
 import cn.vsx.vc.holder.MergeTransmitViewHolder;
+import cn.vsx.vc.model.PlayType;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupMergeTransmitVoiceHandler;
@@ -928,41 +930,31 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
     private void playGroupVoice(int position, MergeTransmitViewHolder holder, TerminalMessage terminalMessage) {
         if(holder.iv_voice_image_anim != null){
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
+                AnimationDrawable animationDrawable = (AnimationDrawable) holder.iv_voice_image_anim.getBackground();
                 if (mposition == position) {
                     setUnread(position);
                     if (isSameItem) {
                         if (isPlaying) {
-//                            Glide.with(activity).load(isReceiver(terminalMessage)?R.drawable.icon_play_voice_left:R.drawable.icon_play_voice_right)
-//                                    .asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE)
-//                                    .into(holder.iv_voice_image_anim);
-                            AnimationsContainer.FramesSequenceAnimation animation = getVoiceAnimation(terminalMessage,holder.iv_voice_image_anim);
                             setViewVisibility(holder.ivVoice, View.GONE);
                             setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
-//                            animation.stop();
-                            animation.start();
+                            animationDrawable.start();
                         } else {
-                            holder.iv_voice_image_anim.setImageResource(R.drawable.sound_blank);
-                            setViewVisibility(holder.ivVoice, View.VISIBLE);
+                            animationDrawable.stop();
                             setViewVisibility(holder.iv_voice_image_anim, View.GONE);
+                            setViewVisibility(holder.ivVoice, View.VISIBLE);
                         }
                     } else {//不同条目
-//                        Glide.with(activity).load(isReceiver(terminalMessage)?R.drawable.icon_play_voice_left:R.drawable.icon_play_voice_right)
-//                                .asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE)
-//                                .into(holder.iv_voice_image_anim);
-                        AnimationsContainer.FramesSequenceAnimation animation = getVoiceAnimation(terminalMessage,holder.iv_voice_image_anim);
                         setViewVisibility(holder.ivVoice, View.GONE);
                         setViewVisibility(holder.iv_voice_image_anim, View.VISIBLE);
-//                        animation.stop();
-                        animation.start();
+                        animationDrawable.start();
                     }
                 } else {
-                    holder.iv_voice_image_anim.setImageResource(R.drawable.sound_blank);
-                    setViewVisibility(holder.ivVoice, View.VISIBLE);
+                    animationDrawable.stop();
                     setViewVisibility(holder.iv_voice_image_anim, View.GONE);
+                    setViewVisibility(holder.ivVoice, View.VISIBLE);
                 }
             }else {
                 if(terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){
-                    holder.iv_voice_image_anim.setImageResource(R.drawable.sound_blank);
                     setViewVisibility(holder.iv_voice_image_anim, View.GONE);
                     setViewVisibility(holder.ivVoice, View.VISIBLE);
                     if (isReceiver(terminalMessage)) {
@@ -1119,7 +1111,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                 if (MyApplication.instance.isPlayVoice) {
                     MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
                 }
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupMergeTransmitVoiceHandler.class, position);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupMergeTransmitVoiceHandler.class,terminalMessage,position,PlayType.PLAY_GROUP_CALL.getCode());
             } else {
                 ToastUtil.showToast(activity, activity.getString(R.string.text_has_no_group_call_listener_authority));
             }
@@ -1133,7 +1125,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
     public void individualNewsRecordItemClick(TerminalMessage terminalMessage, int position) {
         if (terminalMessage.messageType == MessageType.AUDIO.getCode()) {
             logger.error("个呼录音点击事件--->" + position);
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupMergeTransmitVoiceHandler.class, position);
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupMergeTransmitVoiceHandler.class,terminalMessage, position,PlayType.PLAY_AUDIO.getCode());
         }
     }
 

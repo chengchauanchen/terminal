@@ -17,6 +17,7 @@ import java.util.List;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.ChooseDevicesAdapter;
 import cn.vsx.vc.utils.ToastUtil;
@@ -148,7 +149,7 @@ public class ChooseDevicesDialog extends Dialog {
                     break;
             }
         }
-        return result;
+        return DataUtil.removeMemberMyself(result);
     }
 
     /**

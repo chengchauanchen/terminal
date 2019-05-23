@@ -553,6 +553,7 @@ public class CallingService extends BaseService{
     }
 
     private void halfPttUpDothing(){
+        MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
         if(MyApplication.instance.isPttPress){
             logger.info("PTT松开了，结束说话");
             MyApplication.instance.isPttPress = false;
@@ -563,7 +564,6 @@ public class CallingService extends BaseService{
                 startAutoHangUpTimer();
             }
             MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
-            //MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
         }
     }
