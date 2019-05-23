@@ -1016,6 +1016,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private void sendMessageFail(final TerminalMessage terminalMessage, final int resultCode) {
         handler.post(() -> {
             terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_FAIL);
+//            terminalMessage.messageBody.put(JsonParam.SEND_FAILED, true);
             logger.info("发送信令服务器失败" + terminalMessage);
             boolean isContainFail = false;
             for (TerminalMessage terminalMessage1 : allFailMessageList) {
@@ -2120,6 +2121,29 @@ public abstract class ChatBaseActivity extends BaseActivity{
             scrollMyListViewToBottom();
         }
     };
+
+    private void deteleFailedMessage(TerminalMessage terminalMessage){
+        LinkedTreeMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getTerminalMessageListMap(Params.MESSAGE_SEND_FAIL,new LinkedTreeMap<String, List<TerminalMessage>>());
+        List<TerminalMessage> list = sendFailMap.get(userId + "");
+        if(null != list){
+            Iterator<TerminalMessage> iterator = list.iterator();
+            while(iterator.hasNext()){
+                TerminalMessage next = iterator.next();
+                if(terminalMessage.messageBody.get(JsonParam.TOKEN_ID) == next.messageBody.get(JsonParam.TOKEN_ID)){
+                    //同一条消息，删除
+                    iterator.remove();
+                }
+            }
+            Iterator<TerminalMessage> iterator1 = chatMessageList.iterator();
+            while(iterator1.hasNext()){
+                TerminalMessage next = iterator1.next();
+                if(terminalMessage.messageBody.get(JsonParam.TOKEN_ID) == next.messageBody.get(JsonParam.TOKEN_ID)){
+                    //同一条消息，删除
+                    iterator.remove();
+                }
+            }
+        }
+    }
 
     /**
      * 发送信令失败

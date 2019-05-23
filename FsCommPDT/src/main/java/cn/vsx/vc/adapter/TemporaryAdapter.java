@@ -758,8 +758,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 } else if (messageType == MessageType.LONG_TEXT.getCode()) {//长文本
                     uploadLongText(holder, terminalMessage);
                 } else if (messageType == MessageType.POSITION.getCode()) {//定位
-//                        sendLocationMessage(terminalMessage);
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.LOCATION);
+                        sendLocationMessage(terminalMessage);
+//                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.LOCATION);
 
                 } else if (messageType == MessageType.PICTURE.getCode()
                         || messageType == MessageType.FILE.getCode()
