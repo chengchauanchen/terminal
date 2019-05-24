@@ -1988,7 +1988,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     public boolean isTranspon;//是否转发了
 
     public void transponMessage(ArrayList<ContactItemBean> list, PushMessageSendResultHandler pushMessageSendResultHandler) {
-        logger.info("转发消息，type:" + transponMessage.messageType);
+        logger.info("转发消息，type:" + transponMessage);
             //单个转发
         List<Integer> toIds = MyDataUtil.getToIdsTranspon(list);
         TransponToBean bean = MyDataUtil.getToNamesTranspon(list);
