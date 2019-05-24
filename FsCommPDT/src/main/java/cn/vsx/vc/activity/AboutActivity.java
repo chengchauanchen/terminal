@@ -71,7 +71,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener{
                 break;
             case R.id.tv_update:
                 TerminalFactory.getSDK().getThreadPool().execute(()->{
-                    UpdateManager manager = new UpdateManager(this);
+                    UpdateManager manager = new UpdateManager(AboutActivity.this);
                     manager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL,""),true);
                 });
 //                Toast.makeText(this, getResources().getString(R.string.text_is_the_latest_version), Toast.LENGTH_SHORT).show();

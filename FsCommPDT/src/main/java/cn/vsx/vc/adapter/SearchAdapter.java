@@ -11,6 +11,7 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
@@ -152,7 +153,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 holder.setText(R.id.shoutai_tv_member_id, String.valueOf(member.getNo()));
                 holder.setChecked(R.id.checkbox,member.isChecked());
                 holder.setOnClickListener(R.id.checkbox, v -> {
-                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class,member,!member.isChecked());
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class,member,!member.isChecked(), TerminalMemberType.getInstanceByCode(member.getType()).toString());
                     member.setChecked(!member.isChecked());
                     if(onItemClickListener !=null){
                         onItemClickListener.onItemClick();

@@ -720,7 +720,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     /**
      * 搜索页面点击选择
      */
-    private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected) -> {
+    private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected,type) -> {
         member.setChecked(selected);
         int index = -1;
         for (int i = 0; i < selectedMembers.size(); i++) {

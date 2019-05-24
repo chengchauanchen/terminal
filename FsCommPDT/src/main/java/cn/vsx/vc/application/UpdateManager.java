@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
@@ -59,7 +60,7 @@ public class UpdateManager
 	private ProgressBar mProgress;
 	private Dialog mDownloadDialog;
 
-	private Handler mHandler = new Handler()
+	private Handler mHandler = new Handler(Looper.getMainLooper())
 	{
 		public void handleMessage(Message msg)
 		{

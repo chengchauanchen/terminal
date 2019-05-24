@@ -418,6 +418,7 @@
     <string name="text_prompt">提示</string>
     <string name="text_temporarily_unavailable_permissions">:暂时未开通权限</string>
     <string name="text_departmental_delegation_expires">:部门授权过期</string>
+    <string name="text_terminal_type_error">:认证失败，类型不匹配</string>
     <string name="text_looking_for_server">正在找服务器</string>
     <string name="text_invitation_code_wrong_please_regist_again">邀请码错误，请重新注册！</string>
     <string name="text_regist_fail_please_check_all_info_is_correct">注册失败，请检查各项信息是否正确！</string>

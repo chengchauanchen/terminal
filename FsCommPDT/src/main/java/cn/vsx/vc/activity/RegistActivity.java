@@ -152,7 +152,11 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 }else if(resultCode == TerminalErrorCode.DEPT_EXPIRED.getErrorCode()){
                     AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_departmental_delegation_expires)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
                     alerDialog.show();
-                }else if(resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()){
+                }else if(resultCode == TerminalErrorCode.TERMINAL_TYPE_ERROR.getErrorCode()){
+                    AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_terminal_type_error)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
+                    alerDialog.show();
+                }
+                else if(resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()){
                     if(reAuthCount < 3){
                         reAuthCount++;
                         //发生异常的时候重试几次，因为网络原因经常导致一个io异常

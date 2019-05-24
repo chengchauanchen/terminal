@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Department;
-import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetTerminalHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
@@ -38,7 +38,7 @@ public class MemberListFragment extends BaseFragment{
 
     private Handler mHandler = new Handler();
     private MemberListAdapter memberListAdapter;
-    private List<Integer> selectedMemberNos = new ArrayList<>();
+    private List<Member> selectedMember = new ArrayList<>();
 
     public MemberListFragment(){
         // Required empty public constructor
@@ -89,7 +89,7 @@ public class MemberListFragment extends BaseFragment{
             public void itemClick(int type, int position){
                 if(type == Constants.TYPE_USER){
                     Member member = (Member) mData.get(position).getBean();
-                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class,member,!member.isChecked());
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class,member,!member.isChecked(), TerminalMemberType.getInstanceByCode(member.getType()).toString());
 
                 }else if(type == Constants.TYPE_FOLDER){
                     Department department = (Department) mData.get(position).getBean();
@@ -114,15 +114,12 @@ public class MemberListFragment extends BaseFragment{
                 ContactItemBean next = iterator.next();
                 if(next.getBean() instanceof Member){
                     Member member = (Member) next.getBean();
-                    if(bean.getNo() == member.getNo()){
+                    if(bean.getNo() == member.getNo() && bean.getType() == member.getType()){
                         member.setChecked(false);
                     }
                 }
             }
-
-            if(selectedMemberNos.contains(bean.getNo())){
-                selectedMemberNos.remove((Integer)bean.getNo());
-            }
+            selectedMember.remove(bean);
         }
         mHandler.post(()->memberListAdapter.notifyDataSetChanged());
     };
@@ -133,16 +130,17 @@ public class MemberListFragment extends BaseFragment{
         }
     };
 
-    private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected) -> {
+    private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected,type) -> {
         // TODO: 2019/4/22 如果选中的是子部门的，需要修改子部门数据的状态
+        if(!type.equals(this.type)){
+            return;
+        }
         if(selected){
-            if(!selectedMemberNos.contains(member.getNo())){
-                selectedMemberNos.add(member.getNo());
+            if(!selectedMember.contains(member)){
+                selectedMember.add(member);
             }
         }else {
-            if(selectedMemberNos.contains(member.getNo())){
-                selectedMemberNos.remove((Integer)member.getNo());
-            }
+            selectedMember.remove(member);
         }
         for(ContactItemBean bean : mData){
             if(bean.getBean() instanceof Member){
@@ -177,17 +175,18 @@ public class MemberListFragment extends BaseFragment{
             contactItemBean.setType(Constants.TYPE_FOLDER);
             mData.add(contactItemBean);
         }
+
         //将之前选中的人重新选中
-        for(Integer selectedMemberNo : selectedMemberNos){
+        for(Member member : selectedMember){
             for(ContactItemBean contactItemBean : mData){
                 if(contactItemBean.getBean() instanceof Member){
-                    if(selectedMemberNo == contactItemBean.getBean()){
+                    if(member.getNo() == ((Member) contactItemBean.getBean()).getNo()){
                         ((Member) contactItemBean.getBean()).setChecked(true);
                     }
                 }
-
             }
         }
+
         if(memberListAdapter !=null){
             memberListAdapter.notifyDataSetChanged();
         }

@@ -1828,6 +1828,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                     refreshing = false;
                 });
             } else {
+//                messageRecord.remove(0);
                 setData(messageRecord, true);
             }
             handler.post(()-> temporaryAdapter.notifyDataSetChanged());

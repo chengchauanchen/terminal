@@ -327,7 +327,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
         if(contactItemBean.getBean() instanceof Member){
             Member member = (Member) contactItemBean.getBean();
             member.setChecked(!member.isChecked());
-            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class, member, !member.isChecked());
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class, member, !member.isChecked(),TerminalMemberType.getInstanceByCode(member.getType()).toString());
         }else if(contactItemBean.getBean() instanceof Group){
         }
         searchAdapter.notifyDataSetChanged();

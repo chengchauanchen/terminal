@@ -1,6 +1,7 @@
 package cn.vsx.vc.fragment;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.LinearLayoutManager;
@@ -51,9 +52,15 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
     private BaseFragment currentFragment;
 
     private ArrayList<ContactItemBean> selectedMembers;
-    private List<Integer> selectedMemberNos;
+//    private List<Integer> selectedMemberNos;
+    private List<Member> pcSelectMember = new ArrayList<>();
+    private List<Member> policeSelectMember = new ArrayList<>();
+    private List<Member> recoderSelectMember = new ArrayList<>();
+    private List<Member> uavSelectMember = new ArrayList<>();
+
     private SelectAdapter selectAdapter;
     private int currentIndex;
+    private Handler mHandler = new Handler();
 
     public TempGroupMemberFragment(){
         // Required empty public constructor
@@ -67,7 +74,6 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
         View view = inflater.inflate(R.layout.layout_select_member, container, false);
         selectedMembers = new ArrayList<>();
-        selectedMemberNos = new ArrayList<>();
         findView(view);
         initTab();
         initListener();
@@ -192,17 +198,30 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
     }
 
     private void showSearchFragment(){
+        List<Integer> selectedMemberNos = new ArrayList<>();
         switch(currentIndex){
             case 0:
+                for(Member member : pcSelectMember){
+                    selectedMemberNos.add(member.getNo());
+                }
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_PC,selectedMemberNos);
                 break;
             case 1:
+                for(Member member : policeSelectMember){
+                    selectedMemberNos.add(member.getNo());
+                }
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_POLICE,selectedMemberNos);
                 break;
             case 2:
+                for(Member member : recoderSelectMember){
+                    selectedMemberNos.add(member.getNo());
+                }
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_RECODER,selectedMemberNos);
                 break;
             case 3:
+                for(Member member : uavSelectMember){
+                    selectedMemberNos.add(member.getNo());
+                }
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_UAV,selectedMemberNos);
                 break;
             default:
@@ -223,61 +242,97 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
     private ReceiveRemoveSelectedMemberHandler receiveRemoveSelectedMemberHandler = new ReceiveRemoveSelectedMemberHandler(){
         @Override
         public void handle(ContactItemBean contactItemBean){
-            if(contactItemBean.getBean() instanceof Member){
-                Member member = (Member) contactItemBean.getBean();
-                if(selectedMemberNos.contains(member.getNo())){
-                    Iterator<ContactItemBean> iterator = selectedMembers.iterator();
-                    while(iterator.hasNext()){
-                        ContactItemBean next = iterator.next();
-                        if(next.getType() == Constants.TYPE_USER){
-                            Member member1 = (Member) next.getBean();
-                            if(member1.getNo() == member.getNo()){
-                                iterator.remove();
-                            }
-                        }
-                    }
-                    selectedMemberNos.remove((Integer) member.getNo());
+            removeMember(contactItemBean);
+            mHandler.post(()->{
+                if(selectAdapter != null){
+                    selectAdapter.notifyDataSetChanged();
                 }
-            }
-            selectAdapter.notifyDataSetChanged();
+            });
         }
     };
 
-    private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected) -> {
-        //不是同一个member对象
+    private ReceiveMemberSelectedHandler receiveMemberSelectedHandler = (member, selected,type) -> {
         if(selected){
-            ContactItemBean bean = new ContactItemBean();
-            bean.setType(Constants.TYPE_USER);
-            bean.setBean(member);
-            if(!selectedMemberNos.contains(member.getNo())){
-                selectedMembers.add(bean);
-                selectedMemberNos.add(member.getNo());
-            }
+            addMember(member,type);
         }else{
-            if(selectedMemberNos.contains(member.getNo())){
-                Iterator<ContactItemBean> iterator = selectedMembers.iterator();
-                while(iterator.hasNext()){
-                    ContactItemBean next = iterator.next();
-                    if(next.getType() == Constants.TYPE_USER){
-                        Member member1 = (Member) next.getBean();
-                        if(member1.getNo() == member.getNo()){
-                            iterator.remove();
-                        }
-                    }
+            removeMember(member,type);
+
+        }
+        mHandler.post(()->{
+            if(selectAdapter != null){
+                selectAdapter.notifyDataSetChanged();
+            }
+        });
+    };
+
+    @SuppressWarnings("unchecked")
+    private void addMember(Member member, String type){
+        ContactItemBean bean = new ContactItemBean();
+        bean.setType(Constants.TYPE_USER);
+        bean.setBean(member);
+        selectedMembers.add(bean);
+        if(TerminalMemberType.TERMINAL_PC.toString().equals(type)){
+            pcSelectMember.add(member);
+        }else if(TerminalMemberType.TERMINAL_PHONE.toString().equals(type)){
+            policeSelectMember.add(member);
+        }else if(TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString().equals(type)){
+            recoderSelectMember.add(member);
+        }else if(TerminalMemberType.TERMINAL_UAV.toString().equals(type)){
+            uavSelectMember.add(member);
+        }
+    }
+
+    private void removeMember(Member member, String type){
+        if(TerminalMemberType.TERMINAL_PC.toString().equals(type)){
+            pcSelectMember.remove(member);
+        }else if(TerminalMemberType.TERMINAL_PHONE.toString().equals(type)){
+            policeSelectMember.remove(member);
+        }else if(TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString().equals(type)){
+            recoderSelectMember.remove(member);
+        }else if(TerminalMemberType.TERMINAL_UAV.toString().equals(type)){
+            uavSelectMember.remove(member);
+        }
+        Iterator<ContactItemBean> iterator = selectedMembers.iterator();
+        while(iterator.hasNext()){
+            ContactItemBean next = iterator.next();
+            if(next.getType() == Constants.TYPE_USER){
+                Member member1 = (Member) next.getBean();
+                if(member1.getNo() == member.getNo()){
+                    iterator.remove();
                 }
-                selectedMemberNos.remove((Integer) member.getNo());
             }
         }
-//        if(selectedMemberNos.isEmpty()){
-//            mLlSelected.setVisibility(View.GONE);
-//        }else{
-//            mLlSelected.setVisibility(View.VISIBLE);
-//        }
+    }
 
-        if(selectAdapter != null){
-            selectAdapter.notifyDataSetChanged();
+    private void removeMember(ContactItemBean contactItemBean){
+        if(contactItemBean.getBean() instanceof Member){
+            Member member = (Member) contactItemBean.getBean();
+            selectedMembers.remove(contactItemBean);
+//            Iterator<ContactItemBean> iterator = selectedMembers.iterator();
+//            while(iterator.hasNext()){
+//                ContactItemBean next = iterator.next();
+//                if(next.getType() == Constants.TYPE_USER){
+//                    Member member1 = (Member) next.getBean();
+//                    if(member1.getNo() == member.getNo() && member1.getType() == member.getType()){
+//                        iterator.remove();
+//                    }
+//                }
+//            }
+            removeSelectedMember(member);
         }
-    };
+    }
+
+    private void removeSelectedMember(Member member){
+        if(member.getType() == TerminalMemberType.TERMINAL_PC.getCode()){
+            pcSelectMember.remove(member);
+        }else if(member.getType() == TerminalMemberType.TERMINAL_PHONE.getCode()){
+            policeSelectMember.remove(member);
+        }else if(member.getType() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
+            recoderSelectMember.remove(member);
+        }else if(member.getType() == TerminalMemberType.TERMINAL_UAV.getCode()){
+            uavSelectMember.remove(member);
+        }
+    }
 
     public ArrayList<Member> getSelectedMember(){
         ArrayList<Member> list = new ArrayList<>();
@@ -287,9 +342,5 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
             }
         }
         return list;
-    }
-
-    public List<Integer> getSelectedMemberNo(){
-        return selectedMemberNos;
     }
 }
