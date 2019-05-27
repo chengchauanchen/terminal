@@ -804,6 +804,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     private void start() {
+        PromptManager.getInstance().start();
         //进入注册界面了，先判断有没有认证地址
         String authUrl = TerminalFactory.getSDK().getParam(Params.IDENTITY_URL, "");
         if(TextUtils.isEmpty(authUrl)){
