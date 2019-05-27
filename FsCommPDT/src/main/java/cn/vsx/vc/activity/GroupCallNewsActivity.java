@@ -330,9 +330,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     private void refreshPtt(){
         Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(userId);
-        if(ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) && !groupByGroupNo.isHighUser()){
-            change2Forbid();
-        }else if(TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(mGroupId)){
+        //响应组  普通用户  不在响应状态
+        if(ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) &&
+                !groupByGroupNo.isHighUser() &&
+                !TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(mGroupId)){
             change2Forbid();
         }
     }

@@ -137,7 +137,6 @@ public class TalkbackFragment extends BaseFragment {
                         change2Silence();
                     }
                 }
-                setPttText();
                 setViewEnable(true);
             });
         }
@@ -147,7 +146,9 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public void handler(boolean isActive, int responseGroupId){
             //如果时间到了，还在响应组会话界面，将PTT禁止
-            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == responseGroupId && !isActive){
+            Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(responseGroupId);
+            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == responseGroupId && !isActive &&
+                    !groupByGroupNo.isHighUser()){
                 myHandler.post(()->{
                     change2Forbid();
                 });
@@ -206,19 +207,7 @@ public class TalkbackFragment extends BaseFragment {
                     int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
                     Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId);
                     if(!groupByGroupNo.isHighUser()){
-                        myHandler.postDelayed(new Runnable(){
-                            @Override
-                            public void run(){
-                                change2Silence();
-                                if(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID,0) != 0){
-                                    TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID,0));
-                                }else {
-                                    TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
-                                }
-                            }
-                        },100);
-                    }else {
-                        myHandler.post(()-> change2Forbid());
+                        myHandler.post(() -> change2Silence());
                     }
                 } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
                     myHandler.post(() -> ToastUtil.showToast(context, getString(R.string.cannot_talk)));
@@ -338,9 +327,7 @@ public class TalkbackFragment extends BaseFragment {
                 myHandler.post(() -> {
                     setCurrentGroupView();
                     setChangeGroupView();
-                    if(TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(currentGroup)){
-                        change2Forbid();
-                    }
+                    setPttText();
                 });
             }
         }
@@ -1191,9 +1178,10 @@ public class TalkbackFragment extends BaseFragment {
     private void setPttText(){
         int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
         Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId);
-        if(ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) && !groupByGroupNo.isHighUser()){
-            change2Forbid();
-        }else if(TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(currentGroupId)){
+        //响应组  普通用户  不在响应状态
+        if(ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) &&
+                !groupByGroupNo.isHighUser() &&
+                !TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(currentGroupId)){
             change2Forbid();
         }
     }
