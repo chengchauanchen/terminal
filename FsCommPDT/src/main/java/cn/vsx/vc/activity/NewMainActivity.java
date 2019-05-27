@@ -35,7 +35,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -110,7 +109,6 @@ import cn.vsx.vc.application.UpdateManager;
 import cn.vsx.vc.fragment.ContactsFragmentNew;
 import cn.vsx.vc.fragment.GroupSearchFragment;
 import cn.vsx.vc.fragment.NewsFragment;
-import cn.vsx.vc.fragment.PersonSearchFragment;
 import cn.vsx.vc.fragment.SearchFragment;
 import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
@@ -121,7 +119,6 @@ import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
-import cn.vsx.vc.receiveHandle.ReceiverShowPopupwindowHandler;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.AirCraftUtil;
@@ -133,7 +130,6 @@ import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.view.BottomView;
 import cn.vsx.vc.view.IndividualCallTimerView;
 import cn.vsx.vc.view.TimerView;
-import cn.vsx.vc.view.custompopupwindow.ChangeNamePopupwindow;
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
 import dji.common.realname.AircraftBindingState;
@@ -392,27 +388,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     }
                 });
             }
-        }
-    };
-
-    /**
-     * 显示添加成员列表界面popupwindow的消息监听
-     */
-    private ReceiverShowPopupwindowHandler mReceiverShowPopupwindowHandler = new ReceiverShowPopupwindowHandler() {
-        @Override
-        public void handler(final String className) {
-            myHandler.post(() -> {
-
-                if (className.equals(PersonSearchFragment.class.getName())) {
-                    fl_fragment_container_main.setVisibility(View.VISIBLE);
-                    getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, new PersonSearchFragment()).commit();
-                }
-                else if (className.equals(ChangeNamePopupwindow.class.getName())) {
-                    if(my_view == null)
-                        my_view = findViewById(R.id.my_view);
-                    new ChangeNamePopupwindow(NewMainActivity.this).showAtLocation(my_view,Gravity.BOTTOM,0,0);
-                }
-            });
         }
     };
 
@@ -992,7 +967,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     @Override
     public void initListener() {
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowPopupwindowHandler);
         //视频提示按钮监听
         lv_live_return.setOnClickListener(new LiveReturnOnClickListeren());
         //悬浮按钮
@@ -1642,7 +1616,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupListHandler);
 //        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSwitchMainFrgamentHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveUnReadCountChangedHandler);
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowPopupwindowHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowPersonFragmentHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowGroupFragmentHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverFragmentDestoryHandler);

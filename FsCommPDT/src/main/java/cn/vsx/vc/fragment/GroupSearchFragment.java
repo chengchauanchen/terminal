@@ -59,6 +59,8 @@ public class GroupSearchFragment extends BaseFragment {
 
     EditText et_search_allcontacts;
 
+    private LinearLayout ll_delete;
+
     private String keyWord;
     //搜索到的所有组
     private List<Group> searchGroups = new ArrayList<>();
@@ -77,11 +79,12 @@ public class GroupSearchFragment extends BaseFragment {
         rl_search_result = (RelativeLayout) mRootView.findViewById(R.id.rl_search_result);
         tv_search_nothing = (TextView) mRootView.findViewById(R.id.tv_search_nothing);
         btn_search_allcontacts = (Button) mRootView.findViewById(R.id.btn_search_allcontacts);
+        ll_delete = mRootView.findViewById(R.id.ll_delete);
+        ll_delete.setVisibility(View.GONE);
         iv_delete_edittext = (ImageView) mRootView.findViewById(R.id.iv_delete_edittext);
         iv_goback_contacts = (ImageView) mRootView.findViewById(R.id.iv_goback_contacts);
         ll_search_pop = (LinearLayout) mRootView.findViewById(R.id.ll_search_pop);
         showSoftInputFromWindow(getActivity(),et_search_allcontacts);
-        iv_delete_edittext.setVisibility(View.GONE);
         btn_search_allcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
         btn_search_allcontacts.setTextColor(ContextCompat.getColor(context,R.color.search_button_text_color1));
         btn_search_allcontacts.setEnabled(false);
@@ -95,7 +98,7 @@ public class GroupSearchFragment extends BaseFragment {
 
     @Override
     public void initListener() {
-        iv_delete_edittext.setOnClickListener(new OnClickListenerImpDeleteEditText());
+        ll_delete.setOnClickListener(new OnClickListenerImpDeleteEditText());
         iv_goback_contacts.setOnClickListener(new OnClickListenerImpGoBackContactsList());
         btn_search_allcontacts.setOnClickListener(new OnClickListenerImpSearchContats());
         lv_search_allcontacts.setOnItemClickListener(new OnItemClickListenerImpAddCall());
@@ -126,12 +129,12 @@ public class GroupSearchFragment extends BaseFragment {
 
                     }
                     if(TextUtils.isEmpty(s.toString())){
-                        iv_delete_edittext.setVisibility(View.GONE);
+                        ll_delete.setVisibility(View.GONE);
                         btn_search_allcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
                         btn_search_allcontacts.setTextColor(ContextCompat.getColor(context,R.color.search_button_text_color1));
                         btn_search_allcontacts.setEnabled(false);
                     }else {
-                        iv_delete_edittext.setVisibility(View.VISIBLE);
+                        ll_delete.setVisibility(View.VISIBLE);
                         btn_search_allcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape2);
                         btn_search_allcontacts.setTextColor(ContextCompat.getColor(context,R.color.white));
                         btn_search_allcontacts.setEnabled(true);
@@ -187,7 +190,7 @@ public class GroupSearchFragment extends BaseFragment {
         groupSearchAdapter.setFilterKeyWords(keyWord);
 
         tv_search_nothing.setVisibility(View.VISIBLE);
-        tv_search_nothing.setText(R.string.text_search_group);
+        tv_search_nothing.setText(getResources().getString(R.string.text_search_group));
         rl_search_result.setVisibility(View.GONE);
         searchGroups.clear();
 
@@ -222,6 +225,13 @@ public class GroupSearchFragment extends BaseFragment {
         @Override
         public void onClick(View v) {
             et_search_allcontacts.setText("");
+            searchGroups.clear();
+            if(groupSearchAdapter !=null){
+                groupSearchAdapter.notifyDataSetChanged();
+            }
+            rl_search_result.setVisibility(View.GONE);
+            tv_search_nothing.setVisibility(View.VISIBLE);
+            tv_search_nothing.setText(R.string.text_search_by_group_name);
         }
     }
 

@@ -67,16 +67,21 @@
                 android:textColorHint="@color/white_53"
                 android:textSize="@dimen/x12"
                 android:visibility="visible" />
+            <LinearLayout
+                android:id="@+id/ll_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/dp_10"
+                android:gravity="center">
+                <ImageView
+                    android:id="@+id/iv_delete_edittext"
+                    android:layout_width="@dimen/dp_15"
+                    android:layout_height="@dimen/dp_15"
+                    android:src="@drawable/live_cencle"
+                     />
+            </LinearLayout>
             
-            <ImageView
-                android:id="@+id/iv_delete_edittext"
-                android:layout_width="@dimen/dp_15"
-                android:layout_height="@dimen/dp_15"
-                android:layout_marginLeft="@dimen/dp_10"
-                android:layout_marginRight="@dimen/dp_10"
-                android:gravity="center"
-                android:src="@drawable/live_cencle"
-                android:visibility="gone" />
+            
         </LinearLayout>
         
         <Button

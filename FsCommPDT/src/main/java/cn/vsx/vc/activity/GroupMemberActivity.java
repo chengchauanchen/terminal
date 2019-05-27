@@ -31,7 +31,6 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupMemberAdapter;
-import cn.vsx.vc.fragment.PersonSearchFragment;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -203,6 +202,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
     private long lastSearchTime=0;
 
 
+    @Override
     public void onClick(View view) {
         long currentTime = System.currentTimeMillis();
         if( currentTime - lastSearchTime<1000){
@@ -216,12 +216,6 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                 break;
             case R.id.news_bar_back_temp:
                 finish();
-                break;
-            case R.id.right_btn:
-                PersonSearchFragment personSearchFragment = new PersonSearchFragment();
-                personSearchFragment.setGroupMember(DataUtil.getAllMembersExceptMe(currentGroupMembers));
-                personSearchFragment.setInterGroup(true);
-                getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_group_member, personSearchFragment).commit();
                 break;
             case R.id.add_btn:
                 IncreaseTemporaryGroupMemberActivity.startActivity(GroupMemberActivity.this,1,groupId);

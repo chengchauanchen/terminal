@@ -3,16 +3,20 @@ package cn.vsx.vc.fragment;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -54,6 +58,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
     private SwipeRefreshLayout mLayoutSrl;
     private SearchAdapter searchAdapter;
     private BackListener backListener;
+    private LinearLayout mLlDelete;
     private List<ContactItemBean> mData = new ArrayList<>();
     private Handler mhandler = new Handler(Looper.getMainLooper());
     private int currentPage = 0;
@@ -113,7 +118,11 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
                 mLayoutSrl.setRefreshing(false);
                 if(totalPages == 0){
                     mTvSearchNothing.setVisibility(View.VISIBLE);
-                    mTvSearchNothing.setText(R.string.text_contact_is_not_exist);
+                    if(Constants.TYPE_CONTRACT_GROUP == type || Constants.TYPE_CHECK_SEARCH_GROUP == type){
+                        mTvSearchNothing.setText(R.string.text_group_is_not_exist);
+                    }else {
+                        mTvSearchNothing.setText(R.string.text_contact_is_not_exist);
+                    }
                     searchAdapter.loadMoreEnd(true);
                     mRlSearchResult.setVisibility(View.GONE);
                 }else{
@@ -180,12 +189,14 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
     public void initView(){
         mIvBack = mRootView.findViewById(R.id.iv_back);
         mEtSearchAllcontacts = mRootView.findViewById(R.id.et_search_allcontacts);
+        mLlDelete = mRootView.findViewById(R.id.ll_delete);
         mIvDeleteEdittext = mRootView.findViewById(R.id.iv_delete_edittext);
         mBtnSearchAllcontacts = mRootView.findViewById(R.id.btn_search_allcontacts);
         mTvSearchNothing = mRootView.findViewById(R.id.tv_search_nothing);
         mRlSearchResult = mRootView.findViewById(R.id.rl_search_result);
         mRecyclerview = mRootView.findViewById(R.id.recyclerview);
         mLayoutSrl = mRootView.findViewById(R.id.layout_srl);
+        mLlDelete.setVisibility(View.GONE);
     }
 
     @Override
@@ -193,6 +204,23 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSearchAccountResultHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSearchMemberResultHandler);
         mIvBack.setOnClickListener(v -> getActivity().getSupportFragmentManager().popBackStack());
+        mLlDelete.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
+                mEtSearchAllcontacts.setText("");
+                mData.clear();
+                if(searchAdapter != null){
+                    searchAdapter.notifyDataSetChanged();
+                }
+                mRlSearchResult.setVisibility(View.GONE);
+                mTvSearchNothing.setVisibility(View.VISIBLE);
+                if(Constants.TYPE_CONTRACT_GROUP == type || Constants.TYPE_CHECK_SEARCH_GROUP == type){
+                    mTvSearchNothing.setText(getResources().getString(R.string.text_search_by_group_name));
+                }else {
+                    mTvSearchNothing.setText(getResources().getString(R.string.text_search_by_name_or_number));
+                }
+            }
+        });
         mIvBack.setOnClickListener(v -> {
             if(backListener != null){
                 backListener.onBack();
@@ -213,7 +241,47 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
             }
             return false;
         });
+        mEtSearchAllcontacts.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(mEtSearchAllcontacts !=null && context !=null){
+
+                    if (s.toString().contains(" ")) {
+                        String[] str = s.toString().split(" ");
+                        String str1 = "";
+                        for (String aStr : str) {
+                            str1 += aStr;
+                        }
+
+                        mEtSearchAllcontacts.setText(str1);
+
+                        mEtSearchAllcontacts.setSelection(start);
+
+                    }
+                    if(TextUtils.isEmpty(s.toString())){
+                        mLlDelete.setVisibility(View.GONE);
+                        mBtnSearchAllcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
+                        mBtnSearchAllcontacts.setTextColor(ContextCompat.getColor(context,R.color.search_button_text_color1));
+                        mBtnSearchAllcontacts.setEnabled(false);
+                    }else {
+                        mLlDelete.setVisibility(View.VISIBLE);
+                        mBtnSearchAllcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape2);
+                        mBtnSearchAllcontacts.setTextColor(ContextCompat.getColor(context,R.color.white));
+                        mBtnSearchAllcontacts.setEnabled(true);
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 
     private void doSearch(String keywords){
