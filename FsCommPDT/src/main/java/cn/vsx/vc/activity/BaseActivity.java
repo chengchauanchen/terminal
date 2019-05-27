@@ -63,7 +63,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 	private ProgressDialog myProgressDialog;//加载数据的弹窗
 
 	public OnBackListener backListener;
-
     //成员被删除了
 	private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
 		@Override

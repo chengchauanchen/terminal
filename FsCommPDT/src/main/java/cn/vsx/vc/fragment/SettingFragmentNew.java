@@ -599,11 +599,13 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     }
 
     /**日志上传是否成功的消息*/
-    private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = resultCode -> mHandler.post(() -> {
-        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-            ToastUtil.toast(getActivity(), getString(R.string.text_log_upload_success_thanks));
-        } else {
-            ToastUtil.showToast( getString(R.string.text_log_upload_fail_try_again_later), getActivity());
+    private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = (resultCode,type) -> mHandler.post(() -> {
+        if("log".equals(type)){
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                ToastUtil.toast(getActivity(), getString(R.string.text_log_upload_success_thanks));
+            } else {
+                ToastUtil.showToast( getString(R.string.text_log_upload_fail_try_again_later), getActivity());
+            }
         }
     });
 

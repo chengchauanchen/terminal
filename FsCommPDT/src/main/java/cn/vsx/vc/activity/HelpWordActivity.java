@@ -173,7 +173,7 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
             FileUtil.writeTxtToFile(strcontent, MyTerminalFactory.getSDK().getLogDirectory(), txtFileName);
             fileNames.add(logFileName);
             fileNames.add(txtFileName);
-            MyTerminalFactory.getSDK().getLogFileManager().uploadLogFile(fileNames);
+            MyTerminalFactory.getSDK().getLogFileManager().uploadLogFile(fileNames,"question");
         }
         @JavascriptInterface
         public void showMessage(String message){
@@ -437,12 +437,13 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
     /**日志上传是否成功的消息*/
     private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = new ReceiveLogFileUploadCompleteHandler() {
         @Override
-        public void handler(final int resultCode) {
+        public void handler(final int resultCode,String type) {
             myHandler.post(() -> {
               String result = String.valueOf(resultCode);
-              if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+              if (resultCode == BaseCommonCode.SUCCESS_CODE && "question".equals(type)) {
                   ToastUtil.toast(HelpWordActivity.this, getString(R.string.text_log_upload_success_thanks));
                   wv_help.loadUrl("javascript: reqSuccess('"+result+ "')");
+                  finish();
               } else {
                   ToastUtil.showToast( getString(R.string.text_log_upload_fail_please_try_later), HelpWordActivity.this);
                   wv_help.loadUrl("javascript: reqSuccess('"+result+ "')");

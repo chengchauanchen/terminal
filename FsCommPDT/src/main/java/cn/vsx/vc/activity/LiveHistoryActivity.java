@@ -113,13 +113,8 @@ public class LiveHistoryActivity extends BaseActivity implements View.OnClickLis
 
         JSONObject messageBody = terminalMessage.messageBody;
         String liver = messageBody.getString(JsonParam.LIVER);
-        int liverNo = Util.stringToInt(messageBody.getString(JsonParam.LIVERNO));
+
         String[] split = liver.split("_");
-//        //设置默认上报视频者，防止数组下标越界异常
-//        int memberNo = terminalMessage.messageFromId;
-//        if(split.length>0){
-//            memberNo = Integer.valueOf(split[0]);
-//        }
         //上报主题，如果没有就取上报者的名字
         liveTheme = messageBody.getString(JsonParam.TITLE);
         if(TextUtils.isEmpty(liveTheme)){
@@ -128,14 +123,17 @@ public class LiveHistoryActivity extends BaseActivity implements View.OnClickLis
                 liveTheme = String.format(getString(R.string.text_living_theme_member_name),memberName);
                 tv_theme.setText(liveTheme);
             }else {
+                int memberNo = terminalMessage.messageFromId;
                 TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo,true);
+                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(memberNo,true);
                     String name = (account!=null)?account.getName():terminalMessage.messageFromName;
-                    new Handler().post(() -> {
+                    mHandler.post(() -> {
                         tv_theme.setText(String.format(this.getString(R.string.current_push_member),name));
                     });
                 });
             }
+        }else {
+            tv_theme.setText(liveTheme);
         }
 
 
@@ -182,20 +180,18 @@ public class LiveHistoryActivity extends BaseActivity implements View.OnClickLis
      * @return
      */
     private String getCallId(TerminalMessage terminalMessage){
-        String callId = "";
+        String id = "";
         if(terminalMessage.messageBody!=null){
-            if(terminalMessage.messageBody.containsKey(JsonParam.CALLID)){
-                callId = terminalMessage.messageBody.getString(JsonParam.CALLID);
-            }else if(terminalMessage.messageBody.containsKey(JsonParam.EASYDARWIN_RTSP_URL)){
+            if(terminalMessage.messageBody.containsKey(JsonParam.EASYDARWIN_RTSP_URL)){
                 String url = terminalMessage.messageBody.getString(JsonParam.EASYDARWIN_RTSP_URL);
                 if(!TextUtils.isEmpty(url)&&url.contains("/")&&url.contains(".")){
                     int index = url.lastIndexOf("/");
                     int pointIndex = url.lastIndexOf(".");
-                    callId = url.substring(index+1,pointIndex);
+                    id = url.substring(index+1,pointIndex);
                 }
             }
         }
-        return callId;
+        return id;
     }
 
     @Override
