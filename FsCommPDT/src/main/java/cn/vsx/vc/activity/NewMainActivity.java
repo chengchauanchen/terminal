@@ -96,6 +96,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePopBackStackHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
@@ -379,6 +380,19 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
     };
 
+    private ReceiveSetMonitorGroupListHandler receiveSetMonitorGroupListHandler = new ReceiveSetMonitorGroupListHandler(){
+        @Override
+        public void handler(int errorCode, String errorDesc){
+            if(errorCode == BaseCommonCode.SUCCESS_CODE){
+                myHandler.post(()->{
+                    fl_fragment_container_main.setVisibility(View.GONE);
+                    ll_content.setVisibility(View.VISIBLE);
+                    getSupportFragmentManager().popBackStack();
+                });
+            }
+        }
+    };
+
     /**
      * 显示添加成员列表界面popupwindow的消息监听
      */
@@ -405,6 +419,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         public void handle(){
             myHandler.post(() -> {
                 ll_content.setVisibility(View.VISIBLE);
+                fl_fragment_container_main.setVisibility(View.GONE);
                 getSupportFragmentManager().popBackStack();
             });
         }
@@ -1005,6 +1020,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveExitHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupListHandler);
 
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveUnReadCountChangedHandler);
 
@@ -1622,6 +1638,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         //外置摄像头是否连接通知
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUVCCameraConnectChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendDataMessageSuccessHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupListHandler);
 //        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSwitchMainFrgamentHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveUnReadCountChangedHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowPopupwindowHandler);

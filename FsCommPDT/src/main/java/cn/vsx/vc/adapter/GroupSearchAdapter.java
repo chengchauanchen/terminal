@@ -14,13 +14,13 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
-import ptt.terminalsdk.context.MyTerminalFactory;
+import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
 
 /**
  * 通讯录组搜索adapter
@@ -87,32 +87,14 @@ public class GroupSearchAdapter extends BaseAdapter {
         } else {
             viewHolderGroup.groupChildName.setText(name);
         }
+        if(checkIsMonitorGroup(searchGroupList.get(position).getNo())){
+            viewHolderGroup.iv_monitor.setImageResource(R.drawable.monitor_open);
+        }else {
+            viewHolderGroup.iv_monitor.setImageResource(R.drawable.monitor_close_blue);
+        }
         //如果是当前组
-        if (searchGroupList.get(position).id == (DataUtil.getGroupByGroupNo(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)).id)) {
-            viewHolderGroup.isCurrentGroupTv.setVisibility(View.VISIBLE);
-            viewHolderGroup.changeGroup.setVisibility(View.GONE);
-            viewHolderGroup.toGroup.setVisibility(View.GONE);
-        }
-        else {
-            viewHolderGroup.isCurrentGroupTv.setVisibility(View.INVISIBLE);
-            viewHolderGroup.changeGroup.setVisibility(View.VISIBLE);
-            viewHolderGroup.toGroup.setVisibility(View.VISIBLE);
-        }
-
-
-        //转组按钮点击事件
-        viewHolderGroup.changeGroup.setOnClickListener(v -> {
-            MyTerminalFactory.getSDK().getGroupManager().changeGroup(searchGroupList.get(position).id);
-
-//            int resultCode =0;
-//            if(resultCode == BaseCommonCode.SUCCESS_CODE){
-//                v.setVisibility(View.GONE);
-//                if (mItemBtnClickListener!=null){
-//                    mItemBtnClickListener.onItemBtnClick();
-//                }
-//            }else {
-//                ToastUtil.groupChangedFailToast(context, resultCode);
-//            }
+        viewHolderGroup.iv_monitor.setOnClickListener(v -> {
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,searchGroupList.get(position).getNo());
         });
 
         //会话按钮点击事件
@@ -156,7 +138,7 @@ public class GroupSearchAdapter extends BaseAdapter {
 
         TextView isCurrentGroupTv;
 
-        TextView changeGroup;
+        ImageView iv_monitor ;
 
         ImageView toGroup;
 
@@ -166,11 +148,26 @@ public class GroupSearchAdapter extends BaseAdapter {
             ll_group = rootView.findViewById(R.id.ll_group);
             groupChildName = rootView.findViewById(R.id.group_child_name);
             isCurrentGroupTv = rootView.findViewById(R.id.is_current_group_tv);
-            changeGroup = rootView.findViewById(R.id.change_group);
+            iv_monitor = rootView.findViewById(R.id.iv_monitor);
             toGroup = rootView.findViewById(R.id.to_group);
             line = rootView.findViewById(R.id.lay_line);
         }
     }
 
+    private boolean checkIsMonitorGroup(int groupNo){
+        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(groupNo)){
+            return true;
+        }
+        if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
+            return true;
+        }
+        if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
+            return true;
+        }
+        if(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) == groupNo){
+            return true;
+        }
+        return false;
+    }
 
 }

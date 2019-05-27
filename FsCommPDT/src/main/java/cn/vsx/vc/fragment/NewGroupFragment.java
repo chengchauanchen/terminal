@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.SparseBooleanArray;
 
 import com.alibaba.fastjson.JSONObject;
+import com.blankj.utilcode.util.ToastUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.adapter.GroupAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.CatalogBean;
+import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -107,7 +109,9 @@ public class NewGroupFragment extends BaseFragment{
                     //移除监听
                     if(monitorGroupNo == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
                         //当前组被移除监听了切换到主组去
-                        TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
+                        if(monitorGroupNo != TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)){
+                            TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
+                        }
                     }
                 }
                 if(groupAdapter !=null){
@@ -268,6 +272,7 @@ public class NewGroupFragment extends BaseFragment{
 
     @Override
     public void initListener(){
+        MyTerminalFactory.getSDK().registReceiveHandler(receiverMonitorViewClickHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyAboutGroupChangeMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupListHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivegUpdateGroupHandler);
@@ -321,15 +326,23 @@ public class NewGroupFragment extends BaseFragment{
             catalogNames.add(groupCatalogBean);
             TerminalFactory.getSDK().getConfigManager().updateGroup(depId,name);
         });
+    }
 
-        groupAdapter.setMonitorOnClickListener(groupNo -> {
+    private ReceiverMonitorViewClickHandler receiverMonitorViewClickHandler = new ReceiverMonitorViewClickHandler(){
+        @Override
+        public void handler(int groupNo){
             List<Integer> monitorGroups = new ArrayList<>();
             monitorGroups.add(groupNo);
             NewGroupFragment.this.monitorGroupNo = groupNo;
             //如果是当前组，取消当前组
             if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
-                currentMonitorGroup.put(groupNo,false);
-                MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
+                //如果是主组不能取消
+                if(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) == groupNo){
+                    ToastUtils.showShort(R.string.main_group_cannot_cancel_monitor);
+                }else {
+                    currentMonitorGroup.put(groupNo,false);
+                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
+                }
             }else {
                 if(null != DataUtil.getTempGroupByGroupNo(groupNo)){
                     //是临时组
@@ -359,10 +372,8 @@ public class NewGroupFragment extends BaseFragment{
                     }
                 }
             }
-        });
-    }
-
-
+        }
+    };
 
     private void saveLastGroupData(){
         lastGroupDatas.clear();
@@ -373,6 +384,7 @@ public class NewGroupFragment extends BaseFragment{
 
     @Override
     public void onDestroy(){
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiverMonitorViewClickHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyAboutGroupChangeMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupListHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivegUpdateGroupHandler);

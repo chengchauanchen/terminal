@@ -24,7 +24,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
@@ -33,7 +32,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePopBackStackHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupSearchAdapter;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
-import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.utils.InputMethodUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -85,13 +83,13 @@ public class GroupSearchFragment extends BaseFragment {
         showSoftInputFromWindow(getActivity(),et_search_allcontacts);
         iv_delete_edittext.setVisibility(View.GONE);
         btn_search_allcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
-        btn_search_allcontacts.setTextColor(ContextCompat.getColor(getContext(),R.color.search_button_text_color1));
+        btn_search_allcontacts.setTextColor(ContextCompat.getColor(context,R.color.search_button_text_color1));
         btn_search_allcontacts.setEnabled(false);
     }
 
     @Override
     public void initData() {
-        groupSearchAdapter = new GroupSearchAdapter(getContext(), searchGroups);
+        groupSearchAdapter = new GroupSearchAdapter(context, searchGroups);
         lv_search_allcontacts.setAdapter(groupSearchAdapter);
     }
 
@@ -103,6 +101,8 @@ public class GroupSearchFragment extends BaseFragment {
         lv_search_allcontacts.setOnItemClickListener(new OnItemClickListenerImpAddCall());
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveChangeGroupHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverCloseKeyBoardHandler);
+
+
         et_search_allcontacts.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -111,29 +111,31 @@ public class GroupSearchFragment extends BaseFragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(et_search_allcontacts !=null && context !=null){
 
-                if (s.toString().contains(" ")) {
-                    String[] str = s.toString().split(" ");
-                    String str1 = "";
-                    for (String aStr : str) {
-                        str1 += aStr;
+                    if (s.toString().contains(" ")) {
+                        String[] str = s.toString().split(" ");
+                        String str1 = "";
+                        for (String aStr : str) {
+                            str1 += aStr;
+                        }
+
+                        et_search_allcontacts.setText(str1);
+
+                        et_search_allcontacts.setSelection(start);
+
                     }
-
-                    et_search_allcontacts.setText(str1);
-
-                    et_search_allcontacts.setSelection(start);
-
-                }
-                if(TextUtils.isEmpty(s.toString())){
-                    iv_delete_edittext.setVisibility(View.GONE);
-                    btn_search_allcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
-                    btn_search_allcontacts.setTextColor(ContextCompat.getColor(getContext(),R.color.search_button_text_color1));
-                    btn_search_allcontacts.setEnabled(false);
-                }else {
-                    iv_delete_edittext.setVisibility(View.VISIBLE);
-                    btn_search_allcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape2);
-                    btn_search_allcontacts.setTextColor(ContextCompat.getColor(getContext(),R.color.white));
-                    btn_search_allcontacts.setEnabled(true);
+                    if(TextUtils.isEmpty(s.toString())){
+                        iv_delete_edittext.setVisibility(View.GONE);
+                        btn_search_allcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape1);
+                        btn_search_allcontacts.setTextColor(ContextCompat.getColor(context,R.color.search_button_text_color1));
+                        btn_search_allcontacts.setEnabled(false);
+                    }else {
+                        iv_delete_edittext.setVisibility(View.VISIBLE);
+                        btn_search_allcontacts.setBackgroundResource(R.drawable.rectangle_with_corners_shape2);
+                        btn_search_allcontacts.setTextColor(ContextCompat.getColor(context,R.color.white));
+                        btn_search_allcontacts.setEnabled(true);
+                    }
                 }
             }
 
@@ -164,7 +166,6 @@ public class GroupSearchFragment extends BaseFragment {
         super.unRegistListener();
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveChangeGroupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverCloseKeyBoardHandler);
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentDestoryHandler.class);
     }
 
     public static void showSoftInputFromWindow(Activity activity, final EditText editText) {
@@ -259,14 +260,14 @@ public class GroupSearchFragment extends BaseFragment {
 
     /**  切组回调 **/
     private ReceiveChangeGroupHandler mReceiveChangeGroupHandler = (errorCode, errorDesc) -> myHandler.post(() -> {
-        if(errorCode == BaseCommonCode.SUCCESS_CODE){
-            et_search_allcontacts.setText("");
-            InputMethodUtil.hideInputMethod(context, et_search_allcontacts);
-
-            searchGroups.clear();
-            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceivePopBackStackHandler.class);
-        }else {
-            ToastUtil.groupChangedFailToast(context, errorCode);
+        if(null != et_search_allcontacts && null != context){
+            if(errorCode == BaseCommonCode.SUCCESS_CODE){
+                et_search_allcontacts.setText("");
+                InputMethodUtil.hideInputMethod(context, et_search_allcontacts);
+                searchGroups.clear();
+            }else {
+                ToastUtil.groupChangedFailToast(context, errorCode);
+            }
         }
     });
 
@@ -274,8 +275,9 @@ public class GroupSearchFragment extends BaseFragment {
         @Override
         public void handler() {
             logger.info("关闭键盘handler");
-            InputMethodUtil.hideInputMethod(getContext(),et_search_allcontacts);
+            if(null != getContext()){
+                InputMethodUtil.hideInputMethod(getContext(),et_search_allcontacts);
+            }
         }
     };
-
 }

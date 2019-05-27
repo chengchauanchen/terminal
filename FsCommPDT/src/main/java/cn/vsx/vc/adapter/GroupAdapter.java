@@ -29,6 +29,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.receiveHandle.ReceiveSwitchMainFrgamentHandler;
+import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -179,9 +180,10 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             });
 
             groupViewHolder.ivMonitor.setOnClickListener(view -> {
-                if(monitorOnClickListener !=null){
-                    monitorOnClickListener.onMonitorClick(group.getNo());
-                }
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,group.getNo());
+//                if(monitorOnClickListener !=null){
+//                    monitorOnClickListener.onMonitorClick(group.getNo());
+//                }
             });
             groupViewHolder.tvName.setOnClickListener(new View.OnClickListener(){
                 @Override

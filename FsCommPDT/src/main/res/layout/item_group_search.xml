@@ -32,29 +32,28 @@
             android:text="7B-11T"
             android:textColor="@color/group_text_gray"
             android:textSize="@dimen/x12" />
-
-
-        <TextView
-            android:id="@+id/change_group"
-            android:layout_width="@dimen/x53"
-            android:layout_height="@dimen/y18"
-            android:layout_alignParentRight="true"
+    
+    
+        <ImageView
+            android:id="@+id/iv_monitor"
+            android:layout_width="@dimen/dp_35"
+            android:layout_height="@dimen/dp_35"
+            android:paddingLeft="@dimen/dp_15"
+            android:paddingRight="@dimen/dp_15"
             android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/x18"
-            android:background="@drawable/change_group_button_shape"
+            android:layout_marginRight="@dimen/dp_10"
+            android:padding="@dimen/dp_5"
+            android:layout_alignParentRight="true"
             android:gravity="center"
-            android:text="@string/text_change_group"
-            android:textColor="@color/change_group_text_bg"
-            android:textSize="@dimen/x12"
-            android:textStyle="normal" />
+            android:src="@drawable/monitor_open"/>
 
         <ImageView
             android:id="@+id/to_group"
-            android:layout_width="@dimen/x40"
-            android:layout_height="@dimen/x30"
-            android:layout_alignParentRight="true"
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_marginRight="@dimen/dp_20"
+            android:layout_toLeftOf="@id/iv_monitor"
             android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/x100"
             android:src="@drawable/new_message_icon" />
 
         <TextView
