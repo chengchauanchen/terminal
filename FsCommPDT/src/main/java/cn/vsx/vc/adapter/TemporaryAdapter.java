@@ -1361,11 +1361,12 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         if (!file.exists()) {
             MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
             MyTerminalFactory.getSDK().download(terminalMessage, true);
+        }else {
+            String content = FileUtil.getStringFromFile(file);
+            if (TextUtils.isEmpty(content))
+                content = activity.getString(R.string.text_get_no_content);
+            setText(holder.tvContent, content);
         }
-        String content = FileUtil.getStringFromFile(file);
-        if (TextUtils.isEmpty(content))
-            content = activity.getString(R.string.text_get_no_content);
-        setText(holder.tvContent, content);
     }
 
     /***  播放组呼录音相关改变 **/

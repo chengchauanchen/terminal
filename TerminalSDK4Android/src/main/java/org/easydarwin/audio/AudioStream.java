@@ -302,7 +302,7 @@ public class AudioStream{
             }
         } catch (InterruptedException e) {
             logger.error("mThread被中断了");
-            e.fillInStackTrace();
+            e.printStackTrace();
         }
     }
 

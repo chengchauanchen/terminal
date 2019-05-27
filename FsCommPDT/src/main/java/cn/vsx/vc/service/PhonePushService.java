@@ -231,7 +231,7 @@ public class PhonePushService extends BaseService{
                 break;
             case OFF_LINE:
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_push));
-                stopBusiness();
+                finishVideoLive();
                 break;
         }
     }
@@ -644,7 +644,7 @@ public class PhonePushService extends BaseService{
     };
 
     private void handleFocus(Camera camera){
-        if(null != mMediaStream && mMediaStream.isStreaming()){
+        if(null != mMediaStream && mMediaStream.isStreaming() && camera != null){
             camera.autoFocus(null);//屏幕聚焦
         }
         showLivingView();

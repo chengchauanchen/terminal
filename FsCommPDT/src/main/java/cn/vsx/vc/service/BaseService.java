@@ -237,7 +237,9 @@ public abstract class BaseService extends Service{
         if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
             MyTerminalFactory.getSDK().getLiveManager().ceaseLiving();
         }
-        ceaseWatching();
+        if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+            ceaseWatching();
+        }
         Log.d("BaseService", "MyApplication.instance.getIndividualState():" + MyApplication.instance.getIndividualState());
         if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
             MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
