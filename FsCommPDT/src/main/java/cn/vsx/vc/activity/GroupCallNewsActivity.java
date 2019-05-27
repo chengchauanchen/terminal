@@ -330,7 +330,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     private void refreshPtt(){
         Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(userId);
-        if(groupByGroupNo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString()) && !groupByGroupNo.isHighUser()){
+        if(ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) && !groupByGroupNo.isHighUser()){
             change2Forbid();
         }else if(TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(mGroupId)){
             change2Forbid();
@@ -1147,7 +1147,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         //如果时间到了，还在响应组会话界面，将PTT禁止
         if(userId == responseGroupId && !isActive){
             mHandler.post(this::change2Forbid);
-
         }
     };
     /**

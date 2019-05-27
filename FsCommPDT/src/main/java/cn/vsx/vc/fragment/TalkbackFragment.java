@@ -42,6 +42,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.GroupScanType;
 import cn.vsx.hamster.common.MemberChangeType;
+import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -136,6 +137,7 @@ public class TalkbackFragment extends BaseFragment {
                         change2Silence();
                     }
                 }
+                setPttText();
                 setViewEnable(true);
             });
         }
@@ -146,7 +148,9 @@ public class TalkbackFragment extends BaseFragment {
         public void handler(boolean isActive, int responseGroupId){
             //如果时间到了，还在响应组会话界面，将PTT禁止
             if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == responseGroupId && !isActive){
-                change2Forbid();
+                myHandler.post(()->{
+                    change2Forbid();
+                });
             }
         }
     };
@@ -197,22 +201,25 @@ public class TalkbackFragment extends BaseFragment {
                         setViewEnable(false);
                     });
                 }else if(methodResult == SignalServerErrorCode.RESPONSE_GROUP_IS_DISABLED.getErrorCode()){
-                    //切到主组或之前的组
+
                     ToastUtil.showToast(getContext(),resultDesc);
-
-                    myHandler.postDelayed(new Runnable(){
-                        @Override
-                        public void run(){
-                            change2Silence();
-                            if(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID,0) != 0){
-                                TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID,0));
-                            }else {
-                                TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
+                    int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                    Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId);
+                    if(!groupByGroupNo.isHighUser()){
+                        myHandler.postDelayed(new Runnable(){
+                            @Override
+                            public void run(){
+                                change2Silence();
+                                if(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID,0) != 0){
+                                    TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID,0));
+                                }else {
+                                    TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
+                                }
                             }
-                        }
-                    },100);
-
-
+                        },100);
+                    }else {
+                        myHandler.post(()-> change2Forbid());
+                    }
                 } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
                     myHandler.post(() -> ToastUtil.showToast(context, getString(R.string.cannot_talk)));
                     change2Silence();
@@ -1177,8 +1184,18 @@ public class TalkbackFragment extends BaseFragment {
         tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members),online_number));
         startTimerToLock();
         setVideoIcon();//设置视频回传上报相关图标
-
+        setPttText();
 //        setScanGroupIcon();//设置组扫描相关图标
+    }
+
+    private void setPttText(){
+        int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+        Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId);
+        if(ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) && !groupByGroupNo.isHighUser()){
+            change2Forbid();
+        }else if(TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(currentGroupId)){
+            change2Forbid();
+        }
     }
 
     private void setScanGroupIcon() {
