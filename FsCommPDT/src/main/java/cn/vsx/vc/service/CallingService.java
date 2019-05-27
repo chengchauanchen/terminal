@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Message;
-import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -36,7 +35,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicatio
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseIndividualCallAndTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
@@ -138,6 +136,7 @@ public class CallingService extends BaseService{
     }
 
     @SuppressLint("ClickableViewAccessibility")
+    @Override
     protected void initListener(){
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(individualCallPttStatusHandler);
@@ -176,9 +175,6 @@ public class CallingService extends BaseService{
                 //发送通知关闭StartIndividualCallService和ReceiveCallComingService
 //                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveStopStartReceiveCallServiceHandler.class);
                 mHandler.removeMessages(OFF_LINE);
-                mPopupICTVSpeakingTime.onPause();
-                mIctvSpeakingTimeSpeaking.onPause();
-                mIctvHalfDuplexTimeSpeaking.onPause();
                 stopBusiness();
                 break;
         }
@@ -188,7 +184,10 @@ public class CallingService extends BaseService{
     protected void onNetworkChanged(boolean connected){
         if(!connected){
             if(!mHandler.hasMessages(OFF_LINE)){
-                mHandler.sendEmptyMessageDelayed(OFF_LINE,3000);
+                mPopupICTVSpeakingTime.onPause();
+                mIctvSpeakingTimeSpeaking.onPause();
+                mIctvHalfDuplexTimeSpeaking.onPause();
+                mHandler.sendEmptyMessageDelayed(OFF_LINE,30000);
             }
         }else {
             mHandler.removeMessages(OFF_LINE);
@@ -461,6 +460,7 @@ public class CallingService extends BaseService{
         mHandler.removeMessages(AUTOHANGUP);
     }
 
+    @Override
     protected void showPopMiniView(){
         SensorUtil.getInstance().unregistSensor();
         windowManager.removeView(rootView);
@@ -531,7 +531,6 @@ public class CallingService extends BaseService{
             return;
         }
         cancelAutoHangUpTimer();
-        // FIXME: 2019/4/8 半双工发起组呼，是在临时组内
         int tempGroupId = MyTerminalFactory.getSDK().getIndividualCallManager().getTempGroupId();
         if(tempGroupId!=0){
             int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",tempGroupId);

@@ -168,33 +168,6 @@
             />
 
     </LinearLayout>
-    <!--无网络警告-->
-    <LinearLayout
-        android:id="@+id/no_network"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/y20"
-        android:layout_marginTop="@dimen/y45"
-        android:background="@color/no_network_background"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:visibility="gone"
-        >
-
-        <ImageView
-            android:layout_width="@dimen/x19"
-            android:layout_height="@dimen/y13"
-            android:layout_marginLeft="@dimen/x30"
-            android:background="@drawable/warning_icon" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="@dimen/x30"
-            android:text="网络连接断开"
-            android:textColor="@color/group_text_black"
-            android:textSize="@dimen/sp_15" />
-    </LinearLayout>
-
     <!--PPT按钮-->
     <Button
         android:visibility="gone"

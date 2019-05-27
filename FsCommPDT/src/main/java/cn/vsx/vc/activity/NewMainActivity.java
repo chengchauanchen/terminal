@@ -385,9 +385,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         public void handler(int errorCode, String errorDesc){
             if(errorCode == BaseCommonCode.SUCCESS_CODE){
                 myHandler.post(()->{
-                    fl_fragment_container_main.setVisibility(View.GONE);
-                    ll_content.setVisibility(View.VISIBLE);
-                    getSupportFragmentManager().popBackStack();
+                    if(fl_fragment_container_main.getVisibility() == View.VISIBLE){
+                        fl_fragment_container_main.setVisibility(View.GONE);
+                        ll_content.setVisibility(View.VISIBLE);
+                        getSupportFragmentManager().popBackStack();
+                    }
                 });
             }
         }
@@ -970,7 +972,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         tv_emergency_member = (TextView) findViewById(R.id.tv_emergency_member);
         ICTV_emergency_time = (IndividualCallTimerView) findViewById(R.id.ICTV_emergency_time);
         ll_emergency_prompt = (LinearLayout) findViewById(R.id.ll_emergency_prompt);
-        noNetwork = (LinearLayout) findViewById(R.id.no_network);
         pop_view = (View) findViewById(R.id.pop_view);
 
         tv_volume_fw = (TextView) findViewById(R.id.tv_volume_fw);

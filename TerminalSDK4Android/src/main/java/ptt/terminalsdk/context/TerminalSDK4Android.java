@@ -171,6 +171,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 	@Override
 	protected void onStop() {
+		logger.error("TerminalSDK4Android----stop！！");
 		getFileTransferOperation().stop();
 		locationStop();
 		getVideoProxy().stop();
