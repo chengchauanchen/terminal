@@ -24,10 +24,10 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.IncreaseTemporaryGroupMemberActivity;
 import cn.vsx.vc.activity.NewMainActivity;
-import cn.vsx.vc.activity.PcLoginActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -144,7 +144,7 @@ public class MyTopRightMenu {
                                                 ToastUtil.showToast(context,activity.getString(R.string.text_has_no_create_temp_group_authority));
                                                 return;
                                             }
-                                            IncreaseTemporaryGroupMemberActivity.startActivity(context,0,0);
+                                            IncreaseTemporaryGroupMemberActivity.startActivity(context, Constants.CREATE_TEMP_GROUP,0);
                                         }
                                     }else if(items.get(position) ==scanItem){
                                         Intent intent = new Intent(context, CaptureActivity.class);

@@ -121,5 +121,6 @@ public class Constants{
 
     public static String INVITE_MEMBER_EXCEPT_UNIQUE_NO = "inviteMemberExceptUniqueNo";
 
-
+    public static int CREATE_TEMP_GROUP = 0;
+    public static int INCREASE_MEMBER = 1;
 }

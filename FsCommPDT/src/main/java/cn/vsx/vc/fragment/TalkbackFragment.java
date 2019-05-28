@@ -1179,7 +1179,7 @@ public class TalkbackFragment extends BaseFragment {
         int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
         Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId);
         //响应组  普通用户  不在响应状态
-        if(ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) &&
+         if(ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) &&
                 !groupByGroupNo.isHighUser() &&
                 !TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(currentGroupId)){
             change2Forbid();

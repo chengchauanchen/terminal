@@ -580,4 +580,7 @@
     <string name="join_temp_group">%1$s&#160;加入群组</string>
     <string name="main_group_cannot_cancel_monitor">主组不能取消监听!</string>
     <string name="pc_login_state_logined">融合通信PC端已登录</string>
+    <string name="text_pushing_cannot_pull">视频上报中，无法观看</string>
+    <string name="text_pulling_cannot_pull">视频观看中，无法观看</string>
+    <string name="text_calling_cannot_pull">个呼中，无法观看</string>
 </resources>

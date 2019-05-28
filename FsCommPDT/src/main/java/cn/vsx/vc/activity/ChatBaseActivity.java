@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.google.gson.internal.LinkedTreeMap;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
@@ -76,6 +77,9 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
+import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetHistoryMessageRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
@@ -1450,6 +1454,19 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
             /**  上报图像  **/
             if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
+                //如果在视频上报、观看、个呼中不允许观看
+                if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE ){
+                    ToastUtils.showShort(R.string.text_pushing_cannot_pull);
+                    return;
+                }else if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+                    ToastUtils.showShort(R.string.text_pulling_cannot_pull);
+                    return;
+                }else if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
+                    ToastUtils.showShort(R.string.text_calling_cannot_pull);
+                    return;
+                }
+
+
                 //先请求看视频上报是否已经结束
                 MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
                     String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");

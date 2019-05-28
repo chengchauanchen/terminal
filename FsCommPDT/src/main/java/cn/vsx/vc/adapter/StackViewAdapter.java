@@ -140,7 +140,29 @@ public class StackViewAdapter extends BaseAdapter{
         if(data.get(position).messageType == MessageType.WARNING_INSTANCE.getCode()){
             // TODO: 2018/5/4 根据警情级别显示不同的图片,以及设置标题
             viewHolder.dialog_root.setBackgroundResource(R.drawable.warning_background);
-//            viewHolder.iv_warning_level.setImageResource();
+            if(data.get(position).messageBody.containsKey(JsonParam.LEVELS)){
+                int levels = data.get(position).messageBody.getIntValue(JsonParam.LEVELS);
+                switch(levels){
+                    case 1:
+                        viewHolder.iv_warning_level.setImageResource(R.drawable.warning_level1);
+                        break;
+                    case 2:
+                        viewHolder.iv_warning_level.setImageResource(R.drawable.warning_level2);
+                        break;
+                    case 3:
+                        viewHolder.iv_warning_level.setImageResource(R.drawable.warning_level3);
+                        break;
+                    case 4:
+                        viewHolder.iv_warning_level.setImageResource(R.drawable.warning_level4);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if(data.get(position).messageBody.containsKey(JsonParam.SUMMARY)){
+                viewHolder.tv_live_theme.setText(data.get(position).messageBody.getString(JsonParam.SUMMARY));
+            }
+            viewHolder.btn_live_gowatch.setText("进入查看");
         }else if(data.get(position).messageType == MessageType.VIDEO_LIVE.getCode()){
             TerminalMessage message = data.get(position);
             viewHolder.iv_warning_level.setVisibility(View.GONE);

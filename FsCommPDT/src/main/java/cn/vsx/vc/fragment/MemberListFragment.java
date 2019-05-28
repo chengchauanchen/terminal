@@ -17,6 +17,7 @@ import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetTerminalHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTempGroupMembersHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MemberListAdapter;
@@ -39,6 +40,8 @@ public class MemberListFragment extends BaseFragment{
     private Handler mHandler = new Handler();
     private MemberListAdapter memberListAdapter;
     private List<Member> selectedMember = new ArrayList<>();
+    //添加成员时如果成员已经在临时组中了，不在列表显示
+    private List<String> uniqueNos = new ArrayList<>();
 
     public MemberListFragment(){
         // Required empty public constructor
@@ -164,10 +167,15 @@ public class MemberListFragment extends BaseFragment{
     private void updateData(int depId, List<Department> departments, List<Member> members){
         mData.clear();
         for(Member member : members){
-            ContactItemBean<Member> contactItemBean = new ContactItemBean<>();
-            contactItemBean.setBean(member);
-            contactItemBean.setType(Constants.TYPE_USER);
-            mData.add(contactItemBean);
+            if(!uniqueNos.isEmpty()){
+                for(String uniqueNo : uniqueNos){
+                    if(!String.valueOf(member.getUniqueNo()).equals(uniqueNo)){
+                        addData(member);
+                    }
+                }
+            }else {
+                addData(member);
+            }
         }
         for(Department department : departments){
             ContactItemBean<Department> contactItemBean = new ContactItemBean<>();
@@ -191,4 +199,20 @@ public class MemberListFragment extends BaseFragment{
             memberListAdapter.notifyDataSetChanged();
         }
     }
+
+    private void addData(Member member){
+        ContactItemBean<Member> contactItemBean = new ContactItemBean<>();
+        contactItemBean.setBean(member);
+        contactItemBean.setType(Constants.TYPE_USER);
+        mData.add(contactItemBean);
+    }
+
+    private ReceiveTempGroupMembersHandler receiveTempGroupMembersHandler = new ReceiveTempGroupMembersHandler(){
+        @Override
+        public void handler(List<String> uniqueNos){
+            MemberListFragment.this.uniqueNos.clear();
+            MemberListFragment.this.uniqueNos.addAll(uniqueNos);
+
+        }
+    };
 }

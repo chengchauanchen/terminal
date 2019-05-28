@@ -173,6 +173,8 @@
             android:screenOrientation="portrait" />
         <activity android:name=".activity.AboutActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"/>
+        <activity android:name=".activity.WarningMessageDetailActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity android:name=".activity.SetSweepActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity android:name=".activity.CameraActivity"

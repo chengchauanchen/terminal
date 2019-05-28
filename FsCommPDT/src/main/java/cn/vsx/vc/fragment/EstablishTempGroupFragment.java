@@ -10,11 +10,16 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ToastUtils;
+
+import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseAddMemberToTempGroupMessageHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.CreateTemporaryGroupsActivity;
+import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -35,8 +40,6 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
     private ImageView mRightBtn;
     private Button mOkBtn;
     private FrameLayout mContainer;
-    private int CREATE_TEMP_GROUP = 0;
-    private int INCREASE_MEMBER = 1;
     private TempGroupMemberFragment tempGroupMemberFragment;
 
     public EstablishTempGroupFragment(){
@@ -83,10 +86,10 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
 
     private void initView(){
         //titlebar初始化
-        if(type == CREATE_TEMP_GROUP){
+        if(type == Constants.CREATE_TEMP_GROUP){
             mBarTitle.setText(R.string.text_create_temporary_groups);
             mOkBtn.setText(R.string.text_next);
-        }else if(type == INCREASE_MEMBER){
+        }else if(type == Constants.INCREASE_MEMBER){
             mBarTitle.setText(R.string.text_add_group_member);
             mOkBtn.setText(R.string.text_sure);
         }
@@ -96,11 +99,18 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
     private void initListener(){
         mNewsBarBack.setOnClickListener(this);
         mOkBtn.setOnClickListener(this);
+        TerminalFactory.getSDK().registReceiveHandler(receiveResponseAddMemberToTempGroupMessageHandler);
     }
 
     private void initData(){
         tempGroupMemberFragment = TempGroupMemberFragment.newInstance();
         getChildFragmentManager().beginTransaction().add(R.id.container, tempGroupMemberFragment).show(tempGroupMemberFragment).commit();
+    }
+
+    @Override
+    public void onDestroyView(){
+        super.onDestroyView();
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveResponseAddMemberToTempGroupMessageHandler);
     }
 
     @Override
@@ -114,9 +124,9 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
                     ToastUtil.showToast(getContext(), getString(R.string.text_add_at_least_one_member));
                     return;
                 }
-                if(type == CREATE_TEMP_GROUP){
+                if(type == Constants.CREATE_TEMP_GROUP){
                     CreateTemporaryGroupsActivity.startActivity(getContext(), tempGroupMemberFragment.getSelectedMember());
-                }else if(type == INCREASE_MEMBER){
+                }else if(type == Constants.INCREASE_MEMBER){
                     MyTerminalFactory.getSDK().getTempGroupManager().addMemberToTempGroup(groupId, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0), TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L), DataUtil.getUniqueNos(tempGroupMemberFragment.getSelectedMember()));
                 }
                 break;
@@ -124,4 +134,17 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
                 break;
         }
     }
+
+    private ReceiveResponseAddMemberToTempGroupMessageHandler receiveResponseAddMemberToTempGroupMessageHandler = new ReceiveResponseAddMemberToTempGroupMessageHandler(){
+        @Override
+        public void handler(int methodResult, String resultDesc, int tempGroupNo){
+            if(methodResult == BaseCommonCode.SUCCESS_CODE){
+                if(getActivity() !=null){
+                    getActivity().finish();
+                }
+            }else {
+                ToastUtils.showShort(resultDesc);
+            }
+        }
+    };
 }

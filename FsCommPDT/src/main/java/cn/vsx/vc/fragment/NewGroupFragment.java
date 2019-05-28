@@ -290,6 +290,7 @@ public class NewGroupFragment extends BaseFragment{
             CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
             catalogNames.add(groupCatalogBean);
             TerminalFactory.getSDK().getConfigManager().updateAllGroups();
+            TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo();
             myHandler.postDelayed(() -> {
                 // 加载完数据设置为不刷新状态，将下拉进度收起来
                 swipeRefreshLayout.setRefreshing(false);

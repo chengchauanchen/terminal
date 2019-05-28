@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TimerTask;
 
+import cn.vsx.hamster.common.GroupType;
 import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Group;
@@ -31,6 +32,7 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupMemberAdapter;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -162,8 +164,8 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
             group = DataUtil.getGroupByGroupNo(groupId);
         }
         if(group != null){
-            isTemporaryGroup = group.getDeptId() == -1;
-            if(group.getCreatedMemberNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,-1) && isTemporaryGroup){
+            isTemporaryGroup = GroupType.TEMPORARY.toString().equals(group.getGroupType());
+            if(group.getCreatedMemberUniqueNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,-1L) && isTemporaryGroup){
                 canAdd = true;
             }
             rightBtn.setVisibility(View.GONE);
@@ -177,6 +179,9 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                 if(!canAdd){
                     add_btn.setVisibility(View.GONE);
                     delete_btn.setVisibility(View.GONE);
+                }else {
+                    add_btn.setVisibility(View.VISIBLE);
+                    delete_btn.setVisibility(View.VISIBLE);
                 }
             }else {
                 in_title_bar.setVisibility(View.VISIBLE);
@@ -218,7 +223,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                 finish();
                 break;
             case R.id.add_btn:
-                IncreaseTemporaryGroupMemberActivity.startActivity(GroupMemberActivity.this,1,groupId);
+                IncreaseTemporaryGroupMemberActivity.startActivity(GroupMemberActivity.this, Constants.INCREASE_MEMBER,groupId);
                 break;
             case R.id.delete_btn:
                 add_btn.setVisibility(View.GONE);
@@ -313,9 +318,9 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                     group = DataUtil.getGroupByGroupNo(groupId);
                 }
                 if(group !=null){
-                    isTemporaryGroup = group.getDeptId() == -1;
+                    isTemporaryGroup = GroupType.TEMPORARY.toString().equals(group.getGroupType());
                     //只有自己创建的临时组才能添加和删除人
-                    if(group.getCreatedMemberNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,-1) && isTemporaryGroup){
+                    if(group.getCreatedMemberUniqueNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,-1L) && isTemporaryGroup){
                         canAdd = true;
                     }
 

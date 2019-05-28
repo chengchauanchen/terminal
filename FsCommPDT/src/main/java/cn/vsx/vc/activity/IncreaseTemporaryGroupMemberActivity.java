@@ -15,6 +15,7 @@ import cn.vsx.vc.fragment.SelectedMemberFragment;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSelectedFragmentHandler;
+import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
@@ -60,7 +61,7 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
 
     @Override
     public void initView(){
-        int type = getIntent().getIntExtra("type", 1);
+        int type = getIntent().getIntExtra("type", Constants.CREATE_TEMP_GROUP);
         int groupId = getIntent().getIntExtra("groupId", 0);
         establishTempGroupFragment = EstablishTempGroupFragment.newInstance(type, groupId);
         getSupportFragmentManager().beginTransaction().add(R.id.search_framelayout, establishTempGroupFragment).show(establishTempGroupFragment).commit();
