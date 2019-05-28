@@ -149,9 +149,7 @@ public class TalkbackFragment extends BaseFragment {
             Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(responseGroupId);
             if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == responseGroupId && !isActive &&
                     !groupByGroupNo.isHighUser()){
-                myHandler.post(()->{
-                    change2Forbid();
-                });
+                myHandler.post(()-> change2Forbid());
             }
         }
     };
@@ -1183,6 +1181,17 @@ public class TalkbackFragment extends BaseFragment {
                 !groupByGroupNo.isHighUser() &&
                 !TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(currentGroupId)){
             change2Forbid();
+        }else if(MyApplication.instance.getGroupListenenState() != GroupCallListenState.IDLE){
+            change2Listening();
+        }else if(MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTING){
+            change2PreSpeaking();
+        }else if(MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING){
+            change2Waiting();
+        }
+        else if(MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED){
+            change2Speaking();
+        }else {
+            change2Silence();
         }
     }
 
