@@ -937,8 +937,8 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
                 ContactItemBean<Member> contactItemBean = new ContactItemBean<>();
                 contactItemBean.setBean(member);
                 contactItemBean.setType(Constants.TYPE_USER);
-                //过滤自己
-                if(!DataUtil.isMyself(member)){
+                //过滤自己和在除去列表中
+                if(!DataUtil.isMyself(member)&&!hasExceptList(member)){
                     mAllDatas.get(index).add(contactItemBean);
                 }
             }
@@ -985,6 +985,10 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
                 contactAdapter.get(index).notifyDataSetChanged();
             }
         }
+    }
+
+    private boolean hasExceptList(Member member) {
+        return (!exceptList.isEmpty()&&member!=null&&exceptList.contains((Integer) member.getNo()));
     }
 
     /**

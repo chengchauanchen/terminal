@@ -254,6 +254,7 @@ public class AudioRecordButton extends android.support.v7.widget.AppCompatButton
                 }
                 break;
             case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
                 // 首先判断是否有触发onlongclick事件，没有的话直接返回reset
 //                changeState(STATE_WANT_TO_CANCEL);
                 if(mCurrentState == STATE_WANT_TO_CANCEL){
@@ -288,7 +289,6 @@ public class AudioRecordButton extends android.support.v7.widget.AppCompatButton
                 down = false;
                 reset();
                 break;
-
         }
 
         return super.onTouchEvent(event);

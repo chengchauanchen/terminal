@@ -4,7 +4,7 @@
     <!-- <string name="app_name">宽带对讲</string> -->
     <string name="authing">正在认证...</string>
     <string name="auth_fail">认证失败...</string>
-    <string name="logining">正在登陆...</string>
+    <string name="logining">正在登录...</string>
     <string name="connecting_server">正在连接服务器</string>
     <string name="updating_data">正在更新数据</string>
     <string name="please_regist_account">请注册账号</string>
@@ -515,8 +515,12 @@
     <string name="text_has_no_send_message_authority">没有发送消息的权限</string>
     <string name="text_the_other_party_not_supported_this_message_type">对方不支持该消息类型</string>
     <string name="text_has_no_video_receiver_authority">您还没有图像接受权限</string>
-    <string name="text_watching_can_not_report">视频观看中无法上报</string>
-    <string name="text_watching_can_not_request_report">视频观看中无法请求上报</string>
+    <string name="text_watching_can_not_report">正在进行图像观看，无法上报</string>
+    <string name="text_pushing_can_not_report">正在进行图像上报，无法图像上报</string>
+    <string name="text_pushing_can_not_pull">正在进行图像上报，无法请求图像</string>
+    <string name="text_pushing_can_not_private_call">正在进行图像上报，无法个呼</string>
+    <string name="text_watching_can_not_request_report">正在进行图像观看，无法请求上报</string>
+    <string name="text_watching_can_not_private_call">正在进行图像观看，无法个呼</string>
     <string name="text_push">上报图像</string>
     <string name="text_pull">请求图像</string>
     <string name="text_personal_pulling_can_not_group_call">观看图像中，不能组呼</string>

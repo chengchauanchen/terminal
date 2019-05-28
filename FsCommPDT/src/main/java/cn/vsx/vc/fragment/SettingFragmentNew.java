@@ -344,7 +344,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
                     logger.info("sjl_设置页面的组呼到来"+speaking_name.getVisibility()+",正在说话人的名字："+MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
                     String speakingName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
                     speaking_name.setText(speakingName);
-                    setting_group_name.setText(DataUtil.getGroupName(groupId));
+                    setting_group_name.setText(groupName);
                 });
             }
 

@@ -541,7 +541,7 @@ public class NewsFragment extends BaseFragment {
                     logger.info("sjl_消息页面的组呼到来"+speaking_name.getVisibility()+",正在说话人的名字："+MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
                     String speakingName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
                     showViewWhenGroupCall(speakingName);
-                    setting_group_name.setText(DataUtil.getGroupName(groupId));
+                    setting_group_name.setText(groupName);
                 });
             }
 

@@ -63,6 +63,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.model.WarningRecord;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetWarningMessageDetailHandler;
@@ -505,6 +506,15 @@ public class ReceiveHandlerService extends Service{
      */
     private ReceiveCurrentGroupIndividualCallHandler receiveCurrentGroupIndividualCallHandler = (member) -> {
         logger.info("当前呼叫对象:" + member);
+
+        if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_private_call));
+            return;
+        }
+        if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_pushing_can_not_private_call));
+            return;
+        }
         if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
             ToastUtil.showToast(ReceiveHandlerService.this,getString(R.string.text_personal_calling_can_not_do_others));
             return;
@@ -1000,6 +1010,10 @@ public class ReceiveHandlerService extends Service{
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_report));
             return;
         }
+        if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_pushing_can_not_report));
+            return;
+        }
         logger.error("上报给：" + uniqueNoAndType);
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_push_authority));
@@ -1052,6 +1066,10 @@ public class ReceiveHandlerService extends Service{
     private ReceiverRequestVideoHandler receiverRequestVideoHandler = (member) -> {
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_request_report));
+            return;
+        }
+        if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_pushing_can_not_pull));
             return;
         }
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){

@@ -202,11 +202,13 @@ public class NewHandPlatformFragment extends BaseFragment {
         if(catalogNames.size() > 1){
             //返回到上一级
             catalogNames.remove(catalogNames.size()-1);
-            mDatas.clear();
-            mDatas.addAll(lastGroupDatas);
+//            mDatas.clear();
+//            mDatas.addAll(lastGroupDatas);
             if(mContactAdapter !=null){
                 mContactAdapter.notifyDataSetChanged();
             }
+            int position = catalogNames.size()-1;
+            TerminalFactory.getSDK().getConfigManager().updatePDTMember(catalogNames.get(position).getId(),catalogNames.get(position).getName());
             mRecyclerview.scrollToPosition(0);
 
         }else{

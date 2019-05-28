@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.support.v4.widget.TextViewCompat;
@@ -100,7 +101,7 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.I
 public class TalkbackFragment extends BaseFragment {
 
     @SuppressWarnings("HandlerLeak")
-    private Handler myHandler = new Handler() {
+    private Handler myHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == 1) {
@@ -361,7 +362,7 @@ public class TalkbackFragment extends BaseFragment {
      */
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
         @Override
-        public void handler(int memberId, final String memberName, final int groupId, String version, CallMode currentCallMode) {
+        public void handler(int memberId, final String memberName, final int groupId, String groupName, CallMode currentCallMode) {
             logger.info("触发了被动方组呼来了receiveGroupCallIncommingHandler:" + "curreneCallMode " + currentCallMode + "-----" + MyApplication.instance.getGroupSpeakState());
             if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
                 ToastUtil.showToast(activity,getString(R.string.text_has_no_group_call_listener_authority));
@@ -371,12 +372,12 @@ public class TalkbackFragment extends BaseFragment {
                     if (groupId != MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)) {
                         isScanGroupCall = true;
                         groupScanId = groupId;
-                        setCurrentGroupScanView(groupId);
+                        setCurrentGroupScanView(groupId,groupName);
                     }
                     //是当前组的组呼,且扫描组有人说话，变文件夹和组名字
                     if (groupId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0) && MyApplication.instance.getGroupListenenState() == LISTENING) {
                         isScanGroupCall = false;
-                        setCurrentGroupScanView(groupId);
+                        setCurrentGroupScanView(groupId,groupName);
                     }
                     MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, memberName);
             });
@@ -1240,6 +1241,17 @@ public class TalkbackFragment extends BaseFragment {
     private void setCurrentGroupScanView(final int groupId) {
         tv_current_group.setText(DataUtil.getGroupName(groupId));
         tv_current_folder.setText(DataUtil.getGroupDepartmentName(groupId));
+    }
+
+    private void setCurrentGroupScanView(final int groupId,String groupName) {
+        String name = DataUtil.getGroupName(groupId);
+        if(android.text.TextUtils.isEmpty(name)){
+            tv_current_group.setText(groupName);
+            tv_current_folder.setText(getString(R.string.text_temporary_group));
+        }else{
+            tv_current_group.setText(name);
+            tv_current_folder.setText(DataUtil.getGroupDepartmentName(groupId));
+        }
     }
 
     private void setChangeGroupView() {

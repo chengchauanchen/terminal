@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -314,6 +315,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         funcation.hideKeyboard(true);
         funcation.hideKeyboardAndBottom();
     }
+
 
     /**
      * 将数据插入列表中
