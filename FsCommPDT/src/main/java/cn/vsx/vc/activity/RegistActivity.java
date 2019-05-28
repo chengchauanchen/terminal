@@ -170,6 +170,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         ToastUtils.showShort(R.string.please_regist_account);
                         ll_regist.setVisibility(View.VISIBLE);
                         hideProgressDialog();
+                        //没有注册服务地址，去探测地址
+                        TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
                     }else{
                         changeProgressMsg(resultDesc);
                         myHandler.postDelayed(()->{

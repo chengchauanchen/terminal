@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerLiveTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetRtspStreamUrlHandler;
@@ -74,6 +76,13 @@ public class LiveRequestService extends BaseService{
         PromptManager.getInstance().IndividualCallRequestRing();
         mTvLiveRequestName.setText(HandleIdUtil.handleName(memberName));
         mTvLiveRequestId.setText(HandleIdUtil.handleId(memberId));
+
+        int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(memberId,uniqueNo, "");
+        if(requestCode == BaseCommonCode.SUCCESS_CODE){
+        }else{
+            ptt.terminalsdk.tools.ToastUtil.livingFailToast(LiveRequestService.this, requestCode, TerminalErrorCode.LIVING_REQUEST.getErrorCode());
+            stopBusiness();
+        }
     }
 
     @Override

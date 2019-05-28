@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -53,6 +54,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupByNoHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
@@ -61,6 +63,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandl
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePersonMessageNotifyDateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRecallRecordHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTerminalStatusOfPcMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
@@ -107,6 +110,8 @@ public class NewsFragment extends BaseFragment {
     TextView speaking_name;
 
     ImageView voice_image;
+
+    LinearLayout layoutPcLoginState;
 
     private int deletePos = -1 ;
     private MessageListAdapter mMessageListAdapter;
@@ -297,6 +302,7 @@ public class NewsFragment extends BaseFragment {
         setting_group_name = (TextView) mRootView.findViewById(R.id.setting_group_name);
         add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
         newsList = (ListView) mRootView.findViewById(R.id.news_list);
+        layoutPcLoginState = (LinearLayout) mRootView.findViewById(R.id.layout_pc_login_state);
         setVideoIcon();
         setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
         voice_image.setImageResource(BitmapUtil.getVolumeImageResourceByValue(false));
@@ -313,6 +319,10 @@ public class NewsFragment extends BaseFragment {
                 soundOff =false;
             }
         });
+
+        //pc的登录状态
+        boolean isLogin = MyTerminalFactory.getSDK().getParam(Params.PC_LOGIN_STATE, false);
+        layoutPcLoginState.setVisibility(isLogin?View.VISIBLE:View.GONE);
     }
 
     @Override
@@ -340,6 +350,7 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetGroupByNoHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRecallRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mNotifyRecallRecordMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveTerminalStatusOfPcMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverDeleteMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
 
@@ -391,6 +402,7 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTerminalStatusOfPcMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverDeleteMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
         clearData();
@@ -970,6 +982,13 @@ public class NewsFragment extends BaseFragment {
             }
         }
     };
+
+
+    /**
+     * 通知PC登录状态的消息
+     */
+    private ReceiveTerminalStatusOfPcMessageHandler receiveTerminalStatusOfPcMessageHandler = ( uniqueNo, isOnline) ->
+            mHandler.post(() -> layoutPcLoginState.setVisibility(isOnline?View.VISIBLE:View.GONE));
 
     private void updateFrequentMembers(){
         if(messageList.size()>0){

@@ -64,6 +64,7 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.model.Account;
+import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -1074,8 +1075,14 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private void handlerLiveData(TerminalMessage terminalMessage, ChatViewHolder holder) {
         JSONObject messageBody = terminalMessage.messageBody;
         String liver = messageBody.getString(JsonParam.LIVER);
-        int liverNo = Util.stringToInt(messageBody.getString(JsonParam.LIVERNO));
-        String[] split = liver.split("_");
+//        int liverNo = Util.stringToInt(messageBody.getString(JsonParam.LIVERNO));
+        long uniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l);
+        long liverUniqueNo = 0L;
+        String[] split = null;
+        if(!TextUtils.isEmpty(liver)){
+            split = liver.split("_");
+            liverUniqueNo = Util.stringToLong(split[0]);
+        }
         //设置默认上报视频者，防止数组下标越界异常
 //        int memberNo = terminalMessage.messageFromId;
 //        if(split.length>0){
@@ -1084,18 +1091,21 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         //上报主题，如果没有就取上报者的名字
         liveTheme = messageBody.getString(JsonParam.TITLE);
         if(TextUtils.isEmpty(liveTheme)){
-            if(split.length>1){
-                String memberName = split[1];
-                liveTheme = String.format(activity.getString(R.string.current_push_member),memberName);
-                setText(holder.tvContent, liveTheme);
-            }else {
-                TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo,true);
-                    String name = (account!=null)?account.getName():terminalMessage.messageFromName;
-                    myHandler.post(() -> {
-                        setText(holder.tvContent, String.format(activity.getString(R.string.current_push_member),name));
+            if(split!=null){
+                if(split.length>1){
+                    String memberName = split[1];
+                    liveTheme = String.format(activity.getString(R.string.current_push_member),memberName);
+                    setText(holder.tvContent, liveTheme);
+                }else {
+                    long finalLiverUniqueNo = liverUniqueNo;
+                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                        Member member = cn.vsx.hamster.terminalsdk.tools.DataUtil.getMemberByUniqueNo(finalLiverUniqueNo);
+                        String name = (member!=null)?member.getName():terminalMessage.messageFromName;
+                        myHandler.post(() -> {
+                            setText(holder.tvContent, String.format(activity.getString(R.string.current_push_member),name));
+                        });
                     });
-                });
+                }
             }
         }
 
@@ -1136,44 +1146,44 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if (!Util.isEmpty(liver)) {
                 if (terminalMessage.resultCode == SignalServerErrorCode.VIDEO_LIVE_WAITE_TIMEOUT.getErrorCode()) {//超时
 
-                    if (liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
+                    if (liverUniqueNo == uniqueNo) {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.other_no_answer));
                     }
 
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.SLAVE_BUSY.getErrorCode()) {
-                    if ((liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
+                    if (liverUniqueNo == uniqueNo) {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_busy_party));
                     }
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_IS_KILLED.getErrorCode()) {//主叫或被叫被遥弊
-                    if ((liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
+                    if (liverUniqueNo == uniqueNo) {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.other_no_answer));
                     }
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.CALLED_MEMBER_OFFLINE.getErrorCode()) {
-                    if ((liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
+                    if (liverUniqueNo == uniqueNo) {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
                         setText(holder.live_tv_chatcontent, SignalServerErrorCode.CALLED_MEMBER_OFFLINE.getErrorDiscribe());
                     }
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.TERMINAL_OFFLINE_LOGOUT.getErrorCode()) {
-                    if ((liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
+                    if (liverUniqueNo == uniqueNo) {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                     } else {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_the_other_party_is_not_online));
                     }
                 } else if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_REFUSE.getErrorCode()) {
-                    if (liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
+                    if (liverUniqueNo == uniqueNo) {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.refused));
                     } else {
                         setText(holder.live_tv_chatcontent, activity.getString(R.string.text_the_other_party_has_refus));
                     }
 
-                } else if (liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
+                } else if (liverUniqueNo == uniqueNo) {
                     setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                 }
             } else {
@@ -1183,7 +1193,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             setViewVisibility(holder.reBubble, View.GONE);
             setViewVisibility(holder.live_bubble, View.VISIBLE);
             if (terminalMessage.resultCode == SignalServerErrorCode.STOP_ASK_VIDEO_LIVE.getErrorCode()) {
-                if ((liverNo == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0))) {
+                if ((liverUniqueNo == uniqueNo)) {
                     setText(holder.live_tv_chatcontent, activity.getString(R.string.text_not_accepted));
                 } else {
                     setText(holder.live_tv_chatcontent, activity.getString(R.string.canceled));

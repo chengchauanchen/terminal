@@ -726,7 +726,7 @@ public class ReceiveHandlerService extends Service{
                         myHandler.postDelayed(() -> {
                             data.add(terminalMessage);
                             showVideoDialogView();
-                        }, 3000);
+                        }, 5000);
                         //30s没观看就取消当前弹窗
                         Message message = Message.obtain();
                         message.what = DISSMISS_CURRENT_DIALOG;
@@ -1080,16 +1080,11 @@ public class ReceiveHandlerService extends Service{
                 terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_ID,member.getDeptId());
                 goWatchGB28121(terminalMessage);
             }else{
-                int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(member.getNo(),member.getUniqueNo(), "");
-                if(requestCode == BaseCommonCode.SUCCESS_CODE){
-                    Intent intent = new Intent(ReceiveHandlerService.this, LiveRequestService.class);
-                    intent.putExtra(Constants.MEMBER_NAME, member.getName());
-                    intent.putExtra(Constants.MEMBER_ID, member.getNo());
-                    intent.putExtra(Constants.UNIQUE_NO, member.getUniqueNo());
-                    startService(intent);
-                }else{
-                    ToastUtil.livingFailToast(ReceiveHandlerService.this, requestCode, TerminalErrorCode.LIVING_REQUEST.getErrorCode());
-                }
+                Intent intent = new Intent(ReceiveHandlerService.this, LiveRequestService.class);
+                intent.putExtra(Constants.MEMBER_NAME, member.getName());
+                intent.putExtra(Constants.MEMBER_ID, member.getNo());
+                intent.putExtra(Constants.UNIQUE_NO, member.getUniqueNo());
+                startService(intent);
             }
         }
     };
