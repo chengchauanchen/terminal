@@ -1195,6 +1195,10 @@ public abstract class ChatBaseActivity extends BaseActivity{
         public void handler(final TerminalMessage terminalMessage) {
             logger.info("接收到消息-----》" + terminalMessage.toString());
             handler.post(() -> {
+                //判断列表中是否存在相同版本号的消息
+                if(chatMessageList.contains(terminalMessage)){
+                    return;
+                }
 //                if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {//个人消息
 //                    newsBarGroupName.setText(HandleIdUtil.handleName(TerminalMessageUtil.getTitleName(terminalMessage)));
 //                }
