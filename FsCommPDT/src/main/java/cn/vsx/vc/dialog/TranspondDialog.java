@@ -53,7 +53,7 @@ public class TranspondDialog  extends Dialog {
             tv_copy.setVisibility(View.GONE);
         }
         //转发 (个呼不可以转发)
-        if(terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode()){
+        if(terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode()||!DataUtil.isSendedMessage(terminalMessage)){
             tv_forward.setVisibility(View.GONE);
         }
         //只有自己才撤回，并且是两分钟之内的消息
@@ -65,10 +65,10 @@ public class TranspondDialog  extends Dialog {
             tv_withdraw.setVisibility(View.GONE);
         }
         //合并转发 (个呼和图像不可以合并转发)
-        if(terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
+        if((terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
                 terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()||
                 terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()||
-                terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+                terminalMessage.messageType == MessageType.GB28181_RECORD.getCode())||!DataUtil.isSendedMessage(terminalMessage)){
             tv_forward_more.setVisibility(View.GONE);
         }
         //复制

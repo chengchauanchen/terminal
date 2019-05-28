@@ -578,6 +578,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
                 selectedMembers.remove(position);
                 if(selectAdapter!=null){
                     selectAdapter.notifyDataSetChanged();
+                    setButtonCount();
                 }
                 if(selectedListAdapter!=null){
                     selectedListAdapter.notifyDataSetChanged();
@@ -748,6 +749,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         }
         mHandler.post(() -> {
             selectAdapter.notifyDataSetChanged();
+            setButtonCount();
             refreshAllSelectedStatus();
             fromSearchViewGoBackToSeletView();
         });
@@ -782,6 +784,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         }
         mHandler.post(() -> {
             selectAdapter.notifyDataSetChanged();
+            setButtonCount();
             refreshAllSelectedStatus();
             fromSearchViewGoBackToSeletView();
         });
@@ -1252,12 +1255,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             }
         }
         selectAdapter.notifyDataSetChanged();
-        int count = searchList.size();
-        if (count == 0) {
-            mBtnLiveSelectmemberStart.setText(getResources().getString(R.string.confirm));
-        } else {
-            mBtnLiveSelectmemberStart.setText(String.format("确定(%s)", count));
-        }
+        setButtonCount();
     }
 
     /**
@@ -1378,5 +1376,15 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         mTerminalMessage.messageBody = jsonObject;
         MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", mTerminalMessage, memberNos, uniqueNos);
         removeView();
+    }
+
+    private void setButtonCount() {
+        if(selectedMembers.isEmpty()){
+            mBtnLiveSelectmemberStart.setText(getString(R.string.text_sure));
+            llSelect.setVisibility(View.GONE);
+        }else{
+            mBtnLiveSelectmemberStart.setText(String.format(getString(R.string.button_sure_number),selectedMembers.size()));
+            llSelect.setVisibility(View.VISIBLE);
+        }
     }
 }

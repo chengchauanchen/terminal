@@ -317,8 +317,10 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
     private void setButtonCount() {
         if(selectedMemberNos.isEmpty()){
             okBtn.setText(getString(R.string.text_sure));
+            mLlSelected.setVisibility(View.GONE);
         }else{
             okBtn.setText(String.format(getString(R.string.button_sure_number),selectedMemberNos.size()));
+            mLlSelected.setVisibility(View.VISIBLE);
         }
     }
 

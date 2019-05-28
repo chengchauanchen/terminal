@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!--<color name="dodgerblue2">#1E9EFF</color>&lt;!&ndash;闪兰色2 &ndash;&gt;-->
-    <!--<color name="transparent">#00000000</color>&lt;!&ndash;透明 &ndash;&gt;-->
+    <color name="transparent">#00000000</color><!--透明 -->
     
     <!--<color name="backgroudblue">#f5f5f5</color>&lt;!&ndash;背景蓝 &ndash;&gt;-->
     
@@ -556,4 +556,8 @@
     <color name="confirm_create">#0091ff</color>
     <color name="textview_checked">#313131</color>
     <color name="textview_unchecked">#707070</color>
+
+    <color name="pc_login_tempt">#313131</color>
+    <color name="pc_login_button">#0091ff</color>
+    <color name="pc_login_button_cancel">#313131</color>
 </resources>

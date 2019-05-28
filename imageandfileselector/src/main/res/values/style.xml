@@ -63,6 +63,7 @@
     <!--自定义圆形进度条-->
     <style name="mProgress_circle">
         <item name="android:indeterminateDrawable">@drawable/progressbar_white</item>
+        <item name="android:indeterminate">true</item>
         <item name="android:maxWidth">60dp</item>
         <item name="android:maxHeight">60dp</item>
     </style>

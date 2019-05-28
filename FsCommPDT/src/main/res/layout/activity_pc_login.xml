@@ -55,7 +55,7 @@
         android:background="@drawable/bg_button_stoke"
         android:gravity="center"
         android:text="@string/login"
-        android:textColor="@color/chat_title"
+        android:textColor="@color/pc_login_button"
         android:textSize="@dimen/sp_14" />
 
     <TextView
@@ -68,6 +68,6 @@
         android:layout_centerHorizontal="true"
         android:gravity="center"
         android:text="@string/login_cancel"
-        android:textColor="@color/white"
+        android:textColor="@color/pc_login_button_cancel"
         android:textSize="@dimen/sp_14" />
 </RelativeLayout>

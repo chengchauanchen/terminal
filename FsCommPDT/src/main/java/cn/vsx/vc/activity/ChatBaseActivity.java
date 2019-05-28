@@ -2097,25 +2097,25 @@ public abstract class ChatBaseActivity extends BaseActivity{
             if (position < 0) {
                 return;
             }
-            chatMessageList.get(position).messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_SUCCESS);
+//            chatMessageList.get(position).messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_SUCCESS);
             final int viewPos = getViewPos(position);
             logger.info("发送成功position:" + position + ",viewPos:" + viewPos);
             handler.post(() -> {
                 if (viewPos != -1) {
-                    View childView = groupCallList.getChildAt(viewPos);
-                    temporaryAdapter.progressPercentMap.remove(tokenId);
-                    if (childView != null) {
-                        ProgressBar progressBar_pre_upload = childView.findViewById(R.id.progress_bar);
-                        TextView tv_progress_pre_upload = childView.findViewById(R.id.tv_progress);
-                        if (null != progressBar_pre_upload) {
-                            progressBar_pre_upload.setVisibility(View.GONE);
-                        }
-                        if (null != tv_progress_pre_upload) {
-                            tv_progress_pre_upload.setVisibility(View.GONE);
-                        }
-                    }
+//                    View childView = groupCallList.getChildAt(viewPos);
+//                    temporaryAdapter.progressPercentMap.remove(tokenId);
+//                    if (childView != null) {
+//                        ProgressBar progressBar_pre_upload = childView.findViewById(R.id.progress_bar);
+//                        TextView tv_progress_pre_upload = childView.findViewById(R.id.tv_progress);
+//                        if (null != progressBar_pre_upload) {
+//                            progressBar_pre_upload.setVisibility(View.GONE);
+//                        }
+//                        if (null != tv_progress_pre_upload) {
+//                            tv_progress_pre_upload.setVisibility(View.GONE);
+//                        }
+//                    }
                 }
-                temporaryAdapter.notifyItemChanged(position);
+//                temporaryAdapter.notifyItemChanged(position);
                 temporaryAdapter.setUploadFinished();
             });
             funcation.showBottom(false);

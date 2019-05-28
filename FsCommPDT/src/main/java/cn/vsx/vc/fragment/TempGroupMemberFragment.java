@@ -246,6 +246,7 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
             mHandler.post(()->{
                 if(selectAdapter != null){
                     selectAdapter.notifyDataSetChanged();
+                    setButtonCount();
                 }
             });
         }
@@ -261,6 +262,7 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
         mHandler.post(()->{
             if(selectAdapter != null){
                 selectAdapter.notifyDataSetChanged();
+                setButtonCount();
             }
         });
     };
@@ -342,5 +344,13 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
             }
         }
         return list;
+    }
+
+    private void setButtonCount() {
+        if(selectedMembers.isEmpty()){
+            mLlSelected.setVisibility(View.GONE);
+        }else{
+            mLlSelected.setVisibility(View.VISIBLE);
+        }
     }
 }

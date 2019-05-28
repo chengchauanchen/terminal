@@ -1636,7 +1636,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
      **/
     private void transponGroupCallMessage(TerminalMessage terminalMessage, List<Integer> list,List<Long> toUniqueNos,PushMessageSendResultHandler pushMessageSendResultHandler) {
         TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
-        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),list,toUniqueNos,pushMessageSendResultHandler);
+        MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH(terminalMessage.messageUrl, terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),list,toUniqueNos,pushMessageSendResultHandler);
     }
 
     private void sendGroupCallMessage2(TerminalMessage terminalMessage, List<Integer> toIds) {
@@ -2010,8 +2010,6 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         }
         if (transponMessage.messageType == MessageType.PICTURE.getCode()) {
             transponPhotoMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
-        }
-        if (transponMessage.messageType == MessageType.AUDIO.getCode()) {
         }
         if (transponMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
             transponFileMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);

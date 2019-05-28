@@ -779,14 +779,14 @@ public class NewsFragment extends BaseFragment {
                             }
                         }
                     }else {//不是当前打开的会话组，通知
-                        setGroupMessageUnReadCount(unReadCount, terminalMessage,tempGroupMessageVersion);
+                        setGroupMessageUnReadCount(unReadCount, terminalMessage,tempGroupMessageVersion,clearUnread);
                     }
                 }else {//组会话页关闭， 通知
                     if(ActivityCollector.isActivityExist(CombatGroupActivity.class) ||
                             ActivityCollector.isActivityExist(HistoryCombatGroupActivity.class)){
                         terminalMessage.unReadCount = 0;
                     }else {
-                        setGroupMessageUnReadCount(unReadCount, terminalMessage,tempGroupMessageVersion);
+                        setGroupMessageUnReadCount(unReadCount, terminalMessage,tempGroupMessageVersion,clearUnread);
                     }
                 }
             }
@@ -842,40 +842,42 @@ public class NewsFragment extends BaseFragment {
         }
     }
 
-    private void setGroupMessageUnReadCount(int unReadCount, TerminalMessage terminalMessage,long tempGroupMessageVersion) {
+    private void setGroupMessageUnReadCount(int unReadCount, TerminalMessage terminalMessage,long tempGroupMessageVersion,boolean clearUnread) {
         int currentGroupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
         List<Integer> monitorGroupNo = TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo();
-        if (terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){//组呼消息
-            if (terminalMessage.isOffLineMessage) {//离线的组呼也是未读
-//                terminalMessage.unReadCount = unReadCount + 1;
-                terminalMessage.messageBody.put(JsonParam.UNREAD, true);
-            } else {
-                if(terminalMessage.messageToId == currentGroupId){//是当前值
-//                    terminalMessage.unReadCount = unReadCount;
-                    terminalMessage.messageBody.put(JsonParam.UNREAD, false);
-                }else{//不是当前值
-                    boolean isScanGroup = false;
-                    for (Integer integer : monitorGroupNo){
-                        if (integer == terminalMessage.messageToId){//是扫描的组
-                            isScanGroup = true;
-                            break;
-                        }
-                    }
-                    if (isScanGroup){//在组扫描列表中
-//                        terminalMessage.unReadCount = unReadCount;
+        if(clearUnread){
+            terminalMessage.unReadCount = getGroupMessageUnreadCount(unReadCount,terminalMessage,tempGroupMessageVersion);
+        }else{
+            if (terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){//组呼消息
+                if (terminalMessage.isOffLineMessage) {//离线的组呼也是未读
+                    terminalMessage.unReadCount = unReadCount + 1;
+                    terminalMessage.messageBody.put(JsonParam.UNREAD, true);
+                } else {
+                    if(terminalMessage.messageToId == currentGroupId){//是当前值
+                        terminalMessage.unReadCount = unReadCount;
                         terminalMessage.messageBody.put(JsonParam.UNREAD, false);
-                    }else {
-//                        terminalMessage.unReadCount = unReadCount + 1;
-                        terminalMessage.messageBody.put(JsonParam.UNREAD, true);
+                    }else{//不是当前值
+                        boolean isScanGroup = false;
+                        for (Integer integer : monitorGroupNo){
+                            if (integer == terminalMessage.messageToId){//是扫描的组
+                                isScanGroup = true;
+                                break;
+                            }
+                        }
+                        if (isScanGroup){//在组扫描列表中
+                            terminalMessage.unReadCount = unReadCount;
+                            terminalMessage.messageBody.put(JsonParam.UNREAD, false);
+                        }else {
+                            terminalMessage.unReadCount = unReadCount + 1;
+                            terminalMessage.messageBody.put(JsonParam.UNREAD, true);
+                        }
+
                     }
-
                 }
+            }else {//其它类型的消息
+                terminalMessage.unReadCount = unReadCount + 1;
             }
-
-        }else {//其它类型的消息
-//            terminalMessage.unReadCount = unReadCount + 1;
         }
-        terminalMessage.unReadCount = getGroupMessageUnreadCount(unReadCount,terminalMessage,tempGroupMessageVersion);
     }
 
     /**
