@@ -1,7 +1,6 @@
 package cn.vsx.vc.activity;
 
 import android.annotation.SuppressLint;
-import android.content.pm.ActivityInfo;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -126,6 +125,11 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
     }
 
     @Override
+    public void setOritation(){
+        oritationPort = false;
+    }
+
+    @Override
     public void initView(){
         tv_volume = (TextView) findViewById(R.id.tv_volume);
         iv_volume = (ImageView) findViewById(R.id.iv_volume);
@@ -142,7 +146,6 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
         findViewById(R.id.iv_close).setOnClickListener(this);
         findViewById(R.id.iv_pause).setOnClickListener(this);
         findViewById(R.id.iv_pause_continue).setOnClickListener(this);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
     @Override

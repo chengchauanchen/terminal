@@ -63,6 +63,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 	private ProgressDialog myProgressDialog;//加载数据的弹窗
 
 	public OnBackListener backListener;
+	protected boolean oritationPort;
     //成员被删除了
 	private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
 		@Override
@@ -146,8 +147,13 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 		super.onCreate(savedInstanceState);
 		// 没有标题栏
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		//不可横屏
-		setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		setOritation();
+		if(oritationPort){
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+		}else {
+			setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+		}
+
 		//透明状态栏
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
 			getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
@@ -176,6 +182,10 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 		//适配Android9.0调用hide时，关闭警告弹窗
 		closeAndroidPDialog();
 		createProgressDialog();
+	}
+
+	protected void setOritation(){
+		this.oritationPort = true;
 	}
 
 	protected void protectApp(){
