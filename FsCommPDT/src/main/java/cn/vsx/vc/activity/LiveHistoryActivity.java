@@ -196,6 +196,7 @@ public class LiveHistoryActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public void doOtherDestroy(){
+        mHandler.removeCallbacksAndMessages(null);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
     }
 

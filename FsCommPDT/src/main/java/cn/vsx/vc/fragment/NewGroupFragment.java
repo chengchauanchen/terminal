@@ -105,6 +105,10 @@ public class NewGroupFragment extends BaseFragment{
                 //加入监听
                 if(currentMonitorGroup.get(monitorGroupNo)){
                     TerminalFactory.getSDK().getGroupManager().changeGroup(monitorGroupNo);
+                    if(!TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(monitorGroupNo)){
+                        TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().add(monitorGroupNo);
+                        TerminalFactory.getSDK().getConfigManager().updateTempMonitorGroup();
+                    }
                 }else {
                     //移除监听
                     if(monitorGroupNo == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
@@ -113,6 +117,11 @@ public class NewGroupFragment extends BaseFragment{
                             TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
                         }
                     }
+                    if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(monitorGroupNo)){
+                        TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().remove((Integer)monitorGroupNo);
+                        TerminalFactory.getSDK().getConfigManager().updateTempMonitorGroup();
+                    }
+
                 }
                 if(groupAdapter !=null){
                     myHandler.post(()->{
