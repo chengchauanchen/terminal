@@ -54,7 +54,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupByNoHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
@@ -1002,9 +1001,9 @@ public class NewsFragment extends BaseFragment {
                     }
                 }
             }
-            //只取最后五个不重复的
+            //只取最前五个不重复的
             if(cn.vsx.hamster.terminalsdk.tools.DataUtil.removeDuplicate(frequentMemberNos).size() > 5){
-                frequentMemberNos.subList(frequentMemberNos.size()-5,frequentMemberNos.size());
+                frequentMemberNos.subList(0,5);
             }
             if(!frequentMemberNos.isEmpty()){
                 TerminalFactory.getSDK().getConfigManager().updateFrequentMember(frequentMemberNos);

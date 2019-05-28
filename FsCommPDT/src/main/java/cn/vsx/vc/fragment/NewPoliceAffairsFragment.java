@@ -116,6 +116,7 @@ public class NewPoliceAffairsFragment extends BaseFragment {
         myHandler.post(()->{
             allFrequentContacts.clear();
             List<Account> frequentContacts = TerminalFactory.getSDK().getConfigManager().getFrequentContacts();
+//            Collections.reverse(frequentContacts);
             logger.error("常用联系人："+frequentContacts);
             if(frequentContacts != null && !frequentContacts.isEmpty()){
                 ContactItemBean memberCatalogBean = new ContactItemBean();
