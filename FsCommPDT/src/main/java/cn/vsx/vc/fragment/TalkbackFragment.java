@@ -205,6 +205,8 @@ public class TalkbackFragment extends BaseFragment {
                     int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
                     Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId);
                     if(!groupByGroupNo.isHighUser()){
+                        myHandler.post(() -> change2Forbid());
+                    }else {
                         myHandler.post(() -> change2Silence());
                     }
                 } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
@@ -1709,4 +1711,10 @@ public class TalkbackFragment extends BaseFragment {
             }
         }
     };
+
+    @Override
+    public void onResume(){
+        super.onResume();
+        setPttText();
+    }
 }
