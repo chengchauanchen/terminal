@@ -1077,8 +1077,9 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			account = telephonyManager.getDeviceId() == null ?
 					wm.getConnectionInfo().getMacAddress().hashCode()+"" : telephonyManager.getDeviceId().hashCode()+"";
 		}
-		logger.info(" TerminalSDK4Android--------> account = "+account);
-		return account;
+		String terminalType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE, "");
+		logger.info(" TerminalSDK4Android--------> account = "+account+"---terminalType = "+terminalType);
+		return account+terminalType;
 	}
 
 	public void renovateVideoRecord(String videRecordPath){

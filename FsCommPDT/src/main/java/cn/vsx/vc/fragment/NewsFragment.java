@@ -562,7 +562,7 @@ public class NewsFragment extends BaseFragment {
 
     private GetWarningMessageDetailHandler getWarningMessageDetailHandler = new GetWarningMessageDetailHandler(){
         @Override
-        public void handle(TerminalMessage terminalMessage){
+        public void handle(TerminalMessage terminalMessage,boolean newMessage){
             //组的警情消息都是合成作战组消息
             for(TerminalMessage next : terminalMessageData){
                 if(TerminalMessageUtil.isSameGroupMessage(next, terminalMessage) || TerminalMessageUtil.isSameMemberMessage(next, terminalMessage)){

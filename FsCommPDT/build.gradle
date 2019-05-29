@@ -189,7 +189,7 @@ dependencies {
     implementation files('libs/HyteraSDK2.0.jar')
     /*二维码*/
     implementation 'com.github.yuzhiqiang1993:zxing:2.2.8'
-
+    implementation 'com.qw:soulpermission:1.1.6'
     implementation ('com.dji:dji-sdk:4.9', {
 //             Uncomment the following line if your app does not need Anti Distortion for
 //             Mavic 2 Pro and Mavic 2 Zoom. It will greatly reducing the size of the APK:

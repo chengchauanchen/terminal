@@ -58,7 +58,6 @@ import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
-import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
@@ -635,10 +634,17 @@ public class ReceiveHandlerService extends Service{
     };
 
     //获取到警情详情
-    private GetWarningMessageDetailHandler getWarningMessageDetailHandler = terminalMessage -> {
+    private GetWarningMessageDetailHandler getWarningMessageDetailHandler = (terminalMessage,newMessage) -> {
+        if(!newMessage){
+            return;
+        }
         if(!TerminalMessageUtil.isGroupMeaage(terminalMessage)){
             //个人的警情消息需要弹窗显示
             myHandler.post(()->{
+                if(terminalMessage.messageFromId == TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+                    //自己发的警情消息，不弹窗
+                    return;
+                }
                 //判断是否已经存在，没有就添加
                 if(!warningData.contains(terminalMessage)){
                     warningData.add(0,terminalMessage);

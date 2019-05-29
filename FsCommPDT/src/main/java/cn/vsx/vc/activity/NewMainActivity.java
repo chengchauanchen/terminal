@@ -3,7 +3,6 @@ package cn.vsx.vc.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.AppOpsManager;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
@@ -112,6 +111,7 @@ import cn.vsx.vc.fragment.NewsFragment;
 import cn.vsx.vc.fragment.SearchFragment;
 import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
+import cn.vsx.vc.permission.FloatWindowManager;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.ReceiveSwitchMainFrgamentHandler;
@@ -1059,14 +1059,18 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
     @Override
     public void initData() {
-        //先判断悬浮窗权限，没打开就关闭
-        if(!checkFloatPermission(this)){
-            Log.e("NewMainActivity", "未开启悬浮窗权限");
-            // SYSTEM_ALERT_WINDOW permission not granted...
-            ToastUtil.showToast(NewMainActivity.this, getString(R.string.open_overlay_permisson));
-            exitApp();
-            return;
-        }
+//        if(!SoulPermission.getInstance().checkSpecialPermission(Special.SYSTEM_ALERT)){
+//            Log.e("NewMainActivity", "未开启悬浮窗权限");
+//            myHandler.postDelayed(this::exitApp,2000);
+//            ToastUtil.showToast(NewMainActivity.this, getString(R.string.open_overlay_permisson));
+//            return;
+//        }
+//        if(!FloatWindowManager.getInstance().checkPermission(this)){
+//            Log.e("NewMainActivity", "未开启悬浮窗权限");
+//            myHandler.postDelayed(this::exitApp,2000);
+//            ToastUtil.showToast(NewMainActivity.this, getString(R.string.open_overlay_permisson));
+//            return;
+//        }
         WindowManager windowManager = (WindowManager) getSystemService(Service.WINDOW_SERVICE);
         width = windowManager.getDefaultDisplay().getWidth();
         height = windowManager.getDefaultDisplay().getHeight();
@@ -1136,6 +1140,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         manager.checkStartExpireFileAlarm();
         //上传没有上传的文件信息
         manager.uploadFileTreeBean(null);
+
+        if(!FloatWindowManager.getInstance().checkPermission(this)){
+            FloatWindowManager.getInstance().applyPermission(this);
+        }
     }
 
     private void initVoip(){
@@ -1154,24 +1162,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().getVoipCallManager().clearCache();
         if(!TextUtils.isEmpty(account)){
             MyTerminalFactory.getSDK().getVoipCallManager().login(account,account,server);
-        }
-    }
-
-    public boolean checkFloatPermission(Context context) {
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        } else {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                AppOpsManager appOpsMgr = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-                if (appOpsMgr == null)
-                    return false;
-                int mode = appOpsMgr.checkOpNoThrow("android:system_alert_window", android.os.Process.myUid(), context
-                        .getPackageName());
-                return mode == AppOpsManager.MODE_ALLOWED || mode == AppOpsManager.MODE_IGNORED;
-            } else {
-                return Settings.canDrawOverlays(context);
-            }
         }
     }
 

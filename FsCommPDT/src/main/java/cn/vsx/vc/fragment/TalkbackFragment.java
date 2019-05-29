@@ -158,8 +158,10 @@ public class TalkbackFragment extends BaseFragment {
     private ReceiveGetGroupByNoHandler receiveGetGroupByNoHandler = group -> myHandler.post(new Runnable(){
         @Override
         public void run(){
-            tv_current_group.setText(group.getName());
-            tv_current_folder.setText(group.getDepartmentName());
+            myHandler.post(()->{
+                tv_current_group.setText(group.getName());
+                tv_current_folder.setText(group.getDepartmentName());
+            });
         }
     });
 

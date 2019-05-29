@@ -55,8 +55,9 @@ public class SpecificSDK extends TerminalSDK4Android {
             account = telephonyManager.getDeviceId() == null ?
                     wm.getConnectionInfo().getMacAddress().hashCode()+"" : telephonyManager.getDeviceId().hashCode()+"";
         }
-        logger.info("SpecificSDK --------> account = "+account);
-        return account;
+        String terminalType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE, "");
+        logger.info(" SpecificSDK--------> account = "+account+"---terminalType = "+terminalType);
+        return account+terminalType;
     }
 
     /**

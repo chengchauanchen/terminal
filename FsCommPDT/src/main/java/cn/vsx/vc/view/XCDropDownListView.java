@@ -90,6 +90,11 @@ public class XCDropDownListView extends LinearLayout {
         dataList = list;
         editText.setText(list.get(0).toString());
     }
+
+    public void setText(String text){
+        editText.setText(text);
+    }
+
     /**
      * 获取文本框中的数据
      */

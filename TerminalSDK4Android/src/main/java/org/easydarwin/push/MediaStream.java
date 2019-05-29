@@ -551,10 +551,11 @@ public class MediaStream {
             if (!enanleVideo) return;
             Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
             cameraCount = Camera.getNumberOfCameras();//得到摄像头的个数
+            stopPreview();
+            destroyCamera();
             for (int i = 0; i < cameraCount; i++) {
                 Camera.getCameraInfo(i, cameraInfo);//得到每一个摄像头的信息
-//                stopPreview();
-                destroyCamera();
+
                 if (mCameraId == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                     //现在是后置，变更为前置
                     if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {//代表摄像头的方位，CAMERA_FACING_FRONT前置      CAMERA_FACING_BACK后置

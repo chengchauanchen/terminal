@@ -217,7 +217,10 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
 
     @Override
     public void initData() {
-        getActivity().registerReceiver(mbtBroadcastReceiver, makeGattUpdateIntentFilter());
+        if(getActivity() !=null){
+            getActivity().registerReceiver(mbtBroadcastReceiver, makeGattUpdateIntentFilter());
+        }
+        registerPstoreReceiver();
         if(MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW,0)==1){//锁屏设置判断
             btn_lock_screen_setting.initToggleState(true);
         }else {
@@ -411,6 +414,9 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
 
     public void onClick(View v) {
         switch (v.getId()) {
+            case R.id.rl_ble:
+                startActivity(new Intent(getContext(),BleActivity.class));
+                break;
             case R.id.about:
                 startActivity(new Intent(getActivity(), AboutActivity.class));
                 break;

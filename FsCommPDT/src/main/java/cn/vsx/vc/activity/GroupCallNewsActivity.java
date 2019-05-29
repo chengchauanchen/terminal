@@ -32,7 +32,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.http.util.TextUtils;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -80,6 +79,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
+import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.InputMethodUtil;
@@ -402,17 +402,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                     ToastUtil.showToast(GroupCallNewsActivity.this,getString(R.string.can_not_cancel_listener));
                         return;
                 }
-                List<Integer> monitorGroups = new ArrayList<>();
-                monitorGroups.add(userId);
-                if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(userId)){
-                    TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
-                }else {
-                    if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().size()>= 5){
-                        ToastUtil.showToast(GroupCallNewsActivity.this,getResources().getString(R.string.monitor_more_than_five));
-                    }else {
-                        TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
-                    }
-                }
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,userId);
                 break;
             default:
                 break;
@@ -428,13 +418,14 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     }
 
     private boolean checkIsMonitorGroup(int groupNo){
+        Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupNo);
+        if(ResponseGroupType.RESPONSE_TRUE.toString().equals(group.getResponseGroupType())){
+            return true;
+        }
         if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(groupNo)){
             return true;
         }
         if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
-            return true;
-        }
-        if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
             return true;
         }
         if(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) == groupNo){

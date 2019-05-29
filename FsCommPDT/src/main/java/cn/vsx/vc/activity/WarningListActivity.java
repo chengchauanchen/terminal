@@ -184,7 +184,7 @@ public class WarningListActivity extends BaseActivity{
         warningListAdapter.removeMessage();
     }
 
-    private GetWarningMessageDetailHandler getWarningMessageDetailHandler = terminalMessage -> {
+    private GetWarningMessageDetailHandler getWarningMessageDetailHandler = (terminalMessage,newMessage) -> {
         WarningRecord warningRecord = new WarningRecord();
         warningRecord.setLevels(terminalMessage.messageBody.getIntValue(JsonParam.LEVELS));
         warningRecord.setStatus(terminalMessage.messageBody.getIntValue(JsonParam.STATUS));

@@ -164,7 +164,7 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 TextViewCompat.setTextAppearance(groupViewHolder.tvName, R.style.normal_group_color);
                 groupViewHolder.iv_response_group_icon.setVisibility(View.GONE);
             }
-            if(checkIsMonitorGroup(group.getNo())){
+            if(checkIsMonitorGroup(group)){
                 groupViewHolder.ivMonitor.setImageResource(R.drawable.monitor_open);
             }else {
                 groupViewHolder.ivMonitor.setImageResource(R.drawable.monitor_close_blue);
@@ -203,17 +203,20 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         }
     }
 
-    private boolean checkIsMonitorGroup(int groupNo){
-        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(groupNo)){
+    private boolean checkIsMonitorGroup(Group group){
+        if(ResponseGroupType.RESPONSE_TRUE.toString().equals(group.getResponseGroupType())){
             return true;
         }
-        if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
+        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(group.getNo())){
             return true;
         }
-        if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
+        if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(group.getNo())){
             return true;
         }
-        if(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) == groupNo){
+//        if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == group.getNo()){
+//            return true;
+//        }
+        if(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) == group.getNo()){
             return true;
         }
         return false;

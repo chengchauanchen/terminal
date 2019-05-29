@@ -23,6 +23,7 @@ import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -33,7 +34,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import butterknife.Bind;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
@@ -57,6 +57,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.service.LockScreenService;
+import cn.vsx.vc.view.IndividualCallTimerView;
 import cn.vsx.vc.view.MyRelativeLayout;
 import cn.vsx.vc.view.TimerView;
 import cn.vsx.vc.view.VolumeViewLayout;
@@ -273,45 +274,32 @@ public class LockScreenActivity extends BaseActivity {
     }
 
 
+    private RelativeLayout mContentView;
+    private View mMyView;
+    private FrameLayout mFlLockscreen;
+    private RelativeLayout mRlLockscreen;
+    private TextView mTvLockscreenTime;
+    private TextView mTvLockscreenDate;
+    private TextView mTvLockscreenWeek;
+    private LinearLayout mLlGroup;
+    private TextView mTvCurrentOnline;
+    private TextView mTvCurrentFolder;
+    private TextView mTvCurrentGroup;
+    private LinearLayout mLlSpeakingPrompt;
+    private IndividualCallTimerView mICTVSpeakingTime;
+    private MyRelativeLayout mRlLockScreen;
+    private Button mPtt;
+    private LinearLayout mLlSpeakingTime;
+    private TimerView mTalkTime;
+    private LinearLayout mLlListening;
+    private TextView mIncommingCallCurrentSpeaker;
+    private LinearLayout mLlPreSpeaking;
+    private LinearLayout mLlSilence;
+    private LinearLayout mLlForbid;
+    private LinearLayout mLlWaiting;
+    private VolumeViewLayout mVolumeLayout;
 
-    @Bind(R.id.content_view)
-    RelativeLayout content_view;
-    @Bind(R.id.rl_lockscreen)
-    RelativeLayout rl_lockscreen;
-    @Bind(R.id.ptt)
-    Button ptt;
-    @Bind(R.id.ll_speaking_time)
-    LinearLayout ll_speaking_time;
-    @Bind(R.id.ll_listening)
-    LinearLayout ll_listening;
-    @Bind(R.id.talk_time)
-    TimerView talk_time;
-    @Bind(R.id.tv_lockscreen_time)
-    TextView tv_lockscreen_time;
-    @Bind(R.id.tv_lockscreen_date)
-    TextView tv_lockscreen_date;
-    @Bind(R.id.tv_lockscreen_week)
-    TextView tv_lockscreen_week;
-    @Bind(R.id.tv_current_folder)
-    TextView tv_current_folder;
-    @Bind(R.id.tv_current_group)
-    TextView tv_current_group;
-    @Bind(R.id.incomming_call_current_speaker)
-    TextView incomming_call_current_speaker;
-    @Bind(R.id.volume_layout)
-    VolumeViewLayout volumeViewLayout;
-    @Bind(R.id.ll_pre_speaking)
-    LinearLayout ll_pre_speaking;
-    @Bind(R.id.ll_silence)
-    LinearLayout ll_silence;
-    @Bind(R.id.ll_forbid)
-    LinearLayout ll_forbid;
-    @Bind(R.id.ll_waiting)
-    LinearLayout ll_waiting;
-    @Bind(R.id.tv_current_online)
-    TextView tv_current_online;
-    @Bind(R.id.rl_lock_screen)
-    MyRelativeLayout rl_lock_screen;
+
     private CallMode currentCallMode;
     private static final int UPDATETIME = 0;
     @SuppressLint("HandlerLeak")
@@ -359,13 +347,13 @@ public class LockScreenActivity extends BaseActivity {
 
     @Override
     public void initView() {
-
+        findView();
         online_number = MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size();
         setDateTime();
         setCurrentGroupView();
         if (!MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER).equals("")) {
-            ll_listening.setVisibility(View.VISIBLE);
-            incomming_call_current_speaker.setText(MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER));
+            mLlListening.setVisibility(View.VISIBLE);
+            mIncommingCallCurrentSpeaker.setText(MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER));
         }
 
         Message msg = Message.obtain();
@@ -380,9 +368,36 @@ public class LockScreenActivity extends BaseActivity {
 
         // F25手机不显示PTT按钮
         if (PhoneAdapter.isF25()) {
-            ptt.setVisibility(View.GONE);
+            mPtt.setVisibility(View.GONE);
         }
         logger.error("创建了一个锁屏界面");
+    }
+
+    private void findView(){
+        mContentView = (RelativeLayout) findViewById(R.id.content_view);
+        mMyView = (View) findViewById(R.id.my_view);
+        mFlLockscreen = (FrameLayout) findViewById(R.id.fl_lockscreen);
+        mRlLockscreen = (RelativeLayout) findViewById(R.id.rl_lockscreen);
+        mTvLockscreenTime = (TextView) findViewById(R.id.tv_lockscreen_time);
+        mTvLockscreenDate = (TextView) findViewById(R.id.tv_lockscreen_date);
+        mTvLockscreenWeek = (TextView) findViewById(R.id.tv_lockscreen_week);
+        mLlGroup = (LinearLayout) findViewById(R.id.ll_group);
+        mTvCurrentOnline = (TextView) findViewById(R.id.tv_current_online);
+        mTvCurrentFolder = (TextView) findViewById(R.id.tv_current_folder);
+        mTvCurrentGroup = (TextView) findViewById(R.id.tv_current_group);
+        mLlSpeakingPrompt = (LinearLayout) findViewById(R.id.ll_speaking_prompt);
+        mICTVSpeakingTime = (IndividualCallTimerView) findViewById(R.id.ICTV_speaking_time);
+        mRlLockScreen = (MyRelativeLayout) findViewById(R.id.rl_lock_screen);
+        mPtt = (Button) findViewById(R.id.ptt);
+        mLlSpeakingTime = (LinearLayout) findViewById(R.id.ll_speaking_time);
+        mTalkTime = (TimerView) findViewById(R.id.talk_time);
+        mLlListening = (LinearLayout) findViewById(R.id.ll_listening);
+        mIncommingCallCurrentSpeaker = (TextView) findViewById(R.id.incomming_call_current_speaker);
+        mLlPreSpeaking = (LinearLayout) findViewById(R.id.ll_pre_speaking);
+        mLlSilence = (LinearLayout) findViewById(R.id.ll_silence);
+        mLlForbid = (LinearLayout) findViewById(R.id.ll_forbid);
+        mLlWaiting = (LinearLayout) findViewById(R.id.ll_waiting);
+        mVolumeLayout = (VolumeViewLayout) findViewById(R.id.volume_layout);
     }
 
     @Override
@@ -395,7 +410,7 @@ public class LockScreenActivity extends BaseActivity {
 
     @Override
     public void initListener() {
-        ptt.setOnTouchListener(new OnTouchListenerImplementation());
+        mPtt.setOnTouchListener(new OnTouchListenerImplementation());
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
@@ -414,7 +429,7 @@ public class LockScreenActivity extends BaseActivity {
 
         registerReceiver(openLockReceiver, new IntentFilter(Intent.ACTION_USER_PRESENT));
         setOnPTTVolumeBtnStatusChangedListener(new OnPTTVolumeBtnStatusChangedListenerImp());
-        rl_lock_screen.setScreenLockListener(() -> {
+        mRlLockScreen.setScreenLockListener(() -> {
             Log.d("LockScreenActivity", "执行动画");
             playAnimation();
         });
@@ -448,8 +463,8 @@ public class LockScreenActivity extends BaseActivity {
         if (openLockReceiver != null) {
             unregisterReceiver(openLockReceiver);
         }
-        if (volumeViewLayout!= null){
-            volumeViewLayout.unRegistLintener();
+        if (mVolumeLayout!= null){
+            mVolumeLayout.unRegistLintener();
         }
 
         MyApplication.instance.isLockScreenCreat = false;
@@ -461,62 +476,62 @@ public class LockScreenActivity extends BaseActivity {
 
     private void change2Speaking() {
 
-        tv_current_online.setText(String.format(getString(R.string.text_online_member_number),online_number));
+        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number),online_number));
         allViewDefault();
-        ll_speaking_time.setVisibility(View.VISIBLE);
-        talk_time.start(Color.GREEN);
-        ptt.setText(R.string.button_release_end);
-        ptt.setBackgroundResource(R.drawable.ptt_speaking);
+        mLlSpeakingTime.setVisibility(View.VISIBLE);
+        mTalkTime.start(Color.GREEN);
+        mPtt.setText(R.string.button_release_end);
+        mPtt.setBackgroundResource(R.drawable.ptt_speaking);
     }
 
     private void change2PreSpeaking() {
-        tv_current_online.setText(String.format(getString(R.string.text_online_member_number),online_number));
+        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number),online_number));
         allViewDefault();
-        ptt.setText(R.string.text_ready_to_speak);
-        ptt.setBackgroundResource(R.drawable.ptt_pre_speaking);
-        ll_pre_speaking.setVisibility(View.VISIBLE);
+        mPtt.setText(R.string.text_ready_to_speak);
+        mPtt.setBackgroundResource(R.drawable.ptt_pre_speaking);
+        mLlPreSpeaking.setVisibility(View.VISIBLE);
     }
 
     private void change2Silence() {
-        tv_current_online.setText(String.format(getString(R.string.text_online_member_number),online_number));
+        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number),online_number));
         allViewDefault();
-        ptt.setText(R.string.press_blank_space_talk_text);
-        ptt.setBackgroundResource(R.drawable.ptt_silence);
-        ll_silence.setVisibility(View.VISIBLE);
+        mPtt.setText(R.string.press_blank_space_talk_text);
+        mPtt.setBackgroundResource(R.drawable.ptt_silence);
+        mLlSilence.setVisibility(View.VISIBLE);
     }
 
     private void change2Waiting() {
-        tv_current_online.setText(String.format(getString(R.string.text_online_member_number),online_number));
+        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number),online_number));
         allViewDefault();
-        ll_pre_speaking.setVisibility(View.VISIBLE);
-        ptt.setText(R.string.text_ready_to_speak);
-        ptt.setBackgroundResource(R.drawable.ptt_pre_speaking);
+        mLlPreSpeaking.setVisibility(View.VISIBLE);
+        mPtt.setText(R.string.text_ready_to_speak);
+        mPtt.setBackgroundResource(R.drawable.ptt_pre_speaking);
     }
 
     private void change2Listening() {
         String speakMemberName = MyTerminalFactory.getSDK().getGroupCallManager().getSpeakingMemberName();
-        tv_current_online.setText(String.format(getString(R.string.text_online_member_number),online_number));
+        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number),online_number));
         allViewDefault();
         if (!TextUtils.isEmpty(speakMemberName)) {
-            ll_listening.setVisibility(View.VISIBLE);
-            incomming_call_current_speaker.setText(speakMemberName);
+            mLlListening.setVisibility(View.VISIBLE);
+            mIncommingCallCurrentSpeaker.setText(speakMemberName);
         }
 //        ptt.setBackgroundResource(R.drawable.ptt_listening3);
-        ptt.setText(R.string.button_press_to_line_up);
-        ptt.setTextColor(getResources().getColor(R.color.darkgray));
-        ptt.setBackgroundResource(R.drawable.ptt_listening);
+        mPtt.setText(R.string.button_press_to_line_up);
+        mPtt.setTextColor(getResources().getColor(R.color.darkgray));
+        mPtt.setBackgroundResource(R.drawable.ptt_listening);
     }
 
     private void allViewDefault() {
-        if (talk_time != null) {
-            talk_time.stop();
+        if (mTalkTime != null) {
+            mTalkTime.stop();
         }
-        ll_listening.setVisibility(View.GONE);
-        ll_silence.setVisibility(View.GONE);
-        ll_speaking_time.setVisibility(View.GONE);
-        ll_pre_speaking.setVisibility(View.GONE);
-        ll_forbid.setVisibility(View.GONE);
-        ll_waiting.setVisibility(View.GONE);
+        mLlListening.setVisibility(View.GONE);
+        mLlSilence.setVisibility(View.GONE);
+        mLlSpeakingTime.setVisibility(View.GONE);
+        mLlPreSpeaking.setVisibility(View.GONE);
+        mLlForbid.setVisibility(View.GONE);
+        mLlWaiting.setVisibility(View.GONE);
     }
 
 
@@ -525,20 +540,20 @@ public class LockScreenActivity extends BaseActivity {
         String mWeek = DataUtil.getWeek();
         String mAP = DataUtil.getAPM();
 
-        tv_lockscreen_time.setText(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(date));
-        tv_lockscreen_date.setText(new SimpleDateFormat("MM月dd日", Locale.getDefault()).format(date));
-        tv_lockscreen_week.setText(String.format(getString(R.string.text_week_content),mWeek,mAP));
+        mTvLockscreenTime.setText(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(date));
+        mTvLockscreenDate.setText(new SimpleDateFormat("MM月dd日", Locale.getDefault()).format(date));
+        mTvLockscreenWeek.setText(String.format(getString(R.string.text_week_content),mWeek,mAP));
 
     }
 
     private void setCurrentGroupView() {
-        tv_current_group.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
-        tv_current_folder.setText(DataUtil.getGroupDepartmentName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
+        mTvCurrentGroup.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
+        mTvCurrentFolder.setText(DataUtil.getGroupDepartmentName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
     }
 
     private void setCurrentGroupScanView(final int groupId) {
-        tv_current_group.setText(DataUtil.getGroupName(groupId));
-        tv_current_folder.setText(DataUtil.getGroupDepartmentName(groupId));
+        mTvCurrentGroup.setText(DataUtil.getGroupName(groupId));
+        mTvCurrentFolder.setText(DataUtil.getGroupDepartmentName(groupId));
     }
 
     @Override
@@ -562,9 +577,9 @@ public class LockScreenActivity extends BaseActivity {
 
     private void playAnimation(){
         AnimatorSet animatorSet = new AnimatorSet();
-        ObjectAnimator scaleX = ObjectAnimator.ofFloat(content_view, "scaleX", 1f, 0.5f);
-        ObjectAnimator scaleY = ObjectAnimator.ofFloat(content_view, "scaleY", 1f, 0.5f);
-        ObjectAnimator alpha = ObjectAnimator.ofFloat(content_view, "alpha", 1f, 0.5f);
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(mContentView, "scaleX", 1f, 0.5f);
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(mContentView, "scaleY", 1f, 0.5f);
+        ObjectAnimator alpha = ObjectAnimator.ofFloat(mContentView, "alpha", 1f, 0.5f);
         animatorSet.play(alpha).with(scaleX).with(scaleY);
         animatorSet.setDuration(800);
         animatorSet.setInterpolator(new DecelerateInterpolator());
@@ -610,15 +625,15 @@ public class LockScreenActivity extends BaseActivity {
 
     private void change2Forbid() {
         allViewDefault();
-        ll_forbid.setVisibility(View.VISIBLE);
+        mLlForbid.setVisibility(View.VISIBLE);
         //12.25
         logger.info("ptt.change2Forbid()按住排队");
-        tv_current_online.setText(String.format(getString(R.string.text_online_member_number),online_number));
-        ptt.setText(R.string.button_press_to_line_up);
-        ptt.setTextColor(getResources().getColor(R.color.darkgray));
-        ptt.setBackgroundResource(R.drawable.ptt_listening);
+        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number),online_number));
+        mPtt.setText(R.string.button_press_to_line_up);
+        mPtt.setTextColor(getResources().getColor(R.color.darkgray));
+        mPtt.setBackgroundResource(R.drawable.ptt_listening);
         logger.info("主界面，ptt被禁了  isPttPress："+MyApplication.instance.isPttPress);
-        ptt.setEnabled(false);
+        mPtt.setEnabled(false);
         if(MyApplication.instance.isPttPress){
             pttUpDoThing();
         }

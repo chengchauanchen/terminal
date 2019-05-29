@@ -23,8 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -646,7 +644,7 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
     private void setMessagePath(List<TerminalMessage> memberList) {
         for (TerminalMessage message: memberList) {
 //            TerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(message, true);
-            TerminalFactory.getSDK().getTerminalMessageManager().downloadOrSetMessage(message);
+            TerminalFactory.getSDK().getTerminalMessageManager().downloadOrSetMessage(message,false);
         }
     }
 
