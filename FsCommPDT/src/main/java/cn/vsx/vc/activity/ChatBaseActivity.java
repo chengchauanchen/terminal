@@ -1854,7 +1854,12 @@ public abstract class ChatBaseActivity extends BaseActivity{
 //                messageRecord.remove(0);
                 setData(messageRecord, true);
             }
-            handler.post(()-> temporaryAdapter.notifyDataSetChanged());
+            handler.post(()-> {
+                if (chatMessageList.size() > 0) {
+                    setListSelection(chatMessageList.size() - 1);
+                }
+                temporaryAdapter.notifyDataSetChanged();
+            });
         }
     };
     /**

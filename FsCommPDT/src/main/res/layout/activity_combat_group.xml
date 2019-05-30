@@ -17,4 +17,6 @@
         android:visibility="visible"
         android:divider="@null" />
 
+    <include layout="@layout/layout_list_empty_data" />
+
 </LinearLayout>

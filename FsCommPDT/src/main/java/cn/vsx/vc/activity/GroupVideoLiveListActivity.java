@@ -62,7 +62,7 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
     //组ID
     protected int groupId;
     //当前页数
-    private int mPage = 1;
+    private int mPage = 0;
     //每页显示条数
     private static final int mPageSize = 10;
 
@@ -150,7 +150,7 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
 
     @Override
     public void onRefresh() {
-        mPage = 1;
+        mPage = 0;
         contentView.scrollToPosition(0);
         loadData(true);
     }
@@ -220,7 +220,7 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
         handler.post(() -> {
             layoutSrl.setRefreshing(false);
             if (resultCode == BaseCommonCode.SUCCESS_CODE && !beanList.isEmpty()) {
-                if (mPage == 1) {
+                if (mPage == 0) {
                     adapter.getData().clear();
                     adapter.loadMoreEnd(true);
                     adapter.setEnableLoadMore(!(beanList.size() < mPageSize));
@@ -236,7 +236,7 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
                 adapter.getData().addAll(beanList);
                 adapter.notifyDataSetChanged();
             } else {
-                if (mPage == 1) {
+                if (mPage == 0) {
                     adapter.getData().clear();
                     adapter.loadMoreEnd(true);
                     adapter.setEnableLoadMore(false);
@@ -248,7 +248,7 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
                     }
                     adapter.setEnableLoadMore(true);
                 }
-                if (mPage > 1) {
+                if (mPage > 0) {
                     mPage = mPage - 1;
                 }
                 ToastUtil.showToast(GroupVideoLiveListActivity.this, resultDesc);

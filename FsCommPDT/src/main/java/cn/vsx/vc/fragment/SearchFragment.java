@@ -231,11 +231,13 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
                 ToastUtil.showToast(context, context.getResources().getString(R.string.input_search_content));
                 return;
             }
+            searchAdapter.setFilterKeyWords(mEtSearchAllcontacts.getText().toString());
             doSearch(mEtSearchAllcontacts.getText().toString());
         });
         mEtSearchAllcontacts.setOnEditorActionListener((v, actionId, event) -> {
             if(actionId == EditorInfo.IME_ACTION_SEARCH) {
                 if(!TextUtils.isEmpty(mEtSearchAllcontacts.getText().toString())){
+                    searchAdapter.setFilterKeyWords(mEtSearchAllcontacts.getText().toString());
                     doSearch(mEtSearchAllcontacts.getText().toString());
                 }
             }
@@ -308,7 +310,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
                 }
                 break;
             case Constants.TYPE_CONTRACT_PDT:
-                TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_PC.toString(), keywords);
+                TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_PDT.toString(), keywords);
                 break;
             case Constants.TYPE_CONTRACT_LTE:
                 TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_LTE.toString(), keywords);

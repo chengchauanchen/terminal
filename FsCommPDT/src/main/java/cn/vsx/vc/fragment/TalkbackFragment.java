@@ -593,11 +593,13 @@ public class TalkbackFragment extends BaseFragment {
 
                             if (endVolumeC == 0) {
                                 iv_volume_off_call.setImageResource(R.drawable.volume_off_call);
+                                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true, 1);
                             } else {
                                 iv_volume_off_call.setImageResource(R.drawable.volume_silence);
+                                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false, 1);
                             }
 
-                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false, 1);
+
                         }
                     }
                     break;
@@ -1257,12 +1259,12 @@ public class TalkbackFragment extends BaseFragment {
     }
 
     private void setChangeGroupView() {
-        List<Group> groupList;
-        groupList =  TerminalFactory.getSDK().getConfigManager().getMonitorGroup();
-        if(groupList == null || groupList.isEmpty()){
-            groupList = new ArrayList<>();
-            groupList.add(DataUtil.getGroupByGroupNo(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)));
-        }
+        List<Group> groupList  = TerminalFactory.getSDK().getConfigManager().getAllListenerGroup();
+//        groupList =  TerminalFactory.getSDK().getConfigManager().getMonitorGroup();
+////        if(groupList == null || groupList.isEmpty()){
+////            groupList = new ArrayList<>();
+////            groupList.add(DataUtil.getGroupByGroupNo(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)));
+////        }
         if (groupList.size() > 0) {
             change_group_view.setData(groupList, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
         }

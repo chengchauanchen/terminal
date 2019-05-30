@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="@dimen/dp_8"
     android:gravity="center"
@@ -9,15 +9,19 @@
         style="@style/change_group_circle" />
     <TextView
         android:id="@+id/left2"
+        android:layout_marginLeft="@dimen/dp_10"
         style="@style/change_group_circle" />
     <TextView
         android:id="@+id/middle"
+        android:layout_marginLeft="@dimen/dp_10"
+        android:layout_marginRight="@dimen/dp_10"
         style="@style/change_group_circle" />
     <TextView
         android:id="@+id/right2"
+        android:layout_marginRight="@dimen/dp_10"
         style="@style/change_group_circle" />
     <TextView
         android:id="@+id/right1"
         style="@style/change_group_circle" />
     
-</FrameLayout>
+</LinearLayout>

@@ -421,13 +421,17 @@ public class NewGroupFragment extends BaseFragment{
         if(catalogNames.size() > 1){
             //返回到上一级
             catalogNames.remove(catalogNames.size()-1);
-            datas.removeAll(commonGroupDatas);
-            commonGroupDatas.clear();
-            commonGroupDatas.addAll(lastGroupDatas);
-            datas.addAll(lastGroupDatas);
+//            datas.removeAll(commonGroupDatas);
+//            commonGroupDatas.clear();
+//            commonGroupDatas.addAll(lastGroupDatas);
+//            datas.addAll(lastGroupDatas);
+            tempGroupUpdateCompleted = true;
+            groupUpdateCompleted = false;
             if(groupAdapter !=null){
                 groupAdapter.notifyDataSetChanged();
             }
+            int position = catalogNames.size()-1;
+            TerminalFactory.getSDK().getConfigManager().updateGroup(catalogNames.get(position).getId(),catalogNames.get(position).getName());
             groupRecyclerView.scrollToPosition(0);
 
         }else{

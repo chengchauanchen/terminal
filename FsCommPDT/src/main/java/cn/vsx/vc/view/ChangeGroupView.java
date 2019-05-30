@@ -7,6 +7,7 @@ import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
@@ -41,7 +42,11 @@ public class ChangeGroupView extends FrameLayout{
 	private final int maxCommandTimes = 5;
 	private int dataIndexSubtractionViewIndex = Integer.MAX_VALUE;
 	private List<Group> data = new ArrayList<>();
+	private List<Group> tempData = new ArrayList<>();
 	protected OnGroupChangedListener onGroupChangedListener;
+
+	private int temptIndex = 0;
+	private int oldCurrentDataIndex = 0;
 
 	private Runnable worker = new Runnable() {
 
@@ -127,12 +132,14 @@ public class ChangeGroupView extends FrameLayout{
 
 			logger.info("ChangeGroupView ------> width = "+width+"   height = "+height);
 
-			textViewRadius = middle.getWidth()/2;
-			middle.setTranslationX(width/2-textViewRadius);
-			left2.setTranslationX(middle.getTranslationX() - 4f*textViewRadius);
-			right2.setTranslationX(middle.getTranslationX() + 4f*textViewRadius);
-			left1.setTranslationX(middle.getTranslationX() - 8f*textViewRadius);
-			right1.setTranslationX(middle.getTranslationX() + 8f*textViewRadius);
+//			textViewRadius = middle.getWidth()/2;
+//			middle.setTranslationX(width/2-textViewRadius);
+//			left2.setTranslationX(middle.getTranslationX() - 4f*textViewRadius);
+//			right2.setTranslationX(middle.getTranslationX() + 4f*textViewRadius);
+//			left1.setTranslationX(middle.getTranslationX() - 8f*textViewRadius);
+//			right1.setTranslationX(middle.getTranslationX() + 8f*textViewRadius);
+
+
 //			left2.setTranslationX(middle.getTranslationX() - 3f*textViewRadius);
 //			right2.setTranslationX(middle.getTranslationX() + 3f*textViewRadius);
 //			left1.setTranslationX(middle.getTranslationX() - 5.5f*textViewRadius);
@@ -149,16 +156,30 @@ public class ChangeGroupView extends FrameLayout{
 	}
 	public void setData(List<Group> groups, int currentGroupId){
 		data.clear();
-
 		data.addAll(groups);
-
-		int oldCurrentDataIndex = currentDataIndex;
 		for(int i = 0 ; i < data.size() ; i++){
-			if(data.get(i).id == currentGroupId){
+			if(data.get(i).no == currentGroupId){
 				currentDataIndex = i;
 				break;
 			}
 		}
+//		logger.debug("ChangeGroupView-groups-"+groups+"-currentDataIndex-"+currentDataIndex);
+		setTextViewListData(data.size());
+		int size = textViewList.size();
+
+		if(tempData.size() != data.size()){
+			//不同， 初始化数据
+			temptIndex = ((currentDataIndex<size)?currentDataIndex:((currentDataIndex%size)));
+		}else{
+
+			if(temptIndex>=textViewList.size()){
+				temptIndex  = 0;
+			}
+			if(temptIndex<0){
+				temptIndex  = textViewList.size()-1;
+			}
+		}
+
 		if(dataIndexSubtractionViewIndex == Integer.MAX_VALUE){
 			dataIndexSubtractionViewIndex = currentDataIndex - textViewList.size()/2;
 		}
@@ -167,6 +188,9 @@ public class ChangeGroupView extends FrameLayout{
 		}
 
 		resetData();
+
+		tempData.clear();
+		tempData.addAll(data);
 	}
 
 	//	private void resetData(){
@@ -178,16 +202,100 @@ public class ChangeGroupView extends FrameLayout{
 //	}
 	private void resetData(){
 		if(data.size() > 0){
-			for(int i = 0 ; i < textViewList.size() ; i++){
-				TextView tv = getTextView(currentDataIndex-dataIndexSubtractionViewIndex-textViewList.size()/2+i);
+			int size = textViewList.size();
+			for(int i = 0 ; i < size ; i++){
+//				TextView tv = getTextView(currentDataIndex-dataIndexSubtractionViewIndex-textViewList.size()/2+i);
+				TextView tv = textViewList.get(i);
 //				tv.setText(getSeqData(currentDataIndex-textViewList.size()/2+i).toString());
-				if(i == 2){
+				if(i == temptIndex){
 //					tv.setTextColor(Color.parseColor("#0090ff"));
 					tv.setBackgroundResource(R.drawable.change_group_circle_shape_middle);
 				}else{
 //					tv.setTextColor(Color.WHITE);
 					tv.setBackgroundResource(R.drawable.change_group_circle_shape);
 				}
+			}
+		}
+	}
+
+	private int getMiddleIndex(){
+		int size = data.size();
+		int index = 0;
+		switch (size){
+			case 1:
+				index = 0;
+				break;
+			case 2:
+				index = 1;
+				break;
+			case 3:
+				index = 1;
+				break;
+			case 4:
+				index = 2;
+				break;
+			default:
+				index = 2;
+
+				break;
+		}
+		return index;
+	}
+
+	private void setTextViewListData(int size) {
+		if(size>0){
+			textViewList.clear();
+			switch (size){
+				case 1:
+					textViewList.add(middle);
+					left1.setVisibility(View.GONE);
+					left2.setVisibility(View.GONE);
+					middle.setVisibility(View.VISIBLE);
+					right2.setVisibility(View.GONE);
+					right1.setVisibility(View.GONE);
+					break;
+				case 2:
+					textViewList.add(left2);
+					textViewList.add(middle);
+					left1.setVisibility(View.GONE);
+					left2.setVisibility(View.VISIBLE);
+					middle.setVisibility(View.VISIBLE);
+					right2.setVisibility(View.GONE);
+					right1.setVisibility(View.GONE);
+					break;
+				case 3:
+					textViewList.add(left2);
+					textViewList.add(middle);
+					textViewList.add(right2);
+					left1.setVisibility(View.GONE);
+					left2.setVisibility(View.VISIBLE);
+					middle.setVisibility(View.VISIBLE);
+					right2.setVisibility(View.VISIBLE);
+					right1.setVisibility(View.GONE);
+					break;
+				case 4:
+					textViewList.add(left1);
+					textViewList.add(left2);
+					textViewList.add(middle);
+					textViewList.add(right2);
+					left1.setVisibility(View.VISIBLE);
+					left2.setVisibility(View.VISIBLE);
+					middle.setVisibility(View.VISIBLE);
+					right2.setVisibility(View.VISIBLE);
+					right1.setVisibility(View.GONE);
+					break;
+				default:
+					textViewList.add(left1);
+					textViewList.add(left2);
+					textViewList.add(middle);
+					textViewList.add(right2);
+					textViewList.add(right1);
+					left1.setVisibility(View.VISIBLE);
+					left2.setVisibility(View.VISIBLE);
+					middle.setVisibility(View.VISIBLE);
+					right2.setVisibility(View.VISIBLE);
+					right1.setVisibility(View.VISIBLE);
+					break;
 			}
 		}
 	}
@@ -285,10 +393,12 @@ public class ChangeGroupView extends FrameLayout{
 			@Override
 			public void onAnimationEnd(Animator animation) {
 				if(command == LEFT_ONE_COMMAND){
+					temptIndex++;
 					currentDataIndex++;
 					resetData();
 				}
 				else if(command == RIGHT_ONE_COMMAND){
+					temptIndex--;
 					currentDataIndex--;
 					resetData();
 				}

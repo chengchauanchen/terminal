@@ -237,10 +237,7 @@ public class NewsFragment extends BaseFragment {
                 0, 0);
         TerminalMessage terminalMessage;
         if (groupMessageRecord.size() == 0) {
-            terminalMessage = new TerminalMessage();
-            terminalMessage.messageToId = MyTerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0);
-            terminalMessage.messageToName = DataUtil.getGroupName(terminalMessage.messageToId);
-            terminalMessage.messageCategory = MessageCategory.MESSAGE_TO_GROUP.getCode();
+            terminalMessage = newMainGroupMessageToList();
         } else {
             //最后一条消息
             terminalMessage = groupMessageRecord.get(groupMessageRecord.size()-1);
@@ -249,6 +246,17 @@ public class NewsFragment extends BaseFragment {
         if(mMessageListAdapter != null){
             mMessageListAdapter.notifyDataSetChanged();
         }
+    }
+
+    /**
+     * 创建一个主组的消息
+     */
+    private TerminalMessage newMainGroupMessageToList() {
+        TerminalMessage  terminalMessage = new TerminalMessage();
+        terminalMessage.messageToId = MyTerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0);
+        terminalMessage.messageToName = DataUtil.getGroupName(terminalMessage.messageToId);
+        terminalMessage.messageCategory = MessageCategory.MESSAGE_TO_GROUP.getCode();
+        return terminalMessage;
     }
 
     /**  当前组的消息是否存在 **/
@@ -361,6 +369,10 @@ public class NewsFragment extends BaseFragment {
         loadMessages();
         mMessageListAdapter = new MessageListAdapter(getContext(), messageList, true, false);
         newsList.setAdapter(mMessageListAdapter);
+        //当本地没有消息记录时，添加主组消息到messageList中，通过主组的uniqueNo查询主组最新一条消息记录
+        if(messageList.isEmpty()){
+            messageList.add(newMainGroupMessageToList());
+        }
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(messageList));
     }
 

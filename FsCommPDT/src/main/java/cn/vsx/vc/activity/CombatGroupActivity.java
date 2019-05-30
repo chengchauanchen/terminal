@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -56,6 +57,9 @@ public class CombatGroupActivity extends BaseActivity implements View.OnClickLis
         tv_close_combat = (TextView) findViewById(R.id.tv_close_combat);
         tv_close_combat.setVisibility(View.VISIBLE);
         tv_title.setText(getResources().getString(R.string.tv_combat_group));
+
+        RelativeLayout layoutListEmptyData = (RelativeLayout) findViewById(R.id.layout_list_empty_data);
+        help_combat_list.setEmptyView(layoutListEmptyData);
     }
 
     @Override

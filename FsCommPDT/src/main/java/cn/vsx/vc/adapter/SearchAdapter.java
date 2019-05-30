@@ -2,7 +2,10 @@ package cn.vsx.vc.adapter;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.text.Html;
+import android.text.Spanned;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.chad.library.adapter.base.BaseMultiItemQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -21,6 +24,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCa
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.VoipPhoneActivity;
@@ -70,14 +74,20 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
         switch(item.getType()){
             case Constants.TYPE_CONTRACT_GROUP:
                 Group group = (Group) item.getBean();
-                holder.setText(R.id.group_child_name,group.getName());
+                TextView groupName = holder.getView(R.id.group_child_name);
+//                holder.setText(R.id.group_child_name,group.getName());
+                setKeyWordsView(groupName,group.getName());
                 holder.addOnClickListener(R.id.to_group);
                 holder.addOnClickListener(R.id.is_current_group_tv);
                 break;
             case Constants.TYPE_CONTRACT_MEMBER:
                 Account account = (Account) item.getBean();
-                holder.setText(R.id.tv_member_name,HandleIdUtil.handleName(account.getName()));
-                holder.setText(R.id.tv_member_id, HandleIdUtil.handleId(account.getNo()));
+                TextView memberName = holder.getView(R.id.tv_member_name);
+                TextView memberId = holder.getView(R.id.tv_member_id);
+                setKeyWordsView(memberName,HandleIdUtil.handleName(account.getName()));
+                setKeyWordsView(memberId,HandleIdUtil.handleId(account.getNo()));
+//                holder.setText(R.id.tv_member_name,HandleIdUtil.handleName(account.getName()));
+//                holder.setText(R.id.tv_member_id, HandleIdUtil.handleId(account.getNo()));
                 //拨打电话
                 holder.setOnClickListener(R.id.shoutai_dial_to, v -> callPhone(account));
                 //发送消息
@@ -90,8 +100,12 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
             case Constants.TYPE_CONTRACT_PDT:
 
                 Member contractpdt = (Member) item.getBean();
-                holder.setText(R.id.tv_member_name,HandleIdUtil.handleName(contractpdt.getName()));
-                holder.setText(R.id.tv_member_id, HandleIdUtil.handleId(contractpdt.getNo()));
+                TextView memberNamePdt = holder.getView(R.id.tv_member_name);
+                TextView memberIdPdt = holder.getView(R.id.tv_member_id);
+                setKeyWordsView(memberNamePdt,HandleIdUtil.handleName(contractpdt.getName()));
+                setKeyWordsView(memberIdPdt,HandleIdUtil.handleId(contractpdt.getNo()));
+//                holder.setText(R.id.tv_member_name,HandleIdUtil.handleName(contractpdt.getName()));
+//                holder.setText(R.id.tv_member_id, HandleIdUtil.handleId(contractpdt.getNo()));
 
                 //发送消息
                 holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractpdt.getNo(), contractpdt.getName()));
@@ -108,8 +122,12 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
 
             case Constants.TYPE_CONTRACT_LTE:
                 Member contractLte = (Member) item.getBean();
-                holder.setText(R.id.tv_member_name,HandleIdUtil.handleName(contractLte.getName()));
-                holder.setText(R.id.tv_member_id, HandleIdUtil.handleId(contractLte.getNo()));
+                TextView memberNameLte = holder.getView(R.id.tv_member_name);
+                TextView memberIdLte = holder.getView(R.id.tv_member_id);
+                setKeyWordsView(memberNameLte,HandleIdUtil.handleName(contractLte.getName()));
+                setKeyWordsView(memberIdLte,HandleIdUtil.handleId(contractLte.getNo()));
+//                holder.setText(R.id.tv_member_name,HandleIdUtil.handleName(contractLte.getName()));
+//                holder.setText(R.id.tv_member_id, HandleIdUtil.handleId(contractLte.getNo()));
 
                 //发送消息
                 holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractLte.getNo(), contractLte.getName()));
@@ -242,5 +260,24 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
     }
     public interface OnItemClickListener{
         void onItemClick();
+    }
+
+    /**
+     * 设置关键字的颜色
+     * @param textView
+     * @param name
+     */
+    private void setKeyWordsView(TextView textView, String name){
+        if (!Util.isEmpty(name) && !Util.isEmpty(keyWords) && name.toLowerCase().contains(keyWords.toLowerCase())) {
+            int index = name.toLowerCase().indexOf(keyWords.toLowerCase());
+            int len = keyWords.length();
+            Spanned temp = Html.fromHtml(name.substring(0, index)
+                    + "<u><font color=#eb403a>"
+                    + name.substring(index, index + len) + "</font></u>"
+                    + name.substring(index + len, name.length()));
+            textView.setText(temp);
+        } else {
+            textView.setText(name);
+        }
     }
 }

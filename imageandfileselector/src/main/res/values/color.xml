@@ -59,4 +59,8 @@
     <color name="pc_login_tempt">#818181</color>
     <color name="pc_login_button">#627f9c</color>
     <color name="pc_login_button_cancel">#ffffff</color>
+
+    <color name="chat_warning_common_tv">#ffffff</color>
+    <color name="warning_common_tv">#637e9e</color>
+
 </resources>

@@ -1113,6 +1113,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         }
 
         if(!messageBody.containsKey(JsonParam.REMARK)){
+            setViewVisibility(holder.reBubble, View.VISIBLE);
+            setViewVisibility(holder.live_bubble, View.GONE);
             return;
         }
         if (messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE) {//被邀请去观看图像
