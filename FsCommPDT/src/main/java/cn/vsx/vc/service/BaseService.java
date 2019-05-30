@@ -38,6 +38,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
@@ -106,6 +107,7 @@ public abstract class BaseService extends Service{
         initListener();
         initHomeBroadCastReceiver();
         initBroadCastReceiver();
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveForceOfflineHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
@@ -220,6 +222,7 @@ public abstract class BaseService extends Service{
     public void onDestroy(){
         super.onDestroy();
         logger.info(TAG+":onDestroy");
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceOfflineHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
@@ -273,6 +276,10 @@ public abstract class BaseService extends Service{
         mHandler.post(this::removeView);
 
     }
+
+    private ReceiveForceOfflineHandler receiveForceOfflineHandler = () -> {
+        mHandler.post(this::stopBusiness);
+    };
 
     /**
      * 组成员遥毙消息

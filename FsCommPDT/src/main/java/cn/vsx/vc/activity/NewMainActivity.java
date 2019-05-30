@@ -123,6 +123,7 @@ import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.AirCraftUtil;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.DialogUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SensorUtil;
@@ -427,8 +428,30 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private ReceiveForceOfflineHandler receiveForceOfflineHandler = new ReceiveForceOfflineHandler(){
         @Override
         public void handler(){
-            ToastUtil.showToast(NewMainActivity.this,getResources().getString(R.string.force_off_line));
-            myHandler.postDelayed(()-> exitApp(),3000);
+            myHandler.post(()->{
+                new DialogUtil(){
+
+                    @Override
+                    public CharSequence getMessage(){
+                        return getString(R.string.force_off_line);
+                    }
+
+                    @Override
+                    public Context getContext(){
+                        return NewMainActivity.this;
+                    }
+
+                    @Override
+                    public void doConfirmThings(){
+                        exitApp();
+                    }
+
+                    @Override
+                    public void doCancelThings(){
+                        exitApp();
+                    }
+                }.showDialog();
+            });
         }
     };
 
