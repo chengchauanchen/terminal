@@ -155,6 +155,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 }else if(resultCode == TerminalErrorCode.TERMINAL_TYPE_ERROR.getErrorCode()){
                     AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_terminal_type_error)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
                     alerDialog.show();
+                }else if(resultCode == TerminalErrorCode.TERMINAL_REPEAT.getErrorCode()){
+                    AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_terminal_repeat)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
+                    alerDialog.show();
                 }
                 else if(resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()){
                     if(reAuthCount < 3){
@@ -275,6 +278,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             myHandler.post(() -> {
                 logger.info("收到可用IP列表");
                 availableIPlist.clear();
+                String tempName = xcd_available_ip.getText();
                 if (availableIP.size() > 0) {
                     availableIPMap = availableIP;
                     availableIPlist.add(getString(R.string.text_selection_unit));
@@ -285,6 +289,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     availableIPlist.add(getString(R.string.text_selection_unit));
                     availableIPlist.add(company);
                     xcd_available_ip.setItemsData(availableIPlist);
+                }
+                if(!TextUtils.isEmpty(tempName)){
+                    xcd_available_ip.setText(tempName);
                 }
                 ll_regist.setVisibility(View.VISIBLE);
                 hideProgressDialog();
@@ -917,7 +924,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetNameByOrgHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReturnAvailableIPHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRegistCompleteHandler);
         myHandler.removeCallbacksAndMessages(null);
         if (myProgressDialog != null) {
             myProgressDialog.dismiss();

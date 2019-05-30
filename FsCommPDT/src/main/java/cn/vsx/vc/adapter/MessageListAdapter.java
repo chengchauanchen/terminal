@@ -98,6 +98,8 @@ public class MessageListAdapter extends BaseAdapter {
                 viewHolder.tv_user_name.setText(context.getString(R.string.text_image_assistant));
             }else if(terminalMessage.messageType == MessageType.CALL_RECORD.getCode()){//电话助手目前不属于消息
                 viewHolder.tv_user_name.setText(context.getString(R.string.text_telephone_assistant));
+            }else if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){//警情
+                viewHolder.tv_user_name.setText(context.getString(R.string.text_to_warning));
             }
             else {
                 if (isReceiver) {//接受消息，显示对方名字
