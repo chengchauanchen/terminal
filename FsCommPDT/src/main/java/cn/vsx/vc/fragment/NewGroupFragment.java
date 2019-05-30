@@ -341,18 +341,28 @@ public class NewGroupFragment extends BaseFragment{
     private ReceiverMonitorViewClickHandler receiverMonitorViewClickHandler = new ReceiverMonitorViewClickHandler(){
         @Override
         public void handler(int groupNo){
+            //主组不能取消监听
+            if(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) == groupNo){
+                ToastUtils.showShort(R.string.main_group_cannot_cancel_monitor);
+                return;
+            }
+            //响应组不能取消监听
+            Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupNo);
+            if(ResponseGroupType.RESPONSE_TRUE.toString().equals(group.getResponseGroupType())){
+                ToastUtils.showShort(R.string.response_group_cannot_cancel_monitor);
+                return;
+            }
             List<Integer> monitorGroups = new ArrayList<>();
             monitorGroups.add(groupNo);
             NewGroupFragment.this.monitorGroupNo = groupNo;
+
             //如果是当前组，取消当前组
             if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
                 //如果是主组不能取消
-                if(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) == groupNo){
-                    ToastUtils.showShort(R.string.main_group_cannot_cancel_monitor);
-                }else {
+
                     currentMonitorGroup.put(groupNo,false);
                     MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
-                }
+
             }else {
                 if(null != DataUtil.getTempGroupByGroupNo(groupNo)){
                     //是临时组

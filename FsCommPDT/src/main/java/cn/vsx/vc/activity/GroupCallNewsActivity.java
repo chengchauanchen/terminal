@@ -398,10 +398,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
 
             case R.id.iv_monitor:
-                if(userId == TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)){
-                    ToastUtil.showToast(GroupCallNewsActivity.this,getString(R.string.can_not_cancel_listener));
-                        return;
-                }
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,userId);
                 break;
             default:
