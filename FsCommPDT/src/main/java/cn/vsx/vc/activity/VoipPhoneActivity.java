@@ -120,15 +120,15 @@ public class VoipPhoneActivity extends BaseActivity{
         mHandler.post(new Runnable(){
             @Override
             public void run(){
-//                if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().getCurrentState() == IndividualCallState.RINGING){
-//                    if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.SPEAKING)){
-//                        //将状态机移动到说话状态
-//                        TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.SPEAKING);
-//                        voipCallRequest.setVisibility(View.GONE);
-//                        voipCallSpeaking.setVisibility(View.VISIBLE);
-//                        ictVspeakingTimeSpeaking.onStart();
-//                    }
-//                }
+                if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().getCurrentState() == IndividualCallState.RINGING){
+                    if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.SPEAKING)){
+                        //将状态机移动到说话状态
+                        TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.SPEAKING);
+                        voipCallRequest.setVisibility(View.GONE);
+                        voipCallSpeaking.setVisibility(View.VISIBLE);
+                        ictVspeakingTimeSpeaking.onStart();
+                    }
+                }
             }
         });
 

@@ -174,24 +174,4 @@ public class VoipManager{
     public void clearCache(){
         EasyLinphone.getLC().clearAuthInfos();
     }
-
-//    public void moveToRing(){
-//        if(individualCallStateMachine.moveToState(IndividualCallState.RINGING)){
-//            //将个呼状态机移动到响铃状态
-//            TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.RINGING);
-//        }
-//    }
-
-//    public void moveToSpeaking(){
-//
-//        if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().getCurrentState() == IndividualCallState.RINGING){
-//            if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.SPEAKING)){
-//                //将状态机移动到说话状态
-//                TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.SPEAKING);
-//                voipCallRequest.setVisibility(View.GONE);
-//                voipCallSpeaking.setVisibility(View.VISIBLE);
-//                ictVspeakingTimeSpeaking.onStart();
-//            }
-//        }
-//    }
 }

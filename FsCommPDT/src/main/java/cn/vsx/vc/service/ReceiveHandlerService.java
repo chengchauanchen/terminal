@@ -320,15 +320,15 @@ public class ReceiveHandlerService extends Service{
             int code = TerminalFactory.getSDK().getTerminalStateManager().openFunction(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.IDLE);
             if(code == BaseCommonCode.SUCCESS_CODE){
                 //将个呼状态机移动到响铃中
-//                if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.RINGING)) {
-//                    TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.RINGING);
-//                }
-                MyApplication.instance.linphoneCall = linphoneCall;
-                Intent intent = new Intent(ReceiveHandlerService.this,ReceiveVoipService.class);
-                LinphoneAddress from = linphoneCall.getCallLog().getFrom();
-                String userName = from.getUserName();
-                intent.putExtra(Constants.USER_NAME,userName);
-                startService(intent);
+                if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.RINGING)) {
+                    TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.RINGING);
+                    MyApplication.instance.linphoneCall = linphoneCall;
+                    Intent intent = new Intent(ReceiveHandlerService.this,ReceiveVoipService.class);
+                    LinphoneAddress from = linphoneCall.getCallLog().getFrom();
+                    String userName = from.getUserName();
+                    intent.putExtra(Constants.USER_NAME,userName);
+                    startService(intent);
+                }
             }
         }
         @Override
@@ -491,7 +491,7 @@ public class ReceiveHandlerService extends Service{
      * 被动方个呼来了，选择接听或挂断
      */
     private ReceiveNotifyIndividualCallIncommingHandler receiveNotifyIndividualCallIncommingHandler = (mainMemberName, mainMemberId, individualCallType) -> {
-
+        startTranspantActivity();
         Intent individualCallIntent = new Intent(ReceiveHandlerService.this, ReceiveCallComingService.class);
         individualCallIntent.putExtra(Constants.MEMBER_NAME, mainMemberName);
         individualCallIntent.putExtra(Constants.MEMBER_ID, mainMemberId);
@@ -559,6 +559,7 @@ public class ReceiveHandlerService extends Service{
      **/
     @SuppressWarnings("unchecked")
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId, emergencyType) -> myHandler.post(() -> {
+        startTranspantActivity();
         Intent intent = new Intent();
         intent.putExtra(Constants.MEMBER_NAME, mainMemberName);
         intent.putExtra(Constants.MEMBER_ID, mainMemberId);
@@ -989,17 +990,7 @@ public class ReceiveHandlerService extends Service{
      */
     @SuppressWarnings("unchecked")
     private ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler receiveNotifyEmergencyVideoLiveIncommingMessageHandler = message -> myHandler.post(() -> {
-        //判断是否锁屏
-        KeyguardManager mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        boolean flag = mKeyguardManager.inKeyguardRestrictedInputMode();
-        if(flag){
-            //                //无屏保界面
-            if(MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0) != 1){
-                Intent intent = new Intent(ReceiveHandlerService.this, TransparentActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                startActivity(intent);
-            }
-        }
+        startTranspantActivity();
         Map<TerminalState, IState<?>> currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
         //观看上报图像,个呼
         if(currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PLAYING)|| currentStateMap.containsKey(TerminalState.INDIVIDUAL_CALLING)){
@@ -1359,11 +1350,11 @@ public class ReceiveHandlerService extends Service{
     private void sendLocationMessage(double latitude,double longitude,double altitude){
         String ip = MyTerminalFactory.getSDK().getParam(Params.GPS_IP);
         int port = MyTerminalFactory.getSDK().getParam(Params.GPS_PORT,0);
-        //			final String url = "http://192.168.1.174:6666/save";
+        //final String url = "http://192.168.1.174:6666/save";
         final String url = "http://"+ip+":"+port+"/save";
         Map<String,Object> params = new HashMap<>();
         params.put("terminalno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
-        params.put("memberuniqueno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0l));
+        params.put("memberuniqueno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L));
         params.put("longitude",longitude);
         params.put("latitude",latitude);
         params.put("speed",0.0f);
@@ -1372,12 +1363,7 @@ public class ReceiveHandlerService extends Service{
         params.put("mountType", MountType.MOUNT_UAV.toString());
         Gson gson = new Gson();
         final String json = gson.toJson(params);
-        MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable(){
-            @Override
-            public void run(){
-                MyTerminalFactory.getSDK().getHttpClient().postJson(url,"gps="+json);
-            }
-        });
+        MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getHttpClient().postJson(url,"gps="+json));
     }
 
     /**
@@ -1386,5 +1372,19 @@ public class ReceiveHandlerService extends Service{
      */
     private void setUploadTime() {
         uploadTime = 10*1000;
+    }
+
+    private void startTranspantActivity(){
+        //判断是否锁屏
+        KeyguardManager mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        boolean flag = mKeyguardManager.inKeyguardRestrictedInputMode();
+        if(flag){
+            //                //无屏保界面
+            if(MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0) != 1){
+                Intent intent = new Intent(ReceiveHandlerService.this, TransparentActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                startActivity(intent);
+            }
+        }
     }
 }

@@ -320,6 +320,14 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         mGroupId = userId;
         setIvMonitorDrawable();
         funcation.setFunction(true, userId);
+        //能否发消息
+        boolean sendMessage = getIntent().getBooleanExtra("sendMessage", true);
+        if(!sendMessage){
+            funcation.setCannotSendMessage();
+            iv_monitor.setVisibility(View.GONE);
+            groupLiveHistory.setVisibility(View.GONE);
+            groupCallActivityMemberInfo.setVisibility(View.GONE);
+        }
         //获取组内在线人数
 //        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(userId, false);
         TerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(userId, TerminalMemberStatusEnum.ONLINE.toString() );

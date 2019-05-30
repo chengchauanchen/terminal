@@ -248,7 +248,7 @@ public class PromptManager {
 	public void startExternNoStorage(){
 		if(soundPool != null){
 			logger.info("存储空间严重不足！");
-			soundPool.play(soundMap.get(R.raw.exten_no_storage), 0.5f, 0.5f, 0, 0, 1);
+			streamId = soundPool.play(soundMap.get(R.raw.exten_no_storage), 0.5f, 0.5f, 0, 0, 1);
 		}
 	}
 
@@ -258,7 +258,7 @@ public class PromptManager {
 	public void startExternStorageNotEnough(){
 		if(soundPool != null){
 			logger.info("存储空间不足！");
-			soundPool.play(soundMap.get(R.raw.exten_storage_not_engou), 0.5f, 0.5f, 0, 0, 1);
+			streamId = soundPool.play(soundMap.get(R.raw.exten_storage_not_engou), 0.5f, 0.5f, 0, 0, 1);
 		}
 	}
 
@@ -268,7 +268,7 @@ public class PromptManager {
 	public void startReportByNotity(){
 		if(soundPool != null){
 			logger.info("开始被动上报！");
-			soundPool.play(soundMap.get(R.raw.start_report_by_notify), 0.5f, 0.5f, 0, 0, 1);
+			streamId = soundPool.play(soundMap.get(R.raw.start_report_by_notify), 0.5f, 0.5f, 0, 0, 1);
 		}
 	}
 
@@ -278,7 +278,7 @@ public class PromptManager {
 	public void startPlayByNotity(){
 		if(soundPool != null){
 			logger.info("开始被动上报！");
-			soundPool.play(soundMap.get(R.raw.start_play_by_notify), 0.5f, 0.5f, 0, 0, 1);
+			streamId = soundPool.play(soundMap.get(R.raw.start_play_by_notify), 0.5f, 0.5f, 0, 0, 1);
 		}
 	}
 

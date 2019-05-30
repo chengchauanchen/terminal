@@ -271,6 +271,7 @@ public abstract class BaseService extends Service{
      * 退出业务状态
      */
     protected void stopBusiness(){
+        PromptManager.getInstance().stopRing();
         SensorUtil.getInstance().unregistSensor();
         revertStateMachine();
         mHandler.post(this::removeView);
@@ -419,7 +420,7 @@ public abstract class BaseService extends Service{
     }
 
     private void finishTransparentActivity(){
-        Intent intent = new Intent("FINISH_TRANSPARENT");
+        Intent intent = new Intent(Constants.FINISH_TRANSPARENT);
         sendBroadcast(intent);
     }
 }

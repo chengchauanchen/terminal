@@ -12,6 +12,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import cn.vsx.vc.R;
+import cn.vsx.vc.utils.Constants;
 
 /**
  * 透明activity，用于个呼到来时启动接听界面
@@ -79,7 +80,7 @@ public class TransparentActivity extends BaseActivity{
                         TransparentActivity.this.finish();
                     }
                 }
-            }else if(action !=null && "FINISH_TRANSPARENT".equals(action)){
+            }else if(Constants.FINISH_TRANSPARENT.equals(action)){
                 Log.e("TransparentActivity", "收到FINISH_TRANSPARENT");
                 TransparentActivity.this.finish();
             }

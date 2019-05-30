@@ -31,7 +31,6 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
-import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
@@ -598,6 +597,21 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
     public void setPttOnTouchLitener(PttOnTouchLitener pttOnTouchLitener){
         this.pttOnTouchLitener = pttOnTouchLitener;
     }
+
+    public void setCannotSendMessage(){
+        gv_function_bottom.setEnabled(false);
+        top.setEnabled(false);
+        groupCallNewsEt.setEnabled(false);
+        groupCallNewsKeyboard.setEnabled(false);
+        btn_ptt.setEnabled(false);
+        btn_record.setEnabled(false);
+        send.setEnabled(false);
+        ll_function_hide_plus_bottom.setEnabled(false);
+        bt_merge_transmit.setEnabled(false);
+        hideFunction.setEnabled(false);
+        btn_ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
+    }
+
     public interface PttOnTouchLitener{
         void up();
         void down();

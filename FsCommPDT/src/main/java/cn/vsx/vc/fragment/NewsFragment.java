@@ -328,7 +328,7 @@ public class NewsFragment extends BaseFragment {
     @Override
     public void initListener() {
         newsList.setOnItemClickListener(new OnItemClickListenerImp());
-//        newsList.setOnItemLongClickListener(new OnItemLongClickListenerImp());
+        newsList.setOnItemLongClickListener(new OnItemLongClickListenerImp());
         MyTerminalFactory.getSDK().registReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getAllMessageRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUnreadMessageChangedHandler);
@@ -1521,7 +1521,7 @@ public class NewsFragment extends BaseFragment {
         while (iterator.hasNext()){
             TerminalMessage next = iterator.next();
             if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息
-                if(!DataUtil.isExistGroup(next.messageToId)){
+                if(!DataUtil.isExistGroup(next.messageToId) && !TerminalMessageUtil.isCombatGroup(next)){
                     //说明组列表中没有这个组了
                     iterator.remove();//消息列表中移除
                 }else {

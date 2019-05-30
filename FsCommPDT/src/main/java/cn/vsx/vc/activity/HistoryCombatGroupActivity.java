@@ -1,8 +1,9 @@
 package cn.vsx.vc.activity;
 
+import android.content.Intent;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -11,14 +12,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.MessageListAdapter;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
-public class HistoryCombatGroupActivity extends BaseActivity implements View.OnClickListener{
+public class HistoryCombatGroupActivity extends BaseActivity implements View.OnClickListener, AdapterView.OnItemClickListener{
 
 
 
@@ -60,6 +61,7 @@ public class HistoryCombatGroupActivity extends BaseActivity implements View.OnC
         loadMessages();
         mMessageListAdapter = new MessageListAdapter(this, messageList, false, true);
         help_combat_list.setAdapter(mMessageListAdapter);
+        help_combat_list.setOnItemClickListener(this);
     }
 
     @Override
@@ -71,6 +73,7 @@ public class HistoryCombatGroupActivity extends BaseActivity implements View.OnC
             clearData();
             List<TerminalMessage> messageList = TerminalFactory.getSDK().getTerminalMessageManager().getHistoryCombatMessageList();
             addData(messageList);
+            sortMessageList();
         }
     }
     private void clearData(){
@@ -105,16 +108,25 @@ public class HistoryCombatGroupActivity extends BaseActivity implements View.OnC
     private void sortMessageList(){
         synchronized(HistoryCombatGroupActivity.this){
             if(!messageList.isEmpty()){
-
                 //再按照时间来排序
                 Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
                 //再保存到数据库
                 saveMessagesToSql();
                 if(mMessageListAdapter !=null){
-                    Log.e("NewsFragment", "messageList:" + messageList);
                     mMessageListAdapter.notifyDataSetChanged();
                 }
             }
         }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id){
+        TerminalMessage terminalMessage = messageList.get(position);
+        Intent intent = new Intent(this, GroupCallNewsActivity.class);
+        intent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
+        intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
+        intent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
+        intent.putExtra("sendMessage",false);
+        startActivity(intent);
     }
 }

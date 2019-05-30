@@ -76,6 +76,14 @@ public class CombatGroupActivity extends BaseActivity implements View.OnClickLis
     }
 
     @Override
+    public void onResume(){
+        super.onResume();
+        if(null !=mMessageListAdapter){
+            mMessageListAdapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
     public void doOtherDestroy(){
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveNotifyDataMessageHandler);
