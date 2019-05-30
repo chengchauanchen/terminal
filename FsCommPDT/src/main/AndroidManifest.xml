@@ -171,6 +171,8 @@
             android:launchMode="singleTask"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="portrait" />
+        <activity android:name=".activity.WarningListActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity android:name=".activity.AboutActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity android:name=".activity.WarningMessageDetailActivity"

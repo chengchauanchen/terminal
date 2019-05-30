@@ -880,12 +880,15 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         /**  组呼--录音条目  */
         if (terminalMessage.messageType == MessageType.GROUP_CALL.getCode()
                 || terminalMessage.messageType == MessageType.AUDIO.getCode()) {
-            double length = (messageBody.getLong(JsonParam.END_TIME) - messageBody.getLong(JsonParam.START_TIME)) / 1000.00;
-            BigDecimal b = new BigDecimal(new Double(length).toString());
-            long voiceLength = b.setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
-            voiceLength = voiceLength < 1 ? 1 : voiceLength;
-            voiceLength = voiceLength > 60 ? 60 : voiceLength;
-            setText(holder.tvDuration, voiceLength + "''");
+            if(messageBody.containsKey(JsonParam.END_TIME) && messageBody.containsKey(JsonParam.START_TIME)){
+
+                double length = (messageBody.getLong(JsonParam.END_TIME) - messageBody.getLong(JsonParam.START_TIME)) / 1000.00;
+                BigDecimal b = new BigDecimal(new Double(length).toString());
+                long voiceLength = b.setScale(0, BigDecimal.ROUND_HALF_UP).longValue();
+                voiceLength = voiceLength < 1 ? 1 : voiceLength;
+                voiceLength = voiceLength > 60 ? 60 : voiceLength;
+                setText(holder.tvDuration, voiceLength + "''");
+            }
             playGroupVoice(position, holder,terminalMessage);
             if (isReceiver(terminalMessage)) {
                 if (messageBody.containsKey(JsonParam.UNREAD) &&

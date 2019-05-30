@@ -79,6 +79,7 @@ import cn.vsx.vc.activity.HistoryCombatGroupActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.PhoneAssistantManageActivity;
 import cn.vsx.vc.activity.PushLiveMessageManageActivity;
+import cn.vsx.vc.activity.WarningListActivity;
 import cn.vsx.vc.adapter.MessageListAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.DeleteMessageDialog;
@@ -473,6 +474,9 @@ public class NewsFragment extends BaseFragment {
                     terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
                 Intent intent = new Intent(context, PushLiveMessageManageActivity.class);
                 context.startActivity(intent);
+            }else if(terminalMessage.messageType ==MessageType.WARNING_INSTANCE.getCode() && terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()){
+                Intent intent = new Intent(context, WarningListActivity.class);
+                context.startActivity(intent);
             }
             //进入电话助手
             else if(terminalMessage.messageType ==MessageType.CALL_RECORD.getCode()){
@@ -633,7 +637,8 @@ public class NewsFragment extends BaseFragment {
                 }
             }else {
                 if(terminalMessage.messageType != MessageType.WARNING_INSTANCE.getCode()){
-                    saveMessageToList(terminalMessage,false);
+                    //警情详情会处理
+//                    saveMessageToList(terminalMessage,false);
                 }
             }
             mHandler.post(() -> {
@@ -948,6 +953,10 @@ public class NewsFragment extends BaseFragment {
                 terminalMessageData.clear();
                 terminalMessageData.addAll(messageList);
                 for(TerminalMessage terminalMessage : messageRecord){
+                    if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
+                        //警情消息会在警情详情处理
+                        return;
+                    }
                     if (terminalMessage.messageFromId == terminalMessage.messageToId
                             && terminalMessage.messageToId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//主动播的消息，存入视频助手
                         if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() &&

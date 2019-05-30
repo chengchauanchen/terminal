@@ -236,6 +236,12 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
         }
     }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+
+    }
+
     private ReceiveVolumeOffCallHandler receiveVolumeOffCallHandler = new ReceiveVolumeOffCallHandler(){
         @SuppressLint("SetTextI18n")
         @Override
