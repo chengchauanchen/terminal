@@ -2,11 +2,9 @@ package cn.vsx.vc.activity;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.NotificationManager;
 import android.app.Service;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
@@ -83,7 +81,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandle
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
@@ -123,7 +120,6 @@ import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.AirCraftUtil;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.DialogUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SensorUtil;
@@ -422,36 +418,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 //            getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, localMemberSearchFragment).commit();
 //            myHandler.postDelayed(() -> ll_content.setVisibility(View.GONE),500);
 
-        }
-    };
-
-    private ReceiveForceOfflineHandler receiveForceOfflineHandler = new ReceiveForceOfflineHandler(){
-        @Override
-        public void handler(){
-            myHandler.post(()->{
-                new DialogUtil(){
-
-                    @Override
-                    public CharSequence getMessage(){
-                        return getString(R.string.force_off_line);
-                    }
-
-                    @Override
-                    public Context getContext(){
-                        return NewMainActivity.this;
-                    }
-
-                    @Override
-                    public void doConfirmThings(){
-                        exitApp();
-                    }
-
-                    @Override
-                    public void doCancelThings(){
-                        exitApp();
-                    }
-                }.showDialog();
-            });
         }
     };
 
@@ -998,7 +964,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCallingCannotClickHandler);
 
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveForceOfflineHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
@@ -1185,35 +1150,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().getVoipCallManager().clearCache();
         if(!TextUtils.isEmpty(account)){
             MyTerminalFactory.getSDK().getVoipCallManager().login(account,account,server);
-        }
-    }
-
-    private void exitApp() {
-        Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
-        stoppedCallIntent.putExtra("stoppedResult","0");
-        SendRecvHelper.send(NewMainActivity.this,stoppedCallIntent);
-
-        MyTerminalFactory.getSDK().exit();//停止服务
-        PromptManager.getInstance().stop();
-        for (Activity activity : ActivityCollector.getAllActivity().values()) {
-            activity.finish();
-        }
-        MyApplication.instance.isClickVolumeToCall = false;
-        MyApplication.instance.isPttPress = false;
-        MyApplication.instance.stopIndividualCallService();
-        killAllProcess();
-    }
-
-    private void killAllProcess(){
-        ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        if(null !=mActivityManager){
-            List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
-            for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList) {
-                if (runningAppProcessInfo.pid != android.os.Process.myPid()) {
-                    android.os.Process.killProcess(runningAppProcessInfo.pid);
-                }
-            }
-            android.os.Process.killProcess(android.os.Process.myPid());
         }
     }
 
@@ -1614,7 +1550,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler );
 
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceOfflineHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateFoldersAndGroupsHandler );
 

@@ -47,6 +47,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyOtherStopVideoMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSupportResolutionHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -102,6 +103,8 @@ public class PhonePushService extends BaseService{
     private static final int CURRENTTIME = 0;
     private static final int HIDELIVINGVIEW = 1;
     private boolean isGroupPushLive;
+    private int width = 640;
+    private int height = 480;
 
     public PhonePushService(){}
 
@@ -156,6 +159,7 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveExternStorageSizeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSupportResolutionHandler);
 
 
         mSvLive.setSurfaceTextureListener(surfaceTextureListener);
@@ -280,6 +284,7 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSupportResolutionHandler);
     }
 
     private void hideAllView(){
@@ -399,6 +404,35 @@ public class PhonePushService extends BaseService{
         logger.info("收到停止上报通知");
         mHandler.post(() -> finishVideoLive());
     };
+
+    private ReceiveSupportResolutionHandler receiveSupportResolutionHandler = new ReceiveSupportResolutionHandler(){
+        @Override
+        public void Handle(){
+            setResolution();
+            if(mMediaStream !=null){
+                mMediaStream.updateResolution(width, height);
+            }
+        }
+    };
+
+    private void setResolution(){
+        List<String> supportListResolution = org.easydarwin.util.Util.getSupportResolution(getApplicationContext());
+        if(null == supportListResolution || supportListResolution.isEmpty()){
+            return;
+        }
+        int position = MyTerminalFactory.getSDK().getParam(Params.VIDEO_RESOLUTION, 2);
+        String setResolution = listResolution.get(position);
+        if(supportListResolution.contains(setResolution)){
+            String[] splitR = setResolution.split("x");
+            width = Integer.parseInt(splitR[0]);
+            height = Integer.parseInt(splitR[1]);
+        }else {
+            logger.info("支持的分辨率："+supportListResolution);
+            String[] splitR = supportListResolution.get(0).split("x");
+            width = Integer.parseInt(splitR[0]);
+            height = Integer.parseInt(splitR[1]);
+        }
+    }
 
 
     /**
@@ -711,11 +745,7 @@ public class PhonePushService extends BaseService{
     }
 
     private void startCamera(){
-        int position = MyTerminalFactory.getSDK().getParam(Params.VIDEO_RESOLUTION, 2);
-        String r = listResolution.get(position);
-        String[] splitR = r.split("x");
-        int width = Integer.parseInt(splitR[0]);
-        int height = Integer.parseInt(splitR[1]);
+        setResolution();
         logger.error("分辨率--width:" + width + "----height:" + height);
         mMediaStream.updateResolution(width, height);
         mMediaStream.setDgree(getDgree());

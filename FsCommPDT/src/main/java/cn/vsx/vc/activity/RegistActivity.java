@@ -474,9 +474,11 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         xcd_available_ip.setItemsData(availableIPlist);
                         selectIp = availableIPMap.get(name).getIp();
                         selectPort = availableIPMap.get(name).getPort();
-
                         //认证
-                        MyTerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp,selectPort);
+                        int resultCode = MyTerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
+                        if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                            changeProgressMsg(getString(R.string.authing));
+                        }
                     }
                 }
             });
@@ -560,8 +562,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             availableIPlist.add(company);
             xcd_available_ip.setItemsData(availableIPlist);
             reAuthCount = 0;
-            TerminalFactory.getSDK().getAuthManagerTwo().startAuth(viewHolder.userIP.getText().toString(),viewHolder.userPort.getText().toString());
-
+            int code = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString());
+            if(code == BaseCommonCode.SUCCESS_CODE){
+                changeProgressMsg(getString(R.string.authing));
+            }
             popupWindow.dismiss();
             isCheckSuccess = false;
             isCheckFinished = false;

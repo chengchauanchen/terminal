@@ -1,6 +1,7 @@
 package cn.vsx.vc.activity;
 
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
@@ -33,6 +34,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
@@ -41,13 +43,16 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ProgressDialog;
+import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
 import cn.vsx.vc.receive.RecvCallBack;
+import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.OnBackListener;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.DialogUtil;
 import cn.vsx.vc.utils.PhoneAdapter;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -225,6 +230,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     @Override
     protected void onResume(){
         super.onResume();
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveForceOfflineHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
@@ -236,6 +242,10 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     protected void onPause(){
         super.onPause();
         unregisterHeadsetPlugReceiver();
+		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceOfflineHandler);
+		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
+		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
+		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
     }
 
 	@Override
@@ -245,9 +255,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
 			ActivityCollector.removeActivity(this);
 
-			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
-			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
-			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
 			if (mBroadcastReceiv != null) {
 				LocalBroadcastManager.getInstance(BaseActivity.this).unregisterReceiver(
 						mBroadcastReceiv);
@@ -580,5 +587,59 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
 	public void setBackListener(OnBackListener backListener) {
 		this.backListener = backListener;
+	}
+
+	private ReceiveForceOfflineHandler receiveForceOfflineHandler = () -> myHandler.post(()->{
+		new DialogUtil(){
+
+			@Override
+			public CharSequence getMessage(){
+				return getString(R.string.force_off_line);
+			}
+
+			@Override
+			public Context getContext(){
+				return BaseActivity.this;
+			}
+
+			@Override
+			public void doConfirmThings(){
+				exitApp();
+			}
+
+			@Override
+			public void doCancelThings(){
+				exitApp();
+			}
+		}.showDialog();
+	});
+
+	private void exitApp() {
+		Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
+		stoppedCallIntent.putExtra("stoppedResult","0");
+		SendRecvHelper.send(BaseActivity.this,stoppedCallIntent);
+
+		MyTerminalFactory.getSDK().exit();//停止服务
+		PromptManager.getInstance().stop();
+		for (Activity activity : ActivityCollector.getAllActivity().values()) {
+			activity.finish();
+		}
+		MyApplication.instance.isClickVolumeToCall = false;
+		MyApplication.instance.isPttPress = false;
+		MyApplication.instance.stopIndividualCallService();
+		killAllProcess();
+	}
+
+	protected void killAllProcess(){
+		ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		if(null !=mActivityManager){
+			List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
+			for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList) {
+				if (runningAppProcessInfo.pid != android.os.Process.myPid()) {
+					android.os.Process.killProcess(runningAppProcessInfo.pid);
+				}
+			}
+			android.os.Process.killProcess(android.os.Process.myPid());
+		}
 	}
 }
