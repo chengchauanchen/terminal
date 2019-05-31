@@ -1145,7 +1145,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         if(account.startsWith("88")|| account.startsWith("86")){
             account = account.substring(2);
         }
-        account = "1003";
+//        account = "1003";
         logger.info("voip账号："+account+",密码："+ account+"，服务器地址："+server);
         MyTerminalFactory.getSDK().getVoipCallManager().clearCache();
         if(!TextUtils.isEmpty(account)){

@@ -917,7 +917,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     @Override
     public void initData() {
-
     }
 
     @Override

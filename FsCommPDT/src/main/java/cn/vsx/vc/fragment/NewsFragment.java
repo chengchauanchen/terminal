@@ -613,6 +613,7 @@ public class NewsFragment extends BaseFragment {
 
     /**  接收消息 **/
     private ReceiveNotifyDataMessageHandler mReceiveNotifyDataMessageHandler = terminalMessage -> {
+        logger.info("NewsFragment---收到新消息"+terminalMessage);
         synchronized(NewsFragment.this){
             terminalMessageData.clear();
             terminalMessageData.addAll(messageList);
@@ -650,7 +651,7 @@ public class NewsFragment extends BaseFragment {
             }else {
                 if(terminalMessage.messageType != MessageType.WARNING_INSTANCE.getCode()){
                     //警情详情会处理
-//                    saveMessageToList(terminalMessage,false);
+                    saveMessageToList(terminalMessage,false);
                 }
             }
             mHandler.post(() -> {
