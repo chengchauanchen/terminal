@@ -121,5 +121,9 @@
                 android:textStyle="normal" />
         </LinearLayout>
     </RelativeLayout>
+    
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="@dimen/x200"
+        android:layout_height="@dimen/y100"></android.support.v7.widget.RecyclerView>
 
 </RelativeLayout>

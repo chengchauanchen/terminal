@@ -346,7 +346,13 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_correct_name));
                 return;
             }
-            TerminalFactory.getSDK().getAuthManagerTwo().regist(useName,useOrg);
+            String registIP = TerminalFactory.getSDK().getAuthManagerTwo().getTempIp();
+            String registPort = TerminalFactory.getSDK().getAuthManagerTwo().getTempPort();
+            if(TextUtils.isEmpty(registIP) || TextUtils.isEmpty(registPort)){
+                ToastUtils.showShort(R.string.text_please_select_unit);
+            }else {
+                TerminalFactory.getSDK().getAuthManagerTwo().regist(useName,useOrg);
+            }
         }
     }
 

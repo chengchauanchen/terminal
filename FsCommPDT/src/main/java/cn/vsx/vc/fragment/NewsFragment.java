@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.FileUtil;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
@@ -465,10 +466,8 @@ public class NewsFragment extends BaseFragment {
 
         @Override
         public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-            if(position > 0) {
-                new DeleteMessageDialog(context).show();
-                deletePos = position;
-            }
+            new DeleteMessageDialog(context).show();
+            deletePos = position;
             return true;
         }
     }
@@ -1323,6 +1322,10 @@ public class NewsFragment extends BaseFragment {
     /***  删除消息   **/
     private ReceiverDeleteMessageHandler mReceiverDeleteMessageHandler = () -> {
         TerminalMessage terminalMessage = messageList.get(deletePos);
+        if(TerminalMessageUtil.isMainGroupMessage(terminalMessage)){
+            ToastUtils.showShort(R.string.main_group_message_cannot_delete);
+            return;
+        }
         int myId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
         boolean isReceiver = terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
         if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
@@ -1334,6 +1337,7 @@ public class NewsFragment extends BaseFragment {
         }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
             MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_GROUP.getCode(), terminalMessage.messageToId, myId);
         }
+
         removeData(deletePos);
 //        sortMessageList();
         sortFirstMessageList();

@@ -15,7 +15,7 @@
         android:layout_height="@dimen/dp_40"
         android:textColor="@color/regist_host_text"
         android:paddingLeft="@dimen/dp_10"
-        android:text="文本文字"
+        android:text="添加单位"
         android:gravity="center_vertical"
         android:textSize="@dimen/sp_18"
         android:padding="@dimen/dp_5"
