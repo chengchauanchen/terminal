@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.LinearLayout;
 
 import com.alibaba.fastjson.JSONObject;
 
@@ -75,6 +76,7 @@ public abstract class BaseService extends Service{
     protected int screenHeight;
     protected PowerManager.WakeLock wakeLock;
     protected View rootView;
+    protected LinearLayout mLlNoNetwork;
     protected boolean dialogAdd;//是否添加了弹窗
     public static final int OFF_LINE_TIME = 60*1000;
     protected static final int OFF_LINE = 55;
@@ -217,6 +219,12 @@ public abstract class BaseService extends Service{
 
     protected abstract void onNetworkChanged(boolean connected);
 
+//    protected  void setCommonView(){
+//        if(rootView!=null){
+//            mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
+//        }
+//    }
+
 
     @Override
     public void onDestroy(){
@@ -308,10 +316,16 @@ public abstract class BaseService extends Service{
      * 在线状态
      */
     private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> {
-        if(!connected){
-            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
-        }
-        mHandler.post(()-> onNetworkChanged(connected));
+        mHandler.post(()-> {
+            if(mLlNoNetwork!=null){
+                mLlNoNetwork.setVisibility((!connected)?View.VISIBLE:View.GONE);
+            }else{
+                if(!connected){
+                    ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.net_work_disconnect));
+                }
+            }
+            onNetworkChanged(connected);
+        });
     };
 
     /**

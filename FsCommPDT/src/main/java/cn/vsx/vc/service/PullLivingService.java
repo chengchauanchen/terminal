@@ -255,6 +255,7 @@ public class PullLivingService extends BaseService{
         mTvLiveSpeakingName = rootView.findViewById(R.id.tv_live_speakingName);
         mTvLiveGroupName = rootView.findViewById(R.id.tv_live_groupName);
         mTvLiveSpeakingId = rootView.findViewById(R.id.tv_live_speakingId);
+        mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
 
     }
 

@@ -89,6 +89,7 @@ public class PullGB28181Service extends BaseService{
         mIvClose =  rootView.findViewById(R.id.iv_close);
         mLlInviteMember =  rootView.findViewById(R.id.ll_invite_member);
         mIvLiveLookAddmember =  rootView.findViewById(R.id.iv_live_look_addmember);
+        mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
     }
 
     @Override

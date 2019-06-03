@@ -136,6 +136,7 @@ public class UVCPushService extends BaseService{
         mIvUvcHangup = rootView.findViewById(R.id.iv_uvc_hangup);
         mIvUvcInviteMember = rootView.findViewById(R.id.iv_uvc_invite_member);
         mLlUvcInviteMember = rootView.findViewById(R.id.ll_uvc_invite_member);
+        mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
     }
 
     @SuppressLint("ClickableViewAccessibility")

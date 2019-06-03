@@ -254,4 +254,7 @@
             android:textSize="30sp"
             android:visibility="visible" />
     </RelativeLayout>
+
+    <include layout="@layout/layout_no_network"
+        android:visibility="gone"/>
 </RelativeLayout>

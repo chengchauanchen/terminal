@@ -243,4 +243,7 @@
             android:layout_weight="1"
             android:layout_height="@dimen/dp_70"/>
     </LinearLayout>
+
+    <include layout="@layout/layout_no_network"
+        android:visibility="gone"/>
 </RelativeLayout>

@@ -260,6 +260,7 @@ public class RecoderPushService extends BaseService{
         mLvLiveMemberInfo =  rootView.findViewById(R.id.lv_live_member_info);
         mIvLiveAddmember =  rootView.findViewById(R.id.iv_live_addmember);
         mIvHangup = rootView.findViewById(R.id.iv_hangup);
+        mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
     }
 
     private View.OnClickListener hangUpOnClickListener = v-> finishVideoLive();

@@ -518,4 +518,7 @@
                 android:background="@drawable/bg_map_cover_corners" />
         </RelativeLayout>
     </RelativeLayout>
+
+    <include layout="@layout/layout_no_network"
+        android:visibility="gone"/>
 </RelativeLayout>

@@ -632,6 +632,8 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         mapAircraftLive = rootView.findViewById(R.id.map_aircraft_live);
         btnHomeLocation = rootView.findViewById(R.id.btn_home_location);
         btn_auto_flight = rootView.findViewById(R.id.btn_auto_flight);
+
+        mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
     }
 
     @Override

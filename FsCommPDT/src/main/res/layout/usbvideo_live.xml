@@ -200,4 +200,6 @@
                 android:visibility="visible" />
         </LinearLayout>
     </LinearLayout>
+    <include layout="@layout/layout_no_network"
+        android:visibility="gone"/>
 </RelativeLayout>

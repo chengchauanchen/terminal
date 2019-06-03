@@ -273,7 +273,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                         noNetWork.setVisibility(View.GONE);
                     }
                 },1000);
-
+                //网络连接上，需要更新组数据（防止在断网的时候有些组不存在）
+                TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo();
             }
         }
     };
@@ -571,6 +572,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             });
         }
     };
+
     /**=====================================================================================================Listener================================================================================================================================**/
     private CallManager callManager;
     private UpdateManager updateManager;
@@ -1413,9 +1415,13 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 String result = data.getStringExtra(Constant.CODED_CONTENT);
                 logger.info("扫描二维码结果："+result);
                 // TODO: 2019/4/10 给注册服务发送扫码结果
-                Intent intent  = new Intent(this,PcLoginActivity.class);
-                intent.putExtra(Constants.SCAN_DATA,result);
-                startActivity(intent);
+                if(DataUtil.isLegalPcCode(result)){
+                    Intent intent  = new Intent(this,PcLoginActivity.class);
+                    intent.putExtra(Constants.SCAN_DATA,result);
+                    startActivity(intent);
+                }else{
+                    ToastUtil.showToast(NewMainActivity.this,"请扫描有效的PC二维码");
+                }
             }
         }
     }

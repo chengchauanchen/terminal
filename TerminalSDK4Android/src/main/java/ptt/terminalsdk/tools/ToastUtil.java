@@ -7,7 +7,9 @@ import android.os.Looper;
 import android.widget.Toast;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 
@@ -45,6 +47,22 @@ public class ToastUtil {
 			}
 		});
     }
+
+	/*
+	 * 静态吐司显示的速度更快
+	 * 静态toast  toast 消失 变为null 不消失就不用重新创建
+	 */
+	public static void showSystemToast(final Context context, final String text) {
+		handler.post(new Runnable(){
+			@Override
+			public void run(){
+				if (toast == null)
+					toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+				toast.setText(text);
+				showSystemToast(toast);
+			}
+		});
+	}
     
     /*
      * 让主线程和子线程通用
@@ -172,6 +190,38 @@ public class ToastUtil {
 			ToastUtil.showToast(context, TerminalErrorCode.GROUP_CHANGING.getErrorDiscribe()+"，不能再次转组");
 		}else{
 			ToastUtil.showToast(context, "转组失败！");
+		}
+	}
+
+	/**
+	 * 显示系统Toast
+	 */
+	private static void showSystemToast(Toast toast){
+		try{
+			Method getServiceMethod = Toast.class.getDeclaredMethod("getService");
+			getServiceMethod.setAccessible(true);
+
+			final Object iNotificationManager = getServiceMethod.invoke(null);
+			Class iNotificationManagerCls = Class.forName("android.app.INotificationManager");
+			Object iNotificationManagerProxy = Proxy.newProxyInstance(toast.getClass().getClassLoader(), new Class[]{iNotificationManagerCls}, new InvocationHandler() {
+				@Override
+				public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+					// 强制使用系统Toast
+					// 华为p20 pro上为enqueueToastEx
+					if("enqueueToast".equals(method.getName())
+							|| "enqueueToastEx".equals(method.getName())){
+						args[0] = "android";
+					}
+					return method.invoke(iNotificationManager, args);
+				}
+			});
+			Field sServiceFiled = Toast.class.getDeclaredField("sService");
+			sServiceFiled.setAccessible(true);
+			sServiceFiled.set(null, iNotificationManagerProxy);
+			toast.show();
+
+		}catch (Exception e){
+			e.printStackTrace();
 		}
 	}
 }

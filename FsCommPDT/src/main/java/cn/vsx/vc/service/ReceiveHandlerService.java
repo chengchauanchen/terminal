@@ -591,6 +591,7 @@ public class ReceiveHandlerService extends Service{
                 MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
                 intent.setClass(ReceiveHandlerService.this, PhonePushService.class);
                 intent.putExtra(Constants.TYPE,Constants.RECEIVE_PUSH);
+                intent.putExtra(Constants.EMERGENCY_TYPE,true);
                 myHandler.postDelayed(() -> startService(intent),1000);
             }else{
                 intent.setClass(ReceiveHandlerService.this, ReceiveLiveCommingService.class);

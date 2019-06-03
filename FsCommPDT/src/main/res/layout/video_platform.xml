@@ -78,4 +78,7 @@
                 android:visibility="visible" />
         </LinearLayout>
     </RelativeLayout>
+
+    <include layout="@layout/layout_no_network"
+        android:visibility="gone"/>
 </RelativeLayout>

@@ -145,6 +145,8 @@ public class PhonePushService extends BaseService{
         mLlLiveHangupTotal = rootView.findViewById(R.id.ll_live_hangup_total);
         mLlLiveInviteMember = rootView.findViewById(R.id.ll_live_invite_member);
         mIvLiveAddmember = rootView.findViewById(R.id.iv_live_addmember);
+
+        mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -178,6 +180,7 @@ public class PhonePushService extends BaseService{
     protected void initView(Intent intent){
         String type = intent.getStringExtra(Constants.TYPE);
         isGroupPushLive =  intent.getBooleanExtra(Constants.IS_GROUP_PUSH_LIVING,false);
+        boolean emergencyType =  intent.getBooleanExtra(Constants.EMERGENCY_TYPE,false);
         hideAllView();
         mRlPhonePushLive.setVisibility(View.VISIBLE);
         showLivingView();
@@ -202,7 +205,9 @@ public class PhonePushService extends BaseService{
             }
         }else if(Constants.RECEIVE_PUSH.equals(type)){
             MyTerminalFactory.getSDK().getLiveManager().responseLiving(true);
-            PromptManager.getInstance().stopRing();
+            if (!emergencyType) {
+                PromptManager.getInstance().stopRing();
+            }
             mLiveVedioTheme.setText(getResources().getString(R.string.i_pushing_video));
             MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
         }

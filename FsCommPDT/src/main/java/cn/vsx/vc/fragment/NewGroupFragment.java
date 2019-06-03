@@ -24,7 +24,9 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyAboutGroupChangeMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateMonitorGroupViewHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdateGroupHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -128,6 +130,8 @@ public class NewGroupFragment extends BaseFragment{
                         groupAdapter.notifyDataSetChanged();
                     });
                 }
+                //更新对讲页面
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveSetMonitorGroupViewHandler.class);
                 monitorGroupNo = 0;
             }else {
                 monitorGroupNo = 0;
@@ -202,6 +206,25 @@ public class NewGroupFragment extends BaseFragment{
     private ReceiveResponseChangeTempGroupProcessingStateHandler receiveResponseChangeTempGroupProcessingStateHandler = (resultCode, resultDesc) -> {
         if(resultCode == BaseCommonCode.SUCCESS_CODE){
             TerminalFactory.getSDK().getConfigManager().updateAllGroups();
+        }
+    };
+
+    /**
+     * 更新组数据通知
+     */
+    private ReceiveUpdateMonitorGroupViewHandler receiveUpdateMonitorGroupViewHandler = new ReceiveUpdateMonitorGroupViewHandler(){
+        @Override
+        public void handler(){
+            myHandler.post(() -> {
+                groupUpdateCompleted = false;
+                tempGroupUpdateCompleted = false;
+                catalogNames.clear();
+                tempCatalogNames.clear();
+
+                CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+                catalogNames.add(groupCatalogBean);
+                TerminalFactory.getSDK().getConfigManager().updateAllGroups();
+            });
         }
     };
 
@@ -288,6 +311,7 @@ public class NewGroupFragment extends BaseFragment{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateMonitorGroupViewHandler);
         swipeRefreshLayout.setProgressBackgroundColorSchemeResource(R.color.white);
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark);
         swipeRefreshLayout.setOnRefreshListener(() -> {
@@ -411,6 +435,7 @@ public class NewGroupFragment extends BaseFragment{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateMonitorGroupViewHandler);
         super.onDestroy();
     }
 

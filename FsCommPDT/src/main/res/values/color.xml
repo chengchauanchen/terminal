@@ -581,4 +581,7 @@
     <color name="warning_title">#ffffff</color>
     <color name="warning_item_bg">#111f3a</color>
     <color name="transparent_10">#1A000000</color>
+
+    <color name="red_40">#66ff3737</color>
+    <color name="red_ff">#ff3737</color>
 </resources>

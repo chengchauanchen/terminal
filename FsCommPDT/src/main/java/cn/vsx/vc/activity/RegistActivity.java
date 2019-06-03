@@ -233,6 +233,12 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         myHandler.post(() -> {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 changeProgressMsg(getResources().getString(R.string.updating_data));
+            }else{
+                myHandler.post(()-> {
+                    hideProgressDialog();
+                    AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultDesc).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
+                    alerDialog.show();
+                });
             }
         });
     };
