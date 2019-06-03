@@ -31,6 +31,7 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.model.WarningRecord;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 
 /**
  * Created by ysl on 2017/3/24.
@@ -68,6 +69,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public synchronized void addTerminalMessage(TerminalMessage terminalMessage) {
+        logger.info("向terminalMessage表存消息："+terminalMessage);
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("current_member_id",TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
@@ -101,6 +103,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public void deleteMessageFromSQLite(long message_id){
+        logger.error("删除message_id"+message_id+"消息");
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "DELETE FROM terminalMessage WHERE message_id = ?";
         db.execSQL(sql, new String[]{""+message_id});
@@ -109,6 +112,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     @Override
     public synchronized void deleteMessageFromSQLite(int messageCategory, int targetId, int memberId) {
         SQLiteDatabase db = helper.getWritableDatabase();
+        logger.error("删除targetId"+targetId+"消息");
         if (messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
             String sql = "DELETE FROM terminalMessage WHERE current_member_id = ? AND message_to_id = ? AND message_category = ?";
             db.execSQL(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",targetId + "", 2 + ""});
@@ -190,13 +194,53 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         SQLiteDatabase db = helper.getWritableDatabase();
         Cursor cursor;
         if (sendTime == 0) {
-            String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ?AND message_to_id = ? AND message_from_id = ? AND message_type = ? ORDER BY send_time DESC LIMIT 0,10";
-            cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",memberId + "", memberId + "", MessageType.VIDEO_LIVE.getCode()+""});
+            String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ? AND message_from_id = ? AND message_type = ? AND result_code = ? ORDER BY send_time DESC LIMIT 0,10";
+            cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0) + "", memberId + "", MessageType.VIDEO_LIVE.getCode()+"","0"});
         } else {
-            String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ?AND send_time <= ? AND message_to_id = ? AND message_from_id = ? AND message_type = ? ORDER BY send_time DESC LIMIT 0,10";
-            cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",sendTime + "", memberId + "", memberId + "",MessageType.VIDEO_LIVE.getCode()+""});
+            String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ?AND send_time <= ? AND AND message_from_id = ? AND message_type = ? AND result_code = ? ORDER BY send_time DESC LIMIT 0,10";
+            cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",sendTime  + "", memberId + "",MessageType.VIDEO_LIVE.getCode()+"","0"});
         }
-        return getTerminalMessageList(db, cursor);
+        List<TerminalMessage> terminalMessageList = new LinkedList<>();
+
+        if (cursor != null && cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                TerminalMessage terminalMessage = new TerminalMessage();
+
+                terminalMessage.messageId = cursor.getLong(cursor.getColumnIndex("message_id"));
+                terminalMessage.messageBodyId = cursor.getString(cursor.getColumnIndex("message_body_id"));
+                terminalMessage.messageFromId = cursor.getInt(cursor.getColumnIndex("message_from_id"));
+                terminalMessage.messageFromName = cursor.getString(cursor.getColumnIndex("message_from_name"));
+                terminalMessage.messageToId = cursor.getInt(cursor.getColumnIndex("message_to_id"));
+                terminalMessage.messageCategory = cursor.getInt(cursor.getColumnIndex("message_category"));
+                terminalMessage.messageToName = cursor.getString(cursor.getColumnIndex("message_to_name"));
+                terminalMessage.messageBody = JSONObject.parseObject(cursor.getString(cursor.getColumnIndex("message_body")));
+                terminalMessage.messageUrl = cursor.getString(cursor.getColumnIndex("message_url"));
+                terminalMessage.messagePath = cursor.getString(cursor.getColumnIndex("message_path"));
+                terminalMessage.messageType = cursor.getInt(cursor.getColumnIndex("message_type"));
+                terminalMessage.messageVersion = cursor.getLong(cursor.getColumnIndex("message_version"));
+                terminalMessage.resultCode = cursor.getInt(cursor.getColumnIndex("result_code"));
+                terminalMessage.sendTime = cursor.getLong(cursor.getColumnIndex("send_time"));
+                terminalMessage.messageFromUniqueNo = cursor.getLong(cursor.getColumnIndex("message_from_unique_no"));
+                terminalMessage.messageToUniqueNo = cursor.getLong(cursor.getColumnIndex("message_to_unique_no"));
+                int messageStatus = cursor.getInt(cursor.getColumnIndex("message_status"));
+                terminalMessage.messageStatus = (messageStatus == 1)?MessageStatus.MESSAGE_RECALL.toString():MessageStatus.MESSAGE_NORMAL.toString();
+                //消息列表数据库才有unread_count这个字段
+                try {
+                    if (cursor.getColumnIndex("unread_count") != -1) {
+                        terminalMessage.unReadCount = cursor.getInt(cursor.getColumnIndex("unread_count"));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //筛选
+                if(TerminalMessageUtil.isLiveMessage(terminalMessage)){
+                    terminalMessageList.add(terminalMessage);
+                }
+            }
+            cursor.close();
+        }
+
+        return terminalMessageList;
     }
 
     @Override
@@ -332,6 +376,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                logger.info("从数据库取出数据："+terminalMessage);
                 terminalMessageList.add(terminalMessage);
             }
             cursor.close();

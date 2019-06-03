@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.media.MediaRecorder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -249,23 +248,46 @@ public abstract class ChatBaseActivity extends BaseActivity{
         speakingName = getIntent().getStringExtra("speakingName");
         newsBarGroupName.setText(HandleIdUtil.handleName(userName));
         setToIds();
-        //先从本地数据库获取
-        List<TerminalMessage> groupMessageRecord = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupMessageRecord(
-                isGroup ? MessageCategory.MESSAGE_TO_GROUP.getCode() : MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), userId,
-                0, TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
-        Collections.sort(groupMessageRecord);
-        chatMessageList.addAll(groupMessageRecord);
-        if (chatMessageList.size() > 0) {
-            lastVersion = chatMessageList.get(chatMessageList.size() - 1).messageVersion;
-            tempGetMessage = chatMessageList.get(0);
-        }
-        //如果本地没有或者本地的数据不足10条从网络获取
-        if (chatMessageList.size() == 0 || chatMessageList.size() < PAGE_COUNT) {
-            isEnoughPageCount = false;
-            getHistoryMessageRecord(PAGE_COUNT - chatMessageList.size());
-        }else{
-            isEnoughPageCount = true;
-        }
+        //消息从文件服务获取
+//        if(isGroup){
+            getHistoryMessageRecord(PAGE_COUNT);
+//        }else {
+//            List<TerminalMessage> groupMessageRecord = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupMessageRecord(
+//                    isGroup ? MessageCategory.MESSAGE_TO_GROUP.getCode() : MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), userId,
+//                    0, TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+//
+//            Collections.sort(groupMessageRecord);
+//            chatMessageList.addAll(groupMessageRecord);
+//            if (chatMessageList.size() > 0) {
+//                lastVersion = chatMessageList.get(chatMessageList.size() - 1).messageVersion;
+//                tempGetMessage = chatMessageList.get(0);
+//            }
+//            //如果本地没有或者本地的数据不足10条从网络获取
+//            if (chatMessageList.size() == 0 || chatMessageList.size() < PAGE_COUNT) {
+//                isEnoughPageCount = false;
+//                getHistoryMessageRecord(PAGE_COUNT - chatMessageList.size());
+//            }else{
+//                isEnoughPageCount = true;
+//            }
+//        }
+
+//        //先从本地数据库获取
+//        List<TerminalMessage> groupMessageRecord = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupMessageRecord(
+//                isGroup ? MessageCategory.MESSAGE_TO_GROUP.getCode() : MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), userId,
+//                0, TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+//        Collections.sort(groupMessageRecord);
+//        chatMessageList.addAll(groupMessageRecord);
+//        if (chatMessageList.size() > 0) {
+//            lastVersion = chatMessageList.get(chatMessageList.size() - 1).messageVersion;
+//            tempGetMessage = chatMessageList.get(0);
+//        }
+//        //如果本地没有或者本地的数据不足10条从网络获取
+//        if (chatMessageList.size() == 0 || chatMessageList.size() < PAGE_COUNT) {
+//            isEnoughPageCount = false;
+//            getHistoryMessageRecord(PAGE_COUNT - chatMessageList.size());
+//        }else{
+//            isEnoughPageCount = true;
+//        }
 
         LinkedTreeMap<String, List<TerminalMessage>> sendFailMap = MyTerminalFactory.getSDK().getTerminalMessageListMap(Params.MESSAGE_SEND_FAIL,new LinkedTreeMap<String, List<TerminalMessage>>());
 
@@ -1491,7 +1513,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                             handler.sendMessage(msg);
                         } else {
                             // TODO: 2018/8/7
-                            Intent intent = new Intent(ChatBaseActivity.this, LiveHistoryActivity.class);
+                            Intent intent = new Intent(ChatBaseActivity.this, PlayLiveHistoryActivity.class);
                             intent.putExtra("terminalMessage", terminalMessage);
 //                                intent.putExtra("endChatTime",endChatTime);
                             ChatBaseActivity.this.startActivity(intent);
@@ -1732,28 +1754,29 @@ public abstract class ChatBaseActivity extends BaseActivity{
 //            return;
 //        }
         //先从本地数据库中拿数据
-        List<TerminalMessage> groupMessageRecord1 = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupMessageRecord(
-                isGroup ? MessageCategory.MESSAGE_TO_GROUP.getCode() : MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), userId,
-                chatMessageList.size()>0?(chatMessageList.get(0).sendTime - 1):0, TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+//        List<TerminalMessage> groupMessageRecord1 = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupMessageRecord(
+//                isGroup ? MessageCategory.MESSAGE_TO_GROUP.getCode() : MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), userId,
+//                chatMessageList.size()>0?(chatMessageList.get(0).sendTime - 1):0, TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
 
-        if (groupMessageRecord1 != null && groupMessageRecord1.size() > 0) {
-            logger.info("会话列表刷新成功");
+//        if (groupMessageRecord1 != null && groupMessageRecord1.size() > 0) {
+//            logger.info("会话列表刷新成功");
+//            tempPage++;
+//            setData(groupMessageRecord1, false);
+//            if (groupMessageRecord1.size() < PAGE_COUNT) {
+//                //从网络获取
+//                isEnoughPageCount = false;
+//                getHistoryMessageRecord(PAGE_COUNT - groupMessageRecord1.size());
+//            } else {
+//                isEnoughPageCount = true;
+//                handler.post(() -> sflCallList.setRefreshing(false));
+//                refreshing = false;
+//            }
+//        } else {
+//            //从网络获取
+//            isEnoughPageCount = false;
             tempPage++;
-            setData(groupMessageRecord1, false);
-            if (groupMessageRecord1.size() < PAGE_COUNT) {
-                //从网络获取
-                isEnoughPageCount = false;
-                getHistoryMessageRecord(PAGE_COUNT - groupMessageRecord1.size());
-            } else {
-                isEnoughPageCount = true;
-                handler.post(() -> sflCallList.setRefreshing(false));
-                refreshing = false;
-            }
-        } else {
-            //从网络获取
-            isEnoughPageCount = false;
             getHistoryMessageRecord(PAGE_COUNT);
-        }
+//        }
     }
 
     /**
@@ -1856,7 +1879,13 @@ public abstract class ChatBaseActivity extends BaseActivity{
             }
             handler.post(()-> {
                 if (chatMessageList.size() > 0) {
-                    setListSelection(chatMessageList.size() - 1);
+                    if(tempPage == 1){
+                        setListSelection(chatMessageList.size()-1);
+                    }else {
+                        if(chatMessageList.size() > messageRecord.size()){
+                            setListSelection(messageRecord.size());
+                        }
+                    }
                 }
                 temporaryAdapter.notifyDataSetChanged();
             });
@@ -1867,6 +1896,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
      */
     private ReceiveHistoryMessageNotifyDateHandler receivePersonMessageNotifyDateHandler = (resultCode, resultDes) -> {
         if (resultCode != BaseCommonCode.SUCCESS_CODE) {
+            if(tempPage >1){
+                tempPage --;
+            }
             if (resultCode == TerminalErrorCode.OPTION_EXECUTE_ERROR.getErrorCode()&&!isEnoughPageCount) {
                 handler.post(() -> {
                     sflCallList.setRefreshing(false);
@@ -1880,7 +1912,6 @@ public abstract class ChatBaseActivity extends BaseActivity{
         }else {
 
         }
-        logger.info("====="+chatMessageList);
         handler.post(()-> temporaryAdapter.notifyDataSetChanged());
     };
 

@@ -54,7 +54,7 @@ public class PushLiveMessageManageActivity extends BaseActivity implements View.
         findViewById(R.id.iv_back).setOnClickListener(this);
         pl_video_send.setAdapter(mPushLiveListAdapter);
         pl_video_send.setOnItemClickListener((parent, view, position, id) -> {
-            Intent intent = new Intent(PushLiveMessageManageActivity.this,LiveHistoryActivity.class);
+            Intent intent = new Intent(PushLiveMessageManageActivity.this,PlayLiveHistoryActivity.class);
             Log.e("PushLiveMessageManageAc", "position:" + position+"----id:"+id);
             intent.putExtra("terminalMessage",mLiveMessageList.get(position));
             PushLiveMessageManageActivity.this.startActivity(intent);

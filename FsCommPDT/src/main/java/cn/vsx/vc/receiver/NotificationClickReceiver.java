@@ -46,7 +46,7 @@ public class NotificationClickReceiver extends BroadcastReceiver {
         else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
             Intent mIntent = new Intent(context, IndividualNewsActivity.class);
             mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mIntent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
+            mIntent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
             mIntent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
             mIntent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
             context.startActivity(mIntent);
@@ -54,7 +54,7 @@ public class NotificationClickReceiver extends BroadcastReceiver {
         else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//进入组会话页
             Intent mIntent = new Intent(context, GroupCallNewsActivity.class);
             mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mIntent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
+            mIntent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
             mIntent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));//组id
             mIntent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
             mIntent.putExtra("speakingId",terminalMessage.messageFromId);

@@ -25,7 +25,6 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.zectec.imageandfileselector.adapter.FaceRecognitionAdapter;
 import com.zectec.imageandfileselector.bean.FaceRecognitionBean;
 import com.zectec.imageandfileselector.bean.FileInfo;
@@ -46,7 +45,6 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,8 +64,8 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
-import cn.vsx.vc.activity.LiveHistoryActivity;
 import cn.vsx.vc.activity.MergeTransmitListActivity;
+import cn.vsx.vc.activity.PlayLiveHistoryActivity;
 import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.TranspondNewDialog;
@@ -1423,7 +1421,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                     } else {
                         // TODO: 2018/8/7
                         activity.runOnUiThread(() -> {
-                            Intent intent = new Intent(activity, LiveHistoryActivity.class);
+                            Intent intent = new Intent(activity, PlayLiveHistoryActivity.class);
                             intent.putExtra("terminalMessage", terminalMessage);
 //                                intent.putExtra("endChatTime",endChatTime);
                             activity.startActivity(intent);

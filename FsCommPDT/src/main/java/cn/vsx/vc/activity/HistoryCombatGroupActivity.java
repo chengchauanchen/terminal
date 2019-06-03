@@ -126,7 +126,7 @@ public class HistoryCombatGroupActivity extends BaseActivity implements View.OnC
     public void onItemClick(AdapterView<?> parent, View view, int position, long id){
         TerminalMessage terminalMessage = messageList.get(position);
         Intent intent = new Intent(this, GroupCallNewsActivity.class);
-        intent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
+        intent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
         intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
         intent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
         intent.putExtra("sendMessage",false);

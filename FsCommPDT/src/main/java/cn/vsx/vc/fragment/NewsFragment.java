@@ -476,13 +476,14 @@ public class NewsFragment extends BaseFragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             TerminalMessage terminalMessage = messageList.get(position);
-            terminalMessage.unReadCount = 0;
-            unReadCountChanged();//未读消息数变了，通知tab
-            saveMessagesToSql();
+            if(terminalMessage.unReadCount != 0){
+                terminalMessage.unReadCount = 0;
+                unReadCountChanged();//未读消息数变了，通知tab
+                saveMessagesToSql();
+            }
+
             // 进入图像助手
-            if(terminalMessage.messageFromId == terminalMessage.messageToId &&
-                    terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) &&
-                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
+            if(TerminalMessageUtil.isLiveMessage(terminalMessage)) {
                 Intent intent = new Intent(context, PushLiveMessageManageActivity.class);
                 context.startActivity(intent);
             }else if(terminalMessage.messageType ==MessageType.WARNING_INSTANCE.getCode() && terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()){
@@ -496,7 +497,7 @@ public class NewsFragment extends BaseFragment {
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
                 Intent intent = new Intent(context, IndividualNewsActivity.class);
-                intent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
+                intent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
                 intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
                 intent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
                 context.startActivity(intent);
@@ -506,7 +507,7 @@ public class NewsFragment extends BaseFragment {
                     context.startActivity(new Intent(context, CombatGroupActivity.class));
                 }else {
                     Intent intent = new Intent(context, GroupCallNewsActivity.class);
-                    intent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
+                    intent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
                     intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
                     intent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
                     intent.putExtra("speakingId",speakingId);
@@ -586,7 +587,7 @@ public class NewsFragment extends BaseFragment {
                     }
                 }
             }
-            if(TerminalMessageUtil.isGroupMeaage(terminalMessage)){
+            if(TerminalMessageUtil.isGroupMessage(terminalMessage)){
 
                 //添加到合成作战组
                 if(GroupUtils.isCombatGroup(terminalMessage.messageToId)){
@@ -623,16 +624,7 @@ public class NewsFragment extends BaseFragment {
                     }
                 }
             }
-            if (terminalMessage.messageFromId == terminalMessage.messageToId
-                    && terminalMessage.messageToId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//主动播的消息，存入视频助手
-                if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() &&
-                        (terminalMessage.messageBody.getIntValue("remark") == Remark.ACTIVE_VIDEO_LIVE || terminalMessage.messageBody.getIntValue("remark") == Remark.ASK_VIDEO_LIVE)
-                        && terminalMessage.resultCode==0) {
-                    saveVideoMessage(terminalMessage,false);
-                }else{
-                    saveMessageToList(terminalMessage,false);
-                }
-            }else if (TerminalMessageUtil.isGroupMeaage(terminalMessage)) {
+             if (TerminalMessageUtil.isGroupMessage(terminalMessage)) {
                 if(terminalMessage.messageType != MessageType.WARNING_INSTANCE.getCode()){
                     //合成作战组消息，只存一个条目
                     if(GroupUtils.isCombatGroup(terminalMessage.messageToId)){
@@ -649,8 +641,15 @@ public class NewsFragment extends BaseFragment {
                 }
             }else {
                 if(terminalMessage.messageType != MessageType.WARNING_INSTANCE.getCode()){
+                    if(TerminalMessageUtil.isLiveMessage(terminalMessage)){
+                        saveVideoMessage(terminalMessage,false);
+                    }else {
+                        saveMessageToList(terminalMessage,false);
+                    }
                     //警情详情会处理
                     saveMessageToList(terminalMessage,false);
+                }else {
+                    return;
                 }
             }
             mHandler.post(() -> {
@@ -967,18 +966,10 @@ public class NewsFragment extends BaseFragment {
                 for(TerminalMessage terminalMessage : messageRecord){
                     if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
                         //警情消息会在警情详情处理
-                        return;
+                        continue;
                     }
-                    if (terminalMessage.messageFromId == terminalMessage.messageToId
-                            && terminalMessage.messageToId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){//主动播的消息，存入视频助手
-                        if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() &&
-                                (terminalMessage.messageBody.getIntValue("remark") == Remark.ACTIVE_VIDEO_LIVE
-                                        || terminalMessage.messageBody.getIntValue("remark") == Remark.ASK_VIDEO_LIVE)
-                                && terminalMessage.resultCode==0) {
-                            saveVideoMessage(terminalMessage,true);
-                        }else{
-                            saveMessageToList(terminalMessage,true);
-                        }
+                    if(TerminalMessageUtil.isLiveMessage(terminalMessage)){
+                        saveVideoMessage(terminalMessage,true);
                     }else {
                         saveMessageToList(terminalMessage,true);
                     }
@@ -1002,7 +993,6 @@ public class NewsFragment extends BaseFragment {
             }
         }
     };
-
 
     /**
      * 通知PC登录状态的消息
@@ -1105,8 +1095,7 @@ public class NewsFragment extends BaseFragment {
         final Iterator<TerminalMessage> iterator = terminalMessageData.iterator();
         while (iterator.hasNext()){
             TerminalMessage next = iterator.next();
-            if (next.messageFromId == next.messageToId && next.messageFromId == terminalMessage.messageToId &&
-                    next.messageToId == terminalMessage.messageFromId){
+            if (TerminalMessageUtil.isLiveMessage(next)){
                 unReadCount = next.unReadCount;
                 iterator.remove();
                 break;
@@ -1326,17 +1315,17 @@ public class NewsFragment extends BaseFragment {
             ToastUtils.showShort(R.string.main_group_message_cannot_delete);
             return;
         }
-        int myId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-        boolean isReceiver = terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-        if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
-            if (isReceiver) {//接收的消息
-                MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), terminalMessage.messageFromId, myId);
-            } else {//自己发的
-                MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), terminalMessage.messageToId, myId);
-            }
-        }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
-            MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_GROUP.getCode(), terminalMessage.messageToId, myId);
-        }
+//        int myId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+//        boolean isReceiver = terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+//        if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
+//            if (isReceiver) {//接收的消息
+//                MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), terminalMessage.messageFromId, myId);
+//            } else {//自己发的
+//                MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_PERSONAGE.getCode(), terminalMessage.messageToId, myId);
+//            }
+//        }else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){
+//            MyTerminalFactory.getSDK().getTerminalMessageManager().deleteMessageFromSQLite(MessageCategory.MESSAGE_TO_GROUP.getCode(), terminalMessage.messageToId, myId);
+//        }
 
         removeData(deletePos);
 //        sortMessageList();

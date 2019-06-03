@@ -304,7 +304,7 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
 
                     } else {
                         // TODO: 2018/8/7
-                        Intent intent = new Intent(GroupVideoLiveListActivity.this, LiveHistoryActivity.class);
+                        Intent intent = new Intent(GroupVideoLiveListActivity.this, PlayLiveHistoryActivity.class);
                         intent.putExtra("terminalMessage", item);
 //                      intent.putExtra("endChatTime",endChatTime);
                         GroupVideoLiveListActivity.this.startActivity(intent);
@@ -312,7 +312,7 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
                 }
             });
         } else {
-            Intent intent = new Intent(GroupVideoLiveListActivity.this, LiveHistoryActivity.class);
+            Intent intent = new Intent(GroupVideoLiveListActivity.this, PlayLiveHistoryActivity.class);
             intent.putExtra("terminalMessage", item);
 //          intent.putExtra("endChatTime",endChatTime);
             GroupVideoLiveListActivity.this.startActivity(intent);

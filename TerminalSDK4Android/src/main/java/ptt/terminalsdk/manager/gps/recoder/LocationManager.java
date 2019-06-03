@@ -98,7 +98,7 @@ public class LocationManager {
         MyTerminalFactory.getSDK().getRecorderGPSManager().init();
 
 
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
 //        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().getClientChannel().registMessageReceivedHandler(notifyForceUploadGpsMessageReceivedHandler);
@@ -109,7 +109,7 @@ public class LocationManager {
      * 定位服务关闭
      */
     public void stop() {
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
 //        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().getClientChannel().unregistMessageReceivedHandler(responseMemberConfigMessageHandler);

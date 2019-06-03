@@ -79,8 +79,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
-                android:maxHeight="@dimen/dp_1"
-                android:minHeight="@dimen/dp_1"
+                android:maxHeight="@dimen/dp_2"
+                android:minHeight="@dimen/dp_2"
                 android:progressDrawable="@drawable/seek_bar_style"
                 android:thumb="@drawable/select_seekbar" />
 
@@ -92,7 +92,13 @@
                 android:layout_marginRight="@dimen/dp_20"
                 android:textColor="@color/white"
                 android:textSize="@dimen/sp_15" />
-
+            <TextView
+                android:id="@+id/tv_choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:layout_marginRight="@dimen/dp_60"
+                android:text="选择"/>
         </LinearLayout>
 
         <LinearLayout
@@ -122,8 +128,20 @@
         </LinearLayout>
     </RelativeLayout>
     
-    <android.support.v7.widget.RecyclerView
-        android:layout_width="@dimen/x200"
-        android:layout_height="@dimen/y100"></android.support.v7.widget.RecyclerView>
+    <LinearLayout
+        android:id="@+id/ll_list"
+        android:layout_width="@dimen/x160"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        android:visibility="gone"
+        android:background="@color/transparent_70_black">
+        
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+    </LinearLayout>
 
 </RelativeLayout>

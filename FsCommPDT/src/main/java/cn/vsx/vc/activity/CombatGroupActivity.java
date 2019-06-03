@@ -115,7 +115,7 @@ public class CombatGroupActivity extends BaseActivity implements View.OnClickLis
     private ReceiveNotifyDataMessageHandler mReceiveNotifyDataMessageHandler = terminalMessage -> {
         synchronized(CombatGroupActivity.this){
             //Newsfragment已经处理了消息，只需重新从数据库取数据
-            if (TerminalMessageUtil.isGroupMeaage(terminalMessage) && GroupUtils.isCombatGroup(terminalMessage.messageToId)){
+            if (TerminalMessageUtil.isGroupMessage(terminalMessage) && GroupUtils.isCombatGroup(terminalMessage.messageToId)){
                 mHandler.postDelayed(()->{
                     loadMessages();
                     sortMessageList();
@@ -166,7 +166,7 @@ public class CombatGroupActivity extends BaseActivity implements View.OnClickLis
         }
 
         Intent intent = new Intent(this, GroupCallNewsActivity.class);
-        intent.putExtra("isGroup", TerminalMessageUtil.isGroupMeaage(terminalMessage));
+        intent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
         intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));//组id
         intent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
         startActivity(intent);

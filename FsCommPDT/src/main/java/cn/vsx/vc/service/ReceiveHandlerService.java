@@ -83,8 +83,8 @@ import cn.vsx.util.StateMachine.IState;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
-import cn.vsx.vc.activity.LiveHistoryActivity;
 import cn.vsx.vc.activity.NewMainActivity;
+import cn.vsx.vc.activity.PlayLiveHistoryActivity;
 import cn.vsx.vc.activity.TransparentActivity;
 import cn.vsx.vc.activity.WarningMessageDetailActivity;
 import cn.vsx.vc.adapter.StackViewAdapter;
@@ -472,7 +472,7 @@ public class ReceiveHandlerService extends Service{
                         myHandler.sendMessage(msg);
                     }else{
                         removeView();
-                        Intent intent = new Intent(MyTerminalFactory.getSDK().application, LiveHistoryActivity.class);
+                        Intent intent = new Intent(MyTerminalFactory.getSDK().application, PlayLiveHistoryActivity.class);
                         intent.putExtra("terminalMessage", terminalMessage);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         //                                intent.putExtra("endChatTime",endChatTime);
@@ -640,7 +640,7 @@ public class ReceiveHandlerService extends Service{
         if(!newMessage){
             return;
         }
-        if(!TerminalMessageUtil.isGroupMeaage(terminalMessage)){
+        if(!TerminalMessageUtil.isGroupMessage(terminalMessage)){
             //个人的警情消息需要弹窗显示
             myHandler.post(()->{
                 if(terminalMessage.messageFromId == TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
@@ -703,7 +703,7 @@ public class ReceiveHandlerService extends Service{
         }
         //警情消息
         if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
-            if(!TerminalMessageUtil.isGroupMeaage(terminalMessage)){
+            if(!TerminalMessageUtil.isGroupMessage(terminalMessage)){
                 return;
             }
         }
@@ -739,7 +739,7 @@ public class ReceiveHandlerService extends Service{
                         cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(terminalMessage.messageFromId,true);
                     });
                     //判断是否是组内上报，组内上报不弹窗
-                    if(!TerminalMessageUtil.isGroupMeaage(terminalMessage)){
+                    if(!TerminalMessageUtil.isGroupMessage(terminalMessage)){
                         //延迟弹窗，否则判断是否在上报接口返回的是没有在上报
                         myHandler.postDelayed(() -> {
                             data.add(terminalMessage);

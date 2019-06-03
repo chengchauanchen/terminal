@@ -17,14 +17,11 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.util.List;
 
-
-
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageStatus;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.util.JsonParam;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -92,9 +89,7 @@ public class MessageListAdapter extends BaseAdapter {
         //        }
         //设置名字
         if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {//个人消息，显示人名
-            if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() &&
-                    terminalMessage.messageFromId == terminalMessage.messageToId &&
-                    terminalMessage.messageFromId == TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {//自己是直播方
+            if (TerminalMessageUtil.isLiveMessage(terminalMessage)) {//自己是直播方
                 viewHolder.tv_user_name.setText(context.getString(R.string.text_image_assistant));
             }else if(terminalMessage.messageType == MessageType.CALL_RECORD.getCode()){//电话助手目前不属于消息
                 viewHolder.tv_user_name.setText(context.getString(R.string.text_telephone_assistant));
@@ -109,7 +104,7 @@ public class MessageListAdapter extends BaseAdapter {
                 }
             }
 //            viewHolder.tv_current_group.setVisibility(View.GONE);
-        } else if (TerminalMessageUtil.isGroupMeaage(terminalMessage)){//组消息，显示组名
+        } else if (TerminalMessageUtil.isGroupMessage(terminalMessage)){//组消息，显示组名
             //如果是合成作战组，上面显示合成作战组
             if (TerminalMessageUtil.isCombatGroup(terminalMessage)){
                 if(isNewsFragment){
@@ -131,9 +126,7 @@ public class MessageListAdapter extends BaseAdapter {
             viewHolder.tv_last_msg.setText("");
         }
 
-        if(terminalMessage.messageFromId == terminalMessage.messageToId &&
-                terminalMessage.messageFromId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) &&
-                terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {/**  图像助手 **/
+        if(TerminalMessageUtil.isLiveMessage(terminalMessage)) {/**  图像助手 **/
             viewHolder.iv_user_photo.setBackgroundResource(R.drawable.video_photo);
         }else if(terminalMessage.messageType == MessageType.CALL_RECORD.getCode()){/** 电话助手 **/
             viewHolder.iv_user_photo.setBackgroundResource(R.drawable.call_photo);
@@ -155,7 +148,7 @@ public class MessageListAdapter extends BaseAdapter {
             }else{
                 viewHolder.iv_user_photo.setBackgroundResource(R.drawable.group_photo);
             }
-        }else if(!TerminalMessageUtil.isGroupMeaage(terminalMessage) && terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
+        }else if(!TerminalMessageUtil.isGroupMessage(terminalMessage) && terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
             viewHolder.iv_user_photo.setBackgroundResource(R.drawable.warning_list_icon);
         }
         else {

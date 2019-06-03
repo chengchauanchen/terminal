@@ -282,7 +282,8 @@
             android:screenOrientation="portrait"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/android:Theme.Black.NoTitleBar" />
-        <activity android:name=".activity.PlayLiveHistoryActivity" />
+        <activity android:name=".activity.PlayLiveHistoryActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity
             android:name=".activity.LiveHistoryActivity"
             android:launchMode="singleTask"
