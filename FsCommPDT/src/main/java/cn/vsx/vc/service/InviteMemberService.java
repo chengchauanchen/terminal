@@ -1,7 +1,10 @@
 package cn.vsx.vc.service;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -74,6 +77,10 @@ import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.MyDataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
+
+import static cn.vsx.vc.utils.Constants.SYSTEM_DIALOG_REASON_HOME_KEY;
+import static cn.vsx.vc.utils.Constants.SYSTEM_DIALOG_REASON_KEY;
+import static cn.vsx.vc.utils.Constants.SYSTEM_DIALOG_REASON_RECENT_APPS;
 
 public class InviteMemberService extends BaseService implements SwipeRefreshLayout.OnRefreshListener, BaseQuickAdapter.RequestLoadMoreListener {
     protected cn.vsx.vc.view.ServiceFrameLayout rootView;
@@ -162,6 +169,9 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     //当前显示的列表
     private int currentIndex = 0;
 
+    //监听Home
+    private HomeWatcherReceiver mHomeKeyReceiver;
+
     public InviteMemberService() {
     }
 
@@ -234,6 +244,11 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         mEtSearchAllcontacts.addTextChangedListener(editTextChangedListener);
         mEtSearchAllcontacts.setOnEditorActionListener(onEditorActionListener);
         llSelect.setOnClickListener(selectedOnClickListener);
+
+        //注册Home和最近任务监听广播
+        mHomeKeyReceiver = new HomeWatcherReceiver();
+        final IntentFilter homeFilter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        registerReceiver(mHomeKeyReceiver, homeFilter);
 
     }
 
@@ -420,6 +435,9 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupSelectedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiverEntityKeyEventInServiceHandler);
         mHandler.removeCallbacksAndMessages(null);
+
+        //取消监听
+        unregisterReceiver(mHomeKeyReceiver);
 
     }
 
@@ -868,6 +886,23 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             }
         }
     };
+
+    /**
+     * 监听Home键
+     */
+    class HomeWatcherReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
+                String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
+                if (SYSTEM_DIALOG_REASON_HOME_KEY.equals(reason)||SYSTEM_DIALOG_REASON_RECENT_APPS.equals(reason)) {
+                    removeView();
+                }
+            }
+        }
+    }
 
     /**************************************************************************listener***********************************************************************************************/
 
