@@ -479,7 +479,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
             @Override
             public void doCancelThings() {
             }
-        }.showDialog();
+        }.showDialog(true);
     }
 
     private void exit() {
@@ -570,7 +570,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
             public void doCancelThings() {
                 ll_log_upload.setEnabled(true);
             }
-        }.showDialog();
+        }.showDialog(true);
     }
 
     public interface sendPttState {
@@ -599,7 +599,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
                         item = MyTerminalFactory.getSDK().getParam(Params.VIDEO_RESOLUTION, 2);
                         logger.info(" 点击取消按钮" + item);
                     })
-                    .setCancelable(false)
+                    .setCancelable(true)
                     .show();
         }
     }

@@ -15,6 +15,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -67,6 +68,7 @@ import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.InviteMemberLiverMember;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSwitchCameraViewHandler;
+import cn.vsx.vc.receiveHandle.ReceiverEntityKeyEventInServiceHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.MyDataUtil;
@@ -74,6 +76,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
 public class InviteMemberService extends BaseService implements SwipeRefreshLayout.OnRefreshListener, BaseQuickAdapter.RequestLoadMoreListener {
+    protected cn.vsx.vc.view.ServiceFrameLayout rootView;
     //编辑主题
     private LinearLayout mLlEditTheme;
     private ImageView mIvLiveEditReturn;
@@ -165,7 +168,8 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView() {
-        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_invite_member, null);
+        rootView = (cn.vsx.vc.view.ServiceFrameLayout)LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_invite_member, null);
+        super.rootView = rootView;
     }
 
     @Override
@@ -220,6 +224,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSearchMemberResultHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberSelectedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupSelectedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiverEntityKeyEventInServiceHandler);
 
         layout_search.setOnClickListener(searchOnClickListener);
 
@@ -413,6 +418,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSearchMemberResultHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberSelectedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupSelectedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiverEntityKeyEventInServiceHandler);
         mHandler.removeCallbacksAndMessages(null);
 
     }
@@ -838,6 +844,28 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
                     searchAdapter.notifyDataSetChanged();
                 }
             });
+        }
+    };
+
+    /**
+     * 实体按键点击事件的回调
+     */
+    private ReceiverEntityKeyEventInServiceHandler receiverEntityKeyEventInServiceHandler = new ReceiverEntityKeyEventInServiceHandler(){
+
+        @Override
+        public void handler(KeyEvent event) {
+            switch (event.getKeyCode()){
+                case KeyEvent.KEYCODE_BACK:
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (event.getAction() == KeyEvent.ACTION_UP) {
+                                entityBackKeyEvent();
+                            }
+                        }
+                    });
+                    break;
+            }
         }
     };
 
@@ -1389,6 +1417,31 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         }else{
             mBtnLiveSelectmemberStart.setText(String.format(getString(R.string.button_sure_number),selectedMembers.size()));
             llSelect.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * 监听返回按键
+     */
+    private void entityBackKeyEvent() {
+        //编辑主题页面
+        if(mLlEditTheme.getVisibility() == View.VISIBLE){
+            mLlEditTheme.setVisibility(View.GONE);
+            mLlSearchMember.setVisibility(View.GONE);
+            mLlSelectMember.setVisibility(View.VISIBLE);
+        }else if(mLlSearchMember.getVisibility() == View.VISIBLE){
+            //搜索页面
+            fromSearchViewGoBackToSeletView();
+        }else if(mLlSelectMember.getVisibility() == View.VISIBLE){
+            //已经选择的页面
+            if(mLlAllSelected.getVisibility() == View.VISIBLE){
+                mLlAllSelect.setVisibility(View.VISIBLE);
+                mLlAllSelected.setVisibility(View.GONE);
+                mBtnLiveSelectmemberStart.setVisibility(View.VISIBLE);
+            }else{
+                //正在选择的页面
+                removeView();
+            }
         }
     }
 }
