@@ -1785,6 +1785,17 @@ public abstract class ChatBaseActivity extends BaseActivity{
      * @param groupMessageRecord
      */
     private void setData(List<TerminalMessage> groupMessageRecord, boolean isStopRefresh) {
+        if(!isGroup){
+            //个人的警情消息不显示
+            Iterator<TerminalMessage> iterator = groupMessageRecord.iterator();
+            while(iterator.hasNext()){
+                TerminalMessage next = iterator.next();
+                if(next.messageType == MessageType.WARNING_INSTANCE.getCode()){
+                    iterator.remove();
+                }
+            }
+
+        }
         Collections.sort(groupMessageRecord);
         intersetMessageToList(groupMessageRecord, historyFailMessageList);
         List<TerminalMessage> groupMessageRecord2 = new ArrayList<>();

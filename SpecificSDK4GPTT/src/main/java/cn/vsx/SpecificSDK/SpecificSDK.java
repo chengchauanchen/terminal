@@ -241,7 +241,7 @@ public class SpecificSDK extends TerminalSDK4Android {
     }
 
     /**
-     * 异步发起个呼
+     * 异步发起个呼，必须放在子线程里
      * @param memberId 对方memberId
      * @return 状态码 0 表示发起个呼成功
      */

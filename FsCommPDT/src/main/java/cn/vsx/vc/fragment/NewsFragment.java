@@ -476,6 +476,7 @@ public class NewsFragment extends BaseFragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             TerminalMessage terminalMessage = messageList.get(position);
+            logger.info("点击的消息："+terminalMessage);
             if(terminalMessage.unReadCount != 0){
                 terminalMessage.unReadCount = 0;
                 unReadCountChanged();//未读消息数变了，通知tab
@@ -646,9 +647,8 @@ public class NewsFragment extends BaseFragment {
                     }else {
                         saveMessageToList(terminalMessage,false);
                     }
-                    //警情详情会处理
-                    saveMessageToList(terminalMessage,false);
                 }else {
+                    //警情详情会处理
                     return;
                 }
             }
