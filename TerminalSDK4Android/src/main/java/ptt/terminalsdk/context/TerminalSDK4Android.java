@@ -41,6 +41,7 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.Level;
 import org.ddpush.im.client.v1.ServerConnectionEstablishedHandler;
 import org.ddpush.im.util.StringUtil;
+import org.easydarwin.config.Config;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -67,6 +68,7 @@ import cn.vsx.hamster.terminalsdk.TerminalSDKBaseImpl;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
 import cn.vsx.hamster.terminalsdk.manager.channel.AbsClientChannel;
 import cn.vsx.hamster.terminalsdk.manager.http.IHttpClient;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLiveManager;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -98,6 +100,7 @@ import ptt.terminalsdk.manager.gps.recoder.RecorderGPSManager;
 import ptt.terminalsdk.manager.http.MyHttpClient;
 import ptt.terminalsdk.manager.http.ProgressHelper;
 import ptt.terminalsdk.manager.http.ProgressUIListener;
+import ptt.terminalsdk.manager.live.LiveManager;
 import ptt.terminalsdk.manager.message.SQLiteDBManager;
 import ptt.terminalsdk.manager.recordingAudio.RecordingAudioManager;
 import ptt.terminalsdk.manager.video.VideoProxy;
@@ -119,6 +122,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private int accessServerPort;
 	private boolean bindService;
     private VoipManager voipManager;
+    private LiveManager liveManager;
 	//DDpush连接
 	private boolean Established = false;
 	//网络是否连接，只有两个都连接上才是真正的在线，只要有一个为false就是离线
@@ -702,6 +706,13 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			voipManager = new VoipManager();
         }
 		return voipManager;
+	}
+
+	public LiveManager getLiveConfigManager(){
+		if(liveManager == null){
+			liveManager = new LiveManager();
+		}
+		return liveManager;
 	}
 
 	/**得到序列化数据的存储位置*/

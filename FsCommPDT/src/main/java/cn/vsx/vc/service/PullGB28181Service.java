@@ -35,13 +35,11 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberStopWatchMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.vc.R;
-import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
 import static cn.vsx.vc.receive.Actions.KILL_LIVE_WATCH;
-import static org.easydarwin.config.Config.PLAYKEY;
 
 public class PullGB28181Service extends BaseService{
 
@@ -255,7 +253,7 @@ public class PullGB28181Service extends BaseService{
         mHandler.sendEmptyMessage(CURRENTTIME);
         if(!TextUtils.isEmpty(gb28181Url)){
 
-            mStreamRender = new EasyRTSPClient(PullGB28181Service.this, PLAYKEY,
+            mStreamRender = new EasyRTSPClient(PullGB28181Service.this, MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(),
                     surface, mResultReceiver);
             try {
                 if (gb28181Url != null) {

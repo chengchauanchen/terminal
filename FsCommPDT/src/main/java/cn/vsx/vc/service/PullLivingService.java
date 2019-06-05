@@ -72,8 +72,6 @@ import ptt.terminalsdk.manager.audio.CheckMyPermission;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 import static cn.vsx.vc.receive.Actions.KILL_LIVE_WATCH;
-import static org.easydarwin.config.Config.PLAYKEY;
-import static org.easydarwin.config.Config.RTMPPLAYKEY;
 
 /**
  * 观看上报
@@ -607,7 +605,7 @@ public class PullLivingService extends BaseService{
             //测试url
             url = "rtmp://202.69.69.180:443/webcast/bshdlive-pc";
             if(null != surface.getSurfaceTexture()){
-                rtmpClient = new RTMPEasyPlayerClient(this, RTMPPLAYKEY, surface, null, null);
+                rtmpClient = new RTMPEasyPlayerClient(this, MyTerminalFactory.getSDK().getLiveConfigManager().getRtmpPlayKey(), surface, null, null);
                 rtmpClient.play(url);
             }
         }else{
@@ -616,7 +614,7 @@ public class PullLivingService extends BaseService{
                 mResultReceiver = new RtspReceiver(new Handler());
             }
             if(null != surface.getSurfaceTexture()){
-                mStreamRender = new EasyRTSPClient(this, PLAYKEY, surface.getSurfaceTexture(), mResultReceiver);
+                mStreamRender = new EasyRTSPClient(this, MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(), surface.getSurfaceTexture(), mResultReceiver);
                 try{
                     if(!android.text.TextUtils.isEmpty(url)){
                         mStreamRender.start(url, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);

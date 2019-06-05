@@ -65,8 +65,6 @@ import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
-import static org.easydarwin.config.Config.PLAYKEY;
-
 public class RecoderPushService extends BaseService{
 
     private RelativeLayout mPopupMiniLive;
@@ -598,7 +596,7 @@ public class RecoderPushService extends BaseService{
         if(null == pushCallback){
             pushCallback = new PushCallback();
         }
-        pushRTSPClient = new PushRTSPClient(this, PLAYKEY,surface);
+        pushRTSPClient = new PushRTSPClient(this, MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(),surface);
         pushRTSPClient.setRTSPInfo(ip,port,id,mResultReceiver, pushCallback);
         pushRTSPClient.setSurfaceTexture(surface);
         pushRTSPClient.start(Constants.LAWRECODER, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "");

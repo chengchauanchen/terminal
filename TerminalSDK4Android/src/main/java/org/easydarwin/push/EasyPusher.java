@@ -11,7 +11,7 @@ import android.util.Log;
 
 import org.apache.log4j.Logger;
 
-import static org.easydarwin.config.Config.PUSHKEY;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class EasyPusher implements Pusher{
     /*
@@ -105,7 +105,7 @@ public class EasyPusher implements Pusher{
     @Override
     public synchronized void initPush(Context context, final InitCallback callback) {
         logger.info("PusherStart");
-        mPusherObj = init(PUSHKEY, context, new OnInitPusherCallback() {
+        mPusherObj = init(MyTerminalFactory.getSDK().getLiveConfigManager().getPushKey(), context, new OnInitPusherCallback() {
             int code = Integer.MAX_VALUE;
             @Override
             public void onCallback(int code) {

@@ -1,12 +1,8 @@
 package cn.vsx.SpecificSDK;
 
-import android.annotation.SuppressLint;
 import android.app.Application;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiManager;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSONObject;
@@ -19,11 +15,13 @@ import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
+import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Account;
+import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.hamster.terminalsdk.tools.Util;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.context.TerminalSDK4Android;
 
@@ -43,21 +41,6 @@ public class SpecificSDK extends TerminalSDK4Android {
 
     public static SpecificSDK getInstance(){
         return specificSDK;
-    }
-
-    @SuppressLint("MissingPermission")
-    @Override
-    protected String newUuid() {
-        String account = TerminalFactory.getSDK().getParam(UrlParams.ACCOUNT);
-        if (Util.isEmpty(account)){
-            TelephonyManager telephonyManager = (TelephonyManager)application.getSystemService(Context.TELEPHONY_SERVICE);
-            WifiManager wm = (WifiManager)application.getSystemService(Context.WIFI_SERVICE);
-            account = telephonyManager.getDeviceId() == null ?
-                    wm.getConnectionInfo().getMacAddress().hashCode()+"" : telephonyManager.getDeviceId().hashCode()+"";
-        }
-        String terminalType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE, "");
-        logger.info(" SpecificSDK--------> account = "+account+"---terminalType = "+terminalType);
-        return account+terminalType;
     }
 
     /**
@@ -244,11 +227,37 @@ public class SpecificSDK extends TerminalSDK4Android {
     }
 
     /**
+     * 自己发起直播
+     * @param theme
+     * @param channelNo
+     * @return
+     */
+    public int requestMyselfLive(String theme,String channelNo){
+        return TerminalFactory.getSDK().getLiveManager().requestMyselfLive(theme,channelNo);
+    }
+
+    /**
+     * 异步发起个呼
+     * @param memberId 对方memberId
+     * @return 状态码 0 表示发起个呼成功
+     */
+    public int requestPersonalCall(final int memberId){
+        //先根据成员查询uniqueNo
+        Account account = TerminalFactory.getSDK().getConfigManager().getAccountByNo(memberId);
+        if(null != account && !account.getMembers().isEmpty()){
+            Member member = account.getMembers().get(0);
+            return requestPersonalCall(memberId, member.getUniqueNo());
+        }else {
+            return TerminalErrorCode.INDIVIDUAL_CALL_FAIL.getErrorCode();
+        }
+    }
+
+    /**
      * 发起个呼
      * @param memberId 对方memberId
      * @return 状态码 0 表示发起个呼成功
      */
-    public int requestPersonalCall(int memberId,long uniqueNo){
+    private int requestPersonalCall(int memberId,long uniqueNo){
         return MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(memberId,uniqueNo,"");
     }
 
@@ -286,6 +295,10 @@ public class SpecificSDK extends TerminalSDK4Android {
         MyTerminalFactory.getSDK().start();
     }
 
+    /**
+     * 需要在Manifest中填写cn.vsx.sdk.API_KEY值
+     * @param application
+     */
     private static void setAppKey(Application application){
         try{
             ApplicationInfo appInfo = application.getPackageManager().getApplicationInfo(application.getPackageName(), PackageManager.GET_META_DATA);
@@ -299,5 +312,17 @@ public class SpecificSDK extends TerminalSDK4Android {
 
     public static void setTerminalMemberType(String type){
         MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, type);
+    }
+
+    public static void setPushKey(String key){
+        MyTerminalFactory.getSDK().getLiveConfigManager().setPushKey(key);
+    }
+
+    public static void setPlayKey(String key){
+        MyTerminalFactory.getSDK().getLiveConfigManager().setPlayKey(key);
+    }
+
+    public static void setRtmpPlayKey(String key){
+        MyTerminalFactory.getSDK().getLiveConfigManager().setRtmpPlayKey(key);
     }
 }
