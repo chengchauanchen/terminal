@@ -6,13 +6,10 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
-import org.easydarwin.push.UVCCameraService;
 import org.linphone.core.LinphoneCall;
 
 import java.util.ArrayList;
@@ -33,11 +30,9 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.NFCBean;
-import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
-import ptt.terminalsdk.context.MyTerminalFactory;
 import skin.support.SkinCompatManager;
 import skin.support.design.app.SkinMaterialViewInflater;
 
@@ -45,7 +40,6 @@ public class MyApplication extends Application {
 
 	public int mAppStatus = Constants.FORCE_KILL;//App运行状态，是否被强杀
 	public boolean isBinded=false;
-	private boolean isBindedUVCCameraService = false;
 	public boolean isPttFlowPress = false;
 	public boolean isContactsIndividual = false;
 	public boolean isUpdatingAPP  = false;
@@ -87,14 +81,9 @@ public class MyApplication extends Application {
 		instance = this;
 		super.onCreate();
 		SpecificSDK.init(this);
-		setTerminalMemberType();
 		registerActivityLifecycleCallbacks(new SimpleActivityLifecycle());
-		setApkType();
-		MyTerminalFactory.getSDK().getAuthManagerTwo().initIp();
-
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
-		//保存录像，录音，照片的存储路径
-		MyTerminalFactory.getSDK().getFileTransferOperation().initExternalUsableStorage();
+
 		SkinCompatManager.withoutActivity(this)                         // 基础控件换肤初始化
 				.addInflater(new SkinMaterialViewInflater())            // material design 控件换肤初始化[可选]
 				//				.setSkinStatusBarColorEnable(false)                     // 关闭状态栏换肤，默认打开[可选]
@@ -102,18 +91,6 @@ public class MyApplication extends Application {
 				.loadSkin();
         //清空刷NFC需要传的数据
         MyApplication.instance.setNfcBean(null);
-
-	}
-
-	private void setApkType(){
-		try{
-			ApplicationInfo appInfo = this.getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
-			String apkType=appInfo.metaData.getString("APKTYPE");
-			Log.d("MyApplication", " APKTYPE == " + apkType);
-			MyTerminalFactory.getSDK().putParam(Params.APK_TYPE,apkType);
-		}catch(PackageManager.NameNotFoundException e){
-			e.printStackTrace();
-		}
 	}
 
 	public void setTerminalMemberType(){
@@ -168,29 +145,16 @@ public class MyApplication extends Application {
 		MultiDex.install(this);
 		com.secneo.sdk.Helper.install(this);
 	}
-	public enum TYPE{
-		RECODERPUSH,
-		UVCPUSH,
-		PUSH ,
-		PULL,
-		IDLE
-	}
-	public void startIndividualCallService() {
-		Intent intent1 = new Intent(this,ReceiveHandlerService.class);
-		isBinded=bindService(intent1,conn,BIND_AUTO_CREATE);
-	}
-	public void stopIndividualCallService(){
-		if (conn != null) {
 
-			Log.i("服务状态1：",""+conn);
-			Log.i("服务状态2：",""+isBinded);
-			if (isBinded) {
-				unbindService(conn);
-				isBinded=false;
-			}
-			stopService(new Intent(this, ReceiveHandlerService.class));
-		}
+	/**
+	 * 获取到悬浮窗权限之后需要调用
+	 */
+	public void startHandlerService() {
+		Intent intent = new Intent(this,ReceiveHandlerService.class);
+		isBinded=bindService(intent,conn,BIND_AUTO_CREATE);
 	}
+
+
 	private ReceiveHandlerService.ReceiveHandlerBinder individualCallBinder;
 	private ServiceConnection conn = new ServiceConnection() {
 		@Override
@@ -203,29 +167,18 @@ public class MyApplication extends Application {
 		}
 	};
 
-	public void startUVCCameraService(){
-		Intent intent = new Intent(this,UVCCameraService.class);
-		isBindedUVCCameraService = bindService(intent,cameraconn,BIND_AUTO_CREATE);
-	}
+	public void stopHandlerService(){
+		if (conn != null) {
 
-	public void stopUVCCameraService(){
-		if(isBindedUVCCameraService){
-			unbindService(cameraconn);
+			Log.i("服务状态1：",""+conn);
+			Log.i("服务状态2：",""+isBinded);
+			if (isBinded) {
+				unbindService(conn);
+				isBinded=false;
+			}
+			stopService(new Intent(this, ReceiveHandlerService.class));
 		}
 	}
-
-	private UVCCameraService.MyBinder uvcBinder;
-	private ServiceConnection cameraconn = new ServiceConnection() {
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			uvcBinder = (UVCCameraService.MyBinder) service;
-		}
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			Log.e("MyApplication", "UVCCameraService服务断开了");
-			isBindedUVCCameraService = false;
-		}
-	};
 
 	public NFCBean getNfcBean() {
 		return nfcBean;

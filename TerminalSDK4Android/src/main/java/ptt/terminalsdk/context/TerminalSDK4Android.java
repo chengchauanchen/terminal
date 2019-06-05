@@ -41,7 +41,7 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.log4j.Level;
 import org.ddpush.im.client.v1.ServerConnectionEstablishedHandler;
 import org.ddpush.im.util.StringUtil;
-import org.easydarwin.config.Config;
+import org.easydarwin.push.UVCCameraService;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -68,7 +68,6 @@ import cn.vsx.hamster.terminalsdk.TerminalSDKBaseImpl;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
 import cn.vsx.hamster.terminalsdk.manager.channel.AbsClientChannel;
 import cn.vsx.hamster.terminalsdk.manager.http.IHttpClient;
-import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLiveManager;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -131,6 +130,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 	private boolean isBindOnlineService;
 	private boolean isBindBleService;
+	private boolean isBindedUVCCameraService;
+
 	public TerminalSDK4Android (Application mApplication){
 		application = mApplication;
 		account = application.getSharedPreferences(Params.DEFAULT_PRE_NAME,Context.MODE_MULTI_PROCESS);
@@ -153,6 +154,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		registReceiveHandler(receiveNetworkChangeHandler);
 		//个呼通讯录，请求的是自己的列表，还是所有成员列表
 		putParam(Params.REQUEST_ALL, false);
+		startUVCCameraService(application);
 		try {
 			File youyuan = application.getFileStreamPath("SIMYOU.ttf");
 				if (!youyuan.exists()){
@@ -183,6 +185,26 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		disConnectToServer();
 		unregistReceiveHandler(receiveNetworkChangeHandler);
 		application.unregisterReceiver(netWorkConnectionChangeReceiver);
+		stopUVCCameraService();
+		if(MyTerminalFactory.getSDK().isServerConnected()){
+			getAuthManagerTwo().logout();
+		}
+		getVoipCallManager().destroy(application);//VOIP服务注销
+		putParam(Params.CURRENT_SPEAKER,"");
+		OperateReceiveHandlerUtil.getInstance().stop();
+		logger.info("TerminalSDK4Android关闭了OnlineService");
+		Intent onlineService = new Intent(application, OnlineService.class);
+		application.stopService(onlineService);
+		if(isBindOnlineService){
+			application.unbindService(onlineServiceConn);
+			isBindOnlineService = false;
+		}
+		Intent bleService = new Intent(application, BluetoothLeService.class);
+		application.stopService(bleService);
+		if(isBindBleService){
+			application.unbindService(bleServiceConn);
+			isBindBleService = false;
+		}
 	}
 
 
@@ -488,29 +510,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				}
         	}
         }
-	}
-
-	public void exit(){
-		//启动内部事件处理类
-		OperateReceiveHandlerUtil.getInstance().stop();
-		if(MyTerminalFactory.getSDK().isServerConnected()){
-			getAuthManagerTwo().logout();
-		}
-		getVoipCallManager().destroy(application);//VOIP服务注销
-		putParam(Params.CURRENT_SPEAKER,"");
-		logger.info("TerminalSDK4Android关闭了OnlineService");
-		Intent onlineService = new Intent(application, OnlineService.class);
-		application.stopService(onlineService);
-		if(isBindOnlineService){
-			application.unbindService(onlineServiceConn);
-			isBindOnlineService = false;
-		}
-		Intent bleService = new Intent(application, BluetoothLeService.class);
-		application.stopService(bleService);
-		if(isBindBleService){
-			application.unbindService(bleServiceConn);
-			isBindBleService = false;
-		}
 	}
 
 	private void startService(){
@@ -1148,4 +1147,28 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	public Group getGroupByGroupNo(int no){
 		return DataUtil.getGroupByGroupNo(no);
 	}
+
+	public void startUVCCameraService(Application application){
+		Intent intent = new Intent(application, UVCCameraService.class);
+		isBindedUVCCameraService = application.bindService(intent,cameraconn,BIND_AUTO_CREATE);
+	}
+
+	public void stopUVCCameraService(){
+		if(isBindedUVCCameraService){
+			application.unbindService(cameraconn);
+		}
+	}
+
+	private UVCCameraService.MyBinder uvcBinder;
+	private ServiceConnection cameraconn = new ServiceConnection() {
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			uvcBinder = (UVCCameraService.MyBinder) service;
+		}
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			Log.e("MyApplication", "UVCCameraService服务断开了");
+			isBindedUVCCameraService = false;
+		}
+	};
 }

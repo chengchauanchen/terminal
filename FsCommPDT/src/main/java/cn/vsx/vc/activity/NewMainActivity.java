@@ -29,7 +29,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -122,7 +121,6 @@ import cn.vsx.vc.utils.AirCraftUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.NfcUtil;
-import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.view.BottomView;
 import cn.vsx.vc.view.IndividualCallTimerView;
@@ -314,8 +312,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     stoppedCallIntent.putExtra("stoppedResult","0");
                     SendRecvHelper.send(getApplicationContext(),stoppedCallIntent);
 
-                    MyTerminalFactory.getSDK().exit();//停止服务
-                    PromptManager.getInstance().stop();
                     for (Activity activity : ActivityCollector.getAllActivity().values()) {
                         activity.finish();
                     }
@@ -323,7 +319,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 //                TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
                     MyApplication.instance.isClickVolumeToCall = false;
                     MyApplication.instance.isPttPress = false;
-                    MyApplication.instance.stopIndividualCallService();
+                    MyApplication.instance.stopHandlerService();
                     killAllProcess();
                 },2000);
             }
@@ -1070,9 +1066,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         //开启服务，开启锁屏界面
         startService(new Intent(NewMainActivity.this, LockScreenService.class));
-        MyApplication.instance.startUVCCameraService();
-
-        initVoip();
+        SpecificSDK.initVoip();
 
         MyTerminalFactory.getSDK().getVideoProxy().setActivity(this);
 
@@ -1135,26 +1129,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             FloatWindowManager.getInstance().applyPermission(this);
         }
     }
-
-    private void initVoip(){
-        String account = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)+"";
-        String voipServerIp = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_IP, "");
-        String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, 0)+"";
-        String server = voipServerIp+":"+voipServerPort;
-        if(account.contains("@lzy")){
-            account=account.substring(0,6);
-        }
-        if(account.startsWith("88")|| account.startsWith("86")){
-            account = account.substring(2);
-        }
-//        account = "1003";
-        logger.info("voip账号："+account+",密码："+ account+"，服务器地址："+server);
-        MyTerminalFactory.getSDK().getVoipCallManager().clearCache();
-        if(!TextUtils.isEmpty(account)){
-            MyTerminalFactory.getSDK().getVoipCallManager().login(account,account,server);
-        }
-    }
-
 
     private void initFragment() {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
@@ -1545,7 +1519,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             callManager.cancelInterceptPtt();
         }
         HeadSetUtil.getInstance().close(this);// 关闭耳机线控监听
-        SensorUtil.getInstance().unregistSensor();
+
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveCallingCannotClickHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
@@ -1583,7 +1557,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         PromptManager.getInstance().stopRing();
 
         stopService(new Intent(NewMainActivity.this, LockScreenService.class));
-        MyApplication.instance.stopUVCCameraService();
         if (conn != null) {
             unbindService(conn);
         }

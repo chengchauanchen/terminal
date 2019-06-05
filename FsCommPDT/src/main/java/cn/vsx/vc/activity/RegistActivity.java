@@ -265,11 +265,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         stoppedCallIntent.putExtra("stoppedResult","0");
         SendRecvHelper.send(getApplicationContext(),stoppedCallIntent);
 
-        MyTerminalFactory.getSDK().exit();//停止服务
-        PromptManager.getInstance().stop();
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
-        MyApplication.instance.stopIndividualCallService();
+        MyApplication.instance.stopHandlerService();
         Process.killProcess(Process.myPid());
     }
 
@@ -842,9 +840,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         //进入注册界面了，先判断有没有认证地址
         String authUrl = TerminalFactory.getSDK().getParam(Params.IDENTITY_URL, "");
         if(TextUtils.isEmpty(authUrl)){
-            //平台包的话直接用AuthManager中的地址
+            //平台包或者没获取到类型，直接用AuthManager中的地址,
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)){
+            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType) || TextUtils.isEmpty(apkType)){
                 String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
                 if(defaultAddress.length>=2){
                     int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0],defaultAddress[1]);
@@ -1054,11 +1052,11 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         Uri.parse("package:" + getPackageName()));
                 startActivityForResult(intent, OVERLAY_PERMISSION_REQ_CODE);
             } else {
-                MyApplication.instance.startIndividualCallService();
+                MyApplication.instance.startHandlerService();
                 start();
             }
         } else {
-            MyApplication.instance.startIndividualCallService();
+            MyApplication.instance.startHandlerService();
             start();
         }
     }
@@ -1067,7 +1065,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
             // 创建个呼直播服务
-            MyApplication.instance.startIndividualCallService();
+            MyApplication.instance.startHandlerService();
             start();
         } else if (requestCode == REQUEST_PERMISSION_SETTING) {
             // 从设置界面返回时再判断权限是否开启

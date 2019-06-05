@@ -3,6 +3,7 @@ package cn.vsx.SpecificSDK;
 import android.app.Application;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.alibaba.fastjson.JSONObject;
@@ -12,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
@@ -22,6 +24,7 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import ptt.terminalsdk.BuildConfig;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.context.TerminalSDK4Android;
 
@@ -31,6 +34,7 @@ import ptt.terminalsdk.context.TerminalSDK4Android;
 
 public class SpecificSDK extends TerminalSDK4Android {
 
+    private static boolean isBindedUVCCameraService;
     private static SpecificSDK specificSDK;
     private static final String TAG = "SpecificSDK";
 
@@ -50,7 +54,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      * @param groupOrMemberNo  组编号或者个人编号
      * @param isGroup 是否是组消息
      */
-    public void sendShortTextMessage(String text,String groupOrMemberName,int groupOrMemberNo,boolean isGroup){
+    public static void sendShortTextMessage(String text,String groupOrMemberName,int groupOrMemberNo,boolean isGroup){
         JSONObject jsonObject = new JSONObject();
 //        jsonObject.put(JsonParam.SEND_STATE, SendState.SENDING);
         jsonObject.put(JsonParam.CONTENT, text);
@@ -79,7 +83,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      * @param groupOrMemberNo  组编号或者个人编号
      * @param isGroup 是否是组消息
      */
-    public void sendLongTextMessage(String text,String groupOrMemberName,int groupOrMemberNo,boolean isGroup){
+    public static void sendLongTextMessage(String text,String groupOrMemberName,int groupOrMemberNo,boolean isGroup){
         JSONObject jsonObject = new JSONObject();
 //        jsonObject.put(JsonParam.SEND_STATE, SendState.SENDING);
         jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
@@ -108,7 +112,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      * @param msg 长文本消息
      * @return 将长Text转换为file
      */
-    private File saveString2File (String msg, int token) {
+    private static File saveString2File (String msg, int token) {
         String fileName = "longmsg"+token+".txt";
         String fileDir = MyTerminalFactory.getSDK().getWordRecordDirectory();
         File file = new File(fileDir, fileName);
@@ -140,7 +144,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      * @param isGroup 是否是组消息
      * @param isNeedUi 是否需要在界面显示上传进度，如果需要，还要注册ReceiveUploadProgressHandler
      */
-    public void sendFileMessage(int messageTypeCode,File file, String groupOrMemberName, int groupOrMemberNo, boolean isGroup, boolean isNeedUi){
+    public static void sendFileMessage(int messageTypeCode,File file, String groupOrMemberName, int groupOrMemberNo, boolean isGroup, boolean isNeedUi){
         TerminalMessage mTerminalMessage = new TerminalMessage();
         JSONObject jsonObject = new JSONObject();
 //        jsonObject.put(JsonParam.SEND_STATE, SendState.SENDING);
@@ -199,7 +203,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      * @param groupOrMemberNo  组编号或者个人编号
      * @param isGroup 是否是组消息
      */
-    public void sendLocationMessage(double longitude, double latitude, String groupOrMemberName, int groupOrMemberNo, boolean isGroup){
+    public static void sendLocationMessage(double longitude, double latitude, String groupOrMemberName, int groupOrMemberNo, boolean isGroup){
         boolean getLocationSuccess = false;
         TerminalMessage mTerminalMessage = new TerminalMessage();
         JSONObject jsonObject = new JSONObject();
@@ -232,7 +236,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      * @param channelNo
      * @return
      */
-    public int requestMyselfLive(String theme,String channelNo){
+    public static int requestMyselfLive(String theme,String channelNo){
         return TerminalFactory.getSDK().getLiveManager().requestMyselfLive(theme,channelNo);
     }
 
@@ -241,7 +245,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      * @param memberId 对方memberId
      * @return 状态码 0 表示发起个呼成功
      */
-    public int requestPersonalCall(final int memberId){
+    public static int requestPersonalCall(final int memberId){
         //先根据成员查询uniqueNo
         Account account = TerminalFactory.getSDK().getConfigManager().getAccountByNo(memberId);
         if(null != account && !account.getMembers().isEmpty()){
@@ -257,7 +261,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      * @param memberId 对方memberId
      * @return 状态码 0 表示发起个呼成功
      */
-    private int requestPersonalCall(int memberId,long uniqueNo){
+    private static int requestPersonalCall(int memberId,long uniqueNo){
         return MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(memberId,uniqueNo,"");
     }
 
@@ -265,7 +269,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      * 发起组呼
      * @return 状态码 0 表示允许组呼
      */
-    public int requestGroupCall(int groupId){
+    public static int requestGroupCall(int groupId){
         return MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",groupId);
     }
 
@@ -273,7 +277,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      * 注册 ReceiveHandler，必须和{@link SpecificSDK#unregistHandler(ReceiveHandler)}一起使用，避免内存泄漏
      * @param handler
      */
-    public void registHandler(ReceiveHandler handler){
+    public static void registHandler(ReceiveHandler handler){
         MyTerminalFactory.getSDK().registReceiveHandler(handler);
     }
 
@@ -281,7 +285,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      * 反注册 ReceiveHandler
      * @param handler
      */
-    public void unregistHandler(ReceiveHandler handler){
+    public static void unregistHandler(ReceiveHandler handler){
         MyTerminalFactory.getSDK().unregistReceiveHandler(handler);
     }
 
@@ -292,7 +296,31 @@ public class SpecificSDK extends TerminalSDK4Android {
         specificSDK = new SpecificSDK(application);
         MyTerminalFactory.getSDK().setLoginFlag();
         setAppKey(application);
+        setApkType(application);
         MyTerminalFactory.getSDK().start();
+        //设置注册服务地址
+        MyTerminalFactory.getSDK().getAuthManagerTwo().initIp();
+        //保存录像，录音，照片的存储路径
+        MyTerminalFactory.getSDK().getFileTransferOperation().initExternalUsableStorage();
+        SpecificSDK.setTerminalMemberType(TerminalMemberType.TERMINAL_PHONE.toString());
+    }
+
+    /**
+     * 设置sdk的注册服务地址
+     */
+    public static void setAddress(String ip,int port){
+        MyTerminalFactory.getSDK().getAuthManagerTwo().setAddress(ip,port);
+    }
+
+    private static void setApkType(Application application){
+        try{
+            ApplicationInfo appInfo = application.getPackageManager().getApplicationInfo(application.getPackageName(), PackageManager.GET_META_DATA);
+            String apkType=appInfo.metaData.getString("APKTYPE");
+            Log.d("MyApplication", " APKTYPE == " + apkType);
+            MyTerminalFactory.getSDK().putParam(Params.APK_TYPE,apkType);
+        }catch(PackageManager.NameNotFoundException e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -322,7 +350,31 @@ public class SpecificSDK extends TerminalSDK4Android {
         MyTerminalFactory.getSDK().getLiveConfigManager().setPlayKey(key);
     }
 
-    public static void setRtmpPlayKey(String key){
-        MyTerminalFactory.getSDK().getLiveConfigManager().setRtmpPlayKey(key);
+    public static void setRTMPPlayKey(String key){
+        MyTerminalFactory.getSDK().getLiveConfigManager().setRTMPPlayKey(key);
+    }
+
+    /**
+     * 登陆成功之后才能调用此方法
+     */
+    public static void initVoip(){
+        String account = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)+"";
+        String voipServerIp = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_IP, "");
+        String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, 0)+"";
+        String server = voipServerIp+":"+voipServerPort;
+        if(account.contains("@lzy")){
+            account=account.substring(0,6);
+        }
+        if(account.startsWith("88")|| account.startsWith("86")){
+            account = account.substring(2);
+        }
+        if (BuildConfig.DEBUG){
+            Log.d(TAG, "voip账号：" + account + ",密码：" + account + "，服务器地址：" + server);
+        }
+
+        MyTerminalFactory.getSDK().getVoipCallManager().clearCache();
+        if(!TextUtils.isEmpty(account)){
+            MyTerminalFactory.getSDK().getVoipCallManager().login(account,account,server);
+        }
     }
 }

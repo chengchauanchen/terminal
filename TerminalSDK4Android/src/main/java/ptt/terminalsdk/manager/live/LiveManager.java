@@ -25,11 +25,11 @@ public class LiveManager{
         this.playKey = playKey;
     }
 
-    public String getRtmpPlayKey(){
+    public String getRTMPPlayKey(){
         return rtmpPlayKey;
     }
 
-    public void setRtmpPlayKey(String rtmpPlayKey){
+    public void setRTMPPlayKey(String rtmpPlayKey){
         this.rtmpPlayKey = rtmpPlayKey;
     }
 

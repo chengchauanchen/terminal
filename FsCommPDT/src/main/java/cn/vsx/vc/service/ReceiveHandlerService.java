@@ -105,6 +105,7 @@ import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.AirCraftUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DensityUtil;
+import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView;
 import dji.common.battery.BatteryState;
 import dji.common.error.DJIError;
@@ -211,7 +212,6 @@ public class ReceiveHandlerService extends Service{
     @Override
     public IBinder onBind(Intent intent){
         KeepLiveManager.getInstance().setServiceForeground(this);
-//        MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().start());
         return receiveHandlerBinder;
     }
 
@@ -258,6 +258,8 @@ public class ReceiveHandlerService extends Service{
     public void onDestroy(){
         super.onDestroy();
         myHandler.removeCallbacksAndMessages(null);
+        SensorUtil.getInstance().unregistSensor();
+        PromptManager.getInstance().stop();
         MyTerminalFactory.getSDK().stop();
     }
 

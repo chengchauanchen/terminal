@@ -605,7 +605,7 @@ public class PullLivingService extends BaseService{
             //测试url
             url = "rtmp://202.69.69.180:443/webcast/bshdlive-pc";
             if(null != surface.getSurfaceTexture()){
-                rtmpClient = new RTMPEasyPlayerClient(this, MyTerminalFactory.getSDK().getLiveConfigManager().getRtmpPlayKey(), surface, null, null);
+                rtmpClient = new RTMPEasyPlayerClient(this, MyTerminalFactory.getSDK().getLiveConfigManager().getRTMPPlayKey(), surface, null, null);
                 rtmpClient.play(url);
             }
         }else{

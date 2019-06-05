@@ -43,7 +43,6 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ProgressDialog;
-import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
 import cn.vsx.vc.receive.RecvCallBack;
@@ -73,7 +72,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 	private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
 		@Override
 		public void handler() {
-			myHandler.post(() -> MyApplication.instance.stopIndividualCallService());
+			myHandler.post(() -> MyApplication.instance.stopHandlerService());
 		}
 	};
 
@@ -127,7 +126,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 				TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
 				startActivity(new Intent(BaseActivity.this, KilledActivity.class));
 				BaseActivity.this.finish();
-				MyApplication.instance.stopIndividualCallService();
+				MyApplication.instance.stopHandlerService();
 			});
 		}
 	};
@@ -619,14 +618,13 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 		stoppedCallIntent.putExtra("stoppedResult","0");
 		SendRecvHelper.send(BaseActivity.this,stoppedCallIntent);
 
-		MyTerminalFactory.getSDK().exit();//停止服务
-		PromptManager.getInstance().stop();
+
 		for (Activity activity : ActivityCollector.getAllActivity().values()) {
 			activity.finish();
 		}
 		MyApplication.instance.isClickVolumeToCall = false;
 		MyApplication.instance.isPttPress = false;
-		MyApplication.instance.stopIndividualCallService();
+		MyApplication.instance.stopHandlerService();
 		killAllProcess();
 	}
 

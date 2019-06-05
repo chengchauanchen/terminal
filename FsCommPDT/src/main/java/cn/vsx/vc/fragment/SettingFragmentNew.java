@@ -52,7 +52,6 @@ import cn.vsx.vc.activity.AboutActivity;
 import cn.vsx.vc.activity.BleActivity;
 import cn.vsx.vc.activity.HelpWordActivity;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.BitmapUtil;
@@ -487,14 +486,12 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         stoppedCallIntent.putExtra("stoppedResult","0");
         SendRecvHelper.send(getActivity(),stoppedCallIntent);
 
-        MyTerminalFactory.getSDK().exit();//停止服务
-        PromptManager.getInstance().stop();
         for (Activity activity : ActivityCollector.getAllActivity().values()) {
             activity.finish();
         }
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
-        MyApplication.instance.stopIndividualCallService();
+        MyApplication.instance.stopHandlerService();
         killAllProcess();
     }
 

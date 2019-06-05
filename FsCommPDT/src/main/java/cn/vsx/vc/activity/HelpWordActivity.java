@@ -430,7 +430,7 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
         if(forbid){
             myHandler.post(() -> {
                 HelpWordActivity.this.finish();
-                MyApplication.instance.stopIndividualCallService();
+                MyApplication.instance.stopHandlerService();
             });
         }
     };
