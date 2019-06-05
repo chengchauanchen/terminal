@@ -168,7 +168,14 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         changeProgressMsg(getResources().getString(R.string.auth_fail));
                         myHandler.postDelayed(() -> exit(), 3000);
                     }
-                }else{
+                }else if(resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()){
+                    changeProgressMsg(getResources().getString(R.string.auth_fail));
+                    myHandler.postDelayed(()->{
+                        ll_regist.setVisibility(View.VISIBLE);
+                        hideProgressDialog();
+                    },2000);
+                }
+                else{
                     //没有注册服务地址，去探测地址
                     if(availableIPlist.isEmpty()){
                         TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
