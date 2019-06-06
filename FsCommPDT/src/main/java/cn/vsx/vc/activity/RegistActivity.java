@@ -163,7 +163,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     if(reAuthCount < 3){
                         reAuthCount++;
                         //发生异常的时候重试几次，因为网络原因经常导致一个io异常
-                        TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP,""),TerminalFactory.getSDK().getParam(Params.REGIST_PORT,""));
+                        TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(),TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
                     }else{
                         changeProgressMsg(getResources().getString(R.string.auth_fail));
                         myHandler.postDelayed(() -> exit(), 3000);
