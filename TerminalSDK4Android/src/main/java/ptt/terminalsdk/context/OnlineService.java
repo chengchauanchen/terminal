@@ -20,6 +20,7 @@ import ptt.terminalsdk.R;
 import ptt.terminalsdk.broadcastreceiver.PTTDownAndUpReceiver;
 import ptt.terminalsdk.broadcastreceiver.PhoneBroadcastReceiver;
 import ptt.terminalsdk.broadcastreceiver.TickAlarmReceiver;
+import ptt.terminalsdk.service.BluetoothLeService;
 import ptt.terminalsdk.service.KeepLiveManager;
 
 @SuppressLint("Wakelock")
@@ -61,14 +62,16 @@ public class OnlineService extends Service {
 		pttDownAndUpReceiver = new PTTDownAndUpReceiver();
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("BLUE_TOOTH_DOWN");
-		intentFilter.addAction("com.zello.ptt.down");
+		//com.zello.ptt.down
+		intentFilter.addAction(BluetoothLeService.PTT_DOWN);
+		//com.zello.ptt.up
+		intentFilter.addAction(BluetoothLeService.PTT_UP);
 		intentFilter.addAction("com.sonim.intent.action.PTT_KEY_DOWN");
 		intentFilter.addAction("android.intent.action.PTT.down");
 		intentFilter.addAction("com.runbo.ptt.key.down");
 		intentFilter.addAction("com.yl.ptt.keydown");
 		intentFilter.addAction("android.intent.action.OPEN_PTT_BUTTON");
 		intentFilter.addAction("BLUE_TOOTH_UP");
-		intentFilter.addAction("com.zello.ptt.up");
 		intentFilter.addAction("com.sonim.intent.action.PTT_KEY_UP");
 		intentFilter.addAction("android.intent.action.PTT.up");
 		intentFilter.addAction("com.runbo.ptt.key.up");

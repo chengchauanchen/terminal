@@ -5,6 +5,8 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -70,7 +72,7 @@ import skin.support.SkinCompatManager;
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 
 @SuppressLint("ValidFragment")
-public class SettingFragmentNew extends BaseFragment implements View.OnClickListener{
+public class SettingFragmentNew extends BaseFragment implements View.OnClickListener {
     Activity activity;
 
     ImageView add_icon;
@@ -140,29 +142,29 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
         voice_image.setImageResource(BitmapUtil.getVolumeImageResourceByValue(false));
         voice_image.setOnClickListener(view -> {
-            if(!soundOff){
+            if (!soundOff) {
                 voice_image.setImageResource(R.drawable.volume_off_call);
                 TerminalFactory.getSDK().getAudioProxy().volumeQuiet();
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true,1);
-                soundOff =true;
-            }else {
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true, 1);
+                soundOff = true;
+            } else {
                 voice_image.setImageResource(R.drawable.horn);
                 TerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false,1);
-                soundOff =false;
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false, 1);
+                soundOff = false;
             }
         });
 
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if(requestCode == DISABLE_KEYGUARD){
-            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+        if (requestCode == DISABLE_KEYGUARD) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 logger.info("锁屏显示界面权限已申请");
-            }else{
-                ToastUtil.showToast(getContext(),getString(R.string.text_please_open_lock_screen_permission_otherwise_lock_screen_can_not_be_used));
+            } else {
+                ToastUtil.showToast(getContext(), getString(R.string.text_please_open_lock_screen_permission_otherwise_lock_screen_can_not_be_used));
             }
         }
     }
@@ -173,27 +175,27 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         ll_video_resolution_setting.setOnClickListener(new OnClickListenerImpVideoResolution());
         btn_lock_screen_setting.setOnBtnClick(currState -> {
             // TODO: 2018/6/21 先判断锁屏显示界面权限
-            if(currState){
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ){
+            if (currState) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.DISABLE_KEYGUARD) != PackageManager.PERMISSION_GRANTED) {
                         requestPermissions(new String[]{Manifest.permission.DISABLE_KEYGUARD},
                                 DISABLE_KEYGUARD);
-                    }else {
+                    } else {
                         MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 1);
                     }
-                }else {
+                } else {
                     MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 1);
                 }
-            }else{
+            } else {
                 MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0);
             }
         });
         btn_daytime_mode.setOnBtnClick(currState -> {
             Log.e("SettingFragmentNew", "currState:" + currState);
-            if(currState){
+            if (currState) {
                 MyTerminalFactory.getSDK().putParam(Params.DAYTIME_MODE, true);
                 SkinCompatManager.getInstance().loadSkin("daytime.skin", SkinCompatManager.SKIN_LOADER_STRATEGY_ASSETS);
-            }else {
+            } else {
                 MyTerminalFactory.getSDK().putParam(Params.DAYTIME_MODE, false);
                 SkinCompatManager.getInstance().restoreDefaultTheme();
             }
@@ -215,24 +217,43 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     }
 
     @Override
-    public void initData() {
-        if(getActivity() !=null){
-            getActivity().registerReceiver(mbtBroadcastReceiver, makeGattUpdateIntentFilter());
+    public void onResume() {
+        super.onResume();
+        //刷新蓝牙的状态
+        //这里暂时未提供方法获取当前连接的设备，直接用字符串判断
+        BluetoothManager bluetoothManager = (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
+        BluetoothAdapter mBluetoothAdapter = bluetoothManager.getAdapter();
+        if (mBluetoothAdapter.isEnabled()) {
+            if (tv_ble_name.getText().toString().equals(getResources().getString(R.string.text_close))) {
+                tv_ble_name.setText("开启");
+            }
+        } else {
+            tv_ble_name.setText(R.string.text_close);
         }
+    }
+
+    @Override
+    public void initData() {
+        if (getActivity() != null) {
+            IntentFilter filter = makeGattUpdateIntentFilter();
+            filter.addAction(BluetoothAdapter.ACTION_STATE_CHANGED);
+            getActivity().registerReceiver(mbtBroadcastReceiver, filter);
+        }
+
         registerPstoreReceiver();
-        if(MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW,0)==1){//锁屏设置判断
+        if (MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0) == 1) {//锁屏设置判断
             btn_lock_screen_setting.initToggleState(true);
-        }else {
+        } else {
             btn_lock_screen_setting.initToggleState(false);
         }
-        if(MyTerminalFactory.getSDK().getParam(Params.DAYTIME_MODE,false)){
+        if (MyTerminalFactory.getSDK().getParam(Params.DAYTIME_MODE, false)) {
             btn_daytime_mode.initToggleState(true);
-        }else {
+        } else {
             btn_daytime_mode.initToggleState(false);
         }
     }
 
-    private static IntentFilter makeGattUpdateIntentFilter(){
+    private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
@@ -258,52 +279,55 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
         if (changemaingrouplayout != null)
             changemaingrouplayout.unRegistListener();
-        if(volumeChangLayout != null)
+        if (volumeChangLayout != null)
             volumeChangLayout.unRegistLintener();
-        if(personinfolayout != null)
+        if (personinfolayout != null)
             personinfolayout.unInitListener();
-        if (physicalButtonSet4PTT !=  null)
+        if (physicalButtonSet4PTT != null)
             physicalButtonSet4PTT.unregist();
         getActivity().unregisterReceiver(mbtBroadcastReceiver);
         super.onDestroyView();
     }
 
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> mHandler.post(() -> setVideoIcon());
+
     private void setVideoIcon() {
-        MyTopRightMenu.offerObject().initview(add_icon,activity );
+        MyTopRightMenu.offerObject().initview(add_icon, activity);
         add_icon.setVisibility(View.VISIBLE);
     }
 
-    /**音量改变*/
+    /**
+     * 音量改变
+     */
     private ReceiveVolumeOffCallHandler receiveVolumeOffCallHandler = new ReceiveVolumeOffCallHandler() {
 
-                @Override
-                public void handler(boolean isVolumeOff,int status) {
-                    logger.info("触发了receiveVolumeOffCallHandler "+isVolumeOff);
-                    if(isVolumeOff){
-                        voice_image.setImageResource(R.drawable.volume_off_call);
-                        soundOff=true;
-                    }else {
-                        voice_image.setImageResource(R.drawable.horn);
-                        soundOff=false;
-                    }
-                }
-            };
+        @Override
+        public void handler(boolean isVolumeOff, int status) {
+            logger.info("触发了receiveVolumeOffCallHandler " + isVolumeOff);
+            if (isVolumeOff) {
+                voice_image.setImageResource(R.drawable.volume_off_call);
+                soundOff = true;
+            } else {
+                voice_image.setImageResource(R.drawable.horn);
+                soundOff = false;
+            }
+        }
+    };
 
     /***  组呼的时候显示View **/
-    private void showViewWhenGroupCall (final String speakerName) {
+    private void showViewWhenGroupCall(final String speakerName) {
         speaking_name.setVisibility(View.VISIBLE);
         icon_laba.setVisibility(View.VISIBLE);
         speaking_name.setText(speakerName);
     }
 
     /***  停止组呼的时候隐藏View **/
-    private void hideViewWhenStopGroupCall () {
+    private void hideViewWhenStopGroupCall() {
         speaking_name.setVisibility(View.GONE);
         icon_laba.setVisibility(View.GONE);
     }
 
-    private void setViewEnable (boolean isEnable) {
+    private void setViewEnable(boolean isEnable) {
         add_icon.setEnabled(isEnable);
         ll_video_resolution_setting.setEnabled(isEnable);
     }
@@ -325,7 +349,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         setViewEnable(true);
     });
 
-    private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler(){
+    private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler() {
         @Override
         public void handler(int reasonCode) {
             mHandler.post(() -> {
@@ -338,12 +362,12 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
         @Override
         public void handler(int memberId, String memberName, final int groupId, String groupName, CallMode currentCallMode) {
-            if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
+            if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 mHandler.post(() -> {
                     logger.info("sjl_设置页面的组呼到来");
                     speaking_name.setVisibility(View.VISIBLE);
                     icon_laba.setVisibility(View.VISIBLE);
-                    logger.info("sjl_设置页面的组呼到来"+speaking_name.getVisibility()+",正在说话人的名字："+MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
+                    logger.info("sjl_设置页面的组呼到来" + speaking_name.getVisibility() + ",正在说话人的名字：" + MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
                     String speakingName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
                     speaking_name.setText(speakingName);
                     setting_group_name.setText(groupName);
@@ -372,16 +396,16 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         }
     };
 
-    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler(){
+    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler() {
         @Override
-        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType){
-            mHandler.post(()->{
-                if(!TempGroupType.ACTIVITY_TEAM_GROUP.toString().equals(tempGroupType)){
-                    if(isAdd){
-                        if(isLocked || isSwitch|| isScan){
+        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType) {
+            mHandler.post(() -> {
+                if (!TempGroupType.ACTIVITY_TEAM_GROUP.toString().equals(tempGroupType)) {
+                    if (isAdd) {
+                        if (isLocked || isSwitch || isScan) {
                             mHandler.post(() -> setting_group_name.setText(tempGroupName));
                         }
-                    }else {
+                    } else {
                         int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
                         setting_group_name.setText(DataUtil.getMemberByMemberNo(currentGroupId).getName());
                     }
@@ -390,17 +414,17 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         }
     };
 
-    private ReceiveGetGroupByNoHandler receiveGetGroupByNoHandler = group -> mHandler.post(new Runnable(){
+    private ReceiveGetGroupByNoHandler receiveGetGroupByNoHandler = group -> mHandler.post(new Runnable() {
         @Override
-        public void run(){
+        public void run() {
             setting_group_name.setText(group.getName());
         }
     });
 
     private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
         @Override
-        public void handler(int memberId, int toGroupId,boolean forceSwitchGroup,String tempGroupType) {
-            if(!forceSwitchGroup){
+        public void handler(int memberId, int toGroupId, boolean forceSwitchGroup, String tempGroupType) {
+            if (!forceSwitchGroup) {
                 return;
             }
             mHandler.post(() -> {
@@ -414,7 +438,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.rl_ble:
-                startActivity(new Intent(getContext(),BleActivity.class));
+                startActivity(new Intent(getContext(), BleActivity.class));
                 break;
             case R.id.about:
                 startActivity(new Intent(getActivity(), AboutActivity.class));
@@ -424,7 +448,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
                     return;
                 uploadLog();
                 break;
-            case  R.id.ll_helpAndfeedback://帮助与反馈
+            case R.id.ll_helpAndfeedback://帮助与反馈
                 Intent intent = new Intent(context, HelpWordActivity.class);
                 startActivity(intent);
                 break;
@@ -436,7 +460,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         }
     }
 
-    private void connectUs () {
+    private void connectUs() {
         dialog = new DialogUtil() {
             @Override
             public CharSequence getMessage() {
@@ -458,7 +482,8 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
             }
         }.showDialog();
     }
-    private void exitApp () {
+
+    private void exitApp() {
         dialog = new DialogUtil() {
             @Override
             public CharSequence getMessage() {
@@ -483,8 +508,8 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
 
     private void exit() {
         Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
-        stoppedCallIntent.putExtra("stoppedResult","0");
-        SendRecvHelper.send(getActivity(),stoppedCallIntent);
+        stoppedCallIntent.putExtra("stoppedResult", "0");
+        SendRecvHelper.send(getActivity(), stoppedCallIntent);
 
         for (Activity activity : ActivityCollector.getAllActivity().values()) {
             activity.finish();
@@ -495,10 +520,10 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         killAllProcess();
     }
 
-    private void killAllProcess(){
-        if(getActivity() !=null){
+    private void killAllProcess() {
+        if (getActivity() != null) {
             ActivityManager mActivityManager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
-            if(null !=mActivityManager){
+            if (null != mActivityManager) {
                 List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
                 for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList) {
                     if (runningAppProcessInfo.pid != android.os.Process.myPid()) {
@@ -511,7 +536,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     }
 
 
-    public void lockScreen () {
+    public void lockScreen() {
         final int[] item = {MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0)};
         dialog = new AlertDialog.Builder(context)
                 .setTitle(R.string.text_set_lock_screen)
@@ -535,8 +560,10 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
                 .setCancelable(false)
                 .show();
     }
+
     private long currentTime;
-    public void uploadLog () {
+
+    public void uploadLog() {
         dialog = new DialogUtil() {
             @Override
             public CharSequence getMessage() {
@@ -553,11 +580,11 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
                 timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                        if(System.currentTimeMillis()-currentTime>5000){
+                        if (System.currentTimeMillis() - currentTime > 5000) {
                             MyTerminalFactory.getSDK().getLogFileManager().uploadAllLogFile();
                             currentTime = System.currentTimeMillis();
-                        }else {
-                            ToastUtil.showToast(getString(R.string.text_uploaded_log_try_again_later),getActivity());
+                        } else {
+                            ToastUtil.showToast(getString(R.string.text_uploaded_log_try_again_later), getActivity());
                         }
                     }
                 }, 0);
@@ -577,8 +604,10 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     public void setSendPttState(sendPttState sendPttState) {
         this.sendPttState = sendPttState;
     }
+
     private final class OnClickListenerImpVideoResolution implements View.OnClickListener {
         int item = MyTerminalFactory.getSDK().getParam(Params.VIDEO_RESOLUTION, 2);
+
         @Override
         public void onClick(View v) {
             dialog = new AlertDialog.Builder(context)
@@ -601,23 +630,27 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         }
     }
 
-    /**日志上传是否成功的消息*/
-    private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = (resultCode,type) -> mHandler.post(() -> {
-        if("log".equals(type)){
+    /**
+     * 日志上传是否成功的消息
+     */
+    private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = (resultCode, type) -> mHandler.post(() -> {
+        if ("log".equals(type)) {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 ToastUtil.toast(getActivity(), getString(R.string.text_log_upload_success_thanks));
             } else {
-                ToastUtil.showToast( getString(R.string.text_log_upload_fail_try_again_later), getActivity());
+                ToastUtil.showToast(getString(R.string.text_log_upload_fail_try_again_later), getActivity());
             }
         }
     });
 
-    /**收到别人请求我开启直播的通知**/
+    /**
+     * 收到别人请求我开启直播的通知
+     **/
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = new ReceiveNotifyLivingIncommingHandler() {
         @Override
-        public void handler(final String mainMemberName, final int mainMemberId,boolean emergencyType) {
+        public void handler(final String mainMemberName, final int mainMemberId, boolean emergencyType) {
             mHandler.post(() -> {
-                if (dialog != null){
+                if (dialog != null) {
                     dialog.dismiss();
                 }
             });
@@ -627,36 +660,50 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     private BroadcastReceiver exitPstoreReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (cn.com.cybertech.pdk.Intent.ACTION_PSTORE_EXIT.equals(intent.getAction())){
+            if (cn.com.cybertech.pdk.Intent.ACTION_PSTORE_EXIT.equals(intent.getAction())) {
                 exit();
             }
         }
     };
-    private void registerPstoreReceiver(){
+
+    private void registerPstoreReceiver() {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(cn.com.cybertech.pdk.Intent.ACTION_PSTORE_EXIT);
         context.registerReceiver(exitPstoreReceiver, intentFilter);
     }
-    private void unregisterPstoreReceiver(){
+
+    private void unregisterPstoreReceiver() {
         context.unregisterReceiver(exitPstoreReceiver);
     }
 
 
-    public void bleClick(){
-        Intent intent = new Intent(getContext(),BleActivity.class);
+    public void bleClick() {
+        Intent intent = new Intent(getContext(), BleActivity.class);
         startActivity(intent);
     }
 
-    BroadcastReceiver mbtBroadcastReceiver = new BroadcastReceiver(){
+    BroadcastReceiver mbtBroadcastReceiver = new BroadcastReceiver() {
 
         @Override
-        public void onReceive(Context context, Intent intent){
+        public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            if(BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)){
+            if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
                 String deviceName = intent.getStringExtra("deviceName");
                 tv_ble_name.setText(deviceName);
-            }else if(BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)){
-                tv_ble_name.setText(R.string.text_close);
+            } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+                tv_ble_name.setText("开启");
+            } else if (BluetoothAdapter.ACTION_STATE_CHANGED.equals(action)) {
+                //蓝牙状态切换
+                int blueState = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
+                switch (blueState) {
+                    case BluetoothAdapter.STATE_ON:
+                        //开启
+                        tv_ble_name.setText("开启");
+                        break;
+                    case BluetoothAdapter.STATE_OFF: // 关闭
+                        tv_ble_name.setText(R.string.text_close);
+                        break;
+                }
             }
         }
     };

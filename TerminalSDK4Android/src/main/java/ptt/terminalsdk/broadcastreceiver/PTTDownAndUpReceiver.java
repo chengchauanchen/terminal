@@ -10,6 +10,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import ptt.terminalsdk.service.BluetoothLeService;
 
 /**
  * Created by zckj on 2017/5/27.
@@ -17,8 +18,8 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 
 public class PTTDownAndUpReceiver extends BroadcastReceiver {
 
-    private static final String[] down = { "BLUE_TOOTH_DOWN","com.zello.ptt.down", "com.sonim.intent.action.PTT_KEY_DOWN", "android.intent.action.PTT.down", "com.runbo.ptt.key.down","com.yl.ptt.keydown" ,"com.ntdj.ptt_down"};
-    private static final String[] up = { "BLUE_TOOTH_UP","com.zello.ptt.up", "com.sonim.intent.action.PTT_KEY_UP", "android.intent.action.PTT.up", "com.runbo.ptt.key.up","com.yl.ptt.keyup" ,"com.ntdj.ptt_up"};
+    private static final String[] down = { "BLUE_TOOTH_DOWN", BluetoothLeService.PTT_DOWN, "com.sonim.intent.action.PTT_KEY_DOWN", "android.intent.action.PTT.down", "com.runbo.ptt.key.down","com.yl.ptt.keydown" ,"com.ntdj.ptt_down"};
+    private static final String[] up = { "BLUE_TOOTH_UP",BluetoothLeService.PTT_UP, "com.sonim.intent.action.PTT_KEY_UP", "android.intent.action.PTT.up", "com.runbo.ptt.key.up","com.yl.ptt.keyup" ,"com.ntdj.ptt_up"};
     private Logger logger = Logger.getLogger(getClass());
 
     @Override
