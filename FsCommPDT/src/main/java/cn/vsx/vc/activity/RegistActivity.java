@@ -727,7 +727,11 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 return;//finish()之后该活动会继续执行后面的代码，你可以logCat验证，加return避免可能的exception
             }
         }
-
+        String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
+        //市局包隐藏模拟警员
+        if(apkType.equals(AuthManagerTwo.POLICESTORE) || apkType.equals(AuthManagerTwo.POLICETEST)){
+            btnAddMember.setVisibility(View.GONE);
+        }
         initPopupWindow();
         initDialog();
         isCheckSuccess = false;
