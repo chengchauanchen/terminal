@@ -111,7 +111,7 @@ public class GroupMemberAdapter extends BaseAdapter {
             viewHolder.messageTo.setVisibility(View.GONE);
             viewHolder.callTo.setVisibility(View.GONE);
             viewHolder.dialTo.setVisibility(View.GONE);
-            if (member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+            if (member.getUniqueNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L)){
                 viewHolder.select_delete.setVisibility(View.GONE);
             }else {
                 viewHolder.select_delete.setVisibility(View.VISIBLE);
@@ -119,7 +119,7 @@ public class GroupMemberAdapter extends BaseAdapter {
 
         }else {
             viewHolder.select_delete.setVisibility(View.GONE);
-            if (member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+            if (member.getUniqueNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L)){
                 viewHolder.messageTo.setVisibility(View.GONE);
                 viewHolder.callTo.setVisibility(View.GONE);
                 viewHolder.dialTo.setVisibility(View.GONE);

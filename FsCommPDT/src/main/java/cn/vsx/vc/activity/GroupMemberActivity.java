@@ -15,6 +15,8 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ToastUtils;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -78,7 +80,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
     private int groupId;
     String groupName;
     private int total=0;
-    private boolean canAdd;//只有自己创建的临时组才能添加和删除人
+    private boolean canDelete;//只有自己创建的临时组才能删除人
     private boolean isTemporaryGroup;
     public void setListViewHeightBasedOnChildren(ListView listView) {
         if (listView == null)
@@ -166,24 +168,25 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
         if(group != null){
             isTemporaryGroup = GroupType.TEMPORARY.toString().equals(group.getGroupType());
             if(group.getCreatedMemberUniqueNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,-1L) && isTemporaryGroup){
-                canAdd = true;
+                canDelete = true;
             }
             rightBtn.setVisibility(View.GONE);
             ok_btn.setVisibility(View.GONE);
-            logger.info( "是否为我创建的临时组:" + canAdd+"-----groupNo："+groupId);
+            logger.info( "是否为我创建的临时组:" + canDelete+"-----groupNo："+groupId);
             if(isTemporaryGroup){
                 in_title_bar.setVisibility(View.GONE);
                 temp_title_bar.setVisibility(View.VISIBLE);
                 rightBtn.setVisibility(View.GONE);
                 ok_btn.setVisibility(View.GONE);
-                if(!canAdd){
-                    add_btn.setVisibility(View.GONE);
+                add_btn.setVisibility(View.VISIBLE);
+                if(!canDelete){
                     delete_btn.setVisibility(View.GONE);
                 }else {
-                    add_btn.setVisibility(View.VISIBLE);
                     delete_btn.setVisibility(View.VISIBLE);
                 }
             }else {
+                add_btn.setVisibility(View.GONE);
+                delete_btn.setVisibility(View.GONE);
                 in_title_bar.setVisibility(View.VISIBLE);
                 temp_title_bar.setVisibility(View.GONE);
             }
@@ -282,12 +285,16 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                     btn_cancel.setOnClickListener(v -> alertDialog.dismiss());
                 }else {
                     List<Member> deleteMemberList = sortAdapter.getDeleteMemberList();
-                    MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(groupId,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),
-                            MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l),DataUtil.getUniqueNos(deleteMemberList));
-                    add_btn.setVisibility(View.VISIBLE);
-                    delete_btn.setVisibility(View.VISIBLE);
-                    delete_text.setVisibility(View.GONE);
-                    cancel_text.setVisibility(View.GONE);
+                    if(deleteMemberList.isEmpty()){
+                        ToastUtils.showShort(R.string.please_select_delete_member);
+                    }else {
+                        MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(groupId,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),
+                                MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l),DataUtil.getUniqueNos(deleteMemberList));
+                        add_btn.setVisibility(View.VISIBLE);
+                        delete_btn.setVisibility(View.VISIBLE);
+                        delete_text.setVisibility(View.GONE);
+                        cancel_text.setVisibility(View.GONE);
+                    }
                 }
                 break;
             case R.id.cancel_text:
@@ -321,7 +328,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                     isTemporaryGroup = GroupType.TEMPORARY.toString().equals(group.getGroupType());
                     //只有自己创建的临时组才能添加和删除人
                     if(group.getCreatedMemberUniqueNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,-1L) && isTemporaryGroup){
-                        canAdd = true;
+                        canDelete = true;
                     }
 
                 }
@@ -343,11 +350,14 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                     temp_title_bar.setVisibility(View.VISIBLE);
                     rightBtn.setVisibility(View.GONE);
                     ok_btn.setVisibility(View.GONE);
-                    add_btn.setVisibility(canAdd?View.VISIBLE:View.GONE);
+                    add_btn.setVisibility(View.VISIBLE);
+                    delete_btn.setVisibility(canDelete?View.VISIBLE:View.GONE);
                     barTitle.setText(R.string.text_group_members);
                     memberNum.setText(String.format(getString(R.string.text_group_members_number),currentGroupMembers.size()));
                     logger.info("组内成员：" + currentGroupMembers.size());
                 }else {
+                    add_btn.setVisibility(View.GONE);
+                    delete_btn.setVisibility(View.GONE);
                     in_title_bar.setVisibility(View.VISIBLE);
                     temp_title_bar.setVisibility(View.GONE);
                     barTitle.setText(R.string.text_intra_group_line_members);
@@ -362,7 +372,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
         @Override
         public void handler(int methodResult, String resultDesc, int tempGroupNo){
             if(methodResult == BaseCommonCode.SUCCESS_CODE){
-                if(tempGroupNo == groupId && canAdd){
+                if(tempGroupNo == groupId && canDelete){
                     myHandler.postDelayed(() -> {
                         MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId, TerminalMemberStatusEnum.ONLINE.toString());
                         ToastUtil.showToast(GroupMemberActivity.this,getString(R.string.text_delete_success));
@@ -377,7 +387,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
         @Override
         public void handler(int methodResult, String resultDesc, int tempGroupNo){
             if(methodResult == BaseCommonCode.SUCCESS_CODE){
-                if(tempGroupNo == groupId && canAdd){
+                if(tempGroupNo == groupId && canDelete){
                     myHandler.postDelayed(() -> {
                         MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId, TerminalMemberStatusEnum.ONLINE.toString());
                         ToastUtil.showToast(GroupMemberActivity.this,getString(R.string.text_add_success));
