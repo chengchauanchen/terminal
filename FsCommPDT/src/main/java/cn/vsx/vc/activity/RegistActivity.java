@@ -163,7 +163,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     if(reAuthCount < 3){
                         reAuthCount++;
                         //发生异常的时候重试几次，因为网络原因经常导致一个io异常
-                        TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP,""),TerminalFactory.getSDK().getParam(Params.REGIST_PORT,""));
+                        TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(),TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
                     }else{
                         changeProgressMsg(getResources().getString(R.string.auth_fail));
                         myHandler.postDelayed(() -> exit(), 3000);
@@ -339,30 +339,47 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_select_unit));
                 return;
             }
-
-            String useOrg = userOrg.getText().toString().trim();
-            String useName = userName.getText().toString().trim();
-
-            if (TextUtils.isEmpty(useOrg)) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_invitation_code));
-                return;
-            } else if (!DataUtil.isLegalOrg(useOrg) || useOrg.length() != 6) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_invitation_code_by_six_number));
-                return;
-            } else if (TextUtils.isEmpty(useName)) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_name));
-                return;
-            }
-            else if (!DataUtil.isLegalName(useName) || useName.length() > 12 || useName.length() < 2) {
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_correct_name));
-                return;
-            }
-            String registIP = TerminalFactory.getSDK().getAuthManagerTwo().getTempIp();
-            String registPort = TerminalFactory.getSDK().getAuthManagerTwo().getTempPort();
-            if(TextUtils.isEmpty(registIP) || TextUtils.isEmpty(registPort)){
-                ToastUtils.showShort(R.string.text_please_select_unit);
+            if(llreAuthInfo.getVisibility() == View.VISIBLE){
+                //模拟警员
+                String useAccount = account.getText().toString().trim();
+                String useDepartmentId=departmentId.getText().toString().trim();
+                String useDepartmentName=departmentName.getText().toString().trim();
+                String name = edtName.getText().toString().trim();
+                MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, useAccount);
+                MyTerminalFactory.getSDK().putParam(UrlParams.NAME, name);
+                MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_ID, useDepartmentId);
+                MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_NAME, useDepartmentName);
+                int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
+                if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                    changeProgressMsg(getString(R.string.authing));
+                }
             }else {
-                TerminalFactory.getSDK().getAuthManagerTwo().regist(useName,useOrg);
+                //注册
+                String useOrg = userOrg.getText().toString().trim();
+                String useName = userName.getText().toString().trim();
+
+                if (TextUtils.isEmpty(useOrg)) {
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_invitation_code));
+                    return;
+                } else if (!DataUtil.isLegalOrg(useOrg) || useOrg.length() != 6) {
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_invitation_code_by_six_number));
+                    return;
+                } else if (TextUtils.isEmpty(useName)) {
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_name));
+                    return;
+                }
+                else if (!DataUtil.isLegalName(useName) || useName.length() > 12 || useName.length() < 2) {
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_correct_name));
+                    return;
+                }
+                String registIP = TerminalFactory.getSDK().getAuthManagerTwo().getTempIp();
+                String registPort = TerminalFactory.getSDK().getAuthManagerTwo().getTempPort();
+                if(TextUtils.isEmpty(registIP) || TextUtils.isEmpty(registPort)){
+                    ToastUtils.showShort(R.string.text_please_select_unit);
+                }else {
+                    changeProgressMsg(getString(R.string.text_registing));
+                    TerminalFactory.getSDK().getAuthManagerTwo().regist(useName,useOrg);
+                }
             }
         }
     }
@@ -375,7 +392,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             if(llreAuthInfo.getVisibility()==View.GONE&&userName.getVisibility()==View.VISIBLE&&userOrg.getVisibility()==View.VISIBLE){
                 userOrg.setVisibility(View.GONE);
                 userName.setVisibility(View.GONE);
-                btn_confirm.setVisibility(View.GONE);
+                btn_confirm.setVisibility(View.VISIBLE);
                 llreAuthInfo.setVisibility(View.VISIBLE);
 
 

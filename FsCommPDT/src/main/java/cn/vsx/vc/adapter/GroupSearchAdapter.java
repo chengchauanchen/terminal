@@ -101,6 +101,7 @@ public class GroupSearchAdapter extends BaseAdapter {
         viewHolderGroup.toGroup.setOnClickListener(view -> {
             Intent intent = new Intent(context, GroupCallNewsActivity.class);
             intent.putExtra("isGroup", true);
+            intent.putExtra("uniqueNo",searchGroupList.get(position).getUniqueNo());
             intent.putExtra("userId", searchGroupList.get(position).id);//组id
             intent.putExtra("userName", searchGroupList.get(position).name);
             intent.putExtra("speakingId",searchGroupList.get(position).id);

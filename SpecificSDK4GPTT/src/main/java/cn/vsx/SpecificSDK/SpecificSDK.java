@@ -24,7 +24,6 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import ptt.terminalsdk.BuildConfig;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.context.TerminalSDK4Android;
 
@@ -241,7 +240,7 @@ public class SpecificSDK extends TerminalSDK4Android {
     }
 
     /**
-     * 异步发起个呼
+     * 异步发起个呼，必须放在子线程里
      * @param memberId 对方memberId
      * @return 状态码 0 表示发起个呼成功
      */
@@ -358,20 +357,11 @@ public class SpecificSDK extends TerminalSDK4Android {
      * 登陆成功之后才能调用此方法
      */
     public static void initVoip(){
-        String account = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)+"";
+        String account = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L)+"";
         String voipServerIp = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_IP, "");
         String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, 0)+"";
         String server = voipServerIp+":"+voipServerPort;
-        if(account.contains("@lzy")){
-            account=account.substring(0,6);
-        }
-        if(account.startsWith("88")|| account.startsWith("86")){
-            account = account.substring(2);
-        }
-        if (BuildConfig.DEBUG){
-            Log.d(TAG, "voip账号：" + account + ",密码：" + account + "，服务器地址：" + server);
-        }
-
+        logger.info("voip账号：" + account + ",密码：" + account + "，服务器地址：" + server);
         MyTerminalFactory.getSDK().getVoipCallManager().clearCache();
         if(!TextUtils.isEmpty(account)){
             MyTerminalFactory.getSDK().getVoipCallManager().login(account,account,server);
