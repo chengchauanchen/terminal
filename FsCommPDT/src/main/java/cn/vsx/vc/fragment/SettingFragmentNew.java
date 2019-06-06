@@ -333,7 +333,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     }
 
     /*** 自己组呼返回的消息 **/
-    private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
+    private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = (methodResult, resultDesc,groupId) -> mHandler.post(() -> {
         if (methodResult == 0) {
             showViewWhenGroupCall(getString(R.string.text_I_am_talking));
             setViewEnable(false);

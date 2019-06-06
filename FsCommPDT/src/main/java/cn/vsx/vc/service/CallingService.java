@@ -350,7 +350,7 @@ public class CallingService extends BaseService{
     /**
      * 主动方请求组呼的消息
      */
-    private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = (methodResult, resultDesc) -> {
+    private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = (methodResult, resultDesc,groupId) -> {
         if(MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE && MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
             if(MyApplication.instance.isPttPress){
                 mHandler.post(() -> {

@@ -124,8 +124,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
     private LiveManager liveManager;
 	//DDpush连接
 	private boolean Established = false;
-	//网络是否连接，只有两个都连接上才是真正的在线，只要有一个为false就是离线
-	private boolean netWorkConnected = true;
+	//在线状态，手机网络连上和UDP连上
 	private NetWorkConnectionChangeReceiver netWorkConnectionChangeReceiver;
 
 	private boolean isBindOnlineService;
@@ -151,7 +150,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		IntentFilter netFilter = new IntentFilter();
 		netFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 		application.registerReceiver(netWorkConnectionChangeReceiver,netFilter);
-		registReceiveHandler(receiveNetworkChangeHandler);
 		//个呼通讯录，请求的是自己的列表，还是所有成员列表
 		putParam(Params.REQUEST_ALL, false);
 		startUVCCameraService(application);
@@ -183,7 +181,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		getVideoProxy().stop();
 		PromptManager.getInstance().stop();
 		disConnectToServer();
-		unregistReceiveHandler(receiveNetworkChangeHandler);
 		application.unregisterReceiver(netWorkConnectionChangeReceiver);
 		stopUVCCameraService();
 		if(MyTerminalFactory.getSDK().isServerConnected()){
@@ -1046,23 +1043,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			logger.info("***********UDPClientBase**************connected = "+connected);
 			Established = connected;
 			notifyReceiveHandler(ReceiveServerConnectionEstablishedHandler.class, connected);
-			if(netWorkConnected && Established){
-				notifyReceiveHandler(ReceiveOnLineStatusChangedHandler.class,true);
-			}else {
-				notifyReceiveHandler(ReceiveOnLineStatusChangedHandler.class,false);
-			}
-		}
-	};
-
-	private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
-		@Override
-		public void handler(boolean connected){
-			netWorkConnected = connected;
-			if(netWorkConnected && Established){
-				notifyReceiveHandler(ReceiveOnLineStatusChangedHandler.class,true);
-			}else {
-				notifyReceiveHandler(ReceiveOnLineStatusChangedHandler.class,false);
-			}
 		}
 	};
 

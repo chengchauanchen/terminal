@@ -35,7 +35,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import org.apache.http.util.TextUtils;
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 
@@ -70,7 +69,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
@@ -180,7 +178,7 @@ public class TalkbackFragment extends BaseFragment {
      */
     private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
         @Override
-        public void handler(final int methodResult, final String resultDesc) {
+        public void handler(final int methodResult, final String resultDesc,int groupId) {
             logger.info("主动方请求组呼的消息：" + methodResult + "-------" + resultDesc);
             logger.info("主动方请求组呼的消息：" + MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode());
 

@@ -501,7 +501,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
      */
     private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
         @Override
-        public void handler(final int methodResult, String resultDesc) {
+        public void handler(final int methodResult, String resultDesc,int groupId) {
             myHandler.post(() -> {
 
                 currentCallMode = MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode();

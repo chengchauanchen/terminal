@@ -783,7 +783,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     /**
      * 主动方请求组呼的消息
      */
-    private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = (methodResult, resultDesc) -> {
+    private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = (methodResult, resultDesc,groupId) -> {
         logger.info("PTTViewPager触发了请求组呼的响应methodResult:" + methodResult);
         if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
             logger.error("isPttPress值为" + MyApplication.instance.isPttPress);

@@ -288,7 +288,7 @@ public class PullLivingService extends BaseService{
     /**
      * 主动方请求组呼的消息
      */
-    private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = (methodResult, resultDesc) -> mHandler.post(() -> {
+    private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = (methodResult, resultDesc,groupId) -> mHandler.post(() -> {
         if(methodResult == BaseCommonCode.SUCCESS_CODE){
             mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_speaking);
             if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {

@@ -84,7 +84,7 @@ public class PromptManager {
 
 	private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
 		@Override
-		public void handler(int methodResult, String resultDesc) {
+		public void handler(int methodResult, String resultDesc,int groupId) {
 			logger.info("主动发起组呼，开始响起提示音");
 			if(methodResult == BaseCommonCode.SUCCESS_CODE){
 				//组呼成功，发出提示音

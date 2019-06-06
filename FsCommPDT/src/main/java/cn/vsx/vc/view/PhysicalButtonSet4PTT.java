@@ -172,7 +172,7 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
     /**主动方请求组呼的消息*/
     private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
         @Override
-        public void handler(final int methodResult, String resultDesc) {
+        public void handler(final int methodResult, String resultDesc,int groupId) {
             myHandler.post(() -> {
                 if (methodResult == 0) {//请求成功，开始组呼
                     pptButtonCut.setEnabled(false);

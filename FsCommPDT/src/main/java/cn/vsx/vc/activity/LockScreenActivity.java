@@ -190,7 +190,7 @@ public class LockScreenActivity extends BaseActivity {
      */
     private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
         @Override
-        public void handler(int methodResult, String resultDesc) {
+        public void handler(int methodResult, String resultDesc,int groupId) {
             currentCallMode = MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode();
             if (currentCallMode == CallMode.GENERAL_CALL_MODE) {
 
