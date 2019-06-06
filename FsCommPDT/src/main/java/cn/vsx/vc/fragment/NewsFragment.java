@@ -509,6 +509,7 @@ public class NewsFragment extends BaseFragment {
                 }else {
                     Intent intent = new Intent(context, GroupCallNewsActivity.class);
                     intent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
+                    intent.putExtra("uniqueNo",terminalMessage.messageToUniqueNo);
                     intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
                     intent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
                     intent.putExtra("speakingId",speakingId);
@@ -679,7 +680,12 @@ public class NewsFragment extends BaseFragment {
             }
         }
         if(!remove){
-            terminalMessage.unReadCount+=1;
+            //自己发的消息未读不加
+            if(terminalMessage.messageFromId == TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+                terminalMessage.unReadCount = 0;
+            }else {
+                terminalMessage.unReadCount+=1;
+            }
         }
         combatMessageList.add(terminalMessage);
         MyTerminalFactory.getSDK().getTerminalMessageManager().updateCombatMessageList(combatMessageList);
@@ -691,16 +697,19 @@ public class NewsFragment extends BaseFragment {
      * @param terminalMessage 新消息
      */
     private void setCombatMessageUnreadCount(TerminalMessage lastMessage,TerminalMessage terminalMessage){
-
-        if(terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){
-            //组呼消息，判断组是否被监听
-            if(GroupUtils.getAllMonitorGroups().contains(terminalMessage.messageToId)){
-                terminalMessage.unReadCount = lastMessage.unReadCount;
+        if(terminalMessage.messageFromId == TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+            terminalMessage.unReadCount = 0;
+        }else {
+            if(terminalMessage.messageType == MessageType.GROUP_CALL.getCode()){
+                //组呼消息，判断组是否被监听
+                if(GroupUtils.getAllMonitorGroups().contains(terminalMessage.messageToId)){
+                    terminalMessage.unReadCount = lastMessage.unReadCount;
+                }else {
+                    terminalMessage.unReadCount = lastMessage.unReadCount+1;
+                }
             }else {
                 terminalMessage.unReadCount = lastMessage.unReadCount+1;
             }
-        }else {
-            terminalMessage.unReadCount = lastMessage.unReadCount+1;
         }
     }
 

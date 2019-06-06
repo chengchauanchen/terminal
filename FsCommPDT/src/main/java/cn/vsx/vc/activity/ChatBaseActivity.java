@@ -187,6 +187,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
             }
         }
     };
+    private long uniqueNo;
 
     /**
      * 设置状态栏透明
@@ -244,6 +245,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
         userId = getIntent().getIntExtra("userId", 0);
         userName = getIntent().getStringExtra("userName");
         isGroup = getIntent().getBooleanExtra("isGroup", false);
+        uniqueNo = getIntent().getLongExtra("uniqueNo",0L);
         speakingId = getIntent().getIntExtra("speakingId", 0);
         speakingName = getIntent().getStringExtra("speakingName");
         newsBarGroupName.setText(HandleIdUtil.handleName(userName));
@@ -443,7 +445,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
 
             }
         }else if(requestCode == CODE_FNC_REQUEST){
-            checkNFC();
+            checkNFC(false);
         }else if(requestCode == CODE_TRANSPON_REQUEST){
          if(resultCode == RESULT_OK){
              //转发返回结果
@@ -1687,7 +1689,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
                                     requestVideo();
                                     break;
                                 case ReceiverSendFileCheckMessageHandler.NFC://NFC
-                                    checkNFC();
+                                    checkNFC(true);
                                     break;
                             }
                         } else {
@@ -1700,7 +1702,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
     /**
      * 检查NFC功能，并提示
      */
-    private void checkNFC() {
+    private void checkNFC(boolean openSetting) {
         int result = NfcUtil.nfcCheck(this);
         switch (result){
             case NfcUtil.NFC_ENABLE_FALSE_NONE:
@@ -1708,7 +1710,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
                 break;
             case NfcUtil.NFC_ENABLE_FALSE_JUMP:
                 ToastUtil.showToast(this,this.getString(R.string.is_not_open_nfc));
-                handler.postDelayed(() -> startActivityForResult(new Intent(Settings.ACTION_NFC_SETTINGS),CODE_FNC_REQUEST),500);
+                if(openSetting){
+                    handler.postDelayed(() -> startActivityForResult(new Intent(Settings.ACTION_NFC_SETTINGS),CODE_FNC_REQUEST),500);
+                }
                 break;
             case NfcUtil.NFC_ENABLE_FALSE_SHOW:
                 showNFCDialog();
@@ -1814,7 +1818,7 @@ public abstract class ChatBaseActivity extends BaseActivity{
      */
     private void getHistoryMessageRecord(int messageCount) {
         long messageId = tempGetMessage != null ? tempGetMessage.messageId : 0l;
-        long groupUniqueNo = isGroup ? MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupUniqueNo(userId) : 0l;
+        long groupUniqueNo = isGroup ? uniqueNo : 0l;
         long messageVersion = tempGetMessage != null ? tempGetMessage.messageVersion : 0l;
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
             MyTerminalFactory.getSDK().getTerminalMessageManager().getHistoryMessageRecord(isGroup, userId, messageId, groupUniqueNo, messageVersion, messageCount);

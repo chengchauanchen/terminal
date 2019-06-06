@@ -55,6 +55,7 @@ public class NotificationClickReceiver extends BroadcastReceiver {
             Intent mIntent = new Intent(context, GroupCallNewsActivity.class);
             mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mIntent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
+            mIntent.putExtra("uniqueNo",terminalMessage.messageToUniqueNo);
             mIntent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));//组id
             mIntent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
             mIntent.putExtra("speakingId",terminalMessage.messageFromId);

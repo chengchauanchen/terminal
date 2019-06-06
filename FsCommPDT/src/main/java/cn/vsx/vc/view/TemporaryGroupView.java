@@ -92,11 +92,7 @@ public class TemporaryGroupView extends LinearLayout{
 
             ivMessage.setOnClickListener(view -> {
                 Intent intent = new Intent(getContext(), GroupCallNewsActivity.class);
-                intent.putExtra("isGroup", true);
-                intent.putExtra("userId", group.getNo());//组id
-                intent.putExtra("userName", group.getName());
-                intent.putExtra("speakingId",group.getId());
-                intent.putExtra("speakingName",group.getName());
+
 
                 getContext().startActivity(intent);
             });

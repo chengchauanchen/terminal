@@ -172,6 +172,7 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             groupViewHolder.ivMessage.setOnClickListener(view -> {
                 Intent intent = new Intent(context, GroupCallNewsActivity.class);
                 intent.putExtra("isGroup", true);
+                intent.putExtra("uniqueNo",group.getUniqueNo());
                 intent.putExtra("userId", group.getNo());//组id
                 intent.putExtra("userName", group.getName());
                 intent.putExtra("speakingId",group.getId());

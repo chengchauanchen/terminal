@@ -167,6 +167,7 @@ public class CombatGroupActivity extends BaseActivity implements View.OnClickLis
 
         Intent intent = new Intent(this, GroupCallNewsActivity.class);
         intent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
+        intent.putExtra("uniqueNo", terminalMessage.messageToUniqueNo);
         intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));//组id
         intent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
         startActivity(intent);
