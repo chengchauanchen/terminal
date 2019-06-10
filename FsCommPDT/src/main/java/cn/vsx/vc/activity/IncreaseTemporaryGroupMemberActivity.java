@@ -34,6 +34,7 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
         //        catalogBeanList.add(bean);
         //        updateData(memberResponse,catalogBeanList);
     });
+    private boolean searchOrSelectedFragmentShow;
 
     /**
      * 更新配置信息
@@ -45,14 +46,22 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
         @Override
         public void handler(ArrayList<ContactItemBean> selectedContacts){
             SelectedMemberFragment selectedMemberFragment = SelectedMemberFragment.newInstance(selectedContacts);
-            selectedMemberFragment.setBackListener(() -> onBackPressed());
+            selectedMemberFragment.setBackListener(() -> {
+                searchOrSelectedFragmentShow = false;
+                onBackPressed();
+            });
+            searchOrSelectedFragmentShow = true;
             getSupportFragmentManager().beginTransaction().hide(establishTempGroupFragment).add(R.id.search_framelayout, selectedMemberFragment).addToBackStack(null).show(selectedMemberFragment).commit();
         }
     };
 
     private ReceiveShowSearchFragmentHandler receiveShowSearchFragmentHandler = (type,selectedNos) -> {
         SearchFragment searchFragment = SearchFragment.newInstance(type,selectedNos);
-        searchFragment.setBacklistener(() -> onBackPressed());
+        searchFragment.setBacklistener(() -> {
+            searchOrSelectedFragmentShow = false;
+            onBackPressed();
+        });
+        searchOrSelectedFragmentShow = true;
         getSupportFragmentManager().beginTransaction().hide(establishTempGroupFragment).add(R.id.search_framelayout, searchFragment).addToBackStack(null).show(searchFragment).commit();
     };
 
@@ -98,6 +107,10 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
 
     @Override
     public void onBackPressed(){
-        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMemberFragmentBackHandler.class);
+        if(!searchOrSelectedFragmentShow){
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMemberFragmentBackHandler.class);
+        }else {
+            super.onBackPressed();
+        }
     }
 }
