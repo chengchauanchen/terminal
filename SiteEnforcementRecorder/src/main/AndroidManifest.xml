@@ -187,7 +187,9 @@
 
     <!--                service start               -->
     <service android:name=".service.LockScreenService"/>
-    <service android:name=".service.PTTButtonEventService"/>
+    <service android:name=".service.PTTButtonEventService"
+        android:enabled="true"
+        android:exported="false"/>
     <service android:name="org.easydarwin.easypusher.BITBackgroundCameraService"/>
     <!-- 百度定位 -->
     <service

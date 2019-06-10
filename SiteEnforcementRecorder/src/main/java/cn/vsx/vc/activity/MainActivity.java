@@ -2,6 +2,7 @@ package cn.vsx.vc.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -21,6 +22,7 @@ import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -50,6 +52,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import butterknife.Bind;
+import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageType;
@@ -153,6 +156,8 @@ public class MainActivity extends BaseActivity {
     private int pushcount;
     private boolean isPushing;//正在上报
     private boolean isPassiveReport;//是否是被动上报(用于区分提示音)
+    private String ip;
+    private String port ;
     private String id;//自己发起直播返回的callId和member拼接
     private PushCallback pushCallback;
 
@@ -161,6 +166,12 @@ public class MainActivity extends BaseActivity {
 
     private boolean canTakePicture = true;//是否可以拍照
     private TimerTask takePictureTimer;
+
+    private BITDialogUtil dialogUtil;
+
+    private boolean isAgainToRequestLive;
+
+
 
     @Override
     public int getLayoutResId() {
@@ -200,13 +211,14 @@ public class MainActivity extends BaseActivity {
         }
         judgePermission();
 
-        button1.setText("录像");
+        button1.setText("手动设置账号信息");
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
                     @Override
                     public void run() {
+                        myHandler.postDelayed(() -> setManualNFCBean(),1000);
 //                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
 //                        operation.deleteUploadedFile();
                     }
@@ -230,7 +242,7 @@ public class MainActivity extends BaseActivity {
 
             }
         });
-        button1.setVisibility(View.GONE);
+//        button1.setVisibility(View.GONE);
         button2.setVisibility(View.GONE);
         //清理数据库
         FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
@@ -249,6 +261,7 @@ public class MainActivity extends BaseActivity {
             List<Integer> monitorGroups = new ArrayList<>();
             monitorGroups.add(bean.getGroupId());
             TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
+//            MyTerminalFactory.getSDK().getGroupManager().changeGroup(bean.getGroupId());
         }
     }
 
@@ -288,7 +301,7 @@ public class MainActivity extends BaseActivity {
                     .loadLabel(MyApplication.instance.getPackageManager()) + File.separator + "logs"
                     + File.separator + "log.txt");
             if (!file.exists()) {
-                MyApplication.instance.getSpecificSDK().configLogger();
+                SpecificSDK.getInstance().configLogger();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -316,7 +329,6 @@ public class MainActivity extends BaseActivity {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);//网络连接状态
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);//转组
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);//组呼来了
-
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseStartLiveHandler);//请求时，对方拒绝
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);//通知停止直播
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerLiveTimeoutHandler);//直播应答超时
@@ -331,15 +343,11 @@ public class MainActivity extends BaseActivity {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);//观看人员的加入或者退出
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);//通知存储空间不足
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceOfflineHandler);//终端强制下线
-
-
         myHandler.removeCallbacksAndMessages(null);
-
         PromptManager.getInstance().stopRing();
-
         stopService(new Intent(MainActivity.this, LockScreenService.class));
         MyTerminalFactory.getSDK().getVideoProxy().start().unregister(this);
-        stopLiveService();
+
     }
 
     public Handler myHandler = new Handler(Looper.getMainLooper()) {
@@ -364,7 +372,7 @@ public class MainActivity extends BaseActivity {
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {
             logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity: isRegisted" + isRegisted);
             if (isRegisted) {//注册过，在后台登录，session超时也走这
-                TerminalFactory.getSDK().getAuthManagerTwo().login();
+//                TerminalFactory.getSDK().getAuthManagerTwo().login();
                 logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity中登录了");
 //                    MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
             } else {//没注册过，关掉主界面，去注册界面
@@ -428,11 +436,13 @@ public class MainActivity extends BaseActivity {
     private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
         @Override
         public void handler(final boolean connected) {
-            logger.info("主界面收到服务是否连接的通知ServerConnectionEstablishedHandler" + connected);
+            logger.info("主界面收到服务是否连接的通知ReceiveOnLineStatusChangedHandler--" + connected);
             MainActivity.this.runOnUiThread(() -> {
                 if (!connected) {
                     llNoNetwork.setVisibility(View.VISIBLE);
+                    stopPush(false);
                 } else {
+                    autoStartLive();
 //                            initMediaStream(svLive.getSurfaceTexture());
 //                            //判断是否之前在上报中，如果上报中请求继续上报
 //                            if(isPushing){
@@ -455,7 +465,8 @@ public class MainActivity extends BaseActivity {
         public void handler(final String streamMediaServerIp, final int streamMediaServerPort, final long callId) {
             myHandler.postDelayed(() -> {
                 logger.info("自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
-                String port = streamMediaServerPort + "";
+                ip = streamMediaServerIp;
+                port = streamMediaServerPort + "";
                 id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "_" + callId;
                 //如果是组内上报，在组内发送一条上报消息
                 sendGroupMessage(streamMediaServerIp,streamMediaServerPort,callId);
@@ -472,14 +483,21 @@ public class MainActivity extends BaseActivity {
         public void handler(final int resultCode, final String resultDesc) {
             myHandler.post(() -> {
                 if(resultCode == 0){
-//                        List<Integer> pushMemberList = new ArrayList<>();
-//                        pushMemberList.add(88011103);
-//                        logger.info("自己发起直播成功,要推送的列表：" + pushMemberList);
-//                        if (pushMemberList != null) {
-//                            MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(pushMemberList,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
-//                        }
                     isPushing = true;
                     updateNormalPushingState(isPushing);
+                }else if(resultCode == 4308){
+                    //已经在上报
+//                    if(!TextUtils.isEmpty(ip)&&!TextUtils.isEmpty(port)&&!TextUtils.isEmpty(id)){
+//                        isPushing = true;
+//                        updateNormalPushingState(isPushing);
+//                        startPush(ip, port, id);
+//                    }else{
+//                        isPushing = false;
+//                        updateNormalPushingState(isPushing);
+//                        ToastUtil.showToast(getApplicationContext(),resultDesc);
+//                        finishVideoLive();
+//                    }
+                    requestStartLive();
                 }else {
                     isPushing = false;
                     updateNormalPushingState(isPushing);
@@ -604,7 +622,7 @@ public class MainActivity extends BaseActivity {
                 if(mMediaStream!=null) {
                     if(mMediaStream.isStreaming()){
                         updateNormalPushingState(false);
-                        stopPush();
+                        stopPush(true);
                         ToastUtil.showToast(MainActivity.this, "停止上报");
                     }else if (mMediaStream.isRecording()) {
                         //已经在录像，停止录像
@@ -949,14 +967,16 @@ public class MainActivity extends BaseActivity {
     /**
      * 停止上报
      */
-    private void finishVideoLive() {
+    public void finishVideoLive() {
         myHandler.post(() -> {
             PromptManager.getInstance().stopRing();//停止响铃
             //将TextureView设置成全屏
             svLive.getLayoutParams().height = ViewGroup.LayoutParams.MATCH_PARENT;
             svLive.getLayoutParams().width = ViewGroup.LayoutParams.MATCH_PARENT;
             svLive.requestLayout();
-            stopPush();
+            stopPush(false);
+            ip = null;
+            port = null;
             id = null;
         });
 
@@ -965,7 +985,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 停止推流
      */
-    private void stopPush() {
+    private void stopPush(boolean isReportAudio) {
         isPushing = false;
         boolean isStreaming = mMediaStream != null && mMediaStream.isStreaming();
         logger.info("isFinishing() = " + "isFinishing()" + "    isStreaming = " + isStreaming);
@@ -983,15 +1003,16 @@ public class MainActivity extends BaseActivity {
         TerminalFactory.getSDK().getLiveManager().ceaseLiving();
         //提示音
         isPassiveReport = false;
-        PromptManager.getInstance().stopReport();
-
+        if(isReportAudio){
+            PromptManager.getInstance().stopReport();
+        }
     }
 
 
     /**
      * 停止推流并停止预览
      */
-    private void stopPushAndPreview() {
+    public void stopPushAndPreview() {
         isPushing = false;
         boolean isStreaming = mMediaStream != null && mMediaStream.isStreaming();
         if (mMediaStream != null) {
@@ -1005,7 +1026,9 @@ public class MainActivity extends BaseActivity {
             mMediaStream.stopStream();
             mMediaStream.release();
             mMediaStream = null;
-            mService.setMediaStream(null);
+            if(mService!=null){
+                mService.setMediaStream(null);
+            }
             //            stopService(new Intent(VideoLiveActivity.this, BackgroundCameraService.class));
             logger.info("---->>>>页面关闭，停止推送视频");
         } else {
@@ -1189,16 +1212,16 @@ public class MainActivity extends BaseActivity {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CheckMyPermission.REQUEST_CAMERA);
             }else {
                 startLiveService();
-                autoStartLive();
+                myHandler.postDelayed(this::autoStartLive,500);
             }
         } else {
             if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.RECORD_AUDIO)) {
                 if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.CAMERA)) {
-                    startLiveService();
-                    autoStartLive();
                     if (!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                         CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
                     }else{
+                        startLiveService();
+                        myHandler.postDelayed(this::autoStartLive,500);
                         //权限打开之后判断是否需要上传位置信息，这种情况是之前没有打开权限使得登录或者成员信息改变的时候不能上传位置信息，到了主页面才申请权限的情况
                         MyTerminalFactory.getSDK().getLocationManager().requestLocationByJudgePermission();
                     }
@@ -1213,7 +1236,7 @@ public class MainActivity extends BaseActivity {
                 if (onRecordAudioDenied) {
                     if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.CAMERA)) {
                         startLiveService();
-                        autoStartLive();
+                        myHandler.postDelayed(this::autoStartLive,500);
                         if (!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
                             CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
                         }else{
@@ -1248,6 +1271,7 @@ public class MainActivity extends BaseActivity {
         boolean isContains = TerminalFactory.getSDK().contains(Params.PUSH_LIVE_STATE);
         boolean state = TerminalFactory.getSDK().getParam(Params.PUSH_LIVE_STATE,false);
         if(isContains && state){
+//            stopPush(false);
             //弹窗提示
             showPushLiveDialog();
         }else{
@@ -1283,7 +1307,7 @@ public class MainActivity extends BaseActivity {
                     judgePermission();
                 } else {
                     onLocationDenied = false;
-                    permissionDenied(requestCode);
+                    permissionDenied(Manifest.permission.ACCESS_FINE_LOCATION);
                 }
                 break;
             default:
@@ -1363,7 +1387,23 @@ public class MainActivity extends BaseActivity {
             new Handler().postDelayed(() -> mExitFlag = false, CLICK_EXIT_TIME);
         } else {
             updateNormalPushingState(false);
+            stopBusniess();
             moveTaskToBack(true);//把程序变成后台的
+        }
+    }
+
+    /**
+     * 停止业务
+     */
+    private void stopBusniess() {
+        if(mMediaStream != null&&mMediaStream.isStreaming()){
+            stopPush(false);
+        }
+        if(mMediaStream != null&&mMediaStream.isRecording()){
+            mMediaStream.stopRecord();
+        }
+        if(MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus()!=AudioRecordStatus.STATUS_STOPED){
+            stopRecordAudio();
         }
     }
 
@@ -1389,7 +1429,7 @@ public class MainActivity extends BaseActivity {
     private void stopAll(){
         if(mMediaStream!=null) {
             if (mMediaStream.isStreaming()) {
-                stopPush();
+                stopPush(true);
             }
             if (mMediaStream.isRecording()) {
                 //已经在录像，停止录像
@@ -1398,13 +1438,16 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private void stopLiveService(){
+    public void stopLiveService(){
         if (conn != null) {
             if (isBinded) {
                 unbindService(conn);
                 isBinded=false;
             }
             stopService(new Intent(this, BITBackgroundCameraService.class));
+            conn = null;
+            mService = null;
+
         }
     }
     /**
@@ -1450,25 +1493,28 @@ public class MainActivity extends BaseActivity {
      * 弹窗提示是否自动上报
      */
     private void showPushLiveDialog() {
-        new BITDialogUtil() {
-            @Override
-            public CharSequence getMessage() {
-                return "是否继续上报?";
-            }
+        if (dialogUtil == null) {
+            dialogUtil = new BITDialogUtil() {
+                @Override
+                public CharSequence getMessage() {
+                    return "是否继续上报?";
+                }
 
-            @Override
-            public Context getContext() {
-                return MainActivity.this;
-            }
+                @Override
+                public Context getContext() {
+                    return MainActivity.this;
+                }
 
-            @Override
-            public void doConfirmThings() {
-                requestStartLive();
-            }
-
-            @Override
-            public void doCancelThings() {
-            }
-        }.showDialog();
+                @Override
+                public void doConfirmThings() {
+                    isAgainToRequestLive = true;
+                    requestStartLive();
+                }
+                @Override
+                public void doCancelThings() {
+                }
+            };
+        }
+        dialogUtil.showDialog();
     }
 }

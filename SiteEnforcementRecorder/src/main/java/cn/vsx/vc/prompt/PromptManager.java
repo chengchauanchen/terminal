@@ -90,7 +90,7 @@ public class PromptManager {
 	private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
 
 		@Override
-		public void handler(int methodResult, String resultDesc) {
+		public void handler(int methodResult, String resultDesc,int groupId) {
 			logger.info("界面声音管理类，开始组呼，提示音播放");
 			if(MyApplication.instance.isPttPress){
 				if(methodResult == BaseCommonCode.SUCCESS_CODE){

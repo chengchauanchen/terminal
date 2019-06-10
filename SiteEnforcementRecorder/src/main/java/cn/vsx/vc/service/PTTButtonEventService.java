@@ -260,7 +260,7 @@ public class PTTButtonEventService extends Service {
    */
   private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
     @Override
-    public void handler(final int methodResult, final String resultDesc) {
+    public void handler(int methodResult, String resultDesc,int groupId) {
       logger.info("主动方请求组呼的消息：" + methodResult + "-------" + resultDesc);
       logger.info("主动方请求组呼的消息：" + MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode());
 

@@ -147,26 +147,27 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
     protected ReceiveExitHandler receiveExitHandler = new ReceiveExitHandler() {
         @Override
-        public void handle(String msg) {
-            ToastUtil.showToast(BaseActivity.this,msg);
-            myHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    MyTerminalFactory.getSDK().exit();//停止服务
-                    PromptManager.getInstance().stop();
-                    for (Activity activity : ActivityCollector.getAllActivity().values()) {
-                        activity.finish();
+        public void handle(String msg,boolean isExit) {
+            if(isExit){
+                ToastUtil.showToast(BaseActivity.this,msg);
+                myHandler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        PromptManager.getInstance().stop();
+                        for (Activity activity : ActivityCollector.getAllActivity().values()) {
+                            activity.finish();
+                        }
+                        TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
+                        TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
+                        MyApplication.instance.isClickVolumeToCall = false;
+                        MyApplication.instance.isPttPress = false;
+                        MyApplication.instance.stopPTTButtonEventService();
+                        //停止上报或者观看的页面
+                        MyTerminalFactory.getSDK().stop();
+                        Process.killProcess(Process.myPid());
                     }
-                    TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
-                    TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
-                    MyApplication.instance.isClickVolumeToCall = false;
-                    MyApplication.instance.isPttPress = false;
-                    MyApplication.instance.stopPTTButtonEventService();
-                    //停止上报或者观看的页面
-                    MyTerminalFactory.getSDK().stop();
-                    Process.killProcess(Process.myPid());
-                }
-            },2000);
+                },2000);
+            }
         }
     };
 
@@ -684,6 +685,24 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     }
 
     /**
+     * 手动设置
+     */
+    public void setManualNFCBean(){
+        NFCBean bean = new NFCBean("a71f2f3dd59910301791826f435fc6b8",900078,"20190306T00602672");
+        logger.debug("onReadResult---bean:"+bean);
+        //保存账号解绑时间信息
+        TerminalFactory.getSDK().putParam(Params.NFC_BEAN_TIME, System.currentTimeMillis());
+        //开启解绑倒计时
+        MyApplication.instance.startAccountValidClock();
+        //保存NFC信息
+        DataUtil.saveNFCBean(bean);
+        //清空自动上报标记
+        updateNormalPushingState(false);
+        //跳转
+        goJump();
+    }
+
+    /**
      * 临时组解散的通知
      */
     private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = (isAdd, isLocked, isScan, isSwitch, tempGroupNo, tempGroupName, tempGroupType) -> {
@@ -720,8 +739,11 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             //停止业务
             loginOut();
             myHandler.postDelayed(() -> {
+                MainActivity activity = (MainActivity) BaseActivity.this;
+                activity.stopPushAndPreview();
+                activity.stopLiveService();
                 startActivity(new Intent(BaseActivity.this,RegistNFCActivity.class));
-                BaseActivity.this.finish();
+                activity.finish();
             },500);
         }
     }
@@ -732,7 +754,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     private void loginOut(){
         //停止一切业务
         TerminalFactory.getSDK().notifyReceiveHandler(ReceiverStopAllBusniessHandler.class,false);
-        MyTerminalFactory.getSDK().exit();//停止服务
         PromptManager.getInstance().stop();
         TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
         TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);

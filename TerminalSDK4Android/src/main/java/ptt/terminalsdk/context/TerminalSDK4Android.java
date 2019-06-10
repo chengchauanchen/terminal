@@ -1139,11 +1139,11 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 	}
 
-	private UVCCameraService.MyBinder uvcBinder;
+//	private UVCCameraService.MyBinder uvcBinder;
 	private ServiceConnection cameraconn = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			uvcBinder = (UVCCameraService.MyBinder) service;
+//			uvcBinder = (UVCCameraService.MyBinder) service;
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
@@ -1151,4 +1151,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			isBindedUVCCameraService = false;
 		}
 	};
+
+	public boolean isStart(){
+		return started;
+	}
 }

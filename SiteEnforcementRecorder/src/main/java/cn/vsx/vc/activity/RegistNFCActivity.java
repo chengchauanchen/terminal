@@ -16,6 +16,9 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+
+import com.blankj.utilcode.util.ToastUtils;
 
 import org.apache.log4j.Logger;
 
@@ -25,12 +28,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import butterknife.Bind;
+import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.manager.auth.AuthModel;
+import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
+import cn.vsx.hamster.terminalsdk.manager.auth.LoginModel;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRegistCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
@@ -59,6 +63,9 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
 
     @Bind(R.id.regist)
     RelativeLayout ll_regist;
+    @Bind(R.id.tx_state)
+    TextView tx_state;
+
 
     private AlertDialog netWorkDialog;
     private int reAuthCount;
@@ -78,21 +85,21 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
 
 /**============================================================================handler=================================================================================**/
 
-    /**
-     * 网络连接状态
-     */
-    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> RegistNFCActivity.this.runOnUiThread(() -> {
-        if (!MyTerminalFactory.getSDK().getParam(Params.IS_FORBID, false)) {
-            if (!connected) {
-//                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "网络异常");
-            } else {
-                ToastUtil.closeToast();
-                if (TextUtils.isEmpty(MyTerminalFactory.getSDK().getParam(Params.REGIST_URL, ""))) {
-                    againReAuth();
-                }
-            }
-        }
-    });
+//    /**
+//     * 网络连接状态
+//     */
+//    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> RegistNFCActivity.this.runOnUiThread(() -> {
+//        if (!MyTerminalFactory.getSDK().getParam(Params.IS_FORBID, false)) {
+//            if (!connected) {
+////                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "网络异常");
+//            } else {
+//                ToastUtil.closeToast();
+//                if (TextUtils.isEmpty(MyTerminalFactory.getSDK().getParam(Params.REGIST_URL, ""))) {
+//                    againReAuth();
+//                }
+//            }
+//        }
+//    });
 
     private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = new ReceiveSendUuidResponseHandler() {
         @Override
@@ -100,23 +107,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
             logger.info("receiveSendUuidResponseHandler------resultCode：" + resultCode + "；   resultDesc：" + resultDesc + "；   isRegisted：" + isRegisted);
             myHandler.post(() -> {
                     if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                        if (isRegisted) {//卸载后重装，应该显示注册过了,直接去登录
-                            ll_regist.setVisibility(View.GONE);
-                            changeProgressMsg("正在登入...");
-//                            if(MyTerminalFactory.getSDK().isServerConnected()){
-//                                login();
-//                            }
-                        } else {//没注册
-                            MyTerminalFactory.getSDK().putParam(Params.MESSAGE_VERSION, 0l);
-                            if (availableIPlist.size() < 1) {
-                                //重新探测
-                                againReAuth();
-                                changeProgressMsg("正在找服务器");
-                            } else {
-                                ll_regist.setVisibility(View.VISIBLE);
-                                hideProgressDialog();
-                            }
-                        }
+                        changeProgressMsg("正在连接服务器");
                     } else if (resultCode == TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()) {
                         AlertDialog alerDialog = new AlertDialog.Builder(RegistNFCActivity.this)
                                 .setTitle("提示")
@@ -136,29 +127,53 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
                                 .setPositiveButton("确定", (dialogInterface, i) -> finish())
                                 .create();
                         alerDialog.show();
-                    }else if(resultCode == TerminalErrorCode.REGISTER_UNKNOWN_ERROR.getErrorCode()){
-                        //发生异常的时候重试几次，因为网络原因经常导致一个io异常
-                        sendUuid(null, null);
+                    } else if (resultCode == TerminalErrorCode.TERMINAL_TYPE_ERROR.getErrorCode()) {
+                        AlertDialog alerDialog = new AlertDialog.Builder(RegistNFCActivity.this)
+                                .setTitle("提示")
+                                .setMessage(resultCode + ":认证失败,类型不匹配")
+                                .setPositiveButton("确定", (dialogInterface, i) -> finish())
+                                .create();
+                        alerDialog.show();
+                    }else if(resultCode == TerminalErrorCode.TERMINAL_REPEAT.getErrorCode()){
+                        AlertDialog alerDialog = new AlertDialog.Builder(RegistNFCActivity.this)
+                                .setTitle("提示")
+                                .setMessage(resultCode + ":登录失败,找到多个重复用户")
+                                .setPositiveButton("确定", (dialogInterface, i) -> finish())
+                                .create();
+                        alerDialog.show();
+                    } else if(resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()){
+                            if(reAuthCount < 3){
+                                reAuthCount++;
+                                //发生异常的时候重试几次，因为网络原因经常导致一个io异常
+                                TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(),TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
+                            }else{
+                                changeProgressMsg("认证失败");
+                                myHandler.postDelayed(() -> exit(), 3000);
+                            }
+                    }else if(resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()){
+                        changeProgressMsg("认证失败");
+                        myHandler.postDelayed(()->{
+                            ll_regist.setVisibility(View.VISIBLE);
+                            hideProgressDialog();
+                        },2000);
                     } else {
-                        if (isRegisted) {
-                            sendUuid(null, null);
-                        } else {//第一次登录
-                            if (availableIPlist.size() < 1) {
-                                logger.info("第一次登陆App,开始探测ip列表");
-                                //重新探测
-                                againReAuth();
-                                changeProgressMsg("正在找服务器");
-                            } else {
+                        //没有注册服务地址，去探测地址
+                        if(availableIPlist.isEmpty()){
+                            TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
+                        }
+                        if(!isRegisted){
+                            ToastUtils.showShort("请注册账号");
+                            ll_regist.setVisibility(View.VISIBLE);
+                            hideProgressDialog();
+                        }else{
+                            changeProgressMsg(resultDesc);
+                            myHandler.postDelayed(()->{
                                 ll_regist.setVisibility(View.VISIBLE);
                                 hideProgressDialog();
-                            }
+                            },2000);
                         }
                     }
-                //版本的文字提示：内网、西城、东城
-                logger.info("地点是：" + TerminalFactory.getSDK().getParam(Params.PLACE));
-//                    tvVersionPrompt.setText(TerminalFactory.getSDK().getParam(Params.PLACE, "zectec") + " " + DataUtil.getVersion(RegistActivity.this));
             });
-
         }
     };
 
@@ -196,8 +211,14 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         logger.info("RegistActivity---收到登录的消息---resultCode:" + resultCode + "     resultDesc:" + resultDesc);
         myHandler.post(() -> {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                updateData();
-            } else {
+                changeProgressMsg("正在更新数据");
+            } else if(resultCode == Params.JOININ_WARNING_GROUP_ERROR_CODE) {
+                changeProgressMsg(resultDesc);
+                myHandler.postDelayed(() -> {
+                    hideProgressDialog();
+                    ll_regist.setVisibility(View.VISIBLE);
+                }, 2000);
+            }else{
                 changeProgressMsg(resultDesc);
                 myHandler.postDelayed(() -> {
                     hideProgressDialog();
@@ -237,12 +258,17 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         }
         //拿到可用IP列表，遍历取第一个
         if (availableIP != null && availableIP.size() > 0) {
-            AuthModel authModel = null;
-            for (Map.Entry<String, AuthModel> entry : availableIP.entrySet()) {
+            LoginModel authModel = null;
+            for (Map.Entry<String, LoginModel> entry : availableIP.entrySet()) {
                 authModel = entry.getValue();
             }
             if (authModel != null) {
-                MyTerminalFactory.getSDK().getAuthManagerTwo().reAuth(false, authModel.getIp(), authModel.getPort());
+                int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(authModel.getIp(),authModel.getPort());
+                if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                    changeProgressMsg("正在认证...");
+                }else {
+                    //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                }
             }
         } else {
             ToastUtil.showToast(RegistNFCActivity.this, "服务器地址不可用");
@@ -286,6 +312,13 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         }
 //        ll_regist.setVisibility(View.GONE);
         judgePermission();
+        tx_state.setVisibility(View.VISIBLE);
+        tx_state.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myHandler.postDelayed(() -> setManualNFCBean(),1000);
+            }
+        });
     }
 
     private void initDialog() {
@@ -336,7 +369,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
     public void judgePermission() {
         if (CheckMyPermission.selfPermissionGranted(this, permission.WRITE_EXTERNAL_STORAGE)) {//SD卡读写权限
             if (CheckMyPermission.selfPermissionGranted(this, permission.READ_PHONE_STATE)) {//手机权限，获取uuid
-                MyApplication.instance.getSpecificSDK().configLogger();
+                SpecificSDK.getInstance().configLogger();
                 checkIfAuthorize();
             } else {
                 CheckMyPermission.permissionPrompt(this, permission.READ_PHONE_STATE);
@@ -395,13 +428,50 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
     private void start() {
         //发送认证消息，uuid到注册服务器，判断是注册还是登录
         if(DataUtil.getNFCBean() != null){
-        TerminalFactory.getSDK().getThreadPool().execute(() -> {
-            MyTerminalFactory.getSDK().start();
-            PromptManager.getInstance().start();
-        });
-            changeProgressMsg("正在获取信息");
+//        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+//            MyTerminalFactory.getSDK().start();
+//            PromptManager.getInstance().start();
+//        });
+//            changeProgressMsg("正在获取信息");
+//            ll_regist.setVisibility(View.GONE);
+//            sendUuid(null, null);
+            if(!MyTerminalFactory.getSDK().isStart()){
+                TerminalFactory.getSDK().start();
+                PromptManager.getInstance().start();
+            }
             ll_regist.setVisibility(View.GONE);
-            sendUuid(null, null);
+            PromptManager.getInstance().start();
+            //进入注册界面了，先判断有没有认证地址
+            String authUrl = TerminalFactory.getSDK().getParam(Params.IDENTITY_URL, "");
+            if(TextUtils.isEmpty(authUrl)){
+                //平台包或者没获取到类型，直接用AuthManager中的地址,
+                String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
+                if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType) || TextUtils.isEmpty(apkType)){
+                    String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
+                    if(defaultAddress.length>=2){
+                        int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0],defaultAddress[1]);
+                        if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                            changeProgressMsg("正在认证...");
+                        }else {
+                            //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                        }
+                    }else {
+                        //没有注册服务地址，去探测地址
+                        TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
+                    }
+                }else {
+                    //没有注册服务地址，去探测地址
+                    TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
+                }
+            }else {
+                //有注册服务地址，去认证
+                int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP,""),TerminalFactory.getSDK().getParam(Params.REGIST_PORT,""));
+                if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                    changeProgressMsg("正在认证...");
+                }else {
+                    //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                }
+            }
         }
     }
 
@@ -411,7 +481,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRegistCompleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReturnAvailableIPHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiverStartAuthHandler);
     }
@@ -435,7 +505,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRegistCompleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReturnAvailableIPHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiverStartAuthHandler);
         myHandler.removeCallbacksAndMessages(null);
@@ -467,43 +537,43 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
 //        }, 500);
 //    }
 
-    private void updateData() {
-        changeProgressMsg("正在更新数据...");
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                MyTerminalFactory.getSDK().getConfigManager().updateAll();
-            }
-        }, 500);
-    }
+//    private void updateData() {
+//        changeProgressMsg("正在更新数据...");
+//        timer.schedule(new TimerTask() {
+//            @Override
+//            public void run() {
+//                MyTerminalFactory.getSDK().getConfigManager().updateAll();
+//            }
+//        }, 500);
+//    }
 
-    private void login() {
-        changeProgressMsg("正在登入...");
-        TerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getAuthManagerTwo().login());
-    }
+//    private void login() {
+//        changeProgressMsg("正在登入...");
+//        TerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getAuthManagerTwo().login());
+//    }
 
-    private void sendUuid(final String ip, final String port) {
-        reAuthCount++;
-        if (reAuthCount > 3) {
-            changeProgressMsg("登录失败，请检查网络是否连接");
-            myHandler.postDelayed(() -> {
-                hideProgressDialog();
-                exit();
-            }, 500);
-        } else {
-            changeProgressMsg("正在尝试第" + reAuthCount + "次连接");
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    MyTerminalFactory.getSDK().getAuthManagerTwo().reAuth(false, ip, port);
-                }
-            }, 500);
-        }
-    }
+//    private void sendUuid(final String ip, final String port) {
+//        reAuthCount++;
+//        if (reAuthCount > 3) {
+//            changeProgressMsg("登录失败，请检查网络是否连接");
+//            myHandler.postDelayed(() -> {
+//                hideProgressDialog();
+//                exit();
+//            }, 500);
+//        } else {
+//            changeProgressMsg("正在尝试第" + reAuthCount + "次连接");
+//            timer.schedule(new TimerTask() {
+//                @Override
+//                public void run() {
+//                    MyTerminalFactory.getSDK().getAuthManagerTwo().reAuth(false, ip, port);
+//                }
+//            }, 500);
+//        }
+//    }
 
-    private void againReAuth() {
-        MyTerminalFactory.getSDK().getAuthManagerTwo().reAuthOne();
-    }
+//    private void againReAuth() {
+//        MyTerminalFactory.getSDK().getAuthManagerTwo().reAuthOne();
+//    }
 
     private void goOn() {
         changeProgressMsg("启动成功...");
@@ -551,7 +621,6 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         stoppedCallIntent.putExtra("stoppedResult", "0");
         SendRecvHelper.send(getApplicationContext(), stoppedCallIntent);
 
-        MyTerminalFactory.getSDK().exit();//停止服务
         PromptManager.getInstance().stop();
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
