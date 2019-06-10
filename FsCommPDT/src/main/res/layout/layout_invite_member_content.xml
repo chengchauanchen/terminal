@@ -89,12 +89,7 @@
         android:layout_height="@dimen/dp_half_one"
         android:background="@color/diver_bg" />
 
-    <include layout="@layout/layout_search" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_half_one"
-        android:background="@color/diver_bg" />
+    <include layout="@layout/group_adapter_parent_layout" />
 
     <FrameLayout
         android:id="@+id/contacts_viewPager"

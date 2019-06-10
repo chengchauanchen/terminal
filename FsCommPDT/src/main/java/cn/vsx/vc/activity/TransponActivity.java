@@ -4,6 +4,7 @@ import android.content.Intent;
 
 import java.util.ArrayList;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.fragment.SearchFragment;
@@ -13,10 +14,9 @@ import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.TransponSelectedBean;
 import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSelectedFragmentHandler;
+import cn.vsx.vc.receiveHandle.ReceiveTransponBackPressedHandler;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
-
-import static cn.vsx.vc.utils.Constants.TRANSPON_SELECTED_BEAN;
 
 public class TransponActivity extends BaseActivity implements TransponNewFragment.BackListener {
 
@@ -77,7 +77,11 @@ public class TransponActivity extends BaseActivity implements TransponNewFragmen
     @Override
     public void onBackPressed(){
         // TODO: 2019/4/19 返回键和搜索界面返回的处理
-        super.onBackPressed();
+        if(transponNewFragment.isVisible()){
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveTransponBackPressedHandler.class,TransponActivity.this);
+        }else{
+            super.onBackPressed();
+        }
     }
 
     @Override

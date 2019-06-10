@@ -61,11 +61,13 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdateGroupHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.adapter.GroupCatalogAdapter;
 import cn.vsx.vc.adapter.MemberListAdapter;
 import cn.vsx.vc.adapter.SearchAdapter;
 import cn.vsx.vc.adapter.SelectAdapter;
 import cn.vsx.vc.adapter.SelectedListAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.InviteMemberLiverMember;
@@ -159,7 +161,14 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private List<ContactItemBean> mThreeDatas = new ArrayList<>();
     private List<ContactItemBean> mFourDatas = new ArrayList<>();
 
-    private LinearLayout layout_search;
+    private RecyclerView mRlSearch;
+    private ImageView mIvSearch;
+    private GroupCatalogAdapter mCatalogAdapter;
+    private List<List<CatalogBean>> mAllCatalogNames = new ArrayList<>();
+    private List<CatalogBean> mOneCatalogDatas = new ArrayList<>();
+    private List<CatalogBean> mTwoCatalogDatas = new ArrayList<>();
+    private List<CatalogBean> mThreeCatalogDatas = new ArrayList<>();
+    private List<CatalogBean> mFourCatalogDatas = new ArrayList<>();
 
     private List<ContactItemBean> searchList = new ArrayList<>();
     private SearchAdapter searchAdapter;
@@ -217,7 +226,9 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         mRvSelected = rootView.findViewById(R.id.rv_selected);
 
         //搜索布局
-        layout_search = rootView.findViewById(R.id.ll_layout_search);
+        mRlSearch = rootView.findViewById(R.id.parent_recyclerview);
+        mIvSearch = rootView.findViewById(R.id.iv_search);
+
     }
 
     @Override
@@ -236,7 +247,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupSelectedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiverEntityKeyEventInServiceHandler);
 
-        layout_search.setOnClickListener(searchOnClickListener);
+        mIvSearch.setOnClickListener(searchOnClickListener);
 
         mIvBack.setOnClickListener(searchBackOnClickListener);
         mIvDeleteEdittext.setOnClickListener(deleteEditTextOnClickListener);
@@ -289,8 +300,10 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         }
         //根据类型和状态显示不同的布局
         setTabTextView();
+        //设置搜索布局
+        setSearchView();
         //获取选择列表
-        loadData(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0),true);
+        loadData(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0),false);
     }
 
     /**
@@ -379,6 +392,32 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             rls.get(i).setAdapter(adapter);
             contactAdapter.add(adapter);
         }
+    }
+
+    /**
+     * 设置搜索布局
+     */
+    private void setSearchView() {
+        CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+        mRlSearch.setLayoutManager(new LinearLayoutManager(this, OrientationHelper.HORIZONTAL,false));
+        mAllCatalogNames.clear();
+        mOneCatalogDatas.clear();
+        mOneCatalogDatas.add(memberCatalogBean);
+        mTwoCatalogDatas.clear();
+        mTwoCatalogDatas.add(memberCatalogBean);
+        mThreeCatalogDatas.clear();
+        mThreeCatalogDatas.add(memberCatalogBean);
+        mFourCatalogDatas.clear();
+        mFourCatalogDatas.add(memberCatalogBean);
+
+        mAllCatalogNames.add(mOneCatalogDatas);
+        mAllCatalogNames.add(mTwoCatalogDatas);
+        mAllCatalogNames.add(mThreeCatalogDatas);
+        mAllCatalogNames.add(mFourCatalogDatas);
+
+        mCatalogAdapter=new GroupCatalogAdapter(this,mAllCatalogNames.get(currentIndex));
+        mCatalogAdapter.setOnItemClick(searchItemClickListener);
+        mRlSearch.setAdapter(mCatalogAdapter);
     }
 
     @Override
@@ -485,7 +524,13 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             mLlAllSelected.setVisibility(View.GONE);
             mBtnLiveSelectmemberStart.setVisibility(View.VISIBLE);
         }else{
-            removeView();
+            if(mAllCatalogNames.get(currentIndex).size()>1){
+                //返回上一级
+                backDept();
+            }else{
+                //关闭页面
+                removeView();
+            }
         }
     };
     /**
@@ -564,6 +609,10 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         public void onClick(View v) {
             currentIndex = index;
             setTabView(index);
+            if(mCatalogAdapter!=null){
+                mCatalogAdapter.setData(mAllCatalogNames.get(currentIndex));
+                mCatalogAdapter.notifyDataSetChanged();
+            }
             loadData(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0),true);
         }
     }
@@ -586,6 +635,9 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
                 checkSelectSingleOrMultiple(index,position);
             }else if(adapterType == Constants.TYPE_FOLDER){
                 Department department = (Department) mAllDatas.get(index).get(position).getBean();
+                //改变搜素布局中部门导航的显示
+                updateSearchCatalogView(department.getId(),department.getName(),false);
+                //获取对应部门下的数据
                 loadData(department.getId(),false);
             }
         }
@@ -653,6 +705,20 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     };
 
     /**
+     * 点击搜索布局中的部门item
+     */
+    private  GroupCatalogAdapter.ItemClickListener searchItemClickListener = (view, position) -> {
+        List<CatalogBean> catalogBeans = new ArrayList<>(mAllCatalogNames.get(currentIndex).subList(0, position + 1));
+        mAllCatalogNames.get(currentIndex).clear();
+        mAllCatalogNames.get(currentIndex).addAll(catalogBeans);
+        if(mCatalogAdapter!=null){
+            mCatalogAdapter.setData(mAllCatalogNames.get(currentIndex));
+            mCatalogAdapter.notifyDataSetChanged();
+        }
+        loadData(mAllCatalogNames.get(currentIndex).get(position).getId(),false);
+    };
+
+    /**
      * 点击搜索布局，显示搜索页面开始搜索
      */
     private View.OnClickListener searchOnClickListener = v -> {
@@ -710,6 +776,9 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
 
         @Override
         public void onRefresh() {
+            //更新搜索布局中部门的显示
+            updateSearchCatalogView(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0),TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),true);
+            //获取数据
             loadData(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0),false);
             mHandler.postDelayed(()-> srl.setRefreshing(false),1200);
         }
@@ -1112,7 +1181,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      * @return
      */
     private boolean checkDataIsNeedRequest(boolean isNeedCheck) {
-       return (!isNeedCheck) || mAllDatas.get(currentIndex).isEmpty();
+       return (!isNeedCheck) || (mAllDatas.get(currentIndex).isEmpty()&&mAllCatalogNames.get(currentIndex).size()<=1);
     }
 
     /**
@@ -1456,6 +1525,23 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     }
 
     /**
+     * 改变搜素布局中部门导航的显示
+     * @param deptId
+     * @param deptName
+     */
+    private void updateSearchCatalogView(int deptId,String deptName,boolean isClear){
+        if(isClear){
+            mAllCatalogNames.get(currentIndex).clear();
+        }
+        CatalogBean catalogBean = new CatalogBean(deptName,deptId);
+        mAllCatalogNames.get(currentIndex).add(catalogBean);
+        if(mCatalogAdapter!=null){
+            mCatalogAdapter.setData(mAllCatalogNames.get(currentIndex));
+            mCatalogAdapter.notifyDataSetChanged();
+        }
+    }
+
+    /**
      * 监听返回按键
      */
     private void entityBackKeyEvent() {
@@ -1474,9 +1560,28 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
                 mLlAllSelected.setVisibility(View.GONE);
                 mBtnLiveSelectmemberStart.setVisibility(View.VISIBLE);
             }else{
-                //正在选择的页面
-                removeView();
+                if(mAllCatalogNames.get(currentIndex).size()>1){
+                    //返回上一级
+                    backDept();
+                }else{
+                    //关闭页面
+                    removeView();
+                }
             }
         }
+    }
+
+    /**
+     * 返回上级部门
+     */
+    private void backDept(){
+        mAllCatalogNames.get(currentIndex).remove(mAllCatalogNames.get(currentIndex).size()-1);
+        if(mCatalogAdapter !=null){
+            mCatalogAdapter.setData(mAllCatalogNames.get(currentIndex));
+            mCatalogAdapter.notifyDataSetChanged();
+        }
+        int position = mAllCatalogNames.get(currentIndex).size()-1;
+        loadData(mAllCatalogNames.get(currentIndex).get(position).getId(),false);
+        rls.get(currentIndex).scrollToPosition(0);
     }
 }

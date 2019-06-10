@@ -74,4 +74,8 @@ public class GroupCatalogAdapter extends RecyclerView.Adapter<GroupCatalogAdapte
             tvCatalog=  itemView.findViewById(R.id.tv_catalog);
         }
     }
+
+    public void setData(List<CatalogBean> mCatalogs){
+        this.mCatalogs = mCatalogs;
+    }
 }

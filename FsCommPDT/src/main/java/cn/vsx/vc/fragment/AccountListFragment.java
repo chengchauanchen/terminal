@@ -1,10 +1,13 @@
 package cn.vsx.vc.fragment;
 
+import android.app.Activity;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,10 +19,15 @@ import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.NewMemberResponse;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAccountSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdatePoliceMemberHandler;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.AccountListAdapter;
+import cn.vsx.vc.adapter.GroupCatalogAdapter;
+import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.receiveHandle.OnSearchListener;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSelectedMemberHandler;
+import cn.vsx.vc.receiveHandle.ReceiveTransponBackPressedHandler;
 import cn.vsx.vc.utils.Constants;
 
 /**
@@ -30,15 +38,22 @@ public class AccountListFragment extends BaseFragment{
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerview;
 
+    private RecyclerView mRlSearch;
+    private ImageView mIvSearch;
+    private GroupCatalogAdapter mCatalogAdapter;
+    private List<CatalogBean> mCatalogDatas = new ArrayList<>();
+
     private List<ContactItemBean> mData = new ArrayList<>();
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private AccountListAdapter accountListAdapter;
     private List<Integer> selectedMemberNos = new ArrayList<>();
 
+    private OnSearchListener onSearchListener;
+
     @Override
     public int getContentViewId(){
-        return R.layout.member_list_layout;
+        return R.layout.layout_member_list;
     }
 
     @Override
@@ -48,6 +63,17 @@ public class AccountListFragment extends BaseFragment{
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
         accountListAdapter = new AccountListAdapter(getContext(), mData);
         mRecyclerview.setAdapter(accountListAdapter);
+
+        //搜索布局
+        mRlSearch = mRootView.findViewById(R.id.parent_recyclerview);
+        mIvSearch = mRootView.findViewById(R.id.iv_search);
+        CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+        mRlSearch.setLayoutManager(new LinearLayoutManager(getActivity(), OrientationHelper.HORIZONTAL,false));
+        mCatalogDatas.clear();
+        mCatalogDatas.add(memberCatalogBean);
+        mCatalogAdapter=new GroupCatalogAdapter(getActivity(),mCatalogDatas);
+        mCatalogAdapter.setOnItemClick(searchItemClickListener);
+        mRlSearch.setAdapter(mCatalogAdapter);
     }
 
     @Override
@@ -55,7 +81,11 @@ public class AccountListFragment extends BaseFragment{
         TerminalFactory.getSDK().registReceiveHandler(receiveAccountSelectedHandler);
         TerminalFactory.getSDK().registReceiveHandler(receivegUpdatePoliceMemberHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveRemoveSelectedMemberHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiveTransponBackPressedHandler);
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
+            int deptId = TerminalFactory.getSDK().getParam(Params.DEP_ID,0);
+            String deptName = TerminalFactory.getSDK().getParam(Params.DEP_NAME,"");
+            updateSearchCatalogView(deptId,deptName,true);
             TerminalFactory.getSDK().getConfigManager().updataPhoneMemberInfo();
             mHandler.postDelayed(()-> mSwipeRefreshLayout.setRefreshing(false),1200);
         });
@@ -67,9 +97,16 @@ public class AccountListFragment extends BaseFragment{
 
             }else if(type == Constants.TYPE_DEPARTMENT){
                 Department department = (Department) mData.get(position).getBean();
+                updateSearchCatalogView(department.getId(), department.getName(),false);
                 TerminalFactory.getSDK().getConfigManager().updatePoliceMember(department.getId(),department.getName());
             }
-            accountListAdapter.notifyDataSetChanged();
+//            accountListAdapter.notifyDataSetChanged();
+        });
+
+        mIvSearch.setOnClickListener(v -> {
+            if(onSearchListener!=null){
+                onSearchListener.onSearch();
+            }
         });
     }
 
@@ -187,11 +224,75 @@ public class AccountListFragment extends BaseFragment{
         }
     }
 
+    /**
+     * 点击搜索布局中的部门item
+     */
+    private  GroupCatalogAdapter.ItemClickListener searchItemClickListener = (view, position) -> {
+        List<CatalogBean> catalogBeans = new ArrayList<>(mCatalogDatas.subList(0, position + 1));
+        mCatalogDatas.clear();
+        mCatalogDatas.addAll(catalogBeans);
+        if(mCatalogAdapter!=null){
+            mCatalogAdapter.setData(mCatalogDatas);
+            mCatalogAdapter.notifyDataSetChanged();
+        }
+        TerminalFactory.getSDK().getConfigManager().updatePoliceMember(mCatalogDatas.get(position).getId(),mCatalogDatas.get(position).getName());
+    };
+    /**
+     * 返回按键-返回上一级部门
+     */
+    private ReceiveTransponBackPressedHandler receiveTransponBackPressedHandler = new ReceiveTransponBackPressedHandler(){
+        @Override
+        public void handler(Activity activity){
+            mHandler.post(() -> {
+                if(isVisible()){
+                    if(mCatalogDatas.size() > 1){
+                        //返回到上一级
+                        mCatalogDatas.remove(mCatalogDatas.size()-1);
+                        if(mCatalogAdapter !=null){
+                            mCatalogAdapter.notifyDataSetChanged();
+                        }
+                        int position = mCatalogDatas.size()-1;
+                        TerminalFactory.getSDK().getConfigManager().updatePoliceMember(mCatalogDatas.get(position).getId(),mCatalogDatas.get(position).getName());
+                        mRecyclerview.scrollToPosition(0);
+
+                    }else{
+                        if(activity!=null){
+                            activity.finish();
+                        }
+                    }
+                }
+            });
+        }
+    };
+
+    /**
+     * 改变搜素布局中部门导航的显示
+     * @param deptId
+     * @param deptName
+     */
+    private void updateSearchCatalogView(int deptId,String deptName,boolean isClear){
+        if(isClear){
+            mCatalogDatas.clear();
+        }
+        CatalogBean catalogBean = new CatalogBean(deptName,deptId);
+        mCatalogDatas.add(catalogBean);
+        if(mCatalogAdapter!=null){
+            mCatalogAdapter.setData(mCatalogDatas);
+            mCatalogAdapter.notifyDataSetChanged();
+        }
+    }
+
+    public void setOnSearchListener(OnSearchListener onSearchListener){
+        this.onSearchListener = onSearchListener;
+
+    }
+
     @Override
     public void onDestroyView(){
         super.onDestroyView();
         TerminalFactory.getSDK().unregistReceiveHandler(receiveRemoveSelectedMemberHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receivegUpdatePoliceMemberHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveAccountSelectedHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveTransponBackPressedHandler);
     }
 }

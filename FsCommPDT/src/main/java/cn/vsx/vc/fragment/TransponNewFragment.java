@@ -25,6 +25,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupSelectedHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.SelectAdapter;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.receiveHandle.OnSearchListener;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSelectedMemberHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSelectedFragmentHandler;
@@ -47,8 +48,6 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
 
     private TabView mTabGroup;
     private TabView mTabPolice;
-
-    private LinearLayout mLl_search;
 
     private GroupListFragment groupFragment;
     private AccountListFragment accountListFragment;
@@ -78,6 +77,7 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
 
     private void initFragment(){
         groupFragment = new GroupListFragment();
+        groupFragment.setOnSearchListener(mOnSearchListener);
         FragmentTransaction fragmentTransaction = getChildFragmentManager().beginTransaction();
         fragmentTransaction.add(R.id.contacts_viewPager, groupFragment).show(groupFragment).commit();
         currentFragment = groupFragment;
@@ -102,7 +102,6 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
         mTabGroup = view.findViewById(R.id.tab_group);
         mTabPolice = view.findViewById(R.id.tab_police);
 
-        mLl_search = view.findViewById(R.id.ll_search);
     }
 
 
@@ -119,7 +118,6 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
         mTabPolice.setOnClickListener(this);
 
         mIvSelect.setOnClickListener(this);
-        mLl_search.setOnClickListener(this);
         TerminalFactory.getSDK().registReceiveHandler(receiveAccountSelectedHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveGroupSelectedHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveRemoveSelectedMemberHandler);
@@ -156,6 +154,7 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
                 mTabPolice.setChecked(false);
                 if(groupFragment == null){
                     groupFragment = new GroupListFragment();
+                    groupFragment.setOnSearchListener(mOnSearchListener);
                 }
                 switchFragment(groupFragment);
                 currentFragment = groupFragment;
@@ -166,13 +165,11 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
                 mTabPolice.setChecked(true);
                 if(accountListFragment == null){
                     accountListFragment = new AccountListFragment();
+                    accountListFragment.setOnSearchListener(mOnSearchListener);
                 }
                 switchFragment(accountListFragment);
                 currentFragment = accountListFragment;
                 currentIndex = 1;
-                break;
-            case R.id.ll_search:
-                showSearchFragment();
                 break;
             case R.id.iv_select:
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSelectedFragmentHandler.class,selectedMembers);
@@ -192,7 +189,7 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
         }
     }
 
-    private void showSearchFragment(){
+    public void showSearchFragment(){
         switch(currentIndex){
             case 0:
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_GROUP,selectedMemberNos);
@@ -323,12 +320,25 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
             mLlSelected.setVisibility(View.VISIBLE);
         }
     }
+    /**
+     * 搜索点击事件
+     */
+    private OnSearchListener mOnSearchListener = new OnSearchListener(){
+        @Override
+        public void onSearch(){
+            showSearchFragment();
+        }
+    };
 
     public void setBacklistener(BackListener backListener){
         this.backListener = backListener;
     }
+
+
+
     public interface BackListener{
         void onBack();
         void onResult(ArrayList<ContactItemBean> list);
     }
+
 }
