@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.log4j.Level;
@@ -74,10 +75,14 @@ public class MessageService extends Service {
         try {
             if(uuid.length != 0 && accessServerIp.length() != 0 && accessServerPort != 0){
                 logger.info("accessServerIpTemp = "+accessServerIpTemp+"  accessServerPortTemp = "+accessServerPortTemp);
-                if (!accessServerIp.equals(accessServerIpTemp) || accessServerPort != accessServerPortTemp){
-                    myUDPClient.stop();
-                    accessServerIpTemp = accessServerIp;
-                    accessServerPortTemp = accessServerPort;
+                if(!TextUtils.isEmpty(accessServerIpTemp) && accessServerPortTemp !=0){
+                    logger.info("UDPClient已经启动过了");
+                    if (!accessServerIp.equals(accessServerIpTemp) || accessServerPort != accessServerPortTemp){
+                        logger.info("接入服务ip或端口变了");
+                        myUDPClient.stop();
+                        accessServerIpTemp = accessServerIp;
+                        accessServerPortTemp = accessServerPort;
+                    }
                 }
 
                 myUDPClient.setUuid(uuid);

@@ -28,6 +28,7 @@ import java.util.Map;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
+import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -130,6 +131,13 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
             try {
                 String inputString = phone.getText().toString().trim();
                 if(TextUtils.isEmpty(inputString) || inputString.length()>8){
+                    return;
+                }
+                //五位数代表手台，直接播，信令会处理逻辑
+                if(inputString.length() == 5){
+                    int callId = Integer.parseInt(inputString);
+                    Member member = new Member(callId,inputString,callId);
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
                     return;
                 }
                 if(inputString.length() == 6){
