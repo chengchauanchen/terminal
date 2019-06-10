@@ -1818,9 +1818,16 @@ public abstract class ChatBaseActivity extends BaseActivity{
      */
     private void getHistoryMessageRecord(int messageCount) {
         long messageId = tempGetMessage != null ? tempGetMessage.messageId : 0l;
-        long groupUniqueNo = isGroup ? uniqueNo : 0l;
         long messageVersion = tempGetMessage != null ? tempGetMessage.messageVersion : 0l;
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+            long groupUniqueNo = 0L;
+            if(isGroup){
+                if(uniqueNo !=0L){
+                    groupUniqueNo = uniqueNo;
+                }else {
+                    groupUniqueNo = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupUniqueNo(userId);
+                }
+            }
             MyTerminalFactory.getSDK().getTerminalMessageManager().getHistoryMessageRecord(isGroup, userId, messageId, groupUniqueNo, messageVersion, messageCount);
         });
     }
