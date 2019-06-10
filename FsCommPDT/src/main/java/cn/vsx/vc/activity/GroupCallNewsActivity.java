@@ -169,6 +169,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     public static boolean isForeground = false;
     private IGotaKeyMonitor keyMointor;
     private IGotaKeyHandler gotaKeyHandler;
+    private boolean sendMessage;
 
     public static void startCurrentActivity(Context context, int userId, String userName, int speakingId, String speakingName) {
         Intent intent = new Intent(context, GroupCallNewsActivity.class);
@@ -321,7 +322,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         setIvMonitorDrawable();
         funcation.setFunction(true, userId);
         //能否发消息
-        boolean sendMessage = getIntent().getBooleanExtra("sendMessage", true);
+        sendMessage = getIntent().getBooleanExtra("sendMessage", true);
         if(!sendMessage){
             funcation.setCannotSendMessage();
             iv_monitor.setVisibility(View.GONE);
@@ -1051,7 +1052,11 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                     return;
                 }
                 if (DataUtil.isExistGroup(userId)) {
-                    newsBarGroupName.setText(userName + "(" + memberList.size() + ")");
+                    if(sendMessage){
+                        newsBarGroupName.setText(userName + "(" + memberList.size() + ")");
+                    }else {
+                        newsBarGroupName.setText(userName);
+                    }
                 } else {
                     newsBarGroupName.setText(userName);
                 }

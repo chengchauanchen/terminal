@@ -105,6 +105,14 @@ public class HistoryCombatGroupActivity extends BaseActivity implements View.OnC
         }
     }
 
+    @Override
+    protected void onResume(){
+        super.onResume();
+        if(null != mMessageListAdapter){
+            mMessageListAdapter.notifyDataSetChanged();
+        }
+    }
+
     /**
      * 对聊天列表排序
      */
@@ -125,6 +133,10 @@ public class HistoryCombatGroupActivity extends BaseActivity implements View.OnC
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id){
         TerminalMessage terminalMessage = messageList.get(position);
+        if(terminalMessage.unReadCount !=0){
+            terminalMessage.unReadCount = 0;
+            saveMessagesToSql();
+        }
         Intent intent = new Intent(this, GroupCallNewsActivity.class);
         intent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
         intent.putExtra("uniqueNo",terminalMessage.messageToUniqueNo);
