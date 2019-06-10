@@ -230,11 +230,11 @@
         
         <service android:name=".service.LockScreenService" />
         <service android:name="org.easydarwin.easypusher.BackgroundCameraService" />
-        <service
-            android:name="ptt.terminalsdk.service.MessageService"
-            android:enabled="true"
-            android:exported="true"
-            android:process=":remote" /> <!-- 百度定位 -->
+        <!--<service-->
+            <!--android:name="ptt.terminalsdk.service.MessageService"-->
+            <!--android:enabled="true"-->
+            <!--android:exported="true"-->
+            <!--android:process=":remote" /> &lt;!&ndash; 百度定位 &ndash;&gt;-->
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"

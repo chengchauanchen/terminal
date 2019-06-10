@@ -315,7 +315,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 String msg = String.format(activity.getString(R.string.join_temp_group), noticeContent);
                 SpannableString spanString = new SpannableString(msg);
                 //再构造一个改变字体颜色的Span
-                ForegroundColorSpan span = new ForegroundColorSpan(activity.getColor(R.color.grey_b5));
+                ForegroundColorSpan span = new ForegroundColorSpan(activity.getColor(R.color.grey_7f));
                 //将这个Span应用于指定范围的字体
                 spanString.setSpan(span, msg.length()-5, msg.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                 holder.tv_bubble.setText(spanString);

@@ -19,5 +19,5 @@
         android:layout_marginRight="@dimen/dp_20"
         android:textSize="@dimen/sp_18"
         android:gravity="center"
-        android:textColor="@color/white"/>
+        android:textColor="@color/chat_warning_common_tv"/>
 </LinearLayout>
