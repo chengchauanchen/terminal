@@ -47,8 +47,8 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
         public void handler(ArrayList<ContactItemBean> selectedContacts){
             SelectedMemberFragment selectedMemberFragment = SelectedMemberFragment.newInstance(selectedContacts);
             selectedMemberFragment.setBackListener(() -> {
-                searchOrSelectedFragmentShow = false;
                 onBackPressed();
+                searchOrSelectedFragmentShow = false;
             });
             searchOrSelectedFragmentShow = true;
             getSupportFragmentManager().beginTransaction().hide(establishTempGroupFragment).add(R.id.search_framelayout, selectedMemberFragment).addToBackStack(null).show(selectedMemberFragment).commit();
@@ -58,8 +58,8 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
     private ReceiveShowSearchFragmentHandler receiveShowSearchFragmentHandler = (type,selectedNos) -> {
         SearchFragment searchFragment = SearchFragment.newInstance(type,selectedNos);
         searchFragment.setBacklistener(() -> {
-            searchOrSelectedFragmentShow = false;
             onBackPressed();
+            searchOrSelectedFragmentShow = false;
         });
         searchOrSelectedFragmentShow = true;
         getSupportFragmentManager().beginTransaction().hide(establishTempGroupFragment).add(R.id.search_framelayout, searchFragment).addToBackStack(null).show(searchFragment).commit();
