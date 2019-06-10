@@ -5,7 +5,10 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.LinearLayout;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -20,18 +23,27 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTempGroupMembersHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.adapter.GroupCatalogAdapter;
 import cn.vsx.vc.adapter.MemberListAdapter;
+import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSelectedMemberHandler;
+import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
+import cn.vsx.vc.receiveHandle.ReceiverMemberFragmentBackHandler;
 import cn.vsx.vc.utils.Constants;
 
 /**
  * 显示成员列表
  */
-public class MemberListFragment extends BaseFragment{
+public class MemberListFragment extends BaseFragment implements GroupCatalogAdapter.ItemClickListener, View.OnClickListener{
 
     private SwipeRefreshLayout mSwipeRefreshLayout;
     private RecyclerView mRecyclerview;
+    private LinearLayout mLl_title;
+    private RecyclerView mParentRecyclerview;
+
+    private GroupCatalogAdapter parentRecyclerAdapter;
+    private List<CatalogBean> catalogNames=new ArrayList<>();
 
     private static final String TYPE = "type";
     private String type = "type";
@@ -72,13 +84,23 @@ public class MemberListFragment extends BaseFragment{
     public void initView(){
         mSwipeRefreshLayout = mRootView.findViewById(R.id.swipeRefreshLayout);
         mRecyclerview = mRootView.findViewById(R.id.recyclerview);
+        mLl_title = mRootView.findViewById(R.id.ll_title);
+        mParentRecyclerview = mRootView.findViewById(R.id.parent_recyclerview);
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
         memberListAdapter = new MemberListAdapter(getContext(), mData);
         mRecyclerview.setAdapter(memberListAdapter);
+
+        mParentRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity(), OrientationHelper.HORIZONTAL, false));
+        parentRecyclerAdapter = new GroupCatalogAdapter(getContext(),catalogNames);
+        parentRecyclerAdapter.setOnItemClick(this);
+        mParentRecyclerview.setAdapter(parentRecyclerAdapter);
+
+        mRootView.findViewById(R.id.iv_search).setOnClickListener(this);
     }
 
     @Override
     public void initListener(){
+        TerminalFactory.getSDK().registReceiveHandler(receiverMemberFragmentBackHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveMemberSelectedHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveGetTerminalHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveRemoveSelectedMemberHandler);
@@ -96,7 +118,10 @@ public class MemberListFragment extends BaseFragment{
 
                 }else if(type == Constants.TYPE_FOLDER){
                     Department department = (Department) mData.get(position).getBean();
+                    CatalogBean groupCatalogBean = new CatalogBean(department.getName(),department.getId());
+                    catalogNames.add(groupCatalogBean);
                     TerminalFactory.getSDK().getConfigManager().getTerminal(department.getId(),MemberListFragment.this.type);
+                    parentRecyclerAdapter.notifyDataSetChanged();
                 }
                 memberListAdapter.notifyDataSetChanged();
             }
@@ -106,6 +131,9 @@ public class MemberListFragment extends BaseFragment{
     @Override
     public void initData(){
         TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), type);
+
+        CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+        catalogNames.add(groupCatalogBean);
     }
 
     private ReceiveRemoveSelectedMemberHandler receiveRemoveSelectedMemberHandler = contactItemBean -> {
@@ -162,6 +190,7 @@ public class MemberListFragment extends BaseFragment{
         TerminalFactory.getSDK().unregistReceiveHandler(receiveRemoveSelectedMemberHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveGetTerminalHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveMemberSelectedHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiverMemberFragmentBackHandler);
     }
 
     private void updateData(int depId, List<Department> departments, List<Member> members){
@@ -207,6 +236,28 @@ public class MemberListFragment extends BaseFragment{
         mData.add(contactItemBean);
     }
 
+    private ReceiverMemberFragmentBackHandler receiverMemberFragmentBackHandler = new ReceiverMemberFragmentBackHandler(){
+        @Override
+        public void handler(){
+            if(isAdded() && isVisible() && isResumed()){
+                mHandler.post(()->{
+                    if(catalogNames.size() > 1){
+                        //返回到上一级
+                        catalogNames.remove(catalogNames.size()-1);
+                        int position = catalogNames.size()-1;
+                        mRecyclerview.scrollToPosition(0);
+                        parentRecyclerAdapter.notifyDataSetChanged();
+                        TerminalFactory.getSDK().getConfigManager().getTerminal(catalogNames.get(position).getId(),MemberListFragment.this.type);
+                    }else{
+                        if(null != getActivity()){
+                            getActivity().finish();
+                        }
+                    }
+                });
+            }
+        }
+    };
+
     private ReceiveTempGroupMembersHandler receiveTempGroupMembersHandler = new ReceiveTempGroupMembersHandler(){
         @Override
         public void handler(List<String> uniqueNos){
@@ -215,4 +266,34 @@ public class MemberListFragment extends BaseFragment{
 
         }
     };
+
+    @Override
+    public void onItemClick(View view, int position){
+        synchronized(MemberListFragment.this){
+            List<CatalogBean> groupCatalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
+            catalogNames.clear();
+            catalogNames.addAll(groupCatalogBeans);
+            parentRecyclerAdapter.notifyDataSetChanged();
+            TerminalFactory.getSDK().getConfigManager().getTerminal(catalogNames.get(position).getId(),MemberListFragment.this.type);
+        }
+    }
+
+    @Override
+    public void onClick(View v){
+        if(v.getId() == R.id.iv_search){
+            List<Integer> selectedMemberNos = new ArrayList<>();
+            for(Member member : selectedMember){
+                selectedMemberNos.add(member.getNo());
+            }
+            if(TerminalMemberType.TERMINAL_PC.toString().equals(type)){
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class, Constants.TYPE_CHECK_SEARCH_PC, selectedMemberNos);
+            }else if(TerminalMemberType.TERMINAL_PHONE.toString().equals(type)){
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class, Constants.TYPE_CHECK_SEARCH_POLICE, selectedMemberNos);
+            }else if(TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString().equals(type)){
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class, Constants.TYPE_CHECK_SEARCH_RECODER, selectedMemberNos);
+            }else if(TerminalMemberType.TERMINAL_UAV.toString().equals(type)){
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class, Constants.TYPE_CHECK_SEARCH_UAV, selectedMemberNos);
+            }
+        }
+    }
 }

@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -26,7 +25,6 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.SelectAdapter;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSelectedMemberHandler;
-import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSelectedFragmentHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.view.TabView;
@@ -43,8 +41,6 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
     private TabView mTabPolice;
     private TabView mTabRecoder;
     private TabView mTabUav;
-    private LinearLayout mLl_search;
-    private TextView mRecoderTv;
     private MemberListFragment pcFragment;
     private MemberListFragment policeFragment;
     private MemberListFragment recoderFragment;
@@ -52,6 +48,7 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
     private BaseFragment currentFragment;
 
     private ArrayList<ContactItemBean> selectedMembers;
+
 //    private List<Integer> selectedMemberNos;
     private List<Member> pcSelectMember = new ArrayList<>();
     private List<Member> policeSelectMember = new ArrayList<>();
@@ -59,6 +56,7 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
     private List<Member> uavSelectMember = new ArrayList<>();
 
     private SelectAdapter selectAdapter;
+
     private int currentIndex;
     private Handler mHandler = new Handler();
 
@@ -104,8 +102,6 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
         mTabPolice = view.findViewById(R.id.tab_police);
         mTabRecoder = view.findViewById(R.id.tab_recoder);
         mTabUav = view.findViewById(R.id.tab_uav);
-        mLl_search = view.findViewById(R.id.ll_search);
-        mRecoderTv = view.findViewById(R.id.recoder_tv);
     }
 
     private void initTab(){
@@ -121,7 +117,6 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
         mTabRecoder.setOnClickListener(this);
         mTabUav.setOnClickListener(this);
         mIvSelect.setOnClickListener(this);
-        mLl_search.setOnClickListener(this);
         TerminalFactory.getSDK().registReceiveHandler(receiveMemberSelectedHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveRemoveSelectedMemberHandler);
     }
@@ -184,10 +179,6 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
                 currentFragment = uavFragment;
                 currentIndex = 3;
                 break;
-            case R.id.ll_search:
-                showSearchFragment();
-
-                break;
             case R.id.iv_select:
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSelectedFragmentHandler.class,selectedMembers);
 
@@ -195,38 +186,6 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
             default:
                 break;
         }
-    }
-
-    private void showSearchFragment(){
-        List<Integer> selectedMemberNos = new ArrayList<>();
-        switch(currentIndex){
-            case 0:
-                for(Member member : pcSelectMember){
-                    selectedMemberNos.add(member.getNo());
-                }
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_PC,selectedMemberNos);
-                break;
-            case 1:
-                for(Member member : policeSelectMember){
-                    selectedMemberNos.add(member.getNo());
-                }
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_POLICE,selectedMemberNos);
-                break;
-            case 2:
-                for(Member member : recoderSelectMember){
-                    selectedMemberNos.add(member.getNo());
-                }
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_RECODER,selectedMemberNos);
-                break;
-            case 3:
-                for(Member member : uavSelectMember){
-                    selectedMemberNos.add(member.getNo());
-                }
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSearchFragmentHandler.class,Constants.TYPE_CHECK_SEARCH_UAV,selectedMemberNos);
-                break;
-            default:
-        }
-
     }
 
     private void switchFragment(BaseFragment to){

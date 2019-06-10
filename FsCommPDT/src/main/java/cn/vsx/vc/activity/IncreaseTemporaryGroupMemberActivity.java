@@ -6,6 +6,7 @@ import android.os.Handler;
 
 import java.util.ArrayList;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdatePhoneMemberHandler;
 import cn.vsx.vc.R;
@@ -15,6 +16,7 @@ import cn.vsx.vc.fragment.SelectedMemberFragment;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSelectedFragmentHandler;
+import cn.vsx.vc.receiveHandle.ReceiverMemberFragmentBackHandler;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -96,7 +98,6 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
 
     @Override
     public void onBackPressed(){
-        // TODO: 2019/4/19 返回键和搜索界面返回的处理
-        super.onBackPressed();
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMemberFragmentBackHandler.class);
     }
 }
