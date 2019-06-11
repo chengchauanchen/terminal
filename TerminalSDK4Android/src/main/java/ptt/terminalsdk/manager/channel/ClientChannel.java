@@ -10,11 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import cn.vsx.hamster.common.MessageFunEnum;
 import cn.vsx.hamster.protolbuf.codec.PTTMsgCodec;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.channel.AbsClientChannel;
 import cn.vsx.hamster.terminalsdk.manager.channel.ClientChannelMessageDispatcher;
 import cn.vsx.hamster.terminalsdk.manager.channel.ServerMessageReceivedHandler;
@@ -66,23 +66,26 @@ public class ClientChannel extends AbsClientChannel {
 	@Override
 	public void sendMessage(GeneratedMessage message, final PushMessageSendResultHandler handler, byte messageFun) {
 		if(MyTerminalFactory.getSDK().hasNetwork()){
-			logger.info("发送消息："+message.getClass()+"----->"+message);
-			try {
-				messageService.sendMessage(PTTMsgCodec.INSTANCE.getEncode().encodeMessage(message, messageFun), new PushMessageSendResultHandlerAidl.Stub() {
-					@Override
-					public void handler(boolean sendOK, String uuid) throws RemoteException {
-						handler.handler(sendOK, uuid);
-					}
-				});
-			} catch (Exception e) {
-				logger.error("发送命令失败！！"+e);
+			if(TerminalFactory.getSDK().isServerConnected()){
+				logger.info("发送消息："+message.getClass()+"----->"+message);
+				try {
+					messageService.sendMessage(PTTMsgCodec.INSTANCE.getEncode().encodeMessage(message, messageFun), new PushMessageSendResultHandlerAidl.Stub() {
+						@Override
+						public void handler(boolean sendOK, String uuid) throws RemoteException {
+							handler.handler(sendOK, uuid);
+						}
+					});
+				} catch (Exception e) {
+					logger.error("发送命令失败！！"+e);
+					handler.handler(false, null);
+				}
+			}else {
+				logger.error("信令服务没有连接，不能发送命令！！");
 				handler.handler(false, null);
 			}
-
-			byte[] bytes = PTTMsgCodec.INSTANCE.getEncode().encodeMessage(message, messageFun);
-			logger.info("bytes="+ Arrays.toString(bytes));
 		}
 		else{
+			logger.error("网络没有连接，不能发送命令！！");
 			handler.handler(false, null);
 		}
 	}
