@@ -1660,8 +1660,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                                 DJISDKManager.getInstance().startConnectionToProduct();
                             } else {
                                 ToastUtil.showToast(getApplicationContext(),"大疆SDK注册失败");
+                                logger.error(djiError.getDescription());
                             }
-                            Log.e(TAG, "注册大疆sdk："+djiError.getDescription());
+                            Log.d(TAG, "注册大疆sdk："+djiError.getDescription());
                         }
 
                         @Override

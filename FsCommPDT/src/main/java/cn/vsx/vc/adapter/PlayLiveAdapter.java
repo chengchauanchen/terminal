@@ -32,7 +32,7 @@ public class PlayLiveAdapter extends BaseQuickAdapter<MediaBean, BaseViewHolder>
             String min = startTime.substring(10, 12);
             String second = startTime.substring(12);
             StringBuffer stringBuffer = new StringBuffer();
-            stringBuffer.append(date).append(" ").append(hour).append(min).append(second);
+            stringBuffer.append(date).append(" ").append(hour).append(":").append(min).append(":").append(second);
             helper.setText(R.id.tv_start_time, stringBuffer.toString());
         }
         if(item.isSelected()){
