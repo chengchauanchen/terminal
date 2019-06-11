@@ -263,9 +263,11 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
                 authModel = entry.getValue();
             }
             if (authModel != null) {
+
                 int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(authModel.getIp(),authModel.getPort());
                 if(resultCode == BaseCommonCode.SUCCESS_CODE){
                     changeProgressMsg("正在认证...");
+                    ll_regist.setVisibility(View.GONE);
                 }else {
                     //状态机没有转到正在认证，说明已经在状态机中了，不用处理
                 }
@@ -313,12 +315,12 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
 //        ll_regist.setVisibility(View.GONE);
         judgePermission();
         tx_state.setVisibility(View.VISIBLE);
-        tx_state.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                myHandler.postDelayed(() -> setManualNFCBean(),1000);
-            }
-        });
+//        tx_state.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                myHandler.postDelayed(() -> setManualNFCBean(),1000);
+//            }
+//        });
     }
 
     private void initDialog() {

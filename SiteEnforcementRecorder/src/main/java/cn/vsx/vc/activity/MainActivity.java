@@ -26,6 +26,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -72,6 +73,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExternStorageSizeHandler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNobodyRequestVideoLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler;
@@ -88,12 +90,14 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.application.UpdateManager;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverAudioButtonEventHandler;
+import cn.vsx.vc.receiveHandle.ReceiverPTTButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.APPStateUtil;
 import cn.vsx.vc.utils.BITDialogUtil;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.PhotoUtils;
 import cn.vsx.vc.utils.SystemUtil;
@@ -225,7 +229,7 @@ public class MainActivity extends BaseActivity {
                  });
             }
         });
-        button2.setText("上传未上传的文件信息");
+        button2.setText("组呼");
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -242,7 +246,21 @@ public class MainActivity extends BaseActivity {
 
             }
         });
-//        button1.setVisibility(View.GONE);
+        button2.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                switch (event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverPTTButtonEventHandler.class, Constants.PTTEVEVT_ACTION_DOWN);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverPTTButtonEventHandler.class,Constants.PTTEVEVT_ACTION_UP);
+                        break;
+                }
+                return true;
+            }
+        });
+        button1.setVisibility(View.GONE);
         button2.setVisibility(View.GONE);
         //清理数据库
         FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
@@ -270,7 +288,8 @@ public class MainActivity extends BaseActivity {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseMyselfLiveHandler);//直播成功
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);//自己发起直播的响应
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);//网络连接状态
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);//认证
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);//登录
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);//转组
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);//组呼来了
 
@@ -325,7 +344,8 @@ public class MainActivity extends BaseActivity {
     public void doOtherDestroy() {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);//认证
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);//登录
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);//网络连接状态
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);//转组
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);//组呼来了
@@ -381,6 +401,25 @@ public class MainActivity extends BaseActivity {
                 stopService(new Intent(getApplicationContext(), LockScreenService.class));
             }
         }
+    };
+
+    /**
+     * 登陆响应的消息
+     */
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> {
+        logger.info("MainActivity---收到登录的消息---resultCode:" + resultCode + "     resultDesc:" + resultDesc);
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+            } else if(resultCode == Params.JOININ_WARNING_GROUP_ERROR_CODE) {
+                ToastUtil.showToast(MainActivity.this,resultDesc);
+                myHandler.postDelayed(() -> {
+                    clearAccount();
+                }, 2000);
+            }else{
+                ToastUtil.showToast(MainActivity.this,resultDesc);
+                myHandler.postDelayed(() -> {
+                    clearAccount();
+                }, 3000);
+            }
     };
 
     /**

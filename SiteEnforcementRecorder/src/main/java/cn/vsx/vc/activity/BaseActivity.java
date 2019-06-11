@@ -620,7 +620,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                     @Override
                     public void run() {
                         if(System.currentTimeMillis()-currentTime>5000){
-                            MyTerminalFactory.getSDK().getLogFileManager().uploadLogFile();
+                            MyTerminalFactory.getSDK().getLogFileManager().uploadAllLogFile();
                             currentTime = System.currentTimeMillis();
                         }else {
                             ToastUtil.showToast("您已经上传过日志了，请稍后再上传",BaseActivity.this);
@@ -688,7 +688,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
      * 手动设置
      */
     public void setManualNFCBean(){
-        NFCBean bean = new NFCBean("a71f2f3dd59910301791826f435fc6b8",900078,"20190306T00602672");
+//        NFCBean bean = new NFCBean("e0d3ecad1687fbfcd142c9792d7733c9",900020,"20190306T00602672");
+        NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",900020,"20190306T00602672");
         logger.debug("onReadResult---bean:"+bean);
         //保存账号解绑时间信息
         TerminalFactory.getSDK().putParam(Params.NFC_BEAN_TIME, System.currentTimeMillis());

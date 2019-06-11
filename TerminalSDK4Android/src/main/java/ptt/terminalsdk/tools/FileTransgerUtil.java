@@ -229,7 +229,7 @@ public class FileTransgerUtil {
         if(TextUtils.equals(type,TYPE_VIDEO)||TextUtils.equals(type,TYPE_AUDIO)){
             //音频和视频 获取时长
             MediaPlayer mediaPlayer =  getMediaPlayer(MyTerminalFactory.getSDK().application,file);
-            if(mediaPlayer!=null){
+            if(mediaPlayer!=null&&mediaPlayer.getDuration()>=0){
                 bean.setDuration(mediaPlayer.getDuration()+"");
             }
         }

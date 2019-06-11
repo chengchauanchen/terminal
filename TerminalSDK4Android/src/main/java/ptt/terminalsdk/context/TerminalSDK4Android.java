@@ -180,15 +180,14 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		locationStop();
 		getVideoProxy().stop();
 		PromptManager.getInstance().stop();
-		disConnectToServer();
-		application.unregisterReceiver(netWorkConnectionChangeReceiver);
-		stopUVCCameraService();
 		if(MyTerminalFactory.getSDK().isServerConnected()){
 			getAuthManagerTwo().logout();
 		}
+		application.unregisterReceiver(netWorkConnectionChangeReceiver);
+		stopUVCCameraService();
 		getVoipCallManager().destroy(application);//VOIP服务注销
 		putParam(Params.CURRENT_SPEAKER,"");
-		OperateReceiveHandlerUtil.getInstance().stop();
+
 		logger.info("TerminalSDK4Android关闭了OnlineService");
 		Intent onlineService = new Intent(application, OnlineService.class);
 		application.stopService(onlineService);
@@ -202,6 +201,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			application.unbindService(bleServiceConn);
 			isBindBleService = false;
 		}
+		disConnectToServer();
+		OperateReceiveHandlerUtil.getInstance().stop();
 	}
 
 
