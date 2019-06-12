@@ -29,7 +29,8 @@ public class ChangeGroupView extends FrameLayout{
 	private TextView middle;
 	private TextView right2;
 	private TextView right1;
-	private List<TextView> textViewList = new ArrayList<>();
+	private List<TextView> textViewList = new ArrayList<>();//滑动的圆点点图标(放到TextView中
+	// )
 	private int currentDataIndex;
 	private int width;
 	private int height;

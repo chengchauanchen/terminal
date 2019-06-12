@@ -310,7 +310,8 @@ public class BleActivity extends BaseActivity implements View.OnClickListener {
         } else {
             hideConnectingAnimate();
             mScanning = false;
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            //这里如果停止扫描会有一个概率的bug，当关闭蓝牙成功时，蓝牙的状态并不会立马变成STATE_OFF(10)，这里执行停止扫描的操作，如果蓝牙状态在12-15之间，停止扫描ok，但是如果状态到16或者10，下面的方法会抛出IllegalStateException
+//            mBluetoothAdapter.stopLeScan(mLeScanCallback);
         }
     }
 

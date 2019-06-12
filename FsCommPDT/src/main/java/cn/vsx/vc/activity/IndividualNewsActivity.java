@@ -88,7 +88,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 /**
  * Created by zckj on 2017/3/15.
  */
-
+//人员聊天的界面(部分处理和变量存储在父类ChatBaseActivity中)
 public class IndividualNewsActivity extends ChatBaseActivity implements View.OnClickListener {
 
     ImageView newsBarReturn;
@@ -107,6 +107,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     Button ptt;
 
+    //底部聊天发送和拓展面板的自定义控件
     FunctionHidePlus funcation;
 
     AudioRecordButton record;
@@ -116,6 +117,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     SwipeRefreshLayout sflCallList;
 
+    //TODO 这个好像没有用？
     FixedRecyclerView groupCallList;
 
 

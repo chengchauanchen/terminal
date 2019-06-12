@@ -80,12 +80,12 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     ImageButton imgbtn_dial;
 
     private Fragment currentFragment;
-    private NewGroupFragment groupFragmentNew;
+    private NewGroupFragment groupFragmentNew;//群组
     //    private PoliceAffairsFragment policeAffairsFragment;
-    private NewPoliceAffairsFragment policeAffairsFragment;
+    private NewPoliceAffairsFragment policeAffairsFragment;//警务通
     //    private HandPlatformFragment handPlatformFragment;
-    private NewHandPlatformFragment handPlatformFragment;
-    private LteFragment lteFragment;
+    private NewHandPlatformFragment handPlatformFragment;//电台
+    private LteFragment lteFragment;//lte
     private FragmentManager childFragmentManager;
     NewMainActivity activity;
     private Handler mHandler = new Handler();

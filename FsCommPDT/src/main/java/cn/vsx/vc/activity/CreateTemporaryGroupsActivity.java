@@ -34,7 +34,6 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 public class CreateTemporaryGroupsActivity extends BaseActivity implements View.OnClickListener {
 
 
-
     ImageView news_bar_back;
 
     TextView bar_title;
@@ -65,9 +64,9 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     private Handler myHandler = new Handler();
     private ArrayList<Member> list;
     private OptionsPickerView optionsPickerViewA;
-    private List<Integer>options1Items=new ArrayList<>();
-    private List<Integer>options2Items=new ArrayList<>();
-    private List<Integer>options3Items=new ArrayList<>();
+    private List<Integer> options1Items = new ArrayList<>();
+    private List<Integer> options2Items = new ArrayList<>();
+    private List<Integer> options3Items = new ArrayList<>();
     private boolean scanGroup;
     private TimerTask timerTaskLock;
     private List<Integer> signs;
@@ -107,12 +106,12 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     private void initOptionsPickerViewA() {
 
         optionsPickerViewA = new OptionsPickerView.Builder(this, (options1, options2, options3, v) -> {
-            existHour=options1;
-            existMin=options2;
-            existSec=options3;
+            existHour = options1;
+            existMin = options2;
+            existSec = options3;
 
-            logger.info("存在时间"+options1+"时"+options2+"分"+options3+"秒");
-            myHandler.post(() -> exist_time.setText(String.format(getResources().getString(R.string.activity_create_temporary_groups_time),options1,options2,options3)));
+            logger.info("存在时间" + options1 + "时" + options2 + "分" + options3 + "秒");
+            myHandler.post(() -> exist_time.setText(String.format(getResources().getString(R.string.activity_create_temporary_groups_time), options1, options2, options3)));
         }).setLabels(getResources().getString(R.string.text_hour), getResources().getString(R.string.text_minute), getResources().getString(R.string.text_second))
                 .setSubmitText(getResources().getString(R.string.text_sure))//确定按钮文字
                 .setCancelText(getResources().getString(R.string.text_cancel))//取消按钮文字
@@ -131,11 +130,9 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                 .setOutSideCancelable(false)//点击外部 dismiss default true
                 .isDialog(false)//是否显示为对话框样式
                 .build();
-        optionsPickerViewA.setNPicker(options1Items,options2Items,options3Items);
+        optionsPickerViewA.setNPicker(options1Items, options2Items, options3Items);
 
     }
-
-
 
 
     @Override
@@ -148,31 +145,31 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
 
         iv_scan.setOnClickListener(v -> {
-            if(iv_scan.isSelected()){
+            if (iv_scan.isSelected()) {
                 iv_scan.setSelected(false);
                 iv_unscan.setSelected(true);
-                TextViewCompat.setTextAppearance(tv_scan,R.style.temp_group_unchecked);
-                TextViewCompat.setTextAppearance(tv_unscan,R.style.temp_group_checked);
+                TextViewCompat.setTextAppearance(tv_scan, R.style.temp_group_unchecked);
+                TextViewCompat.setTextAppearance(tv_unscan, R.style.temp_group_checked);
 
-            }else {
+            } else {
                 iv_scan.setSelected(true);
                 iv_unscan.setSelected(false);
-                TextViewCompat.setTextAppearance(tv_scan,R.style.temp_group_checked);
-                TextViewCompat.setTextAppearance(tv_unscan,R.style.temp_group_unchecked);
+                TextViewCompat.setTextAppearance(tv_scan, R.style.temp_group_checked);
+                TextViewCompat.setTextAppearance(tv_unscan, R.style.temp_group_unchecked);
             }
         });
 
         iv_unscan.setOnClickListener(v -> {
-            if(iv_scan.isSelected()){
+            if (iv_scan.isSelected()) {
                 iv_scan.setSelected(false);
                 iv_unscan.setSelected(true);
-                TextViewCompat.setTextAppearance(tv_scan,R.style.temp_group_unchecked);
-                TextViewCompat.setTextAppearance(tv_unscan,R.style.temp_group_checked);
-            }else {
+                TextViewCompat.setTextAppearance(tv_scan, R.style.temp_group_unchecked);
+                TextViewCompat.setTextAppearance(tv_unscan, R.style.temp_group_checked);
+            } else {
                 iv_scan.setSelected(true);
                 iv_unscan.setSelected(false);
-                TextViewCompat.setTextAppearance(tv_scan,R.style.temp_group_checked);
-                TextViewCompat.setTextAppearance(tv_unscan,R.style.temp_group_unchecked);
+                TextViewCompat.setTextAppearance(tv_scan, R.style.temp_group_checked);
+                TextViewCompat.setTextAppearance(tv_unscan, R.style.temp_group_unchecked);
             }
         });
 
@@ -187,14 +184,14 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     public void initData() {
 
         list = (ArrayList<Member>) getIntent().getSerializableExtra("data");
-        logger.info("创建临时组成员列表："+list.toString());
-        int index1=0;
-        for(int i=0;i<=23;i++){
+        logger.info("创建临时组成员列表：" + list.toString());
+        int index1 = 0;
+        for (int i = 0; i <= 23; i++) {
             options1Items.add(index1);
             index1++;
         }
-        int index2=0;
-        for(int i=0;i<=59;i++){
+        int index2 = 0;
+        for (int i = 0; i <= 59; i++) {
             options2Items.add(index2);
             options3Items.add(index2);
             index2++;
@@ -220,17 +217,17 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
 
         //从1开始判断
         int sign = getSign(1);
-        int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0);
+        int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
         String s = String.valueOf(memberId);
-        create_temporary_group_name.setText(String.format(getResources().getString(R.string.activity_create_temporary_groups_name),sign,s.substring(s.length()-4)));
+        create_temporary_group_name.setText(String.format(getResources().getString(R.string.activity_create_temporary_groups_name), sign, s.substring(s.length() - 4)));
         exist_time.setText(R.string.activity_create_temporary_groups_tempts_exist_time);
     }
 
     //获取临时组名字里的编号
-    private int getSign(int sign){
+    private int getSign(int sign) {
         int number = sign;
-        if(signs.contains(sign)){
-            sign ++;
+        if (signs.contains(sign)) {
+            sign++;
             number = getSign(sign);
         }
         return number;
@@ -242,34 +239,34 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginForUIOperationHandler);
     }
 
+    /**
+     * =================================================================================================handler======================================================================================================================
+     **/
+    private ReceiveResponseCreateTempGroup4PCHandler receiveResponseCreateTempGroup4PCHandler = new ReceiveResponseCreateTempGroup4PCHandler() {
+        @Override
+        public void handler(int tempGroupNo, String alarmNo, String tempGroupType, long uniqueNo, int resultCode, String resultDesc) {
 
-/**
- * =================================================================================================handler======================================================================================================================
- **/
-    private ReceiveResponseCreateTempGroup4PCHandler receiveResponseCreateTempGroup4PCHandler=new ReceiveResponseCreateTempGroup4PCHandler() {
-    @Override
-    public void handler(int tempGroupNo,String alarmNo,String tempGroupType,long uniqueNo, int resultCode, String resultDesc) {
-
-        myHandler.post(() -> {
-            checkDialogIsNotNull();
-            if(resultCode== BaseCommonCode.SUCCESS_CODE){
-                createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_SUCCESS,"",scanGroup);
-                myHandler.postDelayed(() -> {
-                    //刷新通讯录组群列表
+            myHandler.post(() -> {
+                checkDialogIsNotNull();
+                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                    createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_SUCCESS, "", scanGroup);
+                    //临时组创建成功之后，开启一个定时任务，到期时给用户一个提示
+                    myHandler.postDelayed(() -> {
+                        //刷新通讯录组群列表
 //                    MyTerminalFactory.getSDK().getConfigManager().updateAllGroups();
-                    dismissTemporaryGroupDialog();
-                    startActivity(new Intent(CreateTemporaryGroupsActivity.this,NewMainActivity.class));
-                    CreateTemporaryGroupsActivity.this.finish();
-                },2000);
-            }else {
-                createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_FAIL,resultDesc,scanGroup);
-                myHandler.postDelayed(() -> dismissTemporaryGroupDialog(),2000);
+                        dismissTemporaryGroupDialog();
+                        startActivity(new Intent(CreateTemporaryGroupsActivity.this, NewMainActivity.class));
+                        CreateTemporaryGroupsActivity.this.finish();
+                    }, 2000);
+                } else {
+                    createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_FAIL, resultDesc, scanGroup);
+                    myHandler.postDelayed(() -> dismissTemporaryGroupDialog(), 2000);
 
-            }
+                }
 
-        });
-    }
-};
+            });
+        }
+    };
 
     /**
      * 强制重新注册的消息
@@ -281,7 +278,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                 @Override
                 public void run() {
                     //如果正在弹窗，取消弹窗
-                    if(createTemporaryGroupsDialog!=null&&createTemporaryGroupsDialog.isShowing()){
+                    if (createTemporaryGroupsDialog != null && createTemporaryGroupsDialog.isShowing()) {
                         createTemporaryGroupsDialog.dismiss();
                     }
                 }
@@ -306,6 +303,8 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     private int existMin = 59;
     private int existSec = 59;//默认存活时间23小时59分59秒
 
+    private long existTime;//临时组的存活时间(单位秒)
+    String temporaryGroupsName;//临时组的名称
 
 
     private final class OnClickListenerImplementation implements View.OnClickListener {
@@ -313,23 +312,23 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         @Override
         public void onClick(View v) {
 
-            final String temporaryGroupsName = create_temporary_group_name.getText().toString().trim();
-            final long existTime = existHour * 3600  + existMin * 60  +existSec ;
+            temporaryGroupsName = create_temporary_group_name.getText().toString().trim();
+            existTime = existHour * 3600 + existMin * 60 + existSec;
             scanGroup = iv_scan.isSelected();
-            if(TextUtils.isEmpty(temporaryGroupsName)){
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.activity_create_temporary_groups_check_data_name_one));
+            if (TextUtils.isEmpty(temporaryGroupsName)) {
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.activity_create_temporary_groups_check_data_name_one));
                 return;
             }
-            if(existTime<2*60){
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.activity_create_temporary_groups_check_data_time_one));
+            if (existTime < 2 * 60) {
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.activity_create_temporary_groups_check_data_time_one));
                 return;
             }
-            if(existTime>24*60*60-1){
-                ToastUtil.showToast(MyApplication.instance.getApplicationContext(),getString(R.string.activity_create_temporary_groups_check_data_time_two));
+            if (existTime > 24 * 60 * 60 - 1) {
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.activity_create_temporary_groups_check_data_time_two));
                 return;
             }
 
-            if(StringUtil.isEmoji(temporaryGroupsName)){
+            if (StringUtil.isEmoji(temporaryGroupsName)) {
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.activity_create_temporary_groups_check_data_name_two));
                 return;
             }
@@ -337,10 +336,10 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.activity_create_temporary_groups_check_data_name_three));
                 return;
             }
-           //显示提示框
+            //显示提示框
             checkDialogIsNotNull();
-            createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_CREATTING,"",scanGroup);
-            logger.error("创建临时组：" + "scanGroup" + scanGroup + ",temporaryGroupsName" + temporaryGroupsName + ",pushMemberList" + list.toString() + ",existTime" + existTime );
+            createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_CREATTING, "", scanGroup);
+            logger.error("创建临时组：" + "scanGroup" + scanGroup + ",temporaryGroupsName" + temporaryGroupsName + ",pushMemberList" + list.toString() + ",existTime" + existTime);
             //延时创建临时组
             if (timerTaskLock != null) {
                 timerTaskLock.cancel();
@@ -351,11 +350,11 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                 public void run() {
                     List<Long> uniqueNoList = new ArrayList<>();
                     List<Integer> memberNos = new ArrayList<>();
-                    for(Member member : list){
+                    for (Member member : list) {
                         uniqueNoList.add(member.getUniqueNo());
                         memberNos.add(member.getNo());
                     }
-                    MyTerminalFactory.getSDK().getTempGroupManager().createTempGroup(false,temporaryGroupsName,memberNos,existTime, false,0,scanGroup,"",uniqueNoList);
+                    MyTerminalFactory.getSDK().getTempGroupManager().createTempGroup(false, temporaryGroupsName, memberNos, existTime, false, 0, scanGroup, "", uniqueNoList);
                 }
             };
             MyTerminalFactory.getSDK().getTimer().schedule(timerTaskLock, 2000);
@@ -365,8 +364,8 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     /**
      * 创建临时组的弹窗非空规避
      */
-    private void checkDialogIsNotNull(){
-        if(createTemporaryGroupsDialog==null){
+    private void checkDialogIsNotNull() {
+        if (createTemporaryGroupsDialog == null) {
             createTemporaryGroupsDialog = new CreateTemporaryGroupsDialog(CreateTemporaryGroupsActivity.this);
         }
     }
@@ -374,16 +373,16 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
     /**
      * 关闭创建临时组的弹窗
      */
-    private void dismissTemporaryGroupDialog(){
-        if(createTemporaryGroupsDialog!=null){
+    private void dismissTemporaryGroupDialog() {
+        if (createTemporaryGroupsDialog != null) {
             createTemporaryGroupsDialog.dismiss();
         }
     }
 
-    public static void startActivity(Context context,ArrayList<Member> data){
+    public static void startActivity(Context context, ArrayList<Member> data) {
         Intent intent = new Intent();
-        intent.setClass(context,CreateTemporaryGroupsActivity.class);
-        intent.putExtra("data",data);
+        intent.setClass(context, CreateTemporaryGroupsActivity.class);
+        intent.putExtra("data", data);
         context.startActivity(intent);
     }
 }

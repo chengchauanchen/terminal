@@ -138,6 +138,7 @@ public class NewsFragment extends BaseFragment {
             clearData();
             List<TerminalMessage> messageList = TerminalFactory.getSDK().getTerminalMessageManager().getMessageList();
             logger.info("从数据库取出消息列表："+messageList);
+
             addData(messageList);
         }
     }
@@ -476,13 +477,14 @@ public class NewsFragment extends BaseFragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             TerminalMessage terminalMessage = messageList.get(position);
+            System.out.println("点击的消息:"+terminalMessage);
             logger.info("点击的消息："+terminalMessage);
+
             if(terminalMessage.unReadCount != 0){
                 terminalMessage.unReadCount = 0;
                 unReadCountChanged();//未读消息数变了，通知tab
                 saveMessagesToSql();
             }
-
             // 进入图像助手
             if(TerminalMessageUtil.isLiveMessage(terminalMessage)) {
                 Intent intent = new Intent(context, PushLiveMessageManageActivity.class);
@@ -497,6 +499,7 @@ public class NewsFragment extends BaseFragment {
                 context.startActivity(intent);
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
+                //普通的聊天消息
                 Intent intent = new Intent(context, IndividualNewsActivity.class);
                 intent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
                 intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));

@@ -125,6 +125,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private PopupWindow popupWindow;
     private boolean isCheckSuccess;//联通校验是否通过
     private boolean isCheckFinished;//联通校验是否完成
+
     @Override
     protected void onResume() {
         super.onResume();
@@ -133,7 +134,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     private String company = "添加单位";
 
-/**============================================================================handler=================================================================================**/
+    /**
+     * ============================================================================handler=================================================================================
+     **/
 
 
     //认证回调
@@ -143,53 +146,51 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
             logger.info("receiveSendUuidResponseHandler------resultCode：" + resultCode + "；   resultDesc：" + resultDesc + "；   isRegisted：" + isRegisted);
             myHandler.post(() -> {
-                if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                     //认证成功，去连接接入服务
                     changeProgressMsg(getResources().getString(R.string.connecting_server));
-                }else if(resultCode == TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()){
+                } else if (resultCode == TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()) {
                     AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_temporarily_unavailable_permissions)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
                     alerDialog.show();
-                }else if(resultCode == TerminalErrorCode.DEPT_EXPIRED.getErrorCode()){
+                } else if (resultCode == TerminalErrorCode.DEPT_EXPIRED.getErrorCode()) {
                     AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_departmental_delegation_expires)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
                     alerDialog.show();
-                }else if(resultCode == TerminalErrorCode.TERMINAL_TYPE_ERROR.getErrorCode()){
+                } else if (resultCode == TerminalErrorCode.TERMINAL_TYPE_ERROR.getErrorCode()) {
                     AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_terminal_type_error)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
                     alerDialog.show();
-                }else if(resultCode == TerminalErrorCode.TERMINAL_REPEAT.getErrorCode()){
+                } else if (resultCode == TerminalErrorCode.TERMINAL_REPEAT.getErrorCode()) {
                     AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_terminal_repeat)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
                     alerDialog.show();
-                }
-                else if(resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()){
-                    if(reAuthCount < 3){
+                } else if (resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()) {
+                    if (reAuthCount < 3) {
                         reAuthCount++;
                         //发生异常的时候重试几次，因为网络原因经常导致一个io异常
-                        TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(),TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
-                    }else{
+                        TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(), TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
+                    } else {
                         changeProgressMsg(getResources().getString(R.string.auth_fail));
                         myHandler.postDelayed(() -> exit(), 3000);
                     }
-                }else if(resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()){
+                } else if (resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()) {
                     changeProgressMsg(getResources().getString(R.string.auth_fail));
-                    myHandler.postDelayed(()->{
+                    myHandler.postDelayed(() -> {
                         ll_regist.setVisibility(View.VISIBLE);
                         hideProgressDialog();
-                    },2000);
-                }
-                else{
+                    }, 2000);
+                } else {
                     //没有注册服务地址，去探测地址
-                    if(availableIPlist.isEmpty()){
+                    if (availableIPlist.isEmpty()) {
                         TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
                     }
-                    if(!isRegisted){
+                    if (!isRegisted) {
                         ToastUtils.showShort(R.string.please_regist_account);
                         ll_regist.setVisibility(View.VISIBLE);
                         hideProgressDialog();
-                    }else{
+                    } else {
                         changeProgressMsg(resultDesc);
-                        myHandler.postDelayed(()->{
+                        myHandler.postDelayed(() -> {
                             ll_regist.setVisibility(View.VISIBLE);
                             hideProgressDialog();
-                        },2000);
+                        }, 2000);
                     }
                 }
             });
@@ -199,21 +200,21 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     /**
      * 注册完成的消息
      */
-    private ReceiveRegistCompleteHandler receiveRegistCompleteHandler = new ReceiveRegistCompleteHandler(){
+    private ReceiveRegistCompleteHandler receiveRegistCompleteHandler = new ReceiveRegistCompleteHandler() {
         @Override
-        public void handler(final int errorCode, String errorDesc){
-            myHandler.post(()->{
-                if(errorCode == BaseCommonCode.SUCCESS_CODE){
+        public void handler(final int errorCode, String errorDesc) {
+            myHandler.post(() -> {
+                if (errorCode == BaseCommonCode.SUCCESS_CODE) {
                     changeProgressMsg(getResources().getString(R.string.connecting_server));
-                }else {
+                } else {
                     if (errorCode == TerminalErrorCode.REGISTER_PARAMETER_ERROR.getErrorCode()) {
                         changeProgressMsg(getString(R.string.text_invitation_code_wrong_please_regist_again));
                     } else if (errorCode == TerminalErrorCode.REGISTER_UNKNOWN_ERROR.getErrorCode()) {
                         changeProgressMsg(errorCode + getString(R.string.text_regist_fail_please_check_all_info_is_correct));
-                    }else {
-                        ToastUtil.showToast(RegistActivity.this,errorDesc);
+                    } else {
+                        ToastUtil.showToast(RegistActivity.this, errorDesc);
                     }
-                    myHandler.postDelayed(()-> hideProgressDialog(),3000);
+                    myHandler.postDelayed(() -> hideProgressDialog(), 3000);
                 }
             });
         }
@@ -222,11 +223,12 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     /**
      * 连接接入服务器回调
      */
-    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler(){
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler() {
         @Override
-        public void handler(boolean connected){
-            logger.info("AuthManager收到信令是否连接的通知"+connected);
-            if(connected){
+        public void handler(boolean connected) {
+            System.out.println("注册界面的监听(仅仅更新UI的文字)popo");
+            logger.info("AuthManager收到信令是否连接的通知" + connected);
+            if (connected) {
                 changeProgressMsg(getResources().getString(R.string.logining));
             }
         }
@@ -240,8 +242,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         myHandler.post(() -> {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 changeProgressMsg(getResources().getString(R.string.updating_data));
-            }else{
-                myHandler.post(()-> {
+            } else {
+                myHandler.post(() -> {
                     hideProgressDialog();
                     AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultDesc).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
                     alerDialog.show();
@@ -259,11 +261,11 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         }
     });
 
-    private void exit(){
+    private void exit() {
         finish();
         Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
-        stoppedCallIntent.putExtra("stoppedResult","0");
-        SendRecvHelper.send(getApplicationContext(),stoppedCallIntent);
+        stoppedCallIntent.putExtra("stoppedResult", "0");
+        SendRecvHelper.send(getApplicationContext(), stoppedCallIntent);
 
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
@@ -271,13 +273,12 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         Process.killProcess(Process.myPid());
     }
 
-    private ReceiveExitHandler receiveExitHandler = new ReceiveExitHandler(){
+    private ReceiveExitHandler receiveExitHandler = new ReceiveExitHandler() {
         @Override
-        public void handle(String msg,boolean isExit){
+        public void handle(String msg, boolean isExit) {
             exit();
         }
     };
-
 
 
     ArrayList<String> availableIPlist = new ArrayList<>();
@@ -303,7 +304,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     availableIPlist.add(company);
                     xcd_available_ip.setItemsData(availableIPlist);
                 }
-                if(!TextUtils.isEmpty(tempName)){
+                if (!TextUtils.isEmpty(tempName)) {
                     xcd_available_ip.setText(tempName);
                 }
                 ll_regist.setVisibility(View.VISIBLE);
@@ -327,33 +328,34 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     };
 
 
-
-/**============================================================================Listener================================================================================= **/
+    /**
+     * ============================================================================Listener=================================================================================
+     **/
 
     private final class OnClickListenerImplementation implements
             OnClickListener {
         @Override
         public void onClick(View v) {
             String itemsData = xcd_available_ip.getItemsData();
-            if(company.equals(itemsData)){
+            if (company.equals(itemsData)) {
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_select_unit));
                 return;
             }
-            if(llreAuthInfo.getVisibility() == View.VISIBLE){
+            if (llreAuthInfo.getVisibility() == View.VISIBLE) {
                 //模拟警员
                 String useAccount = account.getText().toString().trim();
-                String useDepartmentId=departmentId.getText().toString().trim();
-                String useDepartmentName=departmentName.getText().toString().trim();
+                String useDepartmentId = departmentId.getText().toString().trim();
+                String useDepartmentName = departmentName.getText().toString().trim();
                 String name = edtName.getText().toString().trim();
                 MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, useAccount);
                 MyTerminalFactory.getSDK().putParam(UrlParams.NAME, name);
                 MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_ID, useDepartmentId);
                 MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_NAME, useDepartmentName);
                 int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
-                if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                     changeProgressMsg(getString(R.string.authing));
                 }
-            }else {
+            } else {
                 //注册
                 String useOrg = userOrg.getText().toString().trim();
                 String useName = userName.getText().toString().trim();
@@ -367,29 +369,28 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 } else if (TextUtils.isEmpty(useName)) {
                     ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_name));
                     return;
-                }
-                else if (!DataUtil.isLegalName(useName) || useName.length() > 12 || useName.length() < 2) {
+                } else if (!DataUtil.isLegalName(useName) || useName.length() > 12 || useName.length() < 2) {
                     ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_input_correct_name));
                     return;
                 }
                 String registIP = TerminalFactory.getSDK().getAuthManagerTwo().getTempIp();
                 String registPort = TerminalFactory.getSDK().getAuthManagerTwo().getTempPort();
-                if(TextUtils.isEmpty(registIP) || TextUtils.isEmpty(registPort)){
+                if (TextUtils.isEmpty(registIP) || TextUtils.isEmpty(registPort)) {
                     ToastUtils.showShort(R.string.text_please_select_unit);
-                }else {
+                } else {
                     changeProgressMsg(getString(R.string.text_registing));
-                    TerminalFactory.getSDK().getAuthManagerTwo().regist(useName,useOrg);
+                    TerminalFactory.getSDK().getAuthManagerTwo().regist(useName, useOrg);
                 }
             }
         }
     }
 
     //模拟警员
-    private class OnSwitchingModeClickListener implements OnClickListener{
+    private class OnSwitchingModeClickListener implements OnClickListener {
 
         @Override
         public void onClick(View v) {
-            if(llreAuthInfo.getVisibility()==View.GONE&&userName.getVisibility()==View.VISIBLE&&userOrg.getVisibility()==View.VISIBLE){
+            if (llreAuthInfo.getVisibility() == View.GONE && userName.getVisibility() == View.VISIBLE && userOrg.getVisibility() == View.VISIBLE) {
                 userOrg.setVisibility(View.GONE);
                 userName.setVisibility(View.GONE);
                 btn_confirm.setVisibility(View.VISIBLE);
@@ -397,7 +398,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
 
                 btnAddMember.setText(R.string.text_invitation_code_regist);
-            }else {
+            } else {
                 userOrg.setVisibility(View.VISIBLE);
                 userName.setVisibility(View.VISIBLE);
                 btn_confirm.setVisibility(View.VISIBLE);
@@ -446,8 +447,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_invitation_code_not_correct));
                 } else {
                     if (s.length() == 6) {//长度是六的时候，请求名字
-                        String registUrl = TerminalFactory.getSDK().getParam(Params.REGIST_URL,"");
-                        if(!TextUtils.isEmpty(registUrl)){
+                        String registUrl = TerminalFactory.getSDK().getParam(Params.REGIST_URL, "");
+                        if (!TextUtils.isEmpty(registUrl)) {
                             logger.info("邀请码输入六位完成；开始到服务器拿名字");
                             TerminalFactory.getSDK().getAuthManagerTwo().getNameByOrg(s + "");
                         }
@@ -512,7 +513,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         selectPort = availableIPMap.get(name).getPort();
                         //认证
                         int resultCode = MyTerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
-                        if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                             changeProgressMsg(getString(R.string.authing));
                         }
                     }
@@ -590,7 +591,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         if (isCheckFinished && isCheckSuccess) {
             availableIPlist.clear();
             LoginModel loginModel = new LoginModel(viewHolder.userUnit.getText().toString(),
-                    viewHolder.userIP.getText().toString(),viewHolder.userPort.getText().toString() );
+                    viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString());
             availableIPMap.put(viewHolder.userUnit.getText().toString(), loginModel);
             availableIPlist.addAll(SetToListUtil.setToArrayList(availableIPMap));
             availableIPlist.remove(viewHolder.userUnit.getText().toString());
@@ -599,7 +600,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             xcd_available_ip.setItemsData(availableIPlist);
             reAuthCount = 0;
             int code = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString());
-            if(code == BaseCommonCode.SUCCESS_CODE){
+            if (code == BaseCommonCode.SUCCESS_CODE) {
                 changeProgressMsg(getString(R.string.authing));
             }
             popupWindow.dismiss();
@@ -617,7 +618,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             } else {
                 String text = viewHolder.userUnit.getText().toString().trim();
                 if (!DataUtil.isLegalName(text) || text.length() < 2) {
-                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(),  getString(R.string.text_unit_name_is_not_correct));
+                    ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_unit_name_is_not_correct));
                     return;
                 }
 
@@ -696,7 +697,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
 
-
     @Override
     public int getLayoutResId() {
         return R.layout.activity_regist;
@@ -729,7 +729,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         }
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
         //市局包隐藏模拟警员
-        if(apkType.equals(AuthManagerTwo.POLICESTORE) || apkType.equals(AuthManagerTwo.POLICETEST)){
+        if (apkType.equals(AuthManagerTwo.POLICESTORE) || apkType.equals(AuthManagerTwo.POLICETEST)) {
             btnAddMember.setVisibility(View.GONE);
         }
         initPopupWindow();
@@ -860,32 +860,34 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         PromptManager.getInstance().start();
         //进入注册界面了，先判断有没有认证地址
         String authUrl = TerminalFactory.getSDK().getParam(Params.IDENTITY_URL, "");
-        if(TextUtils.isEmpty(authUrl)){
+        System.out.println("服务器的地址:" + authUrl);
+        if (TextUtils.isEmpty(authUrl)) {
             //平台包或者没获取到类型，直接用AuthManager中的地址,
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType) || TextUtils.isEmpty(apkType)){
+            if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType) || TextUtils.isEmpty(apkType)) {
                 String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
-                if(defaultAddress.length>=2){
-                    int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0],defaultAddress[1]);
-                    if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                if (defaultAddress.length >= 2) {
+                    int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);
+                    if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                         changeProgressMsg(getString(R.string.authing));
-                    }else {
+                    } else {
                         //状态机没有转到正在认证，说明已经在状态机中了，不用处理
                     }
-                }else {
+                } else {
                     //没有注册服务地址，去探测地址
                     TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
                 }
-            }else {
+            } else {
                 //没有注册服务地址，去探测地址
                 TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
             }
-        }else {
+        } else {
+            System.out.println("11111登录的入口开启状态handle切换");
             //有注册服务地址，去认证
-            int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP,""),TerminalFactory.getSDK().getParam(Params.REGIST_PORT,""));
-            if(resultCode == BaseCommonCode.SUCCESS_CODE){
+            int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 changeProgressMsg(getString(R.string.authing));
-            }else {
+            } else {
                 //状态机没有转到正在认证，说明已经在状态机中了，不用处理
             }
         }
@@ -947,7 +949,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState){
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         // 把状态变为登陆 能使父类不会走 protectApp()
         MyApplication.instance.mAppStatus = Constants.LOGINED;
         super.onCreate(savedInstanceState);
@@ -1109,7 +1111,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 logger.error("获取到的警号变了，删除所有数据！！！！");
                 DeleteData.deleteAllData();
             }
-            TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK,true);
+            TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, true);
             MyApplication.instance.setTerminalMemberType();
             MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, userInfo.get("account") + "");
             MyTerminalFactory.getSDK().putParam(UrlParams.NAME, userInfo.get("name") + "");
@@ -1127,11 +1129,11 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             MyTerminalFactory.getSDK().putParam(UrlParams.PRIVILEGE_CODE, userInfo.get("privilege_code") + "");
             MyTerminalFactory.getSDK().putParam(UrlParams.PRIVILEGE_NAME, userInfo.get("privilege_name") + "");
             MyTerminalFactory.getSDK().putParam(UrlParams.EXTRA_1, userInfo.get("extra_1") + "");
-            
+
         } else {
-            TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK,false);
+            TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, false);
             ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_open_wuhan_police_work_first));
-            
+
         }
     }
 
@@ -1241,7 +1243,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         break;
                     // 未知错误
                     case PstoreUserException.ERROR_UNKONWN:
-                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(),  getString(R.string.text_unknown_error));
+                        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_unknown_error));
                         break;
                     default:
                         break;
