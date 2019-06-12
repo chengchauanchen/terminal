@@ -349,10 +349,12 @@ public abstract class ChatBaseActivity extends BaseActivity implements
     private void initNFC() {
         mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
         mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this,getClass()), 0);
-        // 指定要传输文本的回调
-        mNfcAdapter.setNdefPushMessageCallback(this, this);
-        // 传输完成调用
-        mNfcAdapter.setOnNdefPushCompleteCallback(this, this);
+        if(mNfcAdapter!=null){
+          // 指定要传输文本的回调
+          mNfcAdapter.setNdefPushMessageCallback(this, this);
+          // 传输完成调用
+          mNfcAdapter.setOnNdefPushCompleteCallback(this, this);
+        }
     }
 
     @Override
