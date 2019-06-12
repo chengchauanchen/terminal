@@ -266,6 +266,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
                     ToastUtil.showToast(context,context.getString(R.string.text_has_no_send_message_authority));
                     return;
                 }
+                //点击发送并不真的发送数据，而是触发另外一个地方的回调去发送
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.TEXT);
                 if(!TextUtils.isEmpty(context.getSharedPreferences("unsendMessage", MODE_PRIVATE).getString(String.valueOf(userId),""))){
                     context.getSharedPreferences("unsendMessage",MODE_PRIVATE).edit().remove(String.valueOf(userId)).apply();

@@ -1027,7 +1027,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			clientChannel = null;
 			getClientChannel().registServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
 			getClientChannel().start();
-			startService();
+			startService();//bind方式启动onlineservice，普通方式启动bluetoothservice
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
@@ -1043,6 +1043,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		public void handler(boolean connected) {
 			logger.info("***********UDPClientBase**************connected = "+connected);
 			Established = connected;
+			System.out.println("远程回调触发，说明信令服务真正的连接正常--回调通知函数ReceiveServerConnectionEstablishedHandler");
 			notifyReceiveHandler(ReceiveServerConnectionEstablishedHandler.class, connected);
 		}
 	};
