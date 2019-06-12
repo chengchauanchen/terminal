@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
+import android.text.TextUtils;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.Button;
@@ -435,6 +436,10 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
      * 拨打电话
      */
     private void goToCall(Member member) {
+        if(TextUtils.isEmpty(member.getPhone())){
+            ToastUtils.showShort(R.string.text_has_no_member_phone_number);
+            return;
+        }
         if(member.getUniqueNo() == 0){
             //普通电话
             CallPhoneUtil.callPhone( IndividualNewsActivity.this, member.getPhone());

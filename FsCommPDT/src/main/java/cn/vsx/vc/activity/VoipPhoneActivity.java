@@ -3,6 +3,7 @@ package cn.vsx.vc.activity;
 import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONObject;
+import com.blankj.utilcode.util.ToastUtils;
 
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -226,7 +228,11 @@ public class VoipPhoneActivity extends BaseActivity{
         userId =member.id;
         userName = member.getName();
         phone = member.getPhone();
-
+        if(TextUtils.isEmpty(phone)){
+            ToastUtils.showShort(R.string.text_has_no_member_phone_number);
+            finish();
+            return;
+        }
 
         memberNameRequest.setText(userName + "");
         memberPhoneRequest.setText(phone);

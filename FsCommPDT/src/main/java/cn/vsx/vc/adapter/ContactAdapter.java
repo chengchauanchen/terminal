@@ -14,11 +14,10 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.List;
-
-
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.model.Account;
@@ -286,6 +285,10 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     private void callPhone(Account account){
+        if(TextUtils.isEmpty(account.getPhone())){
+            ToastUtils.showShort(R.string.text_has_no_member_phone_number);
+            return;
+        }
         new ChooseDevicesDialog(mContext, ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog, member) -> {
             if(member.getUniqueNo() == 0){
                 //普通电话

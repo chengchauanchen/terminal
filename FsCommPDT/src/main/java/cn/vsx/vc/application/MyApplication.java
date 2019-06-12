@@ -81,6 +81,7 @@ public class MyApplication extends Application {
 		instance = this;
 		super.onCreate();
 		SpecificSDK.init(this);
+		setTerminalMemberType();
 		registerActivityLifecycleCallbacks(new SimpleActivityLifecycle());
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
 

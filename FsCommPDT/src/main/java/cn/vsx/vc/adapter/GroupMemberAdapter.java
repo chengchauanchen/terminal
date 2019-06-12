@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
@@ -182,6 +183,10 @@ public class GroupMemberAdapter extends BaseAdapter {
         });
         viewHolder.dialTo.setOnClickListener(view12 -> {
             Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMember(member);
+            if(TextUtils.isEmpty(account.getPhone())){
+                ToastUtils.showShort(R.string.text_has_no_member_phone_number);
+                return;
+            }
             new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog,member1) -> {
                 if(member1.getUniqueNo() == 0){
                     //普通电话

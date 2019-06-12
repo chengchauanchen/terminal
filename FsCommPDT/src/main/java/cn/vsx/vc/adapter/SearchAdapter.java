@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.text.Html;
 import android.text.Spanned;
+import android.text.TextUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.chad.library.adapter.base.BaseMultiItemQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
@@ -228,6 +230,10 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
      * 拨打电话
      */
     private void callPhone(Account account){
+        if(TextUtils.isEmpty(account.getPhone())){
+            ToastUtils.showShort(R.string.text_has_no_member_phone_number);
+            return;
+        }
         new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog, member) -> {
             if(member.getUniqueNo() == 0){
                 //普通电话

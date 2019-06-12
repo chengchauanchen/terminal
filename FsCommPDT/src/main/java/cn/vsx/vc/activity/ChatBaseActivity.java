@@ -32,7 +32,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.google.gson.internal.LinkedTreeMap;
-import com.readystatesoftware.systembartint.SystemBarTintManager;
 import com.zectec.imageandfileselector.base.Constant;
 import com.zectec.imageandfileselector.bean.FileInfo;
 import com.zectec.imageandfileselector.bean.Image;
@@ -116,6 +115,7 @@ import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.FileUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.NfcUtil;
+import cn.vsx.vc.utils.StatusBarUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
@@ -208,9 +208,10 @@ public abstract class ChatBaseActivity extends BaseActivity{
      * 设置statusbar颜色
      **/
     protected void setStatusBarColor() {
-        SystemBarTintManager tintManager = new SystemBarTintManager(this);
-        tintManager.setStatusBarTintEnabled(true);
-        tintManager.setTintColor(ContextCompat.getColor(this, R.color.backgroudblue));
+        StatusBarUtil.setStatusBarColor(this, R.color.backgroudblue);
+//        SystemBarTintManager tintManager = new SystemBarTintManager(this);
+//        tintManager.setStatusBarTintEnabled(true);
+//        tintManager.setTintColor(ContextCompat.getColor(this, R.color.sweep_text_black));
     }
 
     public void initListener() {

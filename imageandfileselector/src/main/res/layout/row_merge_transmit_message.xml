@@ -58,7 +58,7 @@
                 android:layout_centerVertical="true"
                 android:autoLink="web"
                 android:gravity="center|left"
-                android:textColor="@color/chat_title"
+                android:textColor="@color/black"
                 android:textSize="@dimen/sp_15" />
         </RelativeLayout>
 

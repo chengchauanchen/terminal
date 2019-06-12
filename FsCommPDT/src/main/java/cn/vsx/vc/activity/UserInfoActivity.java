@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
@@ -239,6 +240,10 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
      * 拨打电话
      */
     private void goToCall(Member member) {
+        if(TextUtils.isEmpty(member.getPhone())){
+            ToastUtils.showShort(R.string.text_has_no_member_phone_number);
+            return;
+        }
         if(member.getUniqueNo() == 0){
             //普通电话
             CallPhoneUtil.callPhone( UserInfoActivity.this, member.getPhone());

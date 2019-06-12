@@ -74,6 +74,9 @@ public class WarningMessageDetailActivity extends BaseActivity{
     };
 
     private void showDailog(String phone){
+        if(TextUtils.isEmpty(phone)){
+            return;
+        }
         ItemAdapter adapter = new ItemAdapter(WarningMessageDetailActivity.this, ItemAdapter.iniDatas());
         AlertDialog.Builder builder = new AlertDialog.Builder(WarningMessageDetailActivity.this);
         //设置标题

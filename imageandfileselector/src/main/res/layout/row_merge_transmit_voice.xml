@@ -81,7 +81,7 @@
             android:layout_marginLeft="@dimen/dp_10"
             android:layout_toRightOf="@id/bubble"
             android:gravity="center"
-            android:textColor="@color/chat_title"
+            android:textColor="@color/voice_length"
             android:textSize="@dimen/sp_16"/>
 
         <ImageView

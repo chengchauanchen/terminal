@@ -107,7 +107,7 @@ public class EasyLinphone {
         if (!LinphoneService.isReady() || !LinphoneManager.isInstanceiated()) {
             return;
         }
-        if (!num.equals("")) {
+        if (!"".equals(num)) {
             PhoneBean phone = new PhoneBean();
             phone.setUserName(num);
             phone.setHost(mServerIP);
