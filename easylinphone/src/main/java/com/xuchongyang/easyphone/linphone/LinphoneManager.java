@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.xuchongyang.easyphone.EasyLinphone;
 import com.xuchongyang.easyphone.R;
 
 import org.linphone.core.LinphoneAddress;
@@ -60,7 +61,7 @@ public class LinphoneManager implements LinphoneCoreListener {
 
     public LinphoneManager(Context serviceContext) {
         mServiceContext = serviceContext;
-        LinphoneCoreFactory.instance().setDebugMode(false, "vsx");
+        LinphoneCoreFactory.instance().setDebugMode(true, "vsx");
         sExited = false;
 
         String basePath = mServiceContext.getFilesDir().getAbsolutePath();
@@ -81,6 +82,7 @@ public class LinphoneManager implements LinphoneCoreListener {
         }
         instance = new LinphoneManager(context);
         instance.startLibLinphone(context);
+        EasyLinphone.getLC().clearAuthInfos();
         return instance;
     }
 

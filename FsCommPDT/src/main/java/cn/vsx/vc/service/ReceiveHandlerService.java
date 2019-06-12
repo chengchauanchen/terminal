@@ -243,8 +243,6 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getWarningMessageDetailHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAirCraftStatusChangedHandler);
-        //开启voip电话服务
-        MyTerminalFactory.getSDK().getVoipCallManager().startService(MyTerminalFactory.getSDK().application);
         //监听voip来电
         MyTerminalFactory.getSDK().getVoipCallManager().addCallback(voipRegistrationCallback,voipPhoneCallback);
 

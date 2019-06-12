@@ -683,7 +683,7 @@ public class PhonePushService extends BaseService{
     };
 
     private void handleFocus(Camera camera){
-        if(null != mMediaStream && mMediaStream.isStreaming() && camera != null){
+        if(null != mMediaStream && mMediaStream.isStreaming() && camera != null && mMediaStream.isPreView()){
             camera.autoFocus(null);//屏幕聚焦
         }
         showLivingView();

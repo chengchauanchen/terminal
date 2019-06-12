@@ -79,6 +79,7 @@ public class MediaStream {
     private final Handler mCameraHandler;
     //    private int previewFormat;
     public static CodecInfo info = new CodecInfo();
+    private boolean preView;
     public Logger logger = Logger.getLogger(getClass());
 
     public MediaStream(Context context, SurfaceTexture texture) {
@@ -368,6 +369,7 @@ public class MediaStream {
             });
             return;
         }
+        preView = true;
         logger.info("------>>>>startPreview");
         if(audioStream == null){
             audioStream = new AudioStream();
@@ -499,6 +501,7 @@ public class MediaStream {
             });
             return;
         }
+        preView = false;
         try {
             if (mCamera != null) {
                 mCamera.stopPreview();
@@ -666,6 +669,10 @@ public class MediaStream {
         }else {
             ToastUtil.showToast(mApplicationContext,"摄像头不支持放大");
         }
+    }
+
+    public boolean isPreView(){
+        return preView;
     }
 
     public static class CodecInfo {
