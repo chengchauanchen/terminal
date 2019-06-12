@@ -375,7 +375,6 @@ public class NewsFragment extends BaseFragment {
         if(messageList.isEmpty()){
             messageList.add(newMainGroupMessageToList());
         }
-        System.out.println("登录界面再来一次messageList："+messageList.size());
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(messageList));
     }
 
@@ -1317,7 +1316,6 @@ public class NewsFragment extends BaseFragment {
      */
     private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> {
         if(connected){
-            System.out.println("网络变化");
             MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(messageList);
         }
     };

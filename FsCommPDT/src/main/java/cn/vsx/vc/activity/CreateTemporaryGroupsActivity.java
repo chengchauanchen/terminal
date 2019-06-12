@@ -1,7 +1,5 @@
 package cn.vsx.vc.activity;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -29,7 +27,6 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.CreateTemporaryGroupsDialog;
-import cn.vsx.vc.receiver.TempGroupExpireReceiver;
 import cn.vsx.vc.utils.StringUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -242,23 +239,6 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginForUIOperationHandler);
     }
 
-
-    private void addTimeAlarm() {
-        //如果程序进程被杀死，该闹钟将不起作用，但对于我们的业务不受影响
-        //获得系统提供的AlarmManager服务的对象
-        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        //Intent设置要启动的组件，这里启动广播
-        Intent intent = new Intent();
-        intent.setAction(TempGroupExpireReceiver.ACTION_TEMP_GROUP_EXPIRE);
-        intent.putExtra(TempGroupExpireReceiver.EXTRA_GROUP_NAME, temporaryGroupsName);
-        //PendingIntent对象设置动作,启动的是Activity还是Service,或广播!
-        PendingIntent sender = PendingIntent.getBroadcast(this, 0, intent, 0);
-        //注册闹钟
-        System.out.println("existTime:" + existTime);
-        alarm.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + existTime * 1000, sender);
-    }
-
-
     /**
      * =================================================================================================handler======================================================================================================================
      **/
@@ -271,7 +251,6 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                 if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                     createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_SUCCESS, "", scanGroup);
                     //临时组创建成功之后，开启一个定时任务，到期时给用户一个提示
-                    addTimeAlarm();
                     myHandler.postDelayed(() -> {
                         //刷新通讯录组群列表
 //                    MyTerminalFactory.getSDK().getConfigManager().updateAllGroups();
