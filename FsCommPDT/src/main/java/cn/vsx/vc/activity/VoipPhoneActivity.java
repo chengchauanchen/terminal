@@ -69,7 +69,10 @@ public class VoipPhoneActivity extends BaseActivity{
         //将状态机至于正在个呼状态
         int code = TerminalFactory.getSDK().getTerminalStateManager().openFunction(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.IDLE);
         if(code == BaseCommonCode.SUCCESS_CODE){
-//            MyTerminalFactory.getSDK().getVoipCallManager().calling();
+            if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.RINGING)){
+                //将个呼状态机移动到响铃状态
+                TerminalFactory.getSDK().getTerminalStateManager().moveToState(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.RINGING);
+            }
         }else {
             finish();
             return;
