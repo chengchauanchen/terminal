@@ -1,11 +1,19 @@
 package cn.vsx.vc.activity;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.nfc.FormatException;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcEvent;
+import android.nfc.Tag;
+import android.nfc.tech.Ndef;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,43 +34,6 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.blankj.utilcode.util.ToastUtils;
-import com.bumptech.glide.Glide;
-import com.google.gson.internal.LinkedTreeMap;
-import com.zectec.imageandfileselector.base.Constant;
-import com.zectec.imageandfileselector.bean.FileInfo;
-import com.zectec.imageandfileselector.bean.Image;
-import com.zectec.imageandfileselector.bean.Record;
-import com.zectec.imageandfileselector.fragment.FileMainFragment;
-import com.zectec.imageandfileselector.fragment.ImagePreviewFragment;
-import com.zectec.imageandfileselector.fragment.ImageSelectorFragment;
-import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileCheckMessageHandler;
-import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileHandler;
-import com.zectec.imageandfileselector.receivehandler.ReceiverToFaceRecognitionHandler;
-import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
-import com.zectec.imageandfileselector.view.LoadingCircleView;
-
-import org.apache.http.util.TextUtils;
-import org.apache.log4j.Logger;
-import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import cn.vsx.hamster.common.Constants;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageSendStateEnum;
@@ -79,6 +50,7 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
+import cn.vsx.hamster.terminalsdk.model.NFCBean;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetHistoryMessageRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
@@ -103,6 +75,7 @@ import cn.vsx.vc.dialog.NFCBindingDialog;
 import cn.vsx.vc.fragment.LocationFragment;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.TransponSelectedBean;
+import cn.vsx.vc.receiveHandle.ReceiveNFCWriteResultHandler;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
@@ -115,10 +88,44 @@ import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.FileUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.NfcUtil;
-import cn.vsx.vc.utils.StatusBarUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.blankj.utilcode.util.ToastUtils;
+import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
+import com.readystatesoftware.systembartint.SystemBarTintManager;
+import com.zectec.imageandfileselector.base.Constant;
+import com.zectec.imageandfileselector.bean.FileInfo;
+import com.zectec.imageandfileselector.bean.Image;
+import com.zectec.imageandfileselector.bean.Record;
+import com.zectec.imageandfileselector.fragment.FileMainFragment;
+import com.zectec.imageandfileselector.fragment.ImagePreviewFragment;
+import com.zectec.imageandfileselector.fragment.ImageSelectorFragment;
+import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileCheckMessageHandler;
+import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileHandler;
+import com.zectec.imageandfileselector.receivehandler.ReceiverToFaceRecognitionHandler;
+import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
+import com.zectec.imageandfileselector.view.LoadingCircleView;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.apache.http.util.TextUtils;
+import org.apache.log4j.Logger;
+import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.HttpUtil;
@@ -131,7 +138,8 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.I
  * Created by gt358 on 2017/8/16.
  */
 
-public abstract class ChatBaseActivity extends BaseActivity{
+public abstract class ChatBaseActivity extends BaseActivity implements
+    NfcAdapter.CreateNdefMessageCallback, NfcAdapter.OnNdefPushCompleteCallback {
     private static final int CODE_CAMERA_REQUEST = 0x11;/** 打开相机 */
     private static final int CODE_IMAGE_RESULT=0;
     private static final int CODE_VIDEO_RESULT=1;
@@ -175,6 +183,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
     private NFCBindingDialog nfcBindingDialog;//nfc弹窗
     private boolean isActivity;//是否是显示
 
+    private NfcAdapter mNfcAdapter;
+    private PendingIntent mPendingIntent;
+
     protected Handler handler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
@@ -208,10 +219,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
      * 设置statusbar颜色
      **/
     protected void setStatusBarColor() {
-        StatusBarUtil.setStatusBarColor(this, R.color.backgroudblue);
-//        SystemBarTintManager tintManager = new SystemBarTintManager(this);
-//        tintManager.setStatusBarTintEnabled(true);
-//        tintManager.setTintColor(ContextCompat.getColor(this, R.color.sweep_text_black));
+        SystemBarTintManager tintManager = new SystemBarTintManager(this);
+        tintManager.setStatusBarTintEnabled(true);
+        tintManager.setTintColor(ContextCompat.getColor(this, R.color.backgroudblue));
     }
 
     public void initListener() {
@@ -250,6 +260,8 @@ public abstract class ChatBaseActivity extends BaseActivity{
         speakingId = getIntent().getIntExtra("speakingId", 0);
         speakingName = getIntent().getStringExtra("speakingName");
         newsBarGroupName.setText(HandleIdUtil.handleName(userName));
+        initNFC();
+
         setToIds();
         //消息从文件服务获取
 //        if(isGroup){
@@ -332,6 +344,15 @@ public abstract class ChatBaseActivity extends BaseActivity{
             setListSelection(chatMessageList.size() - 1);
             temporaryAdapter.notifyDataSetChanged();
         }
+    }
+
+    private void initNFC() {
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this,getClass()), 0);
+        // 指定要传输文本的回调
+        mNfcAdapter.setNdefPushMessageCallback(this, this);
+        // 传输完成调用
+        mNfcAdapter.setOnNdefPushCompleteCallback(this, this);
     }
 
     @Override
@@ -1737,6 +1758,9 @@ public abstract class ChatBaseActivity extends BaseActivity{
     protected void onResume() {
         super.onResume();
         isActivity = true;
+        if (mNfcAdapter != null) {
+            mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, null, null);
+        }
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileHandler);
     }
 
@@ -1744,8 +1768,63 @@ public abstract class ChatBaseActivity extends BaseActivity{
     protected void onPause() {
         super.onPause();
         isActivity = false;
+        if (mNfcAdapter != null) {
+            mNfcAdapter.disableForegroundDispatch(this);
+        }
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSendFileHandler);
     }
+
+    //@Override
+    //protected void onNewIntent(Intent intent) {
+    //    super.onNewIntent(intent);
+    //    NFCBean nfcBean = MyApplication.instance.getNfcBean();
+    //    if(nfcBean != null){
+    //        processIntent(new Gson().toJson(nfcBean),intent);
+    //    }
+    //}
+
+    @Override public NdefMessage createNdefMessage(NfcEvent event) {
+        NFCBean nfcBean = MyApplication.instance.getNfcBean();
+        if(nfcBean != null){
+            NdefMessage ndefMessage = new NdefMessage(new NdefRecord[] { NfcUtil.creatTextRecord(new Gson().toJson(nfcBean)) });
+            //processIntent(new Gson().toJson(nfcBean),intent);
+            return ndefMessage;
+        }
+        return null;
+    }
+
+
+    /**
+     * 往nfc写入数据
+     */
+    public static void writeNFCToTag(String data, Intent intent) throws IOException, FormatException {
+        Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        Ndef ndef = Ndef.get(tag);
+        ndef.connect();
+        NdefRecord ndefRecord = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            ndefRecord = NdefRecord.createTextRecord(null, data);
+        }
+        NdefRecord[] records = {ndefRecord};
+        NdefMessage ndefMessage = new NdefMessage(records);
+        ndef.writeNdefMessage(ndefMessage);
+    }
+
+    @Override
+    public void onNdefPushComplete(NfcEvent event) {
+        logger.debug("onNdefPushComplete:"+event);
+        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveNFCWriteResultHandler.class,0,"");
+    }
+
+    //    @Override
+//    public NdefMessage createNdefMessage(NfcEvent event) {
+//        NFCBean nfcBean = MyApplication.instance.getNfcBean();
+//        if(nfcBean != null){
+//            NdefMessage ndefMessage = new NdefMessage(new NdefRecord[] { creatTextRecord(text) });
+//        }
+//
+//        return null;
+//    }
 
     /**
      * 获取数据并刷新页面
