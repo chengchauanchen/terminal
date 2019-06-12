@@ -138,7 +138,8 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.I
  * Created by gt358 on 2017/8/16.
  */
 
-public abstract class ChatBaseActivity extends BaseActivity {
+public abstract class ChatBaseActivity extends BaseActivity implements
+    NfcAdapter.CreateNdefMessageCallback, NfcAdapter.OnNdefPushCompleteCallback{
     private static final int CODE_CAMERA_REQUEST = 0x11;
     /**
      * 打开相机
@@ -1788,40 +1789,13 @@ public abstract class ChatBaseActivity extends BaseActivity {
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSendFileHandler);
     }
 
-    //@Override
-    //protected void onNewIntent(Intent intent) {
-    //    super.onNewIntent(intent);
-    //    NFCBean nfcBean = MyApplication.instance.getNfcBean();
-    //    if(nfcBean != null){
-    //        processIntent(new Gson().toJson(nfcBean),intent);
-    //    }
-    //}
-
     @Override public NdefMessage createNdefMessage(NfcEvent event) {
         NFCBean nfcBean = MyApplication.instance.getNfcBean();
         if(nfcBean != null){
             NdefMessage ndefMessage = new NdefMessage(new NdefRecord[] { NfcUtil.creatTextRecord(new Gson().toJson(nfcBean)) });
-            //processIntent(new Gson().toJson(nfcBean),intent);
             return ndefMessage;
         }
         return null;
-    }
-
-
-    /**
-     * 往nfc写入数据
-     */
-    public static void writeNFCToTag(String data, Intent intent) throws IOException, FormatException {
-        Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
-        Ndef ndef = Ndef.get(tag);
-        ndef.connect();
-        NdefRecord ndefRecord = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            ndefRecord = NdefRecord.createTextRecord(null, data);
-        }
-        NdefRecord[] records = {ndefRecord};
-        NdefMessage ndefMessage = new NdefMessage(records);
-        ndef.writeNdefMessage(ndefMessage);
     }
 
     @Override
@@ -1829,17 +1803,6 @@ public abstract class ChatBaseActivity extends BaseActivity {
         logger.debug("onNdefPushComplete:"+event);
         MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveNFCWriteResultHandler.class,0,"");
     }
-
-    //    @Override
-//    public NdefMessage createNdefMessage(NfcEvent event) {
-//        NFCBean nfcBean = MyApplication.instance.getNfcBean();
-//        if(nfcBean != null){
-//            NdefMessage ndefMessage = new NdefMessage(new NdefRecord[] { creatTextRecord(text) });
-//        }
-//
-//        return null;
-//    }
-
     /**
      * 获取数据并刷新页面
      */
