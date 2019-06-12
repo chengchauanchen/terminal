@@ -832,6 +832,8 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public void handler() {
             logger.info("ppt.触发了ReceivePTTUpHandler");
+            //手雷上的抬起和按下，通知界面当作屏幕button抬起按下一样处理
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
             myHandler.post(() -> {
                 MyApplication.instance.isClickVolumeToCall = false;
                 if (MyApplication.instance.getGroupListenenState() == LISTENING) {
@@ -848,6 +850,7 @@ public class TalkbackFragment extends BaseFragment {
         public void handler(int requestGroupCall) {
             logger.info("ppt.触发了receivePTTDownHandler");
             if (requestGroupCall == BaseCommonCode.SUCCESS_CODE) {
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);
                 myHandler.post(() -> {
                     if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
                         CheckMyPermission.permissionPrompt((NewMainActivity) context, Manifest.permission.RECORD_AUDIO);
@@ -1140,7 +1143,6 @@ public class TalkbackFragment extends BaseFragment {
 //        context.registerReceiver(talkbackVolumeReceiver, new IntentFilter("android.media.VOLUME_CHANGED_ACTION"));
 
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCallingCannotClickHandler);
-
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
@@ -1319,6 +1321,7 @@ public class TalkbackFragment extends BaseFragment {
         TextViewCompat.setTextAppearance(ptt,R.style.pttSilenceText);
         ptt.setBackgroundResource(R.drawable.ptt_silence);
         ptt.setEnabled(true);
+//        talkback_add_icon.setEnabled(true);
     }
 
     private void change2Waiting() {
@@ -1710,7 +1713,6 @@ public class TalkbackFragment extends BaseFragment {
         if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
 
         }
-
         int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
         logger.info("PTT按下以后resultCode:" + resultCode);
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {//允许组呼了

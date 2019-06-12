@@ -39,7 +39,7 @@ public class ChooseDevicesDialog extends Dialog {
     public static final int TYPE_PUSH_LIVE = 4;//上报图像
 
     public ChooseDevicesDialog(Context context, int type, Account account, ChooseDevicesAdapter.ItemClickListener mItemClickListener) {
-        super(context,R.style.progress_dialog);
+        super(context, R.style.progress_dialog);
         this.type = type;
         this.account = account;
         this.list = getList(account, type);
@@ -59,7 +59,7 @@ public class ChooseDevicesDialog extends Dialog {
         rvList = findViewById(R.id.rv_list);
 
         textTitle.setText(getDialogTitle(type));
-        adapter = new ChooseDevicesAdapter(this.getContext(),this, list, mItemClickListener, (type == TYPE_CALL_PHONE));
+        adapter = new ChooseDevicesAdapter(this.getContext(), this, list, mItemClickListener, (type == TYPE_CALL_PHONE));
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this.getContext());
         linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         rvList.setLayoutManager(linearLayoutManager);
@@ -71,7 +71,7 @@ public class ChooseDevicesDialog extends Dialog {
         int width = display.getWidth();
         Window window = getWindow();
         WindowManager.LayoutParams layoutParams = window.getAttributes();
-        layoutParams.width= (int) (width*0.9);
+        layoutParams.width = (int) (width * 0.9);
 //        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
         layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         window.setAttributes(layoutParams);
@@ -109,15 +109,15 @@ public class ChooseDevicesDialog extends Dialog {
 
     public void showDialog() {
         if (list != null && !list.isEmpty()) {
-            if(list.size() == 1){
-                if(mItemClickListener!=null){
-                    mItemClickListener.onItemClick(this,list.get(0));
+            if (list.size() == 1) {
+                if (mItemClickListener != null) {
+                    mItemClickListener.onItemClick(this, list.get(0));
                 }
-            }else{
+            } else {
                 show();
             }
-        }else{
-            ToastUtil.showToast(getContext(),getContext().getString(R.string.no_use_devices));
+        } else {
+            ToastUtil.showToast(getContext(), getContext().getString(R.string.no_use_devices));
         }
     }
 
@@ -129,7 +129,7 @@ public class ChooseDevicesDialog extends Dialog {
      */
     private List<Member> getList(Account account, int type) {
         List<Member> result = new ArrayList<>();
-        if (account != null && account.getMembers()!=null&&!account.getMembers().isEmpty()) {
+        if (account != null && account.getMembers() != null && !account.getMembers().isEmpty()) {
             switch (type) {
                 //打电话
                 case ChooseDevicesDialog.TYPE_CALL_PHONE:
@@ -160,15 +160,25 @@ public class ChooseDevicesDialog extends Dialog {
      */
     private List<Member> getCallPhoneMemberList(Account account) {
         List<Member> result = new ArrayList<>();
-            for (Member member : account.getMembers()) {
-                if (member.type != TerminalMemberType.TERMINAL_HDMI.getCode() &&
-                        member.type != TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode() &&
-                        member.type != TerminalMemberType.TERMINAL_PDT.getCode()) {
-                    result.add(member);
-                }
+        for (Member member : account.getMembers()) {
+            if (member.type != TerminalMemberType.TERMINAL_HDMI.getCode() &&
+                    member.type != TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode() &&
+                    member.type != TerminalMemberType.TERMINAL_PDT.getCode()) {
+                result.add(member);
+                //因为电话号码都是一样的，获取到任意一个就跳出循环
+                System.out.println("跳出循环");
+                break;
             }
+        }
+//        for (Member member : account.getMembers()) {
+//                if (member.type != TerminalMemberType.TERMINAL_HDMI.getCode() &&
+//                        member.type != TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode() &&
+//                        member.type != TerminalMemberType.TERMINAL_PDT.getCode()) {
+//                    result.add(member);
+//                }
+//            }
         //普通电话
-        if(!TextUtils.isEmpty(account.getPhone())){
+        if (!TextUtils.isEmpty(account.getPhone())) {
             Member m = new Member();
             m.type = TerminalMemberType.TERMINAL_PHONE.getCode();
             m.setUniqueNo(0);
@@ -186,12 +196,12 @@ public class ChooseDevicesDialog extends Dialog {
      */
     private List<Member> getCallPrivateMemberList(Account account) {
         List<Member> result = new ArrayList<>();
-            for (Member member : account.getMembers()) {
-                if (member.type != TerminalMemberType.TERMINAL_HDMI.getCode() &&
-                        member.type != TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()) {
-                    result.add(member);
-                }
+        for (Member member : account.getMembers()) {
+            if (member.type != TerminalMemberType.TERMINAL_HDMI.getCode() &&
+                    member.type != TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()) {
+                result.add(member);
             }
+        }
         return result;
     }
 
@@ -203,13 +213,13 @@ public class ChooseDevicesDialog extends Dialog {
      */
     private List<Member> getPullLiveMemberList(Account account) {
         List<Member> result = new ArrayList<>();
-            for (Member member : account.getMembers()) {
-                if (member.type != TerminalMemberType.TERMINAL_HDMI.getCode() &&
-                        member.type != TerminalMemberType.TERMINAL_PDT.getCode()&&
-                        member.type != TerminalMemberType.TERMINAL_PC.getCode()) {
-                    result.add(member);
-                }
+        for (Member member : account.getMembers()) {
+            if (member.type != TerminalMemberType.TERMINAL_HDMI.getCode() &&
+                    member.type != TerminalMemberType.TERMINAL_PDT.getCode() &&
+                    member.type != TerminalMemberType.TERMINAL_PC.getCode()) {
+                result.add(member);
             }
+        }
         return result;
     }
 
@@ -221,12 +231,12 @@ public class ChooseDevicesDialog extends Dialog {
      */
     private List<Member> getPushLiveMemberList(Account account) {
         List<Member> result = new ArrayList<>();
-            for (Member member : account.getMembers()) {
-                if (member.type != TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode() &&
-                        member.type != TerminalMemberType.TERMINAL_PDT.getCode()) {
-                    result.add(member);
-                }
+        for (Member member : account.getMembers()) {
+            if (member.type != TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode() &&
+                    member.type != TerminalMemberType.TERMINAL_PDT.getCode()) {
+                result.add(member);
             }
+        }
         return result;
     }
 

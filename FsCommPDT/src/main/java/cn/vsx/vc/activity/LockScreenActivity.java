@@ -37,10 +37,13 @@ import java.util.Locale;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
+import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
@@ -69,13 +72,15 @@ import ptt.terminalsdk.tools.ToastUtil;
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.GRANTED;
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.IDLE;
 
+//import cn.vsx.hamster.terminalsdk.model.Group;
+
 public class LockScreenActivity extends BaseActivity {
 
     //成员被删除了,销毁锁屏
     private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
         @Override
         public void handler() {
-            logger.info("receiveMemberDeleteHandler"+"被调用了");
+            logger.info("receiveMemberDeleteHandler" + "被调用了");
             mHandler.post(() -> {
                 LockScreenActivity.this.finish();
                 stopService(new Intent(LockScreenActivity.this, LockScreenService.class));
@@ -83,7 +88,9 @@ public class LockScreenActivity extends BaseActivity {
         }
     };
 
-    /**更新配置信息*/
+    /**
+     * 更新配置信息
+     */
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
         @Override
         public void handler() {
@@ -92,7 +99,9 @@ public class LockScreenActivity extends BaseActivity {
             });
         }
     };
-    /**网络连接状态*/
+    /**
+     * 网络连接状态
+     */
     private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
         @Override
         public void handler(final boolean connected) {
@@ -106,18 +115,20 @@ public class LockScreenActivity extends BaseActivity {
      */
     private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = (resultCode, resultDesc, isRegisted) -> {
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-            if(isRegisted){
+            if (isRegisted) {
 //                TerminalFactory.getSDK().getAuthManagerTwo().login();
                 logger.info("信令服务器通知NotifyForceRegisterMessage消息，在LockScreenActivity中登录了");
-            }else {
+            } else {
                 runOnUiThread(() -> LockScreenActivity.this.finish());
             }
         }
     };
 
 
-    /**更新文件夹和组列表数据*/
-    private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = new ReceiveUpdateFoldersAndGroupsHandler(){
+    /**
+     * 更新文件夹和组列表数据
+     */
+    private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = new ReceiveUpdateFoldersAndGroupsHandler() {
         @Override
         public void handler() {
             mHandler.post(() -> {
@@ -152,7 +163,7 @@ public class LockScreenActivity extends BaseActivity {
         @Override
         public void handler(int memberId, final String memberName, final int groupId,
                             String version, CallMode currentCallMode) {
-            if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
+            if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 mHandler.post(() -> {
                     change2Listening();
                     setCurrentGroupScanView(groupId);
@@ -190,7 +201,7 @@ public class LockScreenActivity extends BaseActivity {
      */
     private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
         @Override
-        public void handler(int methodResult, String resultDesc,int groupId) {
+        public void handler(int methodResult, String resultDesc, int groupId) {
             currentCallMode = MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode();
             if (currentCallMode == CallMode.GENERAL_CALL_MODE) {
 
@@ -241,27 +252,27 @@ public class LockScreenActivity extends BaseActivity {
     }
 
     private void lockPttDownDoThing() {
-        if (!CheckMyPermission.selfPermissionGranted(this, permission.RECORD_AUDIO)){
+        if (!CheckMyPermission.selfPermissionGranted(this, permission.RECORD_AUDIO)) {
             ToastUtil.showToast(this, getString(R.string.text_audio_frequency_is_not_open_audio_is_not_used));
             logger.error("录制音频权限未打开，语音功能将不能使用。");
             return;
         }
-        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
-            ToastUtil.showToast(this,getString(R.string.text_has_no_group_call_speak_authority));
+        if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
+            ToastUtil.showToast(this, getString(R.string.text_has_no_group_call_speak_authority));
             return;
         }
         logger.info("锁屏界面PTT按下");
         int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
-        if (resultCode == BaseCommonCode.SUCCESS_CODE){
+        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
             MyApplication.instance.isPttPress = true;
             change2PreSpeaking();
-        }else{
+        } else {
             ToastUtil.groupCallFailToast(this, resultCode);
         }
     }
 
     private void lockPttUpDoThing() {
-        if(MyApplication.instance.isPttPress){
+        if (MyApplication.instance.isPttPress) {
             MyApplication.instance.isPttPress = false;
             if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
                 change2Listening();
@@ -312,7 +323,7 @@ public class LockScreenActivity extends BaseActivity {
                     setDateTime();
                     Message message = Message.obtain();
                     message.what = UPDATETIME;
-                    mHandler.sendMessageDelayed(message,30*1000);
+                    mHandler.sendMessageDelayed(message, 30 * 1000);
                     break;
                 default:
                     break;
@@ -360,11 +371,13 @@ public class LockScreenActivity extends BaseActivity {
         msg.what = UPDATETIME;
         mHandler.sendMessage(msg);
 
-        if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING){
-            change2Listening();
-        } else {
-            change2Silence();
-        }
+        //这里对当前的状态判断不正确，直接使用TalkbackFragment中的方法
+//        if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING){
+//            change2Listening();
+//        } else {
+//            change2Silence();
+//        }
+        setPttText();
 
         // F25手机不显示PTT按钮
         if (PhoneAdapter.isF25()) {
@@ -373,7 +386,30 @@ public class LockScreenActivity extends BaseActivity {
         logger.error("创建了一个锁屏界面");
     }
 
-    private void findView(){
+
+    private void setPttText() {
+        int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+        Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId);
+        //响应组  普通用户  不在响应状态
+        if (ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) &&
+                !groupByGroupNo.isHighUser() &&
+                !TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(currentGroupId)) {
+            change2Forbid();
+        } else if (MyApplication.instance.getGroupListenenState() != GroupCallListenState.IDLE) {
+            change2Listening();
+        } else if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTING) {
+            change2PreSpeaking();
+        } else if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING) {
+            change2Waiting();
+        } else if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
+            change2Speaking();
+        } else {
+            change2Silence();
+        }
+    }
+
+
+    private void findView() {
         mContentView = (RelativeLayout) findViewById(R.id.content_view);
         mMyView = (View) findViewById(R.id.my_view);
         mFlLockscreen = (FrameLayout) findViewById(R.id.fl_lockscreen);
@@ -401,7 +437,7 @@ public class LockScreenActivity extends BaseActivity {
     }
 
     @Override
-    protected void onNewIntent(Intent intent){
+    protected void onNewIntent(Intent intent) {
         Log.e("LockScreenActivity", "onNewIntent");
         super.onNewIntent(intent);
         setIntent(intent);
@@ -463,7 +499,7 @@ public class LockScreenActivity extends BaseActivity {
         if (openLockReceiver != null) {
             unregisterReceiver(openLockReceiver);
         }
-        if (mVolumeLayout!= null){
+        if (mVolumeLayout != null) {
             mVolumeLayout.unRegistLintener();
         }
 
@@ -476,7 +512,7 @@ public class LockScreenActivity extends BaseActivity {
 
     private void change2Speaking() {
 
-        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number),online_number));
+        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number), online_number));
         allViewDefault();
         mLlSpeakingTime.setVisibility(View.VISIBLE);
         mTalkTime.start(Color.GREEN);
@@ -485,7 +521,7 @@ public class LockScreenActivity extends BaseActivity {
     }
 
     private void change2PreSpeaking() {
-        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number),online_number));
+        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number), online_number));
         allViewDefault();
         mPtt.setText(R.string.text_ready_to_speak);
         mPtt.setBackgroundResource(R.drawable.ptt_pre_speaking);
@@ -493,7 +529,7 @@ public class LockScreenActivity extends BaseActivity {
     }
 
     private void change2Silence() {
-        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number),online_number));
+        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number), online_number));
         allViewDefault();
         mPtt.setText(R.string.press_blank_space_talk_text);
         mPtt.setBackgroundResource(R.drawable.ptt_silence);
@@ -501,7 +537,7 @@ public class LockScreenActivity extends BaseActivity {
     }
 
     private void change2Waiting() {
-        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number),online_number));
+        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number), online_number));
         allViewDefault();
         mLlPreSpeaking.setVisibility(View.VISIBLE);
         mPtt.setText(R.string.text_ready_to_speak);
@@ -510,7 +546,7 @@ public class LockScreenActivity extends BaseActivity {
 
     private void change2Listening() {
         String speakMemberName = MyTerminalFactory.getSDK().getGroupCallManager().getSpeakingMemberName();
-        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number),online_number));
+        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number), online_number));
         allViewDefault();
         if (!TextUtils.isEmpty(speakMemberName)) {
             mLlListening.setVisibility(View.VISIBLE);
@@ -542,7 +578,7 @@ public class LockScreenActivity extends BaseActivity {
 
         mTvLockscreenTime.setText(new SimpleDateFormat("HH:mm", Locale.getDefault()).format(date));
         mTvLockscreenDate.setText(new SimpleDateFormat("MM月dd日", Locale.getDefault()).format(date));
-        mTvLockscreenWeek.setText(String.format(getString(R.string.text_week_content),mWeek,mAP));
+        mTvLockscreenWeek.setText(String.format(getString(R.string.text_week_content), mWeek, mAP));
 
     }
 
@@ -561,7 +597,9 @@ public class LockScreenActivity extends BaseActivity {
         // 不做任何事，为了屏蔽back键
     }
 
-    /**设置音量键为ptt键时的监听*/
+    /**
+     * 设置音量键为ptt键时的监听
+     */
     private final class OnPTTVolumeBtnStatusChangedListenerImp
             implements OnPTTVolumeBtnStatusChangedListener {
         @Override
@@ -575,7 +613,7 @@ public class LockScreenActivity extends BaseActivity {
     }
 
 
-    private void playAnimation(){
+    private void playAnimation() {
         AnimatorSet animatorSet = new AnimatorSet();
         ObjectAnimator scaleX = ObjectAnimator.ofFloat(mContentView, "scaleX", 1f, 0.5f);
         ObjectAnimator scaleY = ObjectAnimator.ofFloat(mContentView, "scaleY", 1f, 0.5f);
@@ -584,22 +622,22 @@ public class LockScreenActivity extends BaseActivity {
         animatorSet.setDuration(800);
         animatorSet.setInterpolator(new DecelerateInterpolator());
         animatorSet.start();
-        animatorSet.addListener(new Animator.AnimatorListener(){
+        animatorSet.addListener(new Animator.AnimatorListener() {
             @Override
-            public void onAnimationStart(Animator animation){
+            public void onAnimationStart(Animator animation) {
             }
 
             @Override
-            public void onAnimationEnd(Animator animation){
+            public void onAnimationEnd(Animator animation) {
                 finish();
             }
 
             @Override
-            public void onAnimationCancel(Animator animation){
+            public void onAnimationCancel(Animator animation) {
             }
 
             @Override
-            public void onAnimationRepeat(Animator animation){
+            public void onAnimationRepeat(Animator animation) {
             }
         });
     }
@@ -628,20 +666,21 @@ public class LockScreenActivity extends BaseActivity {
         mLlForbid.setVisibility(View.VISIBLE);
         //12.25
         logger.info("ptt.change2Forbid()按住排队");
-        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number),online_number));
-        mPtt.setText(R.string.button_press_to_line_up);
+        mTvCurrentOnline.setText(String.format(getString(R.string.text_online_member_number), online_number));
+        mPtt.setText(R.string.text_no_group_calls);
         mPtt.setTextColor(getResources().getColor(R.color.darkgray));
         mPtt.setBackgroundResource(R.drawable.ptt_listening);
-        logger.info("主界面，ptt被禁了  isPttPress："+MyApplication.instance.isPttPress);
+        logger.info("主界面，ptt被禁了  isPttPress：" + MyApplication.instance.isPttPress);
         mPtt.setEnabled(false);
-        if(MyApplication.instance.isPttPress){
+        if (MyApplication.instance.isPttPress) {
             pttUpDoThing();
         }
     }
+
     private void pttUpDoThing() {
-        logger.info("ptt.pttUpDoThing执行了 isPttPress："+MyApplication.instance.isPttPress);
+        logger.info("ptt.pttUpDoThing执行了 isPttPress：" + MyApplication.instance.isPttPress);
         //        talkback_change_session.setEnabled(true);
-        if (MyApplication.instance.isPttPress){
+        if (MyApplication.instance.isPttPress) {
             MyApplication.instance.isPttPress = false;
             //            canScroll = true;
             if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {

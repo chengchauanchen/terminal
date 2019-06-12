@@ -513,6 +513,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 if (viewType == MESSAGE_LOCATION_SEND && terminalMessage.messageBody.containsKey(JsonParam.ACTUAL_SEND) &&
                         !terminalMessage.messageBody.getBooleanValue(JsonParam.ACTUAL_SEND)) {
                 } else {
+                    //这里put是将原来的MessageSendStateEnum.SEND_PRE改成MessageSendStateEnum.SENDING
                     terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
                     sendMessage(holder, terminalMessage, viewType);
                 }
@@ -719,7 +720,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             imm.hideSoftInputFromWindow(holder.reBubble.getWindowToken(), 0);
         });
 		}
-        
+
         if (holder.live_bubble != null) {
             holder.live_bubble.setOnClickListener(v -> {
                 if (terminalMessage.resultCode == SignalServerErrorCode.MEMBER_REFUSE.getErrorCode() || terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.STOP_ASK_VIDEO_LIVE || terminalMessage.resultCode == SignalServerErrorCode.VIDEO_LIVE_WAITE_TIMEOUT.getErrorCode()) {
@@ -759,9 +760,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 } else if (messageType == MessageType.LONG_TEXT.getCode()) {//长文本
                     uploadLongText(holder, terminalMessage);
                 } else if (messageType == MessageType.POSITION.getCode()) {//定位
-                        sendLocationMessage(terminalMessage);
-//                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.LOCATION);
-
+//                        sendLocationMessage(terminalMessage);
+                    //这里将之前的元素移除(发送失败的位置)，重新调取发送位置的方法
+                    chatMessageList.remove(position);
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.LOCATION);
                 } else if (messageType == MessageType.PICTURE.getCode()
                         || messageType == MessageType.FILE.getCode()
                         ||messageType == MessageType.VIDEO_CLIPS.getCode()
