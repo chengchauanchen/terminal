@@ -43,7 +43,6 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
-import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetAllMessageRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetWarningMessageDetailHandler;
@@ -1554,18 +1553,7 @@ public class NewsFragment extends BaseFragment {
      */
     @SuppressWarnings("unused")
     private void setNewMemberList() {
-        Iterator<TerminalMessage> iterator = messageList.iterator();
-        while (iterator.hasNext()){
-            TerminalMessage next = iterator.next();
-            if (next.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()){//个人消息
-                Member memberInfo = DataUtil.getMemberInfoByMemberNo(next.messageFromId);
-                if (memberInfo == null){//说明成员列表中没有这个人了
-                    iterator.remove();//消息列表中移除
-                }else {
-                    next.messageFromName = memberInfo.getName();
-                }
-            }
-        }
+
     }
 
     private void clearData(){

@@ -116,8 +116,8 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
                 <!-- 发布到平台应用商店 -->
-                <!-- <action android:name="pstore.intent.action.MAIN"/> -->
-                <!-- <category android:name="pstore.intent.category.APP"/> -->
+                 <!--<action android:name="pstore.intent.action.MAIN"/>-->
+                 <!--<category android:name="pstore.intent.category.APP"/>-->
             </intent-filter>
         </activity>
         <activity

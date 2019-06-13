@@ -1132,7 +1132,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
         } else {
             TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, false);
-            ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_open_wuhan_police_work_first));
+            String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,AuthManagerTwo.POLICESTORE);
+            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)){
+                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_open_wuhan_police_work_first));
+            }
 
         }
     }

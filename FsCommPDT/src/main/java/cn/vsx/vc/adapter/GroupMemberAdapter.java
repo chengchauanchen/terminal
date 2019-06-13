@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +23,6 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.IndividualNewsActivity;
@@ -99,14 +97,7 @@ public class GroupMemberAdapter extends BaseAdapter {
         viewHolder.userLogo.setImageResource(BitmapUtil.getImageResourceByType(member.type));
         String no = HandleIdUtil.handleId(member.no);
         viewHolder.userName.setText(member.getName());
-        String phoneNum = DataUtil.getMemberByMemberNo(currentGroupMembers.get(position).no).phone;
-        Log.i("sjl_", "getView: "+ phoneNum);
-//        viewHolder.userId.setText(member.id+"");
-        if (TextUtils.isEmpty(no)){
-            viewHolder.userId.setText(phoneNum);
-        }else {
-            viewHolder.userId.setText(no);
-        }
+        viewHolder.userId.setText(no);
 
         if(isDelete){
             viewHolder.messageTo.setVisibility(View.GONE);

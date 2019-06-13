@@ -28,7 +28,6 @@ import org.apache.log4j.Logger;
 import java.util.HashMap;
 
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -158,11 +157,6 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
         gv_function_bottom.setOnItemClickListener((parent, view, position, id) -> {
             String title = titles[position];
             if (isFastClick()){
-                if(DataUtil.getMemberByMemberNo(userId).getType()== TerminalMemberType.TERMINAL_PDT.getCode()){
-                    ToastUtil.showToast(context,context.getString(R.string.text_the_other_party_not_supported_this_message_type));
-                    return;
-                }
-
                 if (title.equals("相册")
                         &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.PHOTO_ALBUM, true, userId);
@@ -421,16 +415,8 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
             groupCallNewsKeyboard.setBackgroundResource(R.drawable.soft_keyboard);
             boolean canPush = false;
             boolean canPull = false;
-            //PDT终端不支持录音消息类型
-            if(DataUtil.getMemberByMemberNo(userId).getType()==TerminalMemberType.TERMINAL_PDT.getCode()){
-                btn_record.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-                btn_record.setText(R.string.text_can_not_sound_recorder);
-                btn_record.setEnabled(false);
-            }else {
-                btn_record.setBackgroundResource(R.drawable.shape_news_ptt_listen);
-                btn_record.setText(R.string.text_long_press_to_sound_recorder);
-                btn_record.setEnabled(true);
-            }
+
+
             canPull=true;
             canPush=true;
             //是否在同一个组
@@ -445,6 +431,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
             }else {
                 setHasVideo();
             }
+
 
             if(!Util.isEmpty(unsendMessage)){
                 groupCallNewsEt.setText(unsendMessage);
@@ -463,9 +450,29 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
                 btn_record.setVisibility(VISIBLE);
                 v_edit_line.setVisibility(GONE);
             }
+
+            //PDT终端不支持录音消息类型
+            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                if(DataUtil.isPDTMember(userId)){
+                    handler.post(() -> {
+                        btn_record.setBackgroundResource(R.drawable.shape_news_ptt_wait);
+                        btn_record.setText(R.string.text_can_not_sound_recorder);
+                        btn_record.setEnabled(false);
+                        setHandlePlatFormView();
+                        gridViewAdapter.refresh(titles, images);
+                    });
+                }else {
+                    handler.post(()->{
+                        btn_record.setBackgroundResource(R.drawable.shape_news_ptt_listen);
+                        btn_record.setText(R.string.text_long_press_to_sound_recorder);
+                        btn_record.setEnabled(true);
+                        gridViewAdapter.refresh(titles, images);
+                    });
+                }
+            });
         }
 
-        gridViewAdapter.refresh(titles, images);
+//        gridViewAdapter.refresh(titles, images);
     }
     private void setNoVideo() {
         titles = null;
@@ -505,6 +512,15 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
                 R.drawable.album,R.drawable.take_phones,
                 R.drawable.file_selector,R.drawable.position,
                 R.drawable.push_video,R.drawable.pull_video
+        };
+    }
+
+    public void setHandlePlatFormView(){
+        titles = null;
+        titles=new String[]{
+        };
+        images = null;
+        images=new Integer[]{
         };
     }
 

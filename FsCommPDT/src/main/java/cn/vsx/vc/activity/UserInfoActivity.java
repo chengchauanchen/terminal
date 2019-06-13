@@ -159,7 +159,10 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
             userPhone.setText(account.getPhone());
         }
 
-        Glide.with(UserInfoActivity.this).load(DataUtil.getMemberByMemberNo(userId).avatarUrl).asBitmap().placeholder(R.drawable.user_photo)//加载中显示的图片
+        Glide.with(UserInfoActivity.this)
+                .load(R.drawable.user_photo)
+                .asBitmap()
+                .placeholder(R.drawable.user_photo)//加载中显示的图片
                 .error(R.drawable.user_photo)//加载失败时显示的图片
                 .into(userLogo);
         initBottomMenu();

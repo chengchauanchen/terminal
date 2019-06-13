@@ -647,7 +647,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                                 //紧急呼叫到人，屏蔽组呼，个呼，显示个呼通话状态
                                 myHandler.post(() -> {
                                     int emergencyMemberId = MyTerminalFactory.getSDK().getParam(Params.EMERGENCYID, 0);
-                                    calleeMember = DataUtil.getMemberByMemberNo(emergencyMemberId);
+//                                    calleeMember = DataUtil.getMemberByMemberNo(emergencyMemberId);
 
                                     //弹出个呼的呼叫请求界面
                                     ll_emergency_prompt.setVisibility(View.VISIBLE);

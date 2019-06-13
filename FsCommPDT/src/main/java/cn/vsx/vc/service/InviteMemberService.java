@@ -1260,7 +1260,8 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
                 result.add(MyDataUtil.getPushInviteMemberData(member.getUniqueNo(), ReceiveObjectMode.MEMBER.toString()));
             }else if(bean.getType() == Constants.TYPE_GROUP){
                 Group group = (Group) bean.getBean();
-                result.add(MyDataUtil.getPushInviteMemberData(group.getUniqueNo(), ReceiveObjectMode.GROUP.toString()));
+                //推送到组使用组的编号，不用UniqueNoa
+                result.add(MyDataUtil.getPushInviteMemberData(group.getNo(), ReceiveObjectMode.GROUP.toString()));
             }
         }
         return result;
