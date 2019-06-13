@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    
+    <!--VM680正在连接-->
+    <include
+        android:id="@+id/live_connecting"
+        android:visibility="gone"
+        layout="@layout/live_connecting"/>
+    <!--缩小化 -->
+    <include layout="@layout/popup_mini_live"
+        android:id="@+id/popup_mini_live"/>
+    
+    <include
+        android:id="@+id/rl_recoder_view"
+        layout="@layout/recoder_view"/>
+</FrameLayout>

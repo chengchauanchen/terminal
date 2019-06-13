@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black"
+    tools:context="cn.vsx.vc.activity.LiveHistoryActivity">
+
+    <ImageView
+        android:id="@+id/iv_close"
+        android:layout_width="@dimen/dp_20"
+        android:layout_height="@dimen/dp_20"
+        android:layout_alignTop="@id/tv_theme"
+        android:src="@drawable/live_exit"
+        android:layout_marginLeft="@dimen/dp_20"/>
+    <TextView
+        android:id="@+id/tv_theme"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:layout_marginTop="@dimen/dp_40"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_20"
+        android:maxLines="1"
+        android:maxEms="8"
+        android:ellipsize="end"
+        android:text=""/>
+    
+    <TextView
+        android:id="@+id/tv_live_finished"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/closed_report"
+        android:textColor="@color/pttyellow"
+        android:layout_below="@id/tv_theme"
+        android:layout_marginTop="@dimen/dp_40"
+        android:layout_marginLeft="@dimen/dp_30"
+        android:textSize="@dimen/sp_22" />
+    
+    <TextView
+        android:id="@+id/tv_live_start_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_18"
+        android:layout_below="@id/tv_live_finished"
+        android:layout_alignLeft="@id/tv_live_finished"
+        android:layout_marginTop="@dimen/dp_20"/>
+    
+    <RelativeLayout
+        android:id="@+id/rl_live_image"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_240"
+        android:layout_below="@id/tv_live_start_time"
+        android:layout_marginLeft="@dimen/dp_20"
+        android:layout_marginRight="@dimen/dp_20">
+        
+        <ImageView
+            android:id="@+id/iv_live_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+        
+        <ImageView
+            android:id="@+id/iv_play"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/pause"
+            android:layout_centerInParent="true"/>
+        
+        <TextView
+            android:id="@+id/tv_live_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_15"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="@dimen/dp_20"
+            android:layout_marginRight="@dimen/dp_20"/>
+        
+    </RelativeLayout>
+    
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text_watch_this_video"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_18"
+        android:layout_below="@id/rl_live_image"
+        android:layout_marginTop="@dimen/dp_20"
+        android:layout_marginLeft="@dimen/dp_40"/>
+    
+    <LinearLayout
+        android:id="@+id/ll_volume"
+        android:layout_width="@dimen/dp_80"
+        android:layout_height="@dimen/dp_40"
+        android:layout_centerInParent="true"
+        android:background="@color/transparent_40"
+        android:visibility="gone"
+        android:gravity="center">
+        <ImageView
+            android:id="@+id/iv_volume"
+            android:layout_width="@dimen/dp_14"
+            android:layout_height="@dimen/dp_24"
+            android:background="@drawable/volume_adjust" />
+        
+        <TextView
+            android:id="@+id/tv_volume"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_10"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_14"
+            android:textStyle="normal" />
+    </LinearLayout>
+</RelativeLayout>

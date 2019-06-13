@@ -151,7 +151,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
         groupCallNewsEt.setOnFocusChangeListener(mOnFocusChangeListener);
         groupCallNewsEt.setOnClickListener(v -> showBottom(false));
 
-        setHasVideo();
+//        setHasVideo();
         gridViewAdapter = new GridViewAdapter(titles, images, context);
         gv_function_bottom.setAdapter(gridViewAdapter);
         gv_function_bottom.setOnItemClickListener((parent, view, position, id) -> {
@@ -472,7 +472,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
             });
         }
 
-//        gridViewAdapter.refresh(titles, images);
+        gridViewAdapter.refresh(titles, images);
     }
     private void setNoVideo() {
         titles = null;

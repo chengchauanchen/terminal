@@ -371,5 +371,23 @@
                 android:name="android.nfc.cardemulation.host_apdu_service"
                 android:resource="@xml/aid_list" />
         </service>
+    
+        <activity
+            android:name=".activity.JumpActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/TranslucentTheme">
+            <intent-filter>
+                <!-- 协议部分，随便设置 -->
+                <data
+                    android:host="project.release.com"
+                    android:path="/jump"
+                    android:scheme="vsxin" />
+                <!-- 下面这几行也必须得设置 -->
+                <category android:name="android.intent.category.DEFAULT" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+            </intent-filter>
+        </activity>
     </application>
 </manifest>
