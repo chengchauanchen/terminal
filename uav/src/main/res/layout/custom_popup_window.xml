@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+    
+    <LinearLayout
+        android:id="@+id/am_nkv_keyboard"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            
+            <EditText
+                android:id="@+id/phone"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dp_60"
+                android:background="@color/phone_edit_bg"
+                android:gravity="center"
+                android:hint="@string/regist_police_no_hint"
+                android:orientation="horizontal"
+                android:maxLength="8"
+                android:textColor="@color/keyboard_text_blue"
+                android:textColorHint="@color/input_phone"
+                android:textSize="@dimen/sp_20" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            
+            <Button
+                android:id="@+id/dialNum1"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_background_selector"
+                android:paddingBottom="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10"
+                android:tag="1"
+                android:text="1"
+                android:textColor="@color/keyboard_text_blue"
+                android:textSize="@dimen/sp_25" />
+            
+            <Button
+                android:id="@+id/dialNum2"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_background_selector"
+                android:paddingBottom="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10"
+                android:tag="2"
+                android:text="2"
+                android:textColor="@color/keyboard_text_blue"
+                android:textSize="@dimen/sp_25" />
+            
+            <Button
+                android:id="@+id/dialNum3"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_background_selector"
+                android:paddingBottom="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10"
+                android:tag="3"
+                android:text="3"
+                android:textColor="@color/keyboard_text_blue"
+                android:textSize="@dimen/sp_25" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            
+            <Button
+                android:id="@+id/dialNum4"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_background_selector"
+                android:paddingBottom="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10"
+                android:tag="4"
+                android:text="4"
+                android:textColor="@color/keyboard_text_blue"
+                android:textSize="@dimen/sp_25" />
+            
+            <Button
+                android:id="@+id/dialNum5"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_background_selector"
+                android:paddingBottom="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10"
+                android:tag="5"
+                android:text="5"
+                android:textColor="@color/keyboard_text_blue"
+                android:textSize="@dimen/sp_25" />
+            
+            <Button
+                android:id="@+id/dialNum6"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_background_selector"
+                android:paddingBottom="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10"
+                android:tag="6"
+                android:text="6"
+                android:textColor="@color/keyboard_text_blue"
+                android:textSize="@dimen/sp_25" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            
+            <Button
+                android:id="@+id/dialNum7"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_background_selector"
+                android:paddingBottom="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10"
+                android:tag="7"
+                android:text="7"
+                android:textColor="@color/keyboard_text_blue"
+                android:textSize="@dimen/sp_25" />
+            
+            <Button
+                android:id="@+id/dialNum8"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_background_selector"
+                android:paddingBottom="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10"
+                android:tag="8"
+                android:text="8"
+                android:textColor="@color/keyboard_text_blue"
+                android:textSize="@dimen/sp_25" />
+            
+            <Button
+                android:id="@+id/dialNum9"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_background_selector"
+                android:paddingBottom="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10"
+                android:tag="9"
+                android:text="9"
+                android:textColor="@color/keyboard_text_blue"
+                android:textSize="@dimen/sp_25" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            
+            <Button
+                android:id="@+id/dialx"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_background_selector"
+                android:paddingBottom="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10"
+                android:tag="*"
+                android:text=""
+                android:textSize="@dimen/sp_30" />
+            
+            <Button
+                android:id="@+id/dialNum10"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_background_selector"
+                android:paddingBottom="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10"
+                android:tag="0"
+                android:text="0"
+                android:textColor="@color/keyboard_text_blue"
+                android:textSize="@dimen/sp_25" />
+            
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@drawable/keyboard_background_selector"
+                android:gravity="center"
+                android:paddingBottom="@dimen/dp_10"
+                android:paddingTop="@dimen/dp_10">
+                
+                <Button
+                    android:id="@+id/delete"
+                    android:layout_width="@dimen/x50"
+                    android:layout_height="@dimen/x25"
+                    android:background="@drawable/keyboard_backspace" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+    
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/am_nkv_keyboard"
+        android:layout_gravity="center"
+        android:background="@color/keyboard_bg"
+        android:padding="@dimen/dp_5">
+        
+        <ImageView
+            android:id="@+id/image1"
+            android:layout_width="@dimen/dp_45"
+            android:layout_height="@dimen/dp_45"
+            android:layout_alignParentLeft="true"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/dp_40"
+            android:padding="@dimen/dp_10"
+            android:src="@drawable/xxdd" />
+        
+        <ImageView
+            android:id="@+id/image_call"
+            android:layout_width="@dimen/dp_60"
+            android:layout_height="@dimen/dp_60"
+            android:layout_centerInParent="true"
+            android:padding="@dimen/dp_5"
+            android:src="@drawable/keyboard_call" />
+        
+        <ImageView
+            android:id="@+id/image_diss"
+            android:layout_width="@dimen/dp_45"
+            android:layout_height="@dimen/dp_45"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_30"
+            android:padding="@dimen/dp_10"
+            android:src="@drawable/eeeee" />
+    </RelativeLayout>
+</RelativeLayout>

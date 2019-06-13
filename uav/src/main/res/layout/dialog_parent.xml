@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:swipe="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparent_82">
+    
+    <cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView
+        android:id="@+id/swipeFlingAdapterView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        swipe:min_adapter_stack="1"
+        swipe:y_offset_step="15dp"/>
+    
+    <cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView
+        android:id="@+id/warning_swipeFlingAdapterView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        swipe:min_adapter_stack="1"
+        swipe:y_offset_step="15dp"
+        android:visibility="gone"/>
+</RelativeLayout>

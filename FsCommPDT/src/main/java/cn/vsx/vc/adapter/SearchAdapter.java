@@ -77,7 +77,6 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
             case Constants.TYPE_CONTRACT_GROUP:
                 Group group = (Group) item.getBean();
                 TextView groupName = holder.getView(R.id.group_child_name);
-//                holder.setText(R.id.group_child_name,group.getName());
                 setKeyWordsView(groupName,group.getName());
                 holder.addOnClickListener(R.id.to_group);
                 holder.addOnClickListener(R.id.is_current_group_tv);
@@ -88,8 +87,10 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 TextView memberId = holder.getView(R.id.tv_member_id);
                 setKeyWordsView(memberName,HandleIdUtil.handleName(account.getName()));
                 setKeyWordsView(memberId,HandleIdUtil.handleId(account.getNo()));
-//                holder.setText(R.id.tv_member_name,HandleIdUtil.handleName(account.getName()));
-//                holder.setText(R.id.tv_member_id, HandleIdUtil.handleId(account.getNo()));
+                //如果是自己，把功能入口禁掉
+                if(account.getNo() == TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+                    holder.setGone(R.id.shoutai_dial_to, false);
+                }
                 //拨打电话
                 holder.setOnClickListener(R.id.shoutai_dial_to, v -> callPhone(account));
                 //发送消息
@@ -106,8 +107,6 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 TextView memberIdPdt = holder.getView(R.id.tv_member_id);
                 setKeyWordsView(memberNamePdt,HandleIdUtil.handleName(contractpdt.getName()));
                 setKeyWordsView(memberIdPdt,HandleIdUtil.handleId(contractpdt.getNo()));
-//                holder.setText(R.id.tv_member_name,HandleIdUtil.handleName(contractpdt.getName()));
-//                holder.setText(R.id.tv_member_id, HandleIdUtil.handleId(contractpdt.getNo()));
 
                 //发送消息
                 holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractpdt.getNo(), contractpdt.getName()));
@@ -124,12 +123,8 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
 
             case Constants.TYPE_CONTRACT_LTE:
                 Member contractLte = (Member) item.getBean();
-                TextView memberNameLte = holder.getView(R.id.tv_member_name);
-                TextView memberIdLte = holder.getView(R.id.tv_member_id);
-                setKeyWordsView(memberNameLte,HandleIdUtil.handleName(contractLte.getName()));
-                setKeyWordsView(memberIdLte,HandleIdUtil.handleId(contractLte.getNo()));
-//                holder.setText(R.id.tv_member_name,HandleIdUtil.handleName(contractLte.getName()));
-//                holder.setText(R.id.tv_member_id, HandleIdUtil.handleId(contractLte.getNo()));
+                setKeyWordsView(holder.getView(R.id.tv_member_name),HandleIdUtil.handleName(contractLte.getName()));
+                setKeyWordsView(holder.getView(R.id.tv_member_id),HandleIdUtil.handleId(contractLte.getNo()));
 
                 //发送消息
                 holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractLte.getNo(), contractLte.getName()));
@@ -150,9 +145,9 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
             case Constants.TYPE_CHECK_SEARCH_GROUP:
                 Group group1 = (Group) item.getBean();
                 holder.setImageResource(R.id.shoutai_user_logo,R.drawable.group_photo);
-                holder.setText(R.id.shoutai_tv_member_name, group1.getName());
                 holder.setGone(R.id.shoutai_tv_member_id,false);
                 holder.setChecked(R.id.checkbox,group1.isChecked());
+                setKeyWordsView(holder.getView(R.id.shoutai_tv_member_name),group1.getName());
                 holder.setOnClickListener(R.id.checkbox, v -> {
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveGroupSelectedHandler.class,group1,!group1.isChecked());
                     group1.setChecked(!group1.isChecked());
@@ -169,9 +164,9 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 Member member = (Member) item.getBean();
                 ImageView image = holder.getView(R.id.shoutai_user_logo);
                 image.setImageResource(BitmapUtil.getImageResourceByType(member.getType()));
-                holder.setText(R.id.shoutai_tv_member_name, member.getName());
-                holder.setText(R.id.shoutai_tv_member_id, String.valueOf(member.getNo()));
                 holder.setChecked(R.id.checkbox,member.isChecked());
+                setKeyWordsView(holder.getView(R.id.shoutai_tv_member_name),HandleIdUtil.handleName(member.getName()));
+                setKeyWordsView(holder.getView(R.id.shoutai_tv_member_id),HandleIdUtil.handleId(member.getNo()));
                 holder.setOnClickListener(R.id.checkbox, v -> {
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class,member,!member.isChecked(), TerminalMemberType.getInstanceByCode(member.getType()).toString());
                     member.setChecked(!member.isChecked());
@@ -186,6 +181,8 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 holder.setText(R.id.shoutai_tv_member_name, account1.getName());
                 holder.setText(R.id.shoutai_tv_member_id, String.valueOf(account1.getNo()));
                 holder.setChecked(R.id.checkbox,account1.isChecked());
+                setKeyWordsView(holder.getView(R.id.shoutai_tv_member_name),HandleIdUtil.handleName(account1.getName()));
+                setKeyWordsView(holder.getView(R.id.shoutai_tv_member_id),HandleIdUtil.handleId(account1.getNo()));
                 holder.setOnClickListener(R.id.checkbox, v -> {
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveAccountSelectedHandler.class,account1,!account1.isChecked());
                     account1.setChecked(!account1.isChecked());

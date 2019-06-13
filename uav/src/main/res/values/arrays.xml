@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string-array name="sent_voice_anim">
+        <item>@drawable/sound_blank</item>
+        <item>@drawable/sound_chat_send_one_right</item>
+        <item>@drawable/sound_chat_send_two_right</item>
+        <item>@drawable/sound_item_right</item>
+    </string-array>
+
+    <string-array name="received_voice_anim">
+        <item>@drawable/sound_blank</item>
+        <item>@drawable/sound_chat_send_one</item>
+        <item>@drawable/sound_chat_send_two</item>
+        <item>@drawable/sound_item</item>
+    </string-array>
+
+    <string-array name="invite_member_tab_text_pull">
+        <item>警务通</item>
+        <item>无人机</item>
+        <item>执法记录仪</item>
+    </string-array>
+    <string-array name="invite_member_tab_text_push">
+        <item>群组</item>
+        <item>PC</item>
+        <item>警务通</item>
+    </string-array>
+    <string-array name="invite_member_tab_text_push_image">
+        <item>群组</item>
+        <item>PC</item>
+        <item>警务通</item>
+        <item>HDMI</item>
+    </string-array>
+</resources>

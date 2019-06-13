@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_group"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/itemblue"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y29">
+
+        <ImageView
+            android:id="@+id/iv_head"
+            android:layout_width="@dimen/x27"
+            android:layout_height="@dimen/x27"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x20"
+            android:src="@drawable/group_photo"
+            android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/group_child_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x9"
+            android:layout_toRightOf="@id/iv_head"
+            android:ellipsize="end"
+            android:maxEms="8"
+            android:maxLines="1"
+            android:text="7B-11T"
+            android:textColor="@color/group_text_gray"
+            android:textSize="@dimen/x12" />
+    
+    
+        <ImageView
+            android:id="@+id/iv_monitor"
+            android:layout_width="@dimen/dp_35"
+            android:layout_height="@dimen/dp_35"
+            android:paddingLeft="@dimen/dp_15"
+            android:paddingRight="@dimen/dp_15"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_10"
+            android:padding="@dimen/dp_5"
+            android:layout_alignParentRight="true"
+            android:gravity="center"
+            android:src="@drawable/monitor_open"/>
+
+        <ImageView
+            android:id="@+id/to_group"
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_marginRight="@dimen/dp_20"
+            android:layout_toLeftOf="@id/iv_monitor"
+            android:layout_centerVertical="true"
+            android:src="@drawable/new_message_icon" />
+
+        <TextView
+            android:id="@+id/is_current_group_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/x30"
+            android:text="@string/text_current_group"
+            android:textColor="@color/group_text_gray_two"
+            android:textSize="@dimen/x10"
+            android:visibility="invisible" />
+
+
+        <ImageView
+            android:id="@+id/iv_scan_group"
+            android:layout_width="@dimen/dp_30"
+            android:layout_height="@dimen/dp_30"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_30"
+            android:src="@drawable/new_current_icon"
+            android:visibility="invisible" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <View
+            android:id="@+id/lay_line"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_half_one"
+            android:layout_marginLeft="@dimen/x55"
+            android:layout_marginTop="@dimen/x38"
+            android:layout_marginRight="@dimen/x20"
+            android:background="@color/diver_bg" />
+    </RelativeLayout>
+
+</LinearLayout>
