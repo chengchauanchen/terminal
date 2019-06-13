@@ -357,7 +357,9 @@ public class NewGroupFragment extends BaseFragment{
             tempGroupUpdateCompleted = true;
             groupUpdateCompleted = false;
             CatalogBean groupCatalogBean = new CatalogBean(name,depId);
-            catalogNames.add(groupCatalogBean);
+            if(!catalogNames.contains(groupCatalogBean)){
+                catalogNames.add(groupCatalogBean);
+            }
             TerminalFactory.getSDK().getConfigManager().updateGroup(depId,name);
         });
     }

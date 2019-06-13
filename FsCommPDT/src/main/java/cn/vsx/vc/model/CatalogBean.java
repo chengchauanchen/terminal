@@ -3,6 +3,7 @@ package cn.vsx.vc.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import java.util.Objects;
 
 /**
  * Created by XX on 2018/4/11.
@@ -63,4 +64,15 @@ public class CatalogBean implements Parcelable {
             return new CatalogBean[size];
         }
     };
+
+    @Override public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CatalogBean that = (CatalogBean) o;
+        return id == that.id;
+    }
+
+    @Override public int hashCode() {
+        return Objects.hash(id);
+    }
 }

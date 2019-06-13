@@ -159,7 +159,9 @@ public class NewHandPlatformFragment extends BaseFragment {
             if (type == Constants.TYPE_DEPARTMENT) {
                 saveLastGroupData();
                 CatalogBean memberCatalogBean = new CatalogBean(depName,depId);
-                catalogNames.add(memberCatalogBean);
+                if(!catalogNames.contains(memberCatalogBean)){
+                    catalogNames.add(memberCatalogBean);
+                }
                 TerminalFactory.getSDK().getConfigManager().updatePDTMember(depId,depName);
             }
         });

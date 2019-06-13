@@ -1535,7 +1535,9 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             mAllCatalogNames.get(currentIndex).clear();
         }
         CatalogBean catalogBean = new CatalogBean(deptName,deptId);
-        mAllCatalogNames.get(currentIndex).add(catalogBean);
+        if(!mAllCatalogNames.get(currentIndex).contains(catalogBean)){
+            mAllCatalogNames.get(currentIndex).add(catalogBean);
+        }
         if(mCatalogAdapter!=null){
             mCatalogAdapter.setData(mAllCatalogNames.get(currentIndex));
             mCatalogAdapter.notifyDataSetChanged();

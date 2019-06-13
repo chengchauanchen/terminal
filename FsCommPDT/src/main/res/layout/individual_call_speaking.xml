@@ -146,7 +146,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
                 android:layout_marginTop="@dimen/dp_5"
-                android:text="@string/text_cancel"
+                android:text="@string/text_call_hang_up"
                 android:textColor="@color/white" />
         </LinearLayout>
     </RelativeLayout>

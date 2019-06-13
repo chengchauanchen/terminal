@@ -197,7 +197,9 @@ public class NewPoliceAffairsFragment extends BaseFragment {
             if (type==Constants.TYPE_DEPARTMENT){
                 saveLastGroupData();
                 CatalogBean catalogBean = new CatalogBean(name,depId);
-                catalogNames.add(catalogBean);
+                if(!catalogNames.contains(catalogBean)){
+                    catalogNames.add(catalogBean);
+                }
                 TerminalFactory.getSDK().getConfigManager().updatePoliceMember(depId,name);
             }
         });
