@@ -20,6 +20,7 @@ import android.util.Log;
 import java.util.List;
 import java.util.UUID;
 
+import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -190,6 +191,10 @@ public class BluetoothLeService extends Service {
 
     @SuppressLint("NewApi")
     private void Pttbroadcast(BluetoothGattCharacteristic characteristic) {
+        if (GroupUtils.currentIsForbid()) {
+            //当前是禁止呼叫的组，直接忽略手雷的按下事件
+            return;
+        }
         final Intent intent = new Intent();
         final byte[] data = characteristic.getValue();
         if (data != null && data.length > 0) {
