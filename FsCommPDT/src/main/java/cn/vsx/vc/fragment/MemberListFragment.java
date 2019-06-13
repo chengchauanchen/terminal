@@ -119,7 +119,9 @@ public class MemberListFragment extends BaseFragment implements GroupCatalogAdap
                 }else if(type == Constants.TYPE_FOLDER){
                     Department department = (Department) mData.get(position).getBean();
                     CatalogBean groupCatalogBean = new CatalogBean(department.getName(),department.getId());
-                    catalogNames.add(groupCatalogBean);
+                    if(!catalogNames.contains(groupCatalogBean)){
+                        catalogNames.add(groupCatalogBean);
+                    }
                     TerminalFactory.getSDK().getConfigManager().getTerminal(department.getId(),MemberListFragment.this.type);
                     parentRecyclerAdapter.notifyDataSetChanged();
                 }

@@ -59,7 +59,6 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -853,7 +852,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
      */
     private void handlerAvatar(TerminalMessage terminalMessage, MergeTransmitViewHolder holder) {
         Glide.with(activity)
-                .load(DataUtil.getMemberByMemberNo(terminalMessage.messageFromId).avatarUrl)
+                .load(com.zectec.imageandfileselector.R.drawable.user_photo)
                 .asBitmap()
                 .placeholder(com.zectec.imageandfileselector.R.drawable.user_photo)//加载中显示的图片
                 .error(com.zectec.imageandfileselector.R.drawable.user_photo)//加载失败时显示的图片

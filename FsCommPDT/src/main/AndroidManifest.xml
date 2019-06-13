@@ -116,8 +116,8 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
                 <!-- 发布到平台应用商店 -->
-                <!-- <action android:name="pstore.intent.action.MAIN"/> -->
-                <!-- <category android:name="pstore.intent.category.APP"/> -->
+                 <!--<action android:name="pstore.intent.action.MAIN"/>-->
+                 <!--<category android:name="pstore.intent.category.APP"/>-->
             </intent-filter>
         </activity>
         <activity
@@ -187,8 +187,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity android:name=".activity.CreateTemporaryGroupsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"/>
-        <activity android:name=".activity.DeleteTemporaryGroupMemberActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"/>
+        
         <activity android:name=".activity.IncreaseTemporaryGroupMemberActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity android:name=".activity.PcLoginActivity"
@@ -360,17 +359,17 @@
             android:name=".service.MultipartyCallService"
             android:enabled="true"
             android:exported="false" /> <!-- 仿真卡服务 -->
-        <!--<service-->
-            <!--android:name=".service.CardService"-->
-            <!--android:exported="true"-->
-            <!--android:permission="android.permission.BIND_NFC_SERVICE">-->
-            <!--<intent-filter>-->
-                <!--<action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />-->
-                <!--<category android:name="android.intent.category.DEFAULT" />-->
-            <!--</intent-filter>-->
-            <!--<meta-data-->
-                <!--android:name="android.nfc.cardemulation.host_apdu_service"-->
-                <!--android:resource="@xml/aid_list" />-->
-        <!--</service>-->
+        <service
+            android:name=".service.CardService"
+            android:exported="true"
+            android:permission="android.permission.BIND_NFC_SERVICE">
+            <intent-filter>
+                <action android:name="android.nfc.cardemulation.action.HOST_APDU_SERVICE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.nfc.cardemulation.host_apdu_service"
+                android:resource="@xml/aid_list" />
+        </service>
     </application>
 </manifest>

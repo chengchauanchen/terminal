@@ -44,6 +44,7 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import cn.vsx.vc.service.CardService;
 import com.hytera.api.SDKException;
 import com.hytera.api.SDKManager;
 import com.hytera.api.base.common.CallManager;
@@ -647,7 +648,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                                 //紧急呼叫到人，屏蔽组呼，个呼，显示个呼通话状态
                                 myHandler.post(() -> {
                                     int emergencyMemberId = MyTerminalFactory.getSDK().getParam(Params.EMERGENCYID, 0);
-                                    calleeMember = DataUtil.getMemberByMemberNo(emergencyMemberId);
+//                                    calleeMember = DataUtil.getMemberByMemberNo(emergencyMemberId);
 
                                     //弹出个呼的呼叫请求界面
                                     ll_emergency_prompt.setVisibility(View.VISIBLE);
@@ -1117,7 +1118,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         judgePermission();
         startSDKRegistration();
         NfcUtil.nfcCheck(this);
-
+        startService(new Intent(this,CardService.class));
         //清理数据库
         FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
         //48小时未上传的文件上传

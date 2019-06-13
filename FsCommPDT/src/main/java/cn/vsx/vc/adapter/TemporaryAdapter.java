@@ -1275,7 +1275,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private void handlerAvatar(TerminalMessage terminalMessage, int position, ChatViewHolder holder) {
         if(activity!=null&&!activity.isDestroyed()){
             Glide.with(activity)
-                    .load(DataUtil.getMemberByMemberNo(terminalMessage.messageFromId).avatarUrl)
+                    .load(com.zectec.imageandfileselector.R.drawable.user_photo)
                     .asBitmap()
                     .placeholder(com.zectec.imageandfileselector.R.drawable.user_photo)//加载中显示的图片
                     .error(com.zectec.imageandfileselector.R.drawable.user_photo)//加载失败时显示的图片

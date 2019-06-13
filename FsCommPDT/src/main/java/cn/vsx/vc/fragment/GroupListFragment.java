@@ -265,7 +265,9 @@ public class GroupListFragment extends BaseFragment{
             mCatalogDatas.clear();
         }
         CatalogBean catalogBean = new CatalogBean(deptName,deptId);
-        mCatalogDatas.add(catalogBean);
+        if(!mCatalogDatas.contains(catalogBean)){
+            mCatalogDatas.add(catalogBean);
+        }
         if(mCatalogAdapter!=null){
             mCatalogAdapter.setData(mCatalogDatas);
             mCatalogAdapter.notifyDataSetChanged();

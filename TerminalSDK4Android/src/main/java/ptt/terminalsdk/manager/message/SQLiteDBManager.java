@@ -197,7 +197,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ? AND message_from_id = ? AND message_type = ? AND result_code = ? ORDER BY send_time DESC LIMIT 0,10";
             cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0) + "", memberId + "", MessageType.VIDEO_LIVE.getCode()+"","0"});
         } else {
-            String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ?AND send_time <= ? AND AND message_from_id = ? AND message_type = ? AND result_code = ? ORDER BY send_time DESC LIMIT 0,10";
+            String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ?AND send_time <= ? AND message_from_id = ? AND message_type = ? AND result_code = ? ORDER BY send_time DESC LIMIT 0,10";
             cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",sendTime  + "", memberId + "",MessageType.VIDEO_LIVE.getCode()+"","0"});
         }
         List<TerminalMessage> terminalMessageList = new LinkedList<>();

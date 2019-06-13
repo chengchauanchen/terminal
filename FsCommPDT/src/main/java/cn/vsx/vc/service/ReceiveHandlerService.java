@@ -296,12 +296,14 @@ public class ReceiveHandlerService extends Service{
         }
     }
 
+    private int registCount;
     private RegistrationCallback voipRegistrationCallback = new RegistrationCallback(){
         @Override
         public void registrationOk(){
             super.registrationOk();
             MyTerminalFactory.getSDK().putParam(Params.VOIP_SUCCESS,true);
             logger.info("voip注册成功");
+            registCount = 0;
         }
 
         @Override
@@ -309,6 +311,11 @@ public class ReceiveHandlerService extends Service{
             super.registrationFailed();
             MyTerminalFactory.getSDK().putParam(Params.VOIP_SUCCESS,false);
             logger.error("voip注册失败");
+            if(registCount == 10){
+                //10次都注册失败就退出VOIP客户端
+                MyTerminalFactory.getSDK().getVoipCallManager().destroy(MyApplication.instance);//VOIP服务注销
+            }
+            registCount++;
         }
     };
 

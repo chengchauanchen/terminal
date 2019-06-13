@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.WarningRecord;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.ItemAdapter;
@@ -87,15 +86,8 @@ public class WarningMessageDetailActivity extends BaseActivity{
                     Intent intent = new Intent(WarningMessageDetailActivity.this, VoipPhoneActivity.class);
                     Member member;
                     long number = Long.parseLong(phone);
-                    if(number>Integer.MAX_VALUE){
-                        member = new Member((int) number,phone);
-                        member.setPhone(phone);
-                    }else {
-                        member = DataUtil.getMemberByMemberNo((int) number);
-                        if(TextUtils.isEmpty(member.getPhone())){
-                            member.setPhone(phone);
-                        }
-                    }
+                    member = new Member((int) number,phone);
+                    member.setPhone(phone);
                     intent.putExtra("member", member);
                     WarningMessageDetailActivity.this.startActivity(intent);
                 }else{

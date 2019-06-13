@@ -16,10 +16,10 @@ import java.util.Map;
 import java.util.TimerTask;
 
 import cn.vsx.hamster.common.CallMode;
-import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
@@ -124,11 +124,17 @@ public class PromptManager {
 		@Override
 		public void handler(final int memberId, final String memberName, final int groupId,
 							String version, final CallMode currentCallMode) {
-			if (DataUtil.getMemberByMemberNo(memberId).getType() == TerminalMemberType.TERMINAL_PDT.getCode()){
-				if(soundPool != null){
-					streamId =soundPool.play(soundMap.get(ptt.terminalsdk.R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
+			TerminalFactory.getSDK().getThreadPool().execute(new Runnable(){
+				@Override
+				public void run(){
+					if(DataUtil.isPDTMember(memberId)){
+						if(soundPool != null){
+							streamId =soundPool.play(soundMap.get(ptt.terminalsdk.R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
+						}
+					}
 				}
-			}
+			});
+
 		}
 	};
 

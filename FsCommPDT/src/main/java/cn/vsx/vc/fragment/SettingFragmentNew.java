@@ -407,7 +407,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
                         }
                     } else {
                         int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                        setting_group_name.setText(DataUtil.getMemberByMemberNo(currentGroupId).getName());
+                        setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
                     }
                 }
             });
