@@ -187,8 +187,7 @@
             android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity android:name=".activity.CreateTemporaryGroupsActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"/>
-        <activity android:name=".activity.DeleteTemporaryGroupMemberActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"/>
+        
         <activity android:name=".activity.IncreaseTemporaryGroupMemberActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity android:name=".activity.PcLoginActivity"

@@ -476,7 +476,6 @@ public class NewsFragment extends BaseFragment {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             TerminalMessage terminalMessage = messageList.get(position);
-            System.out.println("点击的消息:"+terminalMessage);
             logger.info("点击的消息："+terminalMessage);
 
             if(terminalMessage.unReadCount != 0){
