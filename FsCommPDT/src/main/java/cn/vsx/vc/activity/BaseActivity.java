@@ -397,12 +397,12 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
         logger.info("event.getKeyCode() = " + event.getKeyCode());
-        //如果当前是禁呼的组，点击音量键控制是无效的
-        if (GroupUtils.currentIsForbid()) {
-            return true;
-        }
         switch (event.getKeyCode()) {
             case KeyEvent.KEYCODE_VOLUME_UP:// 增大音量
+                //如果当前是禁呼的组，点击音量键控制是无效的
+                if (GroupUtils.currentIsForbid()) {
+                    return true;
+                }
                 if (MyTerminalFactory.getSDK().getParam(Params.VOLUME_UP, false)) {
                     groupCallByVolumeKey(event, true);
                     return true;
@@ -419,6 +419,10 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 }
                 return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:// 减小音量
+                //如果当前是禁呼的组，点击音量键控制是无效的
+                if (GroupUtils.currentIsForbid()) {
+                    return true;
+                }
                 if (MyTerminalFactory.getSDK().getParam(Params.VOLUME_DOWN, false)) {
                     groupCallByVolumeKey(event, false);
                     return true;
