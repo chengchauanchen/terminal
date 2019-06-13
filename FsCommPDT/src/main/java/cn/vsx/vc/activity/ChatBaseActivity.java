@@ -138,8 +138,10 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.I
  * Created by gt358 on 2017/8/16.
  */
 
-public abstract class ChatBaseActivity extends BaseActivity implements
-    NfcAdapter.CreateNdefMessageCallback, NfcAdapter.OnNdefPushCompleteCallback{
+public abstract class ChatBaseActivity extends BaseActivity
+    implements
+    NfcAdapter.CreateNdefMessageCallback, NfcAdapter.OnNdefPushCompleteCallback
+{
     private static final int CODE_CAMERA_REQUEST = 0x11;
     /**
      * 打开相机

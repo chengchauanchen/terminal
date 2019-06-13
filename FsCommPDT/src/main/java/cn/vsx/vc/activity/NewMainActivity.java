@@ -44,6 +44,7 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import cn.vsx.vc.service.CardService;
 import com.hytera.api.SDKException;
 import com.hytera.api.SDKManager;
 import com.hytera.api.base.common.CallManager;
@@ -1117,7 +1118,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         judgePermission();
         startSDKRegistration();
         NfcUtil.nfcCheck(this);
-
+        startService(new Intent(this,CardService.class));
         //清理数据库
         FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
         //48小时未上传的文件上传
