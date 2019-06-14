@@ -231,6 +231,8 @@ public class FileTransgerUtil {
             MediaPlayer mediaPlayer =  getMediaPlayer(MyTerminalFactory.getSDK().application,file);
             if(mediaPlayer!=null&&mediaPlayer.getDuration()>=0){
                 bean.setDuration(mediaPlayer.getDuration()+"");
+            }else{
+                bean = null;
             }
         }
         return bean;

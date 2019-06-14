@@ -215,51 +215,55 @@ public class MainActivity extends BaseActivity {
         }
         judgePermission();
 
-        button1.setText("手动设置账号信息");
+        button1.setText("97f26f");
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
                     @Override
                     public void run() {
-                        myHandler.postDelayed(() -> setManualNFCBean(),1000);
+                        //NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",900020,"20190306T00602672");
+                        NFCBean bean = new NFCBean("11ebf36bcbaa0f7f6683b8295a542377",900014,"20190306T00602672");
+                        myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
 //                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
 //                        operation.deleteUploadedFile();
                     }
                  });
             }
         });
-        button2.setText("组呼");
+        button2.setText("23c75c");
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
-//                        operation.getRecordByAll();
-//                        operation.uploadFileByPath("/storage/emulated/0/Android/data/cn.vsx.vc/VideoRecord/2019022616555402OON000110000001.mp4",0,false);
-//                        operation.uploadFileByPath("/storage/sdcard1/Android/data/cn.vsx.vc/VideoRecord/2019022616555402OON000110000001.mp4",0,false);
-//                        operation.uploadFileTreeBean(null);
-//                    }
-//                });
+                TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        NFCBean bean = new NFCBean("88bd3ad393a710a3ae9164165823c75c",900020,"20190306T00602672");
+                        myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
+                        //FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
+                        //operation.getRecordByAll();
+                        //operation.uploadFileByPath("/storage/emulated/0/Android/data/cn.vsx.vc/VideoRecord/2019022616555402OON000110000001.mp4",0,false);
+                        //operation.uploadFileByPath("/storage/sdcard1/Android/data/cn.vsx.vc/VideoRecord/2019022616555402OON000110000001.mp4",0,false);
+                        //operation.uploadFileTreeBean(null);
+                    }
+                });
 
             }
         });
-        button2.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                switch (event.getAction()){
-                    case MotionEvent.ACTION_DOWN:
-                        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverPTTButtonEventHandler.class, Constants.PTTEVEVT_ACTION_DOWN);
-                        break;
-                    case MotionEvent.ACTION_UP:
-                        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverPTTButtonEventHandler.class,Constants.PTTEVEVT_ACTION_UP);
-                        break;
-                }
-                return true;
-            }
-        });
+        //button2.setOnTouchListener(new View.OnTouchListener() {
+        //    @Override
+        //    public boolean onTouch(View v, MotionEvent event) {
+        //        switch (event.getAction()){
+        //            case MotionEvent.ACTION_DOWN:
+        //                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverPTTButtonEventHandler.class, Constants.PTTEVEVT_ACTION_DOWN);
+        //                break;
+        //            case MotionEvent.ACTION_UP:
+        //                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverPTTButtonEventHandler.class,Constants.PTTEVEVT_ACTION_UP);
+        //                break;
+        //        }
+        //        return true;
+        //    }
+        //});
         button1.setVisibility(View.GONE);
         button2.setVisibility(View.GONE);
         //清理数据库

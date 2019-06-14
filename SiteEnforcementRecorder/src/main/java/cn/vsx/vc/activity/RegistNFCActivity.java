@@ -15,9 +15,12 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import cn.vsx.hamster.terminalsdk.model.NFCBean;
 import com.blankj.utilcode.util.ToastUtils;
 
 import org.apache.log4j.Logger;
@@ -321,6 +324,26 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
 //                myHandler.postDelayed(() -> setManualNFCBean(),1000);
 //            }
 //        });
+        //点击事件
+        LinearLayout ll_button = findViewById(R.id.ll_button);
+        ll_button.setVisibility(View.GONE);
+        Button button1 = findViewById(R.id.button_1);
+        Button button2 = findViewById(R.id.button_2);
+        button2.setVisibility(View.GONE);
+        button1.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                //NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",900020,"20190306T00602672");
+                NFCBean bean = new NFCBean("11ebf36bcbaa0f7f6683b8295a542377",900014,"20190306T00602672");
+                myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
+            }
+        });
+        button2.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                NFCBean bean = new NFCBean("88bd3ad393a710a3ae9164165823c75c",900020,"20190306T00602672");
+                myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
+            }
+        });
+
     }
 
     private void initDialog() {

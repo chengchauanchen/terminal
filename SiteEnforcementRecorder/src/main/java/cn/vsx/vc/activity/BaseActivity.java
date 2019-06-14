@@ -26,6 +26,9 @@ import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
 
+import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLogFileUploadCompleteHandler;
+import cn.vsx.vc.R;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.log4j.Logger;
@@ -101,6 +104,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiverClearAccountHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLogFileUploadCompleteHandler);
         setPttVolumeChangedListener();
     }
 
@@ -170,6 +174,19 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             }
         }
     };
+
+    /**
+     * 日志上传是否成功的消息
+     */
+    private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = (resultCode, type) -> myHandler.post(() -> {
+        if ("log".equals(type)) {
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                ToastUtil.toast(this, getString(R.string.text_log_upload_success_thanks));
+            } else {
+                ToastUtil.showToast(getString(R.string.text_log_upload_fail_please_try_later), this);
+            }
+        }
+    });
 
     static Method findViewBinderForClassMethod;
 
@@ -311,6 +328,10 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
+        //logger.debug("onNewIntent--intent.getAction()："+intent.getAction());
+        //if(mNFCUtil!=null&&mNFCUtil.getmNfcAdapter()!=null){
+        //    mNFCUtil.proccessIntent(getIntent());
+        //}
     }
 
     @Override
@@ -336,6 +357,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiverClearAccountHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLogFileUploadCompleteHandler);
 
             if (mBroadcastReceiv != null) {
                 LocalBroadcastManager.getInstance(BaseActivity.this).unregisterReceiver(
@@ -687,9 +709,11 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     /**
      * 手动设置
      */
-    public void setManualNFCBean(){
+    public void setManualNFCBean(NFCBean bean){
 //        NFCBean bean = new NFCBean("e0d3ecad1687fbfcd142c9792d7733c9",900020,"20190306T00602672");
-        NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",900020,"20190306T00602672");
+        if(bean == null){
+            return;
+        }
         logger.debug("onReadResult---bean:"+bean);
         //保存账号解绑时间信息
         TerminalFactory.getSDK().putParam(Params.NFC_BEAN_TIME, System.currentTimeMillis());
