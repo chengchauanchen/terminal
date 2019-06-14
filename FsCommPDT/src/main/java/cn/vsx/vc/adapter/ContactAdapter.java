@@ -149,15 +149,15 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 mContext.startActivity(intent);
             });
             //如果是自己的不显示业务按钮
-//            if(account.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
-//                userViewHolder.llDialTo.setVisibility(View.GONE);
+            if(account.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
+                userViewHolder.llDialTo.setVisibility(View.GONE);
 //                userViewHolder.llMessageTo.setVisibility(View.GONE);
 //                userViewHolder.llCallTo.setVisibility(View.GONE);
-//            }else{
-//                userViewHolder.llDialTo.setVisibility(View.VISIBLE);
+            }else{
+                userViewHolder.llDialTo.setVisibility(View.VISIBLE);
 //                userViewHolder.llMessageTo.setVisibility(View.VISIBLE);
 //                userViewHolder.llCallTo.setVisibility(View.VISIBLE);
-//            }
+            }
             //电话按钮，是否显示
 //            if(contractType == Constants.TYPE_CONTRACT_MEMBER && account.getNo() != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
 //                userViewHolder.llDialTo.setVisibility(View.VISIBLE);

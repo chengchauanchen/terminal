@@ -30,16 +30,14 @@
             style="@style/warning_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="张晋" />
+            android:layout_marginLeft="10dp"/>
         
         <TextView
             android:id="@+id/tv_aperson_phone"
             style="@style/warning_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="13100715231" />
+            android:layout_marginLeft="10dp"/>
     </LinearLayout>
     
     <LinearLayout
@@ -60,16 +58,14 @@
             style="@style/warning_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="张晋" />
+            android:layout_marginLeft="10dp"/>
         
         <TextView
             android:id="@+id/tv_rece_person_phone"
             style="@style/warning_name_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="027-51253652" />
+            android:layout_marginLeft="10dp"/>
     </LinearLayout>
     
     <LinearLayout
@@ -90,8 +86,7 @@
             style="@style/chat_warning_common_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="2019.01.02 20:02" />
+            android:layout_marginLeft="10dp"/>
     </LinearLayout>
     
     <LinearLayout
@@ -112,8 +107,7 @@
             style="@style/chat_warning_common_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:text="光谷大道" />
+            android:layout_marginLeft="10dp"/>
     </LinearLayout>
     
     <LinearLayout

@@ -125,6 +125,7 @@ public class TranspondDialog  extends Dialog {
     private boolean isShowWithDrawBySendTime(long sendTime){
         long currentTime = System.currentTimeMillis();
         long s = (currentTime - sendTime) / (1000 * 60);
-        return (s>=0 && s<WITH_DRAW_TIME);
+        //return (s>=0 && s<WITH_DRAW_TIME);
+        return ( s<WITH_DRAW_TIME);
     }
 }

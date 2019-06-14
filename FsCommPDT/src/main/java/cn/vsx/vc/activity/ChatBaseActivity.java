@@ -53,6 +53,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.NFCBean;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetHistoryMessageRecordHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.GetWarningMessageDetailHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGPSLocationHandler;
@@ -65,8 +66,10 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageFailedHan
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
+import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
+import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.TemporaryAdapter;
@@ -248,6 +251,7 @@ public abstract class ChatBaseActivity extends BaseActivity
         MyTerminalFactory.getSDK().registReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRecallRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mNotifyRecallRecordMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(getWarningMessageDetailHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileCheckMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowTransponPopupHandler);
@@ -440,6 +444,7 @@ public abstract class ChatBaseActivity extends BaseActivity
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseRecallRecordHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mNotifyRecallRecordMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(getWarningMessageDetailHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowTransponPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowForwardMoreHandler);
@@ -1994,6 +1999,25 @@ public abstract class ChatBaseActivity extends BaseActivity
 
         }
         handler.post(() -> temporaryAdapter.notifyDataSetChanged());
+    };
+
+    /**
+     * 获取警情详情之后替换消息
+     */
+    private GetWarningMessageDetailHandler getWarningMessageDetailHandler = new GetWarningMessageDetailHandler(){
+        @Override
+        public void handle(TerminalMessage terminalMessage,boolean newMessage) {
+            if(!newMessage&&(chatMessageList.contains(terminalMessage))){
+                int index = chatMessageList.indexOf(terminalMessage);
+                if(index>=0&&index<chatMessageList.size()&&chatMessageList.get(index)!=null){
+                    TerminalMessage oldMessage = chatMessageList.get(index);
+                    //if(!oldMessage.messageBody.containsKey(JsonParam.DETAIL) || !oldMessage.messageBody.getBooleanValue(JsonParam.DETAIL)){
+                        Collections.replaceAll(chatMessageList, oldMessage,terminalMessage);
+                        handler.post(() -> temporaryAdapter.notifyItemChanged(index));
+                    //}
+                }
+            }
+        }
     };
 
 //    /**  获取百度地图定位的信息  **/

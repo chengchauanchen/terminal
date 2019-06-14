@@ -214,6 +214,9 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         logger.info("userId：" + userId);
 //        logger.info("member：" + member.toString());
         funcation.setFunction(false, userId);
+        //ivCall
+        ivCall.setVisibility(((userId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)))?View.GONE:View.VISIBLE);
+
     }
 
 

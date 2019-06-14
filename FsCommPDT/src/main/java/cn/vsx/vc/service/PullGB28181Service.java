@@ -21,6 +21,8 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import org.apache.http.util.TextUtils;
 import org.apache.log4j.Logger;
 import org.easydarwin.video.EasyRTSPClient;
@@ -116,7 +118,10 @@ public class PullGB28181Service extends BaseService{
         terminalMessage = (TerminalMessage) intent.getSerializableExtra(Constants.TERMINALMESSAGE);
         if(terminalMessage.messageBody.containsKey(JsonParam.GB28181_RTSP_URL)){
             setPushAuthority();
-            gb28181Url = terminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL);
+            //gb28181Url = terminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL);
+            String deviceId = terminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL);
+            String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
+            gb28181Url = gateWayUrl + "DevAor=" + deviceId;
             logger.info("播放地址："+ gb28181Url);
             String deviceName = terminalMessage.messageBody.getString(JsonParam.DEVICE_NAME);
             mVideoPlatform.setVisibility(View.VISIBLE);

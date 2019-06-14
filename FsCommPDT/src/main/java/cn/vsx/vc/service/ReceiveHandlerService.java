@@ -1093,11 +1093,11 @@ public class ReceiveHandlerService extends Service{
             if(member.getType() == TerminalMemberType.TERMINAL_LTE.getCode()){
                 //LTE
                 String gb28181No = member.getGb28181No();
-                String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
-                String gb28181RtspUrl = gateWayUrl+"DevAor="+gb28181No;
+                //String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
+                //String gb28181RtspUrl = gateWayUrl+"DevAor="+gb28181No;
                 TerminalMessage terminalMessage = new TerminalMessage();
                 terminalMessage.messageBody = new JSONObject();
-                terminalMessage.messageBody.put(JsonParam.GB28181_RTSP_URL,gb28181RtspUrl);
+                terminalMessage.messageBody.put(JsonParam.GB28181_RTSP_URL,gb28181No);
                 terminalMessage.messageBody.put(JsonParam.DEVICE_NAME,member.getName());
                 terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_NAME,member.getDepartmentName());
                 terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_ID,member.getDeptId());
