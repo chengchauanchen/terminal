@@ -226,7 +226,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler() {
         @Override
         public void handler(boolean connected) {
-            System.out.println("注册界面的监听(仅仅更新UI的文字)popo");
             logger.info("AuthManager收到信令是否连接的通知" + connected);
             if (connected) {
                 changeProgressMsg(getResources().getString(R.string.logining));
@@ -882,7 +881,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
             }
         } else {
-            System.out.println("11111登录的入口开启状态handle切换");
             //有注册服务地址，去认证
             int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {

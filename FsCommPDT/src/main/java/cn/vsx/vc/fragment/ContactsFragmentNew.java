@@ -39,7 +39,9 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.utils.BitmapUtil;
+import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.DialPopupwindow;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -92,7 +94,8 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     private DialPopupwindow dialPopupwindow;
     private boolean soundOff;
 
-    public ContactsFragmentNew(){}
+    public ContactsFragmentNew() {
+    }
 
     @Override
     public int getContentViewId() {
@@ -116,7 +119,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         isGroup = (RelativeLayout) mRootView.findViewById(R.id.is_group);
         add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
         setting_group_name = (TextView) mRootView.findViewById(R.id.setting_group_name);
-        lte_line =  mRootView.findViewById(R.id.lte_line);
+        lte_line = mRootView.findViewById(R.id.lte_line);
         lte_tv = (TextView) mRootView.findViewById(R.id.lte_tv);
         activity = (NewMainActivity) getActivity();
         mRootView.findViewById(R.id.is_shoutai).setOnClickListener(this);
@@ -127,27 +130,27 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         childFragmentManager = getChildFragmentManager();
         initFragment();
         setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
-        TextViewCompat.setTextAppearance(group_tv,R.style.contacts_title_checked_text);
-        TextViewCompat.setTextAppearance(shoutai_tv,R.style.contacts_title_unchecked_text);
-        TextViewCompat.setTextAppearance(jingwutong_tv,R.style.contacts_title_unchecked_text);
-        TextViewCompat.setTextAppearance(lte_tv,R.style.contacts_title_unchecked_text);
-        group_tv .setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-        shoutai_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-        jingwutong_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-        lte_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+        TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_checked_text);
+        TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
+        TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
+        TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
+        group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+        shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+        jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+        lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         dialPopupwindow = new DialPopupwindow(context);
         voice_image.setImageResource(BitmapUtil.getVolumeImageResourceByValue(false));
         voice_image.setOnClickListener(view -> {
-            if(!soundOff){
+            if (!soundOff) {
                 voice_image.setImageResource(R.drawable.volume_off_call);
                 TerminalFactory.getSDK().getAudioProxy().volumeQuiet();
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true,1);
-                soundOff =true;
-            }else {
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true, 1);
+                soundOff = true;
+            } else {
                 voice_image.setImageResource(R.drawable.horn);
                 TerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false,1);
-                soundOff =false;
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false, 1);
+                soundOff = false;
             }
         });
     }
@@ -166,62 +169,67 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetGroupByNoHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
         imgbtn_dial.setOnClickListener(v -> {
-            if (dialPopupwindow == null){
+            if (dialPopupwindow == null) {
                 dialPopupwindow = new DialPopupwindow(context);
             }
-            dialPopupwindow.showAtLocation(((Activity)context).findViewById(R.id.rg), Gravity.BOTTOM|Gravity.CENTER_HORIZONTAL, 0, 0);
+            dialPopupwindow.showAtLocation(((Activity) context).findViewById(R.id.rg), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
         });
 
         activity.setOnBackListener(() -> {
-                if (groupFragmentNew.isVisible()) {
-                    groupFragmentNew.onBack();
-                }else if (handPlatformFragment.isVisible()){
-                    handPlatformFragment.onBack();
-                }else if(policeAffairsFragment.isVisible()){
-                    policeAffairsFragment.onBack();
-                }else{
-                    lteFragment.onBack();
-                }
+            if (groupFragmentNew.isVisible()) {
+                groupFragmentNew.onBack();
+            } else if (handPlatformFragment.isVisible()) {
+                handPlatformFragment.onBack();
+            } else if (policeAffairsFragment.isVisible()) {
+                policeAffairsFragment.onBack();
+            } else {
+                lteFragment.onBack();
+            }
         });
 
     }
 
     /*** 自己组呼返回的消息 **/
-    private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = (methodResult, resultDesc,groupId) -> mHandler.post(() -> {
+    private ReceiveRequestGroupCallConformationHandler mReceiveRequestGroupCallConformationHandler = (methodResult, resultDesc, groupId) -> mHandler.post(() -> {
         if (methodResult == 0) {
             showViewWhenGroupCall(getString(R.string.text_I_am_talking));
             setViewEnable(false);
         }
     });
-    private void setViewEnable (boolean isEnable) {
+
+    private void setViewEnable(boolean isEnable) {
 //        newsList.setEnabled(isEnable);
         add_icon.setEnabled(isEnable);
     }
+
     /***  停止组呼的时候隐藏View **/
-    private void hideViewWhenStopGroupCall () {
+    private void hideViewWhenStopGroupCall() {
         speaking_name.setVisibility(View.GONE);
         icon_laba.setVisibility(View.GONE);
     }
 
     /***  组呼的时候显示View **/
-    private void showViewWhenGroupCall (final String speakerName) {
+    private void showViewWhenGroupCall(final String speakerName) {
         speaking_name.setVisibility(View.VISIBLE);
         icon_laba.setVisibility(View.VISIBLE);
         speaking_name.setText(speakerName);
     }
+
     @Override
     public void initData() {
     }
+
     private void setVideoIcon() {
-        MyTopRightMenu.offerObject().initview(add_icon,activity );
+        MyTopRightMenu.offerObject().initview(add_icon, activity);
         //没有上报和回传图像的权限
-        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())
-                && !MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
+        if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())
+                && !MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())) {
             add_icon.setVisibility(View.INVISIBLE);
-        }else {
+        } else {
             add_icon.setVisibility(View.VISIBLE);
         }
     }
+
     @Override
     public void onDestroyView() {
 
@@ -239,6 +247,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
         super.onDestroyView();
     }
+
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> mHandler.post(() -> setVideoIcon());
     private ReceiveChangeGroupHandler receiveChangeGroupHandler = new ReceiveChangeGroupHandler() {
         @Override
@@ -249,7 +258,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
         @Override
         public void handler(int memberId, String memberName, int groupId, final String groupName, CallMode currentCallMode) {
-            if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
+            if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 mHandler.post(() -> {
                     setting_group_name.setText(groupName);
                     speaking_name.setVisibility(View.VISIBLE);
@@ -260,17 +269,19 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
         }
     };
-    /**音量改变*/
+    /**
+     * 音量改变
+     */
     private ReceiveVolumeOffCallHandler receiveVolumeOffCallHandler = new ReceiveVolumeOffCallHandler() {
 
         @Override
-        public void handler(boolean isVolumeOff,int status) {
-            if(isVolumeOff){
+        public void handler(boolean isVolumeOff, int status) {
+            if (isVolumeOff) {
                 voice_image.setImageResource(R.drawable.volume_off_call);
-                soundOff=true;
-            }else {
+                soundOff = true;
+            } else {
                 voice_image.setImageResource(R.drawable.horn);
-                soundOff=false;
+                soundOff = false;
             }
         }
     };
@@ -282,7 +293,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         hideViewWhenStopGroupCall();
         setViewEnable(true);
     });
-    private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler(){
+    private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler() {
 
         @Override
         public void handler(int reasonCode) {
@@ -306,35 +317,39 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         }
     };
 
-    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler(){
+    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = new ReceiveMemberAboutTempGroupHandler() {
         @Override
-        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType){
-            mHandler.post(()->{
-                if(!TempGroupType.ACTIVITY_TEAM_GROUP.toString().equals(tempGroupType)){
-                    if(isAdd ){
-                        if(isLocked || isSwitch||isScan){
+        public void handler(boolean isAdd, boolean isLocked, boolean isScan, boolean isSwitch, int tempGroupNo, String tempGroupName, String tempGroupType) {
+            mHandler.post(() -> {
+                if (!TempGroupType.ACTIVITY_TEAM_GROUP.toString().equals(tempGroupType)) {
+                    if (isAdd) {
+                        if (isLocked || isSwitch || isScan) {
                             setting_group_name.setText(tempGroupName);
                         }
-                    }else {
+                    } else {
                         int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
                         setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
+                        //这里播放提示音大概率会没有声音，原因是soundpool播放了多路声音，这个声音被后面的覆盖(后面调的播放，前面的不播)
+                        //有两种解决办法，1.延迟播放；2.将池子的大小设为2(优先级的参数目前是无效的)
+                        ToastUtil.showToast(getActivity(), tempGroupName + "到期");
+                        PromptManager.getInstance().playTempGroupExpire();
                     }
                 }
             });
         }
     };
 
-    private ReceiveGetGroupByNoHandler receiveGetGroupByNoHandler = group -> mHandler.post(new Runnable(){
+    private ReceiveGetGroupByNoHandler receiveGetGroupByNoHandler = group -> mHandler.post(new Runnable() {
         @Override
-        public void run(){
+        public void run() {
             setting_group_name.setText(group.getName());
         }
     });
 
     private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
         @Override
-        public void handler(int memberId, int toGroupId,boolean forceSwitchGroup,String tempGroupType) {
-            if(!forceSwitchGroup){
+        public void handler(int memberId, int toGroupId, boolean forceSwitchGroup, String tempGroupType) {
+            if (!forceSwitchGroup) {
                 return;
             }
             mHandler.post(() -> {
@@ -353,7 +368,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
             policeAffairsFragment = new NewPoliceAffairsFragment();
         }
 
-        if (handPlatformFragment == null){
+        if (handPlatformFragment == null) {
             handPlatformFragment = new NewHandPlatformFragment();
         }
         if (lteFragment == null) {
@@ -372,7 +387,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         currentFragment = groupFragmentNew;
         imgbtn_dial.setVisibility(View.GONE);
     }
-
 
 
     public void switchFragment(Fragment from, Fragment to) {
@@ -402,14 +416,14 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                 if (groupFragmentNew == null) {
                     groupFragmentNew = new NewGroupFragment();
                 }
-                TextViewCompat.setTextAppearance(group_tv,R.style.contacts_title_checked_text);
-                TextViewCompat.setTextAppearance(shoutai_tv,R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(jingwutong_tv,R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(lte_tv,R.style.contacts_title_unchecked_text);
-                group_tv .setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-                shoutai_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                jingwutong_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                lte_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_checked_text);
+                TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
+                group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+                shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
                 switchFragment(currentFragment, groupFragmentNew);
                 groupLine.setVisibility(View.VISIBLE);
                 shoutai_line.setVisibility(View.INVISIBLE);
@@ -421,17 +435,17 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
             case R.id.is_shoutai:
                 if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
                     return;
-                if (handPlatformFragment == null){
+                if (handPlatformFragment == null) {
                     handPlatformFragment = new NewHandPlatformFragment();
                 }
-                TextViewCompat.setTextAppearance(group_tv,R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(shoutai_tv,R.style.contacts_title_checked_text);
-                TextViewCompat.setTextAppearance(jingwutong_tv,R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(lte_tv,R.style.contacts_title_unchecked_text);
-                group_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                shoutai_tv .setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-                jingwutong_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                lte_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_checked_text);
+                TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
+                group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+                jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
                 switchFragment(currentFragment, handPlatformFragment);
                 groupLine.setVisibility(View.INVISIBLE);
                 shoutai_line.setVisibility(View.VISIBLE);
@@ -446,14 +460,14 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                 if (policeAffairsFragment == null) {
                     policeAffairsFragment = new NewPoliceAffairsFragment();
                 }
-                TextViewCompat.setTextAppearance(group_tv,R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(shoutai_tv,R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(jingwutong_tv,R.style.contacts_title_checked_text);
-                TextViewCompat.setTextAppearance(lte_tv,R.style.contacts_title_unchecked_text);
-                group_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                shoutai_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                jingwutong_tv .setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-                lte_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_checked_text);
+                TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
+                group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+                lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
                 switchFragment(currentFragment, policeAffairsFragment);
                 jingwutong_line.setVisibility(View.VISIBLE);
                 groupLine.setVisibility(View.INVISIBLE);
@@ -468,14 +482,14 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                 if (lteFragment == null) {
                     lteFragment = new LteFragment();
                 }
-                TextViewCompat.setTextAppearance(group_tv,R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(shoutai_tv,R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(jingwutong_tv,R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(lte_tv,R.style.contacts_title_checked_text);
-                group_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                shoutai_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                jingwutong_tv .setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                lte_tv .setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+                TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
+                TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_checked_text);
+                group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+                lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
                 switchFragment(currentFragment, lteFragment);
                 jingwutong_line.setVisibility(View.INVISIBLE);
                 groupLine.setVisibility(View.INVISIBLE);

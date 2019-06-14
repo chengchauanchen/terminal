@@ -292,11 +292,16 @@ public class SpecificSDK extends TerminalSDK4Android {
      * 提供给第三方用户的初始化入口
      */
     public static void init(Application application){
+        //SpecificSDK是TerminalSDK4Android的子类，而TerminalSDK4Android继承TerminalSDKBaseImpl实现ITerminalSDK接口(具备了很多通用的业务功能)
         specificSDK = new SpecificSDK(application);
+        //如果消息服务是开启的，直接关闭
         MyTerminalFactory.getSDK().setLoginFlag();
+        //设置程序的key和type(见具体的清单文件配置)
         setAppKey(application);
         setApkType(application);
+        //开启程序的所有后台服务(包含新开的消息监听进程和很多后台监听和全局控制的服务，程序的登录流程也在对应的服务中自动进行)
         MyTerminalFactory.getSDK().start();
+        //根据前面获取到的type，这里设置地址(不同的类型对应的地址不一样)
         //设置注册服务地址
         MyTerminalFactory.getSDK().getAuthManagerTwo().initIp();
         //保存录像，录音，照片的存储路径

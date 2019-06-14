@@ -288,6 +288,15 @@ public class PromptManager {
 		}
 	}
 
+	/**
+	 * 临时组到期
+	 */
+	public void playTempGroupExpire(){
+		if(soundPool != null){
+			streamId = soundPool.play(soundMap.get(R.raw.temp_group_expire), 0.5f, 0.5f, 0, 0, 1);
+		}
+	}
+
 
 	public void stopRing(){
 		if(soundPool != null){
@@ -319,7 +328,7 @@ public class PromptManager {
 
 	public void start(){
 		logger.info("----------提示音管理类 start()------------");
-		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+		soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
 		soundMap.clear();
 		soundMap.put(ptt.terminalsdk.R.raw.ppt_up, soundPool.load(MyApplication.instance,ptt.terminalsdk.R.raw.ppt_up, 1));
 
@@ -336,6 +345,7 @@ public class PromptManager {
 		soundMap.put(R.raw.exten_storage_not_engou, soundPool.load(MyApplication.instance, R.raw.exten_storage_not_engou,1));
 		soundMap.put(R.raw.start_report_by_notify, soundPool.load(MyApplication.instance, R.raw.start_report_by_notify,1));
 		soundMap.put(R.raw.start_play_by_notify, soundPool.load(MyApplication.instance, R.raw.start_play_by_notify,1));
+		soundMap.put(R.raw.temp_group_expire, soundPool.load(MyApplication.instance, R.raw.temp_group_expire,10));
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);
