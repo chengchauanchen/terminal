@@ -140,29 +140,30 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
 	protected ReceiveExitHandler receiveExitHandler = new ReceiveExitHandler() {
 		@Override
-		public void handle(String msg) {
-			ToastUtil.showToast(BaseActivity.this,msg);
-			myHandler.postDelayed(new Runnable() {
-				@Override
-				public void run() {
-					Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
-					stoppedCallIntent.putExtra("stoppedResult", "0");
-					SendRecvHelper.send(getApplicationContext(), stoppedCallIntent);
+		public void handle(String msg,boolean isExit) {
+			if(isExit){
+				ToastUtil.showToast(BaseActivity.this,msg);
+				myHandler.postDelayed(new Runnable() {
+					@Override
+					public void run() {
+						Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
+						stoppedCallIntent.putExtra("stoppedResult", "0");
+						SendRecvHelper.send(getApplicationContext(), stoppedCallIntent);
 
-					MyTerminalFactory.getSDK().exit();//停止服务
-					PromptManager.getInstance().stop();
-					for (Activity activity : ActivityCollector.getAllActivity().values()) {
-						activity.finish();
+						PromptManager.getInstance().stop();
+						for (Activity activity : ActivityCollector.getAllActivity().values()) {
+							activity.finish();
+						}
+						TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
+						TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
+						MyApplication.instance.isClickVolumeToCall = false;
+						MyApplication.instance.isPttPress = false;
+						//停止上报或者观看的页面
+						MyTerminalFactory.getSDK().stop();
+						Process.killProcess(Process.myPid());
 					}
-					TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
-					TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
-					MyApplication.instance.isClickVolumeToCall = false;
-					MyApplication.instance.isPttPress = false;
-					//停止上报或者观看的页面
-					MyTerminalFactory.getSDK().stop();
-					Process.killProcess(Process.myPid());
-				}
-			},2000);
+				},2000);
+			}
 		}
 	};
 

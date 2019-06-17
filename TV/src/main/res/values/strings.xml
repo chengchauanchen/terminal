@@ -1,11 +1,31 @@
 <resources>
     <string name="app_name">融合通信</string>
-
+    <string name="text_prompt">提示</string>
+    <string name="text_sure">确定</string>
+    <string name="text_cancel">取消</string>
 
     <!--注册界面-->
+    <string name="authing">正在认证...</string>
+    <string name="auth_fail">认证失败...</string>
+    <string name="logining">正在登录...</string>
+    <string name="connecting_server">正在连接服务器</string>
+    <string name="updating_data">正在更新数据</string>
+    <string name="please_regist_account">请注册账号</string>
+    <string name="action_settings">Settings</string>
     <string name="regist_org_hint">邀请码</string>
     <string name="regist_name_hint">姓名</string>
     <string name="regist_button">注册</string>
+    <string name="text_temporarily_unavailable_permissions">:暂时未开通权限</string>
+    <string name="text_departmental_delegation_expires">:部门授权过期</string>
+    <string name="text_terminal_type_error">:认证失败，类型不匹配</string>
+    <string name="text_terminal_repeat">:登录失败，找到多个重复用户</string>
+    <string name="text_looking_for_server">正在找服务器</string>
+    <string name="text_invitation_code_wrong_please_regist_again">邀请码错误，请重新注册！</string>
+    <string name="text_regist_fail_please_check_all_info_is_correct">注册失败，请检查各项信息是否正确！</string>
+    <string name="text_please_select_unit">请选择单位</string>
+    <string name="text_registing">正在注册...</string>
+    <string name="text_updating_data">正在更新数据...</string>
+    <string name="text_logining">正在登入...</string>
 
     <!-- 自动更新 -->
     <string name="soft_update_no">已经是最新版本</string>

@@ -6,8 +6,8 @@ import android.content.pm.PackageManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.Gson;
 
 import org.apache.log4j.Logger;
 
@@ -18,14 +18,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cn.vsx.hamster.common.TerminalMemberType;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Folder;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.RotationImageType;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
-import cn.vsx.vc.R;
 import cn.vsx.vc.model.RorationLiveData;
 import cn.vsx.vc.model.RotationLiveBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -194,35 +192,7 @@ public class DataUtil {
         return m.matches();
     }
 
-    /**
-     * 通过memberId获得member对象
-     *
-     * @param memberId
-     */
-    public static Member getMemberByMemberId(int memberId) {
-        List<Member> allMembers = MyTerminalFactory.getSDK().getConfigManager().getAllMembers();
-        Member member = null;
-//		logger.info("datautil-----getMemberByMemberId"+allMembers.toString()+"-----------"+allMembers.size());	
-        if (allMembers.size() > 0) {
-            for (int i = 0; i < allMembers.size(); i++) {
-                int mMemberId = allMembers.get(i).id;
-                if (mMemberId == memberId) {
-                    member = new Member();
-                    member.id = memberId;
-                    member.setName(allMembers.get(i).getName());
-                    break;
-                }
-            }
-        }
 
-        if (member == null) {
-            member = new Member();
-            member.id = memberId;
-            member.setName(memberId + "");
-        }
-
-        return member;
-    }
 
     /**
      * 通过memberId获得member对象
@@ -292,18 +262,7 @@ public class DataUtil {
         return mWeek;
     }
 
-    /**
-     * 个呼通讯录中是否存在此成员
-     */
-    public static boolean isExistContacts(Member member) {
-        List<Member> allMembers = MyTerminalFactory.getSDK().getConfigManager().getAllMembers();//获取到个呼通讯录
-        for (Member member2 : allMembers) {
-            if (member2.id == member.id) {
-                return true;
-            }
-        }
-        return false;
-    }
+
 
     public static String getVersion(Context context) {
         String version = "";
@@ -317,32 +276,6 @@ public class DataUtil {
         return version;
     }
 
-    /**
-     * @param memberNo 人员编号
-     * @return 根据编号查找人员
-     */
-    public static Member getMemberByMemberNo(int memberNo) {
-        List<Member> allMembers = TerminalFactory.getSDK().getConfigManager().getAllMembers();
-        Member member = null;
-        if (allMembers.size() > 0) {
-            for (int i = 0; i < allMembers.size(); i++) {
-                int mMemberNo = allMembers.get(i).getNo();
-                if (mMemberNo == memberNo) {
-                    member = allMembers.get(i);
-                    break;
-                }
-            }
-        }
-
-        if (member == null) {
-            member = new Member();
-            member.id = memberNo;
-            member.no = memberNo;
-            member.setName(handleName(memberNo + ""));
-        }
-
-        return member;
-    }
 
     public static String handleName(String memberName) {
         String account = memberName;
@@ -355,25 +288,51 @@ public class DataUtil {
     }
 
     /**
+     * 解析轮播List
+     * @param data
+     * @return
+     */
+    public static List<String> getRotationLiveBeanList(String data) {
+        Log.d("---", "getRotationLiveBeanList---data: "+data);
+        List<String> list = new ArrayList<>();
+        try{
+            if(!TextUtils.isEmpty(data)){
+                JSONArray jsonArray = JSONObject.parseArray(data);
+                if(jsonArray!=null){
+                    for (int i = 0; i < jsonArray.size(); i++) {
+                        JSONObject js=  jsonArray.getJSONObject(i);
+                        list.add(js.toJSONString());
+                    }
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /**
      * 解析轮播对象
      * @param data
      * @return
      */
     public static RotationLiveBean getRotationLiveBean(String data) {
+        Log.d("---", "getRotationLiveBean---data: "+data);
         RotationLiveBean bean = null;
         try{
             if(!TextUtils.isEmpty(data)){
                 bean = new RotationLiveBean();
                 //类型
-                String[] string  = data.split(":");
-                int type = stringToInt(string[0]);
-                bean.setType(type);
+                JSONObject jsonResult = JSONObject.parseObject(data);
+                String type = jsonResult.getString("type");
+                bean.setType(RotationImageType.valueOf(type).getCode());
+
                 //信息
-                String json = data.substring(data.indexOf(":")+1);
+                String json = jsonResult.getString("dataStr");
                 Log.d("---", "getRotationLiveBean: "+json);
                 if(!TextUtils.isEmpty(json)){
                     RorationLiveData live = new RorationLiveData();
-                    if (type == RotationImageType.RTSP.getCode()) {
+                    if (bean.getType() == RotationImageType.RTSP.getCode()) {
                         String[] d = json.split("_");
                         if(d.length>0){
                             live.setLiveNo(stringToInt(d[0]));
@@ -384,9 +343,9 @@ public class DataUtil {
                         if(d.length>2){
                             live.setCallId(d[2]);
                         }
-                    }else if(type == RotationImageType.OuterGB28181.getCode()){
+                    }else if(bean.getType() == RotationImageType.OuterGB28181.getCode()){
                         live.setDeviceId(json);
-                    }else if(type == RotationImageType.GB28181.getCode()){
+                    }else if(bean.getType() == RotationImageType.GB28181.getCode()){
                         live.setDeviceId(json);
                     }
                     bean.setData(live);

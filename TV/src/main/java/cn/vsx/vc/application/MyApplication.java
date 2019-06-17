@@ -2,10 +2,7 @@ package cn.vsx.vc.application;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.support.multidex.MultiDex;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +22,6 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
-import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -38,7 +34,6 @@ public class MyApplication extends Application {
 	public static List<Integer> catchGroupIdList = new ArrayList<>();
 	public static MyApplication instance;
 	public TerminalSDK4Android terminalSDK4Android;
-	public SpecificSDK specificSDK;
 	Logger logger = Logger.getLogger(getClass().getName());
 	public boolean folatWindowPress = false; //记录悬浮按钮是否按下
 	public boolean volumePress = false; //记录音量是否按下
@@ -50,19 +45,8 @@ public class MyApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 		instance = this;
-		specificSDK = new SpecificSDK(this);
-		MyTerminalFactory.setTerminalSDK(specificSDK);
-		MyTerminalFactory.getSDK().setLoginFlag();
+		SpecificSDK.init(this);
 		registerActivityLifecycleCallbacks(new SimpleActivityLifecycle());
-		try{
-			ApplicationInfo appInfo = this.getPackageManager().getApplicationInfo(getPackageName(), PackageManager.GET_META_DATA);
-			String apkType=appInfo.metaData.getString("APKTYPE");
-			Log.e("MyApplication", " APKTYPE == " + apkType);
-			MyTerminalFactory.getSDK().putParam(Params.APK_TYPE,apkType);
-		}catch(PackageManager.NameNotFoundException e){
-			e.printStackTrace();
-		}
-		MyTerminalFactory.getSDK().getAuthManagerTwo().initIp();
 		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_HDMI.toString());
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
 	}
@@ -73,15 +57,9 @@ public class MyApplication extends Application {
 		MultiDex.install(this);
 	}
 
-	public SpecificSDK getSpecificSDK(){
-		return specificSDK;
-	}
-
 	public TerminalSDK4Android getTerminalSDK4Android(){
 		return terminalSDK4Android;
 	}
-
-
 
 	public VideoLivePlayingState getVideoLivePlayingState(){
 		VideoLivePlayingStateMachine liveStateMachine = TerminalFactory.getSDK().getLiveManager().getVideoLivePlayingStateMachine();

@@ -354,9 +354,10 @@ public class MainActivity extends BaseActivity {
     private ReceiveLoginResponseHandler mReceiveLoginResponseHandler = (resultCode, resultDesc) -> handler.post(() -> {
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {
             //每次启动都要更新数据，不然本地存的数据和服务不一样就会有问题
-//                    if (!TerminalFactory.getSDK().getParam(Params.IS_UPDATE_DATA, false)) {
-//                        MyTerminalFactory.getSDK().getConfigManager().updateAll();
-//                    }
+            if (noLive != null) {
+                noLive.setText("暂无图像");
+            }
+            showConnectToOtherView(noLive);
             //登录响应成功，把第一次登录标记置为false；
             MyTerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, false);
         } else {
@@ -616,7 +617,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 日志上传是否成功的消息
      */
-    private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = resultCode -> handler.post(() -> {
+    private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = (resultCode, type) -> handler.post(() -> {
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {
             ToastUtil.showToast(MainActivity.this, "日志上传成功，感谢您的支持！");
         } else {
@@ -667,10 +668,10 @@ public class MainActivity extends BaseActivity {
     /**
      * 收到轮播推送的通知
      **/
-    private ReceiveNotifyPushPartyLiveMessageHandler receiveNotifyPushPartyLiveMessageHandler = (message, requestMemberId, requestUniqueNo, liveList) -> {
+    private ReceiveNotifyPushPartyLiveMessageHandler receiveNotifyPushPartyLiveMessageHandler = (message) -> {
         handler.post(() -> {
             myHandler.removeCallbacksAndMessages(null);
-            prepareStartRotationLive(addRotationLiveData(message, liveList));
+            prepareStartRotationLive(addRotationLiveData(message));
         });
     };
 
@@ -705,11 +706,11 @@ public class MainActivity extends BaseActivity {
                 }
             };
             handler.post(() -> {
+                allFinishWatchLive();
                 if (noLive != null) {
                     noLive.setText("图像连接中...");
                     showConnectToOtherView(noLive);
                 }
-                allFinishWatchLive();
             });
             if (messageTimerTask != null) {
                 MyTerminalFactory.getSDK().getTimer().schedule(messageTimerTask, 5000);
@@ -1163,12 +1164,7 @@ public class MainActivity extends BaseActivity {
             @Override
             public void doConfirmThings() {
                 if (System.currentTimeMillis() - uploadLogTime > 5000) {
-                    MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            MyTerminalFactory.getSDK().getLogFileManager().uploadLogFile();
-                        }
-                    });
+                    MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getLogFileManager().uploadAllLogFile());
                     uploadLogTime = System.currentTimeMillis();
                 } else {
                     ToastUtil.showToast("请稍后再上传", MainActivity.this);
@@ -1251,13 +1247,13 @@ public class MainActivity extends BaseActivity {
     /**
      * 添加NotifyDataMessage
      * @param message
-     * @param liveList
      * @return
      */
-    private List<PTTProtolbuf.NotifyDataMessage> addRotationLiveData(PTTProtolbuf.NotifyPushPartyLiveMessage message, List<String> liveList) {
+    private List<PTTProtolbuf.NotifyDataMessage> addRotationLiveData(PTTProtolbuf.NotifyPushPartyLiveMessage message) {
         List<PTTProtolbuf.NotifyDataMessage> list = new ArrayList<>();
-        if (message != null && liveList != null && !liveList.isEmpty()) {
-            for (String string : liveList) {
+        if (message != null && message.getLiveDescListList() != null && !message.getLiveDescListList().isEmpty()) {
+            List<String> strings = DataUtil.getRotationLiveBeanList(message.getLiveDescListList().get(0));
+            for (String string : strings) {
                 PTTProtolbuf.NotifyDataMessage message1 = analysisRotationLiveData(message,string);
                 if (message1 != null) {
                     list.add(message1);

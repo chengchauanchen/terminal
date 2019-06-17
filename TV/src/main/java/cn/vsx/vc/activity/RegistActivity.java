@@ -38,25 +38,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
-import java.util.TimerTask;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.manager.auth.AuthModel;
+import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
+import cn.vsx.hamster.terminalsdk.manager.auth.LoginModel;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetNameByOrgHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRegistCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.tools.JudgeWhetherConnect;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ProgressDialog;
@@ -69,11 +69,11 @@ import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.KeyboarUtils;
 import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.SetToListUtil;
-import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.views.XCDropDownListView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.DialogUtil;
+import ptt.terminalsdk.tools.ToastUtil;
 
 public class RegistActivity extends BaseActivity implements RecvCallBack, Actions {
 
@@ -134,154 +134,85 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
 /**============================================================================handler=================================================================================**/
 
-    /**
-     * 网络连接状态
-     */
-    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
-
-        @Override
-        public void handler(final boolean connected) {
-            RegistActivity.this.runOnUiThread(new Runnable() {
-
-                @Override
-                public void run() {
-                    if (!MyTerminalFactory.getSDK().getParam(Params.IS_FORBID, false)) {
-                        if (!connected) {
-//                            ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "网络异常");
-                        } else {
-                            ToastUtil.closeToast();
-                            if (TextUtils.isEmpty(MyTerminalFactory.getSDK().getParam(Params.REGIST_URL, ""))) {
-                                againReAuth();
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    };
+//    /**
+//     * 网络连接状态
+//     */
+//    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
+//
+//        @Override
+//        public void handler(final boolean connected) {
+//            RegistActivity.this.runOnUiThread(new Runnable() {
+//
+//                @Override
+//                public void run() {
+//                    if (!MyTerminalFactory.getSDK().getParam(Params.IS_FORBID, false)) {
+//                        if (!connected) {
+////                            ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "网络异常");
+//                        } else {
+//                            ToastUtil.closeToast();
+//                            if (TextUtils.isEmpty(MyTerminalFactory.getSDK().getParam(Params.REGIST_URL, ""))) {
+//                                againReAuth();
+//                            }
+//                        }
+//                    }
+//                }
+//            });
+//        }
+//    };
 
     private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = new ReceiveSendUuidResponseHandler() {
         @Override
         public void handler(final int resultCode, final String resultDesc, final boolean isRegisted) {
-
             logger.info("receiveSendUuidResponseHandler------resultCode：" + resultCode + "；   resultDesc：" + resultDesc + "；   isRegisted：" + isRegisted);
-
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    //平台
-                    if (MyTerminalFactory.getSDK().getParam(Params.POLICE_STORE_APK,false)) {
-                        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                            changeProgressMsg("正在登入...");
-                            if(MyTerminalFactory.getSDK().isServerConnected()){
-                                login();
-                            }
-                        }
-                        else if(resultCode == TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()){
-                            AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this)
-                                    .setTitle("提示")
-                                    .setMessage(resultCode + ":暂时未开通权限")
-                                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            finish();
-                                        }
-                                    })
-                                    .create();
-                            alerDialog.show();
-                        }else if (resultCode== TerminalErrorCode.DEPT_EXPIRED.getErrorCode()){
-                            AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this)
-                                    .setTitle("提示")
-                                    .setMessage(resultCode + ":部门授权过期")
-                                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            finish();
-                                        }
-                                    })
-                                    .create();
-                            alerDialog.show();
-                        }else if(resultCode == TerminalErrorCode.REGISTER_UNKNOWN_ERROR.getErrorCode()){
+            myHandler.post(() -> {
+                    if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                        //认证成功，去连接接入服务
+                        changeProgressMsg(getResources().getString(R.string.connecting_server));
+                    } else if(resultCode == TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()){
+                        AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_temporarily_unavailable_permissions)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
+                        alerDialog.show();
+                    }else if (resultCode== TerminalErrorCode.DEPT_EXPIRED.getErrorCode()){
+                        AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_departmental_delegation_expires)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
+                        alerDialog.show();
+                    } else if (resultCode == TerminalErrorCode.TERMINAL_TYPE_ERROR.getErrorCode()) {
+                        AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_terminal_type_error)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
+                        alerDialog.show();
+                    } else if (resultCode == TerminalErrorCode.TERMINAL_REPEAT.getErrorCode()) {
+                        AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_terminal_repeat)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
+                        alerDialog.show();
+                    } else if (resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()) {
+                        if (reAuthCount < 3) {
+                            reAuthCount++;
                             //发生异常的时候重试几次，因为网络原因经常导致一个io异常
-                            sendUuid(null, null);
+                            TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(), TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
+                        } else {
+                            changeProgressMsg(getResources().getString(R.string.auth_fail));
+                            myHandler.postDelayed(() -> exit(), 3000);
                         }
-                        else {
+                    } else if (resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()) {
+                        changeProgressMsg(getResources().getString(R.string.auth_fail));
+                        myHandler.postDelayed(() -> {
+                            llRegistAll.setVisibility(View.VISIBLE);
                             hideProgressDialog();
-//                            ToastUtil.showToast(MyApplication.instance.getApplicationContext(), resultDesc);
-//                            finishActivity();
-                            sendUuid(null,null);
+                        }, 2000);
+                    } else {
+                        //没有注册服务地址，去探测地址
+                        if (availableIPlist.isEmpty()) {
+                            TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
                         }
-                    } else {//测试
-                        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                            if (isRegisted) {//卸载后重装，应该显示注册过了,直接去登录
-                                llRegistAll.setVisibility(View.GONE);
-                                changeProgressMsg("正在登入...");
-                               if(MyTerminalFactory.getSDK().isServerConnected()){
-                                login();
-                               }
-                            } else {//没注册
-                                MyTerminalFactory.getSDK().putParam(Params.MESSAGE_VERSION, 0l);
-                                if (availableIPlist.size() < 1) {
-                                    //重新探测
-                                    againReAuth();
-                                    changeProgressMsg("正在找服务器");
-                                } else {
-                                    llRegistAll.setVisibility(View.VISIBLE);
-                                    btn_confirm.setVisibility(View.VISIBLE);
-                                    hideProgressDialog();
-                                }
-                            }
-                        }
-                        else if(resultCode == TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()){
-                            AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this)
-                                    .setTitle("提示")
-                                    .setMessage(resultCode + ":暂时未开通权限")
-                                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            finish();
-                                        }
-                                    })
-                                    .create();
-                            alerDialog.show();
-                        }else if (resultCode== TerminalErrorCode.DEPT_EXPIRED.getErrorCode()){
-                            AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this)
-                                    .setTitle("提示")
-                                    .setMessage(resultCode + ":部门授权过期")
-                                    .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialogInterface, int i) {
-                                            finish();
-                                        }
-                                    })
-                                    .create();
-                            alerDialog.show();
-                        }else if(resultCode == TerminalErrorCode.REGISTER_UNKNOWN_ERROR.getErrorCode()){
-                            //发生异常的时候重试几次，因为网络原因经常导致一个io异常
-                            sendUuid(null, null);
-                        } else{
-                            //如果已经注册过了，重新再认证
-                            if (isRegisted) {
-                                sendUuid(null, null);
-                            } else {
-                                if (availableIPlist.size() < 1) {
-                                    logger.info("第一次登陆App,开始探测ip列表");
-                                    //重新探测
-                                    againReAuth();
-                                    changeProgressMsg("正在找服务器");
-                                } else {
-                                    llRegistAll.setVisibility(View.VISIBLE);
-                                    hideProgressDialog();
-                                }
-                            }
+                        if (!isRegisted) {
+                            ToastUtil.showToast(RegistActivity.this,getString(R.string.please_regist_account));
+                            llRegistAll.setVisibility(View.VISIBLE);
+                            hideProgressDialog();
+                        } else {
+                            changeProgressMsg(resultDesc);
+                            myHandler.postDelayed(() -> {
+                                llRegistAll.setVisibility(View.VISIBLE);
+                                hideProgressDialog();
+                            }, 2000);
                         }
                     }
-                    //版本的文字提示：内网、西城、东城
-                    logger.info("地点是：" + TerminalFactory.getSDK().getParam(Params.PLACE));
-                    tvVersionPrompt.setText(TerminalFactory.getSDK().getParam(Params.PLACE, "zectec") + " " + DataUtil.getVersion(RegistActivity.this));
-                }
             });
-
         }
     };
 
@@ -295,32 +226,35 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 @Override
                 public void run() {
                     if (errorCode == BaseCommonCode.SUCCESS_CODE) {//注册成功，直接登录
-                        logger.info("注册完成的回调----注册成功，直接登录");
-                        llRegistAll.setVisibility(View.GONE);
-                        changeProgressMsg("正在登入...");
-                        if(MyTerminalFactory.getSDK().isServerConnected()){
-                           login();
-                         }
+                        changeProgressMsg(getResources().getString(R.string.connecting_server));
                     } else {//注册失败，提示并关界面
                         if (errorCode == TerminalErrorCode.REGISTER_PARAMETER_ERROR.getErrorCode()) {
-                            changeProgressMsg("邀请码错误，请重新注册！");
+                            changeProgressMsg(getString(R.string.text_invitation_code_wrong_please_regist_again));
                         } else if (errorCode == TerminalErrorCode.REGISTER_UNKNOWN_ERROR.getErrorCode()) {
-                            changeProgressMsg(errorCode + "注册失败，请检查各项信息是否正确！");
+                            changeProgressMsg(errorCode + getString(R.string.text_regist_fail_please_check_all_info_is_correct));
                         }else {
                             ToastUtil.showToast(RegistActivity.this,errorDesc);
                         }
-                        timer.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                llRegist.setVisibility(View.VISIBLE);
-                                llreAuthInfo.setVisibility(View.GONE);
-                                hideProgressDialog();
-                            }
-                        }, 3000);
+                        myHandler.postDelayed(() -> {
+                            llRegist.setVisibility(View.VISIBLE);
+                            llreAuthInfo.setVisibility(View.GONE);
+                            hideProgressDialog();}, 3000);
                     }
                 }
             });
+        }
+    };
 
+    /**
+     * 连接接入服务器回调
+     */
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler() {
+        @Override
+        public void handler(boolean connected) {
+            logger.info("AuthManager收到信令是否连接的通知" + connected);
+            if (connected) {
+                changeProgressMsg(getResources().getString(R.string.logining));
+            }
         }
     };
 
@@ -328,28 +262,19 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     /**
      * 登陆响应的消息
      */
-    private ReceiveLoginResponseHandler receiveLoginResponseHandler = new ReceiveLoginResponseHandler() {
-        @Override
-        public void handler(final int resultCode, final String resultDesc) {
-            logger.info("RegistActivity---收到登录的消息---resultCode:" + resultCode + "     resultDesc:" + resultDesc);
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                        updateData();
-                    } else {
-                        changeProgressMsg(resultDesc);
-                        timer.schedule(new TimerTask() {
-                            @Override
-                            public void run() {
-                                hideProgressDialog();
-                                exit();
-                            }
-                        }, 3000);
-                    }
-                }
-            });
-        }
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> {
+        logger.info("RegistActivity---收到登录的消息---resultCode:" + resultCode + "     resultDesc:" + resultDesc);
+        myHandler.post(() -> {
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                changeProgressMsg(getResources().getString(R.string.updating_data));
+            } else {
+                myHandler.post(() -> {
+                    hideProgressDialog();
+                    AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultDesc).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
+                    alerDialog.show();
+                });
+            }
+        });
     };
 
     /**
@@ -358,37 +283,21 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = new ReceiveUpdateAllDataCompleteHandler() {
         @Override
         public void handler(final int errorCode, final String errorDesc) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (errorCode == BaseCommonCode.SUCCESS_CODE) {
-                        logger.info("更新数据成功！");
-                        goOn();
-                        MyTerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, false);//数据更新成功，把是否要更新数据的标记置为false；
-                    } else {
-                        changeProgressMsg("更新数据时：" + errorDesc);
-                        myHandler.postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                                hideProgressDialog();
-                                finish();
-                            }
-                        },3000);
-                    }
-                }
-            });
+            if (errorCode == BaseCommonCode.SUCCESS_CODE) {
+                goOn();
+            }
 
         }
     };
 
     ArrayList<String> availableIPlist = new ArrayList<>();
-    Map<String, AuthModel> availableIPMap = new HashMap<>();
+    Map<String, LoginModel> availableIPMap = new HashMap<>();
     /**
      * 获取可用的IP列表
      **/
     private ReceiveReturnAvailableIPHandler receiveReturnAvailableIPHandler = new ReceiveReturnAvailableIPHandler() {
         @Override
-        public void handler(final Map<String, AuthModel> availableIP) {
+        public void handler(final Map<String, LoginModel> availableIP) {
             myHandler.post(new Runnable() {
                 @Override
                 public void run() {
@@ -418,14 +327,11 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private ReceiveGetNameByOrgHandler receiveGetNameByOrgHandler = new ReceiveGetNameByOrgHandler() {
         @Override
         public void handler(final String returnMemberName, final int resultCoed, final String resultDesc) {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    if (resultCoed == 0) {
-                        userName.setText(returnMemberName);
-                    } else {
+            myHandler.post(() -> {
+                if (resultCoed == 0) {
+                    userName.setText(returnMemberName);
+                } else {
 //                        ToastUtil.showToast(RegistActivity.this, resultDesc);
-                    }
                 }
             });
         }
@@ -466,7 +372,14 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入合法的姓名；\n2-7个字符，支持中英文，数字；\n首位不能是数字");
                     return;
                 }
-                regist(useName, useOrg);
+                String registIP = TerminalFactory.getSDK().getAuthManagerTwo().getTempIp();
+                String registPort = TerminalFactory.getSDK().getAuthManagerTwo().getTempPort();
+                if (TextUtils.isEmpty(registIP) || TextUtils.isEmpty(registPort)) {
+                    ToastUtil.showToast(RegistActivity.this,getString(R.string.text_please_select_unit));
+                } else {
+                    changeProgressMsg(getString(R.string.text_registing));
+                    TerminalFactory.getSDK().getAuthManagerTwo().regist(useName, useOrg);
+                }
             }else{
                     //认证
                     String useAccount = account.getText().toString().trim();
@@ -477,9 +390,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     MyTerminalFactory.getSDK().putParam(UrlParams.NAME, name);
                     MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_ID, useDepartmentId);
                     MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_NAME, useDepartmentName);
-                    logger.error("模拟警员认证时获取的IP和端口："+selectIp+":"+selectPort);
-                    reAuthCount = 0;
-                    sendUuid(selectIp,selectPort);
+                    int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
+                    if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                       changeProgressMsg(getString(R.string.authing));
+                    }
             }
         }
     }
@@ -560,9 +474,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private final class TextWatcherImpName implements TextWatcher {
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
-//            if (s.length() > 0 && DataUtil.isLegalOrg(s)) {
-//                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "用户名不合法；\n首位不能是数字");
-//            }
         }
 
         @Override
@@ -612,7 +523,11 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                             selectIp = availableIPMap.get(name).getIp();
                             selectPort = availableIPMap.get(name).getPort();
 
-                            MyTerminalFactory.getSDK().getAuthManagerTwo().reAuth(false, availableIPMap.get(name).getIp(), availableIPMap.get(name).getPort());
+                            //认证
+                            int resultCode = MyTerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
+                            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                                changeProgressMsg(getString(R.string.authing));
+                            }
 
                         }
                     }
@@ -682,12 +597,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
                                     } else {
                                         isCheckFinished = true;
-                                        myHandler.post(new Runnable() {
-                                            @Override
-                                            public void run() {
-                                                isCheckFinished = false;
-                                                ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "连通失败，请输入正确的IP和端口号");
-                                            }
+                                        myHandler.post(() -> {
+                                            isCheckFinished = false;
+                                            ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "连通失败，请输入正确的IP和端口号");
                                         });
                                     }
                                 }
@@ -704,7 +616,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         //校验完成并且通过才去登录认证
         if (isCheckFinished && isCheckSuccess) {
             availableIPlist.clear();
-            AuthModel authModel = new AuthModel(viewHolder.userUnit.getText().toString(),
+            LoginModel authModel = new LoginModel(viewHolder.userUnit.getText().toString(),
                     viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString());
             availableIPMap.put(viewHolder.userUnit.getText().toString(), authModel);
             availableIPlist.addAll(SetToListUtil.setToArrayList(availableIPMap));
@@ -713,7 +625,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             availableIPlist.add(company);
             xcd_available_ip.setItemsData(availableIPlist);
             reAuthCount = 0;
-            sendUuid(authModel.getIp(), authModel.getPort());
+            int code = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString());
+            if (code == BaseCommonCode.SUCCESS_CODE) {
+                changeProgressMsg(getString(R.string.authing));
+            }
 
             popupWindow.dismiss();
             isCheckSuccess = false;
@@ -740,33 +655,20 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     if (TextUtils.isEmpty(viewHolder.userPort.getText())) {
                         ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "请输入端口号");
                     } else {
-                        MyTerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+                        MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+                            isCheckFinished = false;
+                            if (JudgeWhetherConnect.isHostConnectable(viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString())) {
+                                isCheckFinished = true;
+                                myHandler.post(() -> {
+                                    viewHolder.rl_regist_connect_efficacy.setBackgroundColor(getResources().getColor(R.color.green));
+                                    viewHolder.tv_regist_connect_efficacy.setVisibility(View.GONE);
+                                    viewHolder.iv_regist_connect_efficacy_ok.setVisibility(View.VISIBLE);
+                                    isCheckSuccess = true;
+                                });
 
-                            @Override
-                            public void run() {
-                                isCheckFinished = false;
-                                if (JudgeWhetherConnect.isHostConnectable(viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString())) {
-                                    isCheckFinished = true;
-                                    myHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            viewHolder.rl_regist_connect_efficacy.setBackgroundColor(getResources().getColor(R.color.green));
-                                            viewHolder.tv_regist_connect_efficacy.setVisibility(View.GONE);
-                                            viewHolder.iv_regist_connect_efficacy_ok.setVisibility(View.VISIBLE);
-//                                            viewHolder.btnCustomIpOk.setBackgroundColor(getResources().getColor(R.color.ok_blue));
-                                            isCheckSuccess = true;
-                                        }
-                                    });
-
-                                } else {
-                                    isCheckFinished = true;
-                                    myHandler.post(new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "输入的IP和端口号不可用");
-                                        }
-                                    });
-                                }
+                            } else {
+                                isCheckFinished = true;
+                                myHandler.post(() -> ToastUtil.showToast(MyApplication.instance.getApplicationContext(), "输入的IP和端口号不可用"));
                             }
                         });
                     }
@@ -913,7 +815,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private void judgePermission() {
         if (CheckMyPermission.selfPermissionGranted(this, permission.WRITE_EXTERNAL_STORAGE)) {//SD卡读写权限
             if (CheckMyPermission.selfPermissionGranted(this, permission.READ_PHONE_STATE)) {//手机权限，获取uuid
-                MyApplication.instance.getSpecificSDK().configLogger();
+                SpecificSDK.getInstance().configLogger();
                 checkIfAuthorize();
             } else {
                 CheckMyPermission.permissionPrompt(this, permission.READ_PHONE_STATE);
@@ -973,15 +875,39 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     private void start() {
-        TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
-            @Override
-            public void run() {
-                MyTerminalFactory.getSDK().start();
-                PromptManager.getInstance().start();
+        PromptManager.getInstance().start();
+        //进入注册界面了，先判断有没有认证地址
+        String authUrl = TerminalFactory.getSDK().getParam(Params.IDENTITY_URL, "");
+        System.out.println("服务器的地址:" + authUrl);
+        if (TextUtils.isEmpty(authUrl)) {
+            //平台包或者没获取到类型，直接用AuthManager中的地址,
+            String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
+            if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType) || TextUtils.isEmpty(apkType)) {
+                String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
+                if (defaultAddress.length >= 2) {
+                    int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);
+                    if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                        changeProgressMsg(getString(R.string.authing));
+                    } else {
+                        //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                    }
+                } else {
+                    //没有注册服务地址，去探测地址
+                    TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
+                }
+            } else {
+                //没有注册服务地址，去探测地址
+                TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
             }
-        });
-        //发送认证消息，uuid到注册服务器，判断是注册还是登录
-        sendUuid(null, null);
+        } else {
+            //有注册服务地址，去认证
+            int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                changeProgressMsg(getString(R.string.authing));
+            } else {
+                //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+            }
+        }
     }
 
     private void initPopupWindow() {
@@ -1012,9 +938,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRegistCompleteHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetNameByOrgHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReturnAvailableIPHandler);
         userOrg.setOnFocusChangeListener(onFocusChangeListener);
         userOrg.addTextChangedListener(new TextWatcherImpOrg());//监听输入内容的变化
@@ -1064,9 +990,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRegistCompleteHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetNameByOrgHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReturnAvailableIPHandler);
         myHandler.removeCallbacksAndMessages(null);
         if (myProgressDialog != null) {
@@ -1087,69 +1013,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         if (myProgressDialog != null) {
             myProgressDialog.dismiss();
         }
-    }
-
-    private void regist(final String memberName, final String orgBlockCode) {
-        if (!Util.isEmpty(memberName)) {
-            changeProgressMsg("正在注册...");
-        }
-        myHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                MyTerminalFactory.getSDK().getAuthManagerTwo()
-                        .regist(memberName, orgBlockCode);
-            }
-        },500);
-    }
-
-    private void updateData() {
-        changeProgressMsg("正在更新数据...");
-        myHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                MyTerminalFactory.getSDK().getConfigManager().updateAll();
-            }
-        },500);
-    }
-
-    private void login() {
-        changeProgressMsg("正在登入...");
-        myHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                MyTerminalFactory.getSDK().getAuthManagerTwo().login();
-            }
-        },500);
-    }
-
-    private void sendUuid(final String ip, final String port) {
-        reAuthCount++;
-        if (reAuthCount > 5) {
-            changeProgressMsg("登录失败，请检查网络是否连接");
-            myHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    hideProgressDialog();
-                    exit();
-                }
-            }, 500);
-        } else {
-            changeProgressMsg("正在尝试第" + reAuthCount + "次连接");
-            myHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    MyTerminalFactory.getSDK().getAuthManagerTwo().reAuth(false, ip, port);
-                }
-            }, 500);
-        }
-    }
-
-    private void againReAuth() {
-        MyTerminalFactory.getSDK().getAuthManagerTwo().reAuthOne();
-    }
-
-    @Override protected void onStart() {
-        super.onStart();
     }
 
     private void goOn() {
@@ -1234,7 +1097,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
-            // 创建个呼直播服务
             start();
         } else if (requestCode == REQUEST_PERMISSION_SETTING) {
             // 从设置界面返回时再判断权限是否开启
@@ -1255,12 +1117,12 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         stoppedCallIntent.putExtra("stoppedResult","0");
         SendRecvHelper.send(getApplicationContext(),stoppedCallIntent);
 
-        MyTerminalFactory.getSDK().exit();//停止服务
         PromptManager.getInstance().stop();
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
         MyTerminalFactory.getSDK().stop();
         Process.killProcess(Process.myPid());
+
     }
 
 }

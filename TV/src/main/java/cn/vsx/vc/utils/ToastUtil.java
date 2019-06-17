@@ -2,6 +2,8 @@ package cn.vsx.vc.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 import android.widget.Toast;
 
 import java.lang.reflect.Field;
@@ -12,7 +14,7 @@ import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 public class ToastUtil {
 	
 	private static Toast toast;
-	
+	private static Handler handler = new Handler(Looper.getMainLooper());
 	/*
 	 * 为了让主线程和子线程通用
 	 */
@@ -32,10 +34,12 @@ public class ToastUtil {
 	 * 静态toast  toast 消失 变为null 不消失就不用重新创建
 	 */
     public static void showToast(Context context, String text) {
-        if (toast == null)
-            toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
-        toast.setText(text);
-        toast.show();
+		handler.post(() -> {
+			if (toast == null)
+				toast = Toast.makeText(context, text, Toast.LENGTH_SHORT);
+			toast.setText(text);
+			toast.show();
+		});
     }
     
     /*
