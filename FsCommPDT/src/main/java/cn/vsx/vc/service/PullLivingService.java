@@ -294,7 +294,6 @@ public class PullLivingService extends BaseService{
             if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
                 MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(true);
             }
-            MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
         }else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
             ToastUtil.showToast(MyTerminalFactory.getSDK().application, "当前组是只听组，不能发起组呼");
         } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中

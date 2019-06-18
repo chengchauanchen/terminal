@@ -72,8 +72,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     ImageView voice_image;
 
-    TextView speaking_name;
-
     TextView group_tv;
 
     TextView jingwutong_tv;
@@ -110,7 +108,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         shoutai_tv = (TextView) mRootView.findViewById(R.id.shoutai_tv);
         jingwutong_tv = (TextView) mRootView.findViewById(R.id.jingwutong_tv);
         group_tv = (TextView) mRootView.findViewById(R.id.group_tv);
-        speaking_name = (TextView) mRootView.findViewById(R.id.speaking_name);
         voice_image = (ImageView) mRootView.findViewById(R.id.voice_image);
         icon_laba = (ImageView) mRootView.findViewById(R.id.icon_laba);
         viewPager = (FrameLayout) mRootView.findViewById(R.id.contacts_viewPager);
@@ -218,15 +215,14 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     /***  停止组呼的时候隐藏View **/
     private void hideViewWhenStopGroupCall() {
-        speaking_name.setVisibility(View.GONE);
         icon_laba.setVisibility(View.GONE);
+        setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
     }
 
     /***  组呼的时候显示View **/
     private void showViewWhenGroupCall(final String speakerName) {
-        speaking_name.setVisibility(View.VISIBLE);
         icon_laba.setVisibility(View.VISIBLE);
-        speaking_name.setText(speakerName);
+        setting_group_name.setText(speakerName);
     }
 
     @Override
@@ -275,9 +271,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 mHandler.post(() -> {
                     setting_group_name.setText(groupName);
-                    speaking_name.setVisibility(View.VISIBLE);
                     icon_laba.setVisibility(View.VISIBLE);
-                    speaking_name.setText(MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
                 });
             }
 
@@ -313,7 +307,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         public void handler(int reasonCode) {
             mHandler.post(() -> {
                 setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
-                speaking_name.setVisibility(View.GONE);
                 icon_laba.setVisibility(View.GONE);
             });
         }

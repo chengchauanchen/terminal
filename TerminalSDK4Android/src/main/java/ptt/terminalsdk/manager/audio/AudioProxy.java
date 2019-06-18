@@ -3,6 +3,8 @@ package ptt.terminalsdk.manager.audio;
 import android.content.Context;
 import android.media.AudioManager;
 
+import org.apache.log4j.Logger;
+
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
@@ -23,6 +25,7 @@ public class AudioProxy implements IAudioProxy{
 	private final int maxVolumeMusic;
 	private final int maxVolumeCall;
 	private int mode;
+	private Logger logger = Logger.getLogger(getClass().getSimpleName());
 
 	public AudioProxy(Context context){
 		this.context = context;
@@ -94,12 +97,14 @@ public class AudioProxy implements IAudioProxy{
 
 	@Override
 	public void volumeQuiet() {
+		logger.info( "设为静音");
 		MyTerminalFactory.getSDK().putParam(Params.VOLUME_OLD, MyTerminalFactory.getSDK().getParam(Params.VOLUME, VOLUME_DEFAULT));
 		setVolume(0);
 	}
 
 	@Override
 	public void volumeCancelQuiet() {
+		logger.info("取消静音");
 		if(TerminalFactory.getSDK().getParam(Params.VOLUME, IAudioProxy.VOLUME_DEFAULT) == 0) {
 			setVolume(MyTerminalFactory.getSDK().getParam(Params.VOLUME_OLD, IAudioProxy.VOLUME_DEFAULT));
 		}

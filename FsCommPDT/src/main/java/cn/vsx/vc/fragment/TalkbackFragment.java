@@ -1377,7 +1377,6 @@ public class TalkbackFragment extends BaseFragment {
         TextViewCompat.setTextAppearance(ptt, R.style.pttSpeakingText);
         logger.info("主界面，ptt被禁 ？  isClickVolumeToCall：" + MyApplication.instance.isClickVolumeToCall);
         ptt.setEnabled(!MyApplication.instance.isClickVolumeToCall);
-        MyTerminalFactory.getSDK().getAudioProxy().volumeQuiet();
         if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
             MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(true);
         }

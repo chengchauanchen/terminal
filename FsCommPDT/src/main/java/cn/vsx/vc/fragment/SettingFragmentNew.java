@@ -99,10 +99,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     private Timer timer = new Timer();
     private AlertDialog dialog;
 
-
     ImageView icon_laba;
-
-    TextView speaking_name;
     private boolean soundOff;//是否静音
 
     MToggleButton btn_daytime_mode;
@@ -120,7 +117,6 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     public void initView() {
         tv_ble_name = (TextView) mRootView.findViewById(R.id.tv_ble_name);
         btn_daytime_mode = (MToggleButton) mRootView.findViewById(R.id.btn_daytime_mode);
-        speaking_name = (TextView) mRootView.findViewById(R.id.speaking_name);
         icon_laba = (ImageView) mRootView.findViewById(R.id.icon_laba);
         physicalButtonSet4PTT = (PhysicalButtonSet4PTT) mRootView.findViewById(R.id.physicalButtonPTT);
         ll_log_upload = (LinearLayout) mRootView.findViewById(R.id.ll_log_upload);
@@ -316,15 +312,15 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
 
     /***  组呼的时候显示View **/
     private void showViewWhenGroupCall(final String speakerName) {
-        speaking_name.setVisibility(View.VISIBLE);
         icon_laba.setVisibility(View.VISIBLE);
-        speaking_name.setText(speakerName);
+        icon_laba.setVisibility(View.VISIBLE);
+        setting_group_name.setText(speakerName);
     }
 
     /***  停止组呼的时候隐藏View **/
     private void hideViewWhenStopGroupCall() {
-        speaking_name.setVisibility(View.GONE);
         icon_laba.setVisibility(View.GONE);
+        setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
     }
 
     private void setViewEnable(boolean isEnable) {
@@ -353,7 +349,6 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         @Override
         public void handler(int reasonCode) {
             mHandler.post(() -> {
-                speaking_name.setVisibility(View.GONE);
                 icon_laba.setVisibility(View.GONE);
                 setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
             });
@@ -364,13 +359,9 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         public void handler(int memberId, String memberName, final int groupId, String groupName, CallMode currentCallMode) {
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 mHandler.post(() -> {
-                    logger.info("sjl_设置页面的组呼到来");
-                    speaking_name.setVisibility(View.VISIBLE);
                     icon_laba.setVisibility(View.VISIBLE);
-                    logger.info("sjl_设置页面的组呼到来" + speaking_name.getVisibility() + ",正在说话人的名字：" + MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
                     String speakingName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
-                    speaking_name.setText(speakingName);
-                    setting_group_name.setText(groupName);
+                    setting_group_name.setText(speakingName);
                 });
             }
 

@@ -107,7 +107,6 @@ public class NewsFragment extends BaseFragment {
 
     ImageView icon_laba;
 
-    TextView speaking_name;
 
     ImageView voice_image;
 
@@ -306,7 +305,6 @@ public class NewsFragment extends BaseFragment {
     @Override
     public void initView() {
         voice_image = (ImageView) mRootView.findViewById(R.id.voice_image);
-        speaking_name = (TextView) mRootView.findViewById(R.id.speaking_name);
         icon_laba = (ImageView) mRootView.findViewById(R.id.icon_laba);
         setting_group_name = (TextView) mRootView.findViewById(R.id.setting_group_name);
         add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
@@ -430,15 +428,14 @@ public class NewsFragment extends BaseFragment {
 
     /***  组呼的时候显示View **/
     private void showViewWhenGroupCall (final String speakerName) {
-        speaking_name.setVisibility(View.VISIBLE);
         icon_laba.setVisibility(View.VISIBLE);
-        speaking_name.setText(speakerName);
+        setting_group_name.setText(speakerName);
     }
 
     /***  停止组呼的时候隐藏View **/
     private void hideViewWhenStopGroupCall () {
-        if(speaking_name != null && icon_laba != null){
-            speaking_name.setVisibility(View.GONE);
+        setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
+        if(icon_laba != null){
             icon_laba.setVisibility(View.GONE);
         }
     }
@@ -556,11 +553,9 @@ public class NewsFragment extends BaseFragment {
                 mHandler.post(() -> {
                     speakingId = groupId;
                     speakingName = memberName;
-                    logger.info("sjl_消息页面的组呼到来");
-                    logger.info("sjl_消息页面的组呼到来"+speaking_name.getVisibility()+",正在说话人的名字："+MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, ""));
                     String speakingName = MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER, "");
-                    showViewWhenGroupCall(speakingName);
-                    setting_group_name.setText(groupName);
+                    icon_laba.setVisibility(View.VISIBLE);
+                    setting_group_name.setText(speakingName);
                 });
             }
 
@@ -573,8 +568,6 @@ public class NewsFragment extends BaseFragment {
             mHandler.post(() -> {
                 hideViewWhenStopGroupCall();
                 setViewEnable(true);
-                setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK()
-                        .getParam(Params.CURRENT_GROUP_ID, 0)));
             });
         }
     };
