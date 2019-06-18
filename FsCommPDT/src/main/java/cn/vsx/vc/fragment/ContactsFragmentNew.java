@@ -159,7 +159,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     private void initLteView(){
         isLte = mRootView.findViewById(R.id.is_lte);
-        if(ApkUtil.isPoliceApk()){
+        if(ApkUtil.showLteApk()){
             isLte.setVisibility(View.VISIBLE);
         }else {
             isLte.setVisibility(View.GONE);
@@ -379,7 +379,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
             handPlatformFragment = new NewHandPlatformFragment();
         }
         //只有市局的包才有LTE
-        if(ApkUtil.isPoliceApk()){
+        if(ApkUtil.showLteApk()){
             if (lteFragment == null) {
                 lteFragment = new LteFragment();
             }

@@ -729,7 +729,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         }
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
         //市局包隐藏模拟警员
-        if (apkType.equals(AuthManagerTwo.POLICESTORE) || apkType.equals(AuthManagerTwo.POLICETEST)) {
+        if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)
+                || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)) {
             btnAddMember.setVisibility(View.GONE);
         }
         initPopupWindow();
@@ -864,7 +865,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         if (TextUtils.isEmpty(authUrl)) {
             //平台包或者没获取到类型，直接用AuthManager中的地址,
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-            if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType) || TextUtils.isEmpty(apkType)) {
+            if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)||
+                    AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType) || TextUtils.isEmpty(apkType)) {
                 String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
                 if (defaultAddress.length >= 2) {
                     int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);
@@ -1144,7 +1146,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         } else {
             TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, false);
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,AuthManagerTwo.POLICESTORE);
-            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)){
+            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)|| AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)){
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_open_wuhan_police_work_first));
             }
 

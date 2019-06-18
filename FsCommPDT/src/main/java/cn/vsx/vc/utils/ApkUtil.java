@@ -14,8 +14,8 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 public class ApkUtil{
 
     //是否为市局的包
-    public static boolean isPoliceApk(){
+    public static boolean showLteApk(){
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-        return apkType.equals(AuthManagerTwo.POLICESTORE) || apkType.equals(AuthManagerTwo.POLICETEST);
+        return AuthManagerTwo.COMMON.equals(apkType) ||AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType);
     }
 }

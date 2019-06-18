@@ -61,6 +61,9 @@ android {
         policeStore {
 //            buildConfigField "String", "apk_type","policeStore"
         }
+        xiangYang {
+//            buildConfigField "String" ,"apk_type","common"
+        }
         xiangYangPoliceStore {
 //            buildConfigField "String", "apk_type","policeStore"
         }
