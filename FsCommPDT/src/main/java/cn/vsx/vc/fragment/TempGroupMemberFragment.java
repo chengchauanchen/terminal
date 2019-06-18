@@ -130,61 +130,54 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
 
     @Override
     public void onClick(View v){
-        switch(v.getId()){
-            case R.id.tab_pc:
-                mTabPc.setChecked(true);
-                mTabPolice.setChecked(false);
-                mTabRecoder.setChecked(false);
-                mTabUav.setChecked(false);
-                if(pcFragment == null){
-                    pcFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_PC.toString());
-                }
-                switchFragment(pcFragment);
-                currentFragment = pcFragment;
-                currentIndex = 0;
-                break;
-            case R.id.tab_police:
-                mTabPc.setChecked(false);
-                mTabPolice.setChecked(true);
-                mTabRecoder.setChecked(false);
-                mTabUav.setChecked(false);
-                if(policeFragment == null){
-                    policeFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_PHONE.toString());
-                }
-                switchFragment(policeFragment);
-                currentFragment = policeFragment;
-                currentIndex = 1;
-                break;
-            case R.id.tab_recoder:
-                mTabPc.setChecked(false);
-                mTabPolice.setChecked(false);
-                mTabRecoder.setChecked(true);
-                mTabUav.setChecked(false);
-                if(recoderFragment == null){
-                    recoderFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
-                }
-                switchFragment(recoderFragment);
-                currentFragment = recoderFragment;
-                currentIndex = 2;
-                break;
-            case R.id.tab_uav:
-                mTabPc.setChecked(false);
-                mTabPolice.setChecked(false);
-                mTabRecoder.setChecked(false);
-                mTabUav.setChecked(true);
-                if(uavFragment == null){
-                    uavFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_UAV.toString());
-                }
-                switchFragment(uavFragment);
-                currentFragment = uavFragment;
-                currentIndex = 3;
-                break;
-            case R.id.iv_select:
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSelectedFragmentHandler.class,selectedMembers);
-
-                break;
-            default:
-                break;
+        int i = v.getId();
+        if(i == R.id.tab_pc){
+            mTabPc.setChecked(true);
+            mTabPolice.setChecked(false);
+            mTabRecoder.setChecked(false);
+            mTabUav.setChecked(false);
+            if(pcFragment == null){
+                pcFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_PC.toString());
+            }
+            switchFragment(pcFragment);
+            currentFragment = pcFragment;
+            currentIndex = 0;
+        }else if(i == R.id.tab_police){
+            mTabPc.setChecked(false);
+            mTabPolice.setChecked(true);
+            mTabRecoder.setChecked(false);
+            mTabUav.setChecked(false);
+            if(policeFragment == null){
+                policeFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_PHONE.toString());
+            }
+            switchFragment(policeFragment);
+            currentFragment = policeFragment;
+            currentIndex = 1;
+        }else if(i == R.id.tab_recoder){
+            mTabPc.setChecked(false);
+            mTabPolice.setChecked(false);
+            mTabRecoder.setChecked(true);
+            mTabUav.setChecked(false);
+            if(recoderFragment == null){
+                recoderFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
+            }
+            switchFragment(recoderFragment);
+            currentFragment = recoderFragment;
+            currentIndex = 2;
+        }else if(i == R.id.tab_uav){
+            mTabPc.setChecked(false);
+            mTabPolice.setChecked(false);
+            mTabRecoder.setChecked(false);
+            mTabUav.setChecked(true);
+            if(uavFragment == null){
+                uavFragment = MemberListFragment.newInstance(TerminalMemberType.TERMINAL_UAV.toString());
+            }
+            switchFragment(uavFragment);
+            currentFragment = uavFragment;
+            currentIndex = 3;
+        }else if(i == R.id.iv_select){
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSelectedFragmentHandler.class, selectedMembers);
+        }else{
         }
     }
 

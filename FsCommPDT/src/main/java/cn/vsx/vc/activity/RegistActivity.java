@@ -51,6 +51,7 @@ import cn.com.cybertech.pdk.exception.PstoreException;
 import cn.com.cybertech.pdk.exception.PstoreUserException;
 import cn.com.cybertech.pdk.utils.GsonUtils;
 import cn.vsx.SpecificSDK.SpecificSDK;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
@@ -992,8 +993,20 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private void goOn() {
         changeProgressMsg(getString(R.string.text_start_success));
         myHandler.removeCallbacksAndMessages(null);
-        startActivity(new Intent(RegistActivity.this, NewMainActivity.class));
-        overridePendingTransition(0, R.anim.alpha_hide);
+
+        try{
+            Class clazz;
+            String type = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE, "");
+            if(type.equals(TerminalMemberType.TERMINAL_UAV.toString())){
+                clazz = Class.forName("cn.vsx.uav.activity.UavMainActivity");
+            }else {
+                clazz = Class.forName("cn.vsx.vc.activity.NewMainActivity");
+            }
+            Intent intent = new Intent(this,clazz);
+            startActivity(intent);
+        }catch(ClassNotFoundException e){
+            e.printStackTrace();
+        }
         finish();
     }
 

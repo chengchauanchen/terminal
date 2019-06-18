@@ -15,7 +15,6 @@ import android.gesture.GestureOverlayView;
 import android.gesture.Prediction;
 import android.hardware.SensorManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -30,7 +29,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -44,7 +42,6 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import cn.vsx.vc.service.CardService;
 import com.hytera.api.SDKException;
 import com.hytera.api.SDKManager;
 import com.hytera.api.base.common.CallManager;
@@ -60,7 +57,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.Authority;
@@ -76,7 +72,6 @@ import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
@@ -116,9 +111,9 @@ import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
+import cn.vsx.vc.service.CardService;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.ActivityCollector;
-import cn.vsx.vc.utils.AirCraftUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.NfcUtil;
@@ -126,18 +121,6 @@ import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.view.BottomView;
 import cn.vsx.vc.view.IndividualCallTimerView;
 import cn.vsx.vc.view.TimerView;
-import dji.common.error.DJIError;
-import dji.common.error.DJISDKError;
-import dji.common.realname.AircraftBindingState;
-import dji.common.realname.AppActivationState;
-import dji.common.useraccount.UserAccountState;
-import dji.common.util.CommonCallbacks;
-import dji.sdk.base.BaseComponent;
-import dji.sdk.base.BaseProduct;
-import dji.sdk.products.Aircraft;
-import dji.sdk.realname.AppActivationManager;
-import dji.sdk.sdkmanager.DJISDKManager;
-import dji.sdk.useraccount.UserAccountManager;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
@@ -866,7 +849,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
      * SettingFragmentNew   4
      */
     public static int mCurrentFragmentCode;
-    private Logger logger = Logger.getLogger(getClass());
+    protected Logger logger = Logger.getLogger(getClass());
     private boolean isPressedBackOnce = false;
     private long firstTime = 0;
     private long secondTime = 0;
@@ -880,13 +863,17 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handleMessage(Message msg){
             super.handleMessage(msg);
-            if(msg.what == RECEIVEVOICECHANGED){
-                ll_sliding_chenge_volume.setVisibility(View.GONE);
-            }else if(msg.what == MSG_INFORM_ACTIVATION){
-                loginToActivationIfNeeded();
-            }
+            handleMyMessage(msg);
+
         }
     };
+
+    protected void handleMyMessage(Message msg){
+        if(msg.what == RECEIVEVOICECHANGED){
+            ll_sliding_chenge_volume.setVisibility(View.GONE);
+        }
+    }
+
     private boolean isShowPtt = false;
     private boolean isEmergencyCall;//紧急呼叫的标志
     private Member calleeMember;//主叫用的被叫成员对象
@@ -899,13 +886,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private int width;
     private int height;
     private BackListener mBackListener;
-    private AppActivationState appActivationState;
-    private AircraftBindingState bindingState;
-    private AircraftBindingState.AircraftBindingStateListener bindingStateListener;
-    private AtomicBoolean hasAppActivationListenerStarted = new AtomicBoolean(false);
-    private AppActivationState.AppActivationStateListener appActivationStateListener;
-    private static final int MSG_INFORM_ACTIVATION = 1;
-    private static final int ACTIVATION_DALAY_TIME = 1000;
+
 
     @Override
     public int getLayoutResId() {
@@ -1046,6 +1027,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
     @Override
     public void initData() {
+        logger.info("NewMainActivity---initData");
 //        if(!SoulPermission.getInstance().checkSpecialPermission(Special.SYSTEM_ALERT)){
 //            Log.e("NewMainActivity", "未开启悬浮窗权限");
 //            myHandler.postDelayed(this::exitApp,2000);
@@ -1116,7 +1098,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
 
         judgePermission();
-        startSDKRegistration();
+
         NfcUtil.nfcCheck(this);
         startService(new Intent(this,CardService.class));
         //清理数据库
@@ -1173,64 +1155,56 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
      * 设置Fragment状态
      */
     private void setTabSelection(int checkedId) {
-        switch (checkedId) {
-            case R.id.bv_talk_back:
-                if (talkbackFragment == null) {
-                    talkbackFragment = new TalkbackFragment(this);
-                }
-                ll_sliding_chenge_volume.setVisibility(View.GONE);
-                switchFragment(currentFragment, talkbackFragment);
-                mCurrentFragmentCode=1;
-                MyApplication.instance.isTalkbackFragment = true;
-                showFolatWindow();
-                bv_talk_back.setSelected(true);
-                bv_person_contacts.setSelected(false);
-                bv_group_contacts.setSelected(false);
-                bv_setting.setSelected(false);
-                break;
-
-            case R.id.bv_person_contacts:
-                 if (newsFragment == null) {
-                     newsFragment = new NewsFragment();
-                 }
-                 switchFragment(currentFragment, newsFragment);
-                 mCurrentFragmentCode=2;
-                 MyApplication.instance.isTalkbackFragment = false;
-                 showFolatWindow();
-                 bv_talk_back.setSelected(false);
-                 bv_person_contacts.setSelected(true);
-                 bv_group_contacts.setSelected(false);
-                 bv_setting.setSelected(false);
-
-                break;
-            case R.id.bv_group_contacts:
-                if (contactsFragmentNew == null) {
-                    contactsFragmentNew = new ContactsFragmentNew();
-                }
-                switchFragment(currentFragment, contactsFragmentNew);
-                mCurrentFragmentCode=3;
-                MyApplication.instance.isTalkbackFragment = false;
-                showFolatWindow();
-                bv_talk_back.setSelected(false);
-                bv_person_contacts.setSelected(false);
-                bv_group_contacts.setSelected(true);
-                bv_setting.setSelected(false);
-                break;
-            case R.id.bv_setting:
-                if (settingFragmentNew == null) {
-                    settingFragmentNew = new SettingFragmentNew();
-                }
-                switchFragment(currentFragment, settingFragmentNew);
-                mCurrentFragmentCode=4;
-                MyApplication.instance.isTalkbackFragment = false;
-                showFolatWindow();
-                bv_talk_back.setSelected(false);
-                bv_group_contacts.setSelected(false);
-                bv_person_contacts.setSelected(false);
-                bv_setting.setSelected(true);
-                break;
-            default:
-                break;
+        if(checkedId == R.id.bv_talk_back){
+            if(talkbackFragment == null){
+                talkbackFragment = new TalkbackFragment(this);
+            }
+            ll_sliding_chenge_volume.setVisibility(View.GONE);
+            switchFragment(currentFragment, talkbackFragment);
+            mCurrentFragmentCode = 1;
+            MyApplication.instance.isTalkbackFragment = true;
+            showFolatWindow();
+            bv_talk_back.setSelected(true);
+            bv_person_contacts.setSelected(false);
+            bv_group_contacts.setSelected(false);
+            bv_setting.setSelected(false);
+        }else if(checkedId == R.id.bv_person_contacts){
+            if(newsFragment == null){
+                newsFragment = new NewsFragment();
+            }
+            switchFragment(currentFragment, newsFragment);
+            mCurrentFragmentCode = 2;
+            MyApplication.instance.isTalkbackFragment = false;
+            showFolatWindow();
+            bv_talk_back.setSelected(false);
+            bv_person_contacts.setSelected(true);
+            bv_group_contacts.setSelected(false);
+            bv_setting.setSelected(false);
+        }else if(checkedId == R.id.bv_group_contacts){
+            if(contactsFragmentNew == null){
+                contactsFragmentNew = new ContactsFragmentNew();
+            }
+            switchFragment(currentFragment, contactsFragmentNew);
+            mCurrentFragmentCode = 3;
+            MyApplication.instance.isTalkbackFragment = false;
+            showFolatWindow();
+            bv_talk_back.setSelected(false);
+            bv_person_contacts.setSelected(false);
+            bv_group_contacts.setSelected(true);
+            bv_setting.setSelected(false);
+        }else if(checkedId == R.id.bv_setting){
+            if(settingFragmentNew == null){
+                settingFragmentNew = new SettingFragmentNew();
+            }
+            switchFragment(currentFragment, settingFragmentNew);
+            mCurrentFragmentCode = 4;
+            MyApplication.instance.isTalkbackFragment = false;
+            showFolatWindow();
+            bv_talk_back.setSelected(false);
+            bv_group_contacts.setSelected(false);
+            bv_person_contacts.setSelected(false);
+            bv_setting.setSelected(true);
+        }else{
         }
         currentCheckedId = checkedId;
     }
@@ -1644,155 +1618,5 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
     public interface BackListener{
         void onBack();
-    }
-
-    private AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);
-    private void startSDKRegistration() {
-        if (isRegistrationInProgress.compareAndSet(false, true)) {
-            AsyncTask.execute(new Runnable() {
-                @Override
-                public void run() {
-                    //                    ToastUtil.showToast(getApplicationContext(),"registering, pls wait...");
-                    DJISDKManager.getInstance().registerApp(getApplicationContext(), new DJISDKManager.SDKManagerCallback() {
-                        @Override
-                        public void onRegister(DJIError djiError) {
-                            if (djiError == DJISDKError.REGISTRATION_SUCCESS) {
-                                //                                ToastUtil.showToast(getApplicationContext(),"Register Success");
-                                DJISDKManager.getInstance().startConnectionToProduct();
-                            } else {
-                                ToastUtil.showToast(getApplicationContext(),"大疆SDK注册失败");
-                                logger.error(djiError.getDescription());
-                            }
-                            Log.d(TAG, "注册大疆sdk："+djiError.getDescription());
-                        }
-
-                        @Override
-                        public void onProductDisconnect() {
-                            Log.d(TAG, "onProductDisconnect");
-                            //                            ToastUtil.showToast(getApplicationContext(),"Product Disconnected");
-                            notifyStatusChange(false);
-
-                        }
-                        @Override
-                        public void onProductConnect(BaseProduct baseProduct) {
-                            Log.d(TAG, String.format("onProductConnect newProduct:%s", baseProduct));
-                            notifyStatusChange(true);
-
-                        }
-                        @Override
-                        public void onComponentChange(BaseProduct.ComponentKey componentKey, BaseComponent oldComponent,
-                                                      BaseComponent newComponent) {
-
-                            if (newComponent != null) {
-                                newComponent.setComponentListener(new BaseComponent.ComponentListener() {
-
-                                    @Override
-                                    public void onConnectivityChange(boolean isConnected) {
-                                        Log.d(TAG, "onComponentConnectivityChanged: " + isConnected);
-                                        notifyStatusChange(isConnected);
-                                    }
-                                });
-                            }
-                            Log.d(TAG,
-                                    String.format("onComponentChange key:%s, oldComponent:%s, newComponent:%s",
-                                            componentKey,
-                                            oldComponent,
-                                            newComponent));
-
-                        }
-                    });
-                }
-            });
-        }
-    }
-
-    private void notifyStatusChange(boolean connect){
-        if(connect){
-            Aircraft aircraft= AirCraftUtil.getAircraftInstance();
-            if (null != aircraft ) {
-                addAppActivationListenerIfNeeded();
-                //                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
-            } else {
-                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,false);
-            }
-        }else {
-            NewMainActivity.this.bindingState = null;
-            NewMainActivity.this.appActivationState = null;
-            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,false);
-        }
-    }
-
-    private void addAppActivationListenerIfNeeded() {
-        AppActivationState appActivationState = AppActivationManager.getInstance().getAppActivationState();
-        logger.info("addAppActivationListenerIfNeeded状态："+appActivationState);
-        if (appActivationState != AppActivationState.ACTIVATED) {
-            myHandler.sendEmptyMessageDelayed(MSG_INFORM_ACTIVATION, ACTIVATION_DALAY_TIME);
-            if (hasAppActivationListenerStarted.compareAndSet(false, true)) {
-                appActivationStateListener = new AppActivationState.AppActivationStateListener() {
-
-                    @Override
-                    public void onUpdate(AppActivationState appActivationState) {
-                        logger.info("AppActivationStateListener--onUpdate:"+appActivationState.name());
-                        NewMainActivity.this.appActivationState = appActivationState;
-                        if (myHandler != null && myHandler.hasMessages(MSG_INFORM_ACTIVATION)) {
-                            myHandler.removeMessages(MSG_INFORM_ACTIVATION);
-                        }
-                        if (appActivationState != AppActivationState.ACTIVATED) {
-                            myHandler.sendEmptyMessageDelayed(MSG_INFORM_ACTIVATION, ACTIVATION_DALAY_TIME);
-                        }else {
-                            if(checkIsAircraftConnected()){
-                                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
-                            }
-                        }
-                    }
-                };
-                bindingStateListener = new AircraftBindingState.AircraftBindingStateListener() {
-
-                    @Override
-                    public void onUpdate(final AircraftBindingState bindingState) {
-                        logger.info("Binding State: " + bindingState);
-                        NewMainActivity.this.bindingState = bindingState;
-                        if(checkIsAircraftConnected()){
-                            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
-                        }
-                    }
-                };
-                AppActivationManager.getInstance().addAppActivationStateListener(appActivationStateListener);
-                AppActivationManager.getInstance().addAircraftBindingStateListener(bindingStateListener);
-            }
-        }else {
-            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
-        }
-    }
-
-    private boolean checkIsAircraftConnected(){
-        return appActivationState == AppActivationState.ACTIVATED && bindingState == AircraftBindingState.BOUND;
-    }
-
-    private void loginToActivationIfNeeded() {
-
-        AppActivationState appActivationState = AppActivationManager.getInstance().getAppActivationState();
-        logger.info("AppActivationManager.getInstance().getAppActivationState():" + appActivationState);
-        if (AppActivationManager.getInstance().getAppActivationState() == AppActivationState.LOGIN_REQUIRED) {
-            UserAccountManager.getInstance()
-                    .logIntoDJIUserAccount(NewMainActivity.this,
-                            new CommonCallbacks.CompletionCallbackWith<UserAccountState>() {
-                                @Override
-                                public void onSuccess(UserAccountState userAccountState) {
-                                    ToastUtil.showToast(getApplicationContext(),"Login Successed!");
-                                    logger.info("大疆账号登陆成功");
-                                    MyTerminalFactory.getSDK().putParam(Params.DJ_LOGINED,true);
-                                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
-                                }
-
-                                @Override
-                                public void onFailure(DJIError djiError) {
-                                    ToastUtil.showToast(getApplicationContext(),"Login Successed!");
-                                    logger.info("大疆账号登陆失败"+djiError);
-                                    MyTerminalFactory.getSDK().putParam(Params.DJ_LOGINED,false);
-                                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,false);
-                                }
-                            });
-        }
     }
 }

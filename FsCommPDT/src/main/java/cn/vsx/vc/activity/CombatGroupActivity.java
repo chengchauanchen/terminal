@@ -145,15 +145,12 @@ public class CombatGroupActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public void onClick(View v){
-        switch(v.getId()){
-            case R.id.tv_close_combat:
-                //去合成作战组历史界面
-                Intent intent = new Intent(this,HistoryCombatGroupActivity.class);
-                startActivity(intent);
-            break;
-            case R.id.iv_return:
-                finish();
-                break;
+        int i = v.getId();
+        if(i == R.id.tv_close_combat){//去合成作战组历史界面
+            Intent intent = new Intent(this, HistoryCombatGroupActivity.class);
+            startActivity(intent);
+        }else if(i == R.id.iv_return){
+            finish();
         }
     }
 

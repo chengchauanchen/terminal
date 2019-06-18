@@ -17,8 +17,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import java.util.ArrayList;
 import java.util.List;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
 import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Department;
@@ -229,44 +227,51 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
     }
 
     class TitleViewHolder extends RecyclerView.ViewHolder{
-        @Bind(R.id.parent_recyclerview)
         RecyclerView parent_recyclerview;
-        @Bind(R.id.iv_search)
         ImageView iv_search;
 
         TitleViewHolder(View rootView){
             super(rootView);
-            ButterKnife.bind(this, itemView);
+            parent_recyclerview = rootView.findViewById(R.id.parent_recyclerview);
+            iv_search = rootView.findViewById(R.id.iv_search);
         }
     }
 
     class DepartmentViewHolder extends RecyclerView.ViewHolder{
-        @Bind(R.id.tv_department)
         TextView tvFolder;
 
         DepartmentViewHolder(View rootView){
             super(rootView);
-            ButterKnife.bind(this, itemView);
+            tvFolder = rootView.findViewById(R.id.tv_department);
         }
     }
 
     class GroupViewHolder extends RecyclerView.ViewHolder{
-        @Bind(R.id.tv_name)
+
         TextView  tvName;
-        @Bind(R.id.iv_monitor)
+
         ImageView ivMonitor;
-        @Bind(R.id.iv_message)
+
         ImageView ivMessage;
-        @Bind(R.id.placeholder)
+
         View placeholder;
-        @Bind(R.id.iv_group_logo)
+
         ImageView iv_group_logo;
-        @Bind(R.id.iv_response_group_icon)
+
         ImageView iv_response_group_icon;
 
         GroupViewHolder(View itemView) {
             super(itemView);
-            ButterKnife.bind(this, itemView);
+            tvName = itemView.findViewById(R.id.tv_name);
+
+            ivMonitor = itemView.findViewById(R.id.iv_monitor);
+
+            ivMessage = itemView.findViewById(R.id.iv_message);
+
+            placeholder = itemView.findViewById(R.id.placeholder);
+
+            iv_group_logo = itemView.findViewById(R.id.iv_group_logo);
+            iv_response_group_icon = itemView.findViewById(R.id.iv_response_group_icon);
 
         }
     }

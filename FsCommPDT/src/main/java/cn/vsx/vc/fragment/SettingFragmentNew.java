@@ -436,27 +436,24 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
 
 
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.rl_ble:
-                startActivity(new Intent(getContext(), BleActivity.class));
-                break;
-            case R.id.about:
-                startActivity(new Intent(getActivity(), AboutActivity.class));
-                break;
-            case R.id.ll_log_upload://日志上传
-                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                    return;
-                uploadLog();
-                break;
-            case R.id.ll_helpAndfeedback://帮助与反馈
-                Intent intent = new Intent(context, HelpWordActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.ll_exit://退出应用
-                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                    return;
-                exitApp();
-                break;
+        int i = v.getId();//日志上传
+        //帮助与反馈
+        //退出应用
+        if(i == R.id.rl_ble){
+            startActivity(new Intent(getContext(), BleActivity.class));
+        }else if(i == R.id.about){
+            startActivity(new Intent(getActivity(), AboutActivity.class));
+        }else if(i == R.id.ll_log_upload){
+            if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
+                return;
+            uploadLog();
+        }else if(i == R.id.ll_helpAndfeedback){
+            Intent intent = new Intent(context, HelpWordActivity.class);
+            startActivity(intent);
+        }else if(i == R.id.ll_exit){
+            if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
+                return;
+            exitApp();
         }
     }
 

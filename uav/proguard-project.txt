@@ -32,18 +32,15 @@
 -keep public class com.android.vending.licensing.ILicensingService
 -keep public class android.support.design.widget.**
 
+-keepnames class * implements java.io.Serializable
+-keep public class * implements java.io.Serializable {
+    public *;
+}
 
--keepnames class * implements java.io.Serializable  
--keep public class * implements java.io.Serializable {  
-    public *;  
-} 
-
-#-libraryjars libs/android-support-v4.jar
--dontwarn android.support.v4.**    
+-dontwarn android.support.v4.**
 -keep class android.support.v4.** { *; }
 -keep interface android.support.v4.** { *; }
 -keep public class * extends android.app.Fragment
-
 
 -keep class butterknife.** { *; }
 -dontwarn butterknife.internal.**
@@ -89,12 +86,8 @@
 -keep class org.apache.zectec.commons.codec.** { *; }
 -keep interface org.apache.zectec.commons.codec.** { *; }
 
-#-libraryjars libs/com.baidu.speechsynthesizer_1.1.2.jar
 -dontwarn com.baidu.speechsynthesizer.**
 -keep class com.baidu.speechsynthesizer.** { *; }
-
-#-dontwarn com.baidu.**
-#-keep class com.baidu.** { *; }
 
 -dontwarn com.alibaba.fastjson.**
 -keep class com.alibaba.fastjson.** { *; }
@@ -105,9 +98,6 @@
 -dontwarn com.hp.hpl.sparta.**
 -keep class com.hp.hpl.sparta.** { *; }
 
-#-libraryjars TerminalSDK\bin\terminalsdk.jar
-
-#-libraryjars libs/galaxy_lite.jar
 -dontwarn android.content.pm.**
 -keep class android.content.pm.** { *; }
 -dontwarn com.baidu.android.common.**
@@ -131,14 +121,9 @@
 -keep class org.slf4j.impl.** { *; }
 -keep interface org.slf4j.impl.** { *; }
 
--dontwarn org.videolan.**
--keep class org.videolan.** { *; }
-
--dontwarn cn.vsx.vc.receiveHandle.**
--keep class cn.vsx.vc.receiveHandle.** { *; }
-
 -keep class cn.vsx.hamster.errcode.** { *; }
 -keep class cn.vsx.hamster.common.** { *; }
+-keep class cn.vsx.hamster.terminalsdk.model.** { *; }
 
 -keep class cn.vsx.hamster.terminalsdk.manager.channel** { *; }
 -keep class cn.vsx.hamster.protolbuf.** { *; }
@@ -148,22 +133,18 @@
 -keep class cn.vsx.vc.receiveHandle.** { *; }
 -keep class com.zectec.imageandfileselector.receivehandler.** { *; }
 
--keep interface cn.vsx.hamster.terminalsdk.receiveHandler.** { *; }
-
 -keepattributes *Annotation* #假如项目中有用到注解，应加入这行配置
 -keepattributes Signature #过滤泛型（不写可能会出现类型转换错误，一般情况把这个加上就是了）
 -keep class **.R$* { *; }  #保持R文件不被混淆，否则，你的反射是获取不到资源id的
 
 -renamesourcefileattribute SourceFile
 -keepattributes SourceFile,LineNumberTable
--keep class cn.zectec.ptt.utils.ToastUtil
+-keep class ptt.terminalsdk.tools.ToastUtil
 
 -keep class com.android.webrtc.audio.** { *; }
 -keep class org.easydarwin.** { *; }
 
 -keep class cn.com.cybertech.** { *; }
-
--keep class cn.vsx.hamster.terminalsdk.model.** { *; }
 
 -keepclasseswithmembernames class * {
     native <methods>;
@@ -188,19 +169,27 @@
     rx.internal.util.atomic.LinkedQueueNode consumerNode;
 }
 
-
-
-
-
 -keep class * implements android.os.IInterface {*;}
 
 
 -keep class org.linphone.** { *; }
 -keep interface org.linphone.** { *; }
 
+
+
 -keep class com.serenegiant.usb.** { *; }
 -keep interface com.serenegiant.usb.** { *; }
 
+
+
+-keep class com.chad.library.adapter.** {
+*;
+}
+-keep public class * extends com.chad.library.adapter.base.BaseQuickAdapter
+-keep public class * extends com.chad.library.adapter.base.BaseViewHolder
+-keepclassmembers  class **$** extends com.chad.library.adapter.base.BaseViewHolder {
+     <init>(...);
+}
 -ignorewarnings
 
 -keepclassmembers class org.easydarwin.video.EasyRTSPClient {
@@ -211,4 +200,99 @@
     private *;
 }
 
+-keepattributes Exceptions,InnerClasses,*Annotation*,Signature,EnclosingMethod
 
+-dontwarn okio.**
+-dontwarn org.bouncycastle.**
+-dontwarn dji.**
+-dontwarn com.dji.**
+-dontwarn sun.**
+-dontwarn java.**
+
+-keepclassmembers enum * {
+    public static <methods>;
+}
+
+-keepnames class * implements java.io.Serializable
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    !static !transient <fields>;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+-keep class * extends android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+
+-keepnames class * implements java.io.Serializable
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    !static !transient <fields>;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+-keep class * extends android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+#大疆
+
+-keep,allowshrinking class * extends dji.publics.DJIUI.** {
+    public <methods>;
+}
+
+-keep class net.sqlcipher.** { *; }
+
+-keep class net.sqlcipher.database.* { *; }
+
+-keep class dji.** { *; }
+
+-keep class com.dji.** { *; }
+
+-keep class com.google.** { *; }
+
+-keep class org.bouncycastle.** { *; }
+
+-keep,allowshrinking class org.** { *; }
+
+-keep class com.squareup.wire.** { *; }
+
+-keep class sun.misc.Unsafe { *; }
+
+-keep class com.secneo.** { *; }
+
+-keepclasseswithmembers,allowshrinking class * {
+    native <methods>;
+}
+
+
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+
+-keep class android.support.v7.widget.SearchView { *; }
+
+-keepclassmembers class * extends android.app.Service
+-keepclassmembers public class * extends android.view.View {
+    void set*(***);
+    *** get*();
+}
+-keepclassmembers class * extends android.app.Activity {
+    public void *(android.view.View);
+}
+-keep class android.support.** { *; }
+-keep class android.media.** { *; }
+-keep class okio.** { *; }
+-keep class com.lmax.disruptor.** {
+    *;
+}
+
+-dontwarn com.mapbox.services.android.location.LostLocationEngine
+-dontwarn com.mapbox.services.android.location.MockLocationEngine
+
+-keep class cn.vsx.yuv.**{ *; }

@@ -377,40 +377,29 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.news_bar_return:
-                onBackPressed();
-                break;
-            case R.id.group_live_history:
-                goToVideoLiveList(false);
-                break;
-            case R.id.group_call_activity_member_info:
-                if (DataUtil.isExistGroup(userId)) {
-                    Intent intent = new Intent(MyApplication.instance, GroupMemberActivity.class);
-                    intent.putExtra("groupId", userId);
-                    intent.putExtra("groupName", userName);
-                    startActivity(intent);
-                } else {
-                    ToastUtil.showToast(this, getString(R.string.text_member_has_no_authority_in_this_group));
-                }
-                break;
-            case R.id.group_call_activity_help:
-//                Intent intent = new Intent(GroupCallNewsActivity.this, HelpActivity.class);
-//                intent.setAction("5");
-//                startActivity(intent);
-                break;
-            case R.id.ll_living:
-                //点击跳转到正在上报的列表
-//                ToastUtil.showToast(GroupCallNewsActivity.this,"点击跳转到正在上报的列表");
-                goToVideoLiveList(true);
-                break;
-
-
-            case R.id.iv_monitor:
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,userId);
-                break;
-            default:
-                break;
+        int i = v.getId();
+        if(i == R.id.news_bar_return){
+            onBackPressed();
+        }else if(i == R.id.group_live_history){
+            goToVideoLiveList(false);
+        }else if(i == R.id.group_call_activity_member_info){
+            if(DataUtil.isExistGroup(userId)){
+                Intent intent = new Intent(MyApplication.instance, GroupMemberActivity.class);
+                intent.putExtra("groupId", userId);
+                intent.putExtra("groupName", userName);
+                startActivity(intent);
+            }else{
+                ToastUtil.showToast(this, getString(R.string.text_member_has_no_authority_in_this_group));
+            }
+        }else if(i == R.id.group_call_activity_help){//                Intent intent = new Intent(GroupCallNewsActivity.this, HelpActivity.class);
+            //                intent.setAction("5");
+            //                startActivity(intent);
+        }else if(i == R.id.ll_living){//点击跳转到正在上报的列表
+            //                ToastUtil.showToast(GroupCallNewsActivity.this,"点击跳转到正在上报的列表");
+            goToVideoLiveList(true);
+        }else if(i == R.id.iv_monitor){
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class, userId);
+        }else{
         }
     }
 

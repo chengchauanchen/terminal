@@ -321,10 +321,9 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
 
 
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.news_bar_back:
-                finish();
-                break;
+        int i = view.getId();
+        if(i == R.id.news_bar_back){
+            finish();
         }
     }
 

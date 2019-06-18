@@ -234,13 +234,11 @@ public class LiveHistoryActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public void onClick(View v){
-        switch(v.getId()){
-            case R.id.iv_play:
-                play();
-            break;
-            case R.id.iv_close:
-                close();
-                break;
+        int i = v.getId();
+        if(i == R.id.iv_play){
+            play();
+        }else if(i == R.id.iv_close){
+            close();
         }
     }
 }

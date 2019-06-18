@@ -7,9 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import cn.vsx.hamster.common.GroupScanType;
 import cn.vsx.vc.R;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -63,10 +60,10 @@ public class SweepGroupLayout extends LinearLayout {
         });
     }
 
-    @OnClick(R.id.set_sweep)
-    public void onClick (View view) {
-        switch (view.getId()) {
-
-        }
-    }
+//    @OnClick(R.id.set_sweep)
+//    public void onClick (View view) {
+//        switch (view.getId()) {
+//
+//        }
+//    }
 }

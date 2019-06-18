@@ -372,33 +372,27 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.news_bar_return:
-                onBackPressed();
-                break;
-            case R.id.individual_news_phone:
-                hideKey();
-                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                    ToastUtil.showToast(this,getString(R.string.text_no_call_permission));
-                }else {
-                    goToChooseDevices(ChooseDevicesDialog.TYPE_CALL_PRIVATE);
-                }
-                break;
-            case R.id.individual_news_info:
-                Intent intent = new Intent(MyApplication.instance, UserInfoActivity.class);
-                intent.putExtra("userId", userId);
-                intent.putExtra("userName", userName);
-                startActivity(intent);
-                break;
-            case R.id.individual_news_help:
-                //                Intent intent = new Intent(this, HelpActivity.class);
-                //                intent.setAction("5");
-                //                startActivity(intent);
-                break;
-            case R.id.iv_call:
-                hideKey();
-                goToChooseDevices(ChooseDevicesDialog.TYPE_CALL_PHONE);
-                break;
+        int i = v.getId();
+        if(i == R.id.news_bar_return){
+            onBackPressed();
+        }else if(i == R.id.individual_news_phone){
+            hideKey();
+            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                ToastUtil.showToast(this, getString(R.string.text_no_call_permission));
+            }else{
+                goToChooseDevices(ChooseDevicesDialog.TYPE_CALL_PRIVATE);
+            }
+        }else if(i == R.id.individual_news_info){
+            Intent intent = new Intent(MyApplication.instance, UserInfoActivity.class);
+            intent.putExtra("userId", userId);
+            intent.putExtra("userName", userName);
+            startActivity(intent);
+        }else if(i == R.id.individual_news_help){//                Intent intent = new Intent(this, HelpActivity.class);
+            //                intent.setAction("5");
+            //                startActivity(intent);
+        }else if(i == R.id.iv_call){
+            hideKey();
+            goToChooseDevices(ChooseDevicesDialog.TYPE_CALL_PHONE);
         }
     }
 

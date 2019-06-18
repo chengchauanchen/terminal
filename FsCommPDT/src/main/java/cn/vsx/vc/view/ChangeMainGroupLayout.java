@@ -35,7 +35,7 @@ import skin.support.widget.SkinCompatLinearLayout;
  * 更改主通话组和组扫描  组件化
  * Created by gt358 on 2017/8/9.
  */
-public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
+public class ChangeMainGroupLayout extends SkinCompatLinearLayout implements View.OnClickListener{
 
 
     RelativeLayout rl_start_group_sweep;
@@ -75,6 +75,7 @@ public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
         openSweep = view.findViewById(R.id.open_sweep);
         tv_start_group_sweep = view.findViewById(R.id.tv_start_group_sweep);
         rl_group_sweep_setting = view.findViewById(R.id.rl_group_sweep_setting);
+        rl_group_sweep_setting.setOnClickListener(this);
     }
 
     private void initData () {
@@ -162,21 +163,20 @@ public class ChangeMainGroupLayout extends SkinCompatLinearLayout{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
     }
 
-    @OnClick({ R.id.rl_group_sweep_setting})
+    @Override
     public void onClick (View view) {
-        switch (view.getId()) {
-//            case R.id.change_main_group:
-//                Intent intent = new Intent(context, ChangeGroupActivity.class);
-//                intent.putExtra("INTENTFROM", 1);
-//                context.startActivity(intent);
-//                break;
-            case R.id.rl_group_sweep_setting:
-                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_SCAN.name())){
-                    ToastUtil.showToast(context,context.getString(R.string.text_no_set_sweep_group_authority));
-                    return;
-                }
-                context.startActivity(new Intent(context, SetSweepActivity.class));
-                break;
+        int i = view.getId();//            case R.id.change_main_group:
+        //                Intent intent = new Intent(context, ChangeGroupActivity.class);
+        //                intent.putExtra("INTENTFROM", 1);
+        //                context.startActivity(intent);
+        //                break;
+        if(i == R.id.rl_group_sweep_setting){
+            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_SCAN.name())){
+                ToastUtil.showToast(context, context.getString(R.string.text_no_set_sweep_group_authority));
+                return;
+            }
+            context.startActivity(new Intent(context, SetSweepActivity.class));
+        }else{
         }
     }
 

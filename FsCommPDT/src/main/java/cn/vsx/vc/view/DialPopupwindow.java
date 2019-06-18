@@ -210,86 +210,73 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
     }
 
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.dialNum10:
-                if (phone.getText().length() < 8) {
-                    play(11);
-                    input(v.getTag().toString());
-                }
-                break;
-            case R.id.dialNum1:
-                if (phone.getText().length() < 8) {
-                    play(1);
-                    input(v.getTag().toString());
-                }
-                break;
-            case R.id.dialNum2:
-                if (phone.getText().length() < 8) {
-                    play(2);
-                    input(v.getTag().toString());
-                }
-                break;
-            case R.id.dialNum3:
-                if (phone.getText().length() < 8) {
-                    play(3);
-                    input(v.getTag().toString());
-                }
-                break;
-            case R.id.dialNum4:
-                if (phone.getText().length() < 8) {
-                    play(4);
-                    input(v.getTag().toString());
-                }
-                break;
-            case R.id.dialNum5:
-                if (phone.getText().length() < 8) {
-                    play(5);
-                    input(v.getTag().toString());
-                }
-                break;
-            case R.id.dialNum6:
-                if (phone.getText().length() < 8) {
-                    play(6);
-                    input(v.getTag().toString());
-                }
-                break;
-            case R.id.dialNum7:
-                if (phone.getText().length() < 8) {
-                    play(7);
-                    input(v.getTag().toString());
-                }
-                break;
-            case R.id.dialNum8:
-                if (phone.getText().length() < 8) {
-                    play(8);
-                    input(v.getTag().toString());
-                }
-                break;
-            case R.id.dialNum9:
-                if (phone.getText().length() < 8) {
-                    play(9);
-                    input(v.getTag().toString());
-                }
-                break;
-//            case R.id.dialx:
-//                if (phone.getText().length() < 8) {
-//                    play(11);
-//                    input(v.getTag().toString());
-//                }
-//                break;
-//		case R.id.dialj:
-//			if (phone.getText().length() < 8) {
-//				play(12);
-//				input(v.getTag().toString());
-//			}
-//			break;
-            case R.id.delete:
-                play(12);
-                delete();
-                break;
-
-            default:
-                break;
+        int i = v.getId();
+        if(i == R.id.dialNum10){
+            if(phone.getText().length() < 8){
+                play(11);
+                input(v.getTag().toString());
+            }
+        }else if(i == R.id.dialNum1){
+            if(phone.getText().length() < 8){
+                play(1);
+                input(v.getTag().toString());
+            }
+        }else if(i == R.id.dialNum2){
+            if(phone.getText().length() < 8){
+                play(2);
+                input(v.getTag().toString());
+            }
+        }else if(i == R.id.dialNum3){
+            if(phone.getText().length() < 8){
+                play(3);
+                input(v.getTag().toString());
+            }
+        }else if(i == R.id.dialNum4){
+            if(phone.getText().length() < 8){
+                play(4);
+                input(v.getTag().toString());
+            }
+        }else if(i == R.id.dialNum5){
+            if(phone.getText().length() < 8){
+                play(5);
+                input(v.getTag().toString());
+            }
+        }else if(i == R.id.dialNum6){
+            if(phone.getText().length() < 8){
+                play(6);
+                input(v.getTag().toString());
+            }
+        }else if(i == R.id.dialNum7){
+            if(phone.getText().length() < 8){
+                play(7);
+                input(v.getTag().toString());
+            }
+        }else if(i == R.id.dialNum8){
+            if(phone.getText().length() < 8){
+                play(8);
+                input(v.getTag().toString());
+            }
+        }else if(i == R.id.dialNum9){
+            if(phone.getText().length() < 8){
+                play(9);
+                input(v.getTag().toString());
+            }
+            //            case R.id.dialx:
+            //                if (phone.getText().length() < 8) {
+            //                    play(11);
+            //                    input(v.getTag().toString());
+            //                }
+            //                break;
+            //		case R.id.dialj:
+            //			if (phone.getText().length() < 8) {
+            //				play(12);
+            //				input(v.getTag().toString());
+            //			}
+            //			break;
+        }else if(i == R.id.delete){
+            play(12);
+            delete();
+        }else{
         }
     }
 

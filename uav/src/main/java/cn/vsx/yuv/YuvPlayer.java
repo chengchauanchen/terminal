@@ -13,7 +13,7 @@ import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.concurrent.ArrayBlockingQueue;
 
-import cn.vsx.vc.R;
+import cn.vsx.uav.R;
 import dji.common.product.Model;
 import dji.log.DJILog;
 import dji.midware.data.model.P3.DataCameraGetPushStateInfo;

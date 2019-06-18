@@ -18,7 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
 
-
+import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginForUIOperationHandler;
@@ -255,8 +256,20 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                         //刷新通讯录组群列表
 //                    MyTerminalFactory.getSDK().getConfigManager().updateAllGroups();
                         dismissTemporaryGroupDialog();
-                        startActivity(new Intent(CreateTemporaryGroupsActivity.this, NewMainActivity.class));
-                        CreateTemporaryGroupsActivity.this.finish();
+                        try{
+                            Class clazz;
+                            String type = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE, "");
+                            if(type.equals(TerminalMemberType.TERMINAL_UAV.toString())){
+                                clazz = Class.forName("cn.vsx.uav.activity.UavMainActivity");
+                            }else {
+                                clazz = Class.forName("cn.vsx.vc.activity.NewMainActivity");
+                            }
+                            Intent intent = new Intent(CreateTemporaryGroupsActivity.this,clazz);
+                            startActivity(intent);
+                            CreateTemporaryGroupsActivity.this.finish();
+                        }catch(ClassNotFoundException e){
+                            e.printStackTrace();
+                        }
                     }, 2000);
                 } else {
                     createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_FAIL, resultDesc, scanGroup);
@@ -291,11 +304,9 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
      **/
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.news_bar_back:
-                finish();
-                break;
-
+        int i = v.getId();
+        if(i == R.id.news_bar_back){
+            finish();
         }
     }
 

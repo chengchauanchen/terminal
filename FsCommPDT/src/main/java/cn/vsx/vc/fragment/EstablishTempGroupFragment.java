@@ -115,23 +115,20 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
 
     @Override
     public void onClick(View view){
-        switch(view.getId()){
-            case R.id.news_bar_back:
-                getActivity().finish();
-                break;
-            case R.id.ok_btn:
-                if(tempGroupMemberFragment.getSelectedMember().isEmpty()){
-                    ToastUtil.showToast(getContext(), getString(R.string.text_add_at_least_one_member));
-                    return;
-                }
-                if(type == Constants.CREATE_TEMP_GROUP){
-                    CreateTemporaryGroupsActivity.startActivity(getContext(), tempGroupMemberFragment.getSelectedMember());
-                }else if(type == Constants.INCREASE_MEMBER){
-                    MyTerminalFactory.getSDK().getTempGroupManager().addMemberToTempGroup(groupId, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0), TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L), DataUtil.getUniqueNos(tempGroupMemberFragment.getSelectedMember()));
-                }
-                break;
-            default:
-                break;
+        int i = view.getId();
+        if(i == R.id.news_bar_back){
+            getActivity().finish();
+        }else if(i == R.id.ok_btn){
+            if(tempGroupMemberFragment.getSelectedMember().isEmpty()){
+                ToastUtil.showToast(getContext(), getString(R.string.text_add_at_least_one_member));
+                return;
+            }
+            if(type == Constants.CREATE_TEMP_GROUP){
+                CreateTemporaryGroupsActivity.startActivity(getContext(), tempGroupMemberFragment.getSelectedMember());
+            }else if(type == Constants.INCREASE_MEMBER){
+                MyTerminalFactory.getSDK().getTempGroupManager().addMemberToTempGroup(groupId, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0), TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L), DataUtil.getUniqueNos(tempGroupMemberFragment.getSelectedMember()));
+            }
+        }else{
         }
     }
 

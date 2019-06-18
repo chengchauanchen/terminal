@@ -4,7 +4,6 @@ import android.Manifest;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
-import android.bluetooth.le.BluetoothLeScanner;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -16,7 +15,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -37,11 +35,8 @@ import android.widget.TextView;
 
 import org.apache.log4j.Logger;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.MyBleDevice;
@@ -341,13 +336,11 @@ public class BleActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.news_bar_back:
-                onBack();
-                break;
-            case R.id.ll_connecting:
-                refreshDevice();
-                break;
+        int i = v.getId();
+        if(i == R.id.news_bar_back){
+            onBack();
+        }else if(i == R.id.ll_connecting){
+            refreshDevice();
         }
     }
 

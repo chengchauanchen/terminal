@@ -305,10 +305,9 @@ public class PhoneAssistantManageActivity extends BaseActivity implements View.O
     };
 
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.iv_back:
-                finish();
-                break;
+        int i = view.getId();
+        if(i == R.id.iv_back){
+            finish();
         }
     }
 

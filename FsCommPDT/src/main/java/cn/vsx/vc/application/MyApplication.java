@@ -144,7 +144,6 @@ public class MyApplication extends Application {
 	protected void attachBaseContext(Context base) {
 		super.attachBaseContext(base);
 		MultiDex.install(this);
-		com.secneo.sdk.Helper.install(this);
 	}
 
 	/**
@@ -155,16 +154,13 @@ public class MyApplication extends Application {
 		isBinded=bindService(intent,conn,BIND_AUTO_CREATE);
 	}
 
-
-	private ReceiveHandlerService.ReceiveHandlerBinder individualCallBinder;
 	private ServiceConnection conn = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
-			individualCallBinder = (ReceiveHandlerService.ReceiveHandlerBinder) service;
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
-			Log.e("MyApplication", "IndividualCallService服务断开了");
+			Log.e("MyApplication", "ReceiveHandlerService服务断开了");
 		}
 	};
 

@@ -217,61 +217,48 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.hide_function:
-
-                showOrHideBottom();
-                break;
-
-            case R.id.group_call_news_keyboard:
-                    if(isGroupFunction){
-
-                        btn_record.setVisibility(View.GONE);
-                        if(groupCallNewsEt.getVisibility() == View.VISIBLE) {
-                            showVoiceView(true);
-                            showKeyBoard(false);
-                            ll_function_hide_plus_bottom.setVisibility(View.GONE);
-                        }
-                        else {
-                            showInputView();
-                            showKeyBoard(true);
-                            String unsendMessage = context.getSharedPreferences("unsendMessage", MODE_PRIVATE).getString(String.valueOf(userId), null);
-                            if(!TextUtils.isEmpty(unsendMessage)){
-                                groupCallNewsEt.setText(unsendMessage);
-                                groupCallNewsEt.setSelection(unsendMessage.length());
-                            }
-                        }
-                    }else {
-                        if(groupCallNewsEt.getVisibility()==View.VISIBLE){
-                            showKeyBoard(false);
-                            ll_function_hide_plus_bottom.setVisibility(View.GONE);
-                            showVoiceView(false);
-                        }
-                        else {
-                            showInputView();
-                            showKeyBoard(true);
-                        }
-
+        int i = v.getId();
+        if(i == R.id.hide_function){
+            showOrHideBottom();
+        }else if(i == R.id.group_call_news_keyboard){
+            if(isGroupFunction){
+                btn_record.setVisibility(View.GONE);
+                if(groupCallNewsEt.getVisibility() == View.VISIBLE){
+                    showVoiceView(true);
+                    showKeyBoard(false);
+                    ll_function_hide_plus_bottom.setVisibility(View.GONE);
+                }else{
+                    showInputView();
+                    showKeyBoard(true);
+                    String unsendMessage = context.getSharedPreferences("unsendMessage", MODE_PRIVATE).getString(String.valueOf(userId), null);
+                    if(!TextUtils.isEmpty(unsendMessage)){
+                        groupCallNewsEt.setText(unsendMessage);
+                        groupCallNewsEt.setSelection(unsendMessage.length());
                     }
-
-                break;
-            case R.id.bt_send:
-                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
-                    ToastUtil.showToast(context,context.getString(R.string.text_has_no_send_message_authority));
-                    return;
                 }
-                //点击发送并不真的发送数据，而是触发另外一个地方的回调去发送
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.TEXT);
-                if(!TextUtils.isEmpty(context.getSharedPreferences("unsendMessage", MODE_PRIVATE).getString(String.valueOf(userId),""))){
-                    context.getSharedPreferences("unsendMessage",MODE_PRIVATE).edit().remove(String.valueOf(userId)).apply();
+            }else{
+                if(groupCallNewsEt.getVisibility() == View.VISIBLE){
+                    showKeyBoard(false);
+                    ll_function_hide_plus_bottom.setVisibility(View.GONE);
+                    showVoiceView(false);
+                }else{
+                    showInputView();
+                    showKeyBoard(true);
                 }
-                break;
-            case R.id.bt_merge_transmit:
-                //合并转发
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowTransponPopupHandler.class, Constants.TRANSPON_TYPE_MORE);
-                break;
-            default:
-                break;
+            }
+        }else if(i == R.id.bt_send){
+            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
+                ToastUtil.showToast(context, context.getString(R.string.text_has_no_send_message_authority));
+                return;
+            }
+            //点击发送并不真的发送数据，而是触发另外一个地方的回调去发送
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.TEXT);
+            if(!TextUtils.isEmpty(context.getSharedPreferences("unsendMessage", MODE_PRIVATE).getString(String.valueOf(userId), ""))){
+                context.getSharedPreferences("unsendMessage", MODE_PRIVATE).edit().remove(String.valueOf(userId)).apply();
+            }
+        }else if(i == R.id.bt_merge_transmit){//合并转发
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowTransponPopupHandler.class, Constants.TRANSPON_TYPE_MORE);
+        }else{
         }
     }
 

@@ -140,10 +140,9 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
 
 
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.news_bar_back:
-                finish();
-                break;
+        int i = view.getId();
+        if(i == R.id.news_bar_back){
+            finish();
         }
     }
 

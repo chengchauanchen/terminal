@@ -77,30 +77,23 @@ public class ChangeNamePopupwindow extends PopupWindow implements View.OnClickLi
 
 
     public void onClick (View view) {
-        switch (view.getId()) {
-            case R.id.ib_back_change_name:
+        int i = view.getId();
+        if(i == R.id.ib_back_change_name){
+            dismiss();
+        }else if(i == R.id.tv_save){
+            String newName = et_change_name.getText().toString();
+            if(Util.isEmpty(newName)){
+                ToastUtil.showToast(context, context.getString(R.string.text_please_input_name));
+            }else if(!DataUtil.isLegalName(newName) || newName.length() > 7 || newName.length() < 2){
+                ToastUtil.showToast(context, context.getString(R.string.text_please_input_correct_name));
+            }else{
+                //上传名字
+                if(newName.equals(MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""))){
+                }else{
+                    MyTerminalFactory.getSDK().getConfigManager().changeName(newName);
+                }
                 dismiss();
-                break;
-            case R.id.tv_save:
-                String newName = et_change_name.getText().toString();
-                if (Util.isEmpty(newName)) {
-                    ToastUtil.showToast(context, context.getString(R.string.text_please_input_name));
-                }else if (!DataUtil.isLegalName(newName) || newName.length() >7  || newName.length() < 2) {
-                    ToastUtil.showToast(context, context.getString(R.string.text_please_input_correct_name));
-                }
-                else {
-                    //上传名字
-                    if(newName.equals(MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""))) {
-
-                    }
-                    else {
-                        MyTerminalFactory.getSDK().getConfigManager().changeName(newName);
-                    }
-                    dismiss();
-                }
-
-
-                break;
+            }
         }
     }
 

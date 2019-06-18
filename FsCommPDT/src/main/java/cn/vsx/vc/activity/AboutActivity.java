@@ -63,22 +63,18 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener{
 
     @Override
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.help:
-                // 每次更新内容展示
-                // TODO: 2018/5/22
-                startActivity(new Intent(this,FunctionIntroduceActivity.class));
-                break;
-            case R.id.tv_update:
-                TerminalFactory.getSDK().getThreadPool().execute(()->{
-                    UpdateManager manager = new UpdateManager(AboutActivity.this);
-                    manager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL,""),true);
-                });
-//                Toast.makeText(this, getResources().getString(R.string.text_is_the_latest_version), Toast.LENGTH_SHORT).show();
-                break;
-            case R.id.news_bar_back:
-                finish();
-                break;
+        int i = view.getId();
+        if(i == R.id.help){// 每次更新内容展示
+            // TODO: 2018/5/22
+            startActivity(new Intent(this, FunctionIntroduceActivity.class));
+        }else if(i == R.id.tv_update){
+            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                UpdateManager manager = new UpdateManager(AboutActivity.this);
+                manager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL, ""), true);
+            });
+            //                Toast.makeText(this, getResources().getString(R.string.text_is_the_latest_version), Toast.LENGTH_SHORT).show();
+        }else if(i == R.id.news_bar_back){
+            finish();
         }
     }
 

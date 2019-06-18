@@ -92,10 +92,9 @@ public class HistoryCombatGroupActivity extends BaseActivity implements View.OnC
 
     @Override
     public void onClick(View v){
-        switch(v.getId()){
-            case R.id.iv_return:
-                finish();
-                break;
+        int i = v.getId();
+        if(i == R.id.iv_return){
+            finish();
         }
     }
 

@@ -78,24 +78,20 @@ public class VolumeChangLayout extends LinearLayout implements View.OnClickListe
 
     public void onClick(View view) {
         voice = Integer.parseInt(voiceNum.getText().toString());
-        switch (view.getId()) {
-            case R.id.voice_cut:
-                MyTerminalFactory.getSDK().getAudioProxy().volumeDown();
-                voiceNum.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "");
-                if(MyTerminalFactory.getSDK().getAudioProxy().getVolume()==0){
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true,0);
-                }else {
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false,0);
-                }
-
-                break;
-            case R.id.voice_add:
-//                btnIsNoVoice.initToggleState(false);
-                logger.info("声音增强时，现在音量" + MyTerminalFactory.getSDK().getAudioProxy().getVolume());
-                MyTerminalFactory.getSDK().getAudioProxy().volumeUp();
-                voiceNum.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "");
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false,0);
-                break;
+        int i = view.getId();
+        if(i == R.id.voice_cut){
+            MyTerminalFactory.getSDK().getAudioProxy().volumeDown();
+            voiceNum.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "");
+            if(MyTerminalFactory.getSDK().getAudioProxy().getVolume() == 0){
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true, 0);
+            }else{
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false, 0);
+            }
+        }else if(i == R.id.voice_add){//                btnIsNoVoice.initToggleState(false);
+            logger.info("声音增强时，现在音量" + MyTerminalFactory.getSDK().getAudioProxy().getVolume());
+            MyTerminalFactory.getSDK().getAudioProxy().volumeUp();
+            voiceNum.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "");
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false, 0);
         }
     }
 

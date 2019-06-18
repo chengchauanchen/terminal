@@ -64,13 +64,11 @@ public class PromptDialog extends Dialog implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.dialog_no:
-                dialogOnclickListener.onQuitClick();
-                break;
-            case R.id.dialog_yes:
-                dialogOnclickListener.onOkClick();
-                break;
+        int i = v.getId();
+        if(i == R.id.dialog_no){
+            dialogOnclickListener.onQuitClick();
+        }else if(i == R.id.dialog_yes){
+            dialogOnclickListener.onOkClick();
         }
     }
 

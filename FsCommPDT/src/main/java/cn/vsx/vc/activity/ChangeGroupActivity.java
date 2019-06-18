@@ -286,19 +286,18 @@ public class ChangeGroupActivity extends BaseActivity implements View.OnClickLis
     /**====================================================handler===============================================================================**/
 
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.news_bar_back://返回
-                finish();
-                break;
-            case R.id.iv_search://搜索
-                if(MyTerminalFactory.getSDK().getConfigManager().getScanGroups().size()>=10){
-                    ToastUtil.toast(ChangeGroupActivity.this,getString(R.string.text_add_scan_group_out_of_max_count));
-                    return;
-                }
-                ScanGroupSearchFragment groupSearchFragment = new ScanGroupSearchFragment();
-                fl_fragment_container_main.setVisibility(View.VISIBLE);
-                getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, groupSearchFragment).commit();
-                break;
+        int i = view.getId();//返回
+        //搜索
+        if(i == R.id.news_bar_back){
+            finish();
+        }else if(i == R.id.iv_search){
+            if(MyTerminalFactory.getSDK().getConfigManager().getScanGroups().size() >= 10){
+                ToastUtil.toast(ChangeGroupActivity.this, getString(R.string.text_add_scan_group_out_of_max_count));
+                return;
+            }
+            ScanGroupSearchFragment groupSearchFragment = new ScanGroupSearchFragment();
+            fl_fragment_container_main.setVisibility(View.VISIBLE);
+            getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container_main, groupSearchFragment).commit();
         }
     }
 }

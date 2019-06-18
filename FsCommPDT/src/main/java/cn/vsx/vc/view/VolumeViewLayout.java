@@ -15,8 +15,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.TimerTask;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.vc.R;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -27,10 +25,7 @@ import skin.support.widget.SkinCompatLinearLayout;
  */
 
 public class VolumeViewLayout extends SkinCompatLinearLayout {
-    @Bind(R.id.tv_volume_fw)
-    TextView tv_volume_fw;
-    @Bind(R.id.ll_sliding_chenge_volume)
-    LinearLayout ll_sliding_chenge_volume;
+
     private TimerTask timerTask;
     private static final int RECEIVEVOICECHANGED = 0;
     private Handler myHandler = new Handler(Looper.getMainLooper()){
@@ -42,6 +37,8 @@ public class VolumeViewLayout extends SkinCompatLinearLayout {
             }
         }
     };
+    private TextView tv_volume_fw;
+    private LinearLayout ll_sliding_chenge_volume;
 
     public VolumeViewLayout(Context context) {
         super(context);
@@ -63,7 +60,8 @@ public class VolumeViewLayout extends SkinCompatLinearLayout {
         LayoutInflater layoutInflater;
         layoutInflater =  (LayoutInflater) getContext().getSystemService(infServie);
         View view = layoutInflater.inflate(R.layout.layout_volume, this, true);
-        ButterKnife.bind(this, view);
+        tv_volume_fw = view.findViewById(R.id.tv_volume_fw);
+        ll_sliding_chenge_volume = view.findViewById(R.id.ll_sliding_chenge_volume);
     }
     private void initData() {
         tv_volume_fw.setText(MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "%");

@@ -359,16 +359,13 @@ public class VideoPreviewItemFragment extends BaseFragment implements TextureVie
 
     @Override
     public void onClick(View v){
-        switch(v.getId()){
-            case R.id.iv_pause:
-                playOrContinue();
-                break;
-            case R.id.iv_pause_continue:
-                playOrContinue();
-                break;
-            case R.id.iv_close:
-                close();
-                break;
+        int i = v.getId();
+        if(i == R.id.iv_pause){
+            playOrContinue();
+        }else if(i == R.id.iv_pause_continue){
+            playOrContinue();
+        }else if(i == R.id.iv_close){
+            close();
         }
     }
 }

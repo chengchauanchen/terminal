@@ -409,97 +409,92 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.is_group:
-                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                    return;
-                if (groupFragmentNew == null) {
-                    groupFragmentNew = new NewGroupFragment();
-                }
-                TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_checked_text);
-                TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
-                group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-                shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                switchFragment(currentFragment, groupFragmentNew);
-                groupLine.setVisibility(View.VISIBLE);
-                shoutai_line.setVisibility(View.INVISIBLE);
-                jingwutong_line.setVisibility(View.INVISIBLE);
-                lte_line.setVisibility(View.INVISIBLE);
-                imgbtn_dial.setVisibility(View.GONE);
-                MyApplication.instance.setIsContactsPersonal(false);
-                break;
-            case R.id.is_shoutai:
-                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                    return;
-                if (handPlatformFragment == null) {
-                    handPlatformFragment = new NewHandPlatformFragment();
-                }
-                TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_checked_text);
-                TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
-                group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-                jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                switchFragment(currentFragment, handPlatformFragment);
-                groupLine.setVisibility(View.INVISIBLE);
-                shoutai_line.setVisibility(View.VISIBLE);
-                jingwutong_line.setVisibility(View.INVISIBLE);
-                lte_line.setVisibility(View.INVISIBLE);
-                imgbtn_dial.setVisibility(View.VISIBLE);
-                MyApplication.instance.setIsContactsPersonal(true);
-                break;
-            case R.id.is_jingwutong:
-                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                    return;
-                if (policeAffairsFragment == null) {
-                    policeAffairsFragment = new NewPoliceAffairsFragment();
-                }
-                TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_checked_text);
-                TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
-                group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-                lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                switchFragment(currentFragment, policeAffairsFragment);
-                jingwutong_line.setVisibility(View.VISIBLE);
-                groupLine.setVisibility(View.INVISIBLE);
-                shoutai_line.setVisibility(View.INVISIBLE);
-                lte_line.setVisibility(View.INVISIBLE);
-                imgbtn_dial.setVisibility(View.VISIBLE);
-                MyApplication.instance.setIsContactsPersonal(true);
-                break;
-            case R.id.is_lte:
-                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                    return;
-                if (lteFragment == null) {
-                    lteFragment = new LteFragment();
-                }
-                TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
-                TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_checked_text);
-                group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-                lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-                switchFragment(currentFragment, lteFragment);
-                jingwutong_line.setVisibility(View.INVISIBLE);
-                groupLine.setVisibility(View.INVISIBLE);
-                shoutai_line.setVisibility(View.INVISIBLE);
-                lte_line.setVisibility(View.VISIBLE);
-                imgbtn_dial.setVisibility(View.VISIBLE);
-                MyApplication.instance.setIsContactsPersonal(true);
-                break;
-            default:
-                break;
+        int i = v.getId();
+        if(i == R.id.is_group){
+            if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
+                return;
+            if(groupFragmentNew == null){
+                groupFragmentNew = new NewGroupFragment();
+            }
+            TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_checked_text);
+            TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
+            TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
+            TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
+            group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+            shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+            jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+            lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+            switchFragment(currentFragment, groupFragmentNew);
+            groupLine.setVisibility(View.VISIBLE);
+            shoutai_line.setVisibility(View.INVISIBLE);
+            jingwutong_line.setVisibility(View.INVISIBLE);
+            lte_line.setVisibility(View.INVISIBLE);
+            imgbtn_dial.setVisibility(View.GONE);
+            MyApplication.instance.setIsContactsPersonal(false);
+        }else if(i == R.id.is_shoutai){
+            if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
+                return;
+            if(handPlatformFragment == null){
+                handPlatformFragment = new NewHandPlatformFragment();
+            }
+            TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
+            TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_checked_text);
+            TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
+            TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
+            group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+            shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+            jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+            lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+            switchFragment(currentFragment, handPlatformFragment);
+            groupLine.setVisibility(View.INVISIBLE);
+            shoutai_line.setVisibility(View.VISIBLE);
+            jingwutong_line.setVisibility(View.INVISIBLE);
+            lte_line.setVisibility(View.INVISIBLE);
+            imgbtn_dial.setVisibility(View.VISIBLE);
+            MyApplication.instance.setIsContactsPersonal(true);
+        }else if(i == R.id.is_jingwutong){
+            if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
+                return;
+            if(policeAffairsFragment == null){
+                policeAffairsFragment = new NewPoliceAffairsFragment();
+            }
+            TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
+            TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
+            TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_checked_text);
+            TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
+            group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+            shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+            jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+            lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+            switchFragment(currentFragment, policeAffairsFragment);
+            jingwutong_line.setVisibility(View.VISIBLE);
+            groupLine.setVisibility(View.INVISIBLE);
+            shoutai_line.setVisibility(View.INVISIBLE);
+            lte_line.setVisibility(View.INVISIBLE);
+            imgbtn_dial.setVisibility(View.VISIBLE);
+            MyApplication.instance.setIsContactsPersonal(true);
+        }else if(i == R.id.is_lte){
+            if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
+                return;
+            if(lteFragment == null){
+                lteFragment = new LteFragment();
+            }
+            TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
+            TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
+            TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
+            TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_checked_text);
+            group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+            shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+            jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+            lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+            switchFragment(currentFragment, lteFragment);
+            jingwutong_line.setVisibility(View.INVISIBLE);
+            groupLine.setVisibility(View.INVISIBLE);
+            shoutai_line.setVisibility(View.INVISIBLE);
+            lte_line.setVisibility(View.VISIBLE);
+            imgbtn_dial.setVisibility(View.VISIBLE);
+            MyApplication.instance.setIsContactsPersonal(true);
+        }else{
         }
     }
 

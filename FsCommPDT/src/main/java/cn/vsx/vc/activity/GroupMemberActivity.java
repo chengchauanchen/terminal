@@ -217,95 +217,84 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
             return;
         }
         lastSearchTime= currentTime;
-
-        switch (view.getId()) {
-            case R.id.news_bar_back:
-                finish();
-                break;
-            case R.id.news_bar_back_temp:
-                finish();
-                break;
-            case R.id.add_btn:
-                IncreaseTemporaryGroupMemberActivity.startActivity(GroupMemberActivity.this, Constants.INCREASE_MEMBER,groupId);
-                break;
-            case R.id.delete_btn:
-                add_btn.setVisibility(View.GONE);
-                delete_btn.setVisibility(View.GONE);
-                delete_text.setVisibility(View.VISIBLE);
-                cancel_text.setVisibility(View.VISIBLE);
-
-                sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, true);
-                sortAdapter.setOnItemClickListener((view1, position, checked, member) -> {
-                    if(checked){
-                        total++;
-                    }else {
-                        total--;
-                    }
-                    if(total>0){
-                        delete_text.setText(String.format(getString(R.string.button_delete_number),total));
-                    }else {
-                        delete_text.setText(R.string.text_delete);
-                    }
-                });
-                memberList.setAdapter(sortAdapter);
-                sortAdapter.notifyDataSetChanged();
-                break;
-            case R.id.delete_text:
-                if(MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size()<2){//当前组仅剩创建者本身的时候点击删除销临时组
-
-                    final AlertDialog alertDialog = new AlertDialog.Builder(GroupMemberActivity.this).create();
-                    alertDialog.show();
-                    Display display = getWindowManager().getDefaultDisplay();
-                    int heigth = display.getWidth();
-                    int width = display.getHeight();
-                    Window window = alertDialog.getWindow();
-                    WindowManager.LayoutParams layoutParams = window.getAttributes();
-                    layoutParams.width=width/2;
-                    layoutParams.height=heigth/2;
-                    window.setAttributes(layoutParams);
-                    window.setContentView(R.layout.dialog_delete_temporary_group);
-                    final LinearLayout ll_select = window.findViewById(R.id.ll_select);
-                    final LinearLayout  ll_success = window.findViewById(R.id.ll_success);
-                    Button btn_confirm = window.findViewById(R.id.btn_confirm);
-                    btn_confirm.setOnClickListener(v -> myHandler.post(() -> {
-                        ll_success.setVisibility(View.VISIBLE);
-                        ll_select.setVisibility(View.GONE);
-                        MyTerminalFactory.getSDK().getTempGroupManager().destroyTempGroup4PC(groupId);
-                        TimerTask task =new TimerTask() {
-                            @Override
-                            public void run() {
-                                alertDialog.dismiss();
-                                finish();
-                            }
-                        };
-                        MyTerminalFactory.getSDK().getTimer().schedule(task,1000);
-
-                    }));
-                    Button btn_cancel = window.findViewById(R.id.btn_cancel);
-                    btn_cancel.setOnClickListener(v -> alertDialog.dismiss());
-                }else {
-                    List<Member> deleteMemberList = sortAdapter.getDeleteMemberList();
-                    if(deleteMemberList.isEmpty()){
-                        ToastUtils.showShort(R.string.please_select_delete_member);
-                    }else {
-                        MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(groupId,MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0),
-                                MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l),DataUtil.getUniqueNos(deleteMemberList));
-                        add_btn.setVisibility(View.VISIBLE);
-                        delete_btn.setVisibility(View.VISIBLE);
-                        delete_text.setVisibility(View.GONE);
-                        cancel_text.setVisibility(View.GONE);
-                    }
+        int i = view.getId();
+        if(i == R.id.news_bar_back){
+            finish();
+        }else if(i == R.id.news_bar_back_temp){
+            finish();
+        }else if(i == R.id.add_btn){
+            IncreaseTemporaryGroupMemberActivity.startActivity(GroupMemberActivity.this, Constants.INCREASE_MEMBER, groupId);
+        }else if(i == R.id.delete_btn){
+            add_btn.setVisibility(View.GONE);
+            delete_btn.setVisibility(View.GONE);
+            delete_text.setVisibility(View.VISIBLE);
+            cancel_text.setVisibility(View.VISIBLE);
+            sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, true);
+            sortAdapter.setOnItemClickListener((view1, position, checked, member) -> {
+                if(checked){
+                    total++;
+                }else{
+                    total--;
                 }
-                break;
-            case R.id.cancel_text:
-                add_btn.setVisibility(View.VISIBLE);
-                delete_btn.setVisibility(View.VISIBLE);
-                delete_text.setVisibility(View.GONE);
-                cancel_text.setVisibility(View.GONE);
-                sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, false);
-                memberList.setAdapter(sortAdapter);
-                sortAdapter.notifyDataSetChanged();
-                break;
+                if(total > 0){
+                    delete_text.setText(String.format(getString(R.string.button_delete_number), total));
+                }else{
+                    delete_text.setText(R.string.text_delete);
+                }
+            });
+            memberList.setAdapter(sortAdapter);
+            sortAdapter.notifyDataSetChanged();
+        }else if(i == R.id.delete_text){
+            if(MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size() < 2){//当前组仅剩创建者本身的时候点击删除销临时组
+                final AlertDialog alertDialog = new AlertDialog.Builder(GroupMemberActivity.this).create();
+                alertDialog.show();
+                Display display = getWindowManager().getDefaultDisplay();
+                int heigth = display.getWidth();
+                int width = display.getHeight();
+                Window window = alertDialog.getWindow();
+                WindowManager.LayoutParams layoutParams = window.getAttributes();
+                layoutParams.width = width / 2;
+                layoutParams.height = heigth / 2;
+                window.setAttributes(layoutParams);
+                window.setContentView(R.layout.dialog_delete_temporary_group);
+                final LinearLayout ll_select = window.findViewById(R.id.ll_select);
+                final LinearLayout ll_success = window.findViewById(R.id.ll_success);
+                Button btn_confirm = window.findViewById(R.id.btn_confirm);
+                btn_confirm.setOnClickListener(v -> myHandler.post(() -> {
+                    ll_success.setVisibility(View.VISIBLE);
+                    ll_select.setVisibility(View.GONE);
+                    MyTerminalFactory.getSDK().getTempGroupManager().destroyTempGroup4PC(groupId);
+                    TimerTask task = new TimerTask(){
+                        @Override
+                        public void run(){
+                            alertDialog.dismiss();
+                            finish();
+                        }
+                    };
+                    MyTerminalFactory.getSDK().getTimer().schedule(task, 1000);
+                }));
+                Button btn_cancel = window.findViewById(R.id.btn_cancel);
+                btn_cancel.setOnClickListener(v -> alertDialog.dismiss());
+            }else{
+                List<Member> deleteMemberList = sortAdapter.getDeleteMemberList();
+                if(deleteMemberList.isEmpty()){
+                    ToastUtils.showShort(R.string.please_select_delete_member);
+                }else{
+                    MyTerminalFactory.getSDK().getTempGroupManager().removeMemberToTempGroup(groupId, MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0), MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l), DataUtil.getUniqueNos(deleteMemberList));
+                    add_btn.setVisibility(View.VISIBLE);
+                    delete_btn.setVisibility(View.VISIBLE);
+                    delete_text.setVisibility(View.GONE);
+                    cancel_text.setVisibility(View.GONE);
+                }
+            }
+        }else if(i == R.id.cancel_text){
+            add_btn.setVisibility(View.VISIBLE);
+            delete_btn.setVisibility(View.VISIBLE);
+            delete_text.setVisibility(View.GONE);
+            cancel_text.setVisibility(View.GONE);
+            sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, false);
+            memberList.setAdapter(sortAdapter);
+            sortAdapter.notifyDataSetChanged();
         }
     }
 

@@ -295,7 +295,7 @@
             tools:ignore="RtlHardcoded" />
         <!--此面板显示与曝光无关的所有相机设置。
         它分为三个部分： - 图像设置 - 视频设置 - 通用设置-->
-        <cn.vsx.vc.view.MyCameraSettingAdvancedPanel
+        <cn.vsx.uav.view.MyCameraSettingAdvancedPanel
             android:id="@+id/cameraSettingAdvancedPanel"
             android:layout_width="180dp"
             android:layout_height="263dp"
@@ -469,7 +469,7 @@
             android:background="@color/transparent_10"
             android:visibility="visible">
             
-            <cn.vsx.vc.view.CustomWebView
+            <cn.vsx.uav.view.CustomWebView
                 android:id="@+id/map_min_webview"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
@@ -491,7 +491,7 @@
         android:layout_height="match_parent"
         android:visibility="gone">
         
-        <cn.vsx.vc.view.CustomWebView
+        <cn.vsx.uav.view.CustomWebView
             android:id="@+id/map_max_webview"
             android:layout_width="match_parent"
             android:layout_height="match_parent" />

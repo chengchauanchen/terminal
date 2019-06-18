@@ -107,15 +107,14 @@ public class PersonInfoLayout extends LinearLayout {
 
 
     public void toUserInfoActivity (View view) {
-        switch (view.getId()) {
-            case R.id.ll_user_info:
-                Intent intent = new Intent(getContext(), UserInfoActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                intent.putExtra("userId", MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
-                intent.putExtra("userName", userName.getText().toString().trim());
-                getContext().startActivity(intent);
-//                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPopupwindowHandler.class, ChangeNamePopupwindow.class.getTitleName());
-                break;
+        int i = view.getId();
+        if(i == R.id.ll_user_info){
+            Intent intent = new Intent(getContext(), UserInfoActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.putExtra("userId", MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+            intent.putExtra("userName", userName.getText().toString().trim());
+            getContext().startActivity(intent);
+            //                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPopupwindowHandler.class, ChangeNamePopupwindow.class.getTitleName());
         }
 
     }

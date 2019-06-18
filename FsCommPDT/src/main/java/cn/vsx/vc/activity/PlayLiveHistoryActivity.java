@@ -616,16 +616,13 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
 
     @Override
     public void onClick(View v){
-        switch(v.getId()){
-            case R.id.iv_close:
-                close();
-                break;
-            case R.id.iv_pause:
-                pauseOrContinue();
-                break;
-            case R.id.iv_pause_continue:
-                pauseOrContinue();
-                break;
+        int i = v.getId();
+        if(i == R.id.iv_close){
+            close();
+        }else if(i == R.id.iv_pause){
+            pauseOrContinue();
+        }else if(i == R.id.iv_pause_continue){
+            pauseOrContinue();
         }
     }
 

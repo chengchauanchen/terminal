@@ -66,20 +66,17 @@ public class SetSweepActivity extends BaseActivity implements View.OnClickListen
 
 
     public void onClick(View view) {
-            switch (view.getId()) {
-            case R.id.news_bar_back:
-                finish();
-                break;
-            case R.id.right_add:
-                if(groupSweeps.size()>=10){
-                    ToastUtil.showToast(SetSweepActivity.this,getString(R.string.text_sweep_group_count_out_of_bound));
-                    return;
-                }
-                Intent intent = new Intent(this, ChangeGroupActivity.class);
-//                intent.putExtra("INTENTFROM", 2);
-                startActivity(intent);
-
-                break;
+        int i = view.getId();
+        if(i == R.id.news_bar_back){
+            finish();
+        }else if(i == R.id.right_add){
+            if(groupSweeps.size() >= 10){
+                ToastUtil.showToast(SetSweepActivity.this, getString(R.string.text_sweep_group_count_out_of_bound));
+                return;
+            }
+            Intent intent = new Intent(this, ChangeGroupActivity.class);
+            //                intent.putExtra("INTENTFROM", 2);
+            startActivity(intent);
         }
     }
 

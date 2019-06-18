@@ -43,10 +43,9 @@ public class PhotoAlbumLayout extends LinearLayout implements View.OnClickListen
 
 
     public void onClick (View view) {
-        switch (view.getId()) {
-            case R.id.ll_to_photo_album:
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.PHOTO_ALBUM, true);
-                break;
+        int i = view.getId();
+        if(i == R.id.ll_to_photo_album){
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.PHOTO_ALBUM, true);
         }
     }
 

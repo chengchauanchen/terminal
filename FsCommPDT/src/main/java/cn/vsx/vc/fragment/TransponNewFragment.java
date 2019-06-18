@@ -134,48 +134,42 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.news_bar_return:
+        int i = v.getId();
+        if(i == R.id.news_bar_return){
+            if(backListener != null){
+                backListener.onBack();
+            }
+        }else if(i == R.id.ok_btn){
+            if(!selectedMemberNos.isEmpty()){
                 if(backListener != null){
-                    backListener.onBack();
+                    backListener.onResult(selectedMembers);
                 }
-                break;
-            case R.id.ok_btn:
-                if(!selectedMemberNos.isEmpty()){
-                    if(backListener != null){
-                        backListener.onResult(selectedMembers);
-                    }
-                }else{
-                    ToastUtil.showToast(this.getContext(),getString(R.string.please_choose_one));
-                }
-                break;
-            case R.id.tab_group:
-                mTabGroup.setChecked(true);
-                mTabPolice.setChecked(false);
-                if(groupFragment == null){
-                    groupFragment = new GroupListFragment();
-                    groupFragment.setOnSearchListener(mOnSearchListener);
-                }
-                switchFragment(groupFragment);
-                currentFragment = groupFragment;
-                currentIndex = 0;
-                break;
-            case R.id.tab_police:
-                mTabGroup.setChecked(false);
-                mTabPolice.setChecked(true);
-                if(accountListFragment == null){
-                    accountListFragment = new AccountListFragment();
-                    accountListFragment.setOnSearchListener(mOnSearchListener);
-                }
-                switchFragment(accountListFragment);
-                currentFragment = accountListFragment;
-                currentIndex = 1;
-                break;
-            case R.id.iv_select:
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSelectedFragmentHandler.class,selectedMembers);
-                break;
-            default:
-                break;
+            }else{
+                ToastUtil.showToast(this.getContext(), getString(R.string.please_choose_one));
+            }
+        }else if(i == R.id.tab_group){
+            mTabGroup.setChecked(true);
+            mTabPolice.setChecked(false);
+            if(groupFragment == null){
+                groupFragment = new GroupListFragment();
+                groupFragment.setOnSearchListener(mOnSearchListener);
+            }
+            switchFragment(groupFragment);
+            currentFragment = groupFragment;
+            currentIndex = 0;
+        }else if(i == R.id.tab_police){
+            mTabGroup.setChecked(false);
+            mTabPolice.setChecked(true);
+            if(accountListFragment == null){
+                accountListFragment = new AccountListFragment();
+                accountListFragment.setOnSearchListener(mOnSearchListener);
+            }
+            switchFragment(accountListFragment);
+            currentFragment = accountListFragment;
+            currentIndex = 1;
+        }else if(i == R.id.iv_select){
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveShowSelectedFragmentHandler.class, selectedMembers);
+        }else{
         }
     }
 
