@@ -115,7 +115,7 @@ public class MessageListAdapter extends BaseAdapter {
             } else if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
                 viewHolder.tv_user_name.setText(context.getString(R.string.text_to_warning));
             }else {
-                viewHolder.tv_user_name.setText(DataUtil.getGroupName(terminalMessage.messageToId));
+                viewHolder.tv_user_name.setText(terminalMessage.messageToName);
             }
         }
         //设置最后一条消息时间
