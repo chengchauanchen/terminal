@@ -13,7 +13,6 @@ import android.gesture.GestureLibraries;
 import android.gesture.GestureLibrary;
 import android.gesture.GestureOverlayView;
 import android.gesture.Prediction;
-import android.hardware.SensorManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -850,10 +849,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
      */
     public static int mCurrentFragmentCode;
     protected Logger logger = Logger.getLogger(getClass());
-    private boolean isPressedBackOnce = false;
-    private long firstTime = 0;
-    private long secondTime = 0;
-    private SensorManager sensorManager;// 传感器管理对象,调用距离传感器，控制屏幕
+
     private Timer timer = new Timer();
 
     private PopupWindow popupWindow;
@@ -864,7 +860,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         public void handleMessage(Message msg){
             super.handleMessage(msg);
             handleMyMessage(msg);
-
         }
     };
 
@@ -1577,34 +1572,12 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
 
     public void exit(){
-
-
         if ( !cn.vsx.vc.utils.PhoneAdapter.isF25() ) {
             // 判断是否点了一次后退
-            if (isPressedBackOnce) {
-                // 已经点了一次，这是第二次
-                // 判断一下跟上一次点击的时间间隔，如果大于2秒，再谈一次吐司，小于2秒 直接finish
-                secondTime = System.currentTimeMillis();
-                if (secondTime - firstTime > 2000) {
-                    // 第一次点击
-                    cn.vsx.vc.utils.ToastUtil.showToast(this, getString(R.string.text_click_again_to_exit));
-                    isPressedBackOnce = true;
-                    firstTime = System.currentTimeMillis();
-                } else {
-                    if (MyApplication.instance.getIndividualState() != IndividualCallState.SPEAKING) {
-                        // 在2秒之内点击第二次
-                        moveTaskToBack(true);//把程序变成后台的
-                        // finish完成之后当前进程依然在
-                        isPressedBackOnce = false;
-                        firstTime = 0;
-                        secondTime = 0;
-                    }
-                }
-            } else {
-                // 第一次点击
-                cn.vsx.vc.utils.ToastUtil.showToast(this, getString(R.string.text_click_again_to_exit));
-                isPressedBackOnce = true;
-                firstTime = System.currentTimeMillis();
+            if (MyApplication.instance.getIndividualState() != IndividualCallState.SPEAKING) {
+                // 在2秒之内点击第二次
+                moveTaskToBack(true);//把程序变成后台的
+                // finish完成之后当前进程依然在
             }
         }else {
             // 如果是F25机型，返回到主通话界面
