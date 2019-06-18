@@ -61,6 +61,9 @@ android {
         policeStore {
 //            buildConfigField "String", "apk_type","policeStore"
         }
+        xiangYangPoliceStore {
+//            buildConfigField "String", "apk_type","policeStore"
+        }
     }
     productFlavors.all {
         flavor -> flavor.manifestPlaceholders = [apk_type: name]
