@@ -1,3 +1,4 @@
+//打无人机包用此代码
 apply plugin: 'com.android.application'
 //apply plugin: 'com.antfortune.freeline'
 Properties props = new Properties()
