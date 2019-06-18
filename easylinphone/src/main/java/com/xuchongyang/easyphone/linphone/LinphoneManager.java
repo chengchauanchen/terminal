@@ -61,7 +61,7 @@ public class LinphoneManager implements LinphoneCoreListener {
 
     public LinphoneManager(Context serviceContext) {
         mServiceContext = serviceContext;
-        LinphoneCoreFactory.instance().setDebugMode(true, "vsx");
+        LinphoneCoreFactory.instance().setDebugMode(false, "vsx");
         sExited = false;
 
         String basePath = mServiceContext.getFilesDir().getAbsolutePath();

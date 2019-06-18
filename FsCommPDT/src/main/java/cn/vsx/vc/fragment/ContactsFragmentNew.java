@@ -40,6 +40,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.DialPopupwindow;
@@ -93,6 +94,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     private Handler mHandler = new Handler();
     private DialPopupwindow dialPopupwindow;
     private boolean soundOff;
+    private RelativeLayout isLte;
 
     public ContactsFragmentNew() {
     }
@@ -121,6 +123,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         setting_group_name = (TextView) mRootView.findViewById(R.id.setting_group_name);
         lte_line = mRootView.findViewById(R.id.lte_line);
         lte_tv = (TextView) mRootView.findViewById(R.id.lte_tv);
+
         activity = (NewMainActivity) getActivity();
         mRootView.findViewById(R.id.is_shoutai).setOnClickListener(this);
         mRootView.findViewById(R.id.is_jingwutong).setOnClickListener(this);
@@ -134,10 +137,12 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
         TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
         TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
+        initLteView();
         group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
         shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
+
         dialPopupwindow = new DialPopupwindow(context);
         voice_image.setImageResource(BitmapUtil.getVolumeImageResourceByValue(false));
         voice_image.setOnClickListener(view -> {
@@ -153,6 +158,15 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                 soundOff = false;
             }
         });
+    }
+
+    private void initLteView(){
+        isLte = mRootView.findViewById(R.id.is_lte);
+        if(ApkUtil.isPoliceApk()){
+            isLte.setVisibility(View.VISIBLE);
+        }else {
+            isLte.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -182,7 +196,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                 handPlatformFragment.onBack();
             } else if (policeAffairsFragment.isVisible()) {
                 policeAffairsFragment.onBack();
-            } else {
+            } else if(lteFragment != null && lteFragment.isAdded() && lteFragment.isVisible()){
                 lteFragment.onBack();
             }
         });
@@ -371,18 +385,31 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         if (handPlatformFragment == null) {
             handPlatformFragment = new NewHandPlatformFragment();
         }
-        if (lteFragment == null) {
-            lteFragment = new LteFragment();
+        //只有市局的包才有LTE
+        if(ApkUtil.isPoliceApk()){
+            if (lteFragment == null) {
+                lteFragment = new LteFragment();
+            }
+            transaction.add(R.id.contacts_viewPager, groupFragmentNew)
+                    .add(R.id.contacts_viewPager, policeAffairsFragment)
+                    .add(R.id.contacts_viewPager, handPlatformFragment)
+                    .add(R.id.contacts_viewPager, lteFragment)
+                    .hide(policeAffairsFragment)
+                    .hide(handPlatformFragment)
+                    .hide(lteFragment)
+                    .show(groupFragmentNew);
+            transaction.commit();
+
+        }else {
+            transaction.add(R.id.contacts_viewPager, groupFragmentNew)
+                    .add(R.id.contacts_viewPager, policeAffairsFragment)
+                    .add(R.id.contacts_viewPager, handPlatformFragment)
+                    .hide(policeAffairsFragment)
+                    .hide(handPlatformFragment)
+                    .show(groupFragmentNew);
+            transaction.commit();
         }
-        transaction.add(R.id.contacts_viewPager, groupFragmentNew)
-                .add(R.id.contacts_viewPager, policeAffairsFragment)
-                .add(R.id.contacts_viewPager, handPlatformFragment)
-                .add(R.id.contacts_viewPager, lteFragment)
-                .hide(policeAffairsFragment)
-                .hide(handPlatformFragment)
-                .hide(lteFragment)
-                .show(groupFragmentNew);
-        transaction.commit();
+
 
         currentFragment = groupFragmentNew;
         imgbtn_dial.setVisibility(View.GONE);
