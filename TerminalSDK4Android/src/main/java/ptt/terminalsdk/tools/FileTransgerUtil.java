@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -239,12 +240,18 @@ public class FileTransgerUtil {
     }
 
     private static MediaPlayer getMediaPlayer(Context context, File file) {
+        MediaPlayer mediaPlayer = null;
         try {
-            return MediaPlayer.create(context, Uri.fromFile(file));
+            FileInputStream fis = new FileInputStream(file);
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.reset();
+            mediaPlayer.setDataSource(fis.getFD());
+            return mediaPlayer;
         } catch (Exception e) {
             e.printStackTrace();
+            mediaPlayer = null;
         }
-        return null;
+        return mediaPlayer;
     }
 
     /**

@@ -226,7 +226,7 @@ public class PromptManager {
 	//个呼异常提示音响铃
 	public void IndividualHangUpRing(){
 		if(soundPool != null){
-			streamId = soundPool.play(soundMap.get(R.raw.passive_dropped_warning),1,1,0,-1,1);
+			streamId = soundPool.play(soundMap.get(R.raw.passive_dropped_warning),1,1,0,0,1);
 			logger.info("个呼异常提示响铃——————dandandan" + streamId);
 		}
 	}
@@ -328,7 +328,7 @@ public class PromptManager {
 
 	public void start(){
 		logger.info("----------提示音管理类 start()------------");
-		soundPool = new SoundPool(2, AudioManager.STREAM_MUSIC, 0);
+		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 		soundMap.clear();
 		soundMap.put(ptt.terminalsdk.R.raw.ppt_up, soundPool.load(MyApplication.instance,ptt.terminalsdk.R.raw.ppt_up, 1));
 

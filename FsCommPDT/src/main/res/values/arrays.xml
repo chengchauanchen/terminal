@@ -30,4 +30,23 @@
         <item>警务通</item>
         <item>HDMI</item>
     </string-array>
+    <string-array name="invite_member_tab_text_pull_lte">
+        <item>警务通</item>
+        <item>无人机</item>
+        <item>执法记录仪</item>
+        <item>LTE</item>
+    </string-array>
+    <string-array name="invite_member_tab_text_push_lte">
+        <item>群组</item>
+        <item>PC</item>
+        <item>警务通</item>
+        <item>LTE</item>
+    </string-array>
+    <string-array name="invite_member_tab_text_push_image_lte">
+        <item>群组</item>
+        <item>PC</item>
+        <item>警务通</item>
+        <item>HDMI</item>
+        <item>LTE</item>
+    </string-array>
 </resources>

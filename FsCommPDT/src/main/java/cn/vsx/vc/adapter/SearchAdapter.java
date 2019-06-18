@@ -64,6 +64,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
         addItemType(Constants.TYPE_CHECK_SEARCH_UAV, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_RECODER, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_ACCOUNT, R.layout.layout_item_user);
+        addItemType(Constants.TYPE_CHECK_SEARCH_LTE, R.layout.layout_item_user);
     }
 
     public void setFilterKeyWords(String keyWords){
@@ -161,6 +162,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
             case Constants.TYPE_CHECK_SEARCH_RECODER:
             case Constants.TYPE_CHECK_SEARCH_HDMI:
             case Constants.TYPE_CHECK_SEARCH_UAV:
+            case Constants.TYPE_CHECK_SEARCH_LTE:
                 Member member = (Member) item.getBean();
                 ImageView image = holder.getView(R.id.shoutai_user_logo);
                 image.setImageResource(BitmapUtil.getImageResourceByType(member.getType()));

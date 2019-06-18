@@ -74,6 +74,7 @@ import cn.vsx.vc.model.InviteMemberLiverMember;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSwitchCameraViewHandler;
 import cn.vsx.vc.receiveHandle.ReceiverEntityKeyEventInServiceHandler;
+import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.MyDataUtil;
@@ -116,17 +117,17 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private RecyclerView selectRecyclerview;
     //tab
     private List<RelativeLayout> tabLayouts = new ArrayList<>();
-    private int[] tabLayoutIds = new int[]{R.id.is_pc, R.id.is_jingwutong, R.id.is_uav, R.id.is_recoder};
+    private int[] tabLayoutIds = new int[]{R.id.is_pc, R.id.is_jingwutong, R.id.is_uav, R.id.is_recoder, R.id.is_lte};
     private List<TextView> tabs = new ArrayList<>();
-    private int[] tabIds = new int[]{R.id.pc_tv, R.id.jingwutong_tv, R.id.uav_tv, R.id.recoder_tv};
+    private int[] tabIds = new int[]{R.id.pc_tv, R.id.jingwutong_tv, R.id.uav_tv, R.id.recoder_tv,R.id.lte_tv};
     private List<View> lines = new ArrayList<>();
-    private int[] lineIds = new int[]{R.id.pc_line, R.id.jingwutong_line, R.id.uav_line, R.id.recoder_line};
+    private int[] lineIds = new int[]{R.id.pc_line, R.id.jingwutong_line, R.id.uav_line, R.id.recoder_line, R.id.lte_line};
 
     private List<SwipeRefreshLayout> srls = new ArrayList<>();
-    private int[] srlIds = new int[]{R.id.srl_one, R.id.srl_two, R.id.srl_three, R.id.srl_four};
+    private int[] srlIds = new int[]{R.id.srl_one, R.id.srl_two, R.id.srl_three, R.id.srl_four, R.id.srl_five};
 
     private List<RecyclerView> rls = new ArrayList<>();
-    private int[] rlIds = new int[]{R.id.rv_one, R.id.rv_two, R.id.rv_three, R.id.rv_four};
+    private int[] rlIds = new int[]{R.id.rv_one, R.id.rv_two, R.id.rv_three, R.id.rv_four, R.id.rv_five};
     //已选择
     private LinearLayout mLlAllSelected;
     private RecyclerView mRvSelected;
@@ -156,19 +157,10 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private List<List<ContactItemBean>> mAllDatas = new ArrayList<>();
     private List<MemberListAdapter> contactAdapter = new ArrayList<>();
 
-    private List<ContactItemBean> mOneDatas = new ArrayList<>();
-    private List<ContactItemBean> mTwoDatas = new ArrayList<>();
-    private List<ContactItemBean> mThreeDatas = new ArrayList<>();
-    private List<ContactItemBean> mFourDatas = new ArrayList<>();
-
     private RecyclerView mRlSearch;
     private ImageView mIvSearch;
     private GroupCatalogAdapter mCatalogAdapter;
     private List<List<CatalogBean>> mAllCatalogNames = new ArrayList<>();
-    private List<CatalogBean> mOneCatalogDatas = new ArrayList<>();
-    private List<CatalogBean> mTwoCatalogDatas = new ArrayList<>();
-    private List<CatalogBean> mThreeCatalogDatas = new ArrayList<>();
-    private List<CatalogBean> mFourCatalogDatas = new ArrayList<>();
 
     private List<ContactItemBean> searchList = new ArrayList<>();
     private SearchAdapter searchAdapter;
@@ -317,34 +309,51 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      */
     private void setTabTextView() {
         tabTypes.clear();
+        List<Integer> mSearchTypes = null;
+        List<String> mTabTypes = null;
         if (Constants.PUSH.equals(type)) {
             if (pushing) {
                 //推送图像
-                tabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
-                        TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
-                tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_push_image));
-                searchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
                         Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
+                mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                        TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
+                tabText = Arrays.asList(getResources().getStringArray((ApkUtil.isPoliceApk())?
+                        R.array.invite_member_tab_text_push_image_lte:R.array.invite_member_tab_text_push_image));
             } else {
                 //上报图像
-                tabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(), TerminalMemberType.TERMINAL_PHONE.toString());
-                tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_push));
-                searchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC, Constants.TYPE_CHECK_SEARCH_POLICE);
+                mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                        Constants.TYPE_CHECK_SEARCH_POLICE);
+                mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                        TerminalMemberType.TERMINAL_PHONE.toString());
+                tabText = Arrays.asList(getResources().getStringArray((ApkUtil.isPoliceApk())?
+                        R.array.invite_member_tab_text_push_lte:R.array.invite_member_tab_text_push));
             }
         } else if (Constants.PULL.equals(type)) {
             if (pulling) {
                 //推送图像
-                tabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
-                        TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
-                tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_push_image));
-                searchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
                         Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
+                mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                        TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
+                tabText = Arrays.asList(getResources().getStringArray((ApkUtil.isPoliceApk())?
+                        R.array.invite_member_tab_text_push_image_lte:R.array.invite_member_tab_text_push_image));
             } else {
                 //请求图像
-                tabTypes = Arrays.asList(TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_UAV.toString(),TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
-                tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_pull));
-                searchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_POLICE,Constants.TYPE_CHECK_SEARCH_UAV, Constants.TYPE_CHECK_SEARCH_RECODER);
+                mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_POLICE,Constants.TYPE_CHECK_SEARCH_UAV,
+                        Constants.TYPE_CHECK_SEARCH_RECODER);
+                mTabTypes = Arrays.asList(TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_UAV.toString(),
+                        TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
+                tabText = Arrays.asList(getResources().getStringArray((ApkUtil.isPoliceApk())?
+                        R.array.invite_member_tab_text_pull_lte:R.array.invite_member_tab_text_pull));
             }
+        }
+        searchTypes.addAll(mSearchTypes);
+        tabTypes.addAll(mTabTypes);
+        //包含lte
+        if(ApkUtil.isPoliceApk()){
+            searchTypes.add(Constants.TYPE_CHECK_SEARCH_LTE);
+            tabTypes.add(TerminalMemberType.TERMINAL_LTE.toString());
         }
         tabLayouts.clear();
         tabs.clear();
@@ -368,6 +377,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
                 relativeLayout.setVisibility(View.VISIBLE);
                 srl.setVisibility(View.VISIBLE);
                 recyclerView.setVisibility(View.VISIBLE);
+                mAllDatas.add(new ArrayList<ContactItemBean>());
             }else{
                 relativeLayout.setVisibility(View.GONE);
                 srl.setVisibility(View.GONE);
@@ -375,12 +385,6 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
             }
         }
 
-        mAllDatas.add(mOneDatas);
-        mAllDatas.add(mTwoDatas);
-        mAllDatas.add(mThreeDatas);
-        if(tabTypes.size() == tabIds.length){
-            mAllDatas.add(mFourDatas);
-        }
         //设置tab切换之后view的改变
         setTabView(currentIndex);
 
@@ -401,19 +405,11 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
         mRlSearch.setLayoutManager(new LinearLayoutManager(this, OrientationHelper.HORIZONTAL,false));
         mAllCatalogNames.clear();
-        mOneCatalogDatas.clear();
-        mOneCatalogDatas.add(memberCatalogBean);
-        mTwoCatalogDatas.clear();
-        mTwoCatalogDatas.add(memberCatalogBean);
-        mThreeCatalogDatas.clear();
-        mThreeCatalogDatas.add(memberCatalogBean);
-        mFourCatalogDatas.clear();
-        mFourCatalogDatas.add(memberCatalogBean);
-
-        mAllCatalogNames.add(mOneCatalogDatas);
-        mAllCatalogNames.add(mTwoCatalogDatas);
-        mAllCatalogNames.add(mThreeCatalogDatas);
-        mAllCatalogNames.add(mFourCatalogDatas);
+        for (int i = 0; i < rls.size(); i++) {
+            List<CatalogBean> list = new ArrayList<>();
+            list.add(memberCatalogBean);
+            mAllCatalogNames.add(list);
+        }
 
         mCatalogAdapter=new GroupCatalogAdapter(this,mAllCatalogNames.get(currentIndex));
         mCatalogAdapter.setOnItemClick(searchItemClickListener);
