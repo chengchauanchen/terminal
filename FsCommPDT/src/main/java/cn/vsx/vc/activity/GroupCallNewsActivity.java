@@ -32,27 +32,19 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.http.util.TextUtils;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
-import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.TerminalMemberStatusEnum;
-import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
-import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
-import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
@@ -63,8 +55,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupCurrentOnlineMem
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupLivingListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMultimediaFailHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMultimediaMessageCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
@@ -80,7 +70,6 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
-import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.MyDataUtil;
@@ -269,12 +258,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        stopRecord();
-    }
-
     public void initListener() {
         newsBarReturn.setOnClickListener(this);
         groupLiveHistory.setOnClickListener(this);
@@ -300,8 +283,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveHistoryMultimediaFailHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveMultimediaMessageCompleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mmReceiveGetGroupCurrentOnlineMemberListHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
@@ -310,7 +291,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetGroupLivingListHandler);
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverReplayGroupChatVoiceHandler);
         super.initListener();
     }
 
@@ -337,6 +317,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         refreshPtt();
     }
 
+
     private void refreshPtt(){
         Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(userId);
         //响应组  普通用户  不在响应状态
@@ -359,8 +340,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTUpHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveHistoryMultimediaFailHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMultimediaMessageCompleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mmReceiveGetGroupCurrentOnlineMemberListHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveChangeGroupHandler);
@@ -368,7 +347,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetGroupLivingListHandler);
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverReplayGroupChatVoiceHandler);
         if (volumeViewLayout != null) {
             volumeViewLayout.unRegistLintener();
         }
@@ -634,16 +612,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     }
 
     /**
-     * 停止播放组呼录音
-     */
-    public void stopRecord() {
-        if (MyApplication.instance.isPlayVoice) {
-            MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
-            MyApplication.instance.isPlayVoice = false;
-        }
-    }
-
-    /**
      * 主动组呼时屏蔽其他按键
      ***/
     private void setViewEnable(boolean isEnable) {
@@ -889,145 +857,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
     });
 
-    private int mposition = -1;
-    private int lastPosition = -1;
-    private boolean isSameItem = true;
+
     private Handler myHandler = new Handler();
-    private ExecutorService executorService = Executors.newFixedThreadPool(1);
-    /**
-     * 点击消息的组呼条目，播放组呼录音
-     **/
-    private ReceiverReplayGroupChatVoiceHandler mReceiverReplayGroupChatVoiceHandler = new ReceiverReplayGroupChatVoiceHandler() {
-        @Override
-        public void handler(int postion) {
-            mposition = postion;
-
-            myHandler.post(() -> {
-                if (MyApplication.instance.getIndividualState() == IndividualCallState.IDLE &&
-                        MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE &&
-                        MyApplication.instance.getGroupListenenState() == GroupCallListenState.IDLE) {//不是在组呼也不是在个呼中，可以播放录音
-
-                    if (lastPosition == mposition) {//点击同一个条目
-                        if (MyApplication.instance.isPlayVoice) {
-                            MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
-                        } else {
-                            executorService.execute(() -> {
-                                if (mposition < chatMessageList.size() && mposition >= 0) {
-                                    try {
-                                        MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
-                                    } catch (IndexOutOfBoundsException e) {
-                                        logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
-                                    }
-                                }
-                            });
-                        }
-                    } else {//点击不同条目
-
-                        if (MyApplication.instance.isPlayVoice) {
-                            MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
-
-                        }
-
-                        //播放当前的
-                        executorService.execute(() -> {
-                            if (mposition < chatMessageList.size() && mposition >= 0) {
-                                try {
-//                                            logger.error("当前播放的条目是：" + mposition);
-                                    MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
-                                } catch (IndexOutOfBoundsException e) {
-                                    logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
-                                }
-                            }
-                        });
-                    }
-
-                } else {
-                    ToastUtil.showToast(GroupCallNewsActivity.this, getString(R.string.text_can_not_play_recording_now));
-                }
-            });
-        }
-    };
-
-    /**
-     * 录音播放完成的消息
-     */
-    private IAudioPlayComplateHandler audioPlayComplateHandler = () -> myHandler.post(() -> {
-        MyApplication.instance.isPlayVoice = false;
-        isSameItem = true;
-//                    logger.error("录音播放完成的消息：" + chatMessageList.get(mposition).toString());
-        temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-        setSmoothScrollToPosition(mposition);
-//        temporaryAdapter.notifyDataSetChanged();
-
-        autoPlay(mposition + 1);
-
-    });
-
-    //自动播放下一条语音
-    private void autoPlay(int index) {
-//        logger.debug("自动播放:第"+index+"条");
-        //不是最后一条消息，自动播放
-        if (index < chatMessageList.size()) {
-            //不是语音消息跳过执行下一条
-            if (chatMessageList.get(index).messageType != MessageType.AUDIO.getCode()&&chatMessageList.get(index).messageType!=MessageType.GROUP_CALL.getCode()) {
-                index = index + 1;
-                autoPlay(index);
-            } else {
-                if (chatMessageList.get(index).messageBody.containsKey(JsonParam.UNREAD) &&
-                        chatMessageList.get(index).messageBody.getBooleanValue(JsonParam.UNREAD)
-                        && MyTerminalFactory.getSDK().getParam(Params.IS_PLAY_END, false)) {
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupChatVoiceHandler.class, index);
-                }
-            }
-        }else {
-            logger.debug("最后一条消息已播放完成");
-        }
-
-
-    }
-
-    /**
-     * 音频播放失败
-     **/
-    private ReceiveHistoryMultimediaFailHandler receiveHistoryMultimediaFailHandler = resultCode -> {
-        if (resultCode == TerminalErrorCode.STOP_PLAY_RECORD.getErrorCode()) {
-            MyApplication.instance.isPlayVoice = false;
-            isSameItem = true;
-            temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, false, true);
-//            temporaryAdapter.notifyDataSetChanged();
-        } else {
-            logger.info("音频播放失败了！！errorCode=" + resultCode);
-            ToastUtil.showToast(GroupCallNewsActivity.this, getString(R.string.text_play_recorder_fail_has_no_get_recorder_data_please_try_later));
-        }
-    };
-
-    /**
-     * 开始播放或停止播放的回调
-     */
-    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = (resultCode, resultDes,message) -> {
-        logger.error("开始播放或者停止播放的回调");
-        myHandler.post(() -> {
-            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                if (lastPosition == mposition) {//点击同一个条目
-                    isSameItem = true;
-                    MyApplication.instance.isPlayVoice = !MyApplication.instance.isPlayVoice;
-                } else {//点击不同条目
-                    isSameItem = false;
-                    MyApplication.instance.isPlayVoice = true;
-                }
-                Collections.sort(chatMessageList);
-                if (temporaryAdapter != null) {
-                    temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
-//                    temporaryAdapter.notifyDataSetChanged();
-                }
-                lastPosition = mposition;
-            } else {
-                logger.info("开始播放或停止播放的回调" + resultDes);
-                ToastUtil.showToast(GroupCallNewsActivity.this, resultDes);
-            }
-        });
-    };
-
 
     /**
      * 获取当前在线人员列表

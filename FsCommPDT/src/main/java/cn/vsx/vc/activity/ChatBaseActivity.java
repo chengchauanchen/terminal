@@ -7,13 +7,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.nfc.FormatException;
+import android.media.MediaPlayer;
 import android.nfc.NdefMessage;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcEvent;
-import android.nfc.Tag;
-import android.nfc.tech.Ndef;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -34,67 +32,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import cn.vsx.hamster.common.Constants;
-import cn.vsx.hamster.common.MessageCategory;
-import cn.vsx.hamster.common.MessageSendStateEnum;
-import cn.vsx.hamster.common.MessageStatus;
-import cn.vsx.hamster.common.MessageType;
-import cn.vsx.hamster.common.Remark;
-import cn.vsx.hamster.common.util.JsonParam;
-import cn.vsx.hamster.common.util.NoCodec;
-import cn.vsx.hamster.errcode.BaseCommonCode;
-import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
-import cn.vsx.hamster.errcode.module.TerminalErrorCode;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
-import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
-import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
-import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
-import cn.vsx.hamster.terminalsdk.model.NFCBean;
-import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
-import cn.vsx.hamster.terminalsdk.receiveHandler.GetHistoryMessageRecordHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.GetWarningMessageDetailHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGPSLocationHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupOrMemberNotExistHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMessageNotifyDateHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyRecallRecordHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRecallRecordHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageFailedHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
-import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
-import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
-import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
-import cn.vsx.hamster.terminalsdk.tools.Util;
-import cn.vsx.vc.R;
-import cn.vsx.vc.adapter.TemporaryAdapter;
-import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.dialog.NFCBindingDialog;
-import cn.vsx.vc.fragment.LocationFragment;
-import cn.vsx.vc.model.ContactItemBean;
-import cn.vsx.vc.model.TransponSelectedBean;
-import cn.vsx.vc.receiveHandle.ReceiveNFCWriteResultHandler;
-import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
-import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
-import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
-import cn.vsx.vc.receiveHandle.ReceiverShowForwardMoreHandler;
-import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
-import cn.vsx.vc.receiveHandle.ReceiverShowWithDrawPopupHandler;
-import cn.vsx.vc.service.PullLivingService;
-import cn.vsx.vc.utils.BitmapUtil;
-import cn.vsx.vc.utils.DensityUtil;
-import cn.vsx.vc.utils.FileUtil;
-import cn.vsx.vc.utils.HandleIdUtil;
-import cn.vsx.vc.utils.NfcUtil;
-import cn.vsx.vc.utils.StatusBarUtil;
-import cn.vsx.vc.utils.ToastUtil;
-import cn.vsx.vc.view.FixedRecyclerView;
-import cn.vsx.vc.view.FunctionHidePlus;
+
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.blankj.utilcode.util.ToastUtils;
@@ -113,6 +51,11 @@ import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileHandler;
 import com.zectec.imageandfileselector.receivehandler.ReceiverToFaceRecognitionHandler;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import com.zectec.imageandfileselector.view.LoadingCircleView;
+
+import org.apache.http.util.TextUtils;
+import org.apache.log4j.Logger;
+import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -126,9 +69,83 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.http.util.TextUtils;
-import org.apache.log4j.Logger;
-import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import cn.vsx.hamster.common.Constants;
+import cn.vsx.hamster.common.MessageCategory;
+import cn.vsx.hamster.common.MessageSendStateEnum;
+import cn.vsx.hamster.common.MessageStatus;
+import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.Remark;
+import cn.vsx.hamster.common.util.JsonParam;
+import cn.vsx.hamster.common.util.NoCodec;
+import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
+import cn.vsx.hamster.errcode.module.TerminalErrorCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
+import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
+import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
+import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
+import cn.vsx.hamster.terminalsdk.model.NFCBean;
+import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.receiveHandler.GetHistoryMessageRecordHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.GetWarningMessageDetailHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGPSLocationHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupOrMemberNotExistHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMessageNotifyDateHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMultimediaFailHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMultimediaMessageCompleteHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyRecallRecordHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRecallRecordHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageFailedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
+import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
+import cn.vsx.hamster.terminalsdk.tools.Util;
+import cn.vsx.vc.R;
+import cn.vsx.vc.adapter.TemporaryAdapter;
+import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.NFCBindingDialog;
+import cn.vsx.vc.fragment.LocationFragment;
+import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.model.PlayType;
+import cn.vsx.vc.model.TransponSelectedBean;
+import cn.vsx.vc.receiveHandle.ReceiveNFCWriteResultHandler;
+import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
+import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
+import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
+import cn.vsx.vc.receiveHandle.ReceiverShowForwardMoreHandler;
+import cn.vsx.vc.receiveHandle.ReceiverShowTransponPopupHandler;
+import cn.vsx.vc.receiveHandle.ReceiverShowWithDrawPopupHandler;
+import cn.vsx.vc.record.MediaManager;
+import cn.vsx.vc.service.PullLivingService;
+import cn.vsx.vc.utils.BitmapUtil;
+import cn.vsx.vc.utils.DensityUtil;
+import cn.vsx.vc.utils.FileUtil;
+import cn.vsx.vc.utils.HandleIdUtil;
+import cn.vsx.vc.utils.NfcUtil;
+import cn.vsx.vc.utils.StatusBarUtil;
+import cn.vsx.vc.utils.ToastUtil;
+import cn.vsx.vc.view.FixedRecyclerView;
+import cn.vsx.vc.view.FunctionHidePlus;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okio.BufferedSink;
+import okio.BufferedSource;
+import okio.Okio;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.HttpUtil;
@@ -376,8 +393,22 @@ public abstract class ChatBaseActivity extends BaseActivity
     @Override
     protected void onStop() {
         super.onStop();
+        stopRecord();
         funcation.hideKeyboard(true);
         funcation.hideKeyboardAndBottom();
+    }
+
+    /**
+     * 停止播放组呼录音
+     */
+    public void stopRecord() {
+        if (MyApplication.instance.isPlayVoice) {
+            MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
+            MediaManager.release();
+            MyApplication.instance.isPlayVoice = false;
+            isSameItem = true;
+            temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+        }
     }
 
 
@@ -1784,6 +1815,9 @@ public abstract class ChatBaseActivity extends BaseActivity
             mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, null, null);
         }
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileHandler);
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverReplayIndividualChatVoiceHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMultimediaMessageCompleteHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveHistoryMultimediaFailHandler);
     }
 
     @Override
@@ -1794,6 +1828,9 @@ public abstract class ChatBaseActivity extends BaseActivity
             mNfcAdapter.disableForegroundDispatch(this);
         }
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSendFileHandler);
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverReplayIndividualChatVoiceHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMultimediaMessageCompleteHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveHistoryMultimediaFailHandler);
     }
 
     @Override public NdefMessage createNdefMessage(NfcEvent event) {
@@ -2498,6 +2535,282 @@ public abstract class ChatBaseActivity extends BaseActivity
                 temporaryAdapter.clearForWardState();
             }
         }
+    }
+
+
+    private int mposition = -1;
+    private int lastPosition = -1;
+    private boolean isSameItem = true;
+    private ExecutorService executorService = Executors.newFixedThreadPool(1);
+    /**
+     * 点击个呼录音条目
+     */
+    private ReceiverReplayIndividualChatVoiceHandler mReceiverReplayIndividualChatVoiceHandler = new ReceiverReplayIndividualChatVoiceHandler() {
+
+        @Override
+        public void handler(final TerminalMessage terminalMessage, int postion,int type) {
+            mposition = postion;
+            isReject=false;
+            handler.post(() -> {
+                if (MyApplication.instance.getIndividualState() == IndividualCallState.IDLE &&
+                        MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE &&
+                        MyApplication.instance.getGroupListenenState() == GroupCallListenState.IDLE) {//不是在组呼也不是在个呼中，可以播放录音
+
+                    if (lastPosition == mposition) {//点击同一个条目
+                        if (MyApplication.instance.isPlayVoice) {
+                            logger.error("点击同一条目，停止录音，停止动画");
+                            if(type == PlayType.PLAY_PRIVATE_CALL.getCode()||type == PlayType.PLAY_GROUP_CALL.getCode()){
+                                MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
+                            }else{
+                                MediaManager.release();
+                            }
+                            MyApplication.instance.isPlayVoice = false;
+                            isSameItem = true;
+                            temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+//                            temporaryAdapter.notifyDataSetChanged();
+                        } else {
+                            executorService.execute(new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (mposition < chatMessageList.size() && mposition >= 0) {
+                                        try {
+                                            if(type == PlayType.PLAY_PRIVATE_CALL.getCode()||type == PlayType.PLAY_GROUP_CALL.getCode()){
+                                                handler.post(() -> {
+                                                    terminalMessage.isDownLoadAudio = true;
+                                                    temporaryAdapter.notifyItemChanged(postion);
+                                                });
+                                                MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
+                                            }else{
+                                                downloadRecordFileOrPlay(terminalMessage, onCompletionListener);
+                                            }
+                                        } catch (IndexOutOfBoundsException e) {
+                                            logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    } else {//点击不同条目
+                        if (MyApplication.instance.isPlayVoice) {
+                            MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
+                            MediaManager.release();
+                        }
+                        //播放当前的
+                        executorService.execute(new Runnable() {
+                            public void run() {
+                                if (mposition < chatMessageList.size() && mposition >= 0) {
+                                    try {
+                                        if(type == PlayType.PLAY_PRIVATE_CALL.getCode()||type == PlayType.PLAY_GROUP_CALL.getCode()){
+                                            handler.post(() -> {
+                                                terminalMessage.isDownLoadAudio = true;
+                                                temporaryAdapter.notifyItemChanged(postion);
+                                            });
+                                            MyTerminalFactory.getSDK().getTerminalMessageManager().playMultimediaMessage(chatMessageList.get(mposition), audioPlayComplateHandler);
+                                        }else{
+                                            downloadRecordFileOrPlay(terminalMessage, onCompletionListener);
+                                        }
+                                    } catch (IndexOutOfBoundsException e) {
+                                        logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
+                                    }
+                                }
+                            }
+                        });
+                    }
+
+                } else {
+                    ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_can_not_play_audio_now));
+                }
+            });
+        }
+    };
+
+    /**
+     * 录音播放完成的消息
+     */
+    private MediaPlayer.OnCompletionListener onCompletionListener = mediaPlayer -> {
+        handler.post(() -> {
+            //                    logger.error("播放完成的回调触发了========> "+lastPosition+"/"+mposition+"/"+chatMessageList.size());
+            MyApplication.instance.isPlayVoice = false;
+            isSameItem = true;
+            chatMessageList.get(mposition).messageBody.put(JsonParam.UNREAD, false);
+            temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+//            temporaryAdapter.notifyDataSetChanged();
+        });
+        autoPlay(mposition+1);
+    };
+
+    /**
+     * 录音播放完成的消息
+     */
+    private IAudioPlayComplateHandler audioPlayComplateHandler = new IAudioPlayComplateHandler() {
+        @Override
+        public void handle() {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    MyApplication.instance.isPlayVoice = false;
+                    isSameItem = true;
+//                    logger.error("录音播放完成的消息：" + chatMessageList.get(mposition).toString());
+                    temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+                    setSmoothScrollToPosition(mposition);
+                    temporaryAdapter.notifyDataSetChanged();
+                }
+            });
+        }
+    };
+
+    protected boolean isReject=false;
+    //自动播放下一条语音
+    private void autoPlay(int index){
+        if(index<chatMessageList.size()){//不是最后一条消息，自动播放
+            //不是语音消息跳过执行下一条
+            if (chatMessageList.get(index).messageType != MessageType.AUDIO.getCode()&&!isReject) {
+                index = index + 1;
+                autoPlay(index);
+            }else {
+                if (chatMessageList.get(index).messageBody.containsKey(JsonParam.UNREAD) &&
+                        chatMessageList.get(index).messageBody.getBooleanValue(JsonParam.UNREAD) && !MediaManager.isPlaying() && !isReject) {
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayIndividualChatVoiceHandler.class, chatMessageList.get(index), index, PlayType.PLAY_AUDIO.getCode());
+                } else {
+                    logger.error("点击消息以下的未读消息已播放完成");
+                }
+            }
+
+        }else {
+            logger.debug("最后一条消息已播放完成");
+        }
+    }
+
+    /**
+     * 开始播放或停止播放的回调
+     */
+    private ReceiveMultimediaMessageCompleteHandler receiveMultimediaMessageCompleteHandler = (resultCode, resultDes, message) -> {
+        logger.info("ReceiveMultimediaMessageCompleteHandler   "+resultCode+"/"+resultDes);
+        handler.post(() -> {
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                if (lastPosition == mposition) {//点击同一个条目
+                    isSameItem = true;
+                    MyApplication.instance.isPlayVoice = !MyApplication.instance.isPlayVoice;
+                } else {//点击不同条目
+                    isSameItem = false;
+                    MyApplication.instance.isPlayVoice = true;
+                }
+                if(message!=null&&message.messageId!=0){
+                    message.isDownLoadAudio = false;
+                }
+                Collections.sort(chatMessageList);
+                if (temporaryAdapter != null) {
+                    temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, MyApplication.instance.isPlayVoice, isSameItem);
+//                    temporaryAdapter.notifyDataSetChanged();
+                }
+                lastPosition = mposition;
+            } else {
+                logger.info("开始播放或停止播放的回调" + resultDes);
+                ToastUtil.showToast(ChatBaseActivity.this, resultDes);
+                if(message!=null){
+                    message.isDownLoadAudio = false;
+                    if (temporaryAdapter != null) {
+                        temporaryAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+        });
+    };
+
+    /**
+     * 音频播放失败
+     **/
+    private ReceiveHistoryMultimediaFailHandler receiveHistoryMultimediaFailHandler = resultCode -> {
+        if (resultCode == TerminalErrorCode.STOP_PLAY_RECORD.getErrorCode()) {
+            MyApplication.instance.isPlayVoice = false;
+            isSameItem = true;
+            temporaryAdapter.refreshPersonContactsAdapter(mposition, chatMessageList, false, true);
+//            temporaryAdapter.notifyDataSetChanged();
+        } else {
+            logger.info("音频播放失败了！！errorCode=" + resultCode);
+            ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_play_recorder_fail_has_no_get_recorder_data_please_try_later));
+        }
+    };
+
+
+    /**
+     * 下载录音文件并播放
+     */
+    public void downloadRecordFileOrPlay(final TerminalMessage terminalMessage, final MediaPlayer.OnCompletionListener onCompletionListener) {
+        //        logger.info("准备播放个呼音频数据");
+        final int[] resultCode = {TerminalErrorCode.UNKNOWN_ERROR.getErrorCode()};
+        final String[] resultDes = {""};
+        File file = null;
+        try {
+            if (terminalMessage != null) {
+                //如果已经播放过
+                file = new File(terminalMessage.messagePath);
+                //如果播放过没找到文件，或者未播放 则去服务器请求数据
+                if (file == null || !file.exists() || file.length() <= 0) {
+                    logger.info("请求录音时URL：" + terminalMessage.messagePath);
+                    OkHttpClient mOkHttpClient = new OkHttpClient();
+                    MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
+                    Request request = new Request.Builder()
+                            .url(terminalMessage.messagePath)
+                            .build();
+                    mOkHttpClient.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            BufferedSource source = response.body().source();
+
+                            File outFile = MyTerminalFactory.getSDK().getTerminalMessageManager().createFile(terminalMessage);
+                            BufferedSink sink = Okio.buffer(Okio.sink(outFile));
+                            source.readAll(sink);
+                            sink.flush();
+                            source.close();
+
+                            if (outFile.length() <= 0) {
+                                logger.error("请求到的音频数据是null，直接return！");
+                            } else {
+                                terminalMessage.messagePath = TerminalFactory.getSDK().getAudioRecordDirectory() + terminalMessage.messageVersion;
+                                MyTerminalFactory.getSDK().getTerminalMessageManager().updateTerminalMessage(terminalMessage);
+                            }
+
+                            //播放
+                            logger.info("获得音频文件为：file=" + outFile.length() + "---文件的路径---" + outFile.getAbsolutePath());
+                            if (outFile.exists() && outFile.length() > 0) {
+                                resultCode[0] = BaseCommonCode.SUCCESS_CODE;
+                                resultDes[0] = getString(R.string.text_get_audio_success_ready_to_play);
+                                logger.info("URL获得音频文件，播放录音");
+                                MediaManager.playSound(terminalMessage.messagePath, onCompletionListener);
+                            } else {
+                                resultCode[0] = TerminalErrorCode.SERVER_NOT_RESPONSE.getErrorCode();
+                                resultDes[0] = getString(R.string.text_audio_history_not_find_or_server_no_response);
+                                logger.error("历史音频未找到，或服务器无响应！");
+                            }
+                            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0],terminalMessage);
+                        }
+                    });
+                } else {
+                    resultCode[0] = BaseCommonCode.SUCCESS_CODE;
+                    resultDes[0] = getString(R.string.text_get_audio_success_from_local_ready_to_play);
+                    logger.info("从本地音频文件，播放录音");
+                    MediaManager.playSound(terminalMessage.messagePath, onCompletionListener);
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0],terminalMessage);
+                }
+            } else {
+                resultCode[0] = TerminalErrorCode.PARAMETER_ERROR.getErrorCode();
+                resultDes[0] = getString(R.string.text_get_audio_history_paramter_wrongful);
+                logger.error("获取历史音频参数不合法！");
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0],terminalMessage);
+            }
+        } catch (Exception e) {
+            resultDes[0] = getString(R.string.text_get_audio_messge_fail);
+            resultCode[0] = TerminalErrorCode.PARAMETER_ERROR.getErrorCode();
+            logger.error("获得语音消息失败！", e);
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMultimediaMessageCompleteHandler.class, resultCode[0], resultDes[0],terminalMessage);
+        }
+
+
     }
 
 }

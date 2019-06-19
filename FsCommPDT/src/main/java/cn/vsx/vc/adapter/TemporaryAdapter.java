@@ -1796,7 +1796,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 if (MyApplication.instance.isPlayVoice) {
                     MyTerminalFactory.getSDK().getTerminalMessageManager().stopMultimediaMessage();
                 }
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupChatVoiceHandler.class, position);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayIndividualChatVoiceHandler.class, terminalMessage, position, PlayType.PLAY_GROUP_CALL.getCode());
+//                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupChatVoiceHandler.class, position);
             } else {
                 ToastUtil.showToast(activity, activity.getString(R.string.text_has_no_group_call_listener_authority));
             }
@@ -2047,7 +2048,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         }
         if (transponMessage.messageType == MessageType.GROUP_CALL.getCode() || transponMessage.messageType == MessageType.AUDIO.getCode()) {
             //组呼进行转发，类型变为录音
-            transponMessage.messageType = MessageType.AUDIO.getCode();
+//            transponMessage.messageType = MessageType.AUDIO.getCode();
             transponGroupCallMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
         }
         if (transponMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()) {
