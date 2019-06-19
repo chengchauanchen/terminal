@@ -1,8 +1,7 @@
 package cn.vsx.vc.utils;
 
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
  * 作者：ly-xuxiaolong
@@ -15,7 +14,6 @@ public class ApkUtil{
 
     //是否为市局的包
     public static boolean showLteApk(){
-        String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-        return AuthManagerTwo.COMMON.equals(apkType) ||AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType);
+        return MyTerminalFactory.getSDK().getParam(Params.IS_AUTO_UPDATE, false);
     }
 }
