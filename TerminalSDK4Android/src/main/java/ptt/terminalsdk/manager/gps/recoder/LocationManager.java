@@ -317,7 +317,7 @@ public class LocationManager {
         TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
             @Override
             public void run() {
-                mHandler.sendEmptyMessageDelayed(HANDLER_WHAT_LOCATION_CHECK,DELAYED_TIME);
+//                mHandler.sendEmptyMessageDelayed(HANDLER_WHAT_LOCATION_CHECK,DELAYED_TIME);
             }
         });
     }
