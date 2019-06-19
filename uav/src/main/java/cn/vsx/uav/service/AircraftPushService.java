@@ -162,7 +162,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
     private WaypointMissionFinishedAction mFinishedAction = WaypointMissionFinishedAction.NO_ACTION;
     //飞机的朝向
     private WaypointMissionHeadingMode mHeadingMode = WaypointMissionHeadingMode.AUTO;
-    private static String TAG = "AircraftPushService2---";
+    private static String TAG = "AircraftPushService---";
     private boolean patrol;
     /**
      * 在线状态

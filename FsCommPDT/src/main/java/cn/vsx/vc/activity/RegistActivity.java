@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Process;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -270,7 +269,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
         MyApplication.instance.stopHandlerService();
-        Process.killProcess(Process.myPid());
     }
 
     private ReceiveExitHandler receiveExitHandler = new ReceiveExitHandler() {

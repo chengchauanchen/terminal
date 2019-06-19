@@ -258,7 +258,7 @@ public class TalkbackFragment extends BaseFragment {
             myHandler.post(() -> {
                 setCurrentGroupView();//当前的组和文件夹名字重置
                 setVideoIcon();
-                setScanGroupIcon();
+//                setScanGroupIcon();
                 if (groupScanId != 0 && MyApplication.instance.getGroupListenenState() == LISTENING) {
                     setCurrentGroupScanView(groupScanId);
                 }

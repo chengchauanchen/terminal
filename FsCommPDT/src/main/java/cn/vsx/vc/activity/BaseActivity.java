@@ -134,7 +134,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         }
     };
 
-
     static Method findViewBinderForClassMethod;
 
     static {
@@ -654,19 +653,5 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
         MyApplication.instance.stopHandlerService();
-        killAllProcess();
-    }
-
-    protected void killAllProcess() {
-        ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        if (null != mActivityManager) {
-            List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
-            for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList) {
-                if (runningAppProcessInfo.pid != android.os.Process.myPid()) {
-                    android.os.Process.killProcess(runningAppProcessInfo.pid);
-                }
-            }
-            android.os.Process.killProcess(android.os.Process.myPid());
-        }
     }
 }

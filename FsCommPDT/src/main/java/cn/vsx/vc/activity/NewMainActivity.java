@@ -303,7 +303,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     MyApplication.instance.isClickVolumeToCall = false;
                     MyApplication.instance.isPttPress = false;
                     MyApplication.instance.stopHandlerService();
-                    killAllProcess();
                 },2000);
             }
         }

@@ -174,6 +174,7 @@ public class MyApplication extends Application {
 				isBinded=false;
 			}
 			stopService(new Intent(this, ReceiveHandlerService.class));
+			killAllProcess();
 		}
 	}
 
@@ -201,5 +202,19 @@ public class MyApplication extends Application {
 		}
 
 		return null;
+	}
+
+
+	protected void killAllProcess() {
+		ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		if (null != mActivityManager) {
+			List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
+			for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList) {
+				if (runningAppProcessInfo.pid != android.os.Process.myPid()) {
+					android.os.Process.killProcess(runningAppProcessInfo.pid);
+				}
+			}
+			android.os.Process.killProcess(android.os.Process.myPid());
+		}
 	}
 }

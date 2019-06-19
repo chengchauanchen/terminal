@@ -3,7 +3,6 @@ package cn.vsx.vc.fragment;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
@@ -24,7 +23,6 @@ import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -505,22 +503,6 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
         MyApplication.instance.stopHandlerService();
-        killAllProcess();
-    }
-
-    private void killAllProcess() {
-        if (getActivity() != null) {
-            ActivityManager mActivityManager = (ActivityManager) getActivity().getSystemService(Context.ACTIVITY_SERVICE);
-            if (null != mActivityManager) {
-                List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
-                for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList) {
-                    if (runningAppProcessInfo.pid != android.os.Process.myPid()) {
-                        android.os.Process.killProcess(runningAppProcessInfo.pid);
-                    }
-                }
-                android.os.Process.killProcess(android.os.Process.myPid());
-            }
-        }
     }
 
 
