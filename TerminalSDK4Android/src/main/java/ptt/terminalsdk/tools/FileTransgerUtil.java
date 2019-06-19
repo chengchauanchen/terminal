@@ -42,6 +42,13 @@ public class FileTransgerUtil {
     public static final String _TYPE_VIDEO_SUFFIX = ".mp4";
     public static final String _TYPE_IMAGE_SUFFIX = ".jpg";
 
+    //上传文件失败的code
+    public static final int UPLOAD_FILE_FAIL_RESULT_CODE =-1;
+    //上传文件失败的描述-文件不存在
+    public static final String UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS ="文件不存在";
+    public static final String UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_NO_RESPONSE ="服务器无响应";
+    public static final String UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR ="服务器出错";
+
     //未上传的文件限定时间，超过就自动上传
     private static final int FILE_EXPIRE_TIME = 48;
     /**

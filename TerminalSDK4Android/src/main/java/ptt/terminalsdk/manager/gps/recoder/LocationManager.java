@@ -43,6 +43,8 @@ public class LocationManager {
 
     //最近一次定位到的位置信息的时间
     private long lastLocationTime;
+    //最近一次定位的间隔时间
+    private long lastUploadTime = -1;
 
     //是否是聊天页面发送位置信息
     private boolean isChatSendLocation;
@@ -270,6 +272,13 @@ public class LocationManager {
                 }
                 //获取定位间隔时间
                 long uploadTime = getUploadTime(isCommonUpload,isChat);
+
+                //如果这次的间隔时间跟上次的间隔时间相同,就不再重新设置间隔时间
+                if(lastUploadTime!=uploadTime){
+                    lastUploadTime = uploadTime;
+                }else{
+                    return;
+                }
 
                 //通知百度和gps获取位置信息
                 logger.info(TAG + "上传位置信息的间隔时间" + uploadTime + "是否是会话页面发送位置信息：" + isChat + "---之前的是否是会话页面的状态:" + isChatSendLocation);

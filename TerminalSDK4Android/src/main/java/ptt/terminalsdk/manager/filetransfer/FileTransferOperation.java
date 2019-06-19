@@ -289,8 +289,8 @@ public class FileTransferOperation {
             public void run() {
                 File file = new File(path);
                 logger.info(TAG + "uploadFileByPath:path:" + path + "-file-exists-" + ( file.exists()));
+                String fileName = FileTransgerUtil.getFileName(path);
                 if (file.exists()) {
-                    String fileName = FileTransgerUtil.getFileName(path);
                     Map<String, String> paramsMap = new HashMap<>();
                     paramsMap.put("name", fileName);
                     paramsMap.put("memberId", FileTransgerUtil.getPoliceIdInt() + "");
@@ -321,15 +321,22 @@ public class FileTransferOperation {
                                     checkUpdateExpireFileInfo();
                                 } else {
                                     logger.error(TAG + "uploadFileByPath:result;" + object.getString(RESULT_MSG));
+                                    notifyMemberUploadFileFail(fileName,requestUniqueNo,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE,object.getString(RESULT_MSG));
                                 }
                             } else {
                                 logger.info(TAG + "uploadFileByPath:result;解析错误");
+                                notifyMemberUploadFileFail(fileName,requestUniqueNo,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
                             logger.info(TAG + "uploadFileByPath:result:Exception" + e);
+                            notifyMemberUploadFileFail(fileName,requestUniqueNo,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
                         }
+                    }else{
+                        notifyMemberUploadFileFail(fileName,requestUniqueNo,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_NO_RESPONSE);
                     }
+                }else{
+                    notifyMemberUploadFileFail(fileName,requestUniqueNo,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
                 }
             }
         });
@@ -906,6 +913,23 @@ public class FileTransferOperation {
                 ToastUtil.showToast(MyTerminalFactory.getSDK().getApplication(),content);
             }
         });
+    }
+
+    /**
+     * 通知PC文件上传失败
+     * @param fileName
+     * @param requestUniqueNo
+     * @param resultCode
+     * @param resultDesc
+     */
+    private void notifyMemberUploadFileFail(String fileName,long requestUniqueNo,int resultCode,String resultDesc){
+        //被动上传文件（PC拉取文件）
+        if(requestUniqueNo !=0){
+
+            //文件不存在，通知PC上传失败
+            TerminalFactory.getSDK().getFileTransferManager().notifyMemberUploadFileFail(fileName,requestUniqueNo,
+                    resultCode,resultDesc);
+        }
     }
 
     private class PushCallback implements InitCallback {
