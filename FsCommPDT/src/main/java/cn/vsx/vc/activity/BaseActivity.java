@@ -398,12 +398,11 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         logger.info("event.getKeyCode() = " + event.getKeyCode());
         switch (event.getKeyCode()) {
             case KeyEvent.KEYCODE_VOLUME_UP:// 增大音量
-                //如果当前是禁呼的组，点击音量键控制是无效的
-                if (GroupUtils.currentIsForbid()) {
-                    return true;
-                }
                 if (MyTerminalFactory.getSDK().getParam(Params.VOLUME_UP, false)) {
-                    groupCallByVolumeKey(event, true);
+                    //如果当前是禁呼的组，点击音量键控制是无效的
+                    if (!GroupUtils.currentIsForbid()) {
+                        groupCallByVolumeKey(event, true);
+                    }
                     return true;
                 } else {
                     if (System.currentTimeMillis() - lastVolumeUpTime > 500) {
