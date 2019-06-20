@@ -453,13 +453,6 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
     private void start() {
         //发送认证消息，uuid到注册服务器，判断是注册还是登录
         if(DataUtil.getNFCBean() != null){
-//        TerminalFactory.getSDK().getThreadPool().execute(() -> {
-//            MyTerminalFactory.getSDK().start();
-//            PromptManager.getInstance().start();
-//        });
-//            changeProgressMsg("正在获取信息");
-//            ll_regist.setVisibility(View.GONE);
-//            sendUuid(null, null);
             if(!MyTerminalFactory.getSDK().isStart()){
                 TerminalFactory.getSDK().start();
                 PromptManager.getInstance().start();
@@ -547,58 +540,6 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
             myProgressDialog.dismiss();
         }
     }
-
-//    private void regist(final String memberName, final String orgBlockCode) {
-//        if (!Util.isEmpty(memberName)) {
-//            changeProgressMsg("正在注册...");
-//            ll_regist.setVisibility(View.GONE);
-//        }
-//        timer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                MyTerminalFactory.getSDK().getAuthManagerTwo()
-//                        .regist(memberName, orgBlockCode);
-//            }
-//        }, 500);
-//    }
-
-//    private void updateData() {
-//        changeProgressMsg("正在更新数据...");
-//        timer.schedule(new TimerTask() {
-//            @Override
-//            public void run() {
-//                MyTerminalFactory.getSDK().getConfigManager().updateAll();
-//            }
-//        }, 500);
-//    }
-
-//    private void login() {
-//        changeProgressMsg("正在登入...");
-//        TerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getAuthManagerTwo().login());
-//    }
-
-//    private void sendUuid(final String ip, final String port) {
-//        reAuthCount++;
-//        if (reAuthCount > 3) {
-//            changeProgressMsg("登录失败，请检查网络是否连接");
-//            myHandler.postDelayed(() -> {
-//                hideProgressDialog();
-//                exit();
-//            }, 500);
-//        } else {
-//            changeProgressMsg("正在尝试第" + reAuthCount + "次连接");
-//            timer.schedule(new TimerTask() {
-//                @Override
-//                public void run() {
-//                    MyTerminalFactory.getSDK().getAuthManagerTwo().reAuth(false, ip, port);
-//                }
-//            }, 500);
-//        }
-//    }
-
-//    private void againReAuth() {
-//        MyTerminalFactory.getSDK().getAuthManagerTwo().reAuthOne();
-//    }
 
     private void goOn() {
         changeProgressMsg("启动成功...");

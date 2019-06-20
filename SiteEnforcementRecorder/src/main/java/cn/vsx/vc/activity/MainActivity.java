@@ -1502,8 +1502,9 @@ public class MainActivity extends BaseActivity {
     public void sendGroupMessage(String streamMediaServerIp, int streamMediaServerPort, long callId) {
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
             NFCBean bean = cn.vsx.hamster.terminalsdk.tools.DataUtil.getNFCBean();
-            if( bean!=null && bean.getGroupId()!=0 ){
-                Group group = cn.vsx.hamster.terminalsdk.tools.DataUtil.getGroupByGroupNoFromAllGroup(bean.getGroupId());
+            if( bean!=null ){
+                int groupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                Group group = cn.vsx.hamster.terminalsdk.tools.DataUtil.getGroupByGroupNoFromAllGroup(groupId);
                 if (group!=null) {
                     int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
                     long memberUniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
