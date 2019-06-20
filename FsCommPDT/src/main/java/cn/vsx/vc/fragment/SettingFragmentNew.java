@@ -576,24 +576,25 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     }
 
     private final class OnClickListenerImpVideoResolution implements View.OnClickListener {
-        int item = MyTerminalFactory.getSDK().getParam(Params.VIDEO_RESOLUTION, 2);
+
 
         @Override
         public void onClick(View v) {
+            int item = MyTerminalFactory.getSDK().getParam(Params.VIDEO_RESOLUTION, 2);
+            final int[] switchItem = {0};
             dialog = new AlertDialog.Builder(context)
                     .setTitle(R.string.text_set_video_definition)
                     .setSingleChoiceItems(new String[]{"超清 1920x1080", "高清 1280x720", "标清 640x480", "流畅 320x240"}, item, (dialog, which) -> {
-                        item = which;
+                        switchItem[0] = which;
                         logger.info("点击视频清晰度设置选项" + which);
                     })
                     .setPositiveButton(getString(R.string.text_sure), (dialog, which) -> {
-                        logger.info("点击确定按钮" + item);
+                        logger.info("点击确定按钮" + switchItem[0]);
 
-                        MyTerminalFactory.getSDK().putParam(Params.VIDEO_RESOLUTION, item);
+                        MyTerminalFactory.getSDK().putParam(Params.VIDEO_RESOLUTION, switchItem[0]);
                     })
                     .setNegativeButton(getString(R.string.text_cancel), (dialog, which) -> {
-                        item = MyTerminalFactory.getSDK().getParam(Params.VIDEO_RESOLUTION, 2);
-                        logger.info(" 点击取消按钮" + item);
+                        logger.info(" 点击取消按钮" + switchItem[0]);
                     })
                     .setCancelable(true)
                     .show();
