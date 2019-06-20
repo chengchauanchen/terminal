@@ -1804,6 +1804,8 @@ public abstract class ChatBaseActivity extends BaseActivity
         HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
         if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
             nfcBindingDialog.showDialog(userId, hashMap.get(userId + ""));
+        }else{
+            nfcBindingDialog.showDialog(userId, "");
         }
     }
 
