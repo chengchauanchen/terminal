@@ -251,8 +251,8 @@ public class FileTransgerUtil {
         try {
             FileInputStream fis = new FileInputStream(file);
             mediaPlayer = new MediaPlayer();
-            mediaPlayer.reset();
             mediaPlayer.setDataSource(fis.getFD());
+            mediaPlayer.prepare();
             return mediaPlayer;
         } catch (Exception e) {
             e.printStackTrace();
