@@ -1372,6 +1372,18 @@ public class NewsFragment extends BaseFragment {
                             saveHistoryHelpCombatMessageToSql(tempGroupNo);
                         }
                     }
+                }else {
+                    Iterator<TerminalMessage> iterator = messageList.iterator();
+                    while (iterator.hasNext()){
+                        TerminalMessage next = iterator.next();
+                        if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息
+                            if(next.messageToId == tempGroupNo){
+                                iterator.remove();
+                                break;
+                            }
+                        }
+                    }
+                    mMessageListAdapter.notifyDataSetChanged();
                 }
             });
         }
@@ -1628,7 +1640,7 @@ public class NewsFragment extends BaseFragment {
     private void sortMessageList(){
         synchronized(NewsFragment.this){
             if(!messageList.isEmpty()){
-//                setNewGroupList();
+                setNewGroupList();
                 //            setNewMemberList();
                 //再按照时间来排序
                 Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);

@@ -818,7 +818,9 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = (isAdd, isLocked, isScan, isSwitch, tempGroupNo, tempGroupName, tempGroupType) -> {
         if(!isAdd){
             //临时组销毁时关闭当前界面
-            mHandler.post(this::finish);
+            if(tempGroupNo == userId){
+                mHandler.post(this::finish);
+            }
         }
     };
 
