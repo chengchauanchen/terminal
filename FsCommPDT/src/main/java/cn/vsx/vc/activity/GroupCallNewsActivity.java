@@ -55,6 +55,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupCurrentOnlineMem
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupLivingListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
@@ -291,6 +292,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetGroupLivingListHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
         super.initListener();
     }
 
@@ -347,6 +349,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseGroupActiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetGroupLivingListHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
         if (volumeViewLayout != null) {
             volumeViewLayout.unRegistLintener();
         }
@@ -809,6 +812,13 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                     change2Listening();
                 }
             });
+        }
+    };
+
+    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = (isAdd, isLocked, isScan, isSwitch, tempGroupNo, tempGroupName, tempGroupType) -> {
+        if(!isAdd){
+            //临时组销毁时关闭当前界面
+            mHandler.post(this::finish);
         }
     };
 
