@@ -377,12 +377,12 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
         this.isGroupFunction = isGroupFunction;
         String unsendMessage = context.getSharedPreferences("unsendMessage", MODE_PRIVATE).getString(String.valueOf(userId),"");
         if(isGroupFunction){//组消息界面
-            HashMap<String,String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP,new HashMap<String,String>());
-            if(hashMap.containsKey( userId+"")&&!TextUtils.isEmpty(hashMap.get( userId+""))){
+//            HashMap<String,String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP,new HashMap<String,String>());
+//            if(hashMap.containsKey( userId+"")&&!TextUtils.isEmpty(hashMap.get( userId+""))){
                 setHasNFC();
-            }else{
-                setNoVideo();
-            }
+//            }else{
+//                setNoVideo();
+//            }
             groupCallNewsKeyboard.setBackgroundResource(R.drawable.soft_keyboard);
             groupCallNewsEt.setVisibility(GONE);
             v_edit_line.setVisibility(GONE);
