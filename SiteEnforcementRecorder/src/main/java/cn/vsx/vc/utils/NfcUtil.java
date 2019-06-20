@@ -1,6 +1,5 @@
 package cn.vsx.vc.utils;
 
-import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -21,16 +20,12 @@ import android.text.TextUtils;
 
 import com.google.gson.Gson;
 
-import java.io.UnsupportedEncodingException;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 import cn.vsx.hamster.terminalsdk.model.NFCBean;
-import org.apache.poi.hssf.record.chart.TextRecord;
-
-import static android.content.Context.ALARM_SERVICE;
 
 public class NfcUtil {
 

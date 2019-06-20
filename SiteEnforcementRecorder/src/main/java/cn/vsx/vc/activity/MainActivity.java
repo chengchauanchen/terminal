@@ -51,6 +51,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import butterknife.Bind;
 import cn.vsx.SpecificSDK.SpecificSDK;
@@ -63,6 +64,7 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
+import cn.vsx.hamster.terminalsdk.model.BitStarFileRecord;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.NFCBean;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -215,7 +217,7 @@ public class MainActivity extends BaseActivity {
         }
         judgePermission();
 
-        button1.setText("97f26f");
+        button1.setText("设置账号");
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -223,7 +225,7 @@ public class MainActivity extends BaseActivity {
                     @Override
                     public void run() {
                         //NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",900020,"20190306T00602672");
-                        NFCBean bean = new NFCBean("11ebf36bcbaa0f7f6683b8295a542377",900014,"20190306T00602672");
+                        NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",102917,"");
                         myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
 //                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
 //                        operation.deleteUploadedFile();
@@ -231,17 +233,18 @@ public class MainActivity extends BaseActivity {
                  });
             }
         });
-        button2.setText("23c75c");
+        button2.setText("上传文件");
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
                     @Override
                     public void run() {
-                        NFCBean bean = new NFCBean("88bd3ad393a710a3ae9164165823c75c",900020,"20190306T00602672");
-                        myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
-                        //FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
-                        //operation.getRecordByAll();
+//                        NFCBean bean = new NFCBean("88bd3ad393a710a3ae9164165823c75c",900020,"20190306T00602672");
+//                        myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
+                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
+                        CopyOnWriteArrayList<BitStarFileRecord> list=  operation.getRecordByAll();
+                        operation.uploadFileByPaths(list,0,0,false);
                         //operation.uploadFileByPath("/storage/emulated/0/Android/data/cn.vsx.vc/VideoRecord/2019022616555402OON000110000001.mp4",0,false);
                         //operation.uploadFileByPath("/storage/sdcard1/Android/data/cn.vsx.vc/VideoRecord/2019022616555402OON000110000001.mp4",0,false);
                         //operation.uploadFileTreeBean(null);
@@ -413,7 +416,7 @@ public class MainActivity extends BaseActivity {
     private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> {
         logger.info("MainActivity---收到登录的消息---resultCode:" + resultCode + "     resultDesc:" + resultDesc);
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-            } else if(resultCode == Params.JOININ_WARNING_GROUP_ERROR_CODE) {
+            } else if(resultCode == Params.JOININ_WARNING_GROUP_ERROR_CODE||resultCode == Params.JOININ_GROUP_ERROR_CODE) {
                 ToastUtil.showToast(MainActivity.this,resultDesc);
                 myHandler.postDelayed(() -> {
                     clearAccount();

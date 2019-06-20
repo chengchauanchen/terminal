@@ -112,50 +112,50 @@ public class DataUtil {
 		return m.matches();
 	}
 
-	/**
-	 * @param memberNo 人员编号
-	 * @return 根据编号查找人员
-	 */
-	public static Member getMemberByMemberNo(int memberNo) {
-		List<Member> allMembers = MyTerminalFactory.getSDK().getConfigManager().getAllMembers();
-		Member member = null;
-		if (allMembers.size() > 0) {
-			for (int i = 0; i < allMembers.size(); i++) {
-				int mMemberNo = allMembers.get(i).getNo();
-				if (mMemberNo == memberNo) {
-					member = allMembers.get(i);
-					break;
-				}
-			}
-		}
+//	/**
+//	 * @param memberNo 人员编号
+//	 * @return 根据编号查找人员
+//	 */
+//	public static Member getMemberByMemberNo(int memberNo) {
+//		List<Member> allMembers = MyTerminalFactory.getSDK().getConfigManager().getAllMembers();
+//		Member member = null;
+//		if (allMembers.size() > 0) {
+//			for (int i = 0; i < allMembers.size(); i++) {
+//				int mMemberNo = allMembers.get(i).getNo();
+//				if (mMemberNo == memberNo) {
+//					member = allMembers.get(i);
+//					break;
+//				}
+//			}
+//		}
+//
+//		if (member == null) {
+//			member = new Member();
+//			member.id = memberNo;
+//			member.no = memberNo;
+//			member.setName(HandleIdUtil.handleName(memberNo+""));
+//		}
+//
+//		return member;
+//	}
 
-		if (member == null) {
-			member = new Member();
-			member.id = memberNo;
-			member.no = memberNo;
-			member.setName(HandleIdUtil.handleName(memberNo+""));
-		}
-
-		return member;
-	}
-
-	public static Member getMemberInfoByMemberNo(int memberNo) {
-		List<Member> allMembers = MyTerminalFactory.getSDK().getConfigManager().getAllMembers();
-		Member member = null;
-		if (allMembers.size() > 0) {
-			for (int i = 0; i < allMembers.size(); i++) {
-				int mMemberId = allMembers.get(i).id;
-				if (mMemberId == memberNo) {
-					member = new Member();
-					member.id = memberNo;
-					member.setName(allMembers.get(i).getName());
-					break;
-				}
-			}
-		}
-
-		return member;
-	}
+//	public static Member getMemberInfoByMemberNo(int memberNo) {
+//		List<Member> allMembers = MyTerminalFactory.getSDK().getConfigManager().getAllMembers();
+//		Member member = null;
+//		if (allMembers.size() > 0) {
+//			for (int i = 0; i < allMembers.size(); i++) {
+//				int mMemberId = allMembers.get(i).id;
+//				if (mMemberId == memberNo) {
+//					member = new Member();
+//					member.id = memberNo;
+//					member.setName(allMembers.get(i).getName());
+//					break;
+//				}
+//			}
+//		}
+//
+//		return member;
+//	}
 
 	/** 通过memberId获得member对象
 	 * @param memberId */
@@ -222,16 +222,16 @@ public class DataUtil {
 		return mWeek;
 	}
 
-	/**个呼通讯录中是否存在此成员*/
-	public static boolean isExistContacts(Member member) {
-		List<Member> allMembers = MyTerminalFactory.getSDK().getConfigManager().getAllMembers();//获取到个呼通讯录
-		for (Member member2 : allMembers) {
-			if (member2.id == member.id) {
-				return true;
-			}
-		}
-		return false;
-	}
+//	/**个呼通讯录中是否存在此成员*/
+//	public static boolean isExistContacts(Member member) {
+//		List<Member> allMembers = MyTerminalFactory.getSDK().getConfigManager().getAllMembers();//获取到个呼通讯录
+//		for (Member member2 : allMembers) {
+//			if (member2.id == member.id) {
+//				return true;
+//			}
+//		}
+//		return false;
+//	}
 
 	public static String getVersion(Context context) {
 		String version = "";

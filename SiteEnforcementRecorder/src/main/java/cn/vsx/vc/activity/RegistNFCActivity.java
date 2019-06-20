@@ -215,7 +215,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         myHandler.post(() -> {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 changeProgressMsg("正在更新数据");
-            } else if(resultCode == Params.JOININ_WARNING_GROUP_ERROR_CODE) {
+            } else if(resultCode == Params.JOININ_WARNING_GROUP_ERROR_CODE||resultCode == Params.JOININ_GROUP_ERROR_CODE) {
                 changeProgressMsg(resultDesc);
                 myHandler.postDelayed(() -> {
                     hideProgressDialog();
@@ -333,7 +333,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         button1.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 //NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",900020,"20190306T00602672");
-                NFCBean bean = new NFCBean("11ebf36bcbaa0f7f6683b8295a542377",900014,"20190306T00602672");
+                NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",102917,"");
                 myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
             }
         });
