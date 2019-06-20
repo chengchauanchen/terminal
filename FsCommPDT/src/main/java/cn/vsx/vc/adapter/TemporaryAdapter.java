@@ -63,11 +63,9 @@ import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
-import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -84,7 +82,6 @@ import cn.vsx.vc.model.TransponToBean;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
-import cn.vsx.vc.receiveHandle.ReceiverReplayGroupChatVoiceHandler;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.MyDataUtil;
@@ -648,32 +645,41 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private void setListener(final int viewType, final ChatViewHolder holder, final TerminalMessage terminalMessage, final int position) {
         //长按消息条目
         holder.reBubble.setOnLongClickListener(v -> {
-            if (!isEnable)
+
+            if (terminalMessage.messageType == MessageType.AFFICHE.getCode() ||
+                    terminalMessage.messageType == MessageType.CALL_RECORD.getCode()||
+                    terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
+                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
+                    terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() ||
+                    terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode() ||
+                    terminalMessage.messageType == MessageType.MULTI_PATH_VIDEO_PUSH.getCode() ||
+                    terminalMessage.messageType == MessageType.VIDEO_ENTRANCE.getCode()){
+                logger.info("不能转发和撤回");
                 return false;
+            }
+            if (!isEnable){
+                return false;
+            }
             if(upload){
                 ToastUtil.showToast(activity,activity.getString(R.string.text_in_upload_can_not_forward));
                 return false;
             }
-            if (
-//                    terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
-//                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
-//                    terminalMessage.messageType == MessageType.GROUP_CALL.getCode() ||
-//                    terminalMessage.messageType == MessageType.AUDIO.getCode()||
-                    MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                return false;
+
             new TranspondDialog(activity, terminalMessage).showView();
-            if (!terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID))
+            if (!terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID)){
                 terminalMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
+            }
             transponMessage = (TerminalMessage) terminalMessage.clone();
             return false;
         });
 		//个呼单独处理
 		if(terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode()){
 		holder.llCallTempt.setOnClickListener(new View.OnClickListener() {//点击消息条目
-		@Override
-		public void onClick(View v) {
-                    if (!isEnable)
+		    @Override
+		    public void onClick(View v) {
+                    if (!isEnable){
                         return;
+                    }
                     long currentTime = Calendar.getInstance().getTimeInMillis();
 
                     if (currentTime - lastClickTime > MIN_CLICK_DELAY_TIME) {//防止频繁点击操作<1秒
