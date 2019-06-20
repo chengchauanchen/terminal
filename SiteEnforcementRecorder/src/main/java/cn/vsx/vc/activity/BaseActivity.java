@@ -731,12 +731,12 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
      * 临时组解散的通知
      */
     private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = (isAdd, isLocked, isScan, isSwitch, tempGroupNo, tempGroupName, tempGroupType) -> {
-        if(!isAdd){
-          NFCBean bean = DataUtil.getNFCBean();
-          if(bean!=null&&bean.getGroupId()!=0&&bean.getGroupId() == tempGroupNo){
-              myHandler.post(this::clearAccount);
-          }
-        }
+//        if(!isAdd){
+//          NFCBean bean = DataUtil.getNFCBean();
+//          if(bean!=null&&bean.getGroupId()!=0&&bean.getGroupId() == tempGroupNo){
+//              myHandler.post(this::clearAccount);
+//          }
+//        }
     };
 
     /**
