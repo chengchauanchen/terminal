@@ -493,6 +493,9 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     }
 
     private void exit() {
+        if(TerminalFactory.getSDK().isServerConnected()){
+            TerminalFactory.getSDK().getAuthManagerTwo().logout();
+        }
         Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
         stoppedCallIntent.putExtra("stoppedResult", "0");
         SendRecvHelper.send(getActivity(), stoppedCallIntent);

@@ -506,6 +506,19 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
     private void setPCFunction(){
         titles = null;
         titles=new String[]{
+                "相册","拍照","文件","发送位置","上报图像"
+        };
+        images = null;
+        images=new Integer[]{
+                R.drawable.album,R.drawable.take_phones,
+                R.drawable.file_selector,R.drawable.position,
+                R.drawable.push_video
+        };
+    }
+
+    private void setRecoderFunction(){
+        titles = null;
+        titles=new String[]{
                 "相册","拍照","文件","发送位置","请求图像"
         };
         images = null;
@@ -516,7 +529,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
         };
     }
 
-    private void setRecoderFunction(){
+    private void setUavFunction(){
         titles = null;
         titles=new String[]{
                 "相册","拍照","文件","发送位置","请求图像"
@@ -656,7 +669,11 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
         }else if(type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
             setRecoderFunction();
             gridViewAdapter.refresh(titles, images);
-        }else {
+        }else if(type == TerminalMemberType.TERMINAL_UAV.getCode()){
+            setUavFunction();
+            gridViewAdapter.refresh(titles, images);
+        }
+        else {
             setHasVideo();
             gridViewAdapter.refresh(titles, images);
         }

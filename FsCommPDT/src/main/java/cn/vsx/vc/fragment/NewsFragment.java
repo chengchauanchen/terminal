@@ -620,6 +620,7 @@ public class NewsFragment extends BaseFragment {
                 if(terminalMessage.messageType != MessageType.WARNING_INSTANCE.getCode()){
                     //合成作战组消息，只存一个条目
                     if(GroupUtils.isCombatGroup(terminalMessage.messageToId)){
+                        logger.info("合成作战组消息:"+terminalMessage.messageToId);
                         //如果是合成作战组存一下标记
                         terminalMessage.messageBody.put(JsonParam.COMBAT_GROUP,true);
                         saveHelpCombatMessage(terminalMessage, false);

@@ -180,9 +180,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		locationStop();
 		getVideoProxy().stop();
 		PromptManager.getInstance().stop();
-		if(MyTerminalFactory.getSDK().isServerConnected()){
-			getAuthManagerTwo().logout();
-		}
 		application.unregisterReceiver(netWorkConnectionChangeReceiver);
 		stopUVCCameraService();
 		getVoipCallManager().destroy(application);//VOIP服务注销
