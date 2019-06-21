@@ -188,7 +188,7 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
 
         mAdapter.setOnItemClickListener((postion, picture) -> {
             if (picture.getTitle().equals("发消息")){
-                IndividualNewsActivity.startCurrentActivity(UserInfoActivity.this, userId, userName);
+                IndividualNewsActivity.startCurrentActivity(UserInfoActivity.this, userId, userName,0);
 
             }else if (picture.getTitle().equals("个呼")){
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){

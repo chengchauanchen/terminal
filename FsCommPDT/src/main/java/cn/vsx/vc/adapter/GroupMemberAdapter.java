@@ -155,7 +155,7 @@ public class GroupMemberAdapter extends BaseAdapter {
 
         //跳转到消息界面
         viewHolder.messageTo.setOnClickListener(v -> {
-            IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName() );
+            IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName(),member.getType());
         });
         //跳转到个呼
         viewHolder.callTo.setOnClickListener(v -> {

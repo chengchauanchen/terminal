@@ -495,11 +495,7 @@ public class NewsFragment extends BaseFragment {
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
                 //普通的聊天消息
-                Intent intent = new Intent(context, IndividualNewsActivity.class);
-                intent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
-                intent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
-                intent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
-                context.startActivity(intent);
+                IndividualNewsActivity.startCurrentActivity(context,TerminalMessageUtil.getNo(terminalMessage),TerminalMessageUtil.getTitleName(terminalMessage),0);
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//进入组会话页
                 if(TerminalMessageUtil.isCombatGroup(terminalMessage)){

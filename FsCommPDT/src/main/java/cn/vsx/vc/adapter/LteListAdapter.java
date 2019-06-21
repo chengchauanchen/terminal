@@ -15,8 +15,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.List;
 
-
-
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -107,7 +105,7 @@ public class LteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             userViewHolder.llMessageTo.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName());
+                    IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName(), member.getType());
 
                 }
             });

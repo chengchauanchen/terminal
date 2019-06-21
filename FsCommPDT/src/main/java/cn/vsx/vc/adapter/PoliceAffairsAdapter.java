@@ -13,8 +13,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.List;
 
-
-
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
@@ -133,7 +131,7 @@ public class PoliceAffairsAdapter extends BaseExpandableListAdapter {
         });
         viewHolderPerson.jingwutong_message_to.setOnClickListener(v -> {
             Member member1 = list.get(groupPosition).memberList.get(childPosition);
-            IndividualNewsActivity.startCurrentActivity(activity, member1.no, member1.getName());
+            IndividualNewsActivity.startCurrentActivity(activity, member1.no, member1.getName(),member1.getType());
         });
         return convertView;
     }

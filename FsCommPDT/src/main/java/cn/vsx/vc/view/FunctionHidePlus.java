@@ -25,12 +25,10 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.log4j.Logger;
 
-import java.util.HashMap;
-
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
-import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GridViewAdapter;
@@ -445,7 +443,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
                         btn_record.setBackgroundResource(R.drawable.shape_news_ptt_wait);
                         btn_record.setText(R.string.text_can_not_sound_recorder);
                         btn_record.setEnabled(false);
-                        setHandlePlatFormView();
+                        setPDTFunction();
                         gridViewAdapter.refresh(titles, images);
                     });
                 }else {
@@ -489,6 +487,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
                 R.drawable.push_video, R.drawable.nfc
         };
     }
+
     private void setHasVideo() {
         titles = null;
         titles=new String[]{
@@ -502,7 +501,33 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
         };
     }
 
-    public void setHandlePlatFormView(){
+    private void setPCFunction(){
+        titles = null;
+        titles=new String[]{
+                "相册","拍照","文件","发送位置","请求图像"
+        };
+        images = null;
+        images=new Integer[]{
+                R.drawable.album,R.drawable.take_phones,
+                R.drawable.file_selector,R.drawable.position,
+                R.drawable.pull_video
+        };
+    }
+
+    private void setRecoderFunction(){
+        titles = null;
+        titles=new String[]{
+                "相册","拍照","文件","发送位置","请求图像"
+        };
+        images = null;
+        images=new Integer[]{
+                R.drawable.album,R.drawable.take_phones,
+                R.drawable.file_selector,R.drawable.position,
+                R.drawable.pull_video
+        };
+    }
+
+    public void setPDTFunction(){
         titles = null;
         titles=new String[]{
         };
@@ -614,6 +639,25 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
         bt_merge_transmit.setEnabled(false);
         hideFunction.setEnabled(false);
         btn_ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
+    }
+
+    public void setMemberFunction(int type){
+        if(type == TerminalMemberType.TERMINAL_PDT.getCode()){
+            btn_record.setBackgroundResource(R.drawable.shape_news_ptt_wait);
+            btn_record.setText(R.string.text_can_not_sound_recorder);
+            btn_record.setEnabled(false);
+            setPDTFunction();
+            gridViewAdapter.refresh(titles, images);
+        }else if(type == TerminalMemberType.TERMINAL_PC.getCode()){
+            setPCFunction();
+            gridViewAdapter.refresh(titles, images);
+        }else if(type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
+            setRecoderFunction();
+            gridViewAdapter.refresh(titles, images);
+        }else {
+            setHasVideo();
+            gridViewAdapter.refresh(titles, images);
+        }
     }
 
     public interface PttOnTouchLitener{

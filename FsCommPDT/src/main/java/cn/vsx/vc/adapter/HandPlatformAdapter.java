@@ -13,8 +13,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.List;
 
-
-
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
@@ -126,7 +124,7 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
         });
         viewHolderPerson.shoutai_message_to.setOnClickListener(v -> {
             Member member = list.get(groupPosition).memberList.get(childPosition);
-            IndividualNewsActivity.startCurrentActivity(activity, member.no, member.getName());
+            IndividualNewsActivity.startCurrentActivity(activity, member.no, member.getName(), member.getType());
         });
 
         return convertView;

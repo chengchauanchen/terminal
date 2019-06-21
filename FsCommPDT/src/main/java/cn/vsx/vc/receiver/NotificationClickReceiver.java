@@ -44,12 +44,7 @@ public class NotificationClickReceiver extends BroadcastReceiver {
             context.startActivity(mIntent);
         }
         else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
-            Intent mIntent = new Intent(context, IndividualNewsActivity.class);
-            mIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mIntent.putExtra("isGroup", TerminalMessageUtil.isGroupMessage(terminalMessage));
-            mIntent.putExtra("userId", TerminalMessageUtil.getNo(terminalMessage));
-            mIntent.putExtra("userName", TerminalMessageUtil.getTitleName(terminalMessage));
-            context.startActivity(mIntent);
+            IndividualNewsActivity.startCurrentActivity(context,TerminalMessageUtil.getNo(terminalMessage),TerminalMessageUtil.getTitleName(terminalMessage),true,0);
         }
         else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//进入组会话页
             Intent mIntent = new Intent(context, GroupCallNewsActivity.class);

@@ -21,9 +21,12 @@ import android.widget.TextView;
 import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
+import java.util.List;
+
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.ReceiveObjectMode;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -108,13 +111,27 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
 
     public static boolean isForeground = false;
     public static int mFromId;
+    private int type;//跳转过来时Member类型
 //    private Member member;
 
-    public static void startCurrentActivity(Context context, int userId, String userName) {
+    public static void startCurrentActivity(Context context, int userId, String userName,int type) {
         Intent intent = new Intent(context, IndividualNewsActivity.class);
         intent.putExtra("userId", userId);
         intent.putExtra("userName", userName);
         intent.putExtra("isGroup", false);
+        intent.putExtra("type",type);
+        context.startActivity(intent);
+    }
+
+    public static void startCurrentActivity(Context context, int userId, String userName,boolean newTask,int type) {
+        Intent intent = new Intent(context, IndividualNewsActivity.class);
+        if(newTask){
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        intent.putExtra("userId", userId);
+        intent.putExtra("userName", userName);
+        intent.putExtra("isGroup", false);
+        intent.putExtra("type",type);
         context.startActivity(intent);
     }
 
@@ -184,24 +201,74 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     public void initData() {
         super.initData();
         mFromId = userId;
-//        member = DataUtil.getMemberByMemberNo(userId);
         logger.info("userId：" + userId);
-//        logger.info("member：" + member.toString());
+        type = getIntent().getIntExtra("type",0);
         funcation.setFunction(false, userId);
+        funcation.setMemberFunction(type);
         //ivCall
         ivCall.setVisibility(((userId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)))?View.GONE:View.VISIBLE);
-
+        if(type == TerminalMemberType.TERMINAL_PDT.getCode()){
+            ivCall.setVisibility(View.GONE);
+        }else if(type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
+            ivCall.setVisibility(View.GONE);
+            individualNewsPhone.setVisibility(View.GONE);
+        }
     }
 
 
     @Override
     public void postVideo() {
-        goToChooseDevices(ChooseDevicesDialog.TYPE_PUSH_LIVE);
+        if(type == 0){
+            goToChooseDevices(ChooseDevicesDialog.TYPE_PUSH_LIVE);
+        }else {
+            showProgressDialog();
+            TerminalFactory.getSDK().getThreadPool().execute(()-> {
+                Account account = DataUtil.getAccountByMemberNo(userId,true);
+                myHandler.post(this::dismissProgressDialog);
+                Member member = null;
+                if(account != null){
+                    List<Member> members = account.getMembers();
+                    for(Member next : members){
+                        if(type != TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode() &&
+                                type != TerminalMemberType.TERMINAL_PDT.getCode() &&
+                                next.getType() == type){
+                            member = next;
+                            break;
+                        }
+                    }
+                    if(member !=null){
+                        goToPushLive(member);
+                    }
+                }
+            });
+        }
     }
 
     @Override
     public void requestVideo() {
-        goToChooseDevices(ChooseDevicesDialog.TYPE_PULL_LIVE);
+        if(type == 0){
+            goToChooseDevices(ChooseDevicesDialog.TYPE_PULL_LIVE);
+        }else {
+            showProgressDialog();
+            TerminalFactory.getSDK().getThreadPool().execute(()->{
+                Account account = DataUtil.getAccountByMemberNo(userId,true);
+                myHandler.post(this::dismissProgressDialog);
+                Member member = null;
+                if(account != null){
+                    List<Member> members = account.getMembers();
+                    for(Member next : members){
+                        if(next.getType() == type){
+                            member = next;
+                            break;
+                        }
+                    }
+                    if(member !=null){
+                        goToPullLive(member);
+                    }
+                }
+            });
+
+        }
     }
 
     @Override

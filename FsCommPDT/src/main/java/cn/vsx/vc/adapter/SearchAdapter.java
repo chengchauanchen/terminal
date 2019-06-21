@@ -95,7 +95,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 //拨打电话
                 holder.setOnClickListener(R.id.shoutai_dial_to, v -> callPhone(account));
                 //发送消息
-                holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext, account.getNo(), account.getName()));
+                holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext, account.getNo(), account.getName(),0));
                 //拉流
                 holder.setOnClickListener(R.id.shoutai_live_to, v -> pullStream(account));
                 //拨打个呼
@@ -110,7 +110,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 setKeyWordsView(memberIdPdt,HandleIdUtil.handleId(contractpdt.getNo()));
 
                 //发送消息
-                holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractpdt.getNo(), contractpdt.getName()));
+                holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractpdt.getNo(), contractpdt.getName(),TerminalMemberType.TERMINAL_PDT.getCode()));
 
                 //拨打个呼
                 holder.setOnClickListener(R.id.iv_search_call, v -> {
@@ -128,7 +128,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 setKeyWordsView(holder.getView(R.id.tv_member_id),HandleIdUtil.handleId(contractLte.getNo()));
 
                 //发送消息
-                holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractLte.getNo(), contractLte.getName()));
+                holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractLte.getNo(), contractLte.getName(),TerminalMemberType.TERMINAL_LTE.getCode()));
 
                 //拉流
                 holder.setOnClickListener(R.id.shoutai_live_to, v ->  OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, contractLte));

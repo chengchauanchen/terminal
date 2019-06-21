@@ -129,7 +129,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             userViewHolder.llDialTo.setOnClickListener(view -> {
                 callPhone(account);
             });
-            userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, account.getNo(), account.getName()));
+            userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, account.getNo(), account.getName(),0));
             userViewHolder.llCallTo.setOnClickListener(view -> {
                 indivudualCall(account);
             });
@@ -178,7 +178,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 Account account = DataUtil.getAccountByMember(member);
                 callPhone(account);
             });
-            userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName()));
+            userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName(),member.getType()));
             userViewHolder.llCallTo.setOnClickListener(view -> {
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
                     ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
@@ -230,7 +230,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             userViewHolder.tvId.setText(member.getNo() + "");
             userViewHolder.llDialTo.setVisibility(View.GONE);
 
-            userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName()));
+            userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName(),member.getType()));
             userViewHolder.llCallTo.setOnClickListener(view -> {
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
                     ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
