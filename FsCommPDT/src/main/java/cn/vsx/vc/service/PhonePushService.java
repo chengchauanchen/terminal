@@ -218,7 +218,6 @@ public class PhonePushService extends BaseService{
         layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
         windowManager.removeView(rootView);
         windowManager.addView(rootView, layoutParams);
-//        windowManager.updateViewLayout(rootView,layoutParams);
         hideAllView();
         MyApplication.instance.isMiniLive = true;
         mPopupMiniLive.setVisibility(View.VISIBLE);

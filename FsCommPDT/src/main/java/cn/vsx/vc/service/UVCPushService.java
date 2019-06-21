@@ -99,6 +99,8 @@ public class UVCPushService extends BaseService{
     private ArrayList<String> listResolution;
     private View mLlUvcInviteMember;
     private boolean isGroupPushLive;
+    private int width = 640;
+    private int height = 480;
 
     public UVCPushService(){}
 
@@ -201,6 +203,7 @@ public class UVCPushService extends BaseService{
 
     @Override
     protected void showPopMiniView(){
+        layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
         windowManager.removeView(rootView);
         windowManager.addView(rootView, layoutParams);
         hideAllView();
@@ -470,6 +473,9 @@ public class UVCPushService extends BaseService{
                 int newOffsetX = layoutParams.x;
                 int newOffsetY = layoutParams.y;
                 if(Math.abs(newOffsetX - oddOffsetX) <= 30 && Math.abs(newOffsetY - oddOffsetY) <= 30){
+                    if(screenWidth < screenHeight){
+                        layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                    }
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverCloseKeyBoardHandler.class);
                     windowManager.removeView(rootView);
                     windowManager.addView(rootView, layoutParams1);
@@ -599,10 +605,13 @@ public class UVCPushService extends BaseService{
 
     private void pushStream(SurfaceTexture surface){
         if(mUvcMediaStream != null){    // switch from background to front
-//            mUvcMediaStream.stopPreview();
+            mUvcMediaStream.stopPreview();
+//            if(mMediaStream.isRecording()){
+//                mMediaStream.stopRecord();
+//            }
             mUvcMediaStream.setSurfaceTexture(surface);
             mUvcMediaStream.startPreview();
-            startRecord();
+//            startRecord();
             if(mUvcMediaStream.isStreaming()){
                 ToastUtil.showToast(this, getResources().getString(R.string.pushing_stream));
             }
@@ -626,12 +635,7 @@ public class UVCPushService extends BaseService{
     }
 
     private void startCamera(){
-        int position = MyTerminalFactory.getSDK().getParam(Params.VIDEO_RESOLUTION, 2);
-        String r = listResolution.get(position);
-        String[] splitR = r.split("x");
-        int width = Integer.parseInt(splitR[0]);
-        int height = Integer.parseInt(splitR[1]);
-        logger.error("分辨率--width:" + width + "----height:" + height);
+        setResolution();
         mUvcMediaStream.updateResolution(width, height);
         mUvcMediaStream.setDgree(getDgree());
         mUvcMediaStream.createCamera();
@@ -640,6 +644,25 @@ public class UVCPushService extends BaseService{
         logger.info("------>>>>startCamera");
         if(mUvcMediaStream.isStreaming()){
             ToastUtil.showToast(this, getResources().getString(R.string.pushing_stream));
+        }
+    }
+
+    private void setResolution(){
+        List<String> supportListResolution = org.easydarwin.util.Util.getSupportResolution(getApplicationContext());
+        if(null == supportListResolution || supportListResolution.isEmpty()){
+            return;
+        }
+        int position = MyTerminalFactory.getSDK().getParam(Params.VIDEO_RESOLUTION, 2);
+        String setResolution = listResolution.get(position);
+        if(supportListResolution.contains(setResolution)){
+            String[] splitR = setResolution.split("x");
+            width = Integer.parseInt(splitR[0]);
+            height = Integer.parseInt(splitR[1]);
+        }else {
+            logger.info("支持的分辨率："+supportListResolution);
+            String[] splitR = supportListResolution.get(0).split("x");
+            width = Integer.parseInt(splitR[0]);
+            height = Integer.parseInt(splitR[1]);
         }
     }
 

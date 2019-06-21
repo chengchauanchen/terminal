@@ -341,15 +341,13 @@ public class UVCMediaStream {
         }
         overlay = new TxtOverlay(mApplicationContext);
         try {
-            if (mVC == null) {
-                if (mSWCodec) {
-                    mVC = new USBSWConsumer(mApplicationContext, mEasyPusher);
-                } else {
-                    mVC = new USBHWConsumer(mApplicationContext, mEasyPusher);
-                }
-                mVC.onVideoStart(width, height);
-                overlay.init(width, height, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath(), 12);
+            if (mSWCodec) {
+                mVC = new USBSWConsumer(mApplicationContext, mEasyPusher);
+            } else {
+                mVC = new USBHWConsumer(mApplicationContext, mEasyPusher);
             }
+            mVC.onVideoStart(width, height);
+            overlay.init(width, height, mApplicationContext.getFileStreamPath("SIMYOU.ttf").getPath(), 12);
         } catch (IOException ex) {
             ex.printStackTrace();
         } catch (IllegalArgumentException ex) {
