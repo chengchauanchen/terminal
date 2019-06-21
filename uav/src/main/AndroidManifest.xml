@@ -2,8 +2,8 @@
 <manifest package="cn.vsx.uav"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="27"
-    android:versionName="1.0.27">
+    android:versionCode="29"
+    android:versionName="1.0.29">
     
     <application
         android:name=".UavApplication"
