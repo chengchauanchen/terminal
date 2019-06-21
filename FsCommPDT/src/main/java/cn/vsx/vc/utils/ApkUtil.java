@@ -14,6 +14,6 @@ public class ApkUtil{
 
     //是否为市局的包
     public static boolean showLteApk(){
-        return MyTerminalFactory.getSDK().getParam(Params.IS_AUTO_UPDATE, false);
+        return MyTerminalFactory.getSDK().getParam(Params.SHOW_LTE, false);
     }
 }
