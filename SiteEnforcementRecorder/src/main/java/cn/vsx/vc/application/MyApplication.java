@@ -11,6 +11,8 @@ import android.os.IBinder;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
+import com.uuzuche.lib_zxing.activity.ZXingLibrary;
+
 import org.apache.log4j.Logger;
 
 import cn.vsx.SpecificSDK.SpecificSDK;
@@ -70,6 +72,7 @@ public class MyApplication extends Application {
 		SpecificSDK.init(this);
 		registerActivityLifecycleCallbacks(new SimpleActivityLifecycle());
 		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
+		ZXingLibrary.initDisplayOpinion(this);
 	}
 
 

@@ -22,8 +22,8 @@ android {
         applicationId "cn.vsx.vc"
         minSdkVersion 19
         targetSdkVersion 26
-        versionCode 5
-        versionName "1.0.4"
+        versionCode 6
+        versionName "1.0.5"
 
         multiDexEnabled true
 
@@ -126,6 +126,8 @@ dependencies {
     implementation project(':SpecificSDK4GPTT')
     implementation 'io.reactivex.rxjava2:rxjava:2.1.6'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    /*二维码*/
+    compile 'cn.yipianfengye.android:zxing-library:2.2'
     implementation(name: 'libuvccamera-release', ext: 'aar') {
         exclude module: 'support-v4'
         exclude module: 'appcompat-v7'

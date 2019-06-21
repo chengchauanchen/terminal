@@ -134,6 +134,12 @@
         android:exported="false"
         android:finishOnTaskLaunch="false"
         android:launchMode="singleInstance"/>
+    <activity
+        android:name=".activity.MyCaptureActivity"
+        android:theme="@style/RegistTheme"
+        android:configChanges="orientation|keyboardHidden|screenSize"
+        android:screenOrientation="portrait"/>
+
     <!--                activity end               -->
 
 

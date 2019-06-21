@@ -58,23 +58,30 @@ public class NfcUtil {
      * 构造函数，用于初始化nfc
      */
     public NfcUtil(Context context) {
-        nfcCheck(context);
+        nfcCheck(context,false);
         nfcInit(context);
     }
 
     /**
      * 检查NFC是否打开
      */
-    public  void nfcCheck(Context context) {
+    public  void nfcCheck(Context context,boolean show) {
         mNfcAdapter = NfcAdapter.getDefaultAdapter(context);
+        String content = "";
         if (mNfcAdapter == null) {
-            logger.info(TAG + "不支持nfc功能");
+             content = "该设备不支持NFC功能";
+            logger.info(TAG + content);
         } else {
             if (!mNfcAdapter.isEnabled()) {
-                logger.info(TAG + "nfc开关没有打开");
+                content = "NFC没有打开";
+                logger.info(TAG + content);
             }else{
-                logger.info(TAG + "nfc开关已打开");
+                content = "NFC已打开";
+                logger.info(TAG + content);
             }
+        }
+        if(show){
+            ToastUtil.showToast(context,content);
         }
     }
 
@@ -266,7 +273,7 @@ public class NfcUtil {
      * @param content
      * @return
      */
-    private NFCBean getNFCData(String content) {
+    public static NFCBean getNFCData(String content) {
         NFCBean bean = null;
         if(TextUtils.isEmpty(content)){
             return bean;

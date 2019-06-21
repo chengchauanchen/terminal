@@ -15,13 +15,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
-import cn.vsx.hamster.terminalsdk.model.NFCBean;
 import com.blankj.utilcode.util.ToastUtils;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.uuzuche.lib_zxing.activity.CodeUtils;
 
 import org.apache.log4j.Logger;
 
@@ -31,6 +31,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import butterknife.Bind;
+import butterknife.OnClick;
 import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
@@ -55,6 +56,7 @@ import cn.vsx.vc.receiveHandle.ReceiverStartAuthHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.KeyboarUtils;
 import cn.vsx.vc.utils.NetworkUtil;
+import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SetToListUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -66,8 +68,8 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
 
     @Bind(R.id.regist)
     RelativeLayout ll_regist;
-    @Bind(R.id.tx_state)
-    TextView tx_state;
+    @Bind(R.id.iv_nfc)
+    ImageView iv_nfc;
 
 
     private AlertDialog netWorkDialog;
@@ -79,11 +81,15 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
 
     public static final int REQUEST_PERMISSION_SETTING = 1235;
     public static final int OPEN_NET_CODE = 1236;
+    public static final int REQUEST_CODE_SCAN = 1237;
 
     @Override
     protected void onResume() {
         super.onResume();
         KeyboarUtils.getKeyBoardHeight(this);
+        Glide.with(this).load(R.drawable.ic_nfc)
+                .asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .into(iv_nfc);
     }
 
 /**============================================================================handler=================================================================================**/
@@ -317,32 +323,6 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         }
 //        ll_regist.setVisibility(View.GONE);
         judgePermission();
-        tx_state.setVisibility(View.VISIBLE);
-//        tx_state.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                myHandler.postDelayed(() -> setManualNFCBean(),1000);
-//            }
-//        });
-        //点击事件
-        LinearLayout ll_button = findViewById(R.id.ll_button);
-        ll_button.setVisibility(View.GONE);
-        Button button1 = findViewById(R.id.button_1);
-        Button button2 = findViewById(R.id.button_2);
-        button2.setVisibility(View.GONE);
-        button1.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                //NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",900020,"20190306T00602672");
-                NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",102917,"");
-                myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
-            }
-        });
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                NFCBean bean = new NFCBean("88bd3ad393a710a3ae9164165823c75c",900020,"20190306T00602672");
-                myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
-            }
-        });
 
     }
 
@@ -360,6 +340,15 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         });
         builder.setCancelable(false);
         netWorkDialog = builder.create();
+    }
+
+    @OnClick(R.id.ll_qr_recoder_scan)
+    public void onClick(View view){
+        switch (view.getId()){
+             case R.id.ll_qr_recoder_scan:
+                 goToQRCodeScan();
+                 break;
+         }
     }
 
     @Override
@@ -559,6 +548,26 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         });
     }
 
+    /**
+     * 跳转到扫码登录页面
+     */
+    private void goToQRCodeScan(){
+//        Intent intent = new Intent(this, CaptureActivity.class);
+//        ZxingConfig config = new ZxingConfig();
+//        config.setShowbottomLayout(false);//底部布局（包括闪光灯和相册）
+//        config.setPlayBeep(true);//是否播放提示音
+//        config.setShake(true);//是否震动
+//        config.setReactColor(R.color.ok_blue);
+//        config.setScanLineColor(R.color.ok_blue);
+//        //config.setShowAlbum(true);//是否显示相册
+//        //config.setShowFlashLight(true);//是否显示闪光灯
+//        intent.putExtra(Constant.INTENT_ZXING_CONFIG, config);
+//        startActivityForResult(intent, REQUEST_CODE_SCAN);
+
+        Intent intent = new Intent(this, MyCaptureActivity.class);
+        startActivityForResult(intent, REQUEST_CODE_SCAN);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_PERMISSION_SETTING) {
@@ -566,6 +575,28 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
             judgePermission();
         } else if (requestCode == OPEN_NET_CODE) {
             judgePermission();
+        } else if (requestCode == REQUEST_CODE_SCAN) {
+            //拿到二维码扫描的结果
+            if(resultCode == RESULT_OK && data != null){
+                if (null != data) {
+                    Bundle bundle = data.getExtras();
+                    if (bundle == null) {
+                        return;
+                    }
+                    if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
+                        String result = bundle.getString(CodeUtils.RESULT_STRING);
+                        logger.info("扫描二维码结果："+result);
+                        setManualNFCBean(NfcUtil.getNFCData(result));
+//                        Toast.makeText(this, "解析结果:" + result, Toast.LENGTH_LONG).show();
+                    } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
+                        ToastUtil.showToast(this,"解析二维码失败");
+                    }
+                }
+//                String result = data.getStringExtra(Constant.CODED_CONTENT);
+//                logger.info("扫描二维码结果："+result);
+//                // TODO: 2019/4/10 给注册服务发送扫码结果
+//                setManualNFCBean(NfcUtil.getNFCData(result));
+            }
         }
     }
 
@@ -594,5 +625,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         MyTerminalFactory.getSDK().stop();
         Process.killProcess(Process.myPid());
     }
+
+
 
 }

@@ -540,6 +540,10 @@
     <color name="register_button_enable">#800091ff</color>
     <color name="register_button_press">#330091ff</color>
 
+    <color name="exit_account_dialog_go_back_bg">#4d19d1ff</color>
+    <color name="exit_account_dialog_exit_account_bg">#4dff9d4e</color>
 
+    #19d1ff
+    #ff9d4e
 
 </resources>

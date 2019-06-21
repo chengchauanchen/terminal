@@ -2,7 +2,6 @@ package cn.vsx.vc.activity;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -22,11 +21,9 @@ import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
@@ -51,7 +48,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import butterknife.Bind;
 import cn.vsx.SpecificSDK.SpecificSDK;
@@ -64,7 +60,6 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
-import cn.vsx.hamster.terminalsdk.model.BitStarFileRecord;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.NFCBean;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -90,16 +85,15 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.application.UpdateManager;
+import cn.vsx.vc.dialog.ExitAccountDialog;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverAudioButtonEventHandler;
-import cn.vsx.vc.receiveHandle.ReceiverPTTButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.APPStateUtil;
 import cn.vsx.vc.utils.BITDialogUtil;
-import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.PhotoUtils;
 import cn.vsx.vc.utils.SystemUtil;
@@ -225,8 +219,9 @@ public class MainActivity extends BaseActivity {
                     @Override
                     public void run() {
                         //NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",900020,"20190306T00602672");
-                        NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",102917,"");
-                        myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
+//                        NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",102917,"");
+//                        myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
+//                        myHandler.postDelayed(() -> clearAccount(),1000);
 //                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
 //                        operation.deleteUploadedFile();
                     }
@@ -242,9 +237,9 @@ public class MainActivity extends BaseActivity {
                     public void run() {
 //                        NFCBean bean = new NFCBean("88bd3ad393a710a3ae9164165823c75c",900020,"20190306T00602672");
 //                        myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
-                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
-                        CopyOnWriteArrayList<BitStarFileRecord> list=  operation.getRecordByAll();
-                        operation.uploadFileByPaths(list,0,0,false);
+//                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
+//                        CopyOnWriteArrayList<BitStarFileRecord> list=  operation.getRecordByAll();
+//                        operation.uploadFileByPaths(list,0,0,false);
                         //operation.uploadFileByPath("/storage/emulated/0/Android/data/cn.vsx.vc/VideoRecord/2019022616555402OON000110000001.mp4",0,false);
                         //operation.uploadFileByPath("/storage/sdcard1/Android/data/cn.vsx.vc/VideoRecord/2019022616555402OON000110000001.mp4",0,false);
                         //operation.uploadFileTreeBean(null);
@@ -253,20 +248,7 @@ public class MainActivity extends BaseActivity {
 
             }
         });
-        //button2.setOnTouchListener(new View.OnTouchListener() {
-        //    @Override
-        //    public boolean onTouch(View v, MotionEvent event) {
-        //        switch (event.getAction()){
-        //            case MotionEvent.ACTION_DOWN:
-        //                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverPTTButtonEventHandler.class, Constants.PTTEVEVT_ACTION_DOWN);
-        //                break;
-        //            case MotionEvent.ACTION_UP:
-        //                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverPTTButtonEventHandler.class,Constants.PTTEVEVT_ACTION_UP);
-        //                break;
-        //        }
-        //        return true;
-        //    }
-        //});
+
         button1.setVisibility(View.GONE);
         button2.setVisibility(View.GONE);
         //清理数据库
@@ -1415,7 +1397,7 @@ public class MainActivity extends BaseActivity {
                         ||MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus()!=AudioRecordStatus.STATUS_STOPED){
                     exit();
                 }else{
-                    moveTaskToBack(true);//把程序变成后台的
+                    showExitDialog();
                 }
                 return true;
             default:
@@ -1434,7 +1416,7 @@ public class MainActivity extends BaseActivity {
         } else {
             updateNormalPushingState(false);
             stopBusniess();
-            moveTaskToBack(true);//把程序变成后台的
+//            moveTaskToBack(true);//把程序变成后台的
         }
     }
 
@@ -1442,14 +1424,24 @@ public class MainActivity extends BaseActivity {
      * 停止业务
      */
     private void stopBusniess() {
+        boolean report = false;
         if(mMediaStream != null&&mMediaStream.isStreaming()){
-            stopPush(false);
+            stopPush(true);
+            report = true;
         }
         if(mMediaStream != null&&mMediaStream.isRecording()){
             mMediaStream.stopRecord();
+            if(!report){
+                PromptManager.getInstance().stopVideoTap();
+                report = true;
+            }
         }
         if(MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus()!=AudioRecordStatus.STATUS_STOPED){
             stopRecordAudio();
+            if(!report){
+                PromptManager.getInstance().stopRecordAudio();
+                report = true;
+            }
         }
     }
 
@@ -1540,8 +1532,7 @@ public class MainActivity extends BaseActivity {
      * 弹窗提示是否自动上报
      */
     private void showPushLiveDialog() {
-        if (dialogUtil == null) {
-            dialogUtil = new BITDialogUtil() {
+            new BITDialogUtil() {
                 @Override
                 public CharSequence getMessage() {
                     return "是否继续上报?";
@@ -1560,8 +1551,24 @@ public class MainActivity extends BaseActivity {
                 @Override
                 public void doCancelThings() {
                 }
-            };
-        }
-        dialogUtil.showDialog();
+            }.showDialog();
+    }
+
+
+    /**
+     * 弹窗提示是否是否退出账号
+     */
+    private void showExitDialog() {
+        new ExitAccountDialog(MainActivity.this, new ExitAccountDialog.OnClickListener() {
+            @Override
+            public void onMoveTaskToBack() {
+                moveTaskToBack(true);
+            }
+
+            @Override
+            public void onExitAccount() {
+                clearAccount();
+            }
+        }).show();
     }
 }
