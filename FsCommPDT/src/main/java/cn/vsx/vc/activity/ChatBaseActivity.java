@@ -116,6 +116,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.TemporaryAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.NFCBindingDialog;
+import cn.vsx.vc.dialog.QRBindingDialog;
 import cn.vsx.vc.fragment.LocationFragment;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.PlayType;
@@ -1765,6 +1766,9 @@ public abstract class ChatBaseActivity extends BaseActivity
                                 case ReceiverSendFileCheckMessageHandler.NFC://NFC
                                     checkNFC(true);
                                     break;
+                                case ReceiverSendFileCheckMessageHandler.QR_CODE://二维码
+                                    showQRDialog();
+                                    break;
                             }
                         } else {
                             setViewVisibility(fl_fragment_container, View.GONE);
@@ -1806,6 +1810,18 @@ public abstract class ChatBaseActivity extends BaseActivity
             nfcBindingDialog.showDialog(userId, hashMap.get(userId + ""));
         }else{
             nfcBindingDialog.showDialog(userId, "");
+        }
+    }
+    /**
+     * 显示扫二维码的弹窗
+     */
+    private void showQRDialog() {
+        QRBindingDialog qrBindingDialog = new QRBindingDialog(ChatBaseActivity.this);
+        HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
+        if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
+            qrBindingDialog.showDialog(userId, hashMap.get(userId + ""));
+        }else{
+            qrBindingDialog.showDialog(userId, "");
         }
     }
 

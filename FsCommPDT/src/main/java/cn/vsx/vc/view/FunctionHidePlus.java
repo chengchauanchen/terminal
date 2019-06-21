@@ -197,6 +197,8 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO, true, userId);
                 }else if(title.equals("NFC")){
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.NFC, true, userId);
+                }else if(title.equals("二维码")){
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.QR_CODE, true, userId);
                 }else {
                     ToastUtil.showToast(context,context.getString(R.string.text_has_no_send_message_authority));
                 }
@@ -478,13 +480,13 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
     private void setHasNFC() {
         titles = null;
         titles=new String[]{
-                "相册","拍照","文件","发送位置","组内上图","NFC"
+                "相册","拍照","文件","发送位置","组内上图","NFC","二维码"
         };
         images = null;
         images=new Integer[]{
                 R.drawable.album,R.drawable.take_phones,
                 R.drawable.file_selector,R.drawable.position,
-                R.drawable.push_video, R.drawable.nfc
+                R.drawable.push_video, R.drawable.nfc, R.drawable.qr_code
         };
     }
 
