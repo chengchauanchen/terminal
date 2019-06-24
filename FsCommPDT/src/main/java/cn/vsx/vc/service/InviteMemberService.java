@@ -704,14 +704,16 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      * 点击搜索布局中的部门item
      */
     private  GroupCatalogAdapter.ItemClickListener searchItemClickListener = (view, position) -> {
-        List<CatalogBean> catalogBeans = new ArrayList<>(mAllCatalogNames.get(currentIndex).subList(0, position + 1));
-        mAllCatalogNames.get(currentIndex).clear();
-        mAllCatalogNames.get(currentIndex).addAll(catalogBeans);
-        if(mCatalogAdapter!=null){
-            mCatalogAdapter.setData(mAllCatalogNames.get(currentIndex));
-            mCatalogAdapter.notifyDataSetChanged();
+        if(position>=0 && position < mAllCatalogNames.get(currentIndex).size()){
+            List<CatalogBean> catalogBeans = new ArrayList<>(mAllCatalogNames.get(currentIndex).subList(0, position + 1));
+            mAllCatalogNames.get(currentIndex).clear();
+            mAllCatalogNames.get(currentIndex).addAll(catalogBeans);
+            if(mCatalogAdapter!=null){
+                mCatalogAdapter.setData(mAllCatalogNames.get(currentIndex));
+                mCatalogAdapter.notifyDataSetChanged();
+            }
+            loadData(mAllCatalogNames.get(currentIndex).get(position).getId(),false);
         }
-        loadData(mAllCatalogNames.get(currentIndex).get(position).getId(),false);
     };
 
     /**

@@ -228,14 +228,16 @@ public class AccountListFragment extends BaseFragment{
      * 点击搜索布局中的部门item
      */
     private  GroupCatalogAdapter.ItemClickListener searchItemClickListener = (view, position) -> {
-        List<CatalogBean> catalogBeans = new ArrayList<>(mCatalogDatas.subList(0, position + 1));
-        mCatalogDatas.clear();
-        mCatalogDatas.addAll(catalogBeans);
-        if(mCatalogAdapter!=null){
-            mCatalogAdapter.setData(mCatalogDatas);
-            mCatalogAdapter.notifyDataSetChanged();
+        if(position>=0 && position < mCatalogDatas.size()){
+            List<CatalogBean> catalogBeans = new ArrayList<>(mCatalogDatas.subList(0, position + 1));
+            mCatalogDatas.clear();
+            mCatalogDatas.addAll(catalogBeans);
+            if(mCatalogAdapter!=null){
+                mCatalogAdapter.setData(mCatalogDatas);
+                mCatalogAdapter.notifyDataSetChanged();
+            }
+            TerminalFactory.getSDK().getConfigManager().updatePoliceMember(mCatalogDatas.get(position).getId(),mCatalogDatas.get(position).getName());
         }
-        TerminalFactory.getSDK().getConfigManager().updatePoliceMember(mCatalogDatas.get(position).getId(),mCatalogDatas.get(position).getName());
     };
     /**
      * 返回按键-返回上一级部门

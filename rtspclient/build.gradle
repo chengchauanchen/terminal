@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply plugin:'maven'
 android {
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
@@ -37,7 +37,16 @@ dependencies {
     //noinspection GradleCompatible
     compile "com.android.support:appcompat-v7:$support_version"
 }
-
+uploadArchives{
+    repositories{
+        mavenDeployer{
+            repository(url:"file://localhost/"+System.getenv("ANDROID_HOME")+"/extras/android/m2repository/sdk/")
+            pom.groupId = 'rtspclient.lib'
+            pom.artifactId = 'sdk-rtspclient'
+            pom.version = '1.0-SNAPSHOT'
+        }
+    }
+}
 //task makeJar(type: Copy){
 //    delete 'build/libs/rtspclient.jar'
 //    from('build/intermediates/bundles/release/')

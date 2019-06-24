@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply plugin:'maven'
 android {
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
@@ -57,7 +57,16 @@ allprojects {
         maven { url "https://jitpack.io" }
     }
 }
-
+uploadArchives{
+    repositories{
+        mavenDeployer{
+            repository(url:"file://localhost/"+System.getenv("ANDROID_HOME")+"/extras/android/m2repository/sdk/")
+            pom.groupId = 'imageandfileselector.lib'
+            pom.artifactId = 'sdk-imageandfileselector'
+            pom.version = '1.0-SNAPSHOT'
+        }
+    }
+}
 //task makeJar(type: Copy){
 //    delete 'build/libs/imageandfileselector.jar'
 //    from('build/intermediates/bundles/release/')
@@ -66,3 +75,4 @@ allprojects {
 //    rename('classes.jar','imageandfileselector.jar')
 //}
 //makeJar.dependsOn(build)
+

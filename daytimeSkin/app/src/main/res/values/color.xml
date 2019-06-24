@@ -564,4 +564,6 @@
     <color name="chat_warning_common_tv">#06141F</color>
     <color name="warning_common_tv">#707070</color>
     <color name="warning_item_bg">#b5b5b5</color>
+
+    <color name="merge_transmit_text_color">#313131</color>
 </resources>

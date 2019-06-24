@@ -344,12 +344,14 @@ public class NewGroupFragment extends BaseFragment{
 //                groupRecyclerView.scrollToPosition(0);
 //            }else {
                 //重新请求
-                synchronized(NewGroupFragment.this){
-                    List<CatalogBean> groupCatalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
-                    catalogNames.clear();
-                    catalogNames.addAll(groupCatalogBeans);
+               if(position>=0 && position < catalogNames.size()){
+                   synchronized(NewGroupFragment.this){
+                       List<CatalogBean> groupCatalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
+                       catalogNames.clear();
+                       catalogNames.addAll(groupCatalogBeans);
+                   }
+                   TerminalFactory.getSDK().getConfigManager().updateGroup(catalogNames.get(position).getId(),catalogNames.get(position).getName());
                 }
-                TerminalFactory.getSDK().getConfigManager().updateGroup(catalogNames.get(position).getId(),catalogNames.get(position).getName());
 //            }
         });
         groupAdapter.setFolderClickListener((view, depId, name, isTempGroup) -> {

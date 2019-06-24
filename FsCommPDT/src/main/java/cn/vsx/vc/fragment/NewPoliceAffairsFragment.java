@@ -185,10 +185,13 @@ public class NewPoliceAffairsFragment extends BaseFragment {
 //
 //                mRecyclerview.scrollToPosition(0);
 //            }else {
+            if(position>=0 && position < catalogNames.size()){
                 List<CatalogBean> catalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
                 catalogNames.clear();
                 catalogNames.addAll(catalogBeans);
                 TerminalFactory.getSDK().getConfigManager().updatePoliceMember(catalogNames.get(position).getId(),catalogNames.get(position).getName());
+            }
+
 //            }
         });
 

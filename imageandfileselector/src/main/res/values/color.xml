@@ -42,6 +42,8 @@
     <color name="grey_eb">#ebebeb</color>
     <color name="grey_e6">#e6e5e5</color>
     <color name="grey_99">#999999</color>
+    <color name="grey_33">#333333</color>
+    <color name="grey_31">#313131</color>
     <color name="grey_59">#595959</color>
     <color name="grey_37">#373c3d</color>
     <color name="grey_35">#353535</color>
@@ -62,5 +64,8 @@
 
     <color name="chat_warning_common_tv">#ffffff</color>
     <color name="warning_common_tv">#637e9e</color>
-    
+
+    <color name="merge_transmit_text_color">#ffffff</color>
+    <color name="merge_transmit_line">#4C818181</color>
+
 </resources>

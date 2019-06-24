@@ -427,7 +427,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
         }
 
         handlerTime(terminalMessage, holder);
-        handlerAvatar(terminalMessage, holder);
+        handlerAvatar(terminalMessage, holder,position);
         setText(holder.tvNick, terminalMessage.messageFromName);
 
         /**  短文本  */
@@ -850,13 +850,20 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
     /**
      * 设置头像显示
      */
-    private void handlerAvatar(TerminalMessage terminalMessage, MergeTransmitViewHolder holder) {
+    private void handlerAvatar(TerminalMessage terminalMessage, MergeTransmitViewHolder holder, int position) {
         Glide.with(activity)
                 .load(com.zectec.imageandfileselector.R.drawable.user_photo)
                 .asBitmap()
                 .placeholder(com.zectec.imageandfileselector.R.drawable.user_photo)//加载中显示的图片
                 .error(com.zectec.imageandfileselector.R.drawable.user_photo)//加载失败时显示的图片
                 .into(holder.ivAvatar);
+        holder.ivAvatar.setVisibility(View.VISIBLE);
+        if(position > 0 && position < chatMessageList.size()){
+            TerminalMessage message = chatMessageList.get(position-1);
+           if(terminalMessage!=null&&message!=null&&terminalMessage.messageFromId == message.messageFromId){
+             holder.ivAvatar.setVisibility(View.INVISIBLE);
+           }
+        }
     }
 
     /**

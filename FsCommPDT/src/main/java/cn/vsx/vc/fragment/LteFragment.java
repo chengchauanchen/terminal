@@ -125,10 +125,12 @@ public class LteFragment extends BaseFragment{
 //
 //                mRecyclerview.scrollToPosition(0);
 //            }else {
-            List<CatalogBean> catalogBeans = new ArrayList<>(catalogNames.subList(0, position+1));
-            catalogNames.clear();
-            catalogNames.addAll(catalogBeans);
-            TerminalFactory.getSDK().getConfigManager().getTerminal(catalogNames.get(position).getId(), TerminalMemberType.TERMINAL_LTE.toString());
+            if(position>=0 && position < catalogNames.size()){
+                List<CatalogBean> catalogBeans = new ArrayList<>(catalogNames.subList(0, position+1));
+                catalogNames.clear();
+                catalogNames.addAll(catalogBeans);
+                TerminalFactory.getSDK().getConfigManager().getTerminal(catalogNames.get(position).getId(), TerminalMemberType.TERMINAL_LTE.toString());
+            }
 //            }
         });
 

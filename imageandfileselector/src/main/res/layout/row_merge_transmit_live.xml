@@ -163,7 +163,7 @@
             android:layout_below="@+id/bubble"
             android:layout_alignLeft="@+id/tv_userid"
             android:layout_marginTop="@dimen/dp_10"
-            android:background="@color/diver_bg" />
+            android:background="@color/merge_transmit_line" />
 
     </RelativeLayout>
 

@@ -643,9 +643,11 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
                     Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(memberNo,true);
                     String name = (account!=null)?account.getName():terminalMessage.messageFromName;
                     liveTheme = String.format(getString(R.string.text_living_theme_member_name),name);
-                    if(tv_theme !=null){
-                        tv_theme.setText(liveTheme);
-                    }
+                    mHandler.post(() -> {
+                        if(tv_theme !=null){
+                            tv_theme.setText(liveTheme);
+                        }
+                    });
                 });
             }
         }

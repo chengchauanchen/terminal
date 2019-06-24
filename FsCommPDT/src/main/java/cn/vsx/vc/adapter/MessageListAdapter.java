@@ -150,8 +150,7 @@ public class MessageListAdapter extends BaseAdapter {
             }
         }else if(!TerminalMessageUtil.isGroupMessage(terminalMessage) && terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
             viewHolder.iv_user_photo.setBackgroundResource(R.drawable.warning_list_icon);
-        }
-        else {
+        } else {
             if (terminalMessage.messageType == MessageType.HYPERLINK.getCode()) {
                 viewHolder.iv_user_photo.setBackgroundResource(R.drawable.face_recognition_photo);
             } else {

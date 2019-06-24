@@ -13,8 +13,7 @@
             android:layout_width="@dimen/y30"
             android:layout_height="@dimen/y30"
             android:layout_centerVertical="true"
-            android:layout_marginLeft="@dimen/x12"
-            android:background="@drawable/icon_phone" />
+            android:layout_marginLeft="@dimen/x12"/>
 
         <ImageView
             android:id="@+id/iv_watch"

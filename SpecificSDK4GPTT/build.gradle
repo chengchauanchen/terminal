@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply plugin:'maven'
 android {
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
@@ -45,6 +45,17 @@ dependencies {
     compile(name: 'libuvccamera-release', ext: 'aar') {
         exclude module: 'support-v4'
         exclude module: 'appcompat-v7'
+    }
+}
+
+uploadArchives{
+    repositories{
+        mavenDeployer{
+            repository(url:"file://localhost/"+System.getenv("ANDROID_HOME")+"/extras/android/m2repository/sdk/")
+            pom.groupId = 'SpecificSDK4GPTT.lib'
+            pom.artifactId = 'sdk-SpecificSDK4GPTT'
+            pom.version = '1.0-SNAPSHOT'
+        }
     }
 }
 

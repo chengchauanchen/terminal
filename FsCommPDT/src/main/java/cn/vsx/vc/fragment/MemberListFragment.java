@@ -271,12 +271,14 @@ public class MemberListFragment extends BaseFragment implements GroupCatalogAdap
 
     @Override
     public void onItemClick(View view, int position){
-        synchronized(MemberListFragment.this){
-            List<CatalogBean> groupCatalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
-            catalogNames.clear();
-            catalogNames.addAll(groupCatalogBeans);
-            parentRecyclerAdapter.notifyDataSetChanged();
-            TerminalFactory.getSDK().getConfigManager().getTerminal(catalogNames.get(position).getId(),MemberListFragment.this.type);
+        if(position>=0 && position < catalogNames.size()){
+            synchronized(MemberListFragment.this){
+                List<CatalogBean> groupCatalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
+                catalogNames.clear();
+                catalogNames.addAll(groupCatalogBeans);
+                parentRecyclerAdapter.notifyDataSetChanged();
+                TerminalFactory.getSDK().getConfigManager().getTerminal(catalogNames.get(position).getId(),MemberListFragment.this.type);
+            }
         }
     }
 

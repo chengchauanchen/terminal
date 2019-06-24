@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply plugin:'maven'
 android {
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
@@ -34,6 +34,17 @@ dependencies {
     implementation "com.android.support:appcompat-v7:$support_version"
     implementation "com.android.support:support-v4:$support_version"
 //    compile 'com.android.support:appcompat-v7:26.1.0'
+}
+
+uploadArchives{
+    repositories{
+        mavenDeployer{
+            repository(url:"file://localhost/"+System.getenv("ANDROID_HOME")+"/extras/android/m2repository/sdk/")
+            pom.groupId = 'rtmpClient.lib'
+            pom.artifactId = 'sdk-rtmpClient'
+            pom.version = '1.0-SNAPSHOT'
+        }
+    }
 }
 //task makeJar(type: Copy){
 //    delete 'build/libs/rtmpClient.jar'

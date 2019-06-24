@@ -58,7 +58,7 @@
                 android:layout_centerVertical="true"
                 android:autoLink="web"
                 android:gravity="center|left"
-                android:textColor="@color/black"
+                android:textColor="@color/merge_transmit_text_color"
                 android:textSize="@dimen/sp_15" />
         </RelativeLayout>
 
@@ -68,7 +68,7 @@
             android:layout_below="@+id/bubble"
             android:layout_alignLeft="@+id/tv_userid"
             android:layout_marginTop="@dimen/dp_10"
-            android:background="@color/diver_bg" />
+            android:background="@color/merge_transmit_line" />
     </RelativeLayout>
 
     <View

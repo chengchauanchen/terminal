@@ -1,5 +1,5 @@
 apply plugin: 'com.android.library'
-
+apply plugin:'maven'
 android {
     compileSdkVersion 26
     buildToolsVersion '26.0.2'
@@ -39,6 +39,17 @@ dependencies {
     compile "com.android.support:appcompat-v7:$support_version"
     testCompile 'junit:junit:4.12'
     compile(name:'liblinphone-android-sdk', ext:'aar')
+}
+
+uploadArchives{
+    repositories{
+        mavenDeployer{
+            repository(url:"file://localhost/"+System.getenv("ANDROID_HOME")+"/extras/android/m2repository/sdk/")
+            pom.groupId = 'easylinphone.lib'
+            pom.artifactId = 'sdk-easylinphone'
+            pom.version = '1.0-SNAPSHOT'
+        }
+    }
 }
 
 //task makeJar(type: Copy){
