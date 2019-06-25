@@ -126,7 +126,7 @@ public class PhotoUtils {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             //兼容Android7.0
             intentCamera.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            imageUri= FileProvider.getUriForFile(activity, "com.zectec.fileprovider", file);
+            imageUri= FileProvider.getUriForFile(activity, getFileProviderName(activity), file);
         }
         else {
             imageUri = Uri.fromFile(file);
@@ -136,6 +136,10 @@ public class PhotoUtils {
         activity.startActivityForResult(intentCamera, requestCode);
 
         //getSDK().getPhotoRecordDirectory()
+    }
+
+    public static String getFileProviderName(Context context){
+        return context.getPackageName()+".fileprovider";
     }
 
     /**  将图片保存到本地，并在相册中显示 ***/

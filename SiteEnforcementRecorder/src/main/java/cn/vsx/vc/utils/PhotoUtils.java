@@ -37,7 +37,7 @@ public class PhotoUtils {
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             //兼容Android7.0
             intentCamera.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            imageUri= FileProvider.getUriForFile(activity, "cn.zectec.ptt.fileprovider", file);
+            imageUri= FileProvider.getUriForFile(activity, getFileProviderName(activity), file);
         }
         else {
             imageUri = Uri.fromFile(file);
@@ -45,6 +45,11 @@ public class PhotoUtils {
         intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
         intentCamera.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
         activity.startActivityForResult(intentCamera, requestCode);
+    }
+
+
+    public static String getFileProviderName(Context context){
+        return context.getPackageName()+".fileprovider";
     }
 
     public static void savePictureForByte (byte[] data, File file, Context context) {

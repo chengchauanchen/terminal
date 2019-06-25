@@ -38,7 +38,7 @@ public class OpenFileUtils {
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 //兼容Android7.0
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                uri= FileProvider.getUriForFile(_context, "com.zectec.fileprovider" ,
+                uri= FileProvider.getUriForFile(_context, getFileProviderName(_context) ,
                         file);
             }
             else {
@@ -52,6 +52,10 @@ public class OpenFileUtils {
             Toast.makeText(_context, R.string.text_no_application_for_this_open_file, Toast.LENGTH_SHORT).show();
             e.printStackTrace();
         }
+    }
+
+    public static String getFileProviderName(Context context){
+        return context.getPackageName()+".fileprovider";
     }
 
     /**

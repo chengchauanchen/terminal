@@ -215,7 +215,7 @@
         android:value="M95bUm2bTVEGnTqU5mPgzixHVL69pAGa" /> <!-- key:开发者申请的Key -->
     <provider
         android:name="android.support.v4.content.FileProvider"
-        android:authorities="com.zectec.fileprovider"
+        android:authorities="${applicationId}.fileprovider"
         android:exported="false"
         android:grantUriPermissions="true"
         tools:replace="name,authorities,exported,grantUriPermissions">

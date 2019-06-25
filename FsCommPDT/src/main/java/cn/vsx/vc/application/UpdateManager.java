@@ -310,7 +310,7 @@ public class UpdateManager
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-			Uri contentUri = FileProvider.getUriForFile(mContext, "com.zectec.fileprovider", apkfile);
+			Uri contentUri = FileProvider.getUriForFile(mContext, getFileProviderName(mContext), apkfile);
 			intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
 		} else {
 			intent.setDataAndType(Uri.fromFile(apkfile), "application/vnd.android.package-archive");
@@ -320,6 +320,10 @@ public class UpdateManager
 		android.os.Process.killProcess(android.os.Process.myPid());
 
 		logger.info("下载完成，通过Intent开始安装APK文件");
+	}
+
+	public String getFileProviderName(Context context){
+		return context.getPackageName()+".fileprovider";
 	}
 
 	public void checkIsAndroidO(boolean install){
