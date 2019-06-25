@@ -16,7 +16,6 @@ import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
-import cn.vsx.vc.model.CatalogBean;
 
 /**
  * 选择设备
@@ -95,7 +94,7 @@ public class ChooseDevicesAdapter extends RecyclerView.Adapter<ChooseDevicesAdap
         if (type == TerminalMemberType.TERMINAL_PC.getCode()) {
             return R.drawable.icon_pc_device;
         } else if (type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()) {
-            return R.drawable.icon_record_device;
+            return R.drawable.icon_recorder_device;
         } else if (type == TerminalMemberType.TERMINAL_UAV.getCode()) {
             return R.drawable.icon_uav_device;
         } else {

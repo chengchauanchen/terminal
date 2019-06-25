@@ -595,4 +595,6 @@
 
     <string name="qr_binding">扫描二维码绑定</string>
     <string name="binding_qr_tempt">扫一扫,绑定我的警务通</string>
+
+    <string name="text_temp_group_members_title">全部成员(%1$d/%2$d)</string>
 </resources>

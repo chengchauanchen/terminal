@@ -20,7 +20,6 @@ import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetTerminalHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberSelectedHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTempGroupMembersHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupCatalogAdapter;
@@ -257,15 +256,6 @@ public class MemberListFragment extends BaseFragment implements GroupCatalogAdap
                     }
                 });
             }
-        }
-    };
-
-    private ReceiveTempGroupMembersHandler receiveTempGroupMembersHandler = new ReceiveTempGroupMembersHandler(){
-        @Override
-        public void handler(List<String> uniqueNos){
-            MemberListFragment.this.uniqueNos.clear();
-            MemberListFragment.this.uniqueNos.addAll(uniqueNos);
-
         }
     };
 

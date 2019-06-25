@@ -19,6 +19,7 @@
             android:id="@+id/temp_title_bar"
             android:visibility="gone"/>
         <LinearLayout
+            android:id="@+id/ll_member_num"
             android:layout_width="match_parent"
             android:layout_height="@dimen/y15"
             android:gravity="center_vertical">

@@ -25,11 +25,13 @@ import java.util.TimerTask;
 import cn.vsx.hamster.common.GroupType;
 import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupCurrentOnlineMemberListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseAddMemberToTempGroupMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRemoveMemberToTempGroupMessageHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTempGroupMembersHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
@@ -51,6 +53,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
     ImageView newsBarBackTemp;
 
     TextView barTitle;
+    TextView temp_bar_title;
 
     LinearLayout in_title_bar;
 
@@ -69,9 +72,12 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
 
     TextView delete_text;
 
+    LinearLayout ll_member_num;
     TextView memberNum;
 
     ListView memberList;
+
+
 
     VolumeViewLayout volumeViewLayout;
     private GroupMemberAdapter sortAdapter;
@@ -116,14 +122,20 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
         newsBarBack = (ImageView) findViewById(R.id.news_bar_back);
         newsBarBackTemp = (ImageView) findViewById(R.id.news_bar_back_temp);
         barTitle = (TextView) findViewById(R.id.bar_title);
+        temp_bar_title = (TextView) findViewById(R.id.temp_bar_title);
         in_title_bar = (LinearLayout) findViewById(R.id.in_title_bar);
         rightBtn = (ImageView) findViewById(R.id.right_btn);
         ok_btn = (Button) findViewById(R.id.ok_btn);
         temp_title_bar = (LinearLayout) findViewById(R.id.temp_title_bar);
         add_btn = (ImageView) findViewById(R.id.add_btn);
+
+
+
+
         delete_btn = (ImageView) findViewById(R.id.delete_btn);
         cancel_text = (TextView) findViewById(R.id.cancel_text);
         delete_text = (TextView) findViewById(R.id.delete_text);
+        ll_member_num = (LinearLayout) findViewById(R.id.ll_member_num);
         memberNum = (TextView) findViewById(R.id.member_num);
         memberList = (ListView) findViewById(R.id.member_list);
         volumeViewLayout = (VolumeViewLayout) findViewById(R.id.volume_layout);
@@ -142,17 +154,17 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
     @Override
     protected void onResume() {
         super.onResume();
-//        if(isTemporaryGroup){
-//            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, true);
-//        }else {
-//            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberList(groupId, false);
-//        }
-        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId, TerminalMemberStatusEnum.ONLINE.toString());
+        if(isTemporaryGroup){
+            TerminalFactory.getSDK().getThreadPool().execute(() -> TerminalFactory.getSDK().getDataManager().getMemberByTempNo(groupId));
+        }else {
+            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId, TerminalMemberStatusEnum.ONLINE.toString());
+        }
     }
 
     @Override
     public void initListener() {
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveGetGroupCurrentOnlineMemberListHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveTempGroupMembersHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRemoveMemberToTempGroupMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseAddMemberToTempGroupMessageHandler);
     }
@@ -184,14 +196,17 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                 }else {
                     delete_btn.setVisibility(View.VISIBLE);
                 }
+                temp_bar_title.setText(String.format(getString(R.string.text_temp_group_members_title),0,0));
+                ll_member_num.setVisibility(View.GONE);
             }else {
                 add_btn.setVisibility(View.GONE);
                 delete_btn.setVisibility(View.GONE);
                 in_title_bar.setVisibility(View.VISIBLE);
                 temp_title_bar.setVisibility(View.GONE);
+                ll_member_num.setVisibility(View.VISIBLE);
             }
 
-            sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, false);
+            sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, false,isTemporaryGroup);
             memberList.setAdapter(sortAdapter);
             //只有自己创建的临时组才能添加和删除人
         }
@@ -200,6 +215,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void doOtherDestroy() {
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveGetGroupCurrentOnlineMemberListHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTempGroupMembersHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseRemoveMemberToTempGroupMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseAddMemberToTempGroupMessageHandler);
         if (volumeViewLayout != null) {
@@ -229,7 +245,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
             delete_btn.setVisibility(View.GONE);
             delete_text.setVisibility(View.VISIBLE);
             cancel_text.setVisibility(View.VISIBLE);
-            sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, true);
+            sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, true,isTemporaryGroup);
             sortAdapter.setOnItemClickListener((view1, position, checked, member) -> {
                 if(checked){
                     total++;
@@ -292,7 +308,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
             delete_btn.setVisibility(View.VISIBLE);
             delete_text.setVisibility(View.GONE);
             cancel_text.setVisibility(View.GONE);
-            sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, false);
+            sortAdapter = new GroupMemberAdapter(GroupMemberActivity.this, currentGroupMembers, false,isTemporaryGroup);
             memberList.setAdapter(sortAdapter);
             sortAdapter.notifyDataSetChanged();
         }
@@ -308,43 +324,33 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
                 if(isFinishing()){
                     return;
                 }
-                GroupMemberActivity.this.groupId = groupId;
-                Group group =DataUtil.getTempGroupByGroupNo(groupId);
-                if(null ==group){
-                    group = DataUtil.getGroupByGroupNo(groupId);
-                }
-                if(group !=null){
-                    isTemporaryGroup = GroupType.TEMPORARY.toString().equals(group.getGroupType());
-                    //只有自己创建的临时组才能添加和删除人
-                    if(group.getCreatedMemberUniqueNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,-1L) && isTemporaryGroup){
-                        canDelete = true;
+                if(groupId == GroupMemberActivity.this.groupId && !isTemporaryGroup){
+                    Group group =DataUtil.getTempGroupByGroupNo(groupId);
+                    if(null ==group){
+                        group = DataUtil.getGroupByGroupNo(groupId);
                     }
+                    if(group !=null){
+                        isTemporaryGroup = GroupType.TEMPORARY.toString().equals(group.getGroupType());
+                        //只有自己创建的临时组才能添加和删除人
+                        if(group.getCreatedMemberUniqueNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,-1L) && isTemporaryGroup){
+                            canDelete = true;
+                        }
 
-                }
-                currentGroupMembers.clear();
-                currentGroupMembers.addAll(memberList);
-                for(Member member : currentGroupMembers){
-                    if(member.isChecked()){
-                        member.setChecked(false);
                     }
-                }
-                Collections.sort(currentGroupMembers);
-                if (sortAdapter != null) {
-                    sortAdapter.notifyDataSetChanged();
-                }
-                rightBtn.setVisibility(View.GONE);
-                ok_btn.setVisibility(View.GONE);
-                if(isTemporaryGroup){
-                    in_title_bar.setVisibility(View.GONE);
-                    temp_title_bar.setVisibility(View.VISIBLE);
+                    currentGroupMembers.clear();
+                    currentGroupMembers.addAll(memberList);
+                    for(Member member : currentGroupMembers){
+                        if(member.isChecked()){
+                            member.setChecked(false);
+                        }
+                    }
+                    Collections.sort(currentGroupMembers);
+                    if (sortAdapter != null) {
+                        sortAdapter.notifyDataSetChanged();
+                    }
                     rightBtn.setVisibility(View.GONE);
                     ok_btn.setVisibility(View.GONE);
-                    add_btn.setVisibility(View.VISIBLE);
-                    delete_btn.setVisibility(canDelete?View.VISIBLE:View.GONE);
-                    barTitle.setText(R.string.text_group_members);
-                    memberNum.setText(String.format(getString(R.string.text_group_members_number),currentGroupMembers.size()));
-                    logger.info("组内成员：" + currentGroupMembers.size());
-                }else {
+//
                     add_btn.setVisibility(View.GONE);
                     delete_btn.setVisibility(View.GONE);
                     in_title_bar.setVisibility(View.VISIBLE);
@@ -357,13 +363,54 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
         }
     };
 
+    /**
+     * 获取临时组的成员列表
+     */
+    private ReceiveTempGroupMembersHandler receiveTempGroupMembersHandler = new ReceiveTempGroupMembersHandler(){
+        @Override
+        public void handler(int groupId,List<Member> members,int total,int onlineNumber,int offlineNumber){
+            myHandler.post(() -> {
+                if(isFinishing()){
+                    return;
+                }
+                if(groupId == GroupMemberActivity.this.groupId && isTemporaryGroup){
+                    currentGroupMembers.clear();
+                    currentGroupMembers.addAll(members);
+                    for(Member member : currentGroupMembers){
+                        if(member.isChecked()){
+                            member.setChecked(false);
+                        }
+                    }
+                    Collections.sort(currentGroupMembers);
+                    if (sortAdapter != null) {
+                        sortAdapter.notifyDataSetChanged();
+                    }
+                    rightBtn.setVisibility(View.GONE);
+                    ok_btn.setVisibility(View.GONE);
+                    in_title_bar.setVisibility(View.GONE);
+                    temp_title_bar.setVisibility(View.VISIBLE);
+                    rightBtn.setVisibility(View.GONE);
+                    ok_btn.setVisibility(View.GONE);
+                    add_btn.setVisibility(View.VISIBLE);
+                    delete_btn.setVisibility(canDelete?View.VISIBLE:View.GONE);
+                    temp_bar_title.setText(String.format(getString(R.string.text_temp_group_members_title),onlineNumber,total));
+                    ll_member_num.setVisibility(View.GONE);
+                }
+            });
+        }
+    };
+
     private ReceiveResponseRemoveMemberToTempGroupMessageHandler mReceiveResponseRemoveMemberToTempGroupMessageHandler = new ReceiveResponseRemoveMemberToTempGroupMessageHandler(){
         @Override
         public void handler(int methodResult, String resultDesc, int tempGroupNo){
             if(methodResult == BaseCommonCode.SUCCESS_CODE){
                 if(tempGroupNo == groupId && canDelete){
                     myHandler.postDelayed(() -> {
-                        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId, TerminalMemberStatusEnum.ONLINE.toString());
+                        if(isTemporaryGroup){
+                            TerminalFactory.getSDK().getThreadPool().execute(() -> TerminalFactory.getSDK().getDataManager().getMemberByTempNo(groupId));
+                        }else {
+                            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId, TerminalMemberStatusEnum.ONLINE.toString());
+                        }
                         ToastUtil.showToast(GroupMemberActivity.this,getString(R.string.text_delete_success));
                     },2000);
 
@@ -378,7 +425,11 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
             if(methodResult == BaseCommonCode.SUCCESS_CODE){
                 if(tempGroupNo == groupId && canDelete){
                     myHandler.postDelayed(() -> {
-                        MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId, TerminalMemberStatusEnum.ONLINE.toString());
+                        if(isTemporaryGroup){
+                            TerminalFactory.getSDK().getThreadPool().execute(() -> TerminalFactory.getSDK().getDataManager().getMemberByTempNo(groupId));
+                        }else {
+                            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId, TerminalMemberStatusEnum.ONLINE.toString());
+                        }
                         ToastUtil.showToast(GroupMemberActivity.this,getString(R.string.text_add_success));
                     },2000);
                 }

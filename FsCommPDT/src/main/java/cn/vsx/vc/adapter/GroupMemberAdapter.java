@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
@@ -41,12 +42,14 @@ public class GroupMemberAdapter extends BaseAdapter {
     private List<Member> deleteMembers = new ArrayList<>();
     private Context mContext;
     private boolean isDelete;
+    private boolean isTempGroup;
     private OnItemClickListener onItemClickListener;
 
-    public GroupMemberAdapter(Context mContext, List<Member> currentGroupMembers, boolean isDelete) {
+    public GroupMemberAdapter(Context mContext, List<Member> currentGroupMembers, boolean isDelete,boolean isTempGroup) {
         this.mContext = mContext;
         this.currentGroupMembers = currentGroupMembers;
         this.isDelete = isDelete;
+        this.isTempGroup = isTempGroup;
     }
 
     public int getCount() {
@@ -93,8 +96,12 @@ public class GroupMemberAdapter extends BaseAdapter {
         }
 
         viewHolder.catagory.setVisibility(View.GONE);
+        if(!isTempGroup|| member.getStatus() == TerminalMemberStatusEnum.ONLINE.getCode()){
+            viewHolder.userLogo.setImageResource(BitmapUtil.getImageResourceByType(member.type));
+        }else{
+            viewHolder.userLogo.setImageResource(BitmapUtil.getOffineImageResourceByType(member.type));
+        }
 
-        viewHolder.userLogo.setImageResource(BitmapUtil.getImageResourceByType(member.type));
         String no = HandleIdUtil.handleId(member.no);
         viewHolder.userName.setText(member.getName());
         viewHolder.userId.setText(no);

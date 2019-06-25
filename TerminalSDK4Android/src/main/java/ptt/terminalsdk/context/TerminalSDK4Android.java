@@ -1068,6 +1068,19 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		logger.info(" TerminalSDK4Android--------> account = "+account+"---terminalType = "+terminalType);
 		return account+terminalType;
 	}
+	@SuppressLint("MissingPermission")
+	@Override
+	protected String newOldUuid() {
+		String account = TerminalFactory.getSDK().getParam(UrlParams.ACCOUNT);
+		if (Util.isEmpty(account)){
+			TelephonyManager telephonyManager = (TelephonyManager)application.getSystemService(Context.TELEPHONY_SERVICE);
+			WifiManager wm = (WifiManager)application.getSystemService(Context.WIFI_SERVICE);
+			account = telephonyManager.getDeviceId() == null ?
+					wm.getConnectionInfo().getMacAddress().hashCode()+"" : telephonyManager.getDeviceId().hashCode()+"";
+		}
+		logger.info(" TerminalSDK4Android--------> newOldUuid = "+account);
+		return account;
+	}
 
 	public void renovateVideoRecord(String videRecordPath){
 
