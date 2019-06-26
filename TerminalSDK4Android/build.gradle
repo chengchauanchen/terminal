@@ -71,13 +71,37 @@ dependencies {
     }
 }
 
-uploadArchives{
-    repositories{
-        mavenDeployer{
-            repository(url:"file://localhost/"+System.getenv("ANDROID_HOME")+"/extras/android/m2repository/sdk/")
-            pom.groupId = 'TerminalSDK4Android.lib'
-            pom.artifactId = 'sdk-TerminalSDK4Android'
-            pom.version = '1.0-SNAPSHOT'
+//def定义的变量才会在project中
+def POM_NAME='mocklib'
+def POM_VERSION='2.0-SNAPSHOT'
+def POM_ARTIFACTID="sdk-TerminalSDK4Android"//项目名称id
+def POM_GROUPID='TerminalSDK4Android.lib'  //项目组id
+def POM_PACKAGING='aar'
+def POM_DESCRIPTION='mocklib for TerminalSDK4Android'
+def NEXUS_USERNAME='admin'   //用户名
+def NEXUS_PASSWORD='admin123'  //密码
+def NEXUS_REPOSITORY_URL='http://localhost:8081/repository/maven-snapshots/'  //repository的URL
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'//分类器，区分jar
+    from android.sourceSets.main.java.srcDirs
+}
+artifacts {
+    archives androidSourcesJar
+}
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            repository(url: NEXUS_REPOSITORY_URL) {
+                authentication(userName: NEXUS_USERNAME, password: NEXUS_PASSWORD)
+            }
+            pom.project {
+                name POM_NAME
+                version POM_VERSION
+                artifactId POM_ARTIFACTID
+                groupId POM_GROUPID
+                packaging POM_PACKAGING
+                description POM_DESCRIPTION
+            }
         }
     }
 }

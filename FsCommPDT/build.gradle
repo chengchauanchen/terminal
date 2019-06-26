@@ -165,10 +165,6 @@ dependencies {
     annotationProcessor "android.arch.lifecycle:compiler:1.0.0"
     implementation 'io.reactivex.rxjava2:rxjava:2.1.6'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    compile(name: 'libuvccamera-release', ext: 'aar') {
-        exclude module: 'support-v4'
-        exclude module: 'appcompat-v7'
-    }
     //时间选择器
     implementation 'com.contrarywind:Android-PickerView:3.2.7'
     implementation files('libs/HyteraSDK2.0.jar')

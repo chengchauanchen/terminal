@@ -158,10 +158,6 @@ dependencies {
     })
     compileOnly 'com.dji:dji-sdk-provided:4.9'
     implementation 'com.dji:dji-uxsdk:4.9'
-    compile(name: 'libuvccamera-release', ext: 'aar') {
-        exclude module: 'support-v4'
-        exclude module: 'appcompat-v7'
-    }
 }
 
 
