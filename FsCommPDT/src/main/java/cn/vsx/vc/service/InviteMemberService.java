@@ -1500,6 +1500,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         jsonObject.put(JsonParam.DEVICE_NAME, oldTerminalMessage.messageBody.getString(JsonParam.DEVICE_NAME));
         jsonObject.put(JsonParam.DEVICE_DEPT_ID, oldTerminalMessage.messageBody.getString(JsonParam.DEVICE_DEPT_ID));
         jsonObject.put(JsonParam.DEVICE_DEPT_NAME, oldTerminalMessage.messageBody.getString(JsonParam.DEVICE_DEPT_NAME));
+        jsonObject.put(JsonParam.ACCOUNT_ID, oldTerminalMessage.messageBody.getString(JsonParam.ACCOUNT_ID));
         jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
         TerminalMessage mTerminalMessage = new TerminalMessage();
         mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);

@@ -326,6 +326,10 @@ public class MessageListAdapter extends BaseAdapter {
                 }else{
                     viewHolder.tv_last_msg.setText(R.string.text_message_list_with_draw);
                 }
+            }if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+                viewHolder.tv_last_msg.setText(R.string.text_message_LTE_live);
+            }else if(terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
+                viewHolder.tv_last_msg.setText(R.string.text_message_city_live);
             }
         }
     }

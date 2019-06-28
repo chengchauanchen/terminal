@@ -179,7 +179,7 @@ public class ReceiveHandlerService extends Service{
         }
     }
 
-    public class ReceiveHandlerBinder extends Binder{}
+    private class ReceiveHandlerBinder extends Binder{}
 
     @Nullable
     @Override
@@ -407,9 +407,7 @@ public class ReceiveHandlerService extends Service{
                     warningRecord.setLevels(terminalMessage.messageBody.getIntValue(JsonParam.LEVELS));
                     warningRecord.setStatus(terminalMessage.messageBody.getIntValue(JsonParam.STATUS));
                     warningRecord.setUnRead(1);
-                    MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
-                        MyTerminalFactory.getSDK().getSQLiteDBManager().updateWarningRecord(warningRecord);
-                    });
+                    MyTerminalFactory.getSDK().getThreadPool().execute(() -> MyTerminalFactory.getSDK().getSQLiteDBManager().updateWarningRecord(warningRecord));
                     Intent intent = new Intent(getApplicationContext(), WarningMessageDetailActivity.class);
                     intent.putExtra("warningRecord",warningRecord);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -461,8 +459,6 @@ public class ReceiveHandlerService extends Service{
                     }
                 }
             });
-        }else if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
-            // TODO: 2018/5/4 去看警情
         }else if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
             goWatchGB28121(terminalMessage);
         }
@@ -645,8 +641,8 @@ public class ReceiveHandlerService extends Service{
             }
         }
 
-        //视频消息或者国标平台消息
-        if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() || terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+        //视频消息
+        if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()){
             //紧急观看
             if(terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.EMERGENCY_INFORM_TO_WATCH_LIVE){
                 //停止一切业务，开始观看
@@ -692,6 +688,30 @@ public class ReceiveHandlerService extends Service{
             }else if(terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.LIVE_WATCHING_END ||
                     terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.STOP_ASK_VIDEO_LIVE){
                 return;
+            }
+        }else if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() ||
+                terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
+            //国标平台消息
+            // TODO: 2019/6/27  
+            if(MyApplication.instance.getIndividualState() ==  IndividualCallState.IDLE && !MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress){
+                TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                    cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(terminalMessage.messageFromId,true);
+                    if(terminalMessage.messageBody.containsKey(JsonParam.ACCOUNT_ID) && !TextUtils.isEmpty(terminalMessage.messageBody.getString(JsonParam.ACCOUNT_ID))){
+                        cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(Integer.valueOf(terminalMessage.messageBody.getString(JsonParam.ACCOUNT_ID)),true);
+                    }
+                });
+                if(!TerminalMessageUtil.isGroupMessage(terminalMessage)){
+                    //延迟弹窗，否则判断是否在上报接口返回的是没有在上报
+                    myHandler.postDelayed(() -> {
+                        data.add(terminalMessage);
+                        showVideoDialogView();
+                    }, 5000);
+                    //30s没观看就取消当前弹窗
+                    Message message = Message.obtain();
+                    message.what = DISSMISS_CURRENT_DIALOG;
+                    message.obj = terminalMessage;
+                    myHandler.sendMessageDelayed(message, 30 * 1000);
+                }
             }
         }
 
@@ -1029,6 +1049,7 @@ public class ReceiveHandlerService extends Service{
                 terminalMessage.messageBody = new JSONObject();
                 terminalMessage.messageBody.put(JsonParam.GB28181_RTSP_URL,gb28181No);
                 terminalMessage.messageBody.put(JsonParam.DEVICE_NAME,member.getName());
+                terminalMessage.messageBody.put(JsonParam.ACCOUNT_ID,member.getNo());
                 terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_NAME,member.getDepartmentName());
                 terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_ID,member.getDeptId());
                 goWatchGB28121(terminalMessage);
@@ -1226,13 +1247,15 @@ public class ReceiveHandlerService extends Service{
     private void startTranspantActivity(){
         //判断是否锁屏
         KeyguardManager mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-        boolean flag = mKeyguardManager.inKeyguardRestrictedInputMode();
-        if(flag){
-            //                //无屏保界面
-            if(MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0) != 1){
-                Intent intent = new Intent(ReceiveHandlerService.this, TransparentActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-                startActivity(intent);
+        if(null != mKeyguardManager){
+            boolean flag = mKeyguardManager.inKeyguardRestrictedInputMode();
+            if(flag){
+                //                //无屏保界面
+                if(MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0) != 1){
+                    Intent intent = new Intent(ReceiveHandlerService.this, TransparentActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                    startActivity(intent);
+                }
             }
         }
     }

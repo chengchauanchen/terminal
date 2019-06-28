@@ -281,7 +281,14 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                     + name.substring(index, index + len) + "</font></u>"
                     + name.substring(index + len, name.length()));
             textView.setText(temp);
-        } else {
+        }else if(!Util.isEmpty(name) && !Util.isEmpty(keyWords) && keyWords.toLowerCase().contains(name.toLowerCase())){
+            int len = name.length();
+            Spanned temp = Html.fromHtml("<u><font color=#eb403a>"
+                    + name.substring(0, len)+"</font></u>"
+                    );
+            textView.setText(temp);
+        }
+        else {
             textView.setText(name);
         }
     }

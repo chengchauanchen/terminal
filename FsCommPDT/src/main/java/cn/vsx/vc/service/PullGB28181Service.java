@@ -21,8 +21,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.tools.Params;
 import org.apache.http.util.TextUtils;
 import org.apache.log4j.Logger;
 import org.easydarwin.video.EasyRTSPClient;
@@ -33,9 +31,11 @@ import java.util.Date;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.util.JsonParam;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberStopWatchMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -60,6 +60,7 @@ public class PullGB28181Service extends BaseService{
 
     private EasyRTSPClient mStreamRender;
     private TerminalMessage terminalMessage;
+
 
     public PullGB28181Service(){}
 
@@ -105,7 +106,7 @@ public class PullGB28181Service extends BaseService{
 
     @Override
     protected void initListener(){
-//        mIvLiveLookAddmember.setOnClickListener(inviteMemberOnClickListener);
+        mIvLiveLookAddmember.setOnClickListener(inviteMemberOnClickListener);
         mSvGb28181.setSurfaceTextureListener(GB28181SurfaceTextureListener);
         mIvClose.setOnClickListener(closeOnClickListener);
         mLlInviteMember.setOnClickListener(inviteOnClickListener);
@@ -123,9 +124,11 @@ public class PullGB28181Service extends BaseService{
             String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
             gb28181Url = gateWayUrl + "DevAor=" + deviceId;
             logger.info("播放地址："+ gb28181Url);
-            String deviceName = terminalMessage.messageBody.getString(JsonParam.DEVICE_NAME);
             mVideoPlatform.setVisibility(View.VISIBLE);
-            mTvDeviceName.setText(deviceName);
+        }
+        if(terminalMessage.messageBody.containsKey(JsonParam.DEVICE_NAME)){
+            String deviceName = terminalMessage.messageBody.getString(JsonParam.DEVICE_NAME);
+            mTvDeviceName.setText(deviceName+"正在上报图像");
         }
     }
 
@@ -296,13 +299,13 @@ public class PullGB28181Service extends BaseService{
                 onVideoSizeChange();
             } else if (resultCode == EasyRTSPClient.RESULT_TIMEOUT) {
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.time_up));
-                stopBusiness();
+                finishVideoLive();
             } else if (resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_AUDIO) {
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.voice_not_support));
-                stopBusiness();
+                finishVideoLive();
             } else if (resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_VIDEO) {
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.video_not_support));
-                stopBusiness();
+                finishVideoLive();
             } else if (resultCode == EasyRTSPClient.RESULT_EVENT) {
 
                 int errorcode = resultData.getInt("errorcode");
@@ -323,7 +326,7 @@ public class PullGB28181Service extends BaseService{
 
                             }else{
                                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
-                                stopBusiness();
+                                finishVideoLive();
                             }
 
                         } catch (Exception e) {
@@ -331,15 +334,20 @@ public class PullGB28181Service extends BaseService{
                         }
                     } else {
                         ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
-                        stopBusiness();
+                        finishVideoLive();
                     }
                 } else if(errorcode !=0){
                     ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDataString);
-                    stopBusiness();
+                    finishVideoLive();
                 }
             }
         }
     };
+
+    private void finishVideoLive(){
+        stopPull();
+        stopBusiness();
+    }
 
     private void onVideoSizeChange() {
         if (mLiveWidth == 0 || mLiveHeight == 0) {

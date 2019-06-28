@@ -375,7 +375,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if (chatMessageList.get(position).messageType == MessageType.HYPERLINK.getCode()) {
                 return MESSAGE_HYPERLINK_RECEIVED;
             }
-            if(chatMessageList.get(position).messageType == MessageType.GB28181_RECORD.getCode()){
+            if(chatMessageList.get(position).messageType == MessageType.GB28181_RECORD.getCode()
+                ||chatMessageList.get(position).messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
                 return MESSAGE_GB28181_RECODE_RECEIVED;
             }
             if(chatMessageList.get(position).messageType == MessageType.MERGE_TRANSMIT.getCode()){
@@ -421,7 +422,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if (chatMessageList.get(position).messageType == MessageType.HYPERLINK.getCode()) {
                 return MESSAGE_HYPERLINK_SEND;
             }
-            if(chatMessageList.get(position).messageType == MessageType.GB28181_RECORD.getCode()){
+            if(chatMessageList.get(position).messageType == MessageType.GB28181_RECORD.getCode()
+                    ||chatMessageList.get(position).messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
                 return MESSAGE_GB28181_RECODE_SEND;
             }
             if(chatMessageList.get(position).messageType == MessageType.MERGE_TRANSMIT.getCode()){
@@ -457,7 +459,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if(terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
                     terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()||
                     terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()||
-                    terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+                    terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() ||
+                    terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
                 setViewVisibility(holder.cbForward,View.GONE);
             }else{
                 if(!isReceiver(terminalMessage)){
@@ -1749,7 +1752,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     }
 
     private void gb28181ItemClick(TerminalMessage terminalMessage, int viewType){
-        if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+        if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() ||
+            terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())){
                 if(viewType == MESSAGE_GB28181_RECODE_RECEIVED){
                     MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGoWatchRTSPHandler.class,terminalMessage);
@@ -2140,7 +2144,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             noticeContent=String.format(activity.getString(R.string.text_message_list_personal_call_),message.messageFromName);
         }
         //图像记录
-        if(message.messageType ==  MessageType.VIDEO_LIVE.getCode()|| message.messageType ==  MessageType.GB28181_RECORD.getCode()) {
+        if(message.messageType ==  MessageType.VIDEO_LIVE.getCode()||
+                message.messageType ==  MessageType.GB28181_RECORD.getCode() ||
+                message.messageType ==  MessageType.OUTER_GB28181_RECORD.getCode()) {
             noticeContent=String.format(activity.getString(R.string.text_message_list_image_),message.messageFromName);
         }
         //组呼

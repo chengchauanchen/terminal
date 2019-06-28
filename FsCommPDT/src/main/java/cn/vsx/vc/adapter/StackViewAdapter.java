@@ -25,6 +25,7 @@ import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -220,6 +221,34 @@ public class StackViewAdapter extends BaseAdapter{
             if(!TextUtils.isEmpty(data.get(position).messageBody.getString(JsonParam.TITLE))){
                 viewHolder.tv_live_theme.setText(data.get(position).messageBody.getString(JsonParam.TITLE));
             }
+        }else if(data.get(position).messageType == MessageType.GB28181_RECORD.getCode()
+                || data.get(position).messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
+            viewHolder.iv_warning_level.setVisibility(View.GONE);
+            viewHolder.dialog_root.setBackgroundResource(R.drawable.video_background);
+            viewHolder.tv_live_theme.setText(context.getString(R.string.text_message_LTE_live));
+            Account account;
+            boolean pushMessage;
+            if(data.get(position).messageBody.containsKey(JsonParam.ACCOUNT_ID) && !TextUtils.isEmpty(data.get(position).messageBody.getString(JsonParam.ACCOUNT_ID))){
+                 account = DataUtil.getAccountByMemberNo(Integer.valueOf(data.get(position).messageBody.getString(JsonParam.ACCOUNT_ID)),false);
+                 pushMessage = false;
+            }else {
+                //推送
+                account = DataUtil.getAccountByMemberNo(data.get(position).messageFromId,false);
+                pushMessage = true;
+            }
+            if(account!=null){
+                if(TextUtils.isEmpty(account.getDepartmentName())){
+                    viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),account.getName(),HandleIdUtil.handleId(account.getNo())));
+                }else {
+                    viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),account.getName(),HandleIdUtil.handleId(account.getNo()),account.getDepartmentName()));
+                }
+                viewHolder.tv_live_theme.setText(context.getString(R.string.text_dialog_LTE_live));
+            }
+            if(pushMessage){
+                viewHolder.iv_forward.setVisibility(View.VISIBLE);
+            }else {
+                viewHolder.iv_forward.setVisibility(View.GONE);
+            }
         }
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm");
         Date date = new Date(data.get(position).sendTime);
@@ -246,6 +275,7 @@ public class StackViewAdapter extends BaseAdapter{
         ImageView lv_live_return;
         ImageView iv_warning_level;
         Button btn_live_gowatch;
+        ImageView iv_forward;
 
         public ViewHolder(View view){
             dialog_root =  view.findViewById(R.id.dialog_root);
@@ -255,6 +285,7 @@ public class StackViewAdapter extends BaseAdapter{
             tv_time =  view.findViewById(R.id.tv_time);
             lv_live_return = view.findViewById(R.id.lv_live_return);
             btn_live_gowatch = view.findViewById(R.id.btn_live_gowatch);
+            iv_forward = view.findViewById(R.id.iv_forward);
         }
     }
 

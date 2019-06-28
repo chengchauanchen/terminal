@@ -407,6 +407,9 @@
     <string name="text_message_list_face_recognition">[人脸识别]</string>
     <string name="text_message_list_merge_transmit">[聊天记录]</string>
     <string name="text_message_list_with_draw">[撤回]</string>
+    <string name="text_message_LTE_live">[LTE图像]</string>
+    <string name="text_dialog_LTE_live">LTE图像</string>
+    <string name="text_message_city_live">[城市监控]</string>
     <string name="text_gesture_mismatch">手势不匹配</string>
     <string name="text_load_gesture_lib_fail">手势库加载失败</string>
     <string name="text_camera_not_open_audio_is_not_used">相机未打开，图像上报功能将不能使用。</string>
