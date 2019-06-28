@@ -106,7 +106,7 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
         btnOk = (Button) findViewById(R.id.ok_btn);
         barTitle.setText(R.string.text_personal_information);
         findViewById(R.id.news_bar_back).setOnClickListener(this);
-        findViewById(R.id.add_note).setOnClickListener(this);
+        findViewById(R.id.user_phone).setOnClickListener(this);
         rightBtn.setVisibility(View.GONE);
         btnOk.setVisibility(View.GONE);
     }
@@ -324,13 +324,14 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
         int i = view.getId();
         if(i == R.id.news_bar_back){
             finish();
+        }else if(i == R.id.user_phone){
+            goToChooseDevices(ChooseDevicesDialog.TYPE_CALL_PHONE);
         }
     }
 
     private void setNoVideo(){
         mPictures.clear();
         mPictures.add(new Picture(getString(R.string.text_send_message),R.drawable.ic_message));
-        mPictures.add(new Picture(getString(R.string.text_phone),R.drawable.ic_mobile));
         mPictures.add(new Picture(getString(R.string.text_personal_call),R.drawable.ic_call));
     }
 
@@ -338,7 +339,6 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
         mPictures.clear();
         mPictures.add(new Picture(getString(R.string.text_send_message),R.drawable.ic_message));
         mPictures.add(new Picture(getString(R.string.text_personal_call),R.drawable.ic_call));
-        mPictures.add(new Picture(getString(R.string.text_phone),R.drawable.ic_mobile));
         mPictures.add(new Picture(getString(R.string.text_image_report),R.drawable.ic_picture_up));
         mPictures.add(new Picture(getString(R.string.image_request),R.drawable.ic_picture_back));
     }
