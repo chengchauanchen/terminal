@@ -82,8 +82,8 @@ public class QRBindingDialog extends Dialog implements DialogInterface.OnDismiss
     /**
      * 显示NFC弹窗
      */
-    public void showDialog(int groupId,String warningId){
-         account = new Gson().toJson(new NFCBean(TerminalFactory.getSDK().getUuid(),groupId,warningId));
+    public void showDialog(int groupId,int isTempGroup,String warningId){
+         account = new Gson().toJson(new NFCBean(TerminalFactory.getSDK().getUuid(),groupId,isTempGroup,warningId));
         if(!TextUtils.isEmpty(account)){
             show();
         }

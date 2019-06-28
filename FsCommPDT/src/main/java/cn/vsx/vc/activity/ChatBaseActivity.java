@@ -1807,9 +1807,9 @@ public abstract class ChatBaseActivity extends BaseActivity
         nfcBindingDialog = new NFCBindingDialog(ChatBaseActivity.this, NFCBindingDialog.TYPE_WAIT);
         HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
         if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
-            nfcBindingDialog.showDialog(userId, hashMap.get(userId + ""));
+            nfcBindingDialog.showDialog(userId, DataUtil.isTempGroup(userId),hashMap.get(userId + ""));
         }else{
-            nfcBindingDialog.showDialog(userId, "");
+            nfcBindingDialog.showDialog(userId, DataUtil.isTempGroup(userId), "");
         }
     }
     /**
@@ -1818,10 +1818,11 @@ public abstract class ChatBaseActivity extends BaseActivity
     private void showQRDialog() {
         QRBindingDialog qrBindingDialog = new QRBindingDialog(ChatBaseActivity.this);
         HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
+        //是否是临时组
         if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
-            qrBindingDialog.showDialog(userId, hashMap.get(userId + ""));
+            qrBindingDialog.showDialog(userId, DataUtil.isTempGroup(userId), hashMap.get(userId + ""));
         }else{
-            qrBindingDialog.showDialog(userId, "");
+            qrBindingDialog.showDialog(userId, DataUtil.isTempGroup(userId), "");
         }
     }
 
