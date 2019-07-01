@@ -98,6 +98,14 @@ public class MyApplication extends Application {
 		SpecificSDK.setTerminalMemberType(TerminalMemberType.TERMINAL_PHONE.toString());
 	}
 
+	public void setApkType(){
+		SpecificSDK.setApkType(this);
+	}
+
+	public void setAppKey(){
+		SpecificSDK.setAppKey(this);
+	}
+
 	public void setIsContactsPersonal(boolean isContactsIndividual){
 		this.isContactsIndividual = isContactsIndividual;
 	}

@@ -316,7 +316,7 @@ public class SpecificSDK extends TerminalSDK4Android {
         MyTerminalFactory.getSDK().getAuthManagerTwo().setAddress(ip,port);
     }
 
-    private static void setApkType(Application application){
+    public static void setApkType(Application application){
         try{
             ApplicationInfo appInfo = application.getPackageManager().getApplicationInfo(application.getPackageName(), PackageManager.GET_META_DATA);
             String apkType=appInfo.metaData.getString("APKTYPE");
@@ -331,7 +331,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      * 需要在Manifest中填写cn.vsx.sdk.API_KEY值
      * @param application
      */
-    private static void setAppKey(Application application){
+    public static void setAppKey(Application application){
         try{
             ApplicationInfo appInfo = application.getPackageManager().getApplicationInfo(application.getPackageName(), PackageManager.GET_META_DATA);
             String platformKey=appInfo.metaData.getString("cn.vsx.sdk.API_KEY");

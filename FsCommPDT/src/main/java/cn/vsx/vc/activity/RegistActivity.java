@@ -226,7 +226,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler() {
         @Override
         public void handler(boolean connected) {
-            logger.info("AuthManager收到信令是否连接的通知" + connected);
+            logger.info("RegistActivity收到信令是否连接的通知" + connected);
             if (connected) {
                 changeProgressMsg(getResources().getString(R.string.logining));
             }
@@ -1123,6 +1123,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 DeleteData.deleteAllData();
             }
             TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, true);
+            MyApplication.instance.setApkType();
+            MyApplication.instance.setAppKey();
             MyApplication.instance.setTerminalMemberType();
             MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, userInfo.get("account") + "");
             MyTerminalFactory.getSDK().putParam(UrlParams.NAME, userInfo.get("name") + "");
