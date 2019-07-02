@@ -25,6 +25,6 @@ public class CreateTemoGroup extends BaseCommand implements IJumpCommand {
 
     @Override
     public void jumpPage(Map<Object, Object> map) {
-        IncreaseTemporaryGroupMemberActivity.startActivity(context, Constants.CREATE_TEMP_GROUP,0);
+        IncreaseTemporaryGroupMemberActivity.startActivity(context, Constants.CREATE_TEMP_GROUP,0,true);
     }
 }

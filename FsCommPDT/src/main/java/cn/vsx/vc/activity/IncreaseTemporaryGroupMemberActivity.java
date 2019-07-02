@@ -105,6 +105,16 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
         context.startActivity(intent);
     }
 
+    public static void startActivity(Context context, int type, int groupId,boolean newTask){
+        Intent intent = new Intent(context, IncreaseTemporaryGroupMemberActivity.class);
+        intent.putExtra("type", type);
+        intent.putExtra("groupId", groupId);
+        if(newTask){
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        context.startActivity(intent);
+    }
+
     @Override
     public void onBackPressed(){
         if(!searchOrSelectedFragmentShow){
