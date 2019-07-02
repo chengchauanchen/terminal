@@ -15,10 +15,12 @@ import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
@@ -163,8 +165,13 @@ public class JumpService extends Service{
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
             Account account = DataUtil.getAccountByMemberNo(memberNo, true);
             if(account != null){
-                IndividualNewsActivity.startCurrentActivity(getApplicationContext(),account.getNo(),account.getName(),0);
+                IndividualNewsActivity.startCurrentActivity(getApplicationContext(),account.getNo(),account.getName(),true,0);
             }
         });
+    }
+
+    public void jumpGroupChatActivity(int groupNo){
+        Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupNo);
+        GroupCallNewsActivity.startCurrentActivity(getApplicationContext(),groupNo,group.getName(),0,"",true);
     }
 }

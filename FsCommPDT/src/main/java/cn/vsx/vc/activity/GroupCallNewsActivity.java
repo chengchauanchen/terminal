@@ -171,6 +171,19 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         context.startActivity(intent);
     }
 
+    public static void startCurrentActivity(Context context, int userId, String userName, int speakingId, String speakingName,boolean newTask) {
+        Intent intent = new Intent(context, GroupCallNewsActivity.class);
+        intent.putExtra("userId", userId);
+        intent.putExtra("userName", userName);
+        intent.putExtra("isGroup", true);
+        intent.putExtra("speakingId", speakingId);
+        intent.putExtra("speakingName", speakingName);
+        if(newTask){
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        }
+        context.startActivity(intent);
+    }
+
     @Override
     public int getLayoutResId() {
         setSatusBarTransparent();
