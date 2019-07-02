@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import cn.vsx.vc.IJump;
 import cn.vsx.vc.IJump.Stub;
@@ -23,6 +24,7 @@ public class VsxSDK{
 
     private static IJump iJump;
     private static JumpInterface jumpSDK;
+    private static Context mContext;
 
     public static JumpInterface getJumpSDK(){
         if(jumpSDK==null){
@@ -34,7 +36,7 @@ public class VsxSDK{
     public static void initServiceA(Context context) {
 
         //判断我们的应用是否启动
-
+        mContext = context;
         ServiceConnection conn = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
@@ -57,6 +59,7 @@ public class VsxSDK{
         if(iJump!=null){
             return  iJump;
         }else{
+            Toast.makeText(mContext, "请打开融合通信", Toast.LENGTH_SHORT).show();
             return null;
         }
     }
