@@ -161,6 +161,10 @@ public class JumpService extends Service{
         }
     }
 
+    /**
+     * 跳转到个人会话
+     * @param memberNo
+     */
     public void jumpPersonChatActivity(int memberNo){
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
             Account account = DataUtil.getAccountByMemberNo(memberNo, true);
@@ -170,6 +174,10 @@ public class JumpService extends Service{
         });
     }
 
+    /**
+     * 跳转到组会话
+     * @param groupNo
+     */
     public void jumpGroupChatActivity(int groupNo){
         Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupNo);
         GroupCallNewsActivity.startCurrentActivity(getApplicationContext(),groupNo,group.getName(),0,"",true);
