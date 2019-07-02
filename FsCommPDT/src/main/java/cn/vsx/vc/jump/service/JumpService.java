@@ -10,6 +10,7 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.List;
+import java.util.Map;
 
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.TerminalMemberType;
@@ -24,6 +25,7 @@ import cn.vsx.vc.IJump;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
+import cn.vsx.vc.jump.command.FactoryCommand;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.MyDataUtil;
@@ -52,8 +54,8 @@ public class JumpService extends Service{
     public class JumpBinder extends IJump.Stub {
 
         @Override
-        public void activeIndividualCall() throws RemoteException {
-            jumpPersonChatActivity(10000801);
+        public void jumpPage(Map map, int commandType) throws RemoteException {
+            new FactoryCommand(getApplicationContext()).getJumpCommand(commandType).jumpPage(map);
         }
     }
 

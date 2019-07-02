@@ -8,6 +8,7 @@ import android.os.IBinder;
 
 import cn.vsx.vc.IJump;
 import cn.vsx.vc.IJump.Stub;
+import cn.vsx.vsxsdk.Interf.JumpInterface;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -21,6 +22,14 @@ import static android.content.Context.BIND_AUTO_CREATE;
 public class VsxSDK{
 
     private static IJump iJump;
+    private static JumpInterface jumpSDK;
+
+    public static JumpInterface getJumpSDK(){
+        if(jumpSDK==null){
+            jumpSDK = new JumpSDK();
+        }
+        return jumpSDK;
+    }
 
     public static void initServiceA(Context context) {
 

@@ -13,6 +13,12 @@ public interface JumpInterface {
      */
     void activeStartLive(int memberNo,int type);
 
+    /**
+     * 请求别人上报
+     * @param memberNo
+     * 默认是手机
+     */
+    void requestOtherLive(int memberNo);
 
     /**
      * 请求别人上报
