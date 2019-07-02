@@ -58,9 +58,6 @@ public class JumpService extends Service{
     }
 
 
-
-
-
     /**
      * 自己上报，邀请别人来观看
      */

@@ -1,55 +1,51 @@
 package cn.vsx.vsxsdk;
 
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
+import android.util.Log;
 
-import cn.vsx.vc.IJump;
-import cn.vsx.vc.IJump.Stub;
+import java.util.logging.Logger;
 
-import static android.content.Context.BIND_AUTO_CREATE;
+import cn.vsx.vsxsdk.Interf.JumpInterface;
 
-public class JumpSDK {
-    private static IJump iJump;
 
-    public static void initServiceA(Context context) {
+public class JumpSDK implements JumpInterface {
 
-        //判断我们的应用是否启动
 
-        ServiceConnection conn = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName name, IBinder service) {
-                iJump = Stub.asInterface(service);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName name) {
-
-            }
-        };
-
-        Intent intent = new Intent();
-        intent.setAction("cn.vsx.vc.jump.service.JumpService");
-        intent.setPackage("cn.vsx.vc");
-        context.bindService(intent, conn,BIND_AUTO_CREATE);
-    }
-
-    private static IJump getIJump(){
-        if(iJump!=null){
-            return  iJump;
-        }else{
-            return null;
-        }
-    }
-
-    public static void sendMessage()  {
+    @Override
+    public void activeStartLive(int memberNo) {
         try{
-            getIJump().activeIndividualCall();
+            VsxSDK.getIJump().activeIndividualCall();
         }catch (Exception e){
-
+            Log.e("JumpSDK",e.toString());
         }
     }
 
+    @Override
+    public void activeStartLive(int memberNo, int type) {
+
+    }
+
+    @Override
+    public void requestOtherLive(int memberNo, int type) {
+
+    }
+
+    @Override
+    public void activeIndividualCall(int memberNo) {
+
+    }
+
+    @Override
+    public void activeIndividualCall(int memberNo, int type) {
+
+    }
+
+    @Override
+    public void jumpPersonChatActivity(int memberNo) {
+
+    }
+
+    @Override
+    public void jumpGroupChatActivity(int groupNo) {
+
+    }
 }
