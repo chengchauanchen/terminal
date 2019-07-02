@@ -102,6 +102,10 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.I
 @SuppressLint("ValidFragment")
 public class TalkbackFragment extends BaseFragment {
 
+
+    /**
+     * 60s倒计时
+     */
     @SuppressWarnings("HandlerLeak")
     private Handler myHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -202,7 +206,7 @@ public class TalkbackFragment extends BaseFragment {
                         MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
                         setViewEnable(false);
                     });
-                } else if (methodResult == SignalServerErrorCode.RESPONSE_GROUP_IS_DISABLED.getErrorCode()) {
+                } else if (methodResult == SignalServerErrorCode.RESPONSE_GROUP_IS_DISABLED.getErrorCode()) {//响应组为禁用状态，低级用户无法组呼
 
                     ToastUtil.showToast(getContext(), resultDesc);
                     int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
@@ -1298,6 +1302,9 @@ public class TalkbackFragment extends BaseFragment {
         }
     }
 
+    /**
+     * Silence 沉默、无声状态
+     */
     private void change2Silence() {
         if (MyApplication.instance.getGroupListenenState() == LISTENING) {
             return;
@@ -1324,6 +1331,9 @@ public class TalkbackFragment extends BaseFragment {
         }
     }
 
+    /**
+     * 等待
+     */
     private void change2Waiting() {
         layoutDefault();
         ll_show_area.setVisibility(View.VISIBLE);
@@ -1338,6 +1348,9 @@ public class TalkbackFragment extends BaseFragment {
         ptt.setEnabled(true);
     }
 
+    /**
+     * 准备说话
+     */
     private void change2PreSpeaking() {
         logger.info("ptt.change2PreSpeaking()准备说话");
         if (MyApplication.instance.getGroupListenenState() == LISTENING) {
@@ -1360,6 +1373,9 @@ public class TalkbackFragment extends BaseFragment {
         ptt.setEnabled(true);
     }
 
+    /**
+     * 开始说话
+     */
     private void change2Speaking() {
 //        layoutDefault();
 //        talkback_time_progress.setVisibility(View.VISIBLE);
@@ -1382,6 +1398,9 @@ public class TalkbackFragment extends BaseFragment {
         }
     }
 
+    /**
+     * 禁止组呼
+     */
     private void change2Forbid() {
         logger.info("ptt.change2Forbid()按住排队");
         layoutDefault();
@@ -1399,6 +1418,9 @@ public class TalkbackFragment extends BaseFragment {
         }
     }
 
+    /**
+     * 听
+     */
     private void change2Listening() {
         layoutDefault();
         ll_show_area.setVisibility(View.VISIBLE);
@@ -1748,6 +1770,9 @@ public class TalkbackFragment extends BaseFragment {
         }
     };
 
+    /**
+     * 断开连接了
+     */
     BroadcastReceiver mbtBroadcastReceiver = new BroadcastReceiver() {
 
         @Override

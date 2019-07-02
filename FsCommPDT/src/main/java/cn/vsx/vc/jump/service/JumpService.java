@@ -1,8 +1,9 @@
-package cn.vsx.vc.jump;
+package cn.vsx.vc.jump.service;
 
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.support.annotation.Nullable;
 
 import com.blankj.utilcode.util.ToastUtils;
@@ -19,6 +20,7 @@ import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
+import cn.vsx.vc.IJump;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
@@ -39,13 +41,31 @@ public class JumpService extends Service{
     @Nullable
     @Override
     public IBinder onBind(Intent intent){
-        return null;
+        return new JumpBinder();
     }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    public class JumpBinder extends IJump.Stub {
+
+        @Override
+        public void activeIndividualCall() throws RemoteException {
+            jumpPersonChatActivity(10000801);
+        }
+    }
+
+
+
+
 
     /**
      * 自己上报，邀请别人来观看
      */
     private static void activeStartLive(int memberNo){
+
         activeStartLive(memberNo,TerminalMemberType.TERMINAL_PHONE.getCode());
     }
 

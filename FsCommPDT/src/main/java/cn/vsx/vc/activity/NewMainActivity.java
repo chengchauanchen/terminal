@@ -102,6 +102,7 @@ import cn.vsx.vc.fragment.NewsFragment;
 import cn.vsx.vc.fragment.SearchFragment;
 import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
+import cn.vsx.vc.jump.service.JumpService;
 import cn.vsx.vc.permission.FloatWindowManager;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
@@ -1105,7 +1106,15 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         if(!FloatWindowManager.getInstance().checkPermission(this)){
             FloatWindowManager.getInstance().applyPermission(this);
         }
+
+        startJumpService();
     }
+
+    //界面跳转JumpService
+    private void startJumpService(){
+        startService(new Intent(NewMainActivity.this, JumpService.class));
+    }
+
 
     private void initFragment() {
         FragmentTransaction transaction = fragmentManager.beginTransaction();

@@ -308,7 +308,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             //消息撤回
             if(terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
                 setWarningData(terminalMessage,position,holder);
-            }else if(terminalMessage.messageType == MessageType.AFFICHE.getCode()){
+            }else if(terminalMessage.messageType == MessageType.AFFICHE.getCode()){//公告
                 JSONObject messageBody = terminalMessage.messageBody;
                 String noticeContent = messageBody.getString("noticeContent");
                 String msg = String.format(activity.getString(R.string.join_temp_group), noticeContent);
@@ -318,9 +318,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 //将这个Span应用于指定范围的字体
                 spanString.setSpan(span, msg.length()-5, msg.length(), Spannable.SPAN_INCLUSIVE_INCLUSIVE);
                 holder.tv_bubble.setText(spanString);
-
                 handlerTime(terminalMessage,position,holder);
-            }else if(MessageStatus.valueOf(terminalMessage.messageStatus).getCode() == MessageStatus.MESSAGE_RECALL.getCode()){
+            }else if(MessageStatus.valueOf(terminalMessage.messageStatus).getCode() == MessageStatus.MESSAGE_RECALL.getCode()){//撤回
                 withDrawView(terminalMessage,holder);
             }else{
                 setViewVisibility(holder.timeStamp, View.VISIBLE);
@@ -1388,6 +1387,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         File file = new File(path);
         if (!file.exists()) {
             MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
+            //下载这条消息 并 监听进度
             MyTerminalFactory.getSDK().download(terminalMessage, true);
         }else {
             String content = FileUtil.getStringFromFile(file);
@@ -1710,6 +1710,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
 //                    setViewVisibility(download_tv_progressBars, View.VISIBLE);
                     loadingView = chatViewHolder.loadingView;
                     loadingView.setProgerss(0);
+                    //下载这条消息 并 监听进度
                     MyTerminalFactory.getSDK().download(terminalMessage, true);
                 }else {
                     openVideo(terminalMessage,file);

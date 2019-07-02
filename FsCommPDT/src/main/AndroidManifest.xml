@@ -334,10 +334,7 @@
             android:name=".service.ReceiveVoipService"
             android:enabled="true"
             android:exported="false" />
-        <service android:name=".jump.JumpService"
-            android:enabled="true"
-            android:exported="false"/>
-        
+
         <service
             android:name=".service.MultipartyCallService"
             android:enabled="true"
@@ -372,5 +369,18 @@
                 <category android:name="android.intent.category.BROWSABLE" />
             </intent-filter>
         </activity>
+
+
+        <!--跳转服务-->
+        <service
+            android:name=".jump.service.JumpService"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="cn.vsx.vc.jump.service.JumpService" />
+            </intent-filter>
+        </service>
+
+
     </application>
 </manifest>
