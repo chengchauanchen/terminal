@@ -161,6 +161,8 @@ public class JumpService extends Service{
         }
     }
 
+
+
     /**
      * 跳转到个人会话
      * @param memberNo
