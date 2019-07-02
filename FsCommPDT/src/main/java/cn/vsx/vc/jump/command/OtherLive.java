@@ -1,13 +1,10 @@
 package cn.vsx.vc.jump.command;
 
 import android.content.Context;
-
 import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
-
 import java.util.List;
 import java.util.Map;
-
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
@@ -15,7 +12,7 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.vc.R;
 import cn.vsx.vc.jump.constant.CommandEnum;
-import cn.vsx.vc.jump.constant.ParamKey;
+import cn.vsx.vc.jump.utils.MemberUtil;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -35,9 +32,14 @@ public class OtherLive extends BaseCommand implements IJumpCommand {
 
     @Override
     public void jumpPage(Map<Object, Object> map) {
-        int memberNo = (int) map.get(ParamKey.MEMBER_NO);
-//        int terminalType = (int) map.get(ParamKey.TERMINAL_TYPE);
-        requestOtherLive(memberNo);
+
+        int memberNo = MemberUtil.parseMemberNo(map);
+        int terminalType = MemberUtil.parseTerminalType(map);
+        if (terminalType == -1) {
+            requestOtherLive(memberNo);
+        } else {
+            requestOtherLive(memberNo, terminalType);
+        }
     }
 
     /**
@@ -45,7 +47,7 @@ public class OtherLive extends BaseCommand implements IJumpCommand {
      *
      * @param memberNo
      */
-    private static void requestOtherLive(int memberNo) {
+    private void requestOtherLive(int memberNo) {
         requestOtherLive(memberNo, TerminalMemberType.TERMINAL_PHONE.getCode());
     }
 
@@ -55,7 +57,7 @@ public class OtherLive extends BaseCommand implements IJumpCommand {
      * @param memberNo
      * @param type     终端类型 1：手机   6 PC
      */
-    private static void requestOtherLive(int memberNo, int type) {
+    private void requestOtherLive(int memberNo, int type) {
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
             TerminalFactory.getSDK().getThreadPool().execute(() -> {

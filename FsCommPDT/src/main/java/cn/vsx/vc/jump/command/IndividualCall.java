@@ -1,13 +1,10 @@
 package cn.vsx.vc.jump.command;
 
 import android.content.Context;
-
 import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
-
 import java.util.List;
 import java.util.Map;
-
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
@@ -16,7 +13,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCa
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.vc.R;
 import cn.vsx.vc.jump.constant.CommandEnum;
-import cn.vsx.vc.jump.constant.ParamKey;
+import cn.vsx.vc.jump.utils.MemberUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
@@ -36,9 +33,13 @@ public class IndividualCall extends BaseCommand implements IJumpCommand {
 
     @Override
     public void jumpPage(Map<Object, Object> map) {
-        int memberNo = (int) map.get(ParamKey.MEMBER_NO);
-//        int terminalType = (int) map.get(ParamKey.TERMINAL_TYPE);
-        activeIndividualCall(memberNo);
+        int memberNo = MemberUtil.parseMemberNo(map);
+        int terminalType = MemberUtil.parseTerminalType(map);
+        if (terminalType == -1) {
+            activeIndividualCall(memberNo);
+        } else {
+            activeIndividualCall(memberNo, terminalType);
+        }
     }
 
     /**
@@ -46,7 +47,7 @@ public class IndividualCall extends BaseCommand implements IJumpCommand {
      *
      * @param memberNo
      */
-    public static void activeIndividualCall(int memberNo) {
+    public void activeIndividualCall(int memberNo) {
         activeIndividualCall(memberNo, TerminalMemberType.TERMINAL_PHONE.getCode());
     }
 
@@ -56,7 +57,7 @@ public class IndividualCall extends BaseCommand implements IJumpCommand {
      * @param memberNo
      * @param type     终端类型 1：手机   6 PC
      */
-    public static void activeIndividualCall(int memberNo, int type) {
+    public void activeIndividualCall(int memberNo, int type) {
         int memberNum = checkMemberNo(memberNo);
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
             Account account = DataUtil.getAccountByMemberNo(memberNum, true);
@@ -77,14 +78,15 @@ public class IndividualCall extends BaseCommand implements IJumpCommand {
 
     /**
      * 如果memberNo为6位，默认加"88"
+     *
      * @param memberNo
      * @return
      */
-    private static int checkMemberNo(int memberNo){
-        String memberNoStr = memberNo+"";
-        if(length(memberNo)<=6){
-            memberNoStr = "88"+memberNoStr;
-        }else{
+    private static int checkMemberNo(int memberNo) {
+        String memberNoStr = memberNo + "";
+        if (length(memberNo) <= 6) {
+            memberNoStr = "88" + memberNoStr;
+        } else {
             return memberNo;
         }
         return Integer.parseInt(memberNoStr);
@@ -102,11 +104,11 @@ public class IndividualCall extends BaseCommand implements IJumpCommand {
      *
      * @param member
      */
-    private static void activeIndividualCall(Member member) {
+    private void activeIndividualCall(Member member) {
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
-        if(network){
+        if (network) {
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
-        }else{
+        } else {
             ToastUtils.showShort(R.string.text_network_connection_abnormal_please_check_the_network);
         }
     }

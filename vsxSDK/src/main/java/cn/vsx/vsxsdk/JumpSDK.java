@@ -24,7 +24,7 @@ public class JumpSDK implements JumpInterface {
     }
 
     @Override
-    public void activeStartLive(int memberNo) {
+    public void activeStartLive(String memberNo) {
         try{
             Map map= new HashMap();
             map.put(ParamKey.MEMBER_NO,memberNo);
@@ -35,7 +35,7 @@ public class JumpSDK implements JumpInterface {
     }
 
     @Override
-    public void activeStartLive(int memberNo, int type) {
+    public void activeStartLive(String memberNo, int type) {
         try{
             Map map= new HashMap();
             map.put(ParamKey.MEMBER_NO,memberNo);
@@ -47,7 +47,7 @@ public class JumpSDK implements JumpInterface {
     }
 
     @Override
-    public void requestOtherLive(int memberNo) {
+    public void requestOtherLive(String memberNo) {
         try{
             Map map= new HashMap();
             map.put(ParamKey.MEMBER_NO,memberNo);
@@ -58,7 +58,7 @@ public class JumpSDK implements JumpInterface {
     }
 
     @Override
-    public void requestOtherLive(int memberNo, int type) {
+    public void requestOtherLive(String memberNo, int type) {
         try{
             Map map= new HashMap();
             map.put(ParamKey.MEMBER_NO,memberNo);
@@ -70,7 +70,7 @@ public class JumpSDK implements JumpInterface {
     }
 
     @Override
-    public void activeIndividualCall(int memberNo) {
+    public void activeIndividualCall(String memberNo) {
         try{
             Map map= new HashMap();
             map.put(ParamKey.MEMBER_NO,memberNo);
@@ -81,7 +81,7 @@ public class JumpSDK implements JumpInterface {
     }
 
     @Override
-    public void activeIndividualCall(int memberNo, int type) {
+    public void activeIndividualCall(String memberNo, int type) {
         try{
             Map map= new HashMap();
             map.put(ParamKey.MEMBER_NO,memberNo);
@@ -93,7 +93,7 @@ public class JumpSDK implements JumpInterface {
     }
 
     @Override
-    public void jumpPersonChatActivity(int memberNo) {
+    public void jumpPersonChatActivity(String memberNo) {
         try{
             Map map= new HashMap();
             map.put(ParamKey.MEMBER_NO,memberNo);
@@ -104,7 +104,7 @@ public class JumpSDK implements JumpInterface {
     }
 
     @Override
-    public void jumpGroupChatActivity(int groupNo) {
+    public void jumpGroupChatActivity(String groupNo) {
         try{
             Map map= new HashMap();
             map.put(ParamKey.GROUP_NO,groupNo);
