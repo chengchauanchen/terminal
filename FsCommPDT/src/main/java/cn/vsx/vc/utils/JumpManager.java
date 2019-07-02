@@ -6,26 +6,34 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
-
-import org.json.JSONArray;
-import org.json.JSONException;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
+import cn.vsx.vc.R;
+import cn.vsx.vc.activity.GroupCallNewsActivity;
+import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.RegistActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import ptt.terminalsdk.context.MyTerminalFactory;
+
+import static cn.vsx.hamster.common.UrlParams.*;
+
 
 /**
  * @author martian on 2018/11/20.
@@ -50,6 +58,7 @@ public class JumpManager{
         if(intent != null){
             String jumpKey = intent.getStringExtra(UrlParams.JUMP_KEY);
             String jumpValue = intent.getStringExtra(UrlParams.JUMP_VALUE);
+            String appKey = intent.getStringExtra(UrlParams.APP_KEY);
             jump(jumpKey, jumpValue);
         }
     }
@@ -65,10 +74,12 @@ public class JumpManager{
         if(uri != null){
             String key = uri.getQueryParameter(UrlParams.JUMP_KEY);
             String value = uri.getQueryParameter(UrlParams.JUMP_VALUE);
+            String appkey = uri.getQueryParameter(UrlParams.APP_KEY);
+
             if(isLaunched){
                 jump(key, value);
             }else{
-                jumpToLaunch(context, key, value);
+                jumpToLaunch(context, key, value,appkey);
             }
         }
     }
@@ -95,16 +106,63 @@ public class JumpManager{
                     break;
                 case UrlParams.JUMP_KEY_ACTIVE_LIVE://自己发起上报
                     if(!TextUtils.isEmpty(value)){
-                        List<Integer> memberNos = new ArrayList<>();
-                        try{
-                            JSONArray jsonArray = new JSONArray(value);
-                            for(int i = 0; i < jsonArray.length(); i++){
-                                memberNos.add((Integer) jsonArray.get(i));
+                        JSONObject jsonObject = JSONObject.parseObject(value);
+                        List<Integer> members = new ArrayList<>();
+                        if(jsonObject.containsKey("memberNos")){
+                            JSONArray memberNos = jsonObject.getJSONArray("memberNos");
+                            for(int i = 0; i < memberNos.size(); i++){
+                                Integer memberNo = (Integer) memberNos.get(i);
+                                members.add(memberNo);
                             }
-                        }catch(JSONException e){
-                            e.printStackTrace();
                         }
-                        activeStartLive(context, memberNos);
+                        List<Integer> groups = new ArrayList<>();
+                        if(jsonObject.containsKey("groupNos")){
+                            JSONArray groupNos = jsonObject.getJSONArray("groupNos");
+                            for(int i = 0; i < groupNos.size(); i++){
+                                Integer memberNo = (Integer) groupNos.get(i);
+                                groups.add(memberNo);
+                            }
+                        }
+                        
+                        TerminalFactory.getSDK().getThreadPool().execute(()->{
+                            List<String> result = new ArrayList<>();
+                            if(!members.isEmpty()){
+                                List<Account> accounts = DataUtil.getAccountsByMemberNos(members);
+                                for(Account account : accounts){
+                                    result.add(MyDataUtil.getPushInviteMemberData(account.getMembers().get(0).getUniqueNo(), ReceiveObjectMode.MEMBER.toString()));
+                                }
+                            }
+                            if(!groups.isEmpty()){
+                                for(Integer groupNo : groups){
+                                    result.add(MyDataUtil.getPushInviteMemberData(groupNo, ReceiveObjectMode.GROUP.toString()));
+                                }
+                            }
+                            activeStartLive(context,result);
+                        });
+                        
+                    }
+                    break;
+                case UrlParams.JUMP_GROUP_CHAT:
+                    if(!TextUtils.isEmpty(value)){
+                        jumpGroupChatActivity(context,Integer.valueOf(value));
+                    }
+                    break;
+                case UrlParams.JUMP_PERSON_CHAT:
+                    if(!TextUtils.isEmpty(value)){
+                        jumpPersonChatActivity(context,Integer.valueOf(value));
+                    }
+                    break;
+                case JUMP_GROUP_CALL:
+                    if(!TextUtils.isEmpty(value)){
+                        startGroupCall(context,Integer.valueOf(value));
+                    }
+                    break;
+                case JUMP_CEASE_GROUP_CALL:
+                    ceaseGroupCall();
+                    break;
+                case JUMP_VOIP_CALL:
+                    if(!TextUtils.isEmpty(value)){
+                        callVoip(context,Integer.valueOf(value));
                     }
                     break;
                 default:
@@ -113,19 +171,68 @@ public class JumpManager{
         }
     }
 
+    private static void callVoip(Context context, Integer phoneNo){
+        
+    }
+
+    private static void ceaseGroupCall(){
+        MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
+    }
+
+    private static void startGroupCall(Context context, Integer groupNo){
+        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",groupNo);
+        if(resultCode != BaseCommonCode.SUCCESS_CODE){
+            ToastUtils.showShort("发起组呼失败");
+        }
+    }
+
+    private static void jumpPersonChatActivity(Context context, Integer memberNo){
+        TerminalFactory.getSDK().getThreadPool().execute(()->{
+            Account account = DataUtil.getAccountByMemberNo(memberNo, true);
+            if(account != null){
+                IndividualNewsActivity.startCurrentActivity(context,memberNo,account.getName(),true,0);
+            }
+        });
+    }
+
     /**
      * 自己上报，邀请别人来观看
      *
      * @param context
-     * @param memberNos
+     * 推送给一个人
      */
-    private static void activeStartLive(Context context, List<Integer> memberNos){
+    
+    private static void activeStartLive(Context context,String uniqueNoAndType){
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if(network){
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,"",false);
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,uniqueNoAndType,false);
         }else{
             ToastUtil.showToast(context, "网络连接异常，请检查网络！");
         }
+    }
+
+    /**
+     * 推送给多个人
+     * @param context
+     * @param uniqueNoAndTypes
+     */
+    private static void activeStartLive(Context context,List<String> uniqueNoAndTypes){
+        boolean network = MyTerminalFactory.getSDK().hasNetwork();
+        if(network){
+            // TODO: 2019/7/2  
+//            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,uniqueNoAndTypes,false);
+        }else{
+            ToastUtil.showToast(context, "网络连接异常，请检查网络！");
+        }
+    }
+
+    /**
+     * 跳转到组会话
+     * @param groupNo
+     */
+    public static void jumpGroupChatActivity(Context context,int groupNo){
+        Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupNo);
+        GroupCallNewsActivity.startCurrentActivity(context,groupNo,group.getName(),0,"",true);
     }
 
     /**
@@ -163,21 +270,17 @@ public class JumpManager{
     public static void activeIndividualCall(Context context, Member member){
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if(network){
-            int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(member.getNo(),member.getUniqueNo(),"");
-            if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
-            }else{
-                ToastUtil.individualCallFailToast(context, resultCode);
-            }
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
         }else{
-            ToastUtil.showToast(context, "网络连接异常，请检查网络！");
+            ToastUtils.showShort(R.string.text_network_connection_abnormal_please_check_the_network);
         }
     }
 
-    public static void jumpToLaunch(Context context, String key, String value){
+    public static void jumpToLaunch(Context context, String key, String value,String appKey){
         Intent intentLaunch = new Intent(context, RegistActivity.class);
         intentLaunch.putExtra(UrlParams.JUMP_KEY, key);
         intentLaunch.putExtra(UrlParams.JUMP_VALUE, value);
+        intentLaunch.putExtra(UrlParams.APP_KEY, appKey);
         context.startActivity(intentLaunch);
     }
 }

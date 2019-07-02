@@ -1,7 +1,13 @@
 package cn.vsx.vsxsdk.Interf;
 
+import java.util.List;
+
 public interface JumpInterface {
 
+    /**
+     * 发起上报
+     */
+    void activeStartLive();
     /**
      * 自己上报，邀请别人来观看
      */
@@ -51,4 +57,14 @@ public interface JumpInterface {
      * @param groupNo
      */
     void jumpGroupChatActivity(int groupNo);
+
+    void voipCall (String phoneNo, String appkey);
+
+    void createTemporaryGroup(String appkey);
+
+    void changeGroup (String groupNo,String appkey);
+
+    void monitorGroup (String groupNo,String appkey);
+
+    void pushVideoLive (List<String > numbers ,List<String> groups ,String appkey);
 }

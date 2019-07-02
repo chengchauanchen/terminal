@@ -3,7 +3,7 @@ package cn.vsx.vc.jump.command;
 import android.content.Context;
 
 public class BaseCommand {
-    private Context context;
+    protected Context context;
 
     public BaseCommand(Context context) {
         this.context = context;

@@ -37,9 +37,13 @@ public class SelfLive extends BaseCommand implements IJumpCommand {
 
     @Override
     public void jumpPage(Map<Object, Object> map) {
-        int memberNo = (int) map.get(ParamKey.MEMBER_NO);
-//        int terminalType = (int) map.get(ParamKey.TERMINAL_TYPE);
-        activeStartLive(memberNo);
+        if(map.containsKey(ParamKey.MEMBER_NO)){
+            int memberNo = (int) map.get(ParamKey.MEMBER_NO);
+            //int terminalType = (int) map.get(ParamKey.TERMINAL_TYPE);
+            activeStartLive(memberNo);
+        }else {
+            activeStartLive();
+        }
     }
 
     /**
@@ -47,6 +51,13 @@ public class SelfLive extends BaseCommand implements IJumpCommand {
      */
     private static void activeStartLive(int memberNo) {
         activeStartLive(memberNo, TerminalMemberType.TERMINAL_PHONE.getCode());
+    }
+
+    /**
+     * 发起上报，跳到邀请界面
+     */
+    private static void activeStartLive(){
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,"",false);
     }
 
     /**

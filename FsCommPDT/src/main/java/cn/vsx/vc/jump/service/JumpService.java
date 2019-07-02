@@ -59,6 +59,12 @@ public class JumpService extends Service{
         }
     }
 
+    /**
+     * 发起上报，跳到邀请界面
+     */
+    private static void activeStartLive(){
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,"",false);
+    }
 
     /**
      * 自己上报，邀请别人来观看

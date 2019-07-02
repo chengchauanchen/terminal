@@ -35,4 +35,23 @@
         android:id="@+id/btn_log5"
         android:layout_width="wrap_content"
         android:layout_height="60dp" />
+    
+    <Button
+        android:text="发起上报"
+        android:layout_width="wrap_content"
+        android:onClick="startPush"
+        android:layout_height="60dp" />
+    
+    <Button
+        android:text="拨打voip电话"
+        android:layout_width="wrap_content"
+        android:onClick="voipCall"
+        android:layout_height="60dp" />
+    
+    <Button
+        android:text="创建临时组"
+        android:layout_width="wrap_content"
+        android:onClick="createTempGroup"
+        android:layout_height="60dp" />
+
 </LinearLayout>

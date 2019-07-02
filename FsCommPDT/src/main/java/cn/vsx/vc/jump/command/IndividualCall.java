@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import cn.vsx.hamster.common.TerminalMemberType;
-import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;

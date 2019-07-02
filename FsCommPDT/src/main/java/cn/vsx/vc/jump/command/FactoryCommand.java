@@ -1,6 +1,7 @@
 package cn.vsx.vc.jump.command;
 
 import android.content.Context;
+import android.util.Log;
 
 public class FactoryCommand {
 
@@ -28,6 +29,16 @@ public class FactoryCommand {
                 break;
             case 5:
                 jumpCommand = new SelfLive(context);
+                break;
+            case 6:
+                jumpCommand = new VoipCall(context);
+                break;
+            case 7:
+                jumpCommand = new CreateTemoGroup(context);
+                Log.e("FactoryCommand", "jumpCommand:" + jumpCommand);
+                break;
+            case 10:
+                jumpCommand = new PushVideoLive(context);
                 break;
             default:
                 jumpCommand = null;

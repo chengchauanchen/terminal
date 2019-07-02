@@ -17,4 +17,11 @@ public class ParamKey {
      */
     public static final String TERMINAL_TYPE = "terminalType";
 
+    public static final String PHONE_NO = "phoneNo";
+
+    public static final String APP_KEY = "appKey";
+
+    public static final String MEMBER_NOS = "memberNos";
+
+    public static final String GROUP_NOS = "groupNos";
 }

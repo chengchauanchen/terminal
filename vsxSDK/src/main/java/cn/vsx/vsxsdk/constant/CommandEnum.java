@@ -8,7 +8,12 @@ public enum  CommandEnum {
     IndividualCall("个呼",2),//个呼
     OtherLive("请求别人上报",3),//请求别人上报
     PersonChat("个人会话",4),//个人会话
-    SelfLive("自己上报",5);//自己上报
+    SelfLive("自己上报",5),//自己上报
+    VoipCall("拨打voip电话",6),
+    CreateTempGroup("创建临时组",7),
+    changeGroup("转组",8),
+    monitorGroup("设置监听组",9),
+    pushVideoLive("推送视频",10);
 
     private String name;
     private int type;

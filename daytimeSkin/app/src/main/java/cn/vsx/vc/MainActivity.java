@@ -67,32 +67,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-//    private void initData() {
-//        new Thread() {
-//            @Override
-//            public void run() {
-//                synchronized (this) {
-//                    System.out.println("1111111");
-//                    try {
-//                        wait(2000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                    System.out.println("222222222");
-//                }
-//
-//            }
-//        }.start();
-//
-//        double longitude=0.0;
-//        double latitude=0.0;
-//
-//        if (longitude != 0 && latitude != 0) {
-//
-//            System.out.println("出错了！！！！！");
-//        }else
-//        {
-//            System.out.println("正常！！！！！！！！");
-//        }
-//    }
+    public void startPush(View view){
+        VsxSDK.getJumpSDK().activeStartLive();
+    }
+
+    public void voipCall(View view){
+        VsxSDK.getJumpSDK().voipCall("13100715231","lzy");
+    }
+
+    public void createTempGroup(View view){
+        VsxSDK.getJumpSDK().createTemporaryGroup("lzy");
+    }
 }
