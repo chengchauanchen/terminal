@@ -4,6 +4,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.widget.Toast;
 
@@ -28,9 +30,10 @@ public class VsxSDK {
     private static VsxSDK vsxSDK;
     private Context mContext;
 
-    public static void initVsxSDK(Context context, String appKey) {
+    public static void initVsxSDK(Context context) {
         if (vsxSDK == null) {
-            vsxSDK = new VsxSDK(context, appKey);
+            String appKey = getAppKey(context);
+            vsxSDK = new VsxSDK(context,appKey );
         }
     }
 
@@ -42,6 +45,15 @@ public class VsxSDK {
         return vsxSDK;
     }
 
+    public static String getAppKey(Context context){
+        try{
+            ApplicationInfo appInfo = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+            return appInfo.metaData.getString("cn.vsx.sdk.API_KEY");
+        }catch(PackageManager.NameNotFoundException e){
+            e.printStackTrace();
+            return "";
+        }
+    }
 
     private VsxSDK(Context context, String appKey) {
         mContext = context;

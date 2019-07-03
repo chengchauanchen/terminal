@@ -1,7 +1,6 @@
 package cn.vsx.vc.jump.command;
 
 import android.content.Context;
-import android.util.Log;
 
 public class FactoryCommand {
 
@@ -44,8 +43,9 @@ public class FactoryCommand {
                 break;
             case 7:
                 jumpCommand = new CreateTemoGroup(context);
-                Log.e("FactoryCommand", "jumpCommand:" + jumpCommand);
                 break;
+            case 8:
+                jumpCommand = new ChangeGroup(context);
             case 10:
                 jumpCommand = new PushVideoLive(context);
                 break;

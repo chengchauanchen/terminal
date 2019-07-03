@@ -148,7 +148,6 @@ public class JumpSDK implements JumpInterface {
      * voip电话
      *
      * @param phoneNo
-     * @param appkey
      */
     @Override
     public void voipCall(String phoneNo) {

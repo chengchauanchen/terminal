@@ -86,7 +86,7 @@
         <!--平台KEY-->
         <meta-data
             android:name="cn.vsx.sdk.API_KEY"
-            android:value="" />
+            android:value="vsx" />
         
         <activity
             android:name=".activity.RegistActivity"
