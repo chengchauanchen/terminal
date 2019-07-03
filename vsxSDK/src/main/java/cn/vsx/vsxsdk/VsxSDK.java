@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
+import android.widget.Toast;
 
 import cn.vsx.vc.IJump;
 import cn.vsx.vc.IJump.Stub;
@@ -25,6 +26,7 @@ public class VsxSDK {
     private static IJump iJump;
     private static JumpInterface jumpSDK;
     private static VsxSDK vsxSDK;
+    private Context mContext;
 
     public static void initVsxSDK(Context context, String appKey) {
         if (vsxSDK == null) {
@@ -42,6 +44,7 @@ public class VsxSDK {
 
 
     private VsxSDK(Context context, String appKey) {
+        mContext = context;
         setAppKey(appKey);
         initServiceA(context);
     }
@@ -83,7 +86,7 @@ public class VsxSDK {
         context.bindService(intent, conn, BIND_AUTO_CREATE);
     }
 
-    protected static IJump getIJump(){
+    protected IJump getIJump(){
         if(iJump!=null){
             return  iJump;
         }else{
