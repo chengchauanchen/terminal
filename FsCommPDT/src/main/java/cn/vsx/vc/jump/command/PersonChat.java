@@ -1,18 +1,19 @@
 package cn.vsx.vc.jump.command;
 
 import android.content.Context;
-import java.util.Map;
+
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.vc.activity.IndividualNewsActivity;
+import cn.vsx.vc.jump.bean.SendBean;
 import cn.vsx.vc.jump.constant.CommandEnum;
 import cn.vsx.vc.jump.utils.MemberUtil;
 
 /**
  * 个人会话
  */
-public class PersonChat extends BaseCommand implements IJumpCommand {
+public class PersonChat extends BaseCommand {
 
     public PersonChat(Context context) {
         super(context);
@@ -23,10 +24,9 @@ public class PersonChat extends BaseCommand implements IJumpCommand {
         return CommandEnum.PersonChat;
     }
 
-
     @Override
-    public void jumpPage(Map<Object, Object> map) {
-        int memberNo = MemberUtil.parseMemberNo(map);
+    protected void jumpPage(SendBean sendBean) {
+        int memberNo = MemberUtil.strToInt(sendBean.getMemberNo());
         jumpPersonChatActivity(memberNo);
     }
 

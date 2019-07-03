@@ -6,8 +6,17 @@ import android.util.Log;
 public class FactoryCommand {
 
     Context context;
+    private static FactoryCommand instance;
 
-    public FactoryCommand(Context context) {
+    public static FactoryCommand getInstance(Context context) {
+        if (instance == null) {
+            instance = new FactoryCommand(context);
+        }
+        return instance;
+    }
+
+
+    private FactoryCommand(Context context) {
         this.context = context;
     }
 

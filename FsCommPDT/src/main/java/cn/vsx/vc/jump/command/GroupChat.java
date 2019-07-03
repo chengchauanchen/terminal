@@ -1,17 +1,18 @@
 package cn.vsx.vc.jump.command;
 
 import android.content.Context;
-import java.util.Map;
+
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
+import cn.vsx.vc.jump.bean.SendBean;
 import cn.vsx.vc.jump.constant.CommandEnum;
 import cn.vsx.vc.jump.utils.MemberUtil;
 
 /**
  * 组会话
  */
-public class GroupChat extends BaseCommand implements IJumpCommand {
+public class GroupChat extends BaseCommand {
 
     public GroupChat(Context context) {
         super(context);
@@ -22,9 +23,10 @@ public class GroupChat extends BaseCommand implements IJumpCommand {
         return CommandEnum.GroupChat;
     }
 
+
     @Override
-    public void jumpPage(Map<Object, Object> map) {
-        int groupNo=MemberUtil.parseGroupNo(map);
+    protected void jumpPage(SendBean sendBean) {
+        int groupNo = MemberUtil.strToInt(sendBean.getGroupNo());
         jumpGroupChatActivity(getContext(), groupNo);
     }
 

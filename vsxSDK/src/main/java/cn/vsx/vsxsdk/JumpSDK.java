@@ -2,158 +2,217 @@ package cn.vsx.vsxsdk;
 
 import android.util.Log;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import cn.vsx.vsxsdk.Interf.JumpInterface;
 import cn.vsx.vsxsdk.constant.CommandEnum;
-import cn.vsx.vsxsdk.constant.ParamKey;
+import cn.vsx.vsxsdk.utils.GsonUtils;
 
 
 public class JumpSDK implements JumpInterface {
 
+    /**
+     * 发起上报
+     */
     @Override
-    public void activeStartLive(){
-        try{
-            Map map= new HashMap();
-            VsxSDK.getIJump().jumpPage(map,CommandEnum.SelfLive.getType());//;
-        }catch (Exception e){
-            Log.e("JumpSDK",e.toString());
+    public void activeStartLive() {
+        try {
+            String json = GsonUtils.getEmptySendGson();
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.SelfLive.getType());
+        } catch (Exception e) {
+            Log.e("JumpSDK", e.toString());
         }
     }
 
+    /**
+     * 自己上报，邀请别人来观看
+     */
     @Override
     public void activeStartLive(String memberNo) {
-        try{
-            Map map= new HashMap();
-            map.put(ParamKey.MEMBER_NO,memberNo);
-            VsxSDK.getIJump().jumpPage(map,CommandEnum.SelfLive.getType());//;
-        }catch (Exception e){
-            Log.e("JumpSDK",e.toString());
+        try {
+            String json = GsonUtils.getMemberNoToGson(memberNo);
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.SelfLive.getType());//;
+        } catch (Exception e) {
+            Log.e("JumpSDK", e.toString());
         }
     }
 
+    /**
+     * 自己上报，邀请别人来观看
+     *
+     * @param type 终端类型 1：手机   6 PC
+     */
     @Override
     public void activeStartLive(String memberNo, int type) {
-        try{
-            Map map= new HashMap();
-            map.put(ParamKey.MEMBER_NO,memberNo);
-            map.put(ParamKey.TERMINAL_TYPE,type);
-            VsxSDK.getIJump().jumpPage(map,CommandEnum.SelfLive.getType());//;
-        }catch (Exception e){
-            Log.e("JumpSDK",e.toString());
+        try {
+            String json = GsonUtils.getMemberTerminalTypeToGson(memberNo, type);
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.SelfLive.getType());//;
+        } catch (Exception e) {
+            Log.e("JumpSDK", e.toString());
         }
     }
 
+    /**
+     * 请求别人上报
+     *
+     * @param memberNo 默认是手机
+     */
     @Override
     public void requestOtherLive(String memberNo) {
-        try{
-            Map map= new HashMap();
-            map.put(ParamKey.MEMBER_NO,memberNo);
-            VsxSDK.getIJump().jumpPage(map,CommandEnum.OtherLive.getType());//;
-        }catch (Exception e){
-            Log.e("JumpSDK",e.toString());
+        try {
+            String json = GsonUtils.getMemberNoToGson(memberNo);
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.OtherLive.getType());//;
+        } catch (Exception e) {
+            Log.e("JumpSDK", e.toString());
         }
     }
 
+    /**
+     * 请求别人上报
+     *
+     * @param memberNo
+     * @param type     终端类型 1：手机   6 PC
+     */
     @Override
     public void requestOtherLive(String memberNo, int type) {
-        try{
-            Map map= new HashMap();
-            map.put(ParamKey.MEMBER_NO,memberNo);
-            map.put(ParamKey.TERMINAL_TYPE,type);
-            VsxSDK.getIJump().jumpPage(map,CommandEnum.OtherLive.getType());//;
-        }catch (Exception e){
-            Log.e("JumpSDK",e.toString());
+        try {
+            String json = GsonUtils.getMemberTerminalTypeToGson(memberNo, type);
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.OtherLive.getType());//;
+        } catch (Exception e) {
+            Log.e("JumpSDK", e.toString());
         }
     }
 
+    /**
+     * 发起个呼
+     *
+     * @param memberNo
+     */
     @Override
     public void activeIndividualCall(String memberNo) {
-        try{
-            Map map= new HashMap();
-            map.put(ParamKey.MEMBER_NO,memberNo);
-            VsxSDK.getIJump().jumpPage(map,CommandEnum.IndividualCall.getType());//;
-        }catch (Exception e){
-            Log.e("JumpSDK",e.toString());
+        try {
+            String json = GsonUtils.getMemberNoToGson(memberNo);
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.IndividualCall.getType());//;
+        } catch (Exception e) {
+            Log.e("JumpSDK", e.toString());
         }
     }
 
+    /**
+     * 发起个呼
+     *
+     * @param memberNo
+     * @param type     终端类型 1：手机   6 PC
+     */
     @Override
     public void activeIndividualCall(String memberNo, int type) {
-        try{
-            Map map= new HashMap();
-            map.put(ParamKey.MEMBER_NO,memberNo);
-            map.put(ParamKey.TERMINAL_TYPE,type);
-            VsxSDK.getIJump().jumpPage(map,CommandEnum.IndividualCall.getType());//;
-        }catch (Exception e){
-            Log.e("JumpSDK",e.toString());
+        try {
+            String json = GsonUtils.getMemberTerminalTypeToGson(memberNo, type);
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.IndividualCall.getType());//;
+        } catch (Exception e) {
+            Log.e("JumpSDK", e.toString());
         }
     }
 
+    /**
+     * 跳转到个人会话
+     *
+     * @param memberNo
+     */
     @Override
     public void jumpPersonChatActivity(String memberNo) {
-        try{
-            Map map= new HashMap();
-            map.put(ParamKey.MEMBER_NO,memberNo);
-            VsxSDK.getIJump().jumpPage(map,CommandEnum.PersonChat.getType());//;
-        }catch (Exception e){
-            Log.e("JumpSDK",e.toString());
+        try {
+            String json = GsonUtils.getMemberNoToGson(memberNo);
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.PersonChat.getType());//;
+        } catch (Exception e) {
+            Log.e("JumpSDK", e.toString());
         }
     }
 
+    /**
+     * 跳转到组会话
+     *
+     * @param groupNo
+     */
     @Override
     public void jumpGroupChatActivity(String groupNo) {
-        try{
-            Map map= new HashMap();
-            map.put(ParamKey.GROUP_NO,groupNo);
-            VsxSDK.getIJump().jumpPage(map,CommandEnum.GroupChat.getType());//;
-        }catch (Exception e){
-            Log.e("JumpSDK",e.toString());
+        try {
+            String json = GsonUtils.getGroupNoToGson(groupNo);
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.GroupChat.getType());//;
+        } catch (Exception e) {
+            Log.e("JumpSDK", e.toString());
         }
     }
 
+    /**
+     * voip电话
+     *
+     * @param phoneNo
+     * @param appkey
+     */
     @Override
-    public void voipCall(String phoneNo, String appkey){
-        try{
-            Map map= new HashMap();
-            map.put(ParamKey.PHONE_NO,phoneNo);
-            map.put(ParamKey.APP_KEY,appkey);
-            VsxSDK.getIJump().jumpPage(map, CommandEnum.VoipCall.getType());
-        }catch (Exception e){
-            Log.e("JumpSDK",e.toString());
+    public void voipCall(String phoneNo) {
+        try {
+            String json = GsonUtils.getPhoneNoToGson(phoneNo);
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.VoipCall.getType());
+        } catch (Exception e) {
+            Log.e("JumpSDK", e.toString());
         }
     }
 
+    /**
+     * 创建临时组
+     *
+     * @param appkey
+     */
     @Override
-    public void createTemporaryGroup(String appkey){
-        try{
-            Map map= new HashMap();
-            VsxSDK.getIJump().jumpPage(map, CommandEnum.CreateTempGroup.getType());
-        }catch (Exception e){
-            Log.e("JumpSDK",e.toString());
+    public void createTemporaryGroup() {
+        try {
+            String json = GsonUtils.getEmptySendGson();
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.CreateTempGroup.getType());
+        } catch (Exception e) {
+            Log.e("JumpSDK", e.toString());
         }
     }
 
+    /**
+     * 切换组
+     *
+     * @param groupNo
+     * @param appkey
+     */
     @Override
-    public void changeGroup(String groupNo, String appkey){
+    public void changeGroup(String groupNo) {
+        String json = GsonUtils.getGroupNoToGson(groupNo);
+
     }
 
+    /**
+     * 组监听
+     *
+     * @param groupNo
+     * @param appkey
+     */
     @Override
-    public void monitorGroup(String groupNo, String appkey){
+    public void monitorGroup(String groupNo) {
+        String json = GsonUtils.getGroupNoToGson(groupNo);
+
     }
 
+    /**
+     * 上报视频
+     *
+     * @param members
+     * @param groups
+     * @param appkey
+     */
     @Override
-    public void pushVideoLive(List<String> numberNos, List<String> groupNos, String appkey){
-        try{
-            Map map= new HashMap();
-            map.put(ParamKey.MEMBER_NOS,numberNos);
-            map.put(ParamKey.GROUP_NOS,groupNos);
-            map.put(ParamKey.APP_KEY,appkey);
-            VsxSDK.getIJump().jumpPage(map, CommandEnum.pushVideoLive.getType());
-        }catch (Exception e){
-            Log.e("JumpSDK",e.toString());
+    public void pushVideoLive(List<String> members, List<String> groups) {
+        try {
+            String json = GsonUtils.getMembersGroupsToGson(members, groups);
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.pushVideoLive.getType());
+        } catch (Exception e) {
+            Log.e("JumpSDK", e.toString());
         }
     }
 }

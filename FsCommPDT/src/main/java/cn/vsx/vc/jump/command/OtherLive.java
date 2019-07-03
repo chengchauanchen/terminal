@@ -1,16 +1,19 @@
 package cn.vsx.vc.jump.command;
 
 import android.content.Context;
+
 import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
+
 import java.util.List;
-import java.util.Map;
+
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.vc.R;
+import cn.vsx.vc.jump.bean.SendBean;
 import cn.vsx.vc.jump.constant.CommandEnum;
 import cn.vsx.vc.jump.utils.MemberUtil;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
@@ -19,7 +22,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 /**
  * 请求别人上报
  */
-public class OtherLive extends BaseCommand implements IJumpCommand {
+public class OtherLive extends BaseCommand {
 
     public OtherLive(Context context) {
         super(context);
@@ -31,10 +34,10 @@ public class OtherLive extends BaseCommand implements IJumpCommand {
     }
 
     @Override
-    public void jumpPage(Map<Object, Object> map) {
+    protected void jumpPage(SendBean sendBean) {
+        int memberNo = MemberUtil.strToInt(sendBean.getMemberNo());
+        int terminalType = sendBean.getTerminalType();
 
-        int memberNo = MemberUtil.parseMemberNo(map);
-        int terminalType = MemberUtil.parseTerminalType(map);
         if (terminalType == -1) {
             requestOtherLive(memberNo);
         } else {

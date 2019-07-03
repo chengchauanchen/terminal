@@ -1,10 +1,12 @@
 package cn.vsx.vc.jump.command;
 
 import android.content.Context;
+
 import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
+
 import java.util.List;
-import java.util.Map;
+
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
@@ -12,6 +14,7 @@ import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.vc.R;
+import cn.vsx.vc.jump.bean.SendBean;
 import cn.vsx.vc.jump.constant.CommandEnum;
 import cn.vsx.vc.jump.utils.MemberUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -19,7 +22,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 /**
  * 发起个呼
  */
-public class IndividualCall extends BaseCommand implements IJumpCommand {
+public class IndividualCall extends BaseCommand {
 
     public IndividualCall(Context context) {
         super(context);
@@ -30,11 +33,11 @@ public class IndividualCall extends BaseCommand implements IJumpCommand {
         return CommandEnum.IndividualCall;
     }
 
-
     @Override
-    public void jumpPage(Map<Object, Object> map) {
-        int memberNo = MemberUtil.parseMemberNo(map);
-        int terminalType = MemberUtil.parseTerminalType(map);
+    protected void jumpPage(SendBean sendBean) {
+        int memberNo = MemberUtil.strToInt(sendBean.getMemberNo());
+        int terminalType = sendBean.getTerminalType();
+
         if (terminalType == -1) {
             activeIndividualCall(memberNo);
         } else {

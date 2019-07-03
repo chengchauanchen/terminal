@@ -2,15 +2,13 @@ package cn.vsx.vc.jump.command;
 
 import android.content.Context;
 
-import java.util.Map;
-
+import cn.vsx.vc.jump.bean.SendBean;
 import cn.vsx.vc.jump.constant.CommandEnum;
-import cn.vsx.vc.jump.constant.ParamKey;
 
 /**
  * 个人会话
  */
-public class PushVideoLive extends BaseCommand implements IJumpCommand {
+public class PushVideoLive extends BaseCommand {
 
     public PushVideoLive(Context context) {
         super(context);
@@ -21,17 +19,12 @@ public class PushVideoLive extends BaseCommand implements IJumpCommand {
         return CommandEnum.PersonChat;
     }
 
-
     @Override
-    public void jumpPage(Map<Object, Object> map) {
-        String appkey = (String) map.get(ParamKey.APP_KEY);
-        //        List<String> memberNos = (List<String>) map.get(ParamKey.MEMBER_NOS);
-        //        List<String> groupNos = (List<String>) map.get(ParamKey.GROUP_NOS);
-
+    protected void jumpPage(SendBean sendBean) {
         pushLive();
     }
 
-    private void pushLive(){
+    private void pushLive() {
 
     }
 }

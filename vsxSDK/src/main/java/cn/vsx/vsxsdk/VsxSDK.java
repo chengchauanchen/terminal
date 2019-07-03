@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.widget.Toast;
 
 import cn.vsx.vc.IJump;
 import cn.vsx.vc.IJump.Stub;
@@ -20,23 +19,52 @@ import static android.content.Context.BIND_AUTO_CREATE;
  * 描述：
  * 修订历史：
  */
-public class VsxSDK{
+public class VsxSDK {
 
+    private static String APP_KEY = "";
     private static IJump iJump;
     private static JumpInterface jumpSDK;
-    private static Context mContext;
+    private static VsxSDK vsxSDK;
 
-    public static JumpInterface getJumpSDK(){
-        if(jumpSDK==null){
+    public static void initVsxSDK(Context context, String appKey) {
+        if (vsxSDK == null) {
+            vsxSDK = new VsxSDK(context, appKey);
+        }
+    }
+
+
+    public static VsxSDK getInstance() {
+        if(vsxSDK==null){
+            throw new RuntimeException("VsxSDK未初始化");
+        }
+        return vsxSDK;
+    }
+
+
+    private VsxSDK(Context context, String appKey) {
+        setAppKey(appKey);
+        initServiceA(context);
+    }
+
+    private void setAppKey(String appKey) {
+        APP_KEY = appKey;
+    }
+
+    public String getAppKey() {
+        return APP_KEY;
+    }
+
+    public JumpInterface getJumpSDK() {
+        if (jumpSDK == null) {
             jumpSDK = new JumpSDK();
         }
         return jumpSDK;
     }
 
-    public static void initServiceA(Context context) {
+    public void initServiceA(Context context) {
 
         //判断我们的应用是否启动
-        mContext = context;
+
         ServiceConnection conn = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
@@ -52,7 +80,7 @@ public class VsxSDK{
         Intent intent = new Intent();
         intent.setAction("cn.vsx.vc.jump.service.JumpService");
         intent.setPackage("cn.vsx.vc");
-        context.bindService(intent, conn,BIND_AUTO_CREATE);
+        context.bindService(intent, conn, BIND_AUTO_CREATE);
     }
 
     protected static IJump getIJump(){

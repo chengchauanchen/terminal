@@ -34,48 +34,49 @@ public class MainActivity extends AppCompatActivity {
         btn_log1.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getJumpSDK().activeStartLive("10000120");
+                VsxSDK.getInstance().getJumpSDK().activeStartLive("10000120");
             }
         });
         //请求别人上报
         btn_log2.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getJumpSDK().requestOtherLive("10000120");
+                VsxSDK.getInstance().getJumpSDK().requestOtherLive("10000120");
             }
         });
         //个呼
         btn_log3.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getJumpSDK().activeIndividualCall("10000120");
+                VsxSDK.getInstance().getJumpSDK().activeIndividualCall("10000120");
             }
         });
         //个人会话
         btn_log4.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getJumpSDK().jumpPersonChatActivity("10000120");
+                VsxSDK.getInstance().getJumpSDK().jumpPersonChatActivity("10000120");
             }
         });
         //组会话
         btn_log5.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getJumpSDK().jumpGroupChatActivity("100040");
+                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivity("100040");
             }
         });
     }
 
+
     public void startPush(View view){
-        VsxSDK.getJumpSDK().activeStartLive();
+        VsxSDK.getInstance().getJumpSDK().activeStartLive();
     }
 
     public void voipCall(View view){
-        VsxSDK.getJumpSDK().voipCall("13100715231","lzy");
+        VsxSDK.getInstance().getJumpSDK().voipCall("13100715231");
     }
 
     public void createTempGroup(View view){
-        VsxSDK.getJumpSDK().createTemporaryGroup("lzy");
+        VsxSDK.getInstance().getJumpSDK().createTemporaryGroup();
     }
 }

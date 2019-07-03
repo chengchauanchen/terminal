@@ -9,6 +9,6 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        VsxSDK.initServiceA(this);
+        VsxSDK.initVsxSDK(this,"123456789");
     }
 }
