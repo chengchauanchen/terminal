@@ -20,7 +20,7 @@ public class JumpSDK implements JumpInterface {
             String json = GsonUtils.getEmptySendGson();
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.SelfLive.getType());
         } catch (Exception e) {
-            Log.e("JumpSDK", e.toString());
+            Log.e("JumpSDK", "发起上报失败");
         }
     }
 
@@ -33,7 +33,7 @@ public class JumpSDK implements JumpInterface {
             String json = GsonUtils.getMemberNoToGson(memberNo);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.SelfLive.getType());//;
         } catch (Exception e) {
-            Log.e("JumpSDK", e.toString());
+            Log.e("JumpSDK", "自己上报，邀请别人来观看 失败");
         }
     }
 
@@ -48,7 +48,7 @@ public class JumpSDK implements JumpInterface {
             String json = GsonUtils.getMemberTerminalTypeToGson(memberNo, type);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.SelfLive.getType());//;
         } catch (Exception e) {
-            Log.e("JumpSDK", e.toString());
+            Log.e("JumpSDK", "自己上报，邀请别人来观看 失败");
         }
     }
 
@@ -63,7 +63,7 @@ public class JumpSDK implements JumpInterface {
             String json = GsonUtils.getMemberNoToGson(memberNo);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.OtherLive.getType());//;
         } catch (Exception e) {
-            Log.e("JumpSDK", e.toString());
+            Log.e("JumpSDK", "请求别人上报失败");
         }
     }
 
@@ -79,7 +79,7 @@ public class JumpSDK implements JumpInterface {
             String json = GsonUtils.getMemberTerminalTypeToGson(memberNo, type);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.OtherLive.getType());//;
         } catch (Exception e) {
-            Log.e("JumpSDK", e.toString());
+            Log.e("JumpSDK", "请求别人上报");
         }
     }
 
@@ -94,7 +94,7 @@ public class JumpSDK implements JumpInterface {
             String json = GsonUtils.getMemberNoToGson(memberNo);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.IndividualCall.getType());//;
         } catch (Exception e) {
-            Log.e("JumpSDK", e.toString());
+            Log.e("JumpSDK", "发起个呼失败");
         }
     }
 
@@ -110,7 +110,7 @@ public class JumpSDK implements JumpInterface {
             String json = GsonUtils.getMemberTerminalTypeToGson(memberNo, type);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.IndividualCall.getType());//;
         } catch (Exception e) {
-            Log.e("JumpSDK", e.toString());
+            Log.e("JumpSDK", "发起个呼失败");
         }
     }
 
@@ -125,7 +125,7 @@ public class JumpSDK implements JumpInterface {
             String json = GsonUtils.getMemberNoToGson(memberNo);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.PersonChat.getType());//;
         } catch (Exception e) {
-            Log.e("JumpSDK", e.toString());
+            Log.e("JumpSDK", "跳转到个人会话失败");
         }
     }
 
@@ -140,7 +140,7 @@ public class JumpSDK implements JumpInterface {
             String json = GsonUtils.getGroupNoToGson(groupNo);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.GroupChat.getType());//;
         } catch (Exception e) {
-            Log.e("JumpSDK", e.toString());
+            Log.e("JumpSDK", "跳转到组会话失败");
         }
     }
 
@@ -155,14 +155,12 @@ public class JumpSDK implements JumpInterface {
             String json = GsonUtils.getPhoneNoToGson(phoneNo);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.VoipCall.getType());
         } catch (Exception e) {
-            Log.e("JumpSDK", e.toString());
+            Log.e("JumpSDK", "voip电话失败");
         }
     }
 
     /**
      * 创建临时组
-     *
-     * @param appkey
      */
     @Override
     public void createTemporaryGroup() {
@@ -170,7 +168,7 @@ public class JumpSDK implements JumpInterface {
             String json = GsonUtils.getEmptySendGson();
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.CreateTempGroup.getType());
         } catch (Exception e) {
-            Log.e("JumpSDK", e.toString());
+            Log.e("JumpSDK", "创建临时组失败");
         }
     }
 
@@ -178,7 +176,6 @@ public class JumpSDK implements JumpInterface {
      * 切换组
      *
      * @param groupNo
-     * @param appkey
      */
     @Override
     public void changeGroup(String groupNo) {
@@ -190,7 +187,6 @@ public class JumpSDK implements JumpInterface {
      * 组监听
      *
      * @param groupNo
-     * @param appkey
      */
     @Override
     public void monitorGroup(String groupNo) {
@@ -203,7 +199,6 @@ public class JumpSDK implements JumpInterface {
      *
      * @param members
      * @param groups
-     * @param appkey
      */
     @Override
     public void pushVideoLive(List<String> members, List<String> groups) {
@@ -211,7 +206,7 @@ public class JumpSDK implements JumpInterface {
             String json = GsonUtils.getMembersGroupsToGson(members, groups);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.pushVideoLive.getType());
         } catch (Exception e) {
-            Log.e("JumpSDK", e.toString());
+            Log.e("JumpSDK", "上报视频失败");
         }
     }
 }

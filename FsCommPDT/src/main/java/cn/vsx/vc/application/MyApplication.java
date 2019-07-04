@@ -30,6 +30,8 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.NFCBean;
+import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
+import cn.vsx.vc.jump.service.JumpService;
 import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
@@ -92,6 +94,9 @@ public class MyApplication extends Application {
 				.loadSkin();
         //清空刷NFC需要传的数据
         MyApplication.instance.setNfcBean(null);
+
+        //初始化 向地三方应用同步消息的service
+		ThirdSendMessage.initVsxSendMessage(this);
 	}
 
 	public void setTerminalMemberType(){

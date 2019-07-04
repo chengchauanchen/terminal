@@ -12,6 +12,7 @@ import android.widget.Toast;
 import cn.vsx.vc.IJump;
 import cn.vsx.vc.IJump.Stub;
 import cn.vsx.vsxsdk.Interf.JumpInterface;
+import cn.vsx.vsxsdk.service.VsxReceivedService;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -58,7 +59,10 @@ public class VsxSDK {
     private VsxSDK(Context context, String appKey) {
         mContext = context;
         setAppKey(appKey);
-        initServiceA(context);
+        //启动接收消息服务ReceivedService
+        startReceivedService(context);
+        //连接JumpService
+        connectJumpService(context);
     }
 
     private void setAppKey(String appKey) {
@@ -76,14 +80,25 @@ public class VsxSDK {
         return jumpSDK;
     }
 
-    public void initServiceA(Context context) {
+    /**
+     * 1.先启动自己的服务
+     * 2.再试图连接对方的服务
+     * 3.连接成功后通知对方，连接我。
+     * @param context
+     */
+    public void connectJumpService(Context context) {
+        //避免重复连接
+        if(iJump!=null){
+            return;
+        }
 
         //判断我们的应用是否启动
-
         ServiceConnection conn = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
                 iJump = Stub.asInterface(service);
+                //跳转服务连接成功后，通知 融合通信 连接第三方应用的消息接收服务
+                noticeConnectReceivedService();
             }
 
             @Override
@@ -98,6 +113,17 @@ public class VsxSDK {
         context.bindService(intent, conn, BIND_AUTO_CREATE);
     }
 
+    /**
+     * 跳转服务连接成功后，通知 融合通信 连接第三方应用的消息接收服务
+     */
+    private void noticeConnectReceivedService(){
+        try{
+            getIJump().noticeConnectReceivedService();
+        }catch (Exception e){
+            System.out.println(e);
+        }
+    }
+
     protected IJump getIJump(){
         if(iJump!=null){
             return  iJump;
@@ -105,5 +131,12 @@ public class VsxSDK {
             Toast.makeText(mContext, "请打开融合通信", Toast.LENGTH_SHORT).show();
             return null;
         }
+    }
+
+    /**
+     * 启动接收消息服务ReceivedService
+     */
+    private void startReceivedService(Context context){
+        context.startService(new Intent(context, VsxReceivedService.class));
     }
 }

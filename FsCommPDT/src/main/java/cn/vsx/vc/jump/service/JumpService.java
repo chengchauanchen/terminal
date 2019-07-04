@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 
 import cn.vsx.vc.IJump;
 import cn.vsx.vc.jump.command.FactoryCommand;
+import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
 
 /**
  * 第三方应用与本应用通信Service
@@ -31,5 +32,17 @@ public class JumpService extends Service {
         public void jumpPage(String sendJson, int commandType) throws RemoteException {
             FactoryCommand.getInstance(getApplicationContext()).getJumpCommand(commandType).jumpPage(sendJson);
         }
+
+        /**
+         * 第三方app->通知我->去试图连接 第三方app的消息接收服务
+         * @throws RemoteException
+         */
+        @Override
+        public void noticeConnectReceivedService() throws RemoteException {
+            ThirdSendMessage.getInstance().connectReceivedService(getApplicationContext());
+        }
     }
+
+
+
 }

@@ -1106,15 +1106,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         if(!FloatWindowManager.getInstance().checkPermission(this)){
             FloatWindowManager.getInstance().applyPermission(this);
         }
-
-        startJumpService();
     }
-
-    //界面跳转JumpService
-    private void startJumpService(){
-        startService(new Intent(NewMainActivity.this, JumpService.class));
-    }
-
 
     private void initFragment() {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
