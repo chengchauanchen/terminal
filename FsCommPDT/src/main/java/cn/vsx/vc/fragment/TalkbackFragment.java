@@ -85,6 +85,7 @@ import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.GroupMemberActivity;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.UnbindDialog;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.view.ChangeGroupView;
@@ -1028,6 +1029,9 @@ public class TalkbackFragment extends BaseFragment {
     TextView tv_volume_fw;
 
     RelativeLayout title_bar;
+
+    //解绑布局
+    RelativeLayout rl_bind;
     //    private GestureDetector mGestureDetector;
     private Logger logger = Logger.getLogger(getClass());
     private SpeechSynthesizer speechSynthesizer;
@@ -1078,6 +1082,7 @@ public class TalkbackFragment extends BaseFragment {
         ptt = (Button) mRootView.findViewById(R.id.ptt);
         to_current_group = (ImageView) mRootView.findViewById(R.id.to_current_group);
         talkback_change_session = (ImageView) mRootView.findViewById(R.id.talkback_change_session);
+        rl_bind = (RelativeLayout) mRootView.findViewById(R.id.rl_bind);
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         getContext().registerReceiver(mBatInfoReceiver, filter);
         //GH880手机按键服务
@@ -1130,10 +1135,12 @@ public class TalkbackFragment extends BaseFragment {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public void initListener() {
-
         change_group_show_area.setOnTouchListener(new OnTouchListenerImplementation());
         change_group_view.setOnGroupChangedListener(new OnGroupChangedListenerImplementation());
         ll_show_area.setOnTouchListener(new OnTouchListenerImpChengeVolume());
+        rl_bind.setOnClickListener(v -> new UnbindDialog(getActivity(), "执法记录仪123456", () -> {
+
+        }).show());
 
         if (keyMointor != null) {
             try {

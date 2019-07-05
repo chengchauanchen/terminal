@@ -18,7 +18,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.model.NFCBean;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiveNFCWriteResultHandler;
@@ -106,7 +108,9 @@ public class NFCBindingDialog extends Dialog implements DialogInterface.OnDismis
     public void showDialog(int groupId,int isTempGroup,String warningId){
         if(type == TYPE_WAIT){
             //设置刷NFC需要传的数据
-            MyApplication.instance.setNfcBean(new NFCBean(TerminalFactory.getSDK().getUuid(),groupId,isTempGroup,warningId));
+            int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+            long uniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
+            MyApplication.instance.setBindTranslateBean(new RecorderBindTranslateBean(memberId,uniqueNo,groupId,isTempGroup,warningId));
             MyTerminalFactory.getSDK().registReceiveHandler(receiveNFCWriteResultHandler);
         }
         show();
@@ -118,7 +122,7 @@ public class NFCBindingDialog extends Dialog implements DialogInterface.OnDismis
      */
     @Override
     public void onDismiss(DialogInterface dialog) {
-        MyApplication.instance.setNfcBean(null);
+        MyApplication.instance.setBindTranslateBean(null);
         type = TYPE_WAIT;
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNFCWriteResultHandler);
         handler.removeCallbacksAndMessages(null);

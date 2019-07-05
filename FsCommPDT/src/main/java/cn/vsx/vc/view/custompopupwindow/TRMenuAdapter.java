@@ -60,11 +60,11 @@ public class TRMenuAdapter extends RecyclerView.Adapter<TRMenuAdapter.TRMViewHol
         }
         holder.text.setText(menuItem.getText());
 //        holder.text.setTextColor(mContext.getResources().getColor(R.color.video_text_color));
-        if (position==1){
-            holder.viewDivider.setVisibility(View.VISIBLE);
-        }else {
-            holder.viewDivider.setVisibility(View.INVISIBLE);
-        }
+//        if (position==1){
+//            holder.viewDivider.setVisibility(View.VISIBLE);
+//        }else {
+//            holder.viewDivider.setVisibility(View.INVISIBLE);
+//        }
 
 //        if (position == 0){
 //            holder.container.setBackgroundDrawable(addStateDrawable(mContext, -1, R.drawable.trm_popup_top_pressed));

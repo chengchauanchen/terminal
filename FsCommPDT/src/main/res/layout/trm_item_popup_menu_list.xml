@@ -33,6 +33,7 @@
         android:id="@+id/view_divider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_half_one"
+        android:layout_alignParentBottom="true"
         android:background="@color/divider_black_line" />
 
 

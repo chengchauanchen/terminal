@@ -15,16 +15,22 @@ import com.yzq.zxinglibrary.common.Constant;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.ChatBaseActivity;
 import cn.vsx.vc.activity.IncreaseTemporaryGroupMemberActivity;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.NFCBindingDialog;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.Constants;
@@ -65,27 +71,32 @@ public class MyTopRightMenu {
             final MenuItem pushItem = new MenuItem(R.drawable.shipin_up, activity.getString(R.string.text_push));
             final MenuItem pullItem = new MenuItem(R.drawable.shipin_hc, activity.getString(R.string.text_pull));
             final MenuItem createItem = new MenuItem(R.drawable.create_temporary_group,activity.getString(R.string.text_create_temporary_groups));
-            final MenuItem scanItem = new MenuItem(R.drawable.scan,activity.getString(R.string.scan_to_login_pc_device));
+            final MenuItem scanItem = new MenuItem(R.drawable.scan,activity.getString(R.string.scan));
+            final MenuItem nfcItem = new MenuItem(R.drawable.scan,activity.getString(R.string.scan));
             final List<MenuItem> items = new ArrayList<>();
             mTopRightMenu.addMenuItem(pullItem);
             mTopRightMenu.addMenuItem(pushItem);
             mTopRightMenu.addMenuItem(createItem);
             mTopRightMenu.addMenuItem(scanItem);
+//            mTopRightMenu.addMenuItem(nfcItem);
             items.add(pullItem);
             items.add(pushItem);
             items.add(createItem);
             items.add(scanItem);
-            if(items.size() == 1) {
-                mTopRightMenu.setHeight(240);
-            }
-            else if (items.size() == 2){
-                mTopRightMenu.setHeight(480);
-            }
-            else if (items.size() == 3){
-                mTopRightMenu.setHeight(720);
-            }else if (items.size() == 4){
-                mTopRightMenu.setHeight(960);
-            }
+            items.add(nfcItem);
+//            if(items.size() == 1) {
+//                mTopRightMenu.setHeight(240);
+//            }
+//            else if (items.size() == 2){
+//                mTopRightMenu.setHeight(480);
+//            }
+//            else if (items.size() == 3){
+//                mTopRightMenu.setHeight(720);
+//            }else if (items.size() == 4){
+//                mTopRightMenu.setHeight(960);
+//            }else if (items.size() == 5){
+//                mTopRightMenu.setHeight(1200);
+//            }
             mTopRightMenu.setHeight(120)
                     .setWidth(DensityUtil.dip2px(context,200))      //默认宽度wrap_content
                     .showIcon(true)     //显示菜单图标，默认为true
@@ -158,6 +169,15 @@ public class MyTopRightMenu {
                                         //config.setShowFlashLight(true);//是否显示闪光灯
                                         intent.putExtra(Constant.INTENT_ZXING_CONFIG, config);
                                         context.startActivityForResult(intent, NewMainActivity.REQUEST_CODE_SCAN);
+                                    }else if(items.get(position) ==nfcItem){
+                                        int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
+                                        NFCBindingDialog dialog =  new NFCBindingDialog(context, NFCBindingDialog.TYPE_WAIT);
+                                        HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
+                                        if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
+                                            dialog.showDialog(userId, DataUtil.isTempGroup(userId),hashMap.get(userId + ""));
+                                        }else{
+                                            dialog.showDialog(userId, DataUtil.isTempGroup(userId), "");
+                                        }
                                     }
                                     break;
                                 case SPEAKING:

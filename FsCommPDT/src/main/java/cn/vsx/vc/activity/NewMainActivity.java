@@ -3,6 +3,7 @@ package cn.vsx.vc.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
@@ -14,6 +15,10 @@ import android.gesture.GestureLibrary;
 import android.gesture.GestureOverlayView;
 import android.gesture.Prediction;
 import android.net.Uri;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcEvent;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -41,6 +46,7 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.hytera.api.SDKException;
 import com.hytera.api.SDKManager;
 import com.hytera.api.base.common.CallManager;
@@ -70,6 +76,7 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
@@ -106,6 +113,7 @@ import cn.vsx.vc.jump.service.JumpService;
 import cn.vsx.vc.permission.FloatWindowManager;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
+import cn.vsx.vc.receiveHandle.ReceiveNFCWriteResultHandler;
 import cn.vsx.vc.receiveHandle.ReceiveSwitchMainFrgamentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
@@ -131,7 +139,7 @@ import ptt.terminalsdk.tools.ToastUtil;
  * Created by Administrator on 2017/3/16 0016.
  */
 
-public class NewMainActivity extends BaseActivity implements SettingFragmentNew.sendPttState {
+public class NewMainActivity extends BaseActivity implements SettingFragmentNew.sendPttState,NfcAdapter.CreateNdefMessageCallback, NfcAdapter.OnNdefPushCompleteCallback {
     /**============================================================================handler============================================================================================================================**/
     private ReceiveUnReadCountChangedHandler receiveUnReadCountChangedHandler = new ReceiveUnReadCountChangedHandler() {
         @Override
@@ -855,6 +863,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private PopupWindow popupWindow;
     private int moveLeft, moveTop, moveRight, moveBottom;
     private static final int RECEIVEVOICECHANGED = 0;
+
+
+    private NfcAdapter mNfcAdapter;
+    private PendingIntent mPendingIntent;
     public Handler myHandler = new Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(Message msg){
@@ -1018,6 +1030,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
         MyApplication.instance.isPttPress = false;
         talkbackFragment.setPttCurrentState(GroupCallSpeakState.IDLE);
+
+        if (mNfcAdapter != null) {
+            mNfcAdapter.disableForegroundDispatch(this);
+        }
     }
 
     @Override
@@ -1094,7 +1110,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         judgePermission();
 
-        NfcUtil.nfcCheck(this);
+        initNFC();
         startService(new Intent(this,CardService.class));
         //清理数据库
         FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
@@ -1105,6 +1121,17 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         if(!FloatWindowManager.getInstance().checkPermission(this)){
             FloatWindowManager.getInstance().applyPermission(this);
+        }
+    }
+
+    private void initNFC() {
+        mNfcAdapter = NfcAdapter.getDefaultAdapter(this);
+        mPendingIntent = PendingIntent.getActivity(this, 0, new Intent(this,getClass()), 0);
+        if(mNfcAdapter!=null){
+            // 指定要传输文本的回调
+            mNfcAdapter.setNdefPushMessageCallback(this, this);
+            // 传输完成调用
+            mNfcAdapter.setOnNdefPushCompleteCallback(this, this);
         }
     }
 
@@ -1323,6 +1350,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         //清楚所有通知
         NotificationManager notificationManager=(NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
+
+        if (mNfcAdapter != null) {
+            mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, null, null);
+        }
     }
 
 
@@ -1482,6 +1513,20 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
     }
 
+    @Override
+    public NdefMessage createNdefMessage(NfcEvent event) {
+        RecorderBindTranslateBean bean = MyApplication.instance.getBindTranslateBean();
+        if(bean != null){
+            return new NdefMessage(new NdefRecord[] { NfcUtil.creatTextRecord(new Gson().toJson(bean))});
+        }
+        return null;
+    }
+
+    @Override
+    public void onNdefPushComplete(NfcEvent event) {
+        logger.debug("onNdefPushComplete:"+event);
+        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveNFCWriteResultHandler.class,0,"");
+    }
 
     @Override
     public void doOtherDestroy() {

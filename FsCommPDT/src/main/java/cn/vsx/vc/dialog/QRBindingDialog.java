@@ -17,7 +17,7 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.model.NFCBean;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.CodeCreatorUtil;
 import cn.vsx.vc.utils.DensityUtil;
@@ -83,7 +83,7 @@ public class QRBindingDialog extends Dialog implements DialogInterface.OnDismiss
      * 显示NFC弹窗
      */
     public void showDialog(int groupId,int isTempGroup,String warningId){
-         account = new Gson().toJson(new NFCBean(TerminalFactory.getSDK().getUuid(),groupId,isTempGroup,warningId));
+         account = new Gson().toJson(new RecorderBindBean(TerminalFactory.getSDK().getUuid(),groupId,isTempGroup,warningId));
         if(!TextUtils.isEmpty(account)){
             show();
         }

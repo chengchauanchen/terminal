@@ -11,7 +11,7 @@ import org.apache.log4j.Logger;
 
 import java.util.Arrays;
 
-import cn.vsx.hamster.terminalsdk.model.NFCBean;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiveNFCWriteResultHandler;
@@ -44,9 +44,9 @@ public class CardService extends HostApduService {
     public byte[] processCommandApdu(byte[] commandApdu, Bundle extras) {
         //做判断，是否在警情临时组（警情编号和警情临时组id）
         //如果没有，就不发送  return null
-        NFCBean nfcBean = MyApplication.instance.getNfcBean();
-        logger.debug("processCommandApdu---nfcBean:"+nfcBean);
-        if(nfcBean == null){
+        RecorderBindTranslateBean bean = MyApplication.instance.getBindTranslateBean();
+        logger.debug("processCommandApdu---bean:"+bean);
+        if(bean == null){
             return null;
         }
         // 将指令转换成 byte[]
@@ -54,8 +54,8 @@ public class CardService extends HostApduService {
 
         // 判断是否和读卡器发来的数据相同
         if (Arrays.equals(selectAPDU, commandApdu)) {
-//            String account = new Gson().toJson(new NFCBean("1234123",123456789));
-            String account = new Gson().toJson(nfcBean);
+//            String account = new Gson().toJson(new RecorderBindBean("1234123",123456789));
+            String account = new Gson().toJson(bean);
             // 直接模拟返回16位卡号
 //            String account = "6222222200000001";
 

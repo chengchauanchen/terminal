@@ -39,6 +39,8 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
+import com.yzq.zxinglibrary.android.CaptureActivity;
+import com.yzq.zxinglibrary.bean.ZxingConfig;
 import com.zectec.imageandfileselector.base.Constant;
 import com.zectec.imageandfileselector.bean.FileInfo;
 import com.zectec.imageandfileselector.bean.Image;
@@ -90,7 +92,8 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
-import cn.vsx.hamster.terminalsdk.model.NFCBean;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetHistoryMessageRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetWarningMessageDetailHandler;
@@ -154,6 +157,7 @@ import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.IDLE;
+import static cn.vsx.vc.activity.NewMainActivity.REQUEST_CODE_SCAN;
 
 /**
  * Created by gt358 on 2017/8/16.
@@ -533,6 +537,19 @@ public abstract class ChatBaseActivity extends BaseActivity
                         transponMessageMore(bean.getList());
                     }
                 }
+            }
+        }else if(requestCode == REQUEST_CODE_SCAN && resultCode == RESULT_OK){
+            if (data != null) {
+                String result = data.getStringExtra(com.yzq.zxinglibrary.common.Constant.CODED_CONTENT);
+                logger.info("扫描二维码结果："+result);
+                // TODO: 2019/4/10 给注册服务发送扫码结果
+//                if(DataUtil.isLegalPcCode(result)){
+//                    Intent intent  = new Intent(this,PcLoginActivity.class);
+//                    intent.putExtra(cn.vsx.vc.utils.Constants.SCAN_DATA,result);
+//                    startActivity(intent);
+//                }else{
+//                    ToastUtil.showToast(this,"请扫描有效的PC二维码");
+//                }
             }
         }
     }
@@ -1767,7 +1784,8 @@ public abstract class ChatBaseActivity extends BaseActivity
                                     checkNFC(true);
                                     break;
                                 case ReceiverSendFileCheckMessageHandler.QR_CODE://二维码
-                                    showQRDialog();
+//                                    showQRDialog();
+                                    goToScan();
                                     break;
                             }
                         } else {
@@ -1812,6 +1830,23 @@ public abstract class ChatBaseActivity extends BaseActivity
             nfcBindingDialog.showDialog(userId, DataUtil.isTempGroup(userId), "");
         }
     }
+
+    /**
+     * 扫描二维码
+     */
+    private void goToScan(){
+        Intent intent = new Intent(this, CaptureActivity.class);
+        ZxingConfig config = new ZxingConfig();
+        config.setShowbottomLayout(false);//底部布局（包括闪光灯和相册）
+        config.setPlayBeep(true);//是否播放提示音
+        config.setShake(true);//是否震动
+        config.setReactColor(R.color.ok_blue);
+        config.setScanLineColor(R.color.ok_blue);
+        //config.setShowAlbum(true);//是否显示相册
+        //config.setShowFlashLight(true);//是否显示闪光灯
+        intent.putExtra(com.yzq.zxinglibrary.common.Constant.INTENT_ZXING_CONFIG, config);
+        startActivityForResult(intent, REQUEST_CODE_SCAN);
+    }
     /**
      * 显示扫二维码的弹窗
      */
@@ -1853,10 +1888,9 @@ public abstract class ChatBaseActivity extends BaseActivity
     }
 
     @Override public NdefMessage createNdefMessage(NfcEvent event) {
-        NFCBean nfcBean = MyApplication.instance.getNfcBean();
-        if(nfcBean != null){
-            NdefMessage ndefMessage = new NdefMessage(new NdefRecord[] { NfcUtil.creatTextRecord(new Gson().toJson(nfcBean)) });
-            return ndefMessage;
+        RecorderBindTranslateBean bean = MyApplication.instance.getBindTranslateBean();
+        if(bean != null){
+            return new NdefMessage(new NdefRecord[] { NfcUtil.creatTextRecord(new Gson().toJson(bean))});
         }
         return null;
     }

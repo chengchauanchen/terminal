@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/create_tempgroup_bg">
+
+    <TextView
+        android:id="@+id/text_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="@dimen/dp_38"
+        android:paddingBottom="@dimen/dp_38"
+        android:gravity="center"
+        android:text="@string/text_temp_unbind"
+        android:textColor="@color/black"
+        android:textSize="@dimen/sp_20" />
+
+    <View
+        android:id="@+id/v_line"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:layout_below="@+id/text_title"
+        android:background="@color/list_view_item_click"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/v_line"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_cancel"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="@dimen/dp_15"
+            android:paddingBottom="@dimen/dp_15"
+            android:gravity="center"
+            android:text="@string/text_cancel"
+            android:textColor="@color/black"
+            android:textSize="@dimen/sp_20"
+            android:background="@drawable/bg_circle_left_bottom"/>
+
+        <View
+            android:layout_width="@dimen/dp_1"
+            android:layout_height="match_parent"
+            android:background="@color/list_view_item_click"/>
+
+        <TextView
+            android:id="@+id/tv_sure"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="@dimen/dp_15"
+            android:paddingBottom="@dimen/dp_15"
+            android:gravity="center"
+            android:text="@string/text_unbind"
+            android:textColor="@color/key_words"
+            android:textSize="@dimen/sp_20"
+            android:background="@drawable/bg_circle_right_bottom"/>
+    </LinearLayout>
+</RelativeLayout>
