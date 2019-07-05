@@ -2,7 +2,6 @@ package ptt.terminalsdk.tools;
 
 import android.content.Context;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.text.TextUtils;
 
 import java.io.File;
@@ -14,7 +13,7 @@ import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.FileBean;
-import cn.vsx.hamster.terminalsdk.model.NFCBean;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -83,7 +82,7 @@ public class FileTransgerUtil {
      * @return
      */
     public static String getWarningId() {
-        NFCBean bean = DataUtil.getNFCBean();
+        RecorderBindBean bean = DataUtil.getRecorderBindBean();
         if(bean!=null){
              return bean.getWarningId();
         }
