@@ -78,9 +78,10 @@ public class ThirdSendMessage {
     public void connectReceivedService(Context context) {
         //连接成功 就不在连接了(手动将另一线程干掉，再次启动会出问题)
         //非静态不用判断重复连接了，可以多次连接
-//        if(iReceivedVSXMessage!=null){
-//            return;
-//        }
+        ////先判空，避免循环连接
+        if(iReceivedVSXMessage!=null){
+            return;
+        }
 
         //判断我们的应用是否启动
         ServiceConnection conn = new ServiceConnection() {

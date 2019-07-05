@@ -103,9 +103,10 @@ public class VsxSDK {
      */
     public void connectJumpService(Context context) {
         //避免重复连接  非静态不用判断重复连接了，可以多次连接
-//        if(iJump!=null){
-//            return;
-//        }
+        //先判空，避免循环连接
+        if(iJump!=null){
+            return;
+        }
 
         //判断我们的应用是否启动
         ServiceConnection conn = new ServiceConnection() {
