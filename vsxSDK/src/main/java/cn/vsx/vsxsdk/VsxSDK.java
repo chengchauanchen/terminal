@@ -7,11 +7,15 @@ import android.content.ServiceConnection;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.Toast;
 
 import cn.vsx.vc.IJump;
 import cn.vsx.vc.IJump.Stub;
+import cn.vsx.vsxsdk.Interf.IReceivedMessage;
 import cn.vsx.vsxsdk.Interf.JumpInterface;
+import cn.vsx.vsxsdk.constant.ParamKey;
+import cn.vsx.vsxsdk.message.RegistMessageListener;
 import cn.vsx.vsxsdk.service.VsxReceivedService;
 
 import static android.content.Context.BIND_AUTO_CREATE;
@@ -26,14 +30,17 @@ import static android.content.Context.BIND_AUTO_CREATE;
 public class VsxSDK {
 
     private static String APP_KEY = "";
-    private static IJump iJump;
-    private static JumpInterface jumpSDK;
-    private static VsxSDK vsxSDK;
+    private  IJump iJump;
+    private  JumpInterface jumpSDK;
+    private  static VsxSDK vsxSDK;
+    private static RegistMessageListener registMessageListener;
     private Context mContext;
 
     public static void initVsxSDK(Context context) {
         if (vsxSDK == null) {
             String appKey = getAppKey(context);
+            String packageName = context.getApplicationInfo().packageName;
+            Log.e("VsxSDK 包名",packageName);
             vsxSDK = new VsxSDK(context,appKey );
         }
     }
@@ -49,12 +56,13 @@ public class VsxSDK {
     public static String getAppKey(Context context){
         try{
             ApplicationInfo appInfo = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
-            return appInfo.metaData.getString("cn.vsx.sdk.API_KEY");
+            return appInfo.metaData.getString(ParamKey.APP_KEY_META_DATA);
         }catch(PackageManager.NameNotFoundException e){
             e.printStackTrace();
             return "";
         }
     }
+
 
     private VsxSDK(Context context, String appKey) {
         mContext = context;
@@ -80,6 +88,13 @@ public class VsxSDK {
         return jumpSDK;
     }
 
+    public RegistMessageListener getRegistMessageListener() {
+        if (registMessageListener == null) {
+            registMessageListener = new RegistMessageListener();
+        }
+        return registMessageListener;
+    }
+
     /**
      * 1.先启动自己的服务
      * 2.再试图连接对方的服务
@@ -87,7 +102,8 @@ public class VsxSDK {
      * @param context
      */
     public void connectJumpService(Context context) {
-        //避免重复连接
+        //避免重复连接  非静态不用判断重复连接了，可以多次连接
+        //先判空，避免循环连接
         if(iJump!=null){
             return;
         }

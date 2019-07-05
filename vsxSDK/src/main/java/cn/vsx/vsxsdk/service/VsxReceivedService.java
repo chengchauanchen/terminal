@@ -9,6 +9,7 @@ import android.util.Log;
 
 import cn.vsx.vsxsdk.IReceivedVSXMessage;
 import cn.vsx.vsxsdk.VsxSDK;
+import cn.vsx.vsxsdk.message.RegistMessageListener;
 
 /**
  * 作者：ly-xuxiaolong
@@ -33,8 +34,9 @@ public class VsxReceivedService extends Service{
     public class ReceivedMessageBinder extends IReceivedVSXMessage.Stub {
 
         @Override
-        public void receivedMessage(String messageJson) throws RemoteException {
+        public void receivedMessage(String messageJson, int messageType) throws RemoteException {
             Log.e("VsxReceivedService接收:",messageJson);
+            VsxSDK.getInstance().getRegistMessageListener().receivedMessage(messageJson,messageType);
         }
 
         /**

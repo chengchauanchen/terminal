@@ -6,6 +6,7 @@ import android.util.Log;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.jump.bean.SendBean;
+import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.jump.utils.GsonUtils;
 
 abstract class BaseCommand implements IJumpCommand {
@@ -25,7 +26,7 @@ abstract class BaseCommand implements IJumpCommand {
         SendBean sendBean = GsonUtils.sendJsonToBean(sendJson);
         String appKey = sendBean.getAppKey();
         Log.e("JumpService", "APP_KEY:" + appKey);
-        TerminalFactory.getSDK().putParam(Params.APP_KEY,appKey);
+        AppKeyUtils.setAppKey(appKey);
         jumpPage(sendBean);
     }
 
