@@ -68,6 +68,7 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
@@ -1058,6 +1059,15 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         @Override
         public void onSOSKeyUp() throws RemoteException {
 
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        int flags = getIntent().getFlags();
+        if(flags==Intent.FLAG_ACTIVITY_NEW_TASK){//另一个app近来的
+            AppKeyUtils.setAppKey(null);//销毁时，将appKey置空
         }
     }
 }

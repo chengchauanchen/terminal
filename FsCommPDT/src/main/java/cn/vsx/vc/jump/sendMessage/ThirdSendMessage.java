@@ -19,7 +19,7 @@ import static android.content.Context.BIND_AUTO_CREATE;
  */
 public class ThirdSendMessage {
 
-    private static IReceivedVSXMessage iReceivedVSXMessage;
+    private IReceivedVSXMessage iReceivedVSXMessage;
     private static ThirdSendMessage sendMessage;
     private Context mContext;
 
@@ -63,9 +63,9 @@ public class ThirdSendMessage {
      * 发送消息到第三方应用
      * @param messageJson
      */
-    protected void sendMessageToThird(String messageJson){
+    protected void sendMessageToThird(String messageJson,ThirdMessageType messageType){
         try{
-            getiReceivedVSXMessage().receivedMessage(messageJson);
+            getiReceivedVSXMessage().receivedMessage(messageJson,messageType.getCode());
         }catch (Exception e){
             Log.e("ThirdSendMessage",e.toString());
         }
@@ -76,10 +76,11 @@ public class ThirdSendMessage {
      * @param context
      */
     public void connectReceivedService(Context context) {
-        //连接成功 就不在连接了
-        if(iReceivedVSXMessage!=null){
-            return;
-        }
+        //连接成功 就不在连接了(手动将另一线程干掉，再次启动会出问题)
+        //非静态不用判断重复连接了，可以多次连接
+//        if(iReceivedVSXMessage!=null){
+//            return;
+//        }
 
         //判断我们的应用是否启动
         ServiceConnection conn = new ServiceConnection() {
@@ -98,7 +99,7 @@ public class ThirdSendMessage {
 
         Intent intent = new Intent();
         intent.setAction(ParamKey.THIRD_APP_SEND_MESSAGE_SERVICE_PACKAGE_NAME);//
-        intent.setPackage(ParamKey.THIRD_APP_PACKAGE_NAME);//注册服务包名(第三方应用包名)
+//        intent.setPackage(ParamKey.THIRD_APP_PACKAGE_NAME);//注册服务包名(第三方应用包名)
         context.bindService(intent, conn, BIND_AUTO_CREATE);
     }
 

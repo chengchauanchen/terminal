@@ -46,6 +46,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
+import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
@@ -533,4 +534,12 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        int flags = getIntent().getFlags();
+        if(flags==Intent.FLAG_ACTIVITY_NEW_TASK){//另一个app近来的
+            AppKeyUtils.setAppKey(null);//销毁时，将appKey置空
+        }
+    }
 }

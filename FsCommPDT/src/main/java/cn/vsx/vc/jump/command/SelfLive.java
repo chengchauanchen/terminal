@@ -16,6 +16,7 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.vc.R;
 import cn.vsx.vc.jump.bean.SendBean;
 import cn.vsx.vc.jump.constant.CommandEnum;
+import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.jump.utils.MemberUtil;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.utils.MyDataUtil;
@@ -37,20 +38,20 @@ public class SelfLive extends BaseCommand {
 
     @Override
     protected void jumpPage(SendBean sendBean) {
-        int memberNo=MemberUtil.strToInt(sendBean.getMemberNo());
-        int terminalType=sendBean.getTerminalType();
+        int memberNo = MemberUtil.strToInt(sendBean.getMemberNo());
+        int terminalType = sendBean.getTerminalType();
 
-        if(terminalType==-1){
-            if(memberNo==0){
+        if (terminalType == -1) {
+            if (memberNo == 0) {
                 activeStartLive();
-            }else {
+            } else {
                 activeStartLive(memberNo);
             }
-        }else {
-            if(memberNo==0){
+        } else {
+            if (memberNo == 0) {
                 activeStartLive();
-            }else {
-                activeStartLive(memberNo,terminalType);
+            } else {
+                activeStartLive(memberNo, terminalType);
             }
         }
     }
@@ -58,16 +59,15 @@ public class SelfLive extends BaseCommand {
     /**
      * 发起上报，跳到邀请界面
      */
-    private static void activeStartLive(){
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,"",false);
+    private static void activeStartLive() {
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, "", false);
     }
-
 
 
     /**
      * 自己上报，邀请别人来观看
      */
-    private  void activeStartLive(int memberNo) {
+    private void activeStartLive(int memberNo) {
         activeStartLive(memberNo, TerminalMemberType.TERMINAL_PHONE.getCode());
     }
 
@@ -80,23 +80,28 @@ public class SelfLive extends BaseCommand {
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
             TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                boolean isTypeEquals=false;//判断是否进入的个呼方法，没进入需要干掉AppKey
+
                 //根据no查询uniqueNo
                 Account account = DataUtil.getAccountByMemberNo(memberNo, true);
-                if (account != null) {
-                    if (!account.getMembers().isEmpty()) {
-                        List<Member> members = account.getMembers();
-                        for (Member member : members) {
-                            if (member.getType() == type) {
-                                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,
-                                        MyDataUtil.getPushInviteMemberData(member.getUniqueNo(), ReceiveObjectMode.MEMBER.toString()), false);
-                                break;
-                            }
+                if (account != null && !account.getMembers().isEmpty()) {
+                    List<Member> members = account.getMembers();
+                    for (Member member : members) {
+                        if (member.getType() == type) {
+                            isTypeEquals = true;
+                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,
+                                    MyDataUtil.getPushInviteMemberData(member.getUniqueNo(), ReceiveObjectMode.MEMBER.toString()), false);
+                            break;
                         }
+                    }
+                    if(!isTypeEquals){
+                        AppKeyUtils.setAppKey(null);
                     }
                 }
 
             });
         } else {
+            AppKeyUtils.setAppKey(null);
             ToastUtils.showShort(R.string.text_network_connection_abnormal_please_check_the_network);
         }
     }

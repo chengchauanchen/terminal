@@ -2,10 +2,16 @@ package cn.vsx.vc;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 
+import cn.vsx.vsxsdk.Interf.CommonMessageListener;
+import cn.vsx.vsxsdk.Interf.EmergencyVideoLiveListener;
+import cn.vsx.vsxsdk.Interf.GoWatchRTSPListener;
+import cn.vsx.vsxsdk.Interf.IndividualCallListener;
+import cn.vsx.vsxsdk.Interf.LiveInComeListener;
 import cn.vsx.vsxsdk.VsxSDK;
 
 public class MainActivity extends AppCompatActivity {
@@ -65,6 +71,47 @@ public class MainActivity extends AppCompatActivity {
                 VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivity("100040");
             }
         });
+
+        //普通消息监听（文本、语音、图片、视频、定位）
+        VsxSDK.getInstance().getRegistMessageListener().setCommonMessageListener(new CommonMessageListener() {
+            @Override
+            public void onReceived(String messageJson) {
+                Log.d("MainActivity",messageJson);
+            }
+        });
+
+        //收到强制上报图像的通知 消息监听
+        VsxSDK.getInstance().getRegistMessageListener().setEmergencyVideoLiveListener(new EmergencyVideoLiveListener() {
+            @Override
+            public void onReceived(String messageJson) {
+                Log.d("MainActivity",messageJson);
+            }
+        });
+
+        //观看上报视频
+        VsxSDK.getInstance().getRegistMessageListener().setGoWatchRTSPListener(new GoWatchRTSPListener() {
+            @Override
+            public void onReceived(String messageJson) {
+                Log.d("MainActivity",messageJson);
+            }
+        });
+
+        //个呼消息监听
+        VsxSDK.getInstance().getRegistMessageListener().setIndividualCallListener(new IndividualCallListener() {
+            @Override
+            public void onReceived(String messageJson) {
+                Log.d("MainActivity",messageJson);
+            }
+        });
+
+        //收到别人请求我开启直播的通知
+        VsxSDK.getInstance().getRegistMessageListener().setLiveInComeListener(new LiveInComeListener() {
+            @Override
+            public void onReceived(String messageJson) {
+                Log.d("MainActivity",messageJson);
+            }
+        });
+
     }
 
 
@@ -79,4 +126,7 @@ public class MainActivity extends AppCompatActivity {
     public void createTempGroup(View view){
         VsxSDK.getInstance().getJumpSDK().createTemporaryGroup();
     }
+
+
+
 }

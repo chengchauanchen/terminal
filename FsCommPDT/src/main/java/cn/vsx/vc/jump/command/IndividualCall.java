@@ -16,6 +16,7 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.vc.R;
 import cn.vsx.vc.jump.bean.SendBean;
 import cn.vsx.vc.jump.constant.CommandEnum;
+import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.jump.utils.MemberUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -61,19 +62,25 @@ public class IndividualCall extends BaseCommand {
      * @param type     终端类型 1：手机   6 PC
      */
     public void activeIndividualCall(int memberNo, int type) {
+
         int memberNum = checkMemberNo(memberNo);
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            boolean isTypeEquals=false;//判断是否进入的个呼方法，没进入需要干掉AppKey
             Account account = DataUtil.getAccountByMemberNo(memberNum, true);
-            if (account != null) {
-                if (!account.getMembers().isEmpty()) {
-                    List<Member> members = account.getMembers();
-                    for (Member member : members) {
-                        if (type == member.getType()) {
-                            activeIndividualCall(member);
-                            break;
-                        }
+            if (account != null && !account.getMembers().isEmpty()) {
+                List<Member> members = account.getMembers();
+                for (Member member : members) {
+                    if (type == member.getType()) {
+                        isTypeEquals = true;
+                        activeIndividualCall(member);
+                        break;
                     }
                 }
+                if(!isTypeEquals){
+                    AppKeyUtils.setAppKey(null);
+                }
+            }else{
+                AppKeyUtils.setAppKey(null);
             }
         });
     }
@@ -108,10 +115,12 @@ public class IndividualCall extends BaseCommand {
      * @param member
      */
     private void activeIndividualCall(Member member) {
+        member.setOtherInto(true);
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
         } else {
+            AppKeyUtils.setAppKey(null);
             ToastUtils.showShort(R.string.text_network_connection_abnormal_please_check_the_network);
         }
     }

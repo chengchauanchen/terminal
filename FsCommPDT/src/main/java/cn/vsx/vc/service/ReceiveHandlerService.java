@@ -85,6 +85,7 @@ import cn.vsx.vc.activity.WarningMessageDetailActivity;
 import cn.vsx.vc.adapter.StackViewAdapter;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ProgressDialog;
+import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
@@ -485,14 +486,17 @@ public class ReceiveHandlerService extends Service{
 
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_private_call));
+            AppKeyUtils.setAppKey(null);
             return;
         }
         if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_pushing_can_not_private_call));
+            AppKeyUtils.setAppKey(null);
             return;
         }
         if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
             ToastUtil.showToast(ReceiveHandlerService.this,getString(R.string.text_personal_calling_can_not_do_others));
+            AppKeyUtils.setAppKey(null);
             return;
         }
         Intent intent = new Intent(ReceiveHandlerService.this, StartIndividualCallService.class);
@@ -963,15 +967,18 @@ public class ReceiveHandlerService extends Service{
     private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = (uniqueNoAndType,isGroupPushLive) -> {
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_report));
+            AppKeyUtils.setAppKey(null);
             return;
         }
         if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_pushing_can_not_report));
+            AppKeyUtils.setAppKey(null);
             return;
         }
         logger.error("上报给：" + uniqueNoAndType);
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_push_authority));
+            AppKeyUtils.setAppKey(null);
             return;
         }
         if(android.text.TextUtils.isEmpty(uniqueNoAndType)){//要弹出选择成员页
@@ -1021,14 +1028,17 @@ public class ReceiveHandlerService extends Service{
     private ReceiverRequestVideoHandler receiverRequestVideoHandler = (member) -> {
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_request_report));
+            AppKeyUtils.setAppKey(null);
             return;
         }
         if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_pushing_can_not_pull));
+            AppKeyUtils.setAppKey(null);
             return;
         }
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_pull_authority));
+            AppKeyUtils.setAppKey(null);
             return;
         }
         logger.error("请求的直播人：" + member);

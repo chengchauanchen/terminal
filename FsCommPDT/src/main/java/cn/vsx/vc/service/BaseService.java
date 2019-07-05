@@ -49,6 +49,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandl
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverRemoveWindowViewHandler;
 import cn.vsx.vc.utils.Constants;
@@ -273,6 +274,8 @@ public abstract class BaseService extends Service{
         MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverRemoveWindowViewHandler.class,this.getClass().getSimpleName());
         stopSelf();
         finishTransparentActivity();
+
+        AppKeyUtils.setAppKey(null);//退出业务将appKey重置
     }
 
     /**
@@ -283,7 +286,6 @@ public abstract class BaseService extends Service{
         SensorUtil.getInstance().unregistSensor();
         revertStateMachine();
         mHandler.post(this::removeView);
-
     }
 
     private ReceiveForceOfflineHandler receiveForceOfflineHandler = () -> {

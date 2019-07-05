@@ -13,6 +13,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.fragment.EstablishTempGroupFragment;
 import cn.vsx.vc.fragment.SearchFragment;
 import cn.vsx.vc.fragment.SelectedMemberFragment;
+import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSelectedFragmentHandler;
@@ -121,6 +122,15 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
             TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMemberFragmentBackHandler.class);
         }else {
             super.onBackPressed();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        int flags = getIntent().getFlags();
+        if(flags==Intent.FLAG_ACTIVITY_NEW_TASK){//另一个app近来的
+            AppKeyUtils.setAppKey(null);//销毁时，将appKey置空
         }
     }
 }
