@@ -115,7 +115,6 @@ public class IndividualCall extends BaseCommand {
      * @param member
      */
     private void activeIndividualCall(Member member) {
-        member.setOtherInto(true);
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
