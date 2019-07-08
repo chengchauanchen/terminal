@@ -56,7 +56,8 @@ public class FileTransgerUtil {
      * @return
      */
     private static String getPoliceId() {
-        return handleId(TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+        int memberNo = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+        return (memberNo == 0)?"00000000":handleId(memberNo);
     }
     /**
      * 获取警号

@@ -1059,10 +1059,15 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	protected String newUuid() {
 		String account = TerminalFactory.getSDK().getParam(UrlParams.ACCOUNT);
 		if (Util.isEmpty(account)){
-			TelephonyManager telephonyManager = (TelephonyManager)application.getSystemService(Context.TELEPHONY_SERVICE);
-			WifiManager wm = (WifiManager)application.getSystemService(Context.WIFI_SERVICE);
-			account = telephonyManager.getDeviceId() == null ?
-					wm.getConnectionInfo().getMacAddress().hashCode()+"" : telephonyManager.getDeviceId().hashCode()+"";
+			String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+			if(!TextUtils.isEmpty(deviceType)&&(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString()))){
+				account = newIMSI();
+			}else{
+				TelephonyManager telephonyManager = (TelephonyManager)application.getSystemService(Context.TELEPHONY_SERVICE);
+				WifiManager wm = (WifiManager)application.getSystemService(Context.WIFI_SERVICE);
+				account = telephonyManager.getDeviceId() == null ?
+						wm.getConnectionInfo().getMacAddress().hashCode()+"" : telephonyManager.getDeviceId().hashCode()+"";
+			}
 		}
 		String terminalType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE, "");
 		logger.info(" TerminalSDK4Android--------> account = "+account+"---terminalType = "+terminalType);
@@ -1080,6 +1085,35 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 		logger.info(" TerminalSDK4Android--------> newOldUuid = "+account);
 		return account;
+	}
+
+	@Override
+	protected String newIMSIUuid() {
+		String account = TerminalFactory.getSDK().getParam(UrlParams.ACCOUNT);
+		if (Util.isEmpty(account)){
+			account = newIMSI();
+		}
+		String terminalType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE, "");
+		logger.info(" TerminalSDK4Android--------> account = "+account+"---terminalType = "+terminalType);
+		return account+terminalType;
+	}
+
+	@SuppressLint("MissingPermission")
+	@Override
+	public String newIMSI() {
+		try {
+			TelephonyManager telephonyManager=(TelephonyManager)application.getSystemService(Context.TELEPHONY_SERVICE);
+			//获取IMSI号
+			String imsi = telephonyManager.getSubscriberId();
+			if(null == imsi){
+				imsi="";
+			}
+			return imsi;
+//			return "460028027373287";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "";
+		}
 	}
 
 	public void renovateVideoRecord(String videRecordPath){
