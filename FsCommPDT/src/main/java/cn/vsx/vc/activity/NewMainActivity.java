@@ -1587,6 +1587,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             unbindService(conn);
         }
         stopService(new Intent(NewMainActivity.this, BackgroundCameraService.class));
+        MyApplication.instance.stopHandlerService();
     }
 
     @Override
