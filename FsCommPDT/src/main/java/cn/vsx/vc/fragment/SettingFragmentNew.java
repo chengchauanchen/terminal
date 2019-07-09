@@ -681,4 +681,9 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         }
     };
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterPstoreReceiver();
+    }
 }

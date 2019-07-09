@@ -32,6 +32,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -69,6 +70,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.StopGroupCallReason;
+import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -110,6 +112,8 @@ import cn.vsx.vc.fragment.NewsFragment;
 import cn.vsx.vc.fragment.SearchFragment;
 import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
+import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
+import cn.vsx.vc.jump.service.JumpService;
 import cn.vsx.vc.permission.FloatWindowManager;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
@@ -940,6 +944,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         imgbtn_ptt.setVisibility(View.GONE);
         ll_emergency_prompt.setVisibility(View.GONE);
+
+//        thridAppJoin();
+
+        //注册 连接jumpService的广播
+        ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().register(this);
     }
 
     @Override
@@ -1648,5 +1657,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
     public interface BackListener{
         void onBack();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().unregisterReceiver(this);
     }
 }

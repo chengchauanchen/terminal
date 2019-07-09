@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import cn.vsx.vc.IJump;
 import cn.vsx.vc.jump.command.FactoryCommand;
@@ -38,8 +39,9 @@ public class JumpService extends Service {
          * @throws RemoteException
          */
         @Override
-        public void noticeConnectReceivedService() throws RemoteException {
-            ThirdSendMessage.getInstance().connectReceivedService(getApplicationContext());
+        public void noticeConnectReceivedService(String packageName) throws RemoteException {
+            Log.e("JumpService","接收到"+packageName+"发送过来的连接ReceivedService通知");
+            ThirdSendMessage.getInstance().connectReceivedService(getApplicationContext(),packageName,false);
         }
     }
 

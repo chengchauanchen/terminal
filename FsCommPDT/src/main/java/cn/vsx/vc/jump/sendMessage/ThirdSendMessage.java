@@ -7,8 +7,9 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
+import cn.vsx.vc.jump.broadcastReceiver.RegisterBroadcastReceiver;
 import cn.vsx.vc.jump.constant.ParamKey;
 import cn.vsx.vc.jump.service.JumpService;
 import cn.vsx.vsxsdk.IReceivedVSXMessage;
@@ -20,10 +21,9 @@ import static android.content.Context.BIND_AUTO_CREATE;
  */
 public class ThirdSendMessage {
 
-    private IReceivedVSXMessage iReceivedVSXMessage;
     private static ThirdSendMessage sendMessage;
     private Context mContext;
-    private Logger logger = Logger.getLogger(getClass());
+    private final RegisterBroadcastReceiver registerBroadcastReceiver;
 
     public static void initVsxSendMessage(Context context) {
         if (sendMessage == null) {
@@ -41,7 +41,29 @@ public class ThirdSendMessage {
     private ThirdSendMessage(Context context) {
         mContext = context;
         startJumpService(context);
-        connectReceivedService(context);
+        registReceiveHandler();
+        registerBroadcastReceiver = new RegisterBroadcastReceiver();
+        registerBroadcastReceiver.sendBroadcast(context);
+    }
+
+    /**
+     * 获取广播类
+     * @return
+     */
+    public RegisterBroadcastReceiver getRegisterBroadcastReceiver() {
+        if(registerBroadcastReceiver==null){
+            throw new RuntimeException("第三方接收消息服务未初始化");
+        }
+        return registerBroadcastReceiver;
+    }
+
+
+    private void registReceiveHandler(){
+        RegistReceiveHandler.getInstance().registReceiveHandler();
+    }
+
+    private void unregistReceiveHandler(){
+        RegistReceiveHandler.getInstance().unregistReceiveHandler();
     }
 
     /**
@@ -49,16 +71,8 @@ public class ThirdSendMessage {
      * @param context
      */
     private void startJumpService(Context context){
+        Log.e("JumpService","startJumpService");
         context.startService(new Intent(context, JumpService.class));
-    }
-
-    protected IReceivedVSXMessage getiReceivedVSXMessage(){
-        if(iReceivedVSXMessage!=null){
-            return  iReceivedVSXMessage;
-        }else{
-            logger.info("没有绑定第三方应用，不能通知他");
-            return null;
-        }
     }
 
     /**
@@ -67,7 +81,7 @@ public class ThirdSendMessage {
      */
     protected void sendMessageToThird(String messageJson,ThirdMessageType messageType){
         try{
-            getiReceivedVSXMessage().receivedMessage(messageJson,messageType.getCode());
+            Connect3rdParty.getInstance().receivedMessage(messageJson,messageType.getCode());
         }catch (Exception e){
             Log.e("ThirdSendMessage",e.toString());
         }
@@ -77,43 +91,36 @@ public class ThirdSendMessage {
      * 连接第三方应用接收消息的服务
      * @param context
      */
-    public void connectReceivedService(Context context) {
-        //连接成功 就不在连接了(手动将另一线程干掉，再次启动会出问题)
-        //非静态不用判断重复连接了，可以多次连接
-        ////先判空，避免循环连接
-        if(iReceivedVSXMessage!=null){
-            return;
-        }
+    public void connectReceivedService(Context context,String packageName,boolean isNotice) {
 
+        //判断我们的应用是否启动
         ServiceConnection conn = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {
-                iReceivedVSXMessage = IReceivedVSXMessage.Stub.asInterface(service);
-                noticeConnectJumpService();
-                RegistReceiveHandler.getInstance().registReceiveHandler();
+                //连接成功后，将之前的注册全部干掉，重新注册
+                IReceivedVSXMessage iReceivedVSXMessage = IReceivedVSXMessage.Stub.asInterface(service);
+                //连接成功 将连接对象放入连接池中
+                Log.e("connectReceivedService","连接成功");
+                Connect3rdParty.getInstance().addConnect(packageName,iReceivedVSXMessage);
+                if(isNotice){//是否通知第三方连接 JumpService
+                    try {
+                        iReceivedVSXMessage.noticeConnectJumpService();
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
+
             }
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                RegistReceiveHandler.getInstance().unregistReceiveHandler();
+                unregistReceiveHandler();
             }
         };
 
         Intent intent = new Intent();
         intent.setAction(ParamKey.THIRD_APP_SEND_MESSAGE_SERVICE_PACKAGE_NAME);//
-        intent.setPackage(ParamKey.THIRD_APP_PACKAGE_NAME);//注册服务包名(第三方应用包名)
+        intent.setPackage(packageName);//注册服务包名(第三方应用包名)
         context.bindService(intent, conn, BIND_AUTO_CREATE);
     }
-
-    /**
-     * 我 -> 通知第三方app -> 连接我的JumpService
-     */
-    private void noticeConnectJumpService(){
-        try{
-            getiReceivedVSXMessage().noticeConnectJumpService();
-        }catch (Exception e){
-            System.out.println(e);
-        }
-    }
-
 }

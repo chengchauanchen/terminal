@@ -20,7 +20,7 @@ public class GsonUtils {
      */
     public static String getMemberNoToGson(String memberNo){
         SendBean sendBean = new SendBean();
-        sendBean.setMemberNo(memberNo);
+        sendBean.setMemberNo(MemberUtil.checkMemberNo(memberNo));
         return new Gson().toJson(sendBean);
     }
 
@@ -54,7 +54,7 @@ public class GsonUtils {
      */
     public static String getMemberTerminalTypeToGson(String memberNo,int terminalType){
         SendBean sendBean = new SendBean();
-        sendBean.setMemberNo(memberNo);
+        sendBean.setMemberNo(MemberUtil.checkMemberNo(memberNo));
         sendBean.setTerminalType(terminalType);
         return new Gson().toJson(sendBean);
     }
@@ -66,7 +66,7 @@ public class GsonUtils {
      */
     public static String getMemberListToGson(List<String> memberList){
         SendBean sendBean = new SendBean();
-        sendBean.setNumberList(memberList);
+        sendBean.setNumberList(MemberUtil.checkMemberList(memberList));
         return new Gson().toJson(sendBean);
     }
 
@@ -84,7 +84,7 @@ public class GsonUtils {
 
     public static String getMembersGroupsToGson(List<String> memberList,List<String> groupList){
         SendBean sendBean = new SendBean();
-        sendBean.setNumberList(memberList);
+        sendBean.setNumberList(MemberUtil.checkMemberList(memberList));
         sendBean.setGroupList(groupList);
         return new Gson().toJson(sendBean);
     }

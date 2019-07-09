@@ -4,12 +4,10 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
 import cn.vsx.vsxsdk.IReceivedVSXMessage;
 import cn.vsx.vsxsdk.VsxSDK;
-import cn.vsx.vsxsdk.message.RegistMessageListener;
 
 /**
  * 作者：ly-xuxiaolong
@@ -18,9 +16,8 @@ import cn.vsx.vsxsdk.message.RegistMessageListener;
  * 描述：
  * 修订历史：
  */
-public class VsxReceivedService extends Service{
+public class VsxReceivedService extends Service {
 
-    @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return new ReceivedMessageBinder();
@@ -35,17 +32,14 @@ public class VsxReceivedService extends Service{
 
         @Override
         public void receivedMessage(String messageJson, int messageType) throws RemoteException {
-            Log.e("VsxReceivedService接收:",messageJson);
-            VsxSDK.getInstance().getRegistMessageListener().receivedMessage(messageJson,messageType);
+            Log.e("VsxReceivedService接收:", messageJson);
+            VsxSDK.getInstance().getRegistMessageListener().receivedMessage(messageJson, messageType);
         }
 
-        /**
-         * 我 -> 通知第三方app -> 连接我的JumpService
-         * @throws RemoteException
-         */
+        //我-->连接第三方message服务-->成功后-我-->通知第三方 可以连接我的jump服务
         @Override
         public void noticeConnectJumpService() throws RemoteException {
-            VsxSDK.getInstance().connectJumpService(VsxReceivedService.this);
+            VsxSDK.getInstance().connectJumpService(VsxReceivedService.this,false);
         }
     }
 }

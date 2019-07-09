@@ -22,11 +22,13 @@ public class MainActivity extends AppCompatActivity {
     private Button btn_log3;
     private Button btn_log4;
     private Button btn_log5;
+    private Button btn_log6;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        VsxSDK.getInstance().getJumpSDK().registerConnectJumpReceiver(this);
         initView();
     }
 
@@ -36,39 +38,48 @@ public class MainActivity extends AppCompatActivity {
         btn_log3 = findViewById(R.id.btn_log3);
         btn_log4 = findViewById(R.id.btn_log4);
         btn_log5 = findViewById(R.id.btn_log5);
+        btn_log6 = findViewById(R.id.btn_log6);
         //自己上报，邀请别人来观看
         btn_log1.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getInstance().getJumpSDK().activeStartLive("10000120");
+                VsxSDK.getInstance().getJumpSDK().activeStartLive("021222");
             }
         });
         //请求别人上报
         btn_log2.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getInstance().getJumpSDK().requestOtherLive("10000120");
+                VsxSDK.getInstance().getJumpSDK().requestOtherLive("021222");
             }
         });
         //个呼
         btn_log3.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getInstance().getJumpSDK().activeIndividualCall("10000120");
+                VsxSDK.getInstance().getJumpSDK().activeIndividualCall("021222");
             }
         });
         //个人会话
         btn_log4.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getInstance().getJumpSDK().jumpPersonChatActivity("10000120");
+                VsxSDK.getInstance().getJumpSDK().jumpPersonChatActivity("021222");
             }
         });
         //组会话
         btn_log5.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivity("100040");
+                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivity("0");
+            }
+        });
+
+        //打开融合通信app
+        btn_log6.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                VsxSDK.getInstance().getJumpSDK().launchedVSXApp(MainActivity.this);
             }
         });
 
@@ -128,5 +139,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        VsxSDK.getInstance().getJumpSDK().unregisterConnectJumpReceiver(this);
+    }
 }

@@ -1,5 +1,7 @@
 package cn.vsx.vsxsdk.Interf;
 
+import android.content.Context;
+
 import java.util.List;
 
 public interface JumpInterface {
@@ -99,4 +101,21 @@ public interface JumpInterface {
      * @param groups
      */
     void pushVideoLive(List<String> members, List<String> groups);
+
+    /**
+     * 启动融合通信app
+     */
+    void launchedVSXApp(Context context);
+
+    /**
+     * 注册连接jump的广播
+     * @param context
+     */
+    void registerConnectJumpReceiver(Context context);
+
+    /**
+     * 解绑连接jump的广播
+     * @param context
+     */
+    void unregisterConnectJumpReceiver(Context context);
 }

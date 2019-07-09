@@ -13,7 +13,6 @@ interface IReceivedVSXMessage {
 
       //
        void receivedMessage(String messageJson,int messageType);
-
-       //我 -> 通知第三方app -> 连接我的JumpService
+       //通知连接JumpService
        void noticeConnectJumpService();
 }

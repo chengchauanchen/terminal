@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 26
     defaultConfig {
-        applicationId "cn.vsx.vc.daytime"
+        applicationId "cn.vsx.vc.daytime_qzw"
         minSdkVersion 19
         targetSdkVersion 26
         versionCode 1

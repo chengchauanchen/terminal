@@ -14,6 +14,7 @@ import cn.vsx.vc.IJump;
 import cn.vsx.vc.IJump.Stub;
 import cn.vsx.vsxsdk.Interf.IReceivedMessage;
 import cn.vsx.vsxsdk.Interf.JumpInterface;
+import cn.vsx.vsxsdk.broadcastReceiver.RegisterBroadcastReceiver;
 import cn.vsx.vsxsdk.constant.ParamKey;
 import cn.vsx.vsxsdk.message.RegistMessageListener;
 import cn.vsx.vsxsdk.service.VsxReceivedService;
@@ -35,16 +36,14 @@ public class VsxSDK {
     private  static VsxSDK vsxSDK;
     private static RegistMessageListener registMessageListener;
     private Context mContext;
+    private RegisterBroadcastReceiver registerBroadcastReceiver;
 
     public static void initVsxSDK(Context context) {
         if (vsxSDK == null) {
             String appKey = getAppKey(context);
-            String packageName = context.getApplicationInfo().packageName;
-            Log.e("VsxSDK 包名",packageName);
             vsxSDK = new VsxSDK(context,appKey );
         }
     }
-
 
     public static VsxSDK getInstance() {
         if(vsxSDK==null){
@@ -70,8 +69,23 @@ public class VsxSDK {
         //启动接收消息服务ReceivedService
         startReceivedService(context);
         //连接JumpService
-        connectJumpService(context);
+//        connectJumpService(context);
+        registerBroadcastReceiver = new RegisterBroadcastReceiver();
+        //发送一个ReceivedService启动的广播
+        registerBroadcastReceiver.sendMessageActionBroadcast(context);
     }
+
+    /**
+     * 获取广播类
+     * @return
+     */
+    public RegisterBroadcastReceiver getRegisterBroadcastReceiver() {
+        if(registerBroadcastReceiver==null){
+            throw new RuntimeException("VsxSDK未初始化");
+        }
+        return registerBroadcastReceiver;
+    }
+
 
     private void setAppKey(String appKey) {
         APP_KEY = appKey;
@@ -88,6 +102,8 @@ public class VsxSDK {
         return jumpSDK;
     }
 
+
+
     public RegistMessageListener getRegistMessageListener() {
         if (registMessageListener == null) {
             registMessageListener = new RegistMessageListener();
@@ -101,12 +117,13 @@ public class VsxSDK {
      * 3.连接成功后通知对方，连接我。
      * @param context
      */
-    public void connectJumpService(Context context) {
+    public void connectJumpService(final Context context, final boolean isNotice) {
         //避免重复连接  非静态不用判断重复连接了，可以多次连接
         //先判空，避免循环连接
-        if(iJump!=null){
-            return;
-        }
+        //不能判空，当连接成功后，将融合进程干掉，再启动，这个对象死掉了android.os.DeadObjectException
+//        if(iJump!=null){
+//            return;
+//        }
 
         //判断我们的应用是否启动
         ServiceConnection conn = new ServiceConnection() {
@@ -114,7 +131,14 @@ public class VsxSDK {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 iJump = Stub.asInterface(service);
                 //跳转服务连接成功后，通知 融合通信 连接第三方应用的消息接收服务
-                noticeConnectReceivedService();
+                Log.e("VsxSDK","连接JumpService成功");
+                if(isNotice){//是否通知第三方连接 JumpService
+                    try {
+                        noticeConnectReceivedService(context);
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                }
             }
 
             @Override
@@ -132,12 +156,17 @@ public class VsxSDK {
     /**
      * 跳转服务连接成功后，通知 融合通信 连接第三方应用的消息接收服务
      */
-    private void noticeConnectReceivedService(){
+    private void noticeConnectReceivedService(Context context){
         try{
-            getIJump().noticeConnectReceivedService();
+            Log.e("VsxSDK 第三方应用包名：",getPackageName(context));
+            getIJump().noticeConnectReceivedService(getPackageName(context));
         }catch (Exception e){
             System.out.println(e);
         }
+    }
+
+    private String getPackageName(Context context){
+        return context.getApplicationInfo().packageName;
     }
 
     protected IJump getIJump(){

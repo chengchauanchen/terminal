@@ -1,5 +1,8 @@
 package cn.vsx.vsxsdk;
 
+import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 
 import java.util.List;
@@ -8,8 +11,35 @@ import cn.vsx.vsxsdk.Interf.JumpInterface;
 import cn.vsx.vsxsdk.constant.CommandEnum;
 import cn.vsx.vsxsdk.utils.GsonUtils;
 
-
 public class JumpSDK implements JumpInterface {
+
+
+    /**
+     * 注册连接jump的广播
+     * @param context
+     */
+    @Override
+    public void registerConnectJumpReceiver(Context context) {
+        VsxSDK.getInstance().getRegisterBroadcastReceiver().register(context);
+    }
+
+    /**
+     * 解绑连接jump的广播
+     * @param context
+     */
+    @Override
+    public void unregisterConnectJumpReceiver(Context context) {
+        VsxSDK.getInstance().getRegisterBroadcastReceiver().unregisterReceiver(context);
+    }
+
+    /**
+     * 启动融合通信app
+     */
+    @Override
+    public void launchedVSXApp(Context context) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vsxin://project.release.com/jump"));
+        context.startActivity(intent);
+    }
 
     /**
      * 发起上报

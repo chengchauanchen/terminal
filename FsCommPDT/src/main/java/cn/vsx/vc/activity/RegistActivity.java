@@ -993,6 +993,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private void goOn() {
         changeProgressMsg(getString(R.string.text_start_success));
         myHandler.removeCallbacksAndMessages(null);
+        //第三方app包名
+        String third_app_package_name = getIntent().getStringExtra(UrlParams.THIRD_APP_PACKAGE_NAME);
 
         try{
             Class clazz;
@@ -1003,6 +1005,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 clazz = Class.forName("cn.vsx.vc.activity.NewMainActivity");
             }
             Intent intent = new Intent(this,clazz);
+            intent.putExtra(UrlParams.THIRD_APP_PACKAGE_NAME,third_app_package_name);
+            intent.putExtra(UrlParams.IS_REGIST_ACTIVITY_JOIN,true);
             startActivity(intent);
         }catch(ClassNotFoundException e){
             e.printStackTrace();

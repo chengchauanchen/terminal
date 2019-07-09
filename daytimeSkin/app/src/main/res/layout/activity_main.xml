@@ -1,57 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:layout_height="match_parent">
 
-    <Button
-        android:text="自己上报，邀请别人来观看"
-        android:id="@+id/btn_log1"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:context=".MainActivity">
 
-    <Button
-        android:text="别人上报"
-        android:id="@+id/btn_log2"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp" />
+        <Button
+            android:id="@+id/btn_log1"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="自己上报，邀请别人来观看" />
 
-    <Button
-        android:text="个呼"
-        android:id="@+id/btn_log3"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp" />
+        <Button
+            android:id="@+id/btn_log2"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="别人上报" />
 
-    <Button
-        android:text="个人会话"
-        android:id="@+id/btn_log4"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp" />
+        <Button
+            android:id="@+id/btn_log3"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="个呼" />
 
-    <Button
-        android:text="组会话"
-        android:id="@+id/btn_log5"
-        android:layout_width="wrap_content"
-        android:layout_height="60dp" />
-    
-    <Button
-        android:text="发起上报"
-        android:layout_width="wrap_content"
-        android:onClick="startPush"
-        android:layout_height="60dp" />
-    
-    <Button
-        android:text="拨打voip电话"
-        android:layout_width="wrap_content"
-        android:onClick="voipCall"
-        android:layout_height="60dp" />
-    
-    <Button
-        android:text="创建临时组"
-        android:layout_width="wrap_content"
-        android:onClick="createTempGroup"
-        android:layout_height="60dp" />
+        <Button
+            android:id="@+id/btn_log4"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="个人会话" />
 
-</LinearLayout>
+        <Button
+            android:id="@+id/btn_log5"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:text="组会话" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:onClick="startPush"
+            android:text="发起上报" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:onClick="voipCall"
+            android:text="拨打voip电话" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:onClick="createTempGroup"
+            android:text="创建临时组" />
+
+        <Button
+            android:id="@+id/btn_log6"
+            android:layout_width="wrap_content"
+            android:layout_height="60dp"
+            android:onClick="createTempGroup"
+            android:text="打开融合通信app" />
+
+    </LinearLayout>
+</ScrollView>

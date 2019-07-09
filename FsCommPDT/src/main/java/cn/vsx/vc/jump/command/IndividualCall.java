@@ -62,11 +62,9 @@ public class IndividualCall extends BaseCommand {
      * @param type     终端类型 1：手机   6 PC
      */
     public void activeIndividualCall(int memberNo, int type) {
-
-        int memberNum = checkMemberNo(memberNo);
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
             boolean isTypeEquals=false;//判断是否进入的个呼方法，没进入需要干掉AppKey
-            Account account = DataUtil.getAccountByMemberNo(memberNum, true);
+            Account account = DataUtil.getAccountByMemberNo(memberNo, true);
             if (account != null && !account.getMembers().isEmpty()) {
                 List<Member> members = account.getMembers();
                 for (Member member : members) {
@@ -86,27 +84,7 @@ public class IndividualCall extends BaseCommand {
     }
 
 
-    /**
-     * 如果memberNo为6位，默认加"88"
-     *
-     * @param memberNo
-     * @return
-     */
-    private static int checkMemberNo(int memberNo) {
-        String memberNoStr = memberNo + "";
-        if (length(memberNo) <= 6) {
-            memberNoStr = "88" + memberNoStr;
-        } else {
-            return memberNo;
-        }
-        return Integer.parseInt(memberNoStr);
-    }
 
-
-    public static int length(int number) {
-        int length = (number + " ").length();
-        return length;
-    }
 
 
     /**
