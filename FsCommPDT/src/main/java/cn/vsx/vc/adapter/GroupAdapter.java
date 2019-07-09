@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
@@ -167,6 +168,20 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             }else {
                 groupViewHolder.ivMonitor.setImageResource(R.drawable.monitor_close_blue);
             }
+
+            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == group.getNo()){
+                groupViewHolder.tv_change_group.setVisibility(View.GONE);
+                groupViewHolder.iv_current_group.setVisibility(View.VISIBLE);
+            }else {
+                groupViewHolder.tv_change_group.setVisibility(View.VISIBLE);
+                groupViewHolder.iv_current_group.setVisibility(View.GONE);
+            }
+
+            groupViewHolder.tv_change_group.setOnClickListener(view ->{
+                if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) != group.getNo()){
+                    TerminalFactory.getSDK().getGroupManager().changeGroup(group.getNo());
+                }
+            });
             groupViewHolder.ivMessage.setOnClickListener(view -> {
                 Intent intent = new Intent(context, GroupCallNewsActivity.class);
                 intent.putExtra("isGroup", true);
@@ -179,10 +194,11 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
             });
 
             groupViewHolder.ivMonitor.setOnClickListener(view -> {
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,group.getNo());
-//                if(monitorOnClickListener !=null){
-//                    monitorOnClickListener.onMonitorClick(group.getNo());
-//                }
+                if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == group.getNo()){
+                    ToastUtils.showShort(R.string.current_group_cannot_cancel_monitor);
+                }else {
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,group.getNo());
+                }
             });
             groupViewHolder.tvName.setOnClickListener(new View.OnClickListener(){
                 @Override
@@ -212,12 +228,10 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
         if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(group.getNo())){
             return true;
         }
-//        if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == group.getNo()){
-//            return true;
-//        }
-        if(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) == group.getNo()){
+        if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == group.getNo()){
             return true;
         }
+
         return false;
     }
 
@@ -260,6 +274,10 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
         ImageView iv_response_group_icon;
 
+        TextView tv_change_group;
+
+        ImageView iv_current_group;
+
         GroupViewHolder(View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tv_name);
@@ -272,7 +290,8 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
 
             iv_group_logo = itemView.findViewById(R.id.iv_group_logo);
             iv_response_group_icon = itemView.findViewById(R.id.iv_response_group_icon);
-
+            tv_change_group = itemView.findViewById(R.id.tv_change_group);
+            iv_current_group = itemView.findViewById(R.id.iv_current_group);
         }
     }
 

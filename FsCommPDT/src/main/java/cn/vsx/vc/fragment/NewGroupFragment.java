@@ -106,7 +106,7 @@ public class NewGroupFragment extends BaseFragment{
             if(errorCode == BaseCommonCode.SUCCESS_CODE){
                 //加入监听
                 if(currentMonitorGroup.get(monitorGroupNo)){
-                    TerminalFactory.getSDK().getGroupManager().changeGroup(monitorGroupNo);
+//                    TerminalFactory.getSDK().getGroupManager().changeGroup(monitorGroupNo);
                     if(!TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(monitorGroupNo)){
                         TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().add(monitorGroupNo);
                         TerminalFactory.getSDK().getConfigManager().updateTempMonitorGroup();
@@ -116,7 +116,7 @@ public class NewGroupFragment extends BaseFragment{
                     if(monitorGroupNo == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
                         //当前组被移除监听了切换到主组去
                         if(monitorGroupNo != TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)){
-                            TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
+//                            TerminalFactory.getSDK().getGroupManager().changeGroup(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0));
                         }
                     }
                     if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(monitorGroupNo)){
@@ -369,11 +369,6 @@ public class NewGroupFragment extends BaseFragment{
     private ReceiverMonitorViewClickHandler receiverMonitorViewClickHandler = new ReceiverMonitorViewClickHandler(){
         @Override
         public void handler(int groupNo){
-            //主组不能取消监听
-            if(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) == groupNo){
-                ToastUtils.showShort(R.string.main_group_cannot_cancel_monitor);
-                return;
-            }
             //响应组不能取消监听
             Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupNo);
             if(ResponseGroupType.RESPONSE_TRUE.toString().equals(group.getResponseGroupType())){
@@ -386,10 +381,14 @@ public class NewGroupFragment extends BaseFragment{
 
             //如果是当前组，取消当前组
             if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
-                //如果是主组不能取消
-
-                    currentMonitorGroup.put(groupNo,false);
-                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
+                ToastUtils.showShort(R.string.current_group_cannot_cancel_monitor);
+                //既是当前组又是主组不能取消监听
+//                if(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0) == groupNo){
+//                    ToastUtils.showShort(R.string.main_group_cannot_cancel_monitor);
+//                }else {
+//                    currentMonitorGroup.put(groupNo,false);
+//                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,false);
+//                }
 
             }else {
                 if(null != DataUtil.getTempGroupByGroupNo(groupNo)){

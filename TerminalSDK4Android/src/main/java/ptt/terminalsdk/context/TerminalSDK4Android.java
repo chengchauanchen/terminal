@@ -30,6 +30,11 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.allen.library.RxHttpUtils;
+import com.allen.library.config.OkHttpConfig;
+import com.allen.library.cookie.store.SPCookieStore;
+import com.allen.library.interfaces.BuildHeadersListener;
+import com.allen.library.manage.RxUrlManager;
 import com.blankj.utilcode.util.GsonUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -56,6 +61,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,13 +73,12 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.TerminalSDKBaseImpl;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
 import cn.vsx.hamster.terminalsdk.manager.channel.AbsClientChannel;
+import cn.vsx.hamster.terminalsdk.manager.data.DataManager;
 import cn.vsx.hamster.terminalsdk.manager.http.IHttpClient;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -81,12 +86,15 @@ import cn.vsx.hamster.terminalsdk.tools.OperateReceiveHandlerUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import de.mindpipe.android.logging.log4j.LogConfigurator;
+import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import ptt.terminalsdk.BuildConfig;
 import ptt.terminalsdk.IMessageService;
 import ptt.terminalsdk.IMessageService.Stub;
 import ptt.terminalsdk.broadcastreceiver.NetWorkConnectionChangeReceiver;
+import ptt.terminalsdk.manager.MyDataManager;
 import ptt.terminalsdk.manager.Prompt.PromptManager;
 import ptt.terminalsdk.manager.audio.AudioProxy;
 import ptt.terminalsdk.manager.channel.ClientChannel;
@@ -96,6 +104,7 @@ import ptt.terminalsdk.manager.gps.GPSManager;
 import ptt.terminalsdk.manager.gps.recoder.LocationManager;
 import ptt.terminalsdk.manager.gps.recoder.RecorderBDGPSManager;
 import ptt.terminalsdk.manager.gps.recoder.RecorderGPSManager;
+import ptt.terminalsdk.manager.http.AppUrlConfig;
 import ptt.terminalsdk.manager.http.MyHttpClient;
 import ptt.terminalsdk.manager.http.ProgressHelper;
 import ptt.terminalsdk.manager.http.ProgressUIListener;
@@ -153,6 +162,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		//个呼通讯录，请求的是自己的列表，还是所有成员列表
 		putParam(Params.REQUEST_ALL, false);
 		startUVCCameraService(application);
+		initRxHttpUtils();
 		try {
 			File youyuan = application.getFileStreamPath("SIMYOU.ttf");
 				if (!youyuan.exists()){
@@ -1199,5 +1209,88 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 	public boolean isStart(){
 		return started;
+	}
+
+	@Override
+	public DataManager getDataManager(){
+		if(dataManager == null){
+			dataManager = new MyDataManager();
+		}
+		return dataManager;
+	}
+
+	/**
+	 * 全局请求的统一配置（以下配置根据自身情况选择性的配置即可）
+	 */
+	private void initRxHttpUtils() {
+		RxHttpUtils
+				.getInstance()
+				.init(application)
+				.config()
+				//自定义factory的用法
+				//.setCallAdapterFactory(RxJava2CallAdapterFactory.create())
+				//.setConverterFactory(ScalarsConverterFactory.create(),GsonConverterFactory.create(GsonAdapter.buildGson()))
+				//配置全局baseUrl
+				//开启全局配置
+				.setOkClient(createOkHttp());
+	}
+
+	private OkHttpClient createOkHttp() {
+		//        获取证书
+		//        InputStream cerInputStream = null;
+		//        InputStream bksInputStream = null;
+		//        try {
+		//            cerInputStream = getAssets().open("YourSSL.cer");
+		//            bksInputStream = getAssets().open("your.bks");
+		//        } catch (IOException e) {
+		//            e.printStackTrace();
+		//        }
+
+		OkHttpClient okHttpClient = new OkHttpConfig
+				.Builder(application)
+				//添加公共请求头
+				.setHeaders(new BuildHeadersListener() {
+					@Override
+					public Map<String, String> buildHeaders() {
+						HashMap<String, String> hashMap = new HashMap<>();
+						hashMap.put("appVersion", BuildConfig.VERSION_NAME);
+						hashMap.put("client", "android");
+						hashMap.put("token", "your_token");
+						hashMap.put("other_header", URLEncoder.encode("中文需要转码"));
+						return hashMap;
+					}
+				})
+				//添加自定义拦截器
+				//.setAddInterceptor()
+				//开启缓存策略(默认false)
+				//1、在有网络的时候，先去读缓存，缓存时间到了，再去访问网络获取数据；
+				//2、在没有网络的时候，去读缓存中的数据。
+				.setCache(true)
+				.setHasNetCacheTime(10)//默认有网络时候缓存60秒
+				//全局持久话cookie,保存到内存（new MemoryCookieStore()）或者保存到本地（new SPCookieStore(this)）
+				//不设置的话，默认不对cookie做处理
+				.setCookieType(new SPCookieStore(application))
+				//可以添加自己的拦截器(比如使用自己熟悉三方的缓存库等等)
+				//.setAddInterceptor(null)
+				//全局ssl证书认证
+				//1、信任所有证书,不安全有风险（默认信任所有证书）
+				//.setSslSocketFactory()
+				//2、使用预埋证书，校验服务端证书（自签名证书）
+				//.setSslSocketFactory(cerInputStream)
+				//3、使用bks证书和密码管理客户端证书（双向认证），使用预埋证书，校验服务端证书（自签名证书）
+				//.setSslSocketFactory(bksInputStream,"123456",cerInputStream)
+				//设置Hostname校验规则，默认实现返回true，需要时候传入相应校验规则即可
+				//.setHostnameVerifier(null)
+				//全局超时配置
+				.setReadTimeout(10)
+				//全局超时配置
+				.setWriteTimeout(10)
+				//全局超时配置
+				.setConnectTimeout(10)
+				//全局是否打开请求log日志
+				.setDebug(BuildConfig.DEBUG)
+				.build();
+
+		return okHttpClient;
 	}
 }

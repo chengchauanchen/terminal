@@ -18,8 +18,8 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.vc.R;
+import ptt.terminalsdk.bean.GroupBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class ChangeGroupView extends FrameLayout{
@@ -42,8 +42,8 @@ public class ChangeGroupView extends FrameLayout{
 	private BlockingQueue<Integer> commandQueue = new LinkedBlockingQueue<>();
 	private final int maxCommandTimes = 5;
 	private int dataIndexSubtractionViewIndex = Integer.MAX_VALUE;
-	private List<Group> data = new ArrayList<>();
-	private List<Group> tempData = new ArrayList<>();
+	private List<GroupBean> data = new ArrayList<>();
+	private List<GroupBean> tempData = new ArrayList<>();
 	protected OnGroupChangedListener onGroupChangedListener;
 
 	private int temptIndex = 0;
@@ -71,7 +71,7 @@ public class ChangeGroupView extends FrameLayout{
 						worker.wait();
 					}
 					if(commandQueue.size() == 0 && onGroupChangedListener != null){
-						onGroupChangedListener.onGroupChanged(getGroupData(currentDataIndex).getNo(), getGroupData(currentDataIndex).name);
+						onGroupChangedListener.onGroupChanged(getGroupData(currentDataIndex).getNo(), getGroupData(currentDataIndex).getName());
 					}
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -155,11 +155,11 @@ public class ChangeGroupView extends FrameLayout{
 //			right2.setScaleY(edge2Scale);
 		}
 	}
-	public void setData(List<Group> groups, int currentGroupId){
+	public void setData(List<GroupBean> groups, int currentGroupId){
 		data.clear();
 		data.addAll(groups);
 		for(int i = 0 ; i < data.size() ; i++){
-			if(data.get(i).no == currentGroupId){
+			if(data.get(i).getNo() == currentGroupId){
 				currentDataIndex = i;
 				break;
 			}
@@ -307,7 +307,7 @@ public class ChangeGroupView extends FrameLayout{
 		return (getDataRealIndex(index) + 1) + "";
 	}
 
-	private Group getGroupData(int index){
+	private GroupBean getGroupData(int index){
 		return data.get(getDataRealIndex(index));
 	}
 

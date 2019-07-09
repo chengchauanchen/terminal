@@ -6,7 +6,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
+
+import org.apache.log4j.Logger;
 
 import cn.vsx.vc.jump.constant.ParamKey;
 import cn.vsx.vc.jump.service.JumpService;
@@ -22,6 +23,7 @@ public class ThirdSendMessage {
     private IReceivedVSXMessage iReceivedVSXMessage;
     private static ThirdSendMessage sendMessage;
     private Context mContext;
+    private Logger logger = Logger.getLogger(getClass());
 
     public static void initVsxSendMessage(Context context) {
         if (sendMessage == null) {
@@ -54,7 +56,7 @@ public class ThirdSendMessage {
         if(iReceivedVSXMessage!=null){
             return  iReceivedVSXMessage;
         }else{
-            Toast.makeText(mContext, "请打开融合通信", Toast.LENGTH_SHORT).show();
+            logger.info("没有绑定第三方应用，不能通知他");
             return null;
         }
     }
@@ -83,7 +85,6 @@ public class ThirdSendMessage {
             return;
         }
 
-        //判断我们的应用是否启动
         ServiceConnection conn = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName name, IBinder service) {

@@ -72,7 +72,34 @@
             <!--android:layout_marginRight="@dimen/dp_30"-->
             <!--android:src="@drawable/new_current_icon"-->
             <!--android:visibility="invisible" />-->
-
+    
+        <TextView
+            android:id="@+id/tv_change_group"
+            android:layout_width="wrap_content"
+            android:paddingLeft="15dp"
+            android:paddingRight="15dp"
+            android:layout_height="30dp"
+            android:layout_toLeftOf="@id/iv_message"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_20"
+            android:background="@drawable/change_group_button_shape"
+            android:gravity="center"
+            android:text="切组"
+            android:textColor="@color/change_group_text_bg"
+            android:textSize="14sp"
+            android:textStyle="normal" />
+    
+        <ImageView
+            android:id="@+id/iv_current_group"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_toLeftOf="@id/iv_message"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="30dp"
+            android:src="@drawable/new_current_icon"
+            android:visibility="gone" />
+    
+        
         <ImageView
             android:id="@+id/iv_message"
             android:layout_toLeftOf="@id/iv_monitor"

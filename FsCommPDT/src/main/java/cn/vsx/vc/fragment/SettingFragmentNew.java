@@ -311,7 +311,6 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     /***  组呼的时候显示View **/
     private void showViewWhenGroupCall(final String speakerName) {
         icon_laba.setVisibility(View.VISIBLE);
-        icon_laba.setVisibility(View.VISIBLE);
         setting_group_name.setText(speakerName);
     }
 

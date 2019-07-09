@@ -74,8 +74,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandl
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateMonitorGroupViewHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
@@ -92,8 +90,11 @@ import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.view.ChangeGroupView;
 import cn.vsx.vc.view.ChangeGroupView.OnGroupChangedListener;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
+import ptt.terminalsdk.bean.GroupBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.MyDataManager;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.receiveHandler.ReceiveUpdateDepGroupHandler;
 import ptt.terminalsdk.service.BluetoothLeService;
 import ptt.terminalsdk.tools.PhoneAdapter;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -300,10 +301,8 @@ public class TalkbackFragment extends BaseFragment {
             logger.info("TalkbackFragment收到强制切组： toGroupId：" + toGroupId);
             myHandler.post(() -> {
                 setCurrentGroupView();
-                setChangeGroupView();
                 if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false)) || MyApplication.instance.getGroupListenenState() != LISTENING) {
                     change2Silence();
-
                 }
             });
         }
@@ -319,7 +318,6 @@ public class TalkbackFragment extends BaseFragment {
             logger.info("转组消息：" + "errorCode:" + errorCode + "/" + errorDesc);
             if (errorCode != 0 && errorCode != SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
                 myHandler.post(() -> {
-                    setChangeGroupView();
                     if (errorCode == SignalServerErrorCode.RESOURCES_NOT_ENOUGH.getErrorCode()) {
                         ToastUtil.showToast(MyApplication.instance, getString(R.string.text_no_radio_resources_available));
                     } else if (errorCode == SignalServerErrorCode.TEMP_GROUP_LOCKED.getErrorCode()) {
@@ -335,7 +333,6 @@ public class TalkbackFragment extends BaseFragment {
 
                 myHandler.post(() -> {
                     setCurrentGroupView();
-                    setChangeGroupView();
                     setPttText();
                 });
             }
@@ -476,6 +473,12 @@ public class TalkbackFragment extends BaseFragment {
         }
     };
 
+    private ReceiveUpdateDepGroupHandler receiveUpdateDepGroupHandler = new ReceiveUpdateDepGroupHandler(){
+        @Override
+        public void handler(List<GroupBean> groupList){
+            myHandler.post(()-> setChangeGroupView(groupList));
+        }
+    };
 
     /**
      * 登陆响应的消息
@@ -485,8 +488,6 @@ public class TalkbackFragment extends BaseFragment {
         public void handler(int resultCode, String resultDes) {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 myHandler.post(() -> {
-                    //转组数据显示的设置
-                    setChangeGroupView();
                     //当前文件夹、组数据的显示设置
                     setCurrentGroupView();
                 });
@@ -502,26 +503,10 @@ public class TalkbackFragment extends BaseFragment {
         public void handler(int errorCode, String errorDesc) {
             if (errorCode == BaseCommonCode.SUCCESS_CODE) {
                 myHandler.post(() -> {
-                    //转组数据显示的设置
-                    setChangeGroupView();
                     //当前文件夹、组数据的显示设置
                     setCurrentGroupView();
                 });
             }
-        }
-    };
-
-    /**
-     * 更新文件夹和组列表数据
-     */
-    private ReceiveUpdateFoldersAndGroupsHandler receiveUpdateFoldersAndGroupsHandler = new ReceiveUpdateFoldersAndGroupsHandler() {
-        @Override
-        public void handler() {
-            myHandler.post(() -> {
-                //当前文件夹、组数据的显示设置
-                setCurrentGroupView();
-                setChangeGroupView();
-            });
         }
     };
 
@@ -913,19 +898,7 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public void handler() {
             myHandler.post(() -> {
-                setChangeGroupView();
-            });
-        }
-    };
 
-    /**
-     * 更新组数据通知
-     */
-    private ReceiveUpdateMonitorGroupViewHandler receiveUpdateMonitorGroupViewHandler = new ReceiveUpdateMonitorGroupViewHandler() {
-        @Override
-        public void handler() {
-            myHandler.post(() -> {
-                setChangeGroupView();
             });
         }
     };
@@ -1135,7 +1108,7 @@ public class TalkbackFragment extends BaseFragment {
 //        } else {
 //            waitAndFinish();
 //        }
-        setChangeGroupView();
+        setChangeGroupView(MyDataManager.getDepAllGroup());
 
         speechSynthesizer = new SpeechSynthesizer(context, "holder", speechSynthesizerListener);
         // 此处需要将setApiKey方法的两个参数替换为你在百度开发者中心注册应用所得到的apiKey和secretKey
@@ -1171,6 +1144,7 @@ public class TalkbackFragment extends BaseFragment {
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCallingCannotClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
 
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateDepGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEnvironmentMonitorHandler);
@@ -1181,9 +1155,6 @@ public class TalkbackFragment extends BaseFragment {
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
-
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
-
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
@@ -1212,7 +1183,6 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupViewHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateMonitorGroupViewHandler);
 
         ((BaseActivity) context).setOnPTTVolumeBtnStatusChangedListener(new OnPTTVolumeBtnStatusChangedListenerImp());
 
@@ -1312,14 +1282,8 @@ public class TalkbackFragment extends BaseFragment {
         }
     }
 
-    private void setChangeGroupView() {
-        List<Group> groupList = TerminalFactory.getSDK().getConfigManager().getAllListenerGroup();
-//        groupList =  TerminalFactory.getSDK().getConfigManager().getMonitorGroup();
-////        if(groupList == null || groupList.isEmpty()){
-////            groupList = new ArrayList<>();
-////            groupList.add(DataUtil.getGroupByGroupNo(TerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID,0)));
-////        }
-        if (groupList.size() > 0) {
+    private void setChangeGroupView(List<GroupBean> groupList) {
+        if (groupList.size() > 0 && null != change_group_view) {
             change_group_view.setData(groupList, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
         }
     }
@@ -1570,6 +1534,8 @@ public class TalkbackFragment extends BaseFragment {
 
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
 
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateDepGroupHandler);
+
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEnvironmentMonitorHandler);
@@ -1584,8 +1550,6 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
-
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
@@ -1603,9 +1567,7 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupViewHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateMonitorGroupViewHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyZfyBoundPhoneMessageHandler);
-
         try {
             getContext().unregisterReceiver(mBatInfoReceiver);
             getActivity().unregisterReceiver(mbtBroadcastReceiver);

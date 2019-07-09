@@ -113,9 +113,6 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
         windowManager = (WindowManager)getSystemService(WINDOW_SERVICE);
         dialog = LayoutInflater.from(HelpWordActivity.this).inflate(R.layout.layout_problem_dialog, null);
         //华为8.0的手机上将WindowManager的type设置为TYPE_PHONE程序会崩溃
-//        layoutParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
-//                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW+2 ,
-//                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
         layoutParams = new WindowManager.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT,
                 WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.TYPE_PHONE ,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE, PixelFormat.TRANSPARENT);
@@ -124,13 +121,7 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
         } else {
             layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
         }
-//        if(Build.VERSION.SDK_INT>=Build.VERSION_CODES.N_MR1){
-//            layoutParams.type = WindowManager.LayoutParams.FIRST_SYSTEM_WINDOW+2;
-//        }else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-//            layoutParams.type = WindowManager.LayoutParams.TYPE_TOAST;
-//        } else {
-//            layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
-//        }
+
         RelativeLayout root =  dialog.findViewById(R.id.dialog_root);
         ListView list_dialog =  dialog.findViewById(R.id.list_dialog);
         problem.add(getString(R.string.text_group_call_fail));
