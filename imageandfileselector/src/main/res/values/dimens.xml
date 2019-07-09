@@ -15,15 +15,21 @@
     <!--photopicker-->
     <dimen name="actionBarSize" >48dp</dimen>
 
+    <dimen name="dp_340" >340dp</dimen>
     <dimen name="dp_300" >300dp</dimen>
     <dimen name="dp_280" >280dp</dimen>
+    <dimen name="dp_260" >260dp</dimen>
     <dimen name="dp_240" >240dp</dimen>
     <dimen name="dp_225" >225dp</dimen>
     <dimen name="dp_200" >200dp</dimen>
     <dimen name="dp_180" >180dp</dimen>
+    <dimen name="dp_164" >164dp</dimen>
     <dimen name="dp_150" >150dp</dimen>
+    <dimen name="dp_130" >130dp</dimen>
     <dimen name="dp_125" >125dp</dimen>
     <dimen name="dp_120" >120dp</dimen>
+    <dimen name="dp_118" >118dp</dimen>
+    <dimen name="dp_100" >100dp</dimen>
     <dimen name="dp_90" >90dp</dimen>
     <dimen name="dp_80" >80dp</dimen>
     <dimen name="dp_78" >78dp</dimen>
