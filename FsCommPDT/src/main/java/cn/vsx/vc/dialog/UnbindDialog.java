@@ -57,7 +57,7 @@ public class UnbindDialog extends Dialog {
         window.setAttributes(layoutParams);
         setCanceledOnTouchOutside(true);
         setCancelable(true);
-        textTitle.setText(String.format(getContext().getString(R.string.text_temp_unbind),content));
+        textTitle.setText(getContext().getString(R.string.text_temp_unbind));
     }
 
     public interface UnbindListener{

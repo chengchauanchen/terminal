@@ -16,11 +16,13 @@ import android.widget.TextView;
 
 import com.google.gson.Gson;
 
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
+
+import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.CodeCreatorUtil;
 import cn.vsx.vc.utils.DensityUtil;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class QRBindingDialog extends Dialog implements DialogInterface.OnDismissListener {
 
@@ -82,8 +84,10 @@ public class QRBindingDialog extends Dialog implements DialogInterface.OnDismiss
     /**
      * 显示NFC弹窗
      */
-    public void showDialog(int groupId,int isTempGroup,String warningId){
-         account = new Gson().toJson(new RecorderBindBean(TerminalFactory.getSDK().getUuid(),groupId,isTempGroup,warningId));
+    public void showDialog(int groupId,String warningId){
+        int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+        long uniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
+         account = new Gson().toJson(new RecorderBindTranslateBean(memberId,uniqueNo,groupId,warningId));
         if(!TextUtils.isEmpty(account)){
             show();
         }

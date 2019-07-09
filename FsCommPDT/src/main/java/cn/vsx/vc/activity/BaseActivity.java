@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import butterknife.ButterKnife;
+import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
@@ -38,6 +39,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseZfyBoundPhoneByRequestMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -235,6 +237,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseZfyBoundPhoneByRequestMessageHandler);
         registerHeadsetPlugReceiver();
         setPttVolumeChangedListener();
     }
@@ -247,6 +250,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseZfyBoundPhoneByRequestMessageHandler);
     }
 
     @Override
@@ -578,6 +582,20 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                         ToastUtil.showToast(BaseActivity.this, "正在强制重新登录");
                     }
                 });
+            }
+        }
+    };
+
+    /**
+     * 响应执法记录仪绑定警务通（相应给请求人，说明绑定请求是否成功）
+     */
+    private ReceiveResponseZfyBoundPhoneByRequestMessageHandler receiveResponseZfyBoundPhoneByRequestMessageHandler = new ReceiveResponseZfyBoundPhoneByRequestMessageHandler(){
+        @Override
+        public void handler(int resultCode,String resultDesc) {
+            if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                cn.vsx.vc.utils.ToastUtil.showToast(BaseActivity.this,getString(R.string.text_request_bind_success));
+            }else{
+                cn.vsx.vc.utils.ToastUtil.showToast(BaseActivity.this,(android.text.TextUtils.isEmpty(resultDesc))?getString(R.string.text_request_bind_fail):resultDesc);
             }
         }
     };

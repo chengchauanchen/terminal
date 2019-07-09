@@ -59,6 +59,7 @@ import org.easydarwin.easypusher.BackgroundCameraService;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -109,7 +110,6 @@ import cn.vsx.vc.fragment.NewsFragment;
 import cn.vsx.vc.fragment.SearchFragment;
 import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
-import cn.vsx.vc.jump.service.JumpService;
 import cn.vsx.vc.permission.FloatWindowManager;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
@@ -139,7 +139,9 @@ import ptt.terminalsdk.tools.ToastUtil;
  * Created by Administrator on 2017/3/16 0016.
  */
 
-public class NewMainActivity extends BaseActivity implements SettingFragmentNew.sendPttState,NfcAdapter.CreateNdefMessageCallback, NfcAdapter.OnNdefPushCompleteCallback {
+public class NewMainActivity extends BaseActivity implements SettingFragmentNew.sendPttState
+        ,NfcAdapter.CreateNdefMessageCallback, NfcAdapter.OnNdefPushCompleteCallback
+{
     /**============================================================================handler============================================================================================================================**/
     private ReceiveUnReadCountChangedHandler receiveUnReadCountChangedHandler = new ReceiveUnReadCountChangedHandler() {
         @Override
@@ -1389,13 +1391,22 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             if (data != null) {
                 String result = data.getStringExtra(Constant.CODED_CONTENT);
                 logger.info("扫描二维码结果："+result);
+                RecorderBindTranslateBean bean = DataUtil.getRecorderBindTranslateBean(result);
                 // TODO: 2019/4/10 给注册服务发送扫码结果
-                if(DataUtil.isLegalPcCode(result)){
-                    Intent intent  = new Intent(this,PcLoginActivity.class);
-                    intent.putExtra(Constants.SCAN_DATA,result);
+                if(DataUtil.isLegalPcCode(result)) {
+                    //PC登录
+                    Intent intent = new Intent(this, PcLoginActivity.class);
+                    intent.putExtra(Constants.SCAN_DATA, result);
                     startActivity(intent);
+                }else if(bean!=null){
+                    //执法记录仪绑定
+                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                        int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
+                        HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
+                        TerminalFactory.getSDK().getRecorderBindManager().requestBind(bean.getAccountNo(),bean.getUniqueNo(),userId,hashMap.get(userId + ""));
+                    });
                 }else{
-                    ToastUtil.showToast(NewMainActivity.this,"请扫描有效的PC二维码");
+                    ToastUtil.showToast(NewMainActivity.this,getString(R.string.text_please_scan_correct_qr_recorder));
                 }
             }
         }

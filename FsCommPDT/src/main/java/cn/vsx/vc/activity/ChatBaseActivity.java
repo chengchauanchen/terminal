@@ -92,7 +92,6 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
-import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
 import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetHistoryMessageRecordHandler;
@@ -543,13 +542,17 @@ public abstract class ChatBaseActivity extends BaseActivity
                 String result = data.getStringExtra(com.yzq.zxinglibrary.common.Constant.CODED_CONTENT);
                 logger.info("扫描二维码结果："+result);
                 // TODO: 2019/4/10 给注册服务发送扫码结果
-//                if(DataUtil.isLegalPcCode(result)){
-//                    Intent intent  = new Intent(this,PcLoginActivity.class);
-//                    intent.putExtra(cn.vsx.vc.utils.Constants.SCAN_DATA,result);
-//                    startActivity(intent);
-//                }else{
-//                    ToastUtil.showToast(this,"请扫描有效的PC二维码");
-//                }
+                RecorderBindTranslateBean bean = DataUtil.getRecorderBindTranslateBean(result);
+                if(bean!=null){
+                    //执法记录仪绑定
+                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                        int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
+                        HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
+                        TerminalFactory.getSDK().getRecorderBindManager().requestBind(bean.getAccountNo(),bean.getUniqueNo(),userId,hashMap.get(userId + ""));
+                    });
+                }else{
+                    ToastUtil.showToast(ChatBaseActivity.this,getString(R.string.text_please_scan_correct_qr_recorder));
+                }
             }
         }
     }
@@ -1855,9 +1858,9 @@ public abstract class ChatBaseActivity extends BaseActivity
         HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
         //是否是临时组
         if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
-            qrBindingDialog.showDialog(userId, DataUtil.isTempGroup(userId), hashMap.get(userId + ""));
+            qrBindingDialog.showDialog(userId, hashMap.get(userId + ""));
         }else{
-            qrBindingDialog.showDialog(userId, DataUtil.isTempGroup(userId), "");
+            qrBindingDialog.showDialog(userId, "");
         }
     }
 
@@ -2461,7 +2464,6 @@ public abstract class ChatBaseActivity extends BaseActivity
             });
         }
     };
-
 
     public void setSmoothScrollToPosition(int position) {
         groupCallList.smoothScrollToPosition(position);

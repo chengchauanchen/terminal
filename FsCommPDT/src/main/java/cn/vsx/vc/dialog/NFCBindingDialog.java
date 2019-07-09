@@ -110,7 +110,7 @@ public class NFCBindingDialog extends Dialog implements DialogInterface.OnDismis
             //设置刷NFC需要传的数据
             int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
             long uniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
-            MyApplication.instance.setBindTranslateBean(new RecorderBindTranslateBean(memberId,uniqueNo,groupId,isTempGroup,warningId));
+            MyApplication.instance.setBindTranslateBean(new RecorderBindTranslateBean(memberId,uniqueNo,groupId,warningId));
             MyTerminalFactory.getSDK().registReceiveHandler(receiveNFCWriteResultHandler);
         }
         show();

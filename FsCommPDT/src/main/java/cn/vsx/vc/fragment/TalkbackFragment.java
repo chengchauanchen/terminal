@@ -63,6 +63,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEnvironmentMonitorHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyZfyBoundPhoneMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
@@ -523,6 +524,22 @@ public class TalkbackFragment extends BaseFragment {
             });
         }
     };
+
+    /**
+     * 接收到绑定/解绑的结果
+     */
+   private ReceiveNotifyZfyBoundPhoneMessageHandler receiveNotifyZfyBoundPhoneMessageHandler = new ReceiveNotifyZfyBoundPhoneMessageHandler(){
+        @Override
+        public void handler(boolean isBound) {
+        if(!isBound){
+            ToastUtil.showToast(getContext(),getString(R.string.text_unbind_success));
+             myHandler.post(() -> rlBind.setVisibility(View.GONE));
+            }else{
+            ToastUtil.showToast(getContext(),getString(R.string.text_bind_success));
+            myHandler.post(() -> rlBind.setVisibility(View.VISIBLE));
+           }
+        }
+   };
 
     /**
      * 手势滑动监听器
@@ -1031,7 +1048,7 @@ public class TalkbackFragment extends BaseFragment {
     RelativeLayout title_bar;
 
     //解绑布局
-    RelativeLayout rl_bind;
+    RelativeLayout rlBind;
     //    private GestureDetector mGestureDetector;
     private Logger logger = Logger.getLogger(getClass());
     private SpeechSynthesizer speechSynthesizer;
@@ -1082,7 +1099,7 @@ public class TalkbackFragment extends BaseFragment {
         ptt = (Button) mRootView.findViewById(R.id.ptt);
         to_current_group = (ImageView) mRootView.findViewById(R.id.to_current_group);
         talkback_change_session = (ImageView) mRootView.findViewById(R.id.talkback_change_session);
-        rl_bind = (RelativeLayout) mRootView.findViewById(R.id.rl_bind);
+        rlBind = (RelativeLayout) mRootView.findViewById(R.id.rl_bind);
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         getContext().registerReceiver(mBatInfoReceiver, filter);
         //GH880手机按键服务
@@ -1138,10 +1155,8 @@ public class TalkbackFragment extends BaseFragment {
         change_group_show_area.setOnTouchListener(new OnTouchListenerImplementation());
         change_group_view.setOnGroupChangedListener(new OnGroupChangedListenerImplementation());
         ll_show_area.setOnTouchListener(new OnTouchListenerImpChengeVolume());
-        rl_bind.setOnClickListener(v -> new UnbindDialog(getActivity(), "执法记录仪123456", () -> {
-
-        }).show());
-
+        rlBind.setOnClickListener(v -> new UnbindDialog(getActivity(), "", () ->
+                TerminalFactory.getSDK().getThreadPool().execute(() -> TerminalFactory.getSDK().getRecorderBindManager().requestUnBind())).show());
         if (keyMointor != null) {
             try {
                 gotaKeyHandler = keyMointor.setHandler(new GotaKeHandler());
@@ -1179,6 +1194,7 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUnreadMessageAdd1Handler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyZfyBoundPhoneMessageHandler);
         ptt.setOnTouchListener(new OnPttTouchListenerImplementation());
         talkback_change_session.setOnClickListener(v -> GroupCallNewsActivity.startCurrentActivity(context, MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0), DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)), speakingId, speakingName));
         to_current_group.setOnClickListener(view -> {
@@ -1201,7 +1217,6 @@ public class TalkbackFragment extends BaseFragment {
         ((BaseActivity) context).setOnPTTVolumeBtnStatusChangedListener(new OnPTTVolumeBtnStatusChangedListenerImp());
 
     }
-
 
     @Override
     public void initData() {
@@ -1589,6 +1604,7 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupViewHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateMonitorGroupViewHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyZfyBoundPhoneMessageHandler);
 
         try {
             getContext().unregisterReceiver(mBatInfoReceiver);
