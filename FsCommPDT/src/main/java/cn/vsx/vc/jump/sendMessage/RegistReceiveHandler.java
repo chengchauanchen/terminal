@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
@@ -32,6 +33,7 @@ public class RegistReceiveHandler {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGoWatchRTSPHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);
     }
 
 
@@ -44,6 +46,7 @@ public class RegistReceiveHandler {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGoWatchRTSPHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
     }
 
     /**
@@ -107,5 +110,19 @@ public class RegistReceiveHandler {
         map.put("version",message.getVersion());
         String json = new Gson().toJson(map);
         ThirdSendMessage.getInstance().sendMessageToThird(json,ThirdMessageType.NOTIFY_EMERGENCY_VIDEO_LIVE_IN_COMMING);
+    };
+
+
+    private ReceiveMemberAboutTempGroupHandler receiveMemberAboutTempGroupHandler = (isAdd, isLocked, isScan, isSwitch, tempGroupNo, tempGroupName, tempGroupType) -> {
+        Map<String,Object> map = new HashMap<>();
+        map.put("isAdd",isAdd);//是否添加
+        map.put("isLocked",isLocked);//是否锁定（不能切组）
+        map.put("isScan",isScan);//是否添加到扫描（实时听到其它人说话）
+//        map.put("isSwitch",isSwitch);
+        map.put("tempGroupNo",tempGroupNo);//
+        map.put("tempGroupName",tempGroupName);//
+        map.put("tempGroupType",tempGroupType);//COMMON_TEAM_GROUP("普通临时组", 1),BUSINESS_TEAM_GROUP("业务临时组", 2),ACTIVITY_TEAM_GROUP("活动临时组", 3),TO_HELP_COMBAT("合成作战临时组",4);
+        String json = new Gson().toJson(map);
+        ThirdSendMessage.getInstance().sendMessageToThird(json,ThirdMessageType.NOTIFY_MEMBER_ABOUT_TEMP_GROUP);
     };
 }

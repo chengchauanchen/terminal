@@ -12,6 +12,7 @@ import cn.vsx.vsxsdk.Interf.EmergencyVideoLiveListener;
 import cn.vsx.vsxsdk.Interf.GoWatchRTSPListener;
 import cn.vsx.vsxsdk.Interf.IndividualCallListener;
 import cn.vsx.vsxsdk.Interf.LiveInComeListener;
+import cn.vsx.vsxsdk.Interf.TempGroupListener;
 import cn.vsx.vsxsdk.VsxSDK;
 
 public class MainActivity extends AppCompatActivity {
@@ -90,6 +91,14 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("MainActivity",messageJson);
             }
         });
+        //临时组消息
+        VsxSDK.getInstance().getRegistMessageListener().setTempGroupListener(new TempGroupListener() {
+            @Override
+            public void onReceived(String messageJson) {
+                Log.d("MainActivity",messageJson);
+            }
+        });
+
 
         //收到强制上报图像的通知 消息监听
         VsxSDK.getInstance().getRegistMessageListener().setEmergencyVideoLiveListener(new EmergencyVideoLiveListener() {
