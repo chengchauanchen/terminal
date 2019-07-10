@@ -36,6 +36,17 @@ public class GsonUtils {
     }
 
     /**
+     * 将 groupName 转化为SendBean json对象
+     * @param groupName
+     * @return
+     */
+    public static String getGroupNameToGson(String groupName){
+        SendBean sendBean = new SendBean();
+        sendBean.setGroupName(groupName);
+        return new Gson().toJson(sendBean);
+    }
+
+    /**
      * 将 phoneNo 转化为SendBean json对象
      * @param phoneNo
      * @return

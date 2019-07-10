@@ -72,7 +72,8 @@ public class MainActivity extends AppCompatActivity {
         btn_log5.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivity("0");
+//                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivity("0");
+                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivityForName("临时组7777");
             }
         });
 
