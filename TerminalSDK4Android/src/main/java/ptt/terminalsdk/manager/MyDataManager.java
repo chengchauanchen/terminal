@@ -14,8 +14,6 @@ import java.util.Map;
 import cn.vsx.hamster.common.RequestDataType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.data.DataManager;
-import cn.vsx.hamster.terminalsdk.model.Group;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import io.reactivex.schedulers.Schedulers;
 import ptt.terminalsdk.bean.DepData;
@@ -48,14 +46,11 @@ public class MyDataManager extends DataManager{
      * 更新当前组部门下的所有组
      */
     public void updateDepAllGroup(){
-        int currentGroupNo = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-        Group currentGroup = DataUtil.getGroupByGroupNo(currentGroupNo);
-        logger.info("updateDepAllGroup---"+currentGroup);
         //查询所在部门的组
         Map<String, String> paramsMap = new HashMap<>();
         paramsMap.put("type", RequestDataType.DEPARTMENTS_GROUPS_DATA.toString());
         paramsMap.put("memberId", String.valueOf(TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L)));
-        paramsMap.put("id", String.valueOf(currentGroup.getDeptId()));
+        paramsMap.put("id", String.valueOf(TerminalFactory.getSDK().getParam(Params.CURRENT_DEP_ID,0L)));
         ApiManager.getFileServerApi()
                 .getDeptData(paramsMap)
                 .subscribeOn(Schedulers.io())
