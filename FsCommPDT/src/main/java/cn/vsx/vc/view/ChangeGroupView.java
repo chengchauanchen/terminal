@@ -394,12 +394,20 @@ public class ChangeGroupView extends FrameLayout{
 			@Override
 			public void onAnimationEnd(Animator animation) {
 				if(command == LEFT_ONE_COMMAND){
-					temptIndex++;
+					if(temptIndex == textViewList.size()-1){
+						temptIndex =0;
+					}else {
+						temptIndex++;
+					}
 					currentDataIndex++;
 					resetData();
 				}
 				else if(command == RIGHT_ONE_COMMAND){
-					temptIndex--;
+					if(temptIndex == 0){
+						temptIndex = textViewList.size()-1;
+					}else {
+						temptIndex--;
+					}
 					currentDataIndex--;
 					resetData();
 				}
