@@ -2,8 +2,10 @@ package cn.vsx.vsxsdk;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.util.List;
 
@@ -37,9 +39,25 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void launchedVSXApp(Context context) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("vsxin://project.release.com/jump"));
-        context.startActivity(intent);
+        startIntent(context,"vsxin://project.release.com/jump");
     }
+
+    private void startIntent(Context context,String url){
+        PackageManager packageManager = context.getPackageManager();
+        String packageName = "cn.vsx.vc";//要打开应用的包名
+        Intent launchIntentForPackage = packageManager.getLaunchIntentForPackage(packageName);
+        if(launchIntentForPackage != null){
+            //scheme
+
+            Uri uri = Uri.parse(url);
+            Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+            intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+            context.startActivity(intent);
+        }else{
+            Toast.makeText(context, "手机未安装该应用", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     /**
      * 发起上报
