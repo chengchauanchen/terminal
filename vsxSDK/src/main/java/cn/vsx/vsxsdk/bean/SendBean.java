@@ -8,10 +8,19 @@ import java.util.List;
 public class SendBean extends BaseBean {
     private String memberNo;//警号
     private String groupNo;//组号
+    private String groupName;//组名
     private int terminalType=-1;//终端类型 1:手机   6:PC
     List<String > numberList;//警号list
     List<String> groupList;//组号list
     private String phoneNo;//手机号
+
+    public String getGroupName() {
+        return groupName;
+    }
+
+    public void setGroupName(String groupName) {
+        this.groupName = groupName;
+    }
 
     public String getPhoneNo() {
         return phoneNo;

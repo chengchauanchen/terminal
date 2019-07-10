@@ -5,6 +5,7 @@ import cn.vsx.vsxsdk.Interf.EmergencyVideoLiveListener;
 import cn.vsx.vsxsdk.Interf.GoWatchRTSPListener;
 import cn.vsx.vsxsdk.Interf.IndividualCallListener;
 import cn.vsx.vsxsdk.Interf.LiveInComeListener;
+import cn.vsx.vsxsdk.Interf.TempGroupListener;
 import cn.vsx.vsxsdk.constant.ThirdMessageType;
 
 public class RegistMessageListener {
@@ -14,6 +15,7 @@ public class RegistMessageListener {
     private IndividualCallListener individualCallListener;
     private LiveInComeListener liveInComeListener;
     private CommonMessageListener commonMessageListener;
+    private TempGroupListener tempGroupListener;
 
     public void receivedMessage(String messageJson, int messageType) {
         if (messageType == ThirdMessageType.NOTIFY_DATA_MESSAGE.getCode()) {//接收到普通消息
@@ -35,6 +37,10 @@ public class RegistMessageListener {
         } else if (messageType == ThirdMessageType.NOTIFY_EMERGENCY_VIDEO_LIVE_IN_COMMING.getCode()) {//收到强制上报图像的通知
             if (emergencyVideoLiveListener != null) {
                 emergencyVideoLiveListener.onReceived(messageJson);
+            }
+        }else if(messageType == ThirdMessageType.NOTIFY_MEMBER_ABOUT_TEMP_GROUP.getCode()){
+            if (tempGroupListener != null) {
+                tempGroupListener.onReceived(messageJson);
             }
         }
     }
@@ -82,5 +88,14 @@ public class RegistMessageListener {
      */
     public void setCommonMessageListener(CommonMessageListener commonMessageListener) {
         this.commonMessageListener = commonMessageListener;
+    }
+
+    /**
+     * jie收警情临时组消息
+     *
+     * @param tempGroupListener
+     */
+    public void setTempGroupListener(TempGroupListener tempGroupListener) {
+        this.tempGroupListener = tempGroupListener;
     }
 }

@@ -96,7 +96,7 @@ public class MyApplication extends Application {
         MyApplication.instance.setBindTranslateBean(null);
 
         //初始化 向地三方应用同步消息的service
-		ThirdSendMessage.initVsxSendMessage(this);
+		//ThirdSendMessage.initVsxSendMessage(this);
 	}
 
 	public void setTerminalMemberType(){

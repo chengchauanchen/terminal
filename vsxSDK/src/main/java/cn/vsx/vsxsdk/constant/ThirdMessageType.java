@@ -10,7 +10,8 @@ public enum ThirdMessageType {
     NOTIFY_INDIVIDUAL_CALL_IN_COMMING("个呼来了",2),
     GO_WATCH_RTSP("观看上报视频",3),
     NOTIFY_LIVING_IN_COMMING("收到别人请求我开启直播的通知",4),
-    NOTIFY_EMERGENCY_VIDEO_LIVE_IN_COMMING("收到强制上报图像的通知",5);
+    NOTIFY_EMERGENCY_VIDEO_LIVE_IN_COMMING("收到强制上报图像的通知",5),
+    NOTIFY_MEMBER_ABOUT_TEMP_GROUP("接收警情消息",6);
 
     private String value;
     private int code;

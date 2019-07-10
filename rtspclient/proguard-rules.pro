@@ -16,7 +16,7 @@
 #   public *;
 #}
 # 忽略警告
--ignorewarning
+#-ignorewarning
 
 -keepclassmembers class org.easydarwin.video.EasyRTSPClient {
    public *;

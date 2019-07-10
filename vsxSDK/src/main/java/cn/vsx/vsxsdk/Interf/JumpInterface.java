@@ -68,6 +68,13 @@ public interface JumpInterface {
     void jumpGroupChatActivity(String groupNo);
 
     /**
+     * 跳转到组会话
+     *
+     * @param groupName 组名
+     */
+    void jumpGroupChatActivityForName(String groupName);
+
+    /**
      * voip电话
      *
      * @param phoneNo

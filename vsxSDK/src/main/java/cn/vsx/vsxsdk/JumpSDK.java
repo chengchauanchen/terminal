@@ -192,6 +192,16 @@ public class JumpSDK implements JumpInterface {
         }
     }
 
+    @Override
+    public void jumpGroupChatActivityForName(String groupName) {
+        try {
+            String json = GsonUtils.getGroupNameToGson(groupName);
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.GroupChat.getType());//;
+        } catch (Exception e) {
+            Log.e("JumpSDK", "跳转到组会话失败");
+        }
+    }
+
     /**
      * voip电话
      *

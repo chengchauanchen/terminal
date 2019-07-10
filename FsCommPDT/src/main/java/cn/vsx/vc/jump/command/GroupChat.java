@@ -1,15 +1,18 @@
 package cn.vsx.vc.jump.command;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.jump.bean.SendBean;
 import cn.vsx.vc.jump.constant.CommandEnum;
 import cn.vsx.vc.jump.constant.ParamKey;
 import cn.vsx.vc.jump.utils.MemberUtil;
+import cn.vsx.vc.utils.ToastUtil;
 
 /**
  * 组会话
@@ -29,7 +32,12 @@ public class GroupChat extends BaseCommand {
     @Override
     protected void jumpPage(SendBean sendBean) {
         int groupNo = MemberUtil.strToInt(sendBean.getGroupNo());
-        jumpGroupChatActivity(getContext(), groupNo);
+        String groupName = sendBean.getGroupName();
+        if(TextUtils.isEmpty(groupName)){
+            jumpGroupChatActivity(getContext(), groupNo);
+        }else{
+            jumpGroupChatActivityForName(getContext(),groupName);
+        }
     }
 
     /**
@@ -44,5 +52,14 @@ public class GroupChat extends BaseCommand {
         }
         Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupNo);
         GroupCallNewsActivity.startCurrentActivity(context, groupNo, group.getName(), 0, "", true);
+    }
+
+    public void jumpGroupChatActivityForName(Context context, String groupName) {
+        Group group =  DataUtil.getTempGroupByGroupName(groupName);
+        if(group==null){
+            ToastUtil.showToast(context,"未找到当前组");
+            return;
+        }
+        GroupCallNewsActivity.startCurrentActivity(context, group.getNo(), group.getName(), 0, "", true);
     }
 }
