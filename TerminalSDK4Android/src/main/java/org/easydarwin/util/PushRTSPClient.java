@@ -4,9 +4,7 @@ import android.content.Context;
 import android.graphics.SurfaceTexture;
 import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
-import android.text.TextUtils;
 
-import org.easydarwin.muxer.EasyMuxer;
 import org.easydarwin.push.EasyPusher;
 import org.easydarwin.push.InitCallback;
 import org.easydarwin.push.Pusher;
@@ -38,9 +36,9 @@ public class PushRTSPClient{
     private static final int VIDEO_RECODE_PER_TIME = 5 * 60 * 1000;
 
     public PushRTSPClient(Context context, String PLAYKEY,
-                     SurfaceTexture surfaceTexture){
+                          SurfaceTexture surfaceTexture, ResultReceiver mResultReceiver){
         pusher = new EasyPusher();
-        easyRTSPPlayer = new EasyRTSPPlayer(context,PLAYKEY,surfaceTexture);
+        easyRTSPPlayer = new EasyRTSPPlayer(context,PLAYKEY,surfaceTexture,mResultReceiver);
     }
 
     public void start(final String url, int type, int mediaType, String user, String pwd){
@@ -70,8 +68,8 @@ public class PushRTSPClient{
     }
 
 
-    public void setRTSPInfo(String ip,String port,String id, ResultReceiver mResultReceiver, InitCallback callBack){
-        easyRTSPPlayer.setRTSPInfo(pusher,ip,port,id,mResultReceiver,callBack);
+    public void setRTSPInfo(String ip,String port,String id, InitCallback callBack){
+        easyRTSPPlayer.setRTSPInfo(pusher,ip,port,id,callBack);
     }
 
     public void setSurfaceTexture(SurfaceTexture surfaceTexture){

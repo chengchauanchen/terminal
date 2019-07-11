@@ -1,7 +1,10 @@
 package cn.vsx.vc.service;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.dsp.bean.CInt2Pracel;
 import android.dsp.bean.CInt4Pracel;
 import android.os.Build;
@@ -21,8 +24,6 @@ import com.hytera.api.base.common.CommonManager;
 
 import org.apache.log4j.Logger;
 
-import java.util.ArrayList;
-
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
@@ -30,6 +31,10 @@ import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSwitchCameraViewHandler;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
+
+import static cn.vsx.vc.utils.Constants.SYSTEM_DIALOG_REASON_HOME_KEY;
+import static cn.vsx.vc.utils.Constants.SYSTEM_DIALOG_REASON_KEY;
+import static cn.vsx.vc.utils.Constants.SYSTEM_DIALOG_REASON_RECENT_APPS;
 
 public class SwitchCameraService extends BaseService{
 
@@ -50,6 +55,7 @@ public class SwitchCameraService extends BaseService{
     private PushLiveMemberList pushLiveMemberList;
     private boolean isGroupPushLive;
     private String theme;
+    private HomeWatcherReceiver mHomeKeyReceiver;
 
     public SwitchCameraService(){}
 
@@ -132,6 +138,10 @@ public class SwitchCameraService extends BaseService{
         mIvOutCamera.setOnClickListener(outCameraOnClickListener);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUVCCameraConnectChangeHandler);
 
+        //注册Home和最近任务监听广播
+        mHomeKeyReceiver = new HomeWatcherReceiver();
+        final IntentFilter homeFilter = new IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+        registerReceiver(mHomeKeyReceiver, homeFilter);
     }
 
     @Override
@@ -139,10 +149,13 @@ public class SwitchCameraService extends BaseService{
         super.onDestroy();
         mHandler.removeCallbacksAndMessages(null);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUVCCameraConnectChangeHandler);
+        unregisterReceiver(mHomeKeyReceiver);
     }
 
     @Override
-    protected void showPopMiniView(){}
+    protected void showPopMiniView(){
+        stopBusiness();
+    }
 
     private View.OnClickListener phoneCameraOnclickListener = v -> {
         MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveRemoveSwitchCameraViewHandler.class);
@@ -266,5 +279,23 @@ public class SwitchCameraService extends BaseService{
             sb.append(Character.forDigit(aBuffer & 15, 16));
         }
         return sb.toString();
+    }
+
+    /**
+     * 监听Home键
+     */
+    class HomeWatcherReceiver extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)) {
+                String reason = intent.getStringExtra(SYSTEM_DIALOG_REASON_KEY);
+                if (SYSTEM_DIALOG_REASON_HOME_KEY.equals(reason)||SYSTEM_DIALOG_REASON_RECENT_APPS.equals(reason)) {
+                    logger.info("监听到返回键");
+                    removeView();
+                }
+            }
+        }
     }
 }

@@ -296,3 +296,7 @@
 -dontwarn com.mapbox.services.android.location.MockLocationEngine
 
 -keep class cn.vsx.yuv.**{ *; }
+
+#海能达SDK
+-keep class com.hytera.**{*;}
+-keep class android.dsp.**{*;}

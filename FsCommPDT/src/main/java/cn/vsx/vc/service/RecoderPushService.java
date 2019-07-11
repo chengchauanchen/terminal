@@ -264,9 +264,9 @@ public class RecoderPushService extends BaseService{
     private View.OnClickListener hangUpOnClickListener = v-> finishVideoLive();
 
     private View.OnClickListener retractOnClickListener = v -> {
-        if(pushRTSPClient != null){
-            pushRTSPClient.stop();
-        }
+//        if(pushRTSPClient != null){
+//            pushRTSPClient.stop();
+//        }
         showPopMiniView();
     };
 
@@ -590,14 +590,18 @@ public class RecoderPushService extends BaseService{
     }
 
     private void pushLawRecorder(SurfaceTexture surface){
-        if(null == mResultReceiver){
-            mResultReceiver = new RtspReceiver(new Handler());
+        if(null != pushRTSPClient){
+            pushRTSPClient = null;
+        }
+        if(null != mResultReceiver ){
+            mResultReceiver = null;
         }
         if(null == pushCallback){
             pushCallback = new PushCallback();
         }
-        pushRTSPClient = new PushRTSPClient(this, MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(),surface);
-        pushRTSPClient.setRTSPInfo(ip,port,id,mResultReceiver, pushCallback);
+        mResultReceiver = new RtspReceiver(new Handler());
+        pushRTSPClient = new PushRTSPClient(this, MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(),surface,mResultReceiver);
+        pushRTSPClient.setRTSPInfo(ip,port,id, pushCallback);
         pushRTSPClient.setSurfaceTexture(surface);
         pushRTSPClient.start(Constants.LAWRECODER, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "");
     }

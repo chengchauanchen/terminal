@@ -21,6 +21,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
 
+import org.apache.log4j.Logger;
 import org.easydarwin.audio.AudioCodec;
 import org.easydarwin.muxer.EasyAACMuxer;
 import org.easydarwin.push.EasyPusher;
@@ -127,7 +128,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
     private ByteBuffer mCSD1;
     private long millis;
     private String dataStr;
-
+    private Logger logger = Logger.getLogger(this.getClass());
 //    private RtmpClient mRTMPClient = new RtmpClient();
 
     public boolean isRecording() {
@@ -291,12 +292,12 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
      * @param key     SDK key
      * @param surface 显示视频用的surface
      */
-    public EasyRTSPPlayer(Context context, String key, SurfaceTexture surface) {
+    public EasyRTSPPlayer(Context context, String key, SurfaceTexture surface, ResultReceiver receiver) {
         mTexture = surface;
         mSurface = new Surface(surface);
         mContext = context;
         mKey = key;
-
+        mRR = receiver;
     }
 
 
@@ -1045,6 +1046,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
                     }
                 }
                 mPusher.initPush(mContext, mRtspCallBack);
+                logger.info("initPush ---mMediaInfo:" + mMediaInfo);
                 Log.e(TAG, "initPush ---mMediaInfo:" + mMediaInfo);
                 if(null != mMediaInfo){
                     mPusher.setMediaInfo(mMediaInfo.videoCodec,mMediaInfo.fps,mMediaInfo.audioCodec,mMediaInfo.channel,mMediaInfo.sample,mMediaInfo.bitPerSample);
@@ -1054,6 +1056,8 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
             Log.e(TAG, "视频frameInfo.codec:" + frameInfo.codec+"--frameInfo.buffer:"+frameInfo.buffer.length+"--frameInfo.offset:"+frameInfo.offset+"--frameInfo.length:"+frameInfo.length);
             if(mPusher != null) {
                 mPusher.push(frameInfo.buffer, frameInfo.offset, frameInfo.length, 0, EasyPusher.FrameType.FRAME_TYPE_VIDEO);
+                logger.info("push------视频frameInfo.codec:" + frameInfo.codec+"--frameInfo.buffer:"+frameInfo.buffer.length+"--frameInfo.offset:"+frameInfo.offset+"--frameInfo.length:"+frameInfo.length);
+
             }
 //            Log.d(TAG, String.format("queue size :%d", mQueue.size()));
             try {
@@ -1081,6 +1085,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
             if(frameInfo.codec == EASY_SDK_AUDIO_CODEC_AAC){
                 if(mPusher != null){
                     mPusher.push(frameInfo.buffer, frameInfo.offset, frameInfo.length, 0, EasyPusher.FrameType.FRAME_TYPE_AUDIO);
+                    logger.info("push-----音频"+frameInfo.buffer);
                 }
             }
 
@@ -1160,12 +1165,11 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
         if (rr != null) rr.send(RESULT_EVENT, resultData);
     }
 
-    public void setRTSPInfo(Pusher pusher,String ip,String port,String id, ResultReceiver receiver, InitCallback callBack){
+    public void setRTSPInfo(Pusher pusher,String ip,String port,String id, InitCallback callBack){
         mPusher = pusher;
         this.ip = ip;
         this.port = port;
         this.id = id;
-        mRR = receiver;
         mRtspCallBack = callBack;
     }
 
