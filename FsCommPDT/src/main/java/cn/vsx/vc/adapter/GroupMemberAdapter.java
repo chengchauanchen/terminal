@@ -205,6 +205,10 @@ public class GroupMemberAdapter extends BaseAdapter {
 
     }
 
+    public void setDelete(boolean isDelete){
+        this.isDelete = isDelete;
+    }
+
     final static class ViewHolder {
         LinearLayout ll_person_search_item;
         TextView tvLetter;

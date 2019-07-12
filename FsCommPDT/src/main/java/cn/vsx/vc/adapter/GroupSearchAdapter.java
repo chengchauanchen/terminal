@@ -102,10 +102,10 @@ public class GroupSearchAdapter extends BaseAdapter {
             Intent intent = new Intent(context, GroupCallNewsActivity.class);
             intent.putExtra("isGroup", true);
             intent.putExtra("uniqueNo",searchGroupList.get(position).getUniqueNo());
-            intent.putExtra("userId", searchGroupList.get(position).id);//组id
+            intent.putExtra("userId", searchGroupList.get(position).getNo());//组id
             intent.putExtra("userName", searchGroupList.get(position).name);
-            intent.putExtra("speakingId",searchGroupList.get(position).id);
-            intent.putExtra("speakingName",searchGroupList.get(position).name);
+//            intent.putExtra("speakingId",searchGroupList.get(position).getNo());
+//            intent.putExtra("speakingName",searchGroupList.get(position).name);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
             if (mItemBtnClickListener!=null){

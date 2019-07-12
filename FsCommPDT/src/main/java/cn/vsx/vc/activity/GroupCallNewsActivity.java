@@ -44,7 +44,6 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
-import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
@@ -320,13 +319,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         mGroupId = userId;
 
         isCurrentGroup = (userId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
-
-        if (!isCurrentGroup) {
-            ptt.setText("切到此组 说话");
-            ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-            TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
-        }
-
         setIvMonitorDrawable();
         funcation.setFunction(true, userId);
         //能否发消息
@@ -345,14 +337,32 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         refreshPtt();
     }
 
+    private void switchToGroup(){
+        ptt.setText("切到此组 说话");
+        ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
+        TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
+    }
 
     private void refreshPtt(){
-        Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(userId);
-        //响应组  普通用户  不在响应状态
-        if(ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) &&
-                !groupByGroupNo.isHighUser() &&
-                !TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(mGroupId)){
-            change2Forbid();
+        //先判断权限
+        if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
+            //再判断是否为当前组
+            if(isCurrentGroup){
+                Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(userId);
+                //响应组  普通用户  不在响应状态
+                if(ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) &&
+                        !groupByGroupNo.isHighUser() &&
+                        !TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(mGroupId)){
+                    change2Forbid();
+                }else {
+                    stateView();
+                }
+            }else {
+                switchToGroup();
+            }
+        }else {
+            ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
+            ptt.setText(R.string.text_no_group_calls);
         }
     }
 
@@ -683,7 +693,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 if (MyApplication.instance.isMiniLive) {
                     ToastUtil.showToast(GroupCallNewsActivity.this, "小窗口模式不能进行其他业务");
                 } else {
-                    int resultCode = -1;
                     if (event.getAction() == MotionEvent.ACTION_DOWN) {
                         MyTerminalFactory.getSDK().getGroupManager().changeGroup(userId);
                     }
@@ -847,14 +856,15 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 
         if (currentCallMode == CallMode.GENERAL_CALL_MODE) {
             mHandler.post(() -> {
-                if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTING
-                        || MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING) {
-                    change2Waiting();
-                } else if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
-                    //什么都不用做
-                } else {
-                    change2Listening();
-                }
+                refreshPtt();
+//                if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTING
+//                        || MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.WAITING) {
+//                    change2Waiting();
+//                } else if (MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
+//                    //什么都不用做
+//                } else {
+//                    change2Listening();
+//                }
             });
         }
     };
@@ -876,12 +886,13 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
 //            groupScanId = 0;
         mHandler.post(() -> {
             if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
-                if (MyApplication.instance.isPttPress && MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE) {
-                    change2Speaking();
-                }
-                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.WAITING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTED) {
-                    change2Silence();
-                }
+                refreshPtt();
+//                if (MyApplication.instance.isPttPress && MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.IDLE) {
+//                    change2Speaking();
+//                }
+//                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.WAITING && MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTED) {
+//                    change2Silence();
+//                }
             }
         });
     };
@@ -892,13 +903,14 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = (resultCode, resultDesc) -> {
         logger.info("主动方停止组呼的消息ReceiveCeaseGroupCallConformationHander");
         mHandler.post(() -> {
-            if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
-                if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
-                    change2Listening();
-                } else {
-                    change2Silence();
-                }
-            }
+            refreshPtt();
+//            if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
+//                if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
+//                    change2Listening();
+//                } else {
+//                    change2Silence();
+//                }
+//            }
             setViewEnable(true);
         });
     };
@@ -958,13 +970,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             logger.info("转组成功回调消息");
             handler.post(() -> {
                 if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
-                    if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
-                        ptt.setBackgroundResource(R.drawable.shape_news_ptt_listen);
-                        ptt.setText(R.string.text_ptt);
-                    } else {
-                        ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-                        ptt.setText(R.string.text_no_group_calls);
-                    }
+                    refreshPtt();
+
 
                     TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
                     isCurrentGroup = !isCurrentGroup;
@@ -1060,13 +1067,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         public void handler(int currentGroupId, int errorCode, String errorDesc){
             if(errorCode == BaseCommonCode.SUCCESS_CODE){
                 if(currentGroupId == userId){
-                    if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
-                        ptt.setBackgroundResource(R.drawable.shape_news_ptt_listen);
-                        ptt.setText(R.string.text_ptt);
-                    } else {
-                        ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
-                        ptt.setText(R.string.text_no_group_calls);
-                    }
+                    refreshPtt();
 
                     TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
                     isCurrentGroup = !isCurrentGroup;

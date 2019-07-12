@@ -261,7 +261,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
             memberList.setAdapter(sortAdapter);
             sortAdapter.notifyDataSetChanged();
         }else if(i == R.id.delete_text){
-            if(MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size() < 2){//当前组仅剩创建者本身的时候点击删除销临时组
+            if(currentGroupMembers.size() <= 2){//当前组仅剩创建者本身的时候点击删除销临时组
                 final AlertDialog alertDialog = new AlertDialog.Builder(GroupMemberActivity.this).create();
                 alertDialog.show();
                 Display display = getWindowManager().getDefaultDisplay();
@@ -405,15 +405,16 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
         public void handler(int methodResult, String resultDesc, int tempGroupNo){
             if(methodResult == BaseCommonCode.SUCCESS_CODE){
                 if(tempGroupNo == groupId && canDelete){
-                    myHandler.postDelayed(() -> {
-                        if(isTemporaryGroup){
-                            TerminalFactory.getSDK().getThreadPool().execute(() -> TerminalFactory.getSDK().getDataManager().getMemberByTempNo(groupId));
-                        }else {
-                            MyTerminalFactory.getSDK().getGroupManager().getGroupCurrentOnlineMemberListNewMethod(groupId, TerminalMemberStatusEnum.ONLINE.toString());
-                        }
-                        ToastUtil.showToast(GroupMemberActivity.this,getString(R.string.text_delete_success));
-                    },2000);
-
+                    TerminalFactory.getSDK().getDataManager().getMemberByTempNo(groupId);
+                    myHandler.post(()->{
+                        add_btn.setVisibility(View.VISIBLE);
+                        delete_btn.setVisibility(View.VISIBLE);
+                        delete_text.setVisibility(View.GONE);
+                        cancel_text.setVisibility(View.GONE);
+                        sortAdapter.setDelete(false);
+                        sortAdapter.notifyDataSetChanged();
+                    });
+                    ToastUtil.showToast(GroupMemberActivity.this,getString(R.string.text_delete_success));
                 }
             }
         }
