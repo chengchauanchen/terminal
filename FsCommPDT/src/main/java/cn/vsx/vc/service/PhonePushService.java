@@ -350,7 +350,7 @@ public class PhonePushService extends BaseService{
         port = String.valueOf(streamMediaServerPort);
         id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "_" + callId;
         //如果是组内上报，在组内发送一条上报消息
-        sendGroupMessage(streamMediaServerIp,streamMediaServerPort,callId,pushMemberList,isGroupPushLive);
+//        sendGroupMessage(streamMediaServerIp,streamMediaServerPort,callId,pushMemberList,isGroupPushLive);
         startPush();
 //        startRecord();
     }, 1000);

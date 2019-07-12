@@ -31,7 +31,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 
 	private final Logger logger = Logger.getLogger(getClass());
 	private final int timeOut = 30 * 1000;
-	private static final String DEFAULT_ENCODING = "utf8";
+	private static final String DEFAULT_ENCODING = "UTF-8";
 	@Override
 	public String postJson(String url, String jsonMessage) {
 		try {

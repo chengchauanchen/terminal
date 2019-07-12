@@ -154,7 +154,7 @@ public class MyDataUtil{
                     String[] split = string.split("_");
                     if(split.length>1&& ReceiveObjectMode.valueOf(split[1]).getCode() == ReceiveObjectMode.GROUP.getCode()){
                         for (Group group: groups) {
-                            if(StringUtil.toLong(split[0]) == group.getUniqueNo()){
+                            if(StringUtil.toLong(split[0]) == group.getNo()){
                                 list.add(group);
                                 break;
                             }

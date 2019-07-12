@@ -1415,7 +1415,12 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     TerminalFactory.getSDK().getThreadPool().execute(() -> {
                         int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
                         HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
-                        TerminalFactory.getSDK().getRecorderBindManager().requestBind(bean.getAccountNo(),bean.getUniqueNo(),userId,hashMap.get(userId + ""));
+                        int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+                        if(hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))){
+                            TerminalFactory.getSDK().getRecorderBindManager().requestBind(memberId,bean.getUniqueNo(),userId,hashMap.get(userId + ""));
+                        }else{
+                            TerminalFactory.getSDK().getRecorderBindManager().requestBind(memberId,bean.getUniqueNo(),userId,"");
+                        }
                     });
                 }else{
                     ToastUtil.showToast(NewMainActivity.this,getString(R.string.text_please_scan_correct_qr_recorder));
