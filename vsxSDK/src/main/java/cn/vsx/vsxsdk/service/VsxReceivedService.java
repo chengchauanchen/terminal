@@ -6,6 +6,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
+import cn.vsx.vsxsdk.CommandCache;
 import cn.vsx.vsxsdk.IReceivedVSXMessage;
 import cn.vsx.vsxsdk.VsxSDK;
 
@@ -40,6 +41,11 @@ public class VsxReceivedService extends Service {
         @Override
         public void noticeConnectJumpService() throws RemoteException {
             VsxSDK.getInstance().connectJumpService(VsxReceivedService.this,false);
+        }
+
+        @Override
+        public void continueBeforeActions() throws RemoteException {
+            CommandCache.getInstance().doCommandCache();
         }
     }
 }

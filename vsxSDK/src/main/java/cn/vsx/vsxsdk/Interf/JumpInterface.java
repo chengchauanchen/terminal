@@ -125,4 +125,5 @@ public interface JumpInterface {
      * @param context
      */
     void unregisterConnectJumpReceiver(Context context);
+
 }

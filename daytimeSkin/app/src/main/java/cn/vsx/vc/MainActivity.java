@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 //                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivity("0");
-                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivityForName("临时组7777");
+                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivityForName("临时组777");
             }
         });
 

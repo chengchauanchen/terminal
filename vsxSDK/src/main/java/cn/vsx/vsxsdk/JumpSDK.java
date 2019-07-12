@@ -15,6 +15,11 @@ import cn.vsx.vsxsdk.utils.GsonUtils;
 
 public class JumpSDK implements JumpInterface {
 
+    private Context context;
+
+    public JumpSDK(Context context) {
+        this.context = context;
+    }
 
     /**
      * 注册连接jump的广播
@@ -39,6 +44,7 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void launchedVSXApp(Context context) {
+        Toast.makeText(context, "正在开启融合通信", Toast.LENGTH_SHORT).show();
         startIntent(context,"vsxin://project.release.com/jump");
     }
 
@@ -64,11 +70,12 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void activeStartLive() {
+        String json = GsonUtils.getEmptySendGson();
         try {
-            String json = GsonUtils.getEmptySendGson();
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.SelfLive.getType());
         } catch (Exception e) {
             Log.e("JumpSDK", "发起上报失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.SelfLive.getType());
         }
     }
 
@@ -77,11 +84,12 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void activeStartLive(String memberNo) {
+        String json = GsonUtils.getMemberNoToGson(memberNo);
         try {
-            String json = GsonUtils.getMemberNoToGson(memberNo);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.SelfLive.getType());//;
         } catch (Exception e) {
             Log.e("JumpSDK", "自己上报，邀请别人来观看 失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.SelfLive.getType());
         }
     }
 
@@ -92,11 +100,12 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void activeStartLive(String memberNo, int type) {
+        String json = GsonUtils.getMemberTerminalTypeToGson(memberNo, type);
         try {
-            String json = GsonUtils.getMemberTerminalTypeToGson(memberNo, type);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.SelfLive.getType());//;
         } catch (Exception e) {
             Log.e("JumpSDK", "自己上报，邀请别人来观看 失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.SelfLive.getType());
         }
     }
 
@@ -107,11 +116,12 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void requestOtherLive(String memberNo) {
+        String json = GsonUtils.getMemberNoToGson(memberNo);
         try {
-            String json = GsonUtils.getMemberNoToGson(memberNo);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.OtherLive.getType());//;
         } catch (Exception e) {
             Log.e("JumpSDK", "请求别人上报失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.OtherLive.getType());
         }
     }
 
@@ -123,11 +133,12 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void requestOtherLive(String memberNo, int type) {
+        String json = GsonUtils.getMemberTerminalTypeToGson(memberNo, type);
         try {
-            String json = GsonUtils.getMemberTerminalTypeToGson(memberNo, type);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.OtherLive.getType());//;
         } catch (Exception e) {
             Log.e("JumpSDK", "请求别人上报");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.OtherLive.getType());
         }
     }
 
@@ -138,11 +149,12 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void activeIndividualCall(String memberNo) {
+        String json = GsonUtils.getMemberNoToGson(memberNo);
         try {
-            String json = GsonUtils.getMemberNoToGson(memberNo);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.IndividualCall.getType());//;
         } catch (Exception e) {
             Log.e("JumpSDK", "发起个呼失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.IndividualCall.getType());
         }
     }
 
@@ -154,11 +166,12 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void activeIndividualCall(String memberNo, int type) {
+        String json = GsonUtils.getMemberTerminalTypeToGson(memberNo, type);
         try {
-            String json = GsonUtils.getMemberTerminalTypeToGson(memberNo, type);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.IndividualCall.getType());//;
         } catch (Exception e) {
             Log.e("JumpSDK", "发起个呼失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.IndividualCall.getType());
         }
     }
 
@@ -169,11 +182,12 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void jumpPersonChatActivity(String memberNo) {
+        String json = GsonUtils.getMemberNoToGson(memberNo);
         try {
-            String json = GsonUtils.getMemberNoToGson(memberNo);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.PersonChat.getType());//;
         } catch (Exception e) {
             Log.e("JumpSDK", "跳转到个人会话失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.PersonChat.getType());
         }
     }
 
@@ -184,21 +198,23 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void jumpGroupChatActivity(String groupNo) {
+        String json = GsonUtils.getGroupNoToGson(groupNo);
         try {
-            String json = GsonUtils.getGroupNoToGson(groupNo);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.GroupChat.getType());//;
         } catch (Exception e) {
             Log.e("JumpSDK", "跳转到组会话失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.GroupChat.getType());
         }
     }
 
     @Override
     public void jumpGroupChatActivityForName(String groupName) {
+        String json = GsonUtils.getGroupNameToGson(groupName);
         try {
-            String json = GsonUtils.getGroupNameToGson(groupName);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.GroupChat.getType());//;
         } catch (Exception e) {
             Log.e("JumpSDK", "跳转到组会话失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.GroupChat.getType());
         }
     }
 
@@ -209,11 +225,12 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void voipCall(String phoneNo) {
+        String json = GsonUtils.getPhoneNoToGson(phoneNo);
         try {
-            String json = GsonUtils.getPhoneNoToGson(phoneNo);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.VoipCall.getType());
         } catch (Exception e) {
             Log.e("JumpSDK", "voip电话失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.VoipCall.getType());
         }
     }
 
@@ -222,11 +239,12 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void createTemporaryGroup() {
+        String json = GsonUtils.getEmptySendGson();
         try {
-            String json = GsonUtils.getEmptySendGson();
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.CreateTempGroup.getType());
         } catch (Exception e) {
             Log.e("JumpSDK", "创建临时组失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.CreateTempGroup.getType());
         }
     }
 
@@ -260,11 +278,22 @@ public class JumpSDK implements JumpInterface {
      */
     @Override
     public void pushVideoLive(List<String> members, List<String> groups) {
+        String json = GsonUtils.getMembersGroupsToGson(members, groups);
         try {
-            String json = GsonUtils.getMembersGroupsToGson(members, groups);
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.pushVideoLive.getType());
         } catch (Exception e) {
             Log.e("JumpSDK", "上报视频失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.pushVideoLive.getType());
         }
+    }
+
+    /**
+     * 缓存指令参数,并打开融合通信app
+     * @param json
+     * @param type
+     */
+    private void doCacheCommandAndLaunchedVSXApp(String json,int type){
+        CommandCache.getInstance().setCommandCacheData(json, type);
+        launchedVSXApp(context);
     }
 }

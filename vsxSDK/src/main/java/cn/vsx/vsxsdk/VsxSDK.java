@@ -97,7 +97,7 @@ public class VsxSDK {
 
     public JumpInterface getJumpSDK() {
         if (jumpSDK == null) {
-            jumpSDK = new JumpSDK();
+            jumpSDK = new JumpSDK(mContext);
         }
         return jumpSDK;
     }
@@ -173,7 +173,7 @@ public class VsxSDK {
         if(iJump!=null){
             return  iJump;
         }else{
-            Toast.makeText(mContext, "请打开融合通信", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(mContext, "正在开启融合通信", Toast.LENGTH_SHORT).show();
             return null;
         }
     }

@@ -108,6 +108,13 @@ public class ThirdSendMessage {
                     }catch (Exception e){
                         e.printStackTrace();
                     }
+                }else{//做他之前没有做完的指令
+                    try {
+//                        Connect3rdParty.getInstance().getConnectForPackageName(packageName).continueBeforeActions();
+                        iReceivedVSXMessage.continueBeforeActions();
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
 
             }
