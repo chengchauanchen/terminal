@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 import java.util.concurrent.BlockingQueue;
 
 import cn.zectec.speex.Speex;
@@ -118,5 +119,17 @@ public class CollectAndSendWork implements Runnable {
         AudioResourceManager.INSTANCE.releaseAudioRecord();
         AudioResourceManager.INSTANCE.releaseSpeex4Sender();
         AudioResourceManager.INSTANCE.releaseSendSocket();
+    }
+
+    private void sendData(){
+        try{
+            SocketChannel channel  = SocketChannel.open();
+            channel.configureBlocking(true);
+//            channel.socket().connect(new InetSocketAddress(remoteAddress, remotePort), 1000 * connectTimeout);
+            channel.socket().setSoTimeout(1000 * 5);
+
+        }catch(IOException e){
+            e.printStackTrace();
+        }
     }
 }

@@ -283,7 +283,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         public void handler(int memberId, String memberName, int groupId, final String groupName, CallMode currentCallMode) {
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 mHandler.post(() -> {
-                    setting_group_name.setText(groupName);
+                    setting_group_name.setText(memberName);
                     icon_laba.setVisibility(View.VISIBLE);
                 });
             }

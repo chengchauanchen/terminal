@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/common_bg">
+    <RelativeLayout
+        android:id="@+id/rl_title"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/y45"
+        android:background="@drawable/titel_bar_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent"
+        android:paddingTop="@dimen/x20">
+        
+        <ImageView
+            android:id="@+id/news_bar_back"
+            android:layout_width="@dimen/x20"
+            android:layout_height="@dimen/x20"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x15"
+            android:src="@drawable/news_bar_return" />
+        
+        
+        <TextView
+            android:id="@+id/bar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toRightOf="@+id/news_bar_back"
+            android:textColor="@color/bar_text_white"
+            android:textSize="@dimen/sp_20"
+            android:layout_marginLeft="20dp"
+            android:text="@string/text_monitor_group_list"/>
+        
+    </RelativeLayout>
+    
+    <TextView
+        android:id="@+id/tv_max_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/text_monior_group_count_max"
+        app:layout_constraintTop_toBottomOf="@id/rl_title"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/textview_color"
+        android:textSize="@dimen/sp_15"/>
+    
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/tv_max_count"
+        android:layout_marginTop="10dp"/>
+    
+</android.support.constraint.ConstraintLayout>

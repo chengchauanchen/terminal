@@ -609,4 +609,10 @@
     <string name="text_request_bind_success">绑定请求发送成功</string>
     <string name="text_request_bind_fail">绑定请求发送失败</string>
     <string name="current_group_cannot_cancel_monitor">当前组不能取消监听</string>
+    <string name="text_monitor_group">监听组</string>
+    <string name="text_monitor_group_list">监听组列表</string>
+    <string name="text_monior_group_count_max">只能主动添加5个监听组</string>
+    <string name="current_group_cannot_remove">当前组不能移除监听</string>
+    <string name="temp_group_cannot_remove">临时组不能移除监听</string>
+    <string name="response_group_cannot_remove">响应组不能移除监听</string>
 </resources>

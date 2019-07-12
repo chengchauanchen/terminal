@@ -65,7 +65,24 @@
                 android:id="@+id/physicalButtonPTT"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
-
+    
+            <LinearLayout
+                android:id="@+id/ll_group_scan"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/y30"
+                android:layout_marginTop="@dimen/dp_half_one"
+                android:background="@color/itemblue"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="visible">
+        
+                <TextView
+                    style="@style/setting_text_style_left"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/text_monitor_group" />
+    
+            </LinearLayout>
 
             <!--扫描组设置-->
             <cn.vsx.vc.view.ChangeMainGroupLayout

@@ -370,7 +370,7 @@
             </intent-filter>
         </activity>
 
-
+        <activity android:name=".activity.MonitorGroupListActivity"/>
         <!--跳转服务-->
         <service
             android:name=".jump.service.JumpService"

@@ -51,6 +51,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.activity.AboutActivity;
 import cn.vsx.vc.activity.BleActivity;
 import cn.vsx.vc.activity.HelpWordActivity;
+import cn.vsx.vc.activity.MonitorGroupListActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.utils.ActivityCollector;
@@ -105,6 +106,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     TextView tv_ble_name;
 
     private static final int DISABLE_KEYGUARD = 0;
+    private LinearLayout ll_group_scan;
 
     @Override
     public int getContentViewId() {
@@ -126,12 +128,14 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         setting_group_name = (TextView) mRootView.findViewById(R.id.setting_group_name);
         btn_lock_screen_setting = (MToggleButton) mRootView.findViewById(R.id.btn_lock_screen_setting);
         add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
+        ll_group_scan = mRootView.findViewById(R.id.ll_group_scan);
         activity = getActivity();
         mRootView.findViewById(R.id.rl_ble).setOnClickListener(this);
         mRootView.findViewById(R.id.ll_helpAndfeedback).setOnClickListener(this);
         mRootView.findViewById(R.id.ll_log_upload).setOnClickListener(this);
         mRootView.findViewById(R.id.ll_exit).setOnClickListener(this);
         mRootView.findViewById(R.id.about).setOnClickListener(this);
+        ll_group_scan.setOnClickListener(this);
         setVideoIcon();
         setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
         voice_image.setImageResource(BitmapUtil.getVolumeImageResourceByValue(false));
@@ -442,6 +446,9 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
             if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
                 return;
             exitApp();
+        }else if(i == R.id.ll_group_scan){
+            Intent intent = new Intent(context, MonitorGroupListActivity.class);
+            startActivity(intent);
         }
     }
 
