@@ -56,7 +56,6 @@ import cn.vsx.vc.receiveHandle.ReceiverStartAuthHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.KeyboarUtils;
 import cn.vsx.vc.utils.NetworkUtil;
-import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SetToListUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -346,7 +345,9 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
     public void onClick(View view){
         switch (view.getId()){
              case R.id.ll_qr_recoder_scan:
-                 goToQRCodeScan();
+//                 goToQRCodeScan();
+//                 String imsi = MyTerminalFactory.getSDK().getIMSI();
+//                 logger.debug("获取imsi:"+imsi);
                  break;
          }
     }
@@ -441,7 +442,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
 
     private void start() {
         //发送认证消息，uuid到注册服务器，判断是注册还是登录
-        if(DataUtil.getNFCBean() != null){
+        if(DataUtil.getRecorderBindBean() != null){
             if(!MyTerminalFactory.getSDK().isStart()){
                 TerminalFactory.getSDK().start();
                 PromptManager.getInstance().start();
@@ -503,7 +504,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
     @Override
     public void initData() {
          //开启解绑倒计时
-        MyApplication.instance.startAccountValidClock();
+//        MyApplication.instance.startAccountValidClock();
     }
 
     @Override
@@ -522,6 +523,18 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
         }
         reAuthCount = 0;
 
+    }
+
+    @Override
+    protected void startLiveService() {
+    }
+
+    @Override
+    protected void requestStartLive() {
+    }
+
+    @Override
+    protected void finishVideoLive() {
     }
 
     private void hideProgressDialog() {
@@ -586,7 +599,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
                     if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_SUCCESS) {
                         String result = bundle.getString(CodeUtils.RESULT_STRING);
                         logger.info("扫描二维码结果："+result);
-                        setManualNFCBean(NfcUtil.getNFCData(result));
+//                        setManualNFCBean(NfcUtil.getRecorderBindTranslateBean(result));
 //                        Toast.makeText(this, "解析结果:" + result, Toast.LENGTH_LONG).show();
                     } else if (bundle.getInt(CodeUtils.RESULT_TYPE) == CodeUtils.RESULT_FAILED) {
                         ToastUtil.showToast(this,"解析二维码失败");
@@ -595,7 +608,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
 //                String result = data.getStringExtra(Constant.CODED_CONTENT);
 //                logger.info("扫描二维码结果："+result);
 //                // TODO: 2019/4/10 给注册服务发送扫码结果
-//                setManualNFCBean(NfcUtil.getNFCData(result));
+//                setManualNFCBean(NfcUtil.getRecorderBindTranslateBean(result));
             }
         }
     }

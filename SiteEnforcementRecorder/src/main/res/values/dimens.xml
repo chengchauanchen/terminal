@@ -60,5 +60,7 @@
     <dimen name="sp_16">16sp</dimen>
     <dimen name="sp_20">20sp</dimen>
     <dimen name="sp_22">22sp</dimen>
+    <dimen name="sp_24">24sp</dimen>
     <dimen name="sp_25">25sp</dimen>
+    <dimen name="sp_28">28sp</dimen>
 </resources>

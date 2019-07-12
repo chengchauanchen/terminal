@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 
 import cn.vsx.vc.activity.MainActivity;
 import cn.vsx.vc.activity.RegistNFCActivity;
+import cn.vsx.vc.activity.SplashActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverPTTButtonEventHandler;
 import cn.vsx.vc.service.PTTButtonEventService;
@@ -30,7 +31,7 @@ public class PTTButtonEventReceiver extends BroadcastReceiver {
     if (Constants.PTTEVEVT_ACTION_UP.equals(intentAction)) {
       //判断应用是否已经打开
       if (APPStateUtil.activityIsOpened(context, MainActivity.class)
-          || APPStateUtil.activityIsOpened(context, RegistNFCActivity.class)) {
+          || APPStateUtil.activityIsOpened(context, SplashActivity.class)) {
         logger.info("PTTButtonEventReceiver = APPState：opened");
         if (!APPStateUtil.isServiceWork(context, PTTButtonEventService.class)&&APPStateUtil.activityIsOpened(context, MainActivity.class)) {
           //当已经登录过但ptt按键的service没有运行
@@ -43,7 +44,7 @@ public class PTTButtonEventReceiver extends BroadcastReceiver {
       } else {
         //没有打开过 --- 启动应用
         logger.info("PTTButtonEventReceiver = APPState：noopened");
-        Intent jumpIntent = new Intent(context, RegistNFCActivity.class);
+        Intent jumpIntent = new Intent(context, SplashActivity.class);
         jumpIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(jumpIntent);
         return;

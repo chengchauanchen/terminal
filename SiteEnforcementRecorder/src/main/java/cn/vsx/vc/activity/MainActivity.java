@@ -1,44 +1,38 @@
 package cn.vsx.vc.activity;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
-import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.LinearLayout;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
-import com.alibaba.fastjson.JSONObject;
+import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.log4j.Logger;
 import org.easydarwin.easypusher.BITBackgroundCameraService;
 import org.easydarwin.push.BITMediaStream;
-import org.easydarwin.push.EasyPusher;
-import org.easydarwin.push.InitCallback;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -46,23 +40,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import butterknife.Bind;
+import butterknife.OnClick;
 import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.MessageSendStateEnum;
-import cn.vsx.hamster.common.MessageType;
-import cn.vsx.hamster.common.util.JsonParam;
-import cn.vsx.hamster.common.util.NoCodec;
+import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.auth.LoginModel;
+import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
-import cn.vsx.hamster.terminalsdk.model.Group;
-import cn.vsx.hamster.terminalsdk.model.NFCBean;
-import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerLiveTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
@@ -72,37 +65,45 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNobodyRequestVideoLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyOtherStopVideoMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRecorderLoginHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRegistCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.util.StateMachine.IState;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.application.UpdateManager;
-import cn.vsx.vc.dialog.ExitAccountDialog;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverAudioButtonEventHandler;
+import cn.vsx.vc.receiveHandle.ReceiverFragmentBackPressedByGroupChangeHandler;
+import cn.vsx.vc.receiveHandle.ReceiverFragmentClearHandler;
+import cn.vsx.vc.receiveHandle.ReceiverFragmentPopBackStackHandler;
+import cn.vsx.vc.receiveHandle.ReceiverFragmentShowHandler;
 import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.APPStateUtil;
-import cn.vsx.vc.utils.BITDialogUtil;
+import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
+import cn.vsx.vc.utils.FragmentUtil;
 import cn.vsx.vc.utils.PhotoUtils;
-import cn.vsx.vc.utils.SystemUtil;
+import cn.vsx.vc.utils.SetToListUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
-import ptt.terminalsdk.tools.DialogUtil;
 import ptt.terminalsdk.tools.FileTransgerUtil;
 import ptt.terminalsdk.tools.SDCardUtil;
 
@@ -110,25 +111,23 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
 import static cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory.USB;
 
 public class MainActivity extends BaseActivity {
-    //没有网络的提示
-    @Bind(R.id.ll_no_network)
-    LinearLayout llNoNetwork;
+    @Bind(R.id.rl_login_bind)
+    RelativeLayout rlLoginBind;
+    @Bind(R.id.tv_login_info)
+    TextView tvLoginInfo;
+//    @Bind(R.id.tv_bind_info)
+//    TextView tvBindInfo;
+    @Bind(R.id.bt_bind_state)
+    TextView btBindState;
+
+    //操作的framelayout
+    @Bind(R.id.fl_content)
+    FrameLayout flContent;
+
     //视频
     @Bind(R.id.sv_live)
     TextureView svLive;
-
-    @Bind(R.id.button1)
-    Button button1;
-    @Bind(R.id.button2)
-    Button button2;
-
-
     private Timer timer = new Timer();
-
-    private boolean onRecordAudioDenied;
-    private boolean onLocationDenied;
-    private boolean onCameraDenied;
-
     private ServiceConnection conn;
     private IBinder myIBinder;
 
@@ -137,12 +136,13 @@ public class MainActivity extends BaseActivity {
     private boolean mExitFlag;
     //双击退出应用的时间间隔
     public static final int CLICK_EXIT_TIME = 3000;
+    //不点击屏幕隐藏头部信息布局的时间间隔
+    public static final int HIDE_INFO_LAYOUT_TIME = 3*1000;
 
     private static final String STATE = "state";
     private static final int HANDLE_CODE_OPEN_CAMERA = -1;
     private static final int HANDLE_CODE_MSG_STATE = 0;
-    //上报时开始每隔5s摄像头自动对焦一次
-    private static final int HANDLE_CODE_LIVING_STATE = 0;
+    private static final int HANDLE_CODE_HIDE_INFO_LAYOUT = 1;
 
     BITMediaStream mMediaStream;
     List<String> listResolution;
@@ -153,7 +153,7 @@ public class MainActivity extends BaseActivity {
     int width = 640, height = 480;
 
     private WindowManager windowManager;
-    private int pushcount;
+
     private boolean isPushing;//正在上报
     private boolean isPassiveReport;//是否是被动上报(用于区分提示音)
     private String ip;
@@ -161,17 +161,13 @@ public class MainActivity extends BaseActivity {
     private String id;//自己发起直播返回的callId和member拼接
     private PushCallback pushCallback;
 
-    public static final int REQUEST_PERMISSION_SETTING = 1235;
     private List<VideoMember> watchLiveList = new ArrayList<>();//加入观看人员的集合
 
     private boolean canTakePicture = true;//是否可以拍照
     private TimerTask takePictureTimer;
 
-    private BITDialogUtil dialogUtil;
-
-    private boolean isAgainToRequestLive;
-
-
+    private int reAuthCount;
+    ArrayList<String> availableIPlist = new ArrayList<>();
 
     @Override
     public int getLayoutResId() {
@@ -181,11 +177,9 @@ public class MainActivity extends BaseActivity {
     @SuppressLint("InvalidWakeLockTag")
     @Override
     public void initData() {
-
         svLive.setVisibility(View.GONE);
         svLive.setOpaque(false);
         svLive.setSurfaceTextureListener(new SurfaceTextureListener());
-        svLive.setOnClickListener(new OnClickListenerAutoFocus());
 
         windowManager = (WindowManager) this.getSystemService(WINDOW_SERVICE);
         DisplayMetrics dm = new DisplayMetrics();
@@ -211,46 +205,6 @@ public class MainActivity extends BaseActivity {
         }
         judgePermission();
 
-        button1.setText("设置账号");
-        button1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        //NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",900020,"20190306T00602672");
-//                        NFCBean bean = new NFCBean("396ab3e8a7a799ddbd93a59e1f97f26f",102917,"");
-//                        myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
-//                        myHandler.postDelayed(() -> clearAccount(),1000);
-//                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
-//                        operation.deleteUploadedFile();
-                    }
-                 });
-            }
-        });
-        button2.setText("上传文件");
-        button2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
-                    @Override
-                    public void run() {
-//                        NFCBean bean = new NFCBean("88bd3ad393a710a3ae9164165823c75c",900020,"20190306T00602672");
-//                        myHandler.postDelayed(() -> setManualNFCBean(bean),1000);
-//                        FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
-//                        CopyOnWriteArrayList<BitStarFileRecord> list=  operation.getRecordByAll();
-//                        operation.uploadFileByPaths(list,0,0,false);
-                        //operation.uploadFileByPath("/storage/emulated/0/Android/data/cn.vsx.vc/VideoRecord/2019022616555402OON000110000001.mp4",0,false);
-                        //operation.uploadFileByPath("/storage/sdcard1/Android/data/cn.vsx.vc/VideoRecord/2019022616555402OON000110000001.mp4",0,false);
-                        //operation.uploadFileTreeBean(null);
-                    }
-                });
-
-            }
-        });
-
-        button1.setVisibility(View.GONE);
-        button2.setVisibility(View.GONE);
         //清理数据库
         FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
         //48小时未上传的文件上传
@@ -259,30 +213,37 @@ public class MainActivity extends BaseActivity {
         manager.uploadFileTreeBean(null);
 //        //检测内存卡的size
 //        manager.checkExternalUsableSize();
+        showLoginAndBindUI(Constants.LOGIN_BIND_STATE_IDLE);
+//        int w = ScreenUtils.getScreenWidth();
+//        int h = ScreenUtils.getScreenHeight();
+//        logger.debug("ScreenUtils--width-"+w+"-height-"+h);
+//        if (w>h) {
+//            width = 640;
+//            height = 480;
+//        }else{
+//            width = 480;
+//            height = 640;
+//        }
     }
 
     @Override
     public void initView() {
-        NFCBean bean = cn.vsx.hamster.terminalsdk.tools.DataUtil.getNFCBean();
-        if( bean!= null&&bean.getGroupId()!=0){
-            List<Integer> monitorGroups = new ArrayList<>();
-            monitorGroups.add(bean.getGroupId());
-            TerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
-//            MyTerminalFactory.getSDK().getGroupManager().changeGroup(bean.getGroupId());
-        }
+
     }
 
     @Override
     public void initListener() {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseMyselfLiveHandler);//直播成功
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);//自己发起直播的响应
+        TerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);//真实网络连接状态
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);//网络连接状态
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);//认证
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveReturnAvailableIPHandler);//可用的ip
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveRegistCompleteHandler);//注册
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);//登录
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);//更新数据
         MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);//转组
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);//组呼来了
-
-
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseStartLiveHandler);//请求时，对方拒绝
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);//通知停止直播
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerLiveTimeoutHandler);//直播应答超时
@@ -297,6 +258,9 @@ public class MainActivity extends BaseActivity {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);//观看人员的加入或者退出
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveExternStorageSizeHandler);//通知存储空间不足
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceOfflineHandler);//终端强制下线
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverFragmentShowHandler);//收到fragment show
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverFragmentPopBackStackHandler);//收到fragment PopBackStack
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverFragmentClearHandler);//收到fragment clear
     }
 
     @Override
@@ -331,10 +295,14 @@ public class MainActivity extends BaseActivity {
 
     @Override
     public void doOtherDestroy() {
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseMyselfLiveHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseMyselfLiveHandler);//直播成功
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);//自己发起直播的响应
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);//认证
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReturnAvailableIPHandler);//可用的ip
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRegistCompleteHandler);//注册
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);//登录
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);//更新数据
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);//真实网络连接状态
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);//网络连接状态
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);//转组
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);//组呼来了
@@ -352,11 +320,38 @@ public class MainActivity extends BaseActivity {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);//观看人员的加入或者退出
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);//通知存储空间不足
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceOfflineHandler);//终端强制下线
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverFragmentShowHandler);//收到fragment show
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverFragmentPopBackStackHandler);//收到fragment PopBackStack
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverFragmentClearHandler);//收到fragment clear
         myHandler.removeCallbacksAndMessages(null);
         PromptManager.getInstance().stopRing();
         stopService(new Intent(MainActivity.this, LockScreenService.class));
         MyTerminalFactory.getSDK().getVideoProxy().start().unregister(this);
+    }
 
+    @OnClick({R.id.sv_live,R.id.tv_login_info,R.id.bt_bind_state})
+    public void onClick(View view){
+        switch (view.getId()){
+            case R.id.sv_live:
+                try {
+                    mMediaStream.getCamera().autoFocus(null);//屏幕聚焦
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                //显示头部的信息布局
+                showTopInfoLayout();
+                break;
+            case R.id.tv_login_info:
+                //认证
+                if(btBindState.getVisibility() == View.GONE&&TerminalFactory.getSDK().getAuthManagerTwo().needLogin()){
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveRecorderLoginHandler.class);
+                }
+                break;
+            case R.id.bt_bind_state:
+               //绑定或者解绑
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_BIND);
+                break;
+        }
     }
 
     public Handler myHandler = new Handler(Looper.getMainLooper()) {
@@ -370,6 +365,11 @@ public class MainActivity extends BaseActivity {
                     String state = msg.getData().getString(STATE);
                     ToastUtil.showToast(getApplicationContext(), state);
                     break;
+                case HANDLE_CODE_HIDE_INFO_LAYOUT:
+                    //隐藏头部的布局
+                    myHandler.removeMessages(HANDLE_CODE_HIDE_INFO_LAYOUT);
+                    rlLoginBind.setVisibility(View.GONE);
+                    break;
             }
         }
     };
@@ -378,60 +378,130 @@ public class MainActivity extends BaseActivity {
      * 信令服务发送NotifyForceRegisterMessage消息时，先去reAuth(false)，然后login()
      */
     private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = (resultCode, resultDesc, isRegisted) -> {
-        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-            logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity: isRegisted" + isRegisted);
-            if (isRegisted) {//注册过，在后台登录，session超时也走这
-//                TerminalFactory.getSDK().getAuthManagerTwo().login();
-                logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity中登录了");
-//                    MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecord();
-            } else {//没注册过，关掉主界面，去注册界面
-                startActivity(new Intent(getApplicationContext(), RegistNFCActivity.class));
-                MainActivity.this.finish();
-                stopService(new Intent(getApplicationContext(), LockScreenService.class));
+        myHandler.post(() -> {
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                ToastUtil.showToast(MainActivity.this,getString(R.string.text_connecting));
+            } else if (resultCode == TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()) {
+                ToastUtil.showToast(MainActivity.this,getString(R.string.text_dept_not_activated));
+            } else if (resultCode == TerminalErrorCode.DEPT_EXPIRED.getErrorCode()) {
+                ToastUtil.showToast(MainActivity.this,getString(R.string.text_dept_expired));
+            } else if (resultCode == TerminalErrorCode.TERMINAL_TYPE_ERROR.getErrorCode()) {
+                ToastUtil.showToast(MainActivity.this,getString(R.string.text_terminal_type_error));
+            }else if(resultCode == TerminalErrorCode.TERMINAL_REPEAT.getErrorCode()){
+                ToastUtil.showToast(MainActivity.this,getString(R.string.text_terminal_repeat));
+            } else if(resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()){
+                if(reAuthCount < 3){
+                    reAuthCount++;
+                    //发生异常的时候重试几次，因为网络原因经常导致一个io异常
+                    TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(),TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
+                }else{
+                    ToastUtil.showToast(MainActivity.this,getString(R.string.text_auth_error));
+                }
+            }else if(resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()){
+                ToastUtil.showToast(MainActivity.this,getString(R.string.text_auth_error));
+            } else {
+                //没有注册服务地址，去探测地址
+                if(availableIPlist.isEmpty()){
+                    TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
+                }else{
+                    ToastUtil.showToast(MainActivity.this,(!isRegisted)?getString(R.string.text_please_regist_first):resultDesc);
+                }
+            }
+        });
+    };
+
+    /**
+     * 获取可用的IP列表
+     **/
+    private ReceiveReturnAvailableIPHandler receiveReturnAvailableIPHandler = availableIP -> myHandler.post(() -> {
+        logger.info("收到可用IP列表");
+        if (availableIP.size() > 0) {
+            availableIPlist.addAll(SetToListUtil.setToArrayList(availableIP));
+        }
+        //拿到可用IP列表，遍历取第一个
+        if (availableIP != null && availableIP.size() > 0) {
+            LoginModel authModel = null;
+            for (Map.Entry<String, LoginModel> entry : availableIP.entrySet()) {
+                authModel = entry.getValue();
+            }
+            if (authModel != null) {
+
+                int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(authModel.getIp(),authModel.getPort());
+                if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                    ToastUtil.showToast(MainActivity.this,getString(R.string.text_authing));
+                }else {
+                    //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                }
+            }
+        } else {
+            ToastUtil.showToast(MainActivity.this,getString(R.string.text_server_ip_no_used));
+        }
+    });
+
+    /**
+     * 注册完成的消息
+     */
+    private ReceiveRegistCompleteHandler receiveRegistCompleteHandler = (errorCode, errorDesc) -> myHandler.post(() -> {
+        if (errorCode == BaseCommonCode.SUCCESS_CODE) {//注册成功，直接登录
+            logger.info("注册完成的回调----注册成功，直接登录");
+            ToastUtil.showToast(MainActivity.this,getString(R.string.text_logging));
+        } else {//注册失败，提示并关界面
+            if (errorCode == TerminalErrorCode.REGISTER_PARAMETER_ERROR.getErrorCode()) {
+                ToastUtil.showToast(MainActivity.this,getString(R.string.text_invitation_code_error_regist_again));
+            } else if (errorCode == TerminalErrorCode.REGISTER_UNKNOWN_ERROR.getErrorCode()) {
+                ToastUtil.showToast(MainActivity.this,getString(R.string.text_regist_error_please_check));
+            } else {
+                ToastUtil.showToast(MainActivity.this,errorDesc);
             }
         }
-    };
+    });
+
 
     /**
      * 登陆响应的消息
      */
     private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> {
         logger.info("MainActivity---收到登录的消息---resultCode:" + resultCode + "     resultDesc:" + resultDesc);
-            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-            } else if(resultCode == Params.JOININ_WARNING_GROUP_ERROR_CODE||resultCode == Params.JOININ_GROUP_ERROR_CODE) {
-                ToastUtil.showToast(MainActivity.this,resultDesc);
-                myHandler.postDelayed(() -> {
-                    clearAccount();
-                }, 2000);
-            }else{
-                ToastUtil.showToast(MainActivity.this,resultDesc);
-                myHandler.postDelayed(() -> {
-                    clearAccount();
-                }, 3000);
-            }
+        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+            ToastUtil.showToast(MainActivity.this,getString(R.string.text_updatting));
+        } else if(resultCode == Params.JOININ_WARNING_GROUP_ERROR_CODE||resultCode == Params.JOININ_GROUP_ERROR_CODE) {
+            ToastUtil.showToast(MainActivity.this,resultDesc);
+        }else{
+            ToastUtil.showToast(MainActivity.this,resultDesc);
+        }
     };
+
+    /**
+     * 更新所有数据信息的消息
+     */
+    private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = (errorCode, errorDesc) -> myHandler.post(() -> {
+        if (errorCode == BaseCommonCode.SUCCESS_CODE) {
+            if(cn.vsx.hamster.terminalsdk.tools.DataUtil.getRecorderBindBean()==null){
+                ToastUtil.showToast(MainActivity.this,getString(R.string.text_login_success));
+            }
+            //更新UI
+            RecorderBindBean bean = cn.vsx.hamster.terminalsdk.tools.DataUtil.getRecorderBindBean();
+            showLoginAndBindUI((bean == null)?Constants.LOGIN_BIND_STATE_LOGIN:Constants.LOGIN_BIND_STATE_BIND);
+            //自动上报
+            myHandler.postDelayed(() -> {
+                if(isBinded){
+                    autoStartLive();
+                }
+            },2000);
+        } else {
+            ToastUtil.showToast(MainActivity.this,errorDesc);
+        }
+    });
 
     /**
      * 转组消息
      */
-    private ReceiveChangeGroupHandler receiveChangeGroupHandler = new ReceiveChangeGroupHandler() {
-        @Override
-        public void handler(int errorCode, String errorDesc) {
-            logger.info("转组成功回调消息, isChanging:" + MyApplication.instance.isChanging);
-            synchronized (MyApplication.instance) {
-                MyApplication.instance.isChanging = false;
-//                if (MyApplication.instance.isPttPress) {
-                    logger.info("转组成功回调消息：isPttPress" + MyApplication.instance.isPttPress);
-                    //来自NFC消息转组，需要上报图像，录像
-//                    if(isFromNFCToChangeGroup){
-//                        isFromNFCToChangeGroup = false;
-//                        //上报,先停止上报，再开始主动上报,并录像。
-//                        finishVideoLive();
-//                        requestStartLive();
-//                    }
-//                }
-                MyApplication.instance.notifyAll();
-            }
+    private ReceiveChangeGroupHandler receiveChangeGroupHandler = (errorCode, errorDesc) -> {
+        logger.info("转组成功回调消息, isChanging:" + MyApplication.instance.isChanging);
+        synchronized (MyApplication.instance) {
+            MyApplication.instance.isChanging = false;
+            logger.info("转组成功回调消息：isPttPress" + MyApplication.instance.isPttPress);
+            MyApplication.instance.notifyAll();
         }
     };
 
@@ -459,29 +529,35 @@ public class MainActivity extends BaseActivity {
     };
 
     /**
+     * 真实网络
+     */
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = connected -> {
+        if(!connected){
+        }else {
+            if(!TerminalFactory.getSDK().isServerConnected()){
+                //网络连接上了，心跳断开了，需要重新登陆，等待心跳连接成功
+                if(TerminalFactory.getSDK().getAuthManagerTwo().needLogin()){
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveRecorderLoginHandler.class);
+                }
+            }
+        }
+    };
+
+    /**
      * 网络连接状态
      */
-    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
-        @Override
-        public void handler(final boolean connected) {
-            logger.info("主界面收到服务是否连接的通知ReceiveOnLineStatusChangedHandler--" + connected);
-            MainActivity.this.runOnUiThread(() -> {
-                if (!connected) {
-                    llNoNetwork.setVisibility(View.VISIBLE);
-                    stopPush(false);
-                } else {
-                    autoStartLive();
-//                            initMediaStream(svLive.getSurfaceTexture());
-//                            //判断是否之前在上报中，如果上报中请求继续上报
-//                            if(isPushing){
-//                                requestStartLive();
-//                            }
-                    llNoNetwork.setVisibility(View.GONE);
-                    //上传未上传的文件信息
-                    MyTerminalFactory.getSDK().getFileTransferOperation().uploadFileTreeBean(null);
-                }
-            });
-        }
+    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> {
+        logger.info("主界面收到服务是否连接的通知ReceiveOnLineStatusChangedHandler--" + connected);
+        MainActivity.this.runOnUiThread(() -> {
+            if (!connected) {
+                ToastUtil.showToast(MainActivity.this,getString(R.string.text_network_is_disconnect));
+//                stopPush(false);
+//                showLoginAndBindUI(Constants.LOGIN_BIND_STATE_IDLE);
+            } else {
+                //上传未上传的文件信息
+                MyTerminalFactory.getSDK().getFileTransferOperation().uploadFileTreeBean(null);
+            }
+        });
     };
 
 
@@ -497,7 +573,7 @@ public class MainActivity extends BaseActivity {
                 port = streamMediaServerPort + "";
                 id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "_" + callId;
                 //如果是组内上报，在组内发送一条上报消息
-                sendGroupMessage(streamMediaServerIp,streamMediaServerPort,callId);
+//                MessageUtil.sendGroupMessage(streamMediaServerIp,streamMediaServerPort,callId);
                 startPush(streamMediaServerIp, port, id);
             }, 1000);
         }
@@ -513,18 +589,9 @@ public class MainActivity extends BaseActivity {
                 if(resultCode == 0){
                     isPushing = true;
                     updateNormalPushingState(isPushing);
+                    pushRelationGroup();
                 }else if(resultCode == 4308){
                     //已经在上报
-//                    if(!TextUtils.isEmpty(ip)&&!TextUtils.isEmpty(port)&&!TextUtils.isEmpty(id)){
-//                        isPushing = true;
-//                        updateNormalPushingState(isPushing);
-//                        startPush(ip, port, id);
-//                    }else{
-//                        isPushing = false;
-//                        updateNormalPushingState(isPushing);
-//                        ToastUtil.showToast(getApplicationContext(),resultDesc);
-//                        finishVideoLive();
-//                    }
                     requestStartLive();
                 }else {
                     isPushing = false;
@@ -586,8 +653,9 @@ public class MainActivity extends BaseActivity {
                     //无屏保界面
                     APPStateUtil.setTopApp(MainActivity.this);
                 }
-//                    wakeLockComing.acquire();
-                logger.info("main点亮屏幕");
+                if(wakeLockComing!=null){
+                    wakeLockComing.acquire();
+                }
                 //自动接收上报视频
                 MyTerminalFactory.getSDK().getLiveManager().responseLiving(true);
                 MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
@@ -610,7 +678,7 @@ public class MainActivity extends BaseActivity {
     private ReceiveNotifyOtherStopVideoMessageHandler receiveNotifyOtherStopVideoMessageHandler = (message) -> {
         logger.info("收到停止上报通知");
         ToastUtil.showToast(getApplicationContext(),"收到停止上报的通知");
-        stopAll();
+        stopPushAndRecord();
     };
 
     /**
@@ -621,10 +689,11 @@ public class MainActivity extends BaseActivity {
         if(showMessage){
             ToastUtil.showToast(getApplicationContext(),"收到停止业务的通知");
         }
-        stopAll();
+        updateNormalPushingState(false);
+        stopBusniess();
+        //修改账号信息的布局
+        myHandler.post(() -> showLoginAndBindUI(Constants.LOGIN_BIND_STATE_IDLE));
     };
-
-
 
     /**
      * 视频实体按钮，上报视频
@@ -635,6 +704,10 @@ public class MainActivity extends BaseActivity {
             if(isLongPress){
                 //上报视频
                 logger.info("视频实体按钮，上报视频");
+                if(!TerminalFactory.getSDK().getAuthManagerTwo().isOnLine()){
+                    ToastUtil.showToast(MainActivity.this,getString(R.string.text_no_login_can_not_push));
+                    return;
+                }
                 if(mMediaStream!=null) {
                     if (mMediaStream.isStreaming()) {
                         ToastUtil.showToast(MainActivity.this, "上报中");
@@ -809,8 +882,41 @@ public class MainActivity extends BaseActivity {
      */
     private ReceiveForceOfflineHandler receiveForceOfflineHandler = () -> {
         ToastUtil.showToast(MainActivity.this,getResources().getString(R.string.force_off_line));
-        myHandler.postDelayed(()-> clearAccount(),3000);
+        myHandler.postDelayed(()-> exitApp(),3000);
     };
+
+    /**
+     * 收到fragment popBackStack
+     */
+    private ReceiverFragmentShowHandler receiverFragmentShowHandler = (tag) -> {
+        Fragment mFragment = FragmentUtil.getFragmentByTag(tag);
+        if(mFragment!=null){
+            if(TextUtils.equals(Constants.FRAGMENT_TAG_MENU,tag)){
+                clearFragmentBackStack();
+            }
+            hideTopInfoLayout();
+            getSupportFragmentManager().beginTransaction().replace(R.id.fl_content, mFragment,tag).addToBackStack(tag).show(mFragment).commit();
+        }
+    };
+
+    /**
+     * 收到fragment popBackStack
+     */
+    private ReceiverFragmentPopBackStackHandler receiverFragmentPopBackStackHandler = () -> {
+        if(getSupportFragmentManager().getBackStackEntryCount()!=0){
+            popBackStack();
+        }
+    };
+
+    /**
+     * 收到fragment clear
+     */
+    private ReceiverFragmentClearHandler receiverFragmentClearHandler = () -> {
+        if(getSupportFragmentManager().getBackStackEntryCount()!=0){
+            clearFragmentBackStack();
+        }
+    };
+
 
     private final class SurfaceTextureListener implements TextureView.SurfaceTextureListener {
         @Override
@@ -856,11 +962,10 @@ public class MainActivity extends BaseActivity {
 
     }
 
-
     /**
      * 请求自己开始上报
      */
-    private void requestStartLive() {
+    protected void requestStartLive() {
         int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMyselfLive("", "");
         logger.error("上报图像：requestCode=" + requestCode);
         if (requestCode == BaseCommonCode.SUCCESS_CODE) {
@@ -871,6 +976,19 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    /**
+     * 上报图像与组关联
+     */
+    private void pushRelationGroup(){
+        RecorderBindBean bean = cn.vsx.hamster.terminalsdk.tools.DataUtil.getRecorderBindBean();
+        int groupNo = (bean!=null)?bean.getGroupId():MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+        List<String> list = new ArrayList<>();
+        list.add(DataUtil.getPushInviteMemberData(groupNo, ReceiveObjectMode.GROUP.toString()));
+        logger.debug("pushRelationGroup-list"+list);
+        MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(list,
+                MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0),
+                TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l));
+    }
     /**
      * 开始上报
      * @param ip
@@ -888,7 +1006,6 @@ public class MainActivity extends BaseActivity {
                 return;
             }
         }
-
         if (null == pushCallback) {
             pushCallback = new PushCallback();
         }
@@ -908,31 +1025,22 @@ public class MainActivity extends BaseActivity {
             //主动上报
             PromptManager.getInstance().startReport();
         }
-
     }
 
     private void startCamera() {
         mMediaStream.updateResolution(width, height);
-        mMediaStream.setDgree(getDgree());
+        mMediaStream.setDgree(getDgree(windowManager));
         mMediaStream.createCamera();
         mMediaStream.startPreview();
-        logger.info("------>>>>startCamera");
         if (mMediaStream.isStreaming()) {
-            sendMessage("推流中..");
-            String ip = MyTerminalFactory.getSDK().getParam(Params.VIDEO_SERVER_IP, "");
-            int port = MyTerminalFactory.getSDK().getParam(Params.VIDEO_SERVER_PORT, 0);
-            int id = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-
-            String url = String.format("rtsp://%s:%s/%s.sdp", ip, port, id);
-            logger.info("startCamera ----->  " + url);
+            ToastUtil.showToast(this,"推流中..");
         }
     }
-
 
     /**
      * 创建直播服务
      */
-    private void startLiveService() {
+    protected void startLiveService() {
         MyTerminalFactory.getSDK().getVideoProxy().start().register(this);
         startService(new Intent(this, BITBackgroundCameraService.class));
 
@@ -972,13 +1080,7 @@ public class MainActivity extends BaseActivity {
                 ms.startPreview();
                 mMediaStream = ms;
                 if (ms.isStreaming()) {
-                    String ip = MyTerminalFactory.getSDK().getParam(Params.VIDEO_SERVER_IP, "");
-                    int port = MyTerminalFactory.getSDK().getParam(Params.VIDEO_SERVER_PORT, 0);
-                    int id = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-                    String url = String.format("rtsp://%s:%s/%s.sdp", ip, port, id);
-                    sendMessage("推流中.");
-                    logger.info("推流地址:" + url);
-
+                    ToastUtil.showToast(this,"推流中..");
                 }
             } else {
                 ms = new BITMediaStream(getApplicationContext(), surface, true,width,height);
@@ -995,7 +1097,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 停止上报
      */
-    public void finishVideoLive() {
+    protected void finishVideoLive() {
         myHandler.post(() -> {
             PromptManager.getInstance().stopRing();//停止响铃
             //将TextureView设置成全屏
@@ -1019,12 +1121,9 @@ public class MainActivity extends BaseActivity {
         logger.info("isFinishing() = " + "isFinishing()" + "    isStreaming = " + isStreaming);
         if (mMediaStream != null) {
             mMediaStream.stopStream();
-            //            stopService(new Intent(VideoLiveActivity.this, BackgroundCameraService.class));
-            logger.info("---->>>>页面关闭，停止推送视频");
         } else {
             if (isStreaming) {
                 mService.activePreview();
-                logger.info("---->>>>退到后台，继续推送视频");
             }
         }
         watchLiveList.clear();
@@ -1057,12 +1156,9 @@ public class MainActivity extends BaseActivity {
             if(mService!=null){
                 mService.setMediaStream(null);
             }
-            //            stopService(new Intent(VideoLiveActivity.this, BackgroundCameraService.class));
-            logger.info("---->>>>页面关闭，停止推送视频");
         } else {
             if (isStreaming) {
                 mService.activePreview();
-                logger.info("---->>>>退到后台，继续推送视频");
             }
         }
         watchLiveList.clear();
@@ -1073,12 +1169,7 @@ public class MainActivity extends BaseActivity {
      * 开始录音
      */
     private void startRecordAudio(){
-        myHandler.postDelayed(() -> MyTerminalFactory.getSDK().getRecordingAudioManager().start((mr, what, extra) -> myHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                stopRecordAudio();
-            }
-        })),500);
+        myHandler.postDelayed(() -> MyTerminalFactory.getSDK().getRecordingAudioManager().start((mr, what, extra) -> myHandler.post(this::stopRecordAudio)),500);
     }
 
     /**
@@ -1099,197 +1190,33 @@ public class MainActivity extends BaseActivity {
         Camera camera = mService.getMediaStream().getCamera();
         if (camera == null)
             return;
-        camera.takePicture(null, null, new Camera.PictureCallback() {
-            @Override
-            public void onPictureTaken(final byte[] data, final Camera camera) {
-                if (takePictureTimer != null) {
-                    takePictureTimer.cancel();
-                    takePictureTimer = null;
-                }
-                PromptManager.getInstance().startPhotograph();
-                camera.startPreview();
-                MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    //检测内存卡的size
-                    FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
-                    operation.checkExternalUsableSize();
-                    String fileName = FileTransgerUtil.getPhotoFileName();
-                    String directoty = MyTerminalFactory.getSDK().getBITPhotoRecordedDirectoty(operation.getExternalUsableStorageDirectory());
-                    File file = new File( directoty, fileName+FileTransgerUtil._TYPE_IMAGE_SUFFIX);
-                    PhotoUtils.savePictureForByte(data, file, MainActivity.this);
-                    SDCardUtil.scanMtpAsync(MainActivity.this, file.getAbsolutePath());
-                    long fileSize = DataUtil.getFileSize(file);
-                    logger.info("保存图片的大小=====" + fileSize);
-                    if (fileSize > 0) {
-                        //拍完照 上传文件目录，并保存到数据库中
-                        operation.generateFileComplete(directoty,file.getPath());
-                        //发送到群组中
+        camera.takePicture(null, null, (data, camera1) -> {
+            if (takePictureTimer != null) {
+                takePictureTimer.cancel();
+                takePictureTimer = null;
+            }
+            PromptManager.getInstance().startPhotograph();
+            camera1.startPreview();
+            MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+                //检测内存卡的size
+                FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
+                operation.checkExternalUsableSize();
+                String fileName = FileTransgerUtil.getPhotoFileName();
+                String directoty = MyTerminalFactory.getSDK().getBITPhotoRecordedDirectoty(operation.getExternalUsableStorageDirectory());
+                File file = new File( directoty, fileName+FileTransgerUtil._TYPE_IMAGE_SUFFIX);
+                PhotoUtils.savePictureForByte(data, file, MainActivity.this);
+                SDCardUtil.scanMtpAsync(MainActivity.this, file.getAbsolutePath());
+                long fileSize = DataUtil.getFileSize(file);
+                logger.info("保存图片的大小=====" + fileSize);
+                if (fileSize > 0) {
+                    //拍完照 上传文件目录，并保存到数据库中
+                    operation.generateFileComplete(directoty,file.getPath());
+                    //发送到群组中
 //                            PhotoUtils.sendPhotoFromCamera(file);
-                    }
-                });
-                canTakePicture = true;
-            }
+                }
+            });
+            canTakePicture = true;
         });
-    }
-
-    private void sendMessage(String message) {
-        Message msg = Message.obtain();
-        msg.what = HANDLE_CODE_MSG_STATE;
-        Bundle bundle = new Bundle();
-        bundle.putString(STATE, message);
-        msg.setData(bundle);
-        myHandler.sendMessage(msg);
-    }
-
-    private int getDgree() {
-        int rotation = windowManager.getDefaultDisplay().getRotation();
-        int degrees = 0;
-        switch (rotation) {
-            case Surface.ROTATION_0:
-                degrees = 0;
-                break; // Natural orientation
-            case Surface.ROTATION_90:
-                degrees = 90;
-                break; // Landscape left
-            case Surface.ROTATION_180:
-                degrees = 180;
-                break;// Upside down
-            case Surface.ROTATION_270:
-                degrees = 270;
-                break;// Landscape right
-            default:
-                break;
-        }
-        return degrees;
-    }
-
-    private final class OnClickListenerAutoFocus implements View.OnClickListener {
-        @Override
-        public void onClick(View v) {
-            try {
-                mMediaStream.getCamera().autoFocus(null);//屏幕聚焦
-            } catch (Exception e) {
-
-            }
-        }
-    }
-
-    private class PushCallback implements InitCallback {
-
-        @Override
-        public void onCallback(int code) {
-            Bundle resultData = new Bundle();
-            switch (code) {
-                case EasyPusher.OnInitPusherCallback.CODE.EASY_ACTIVATE_INVALID_KEY:
-                    resultData.putString("event-msg", "EasyRTSP 无效Key");
-                    break;
-                case EasyPusher.OnInitPusherCallback.CODE.EASY_ACTIVATE_SUCCESS:
-                    resultData.putString("event-msg", "EasyRTSP 激活成功");
-                    break;
-                case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECTING:
-                    resultData.putString("event-msg", "EasyRTSP 连接中");
-                    break;
-                case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECTED:
-                    resultData.putString("event-msg", "EasyRTSP 连接成功");
-                    pushcount = 0;
-                    break;
-                case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_FAILED:
-                    resultData.putString("event-msg", "EasyRTSP 连接失败");
-                    if (pushcount <= 10) {
-                        pushcount++;
-                    } else {
-                        finishVideoLive();
-                    }
-                    break;
-                case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_ABORT:
-                    resultData.putString("event-msg", "EasyRTSP 连接异常中断");
-                    if (pushcount <= 10) {
-                        pushcount++;
-                    } else {
-                        finishVideoLive();
-                    }
-                    break;
-                case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_PUSHING:
-                    resultData.putString("event-msg", "EasyRTSP 推流中");
-                    break;
-                case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_DISCONNECTED:
-                    resultData.putString("event-msg", "EasyRTSP 断开连接");
-                    break;
-                case EasyPusher.OnInitPusherCallback.CODE.EASY_ACTIVATE_PLATFORM_ERR:
-                    resultData.putString("event-msg", "EasyRTSP 平台不匹配");
-                    break;
-                case EasyPusher.OnInitPusherCallback.CODE.EASY_ACTIVATE_COMPANY_ID_LEN_ERR:
-                    resultData.putString("event-msg", "EasyRTSP 断授权使用商不匹配");
-                    break;
-                case EasyPusher.OnInitPusherCallback.CODE.EASY_ACTIVATE_PROCESS_NAME_LEN_ERR:
-                    resultData.putString("event-msg", "EasyRTSP 进程名称长度不匹配");
-                    break;
-            }
-//            mResultReceiver.send(EasyRTSPClient.RESULT_EVENT, resultData);
-        }
-    }
-
-
-    /**
-     * 必须要有录音和相机的权限，APP才能去视频页面
-     */
-    private void judgePermission() {
-
-        //6.0以下判断相机权限
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            if (!SystemUtil.cameraIsCanUse()) {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CheckMyPermission.REQUEST_CAMERA);
-            }else {
-                startLiveService();
-                myHandler.postDelayed(this::autoStartLive,500);
-            }
-        } else {
-            if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.RECORD_AUDIO)) {
-                if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.CAMERA)) {
-                    if (!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                        CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
-                    }else{
-                        startLiveService();
-                        myHandler.postDelayed(this::autoStartLive,500);
-                        //权限打开之后判断是否需要上传位置信息，这种情况是之前没有打开权限使得登录或者成员信息改变的时候不能上传位置信息，到了主页面才申请权限的情况
-                        MyTerminalFactory.getSDK().getLocationManager().requestLocationByJudgePermission();
-                    }
-//                    else {
-//                        CheckMyPermission.permissionPrompt(this,Manifest.permission.WRITE_EXTERNAL_STORAGE);
-//                    }
-                } else {
-                    CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
-                }
-            } else {
-                //如果权限被拒绝，申请下一个权限
-                if (onRecordAudioDenied) {
-                    if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.CAMERA)) {
-                        startLiveService();
-                        myHandler.postDelayed(this::autoStartLive,500);
-                        if (!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                            CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
-                        }else{
-                            //权限打开之后判断是否需要上传位置信息，这种情况是之前没有打开权限使得登录或者成员信息改变的时候不能上传位置信息，到了主页面才申请权限的情况
-                            MyTerminalFactory.getSDK().getLocationManager().requestLocationByJudgePermission();
-                        }
-                    } else {
-                        if (onCameraDenied) {
-                            if (!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
-                                if (!onLocationDenied) {
-                                    CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
-                                }
-                            }else{
-                                //权限打开之后判断是否需要上传位置信息，这种情况是之前没有打开权限使得登录或者成员信息改变的时候不能上传位置信息，到了主页面才申请权限的情况
-                                MyTerminalFactory.getSDK().getLocationManager().requestLocationByJudgePermission();
-                            }
-                        } else {
-                            CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
-                        }
-                    }
-                } else {
-                    CheckMyPermission.permissionPrompt(this, Manifest.permission.RECORD_AUDIO);
-                }
-            }
-        }
     }
 
     /**
@@ -1308,91 +1235,24 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case CheckMyPermission.REQUEST_RECORD_AUDIO:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    onRecordAudioDenied = true;
-                    judgePermission();
-                } else {
-                    onRecordAudioDenied = false;
-                    permissionDenied(Manifest.permission.RECORD_AUDIO);
-                }
-                break;
-            case CheckMyPermission.REQUEST_CAMERA:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    onCameraDenied = true;
-                    judgePermission();
-                } else {
-                    onCameraDenied = false;
-                    permissionDenied(Manifest.permission.CAMERA);
-                }
-                break;
-            case CheckMyPermission.REQUEST_LOCATION:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    onLocationDenied = true;
-                    judgePermission();
-                } else {
-                    onLocationDenied = false;
-                    permissionDenied(Manifest.permission.ACCESS_FINE_LOCATION);
-                }
-                break;
-            default:
-                break;
-
-        }
-    }
-
-    private void permissionDenied(int requestCode) {
-        if (requestCode == CheckMyPermission.REQUEST_RECORD_AUDIO) {
-            ToastUtil.showToast(this, "录制音频权限未打开，语音功能将不能使用。");
-        } else if (requestCode == CheckMyPermission.REQUEST_CAMERA) {
-            ToastUtil.showToast(this, "相机未打开，图像上报功能将不能使用。");
-        } else if (requestCode == CheckMyPermission.REQUEST_LOCATION) {
-            ToastUtil.showToast(this, "位置信息权限未打开，定位功能将不能使用。");
-        }
-    }
-
-    private void permissionDenied(final String permissionName) {
-        new DialogUtil() {
-            @Override
-            public CharSequence getMessage() {
-                return CheckMyPermission.getDesForPermission(permissionName);
-            }
-            @Override
-            public Context getContext() {
-                return MainActivity.this;
-            }
-
-            @Override
-            public void doConfirmThings() {
-                //点击确定时跳转到设置界面
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                Uri uri = Uri.fromParts("package", getPackageName(), null);
-                intent.setData(uri);
-                startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
-            }
-
-            @Override
-            public void doCancelThings() {
-                MainActivity.this.finish();
-            }
-        }.showDialog();
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-       if (requestCode == REQUEST_PERMISSION_SETTING) {
-            // 从设置界面返回时再判断权限是否开启
-            judgePermission();
-        }
-    }
-
-    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         switch (keyCode) {
             case KeyEvent.KEYCODE_BACK:
+                if(getSupportFragmentManager().getBackStackEntryCount()!=0){
+                    List<Fragment> list = getSupportFragmentManager().getFragments();
+                    StringBuffer sb = new StringBuffer();
+                    for (Fragment f : list) {
+                        sb.append("-f-:"+f.getTag());
+                    }
+                    logger.debug("onKeyDown-count:"+getSupportFragmentManager().getBackStackEntryCount()+"-size-"+list.size()+"-tag-"+sb.toString());
+                    if(list.size()>0&&TextUtils.equals(Constants.FRAGMENT_TAG_GROUP_CHANGE,list.get(0).getTag())){
+                        //说明当前显示的转组页面
+                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentBackPressedByGroupChangeHandler.class);
+                    }else{
+                        popBackStack();
+                    }
+                }
+               else
                 if((mMediaStream != null && (mMediaStream.isStreaming()||mMediaStream.isRecording()))
                         ||MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus()!=AudioRecordStatus.STATUS_STOPED){
                     exit();
@@ -1405,18 +1265,22 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
     /**
      * 返回键退出应用
      */
     public void exit() {
         if (!mExitFlag) {
-            ToastUtil.showToast(this, "再点一次"+getExitState());
+            ToastUtil.showToast(this, "再点一次"+getExitState(mMediaStream));
             mExitFlag = true;
             new Handler().postDelayed(() -> mExitFlag = false, CLICK_EXIT_TIME);
         } else {
             updateNormalPushingState(false);
             stopBusniess();
-//            moveTaskToBack(true);//把程序变成后台的
         }
     }
 
@@ -1443,28 +1307,19 @@ public class MainActivity extends BaseActivity {
                 report = true;
             }
         }
-    }
-
-    /**
-     * 获取退出时的提示
-     * @return
-     */
-    private String getExitState(){
-        if(mMediaStream != null&&mMediaStream.isStreaming()){
-            return "停止上报";
-        }else if(mMediaStream != null&&mMediaStream.isRecording()){
-            return "停止录像";
-        }else if(MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus()!=AudioRecordStatus.STATUS_STOPED){
-            return "停止录音";
-        }else {
-            return "退出";
+        Map<TerminalState, IState<?>> currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
+        if(currentStateMap.containsKey(TerminalState.GROUP_CALL_LISTENING)){
+            TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
+        }
+        if(currentStateMap.containsKey(TerminalState.GROUP_CALL_SPEAKING)){
+            TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
         }
     }
 
     /**
-     * 停止业务
+     * 停止上报和停止录像业务
      */
-    private void stopAll(){
+    private void stopPushAndRecord(){
         if(mMediaStream!=null) {
             if (mMediaStream.isStreaming()) {
                 stopPush(true);
@@ -1488,87 +1343,78 @@ public class MainActivity extends BaseActivity {
 
         }
     }
+
     /**
-     * 在组内发一条消息
+     * 显示登陆和绑定的UI
+     * @param state
      */
-    public void sendGroupMessage(String streamMediaServerIp, int streamMediaServerPort, long callId) {
-        TerminalFactory.getSDK().getThreadPool().execute(() -> {
-            NFCBean bean = cn.vsx.hamster.terminalsdk.tools.DataUtil.getNFCBean();
-            if( bean!=null ){
-                int groupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                Group group = cn.vsx.hamster.terminalsdk.tools.DataUtil.getGroupByGroupNoFromAllGroup(groupId);
-                if (group!=null) {
-                    int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-                    long memberUniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
-                    String memberName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
-                    String url = "rtsp://"+streamMediaServerIp+":"+streamMediaServerPort+"/"+memberUniqueNo+"_"+callId+".sdp";
-                    JSONObject jsonObject = new JSONObject();
-                    jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
-                    jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
-//                  jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
-                    jsonObject.put(JsonParam.CALLID, String.valueOf(callId));
-                    jsonObject.put(JsonParam.REMARK, 2);
-                    jsonObject.put(JsonParam.LIVER, memberUniqueNo+"_"+memberName);
-                    jsonObject.put(JsonParam.LIVERNO, memberId);
-                    jsonObject.put(JsonParam.BACKUP, memberId+"_"+memberName);
-                    jsonObject.put(JsonParam.EASYDARWIN_RTSP_URL, url);
-                    TerminalMessage mTerminalMessage = new TerminalMessage();
-                    mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-                    mTerminalMessage.messageFromName = memberName;
-                    mTerminalMessage.messageToId = NoCodec.encodeGroupNo(group.getNo());
-                    mTerminalMessage.messageToName = group.getName();
-                    mTerminalMessage.messageBody = jsonObject;
-                    mTerminalMessage.sendTime = System.currentTimeMillis();
-                    mTerminalMessage.messageType = MessageType.VIDEO_LIVE.getCode();
-                    mTerminalMessage.messageUrl = url;
-                    TerminalMessage terminalMessage1 = (TerminalMessage) mTerminalMessage.clone();
-                    MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1);
-                }
-            }
-        });
+    private void showLoginAndBindUI(int state){
+       switch (state){
+           case Constants.LOGIN_BIND_STATE_IDLE:
+               //未登录
+               tvLoginInfo.setCompoundDrawables(null,null,null,null);
+               tvLoginInfo.setText(getString(R.string.text_unlogin));
+               btBindState.setVisibility(View.GONE);
+               break;
+           case Constants.LOGIN_BIND_STATE_LOGIN:
+               //已登录
+               Drawable d1= getResources().getDrawable(R.drawable.icon_logined);
+               d1.setBounds(0, 0, d1.getMinimumWidth(), d1.getMinimumHeight());
+               tvLoginInfo.setCompoundDrawables(d1,null,null,null);
+               tvLoginInfo.setText(String.format(getString(R.string.text_member_id),MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)));
+               btBindState.setText(getString(R.string.text_bind));
+               btBindState.setVisibility(View.VISIBLE);
+               break;
+           case Constants.LOGIN_BIND_STATE_BIND:
+               //已绑定
+               Drawable d2= getResources().getDrawable(R.drawable.icon_binded);
+               d2.setBounds(0, 0, d2.getMinimumWidth(), d2.getMinimumHeight());
+               tvLoginInfo.setCompoundDrawables(d2,null,null,null);
+               tvLoginInfo.setText(String.format(getString(R.string.text_bind_member_id),MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)));
+
+               btBindState.setText(getString(R.string.text_unbind));
+               btBindState.setVisibility(View.VISIBLE);
+               break;
+       }
+        showTopInfoLayout();
     }
 
     /**
-     * 弹窗提示是否自动上报
+     * 显示头部的信息布局
      */
-    private void showPushLiveDialog() {
-            new BITDialogUtil() {
-                @Override
-                public CharSequence getMessage() {
-                    return "是否继续上报?";
-                }
-
-                @Override
-                public Context getContext() {
-                    return MainActivity.this;
-                }
-
-                @Override
-                public void doConfirmThings() {
-                    isAgainToRequestLive = true;
-                    requestStartLive();
-                }
-                @Override
-                public void doCancelThings() {
-                }
-            }.showDialog();
+    private void showTopInfoLayout() {
+        rlLoginBind.setVisibility(View.VISIBLE);
+        myHandler.sendEmptyMessageDelayed(HANDLE_CODE_HIDE_INFO_LAYOUT,HIDE_INFO_LAYOUT_TIME);
     }
-
 
     /**
-     * 弹窗提示是否是否退出账号
+     * 隐藏头部的信息布局
      */
-    private void showExitDialog() {
-        new ExitAccountDialog(MainActivity.this, new ExitAccountDialog.OnClickListener() {
-            @Override
-            public void onMoveTaskToBack() {
-                moveTaskToBack(true);
-            }
-
-            @Override
-            public void onExitAccount() {
-                clearAccount();
-            }
-        }).show();
+    private void hideTopInfoLayout(){
+        rlLoginBind.setVisibility(View.GONE);
+        myHandler.removeMessages(HANDLE_CODE_HIDE_INFO_LAYOUT);
     }
+
+    /**
+     * 清空BackStack中所有的fragment
+     */
+    private void clearFragmentBackStack(){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        int count = fragmentManager.getBackStackEntryCount();
+//        List<Fragment> list = fragmentManager.getFragments();
+        for (int i = 0; i < count; ++i) {
+            fragmentManager.popBackStack();
+//            if(list.get(i)!=null){
+//                fragmentManager.beginTransaction().remove(list.get(i)).commit();
+//            }
+        }
+    }
+
+    /**
+     * 退栈
+     */
+    private void popBackStack(){
+        getSupportFragmentManager().popBackStack();
+    }
+
 }

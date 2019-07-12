@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" 
+    android:orientation="vertical"
     android:gravity="center">
-    
+
     <RelativeLayout
         android:id="@+id/home_loading_layout"
         android:layout_width="wrap_content"
@@ -12,7 +12,7 @@
 		android:layout_gravity="center"
         android:gravity="center_horizontal"
         >
-	    <ImageView 
+	    <ImageView
 	        android:id="@+id/progress_dialog_img"
 	        android:layout_width="100dp"
 	        android:layout_height="100dp"
@@ -35,6 +35,6 @@
 	        android:layout_width="wrap_content"
 	        android:layout_height="wrap_content"/>
     </RelativeLayout>
-    
+
 
 </LinearLayout>

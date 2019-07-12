@@ -13,28 +13,51 @@
         android:layout_centerInParent="true"
         android:keepScreenOn="true"
         android:visibility="visible" />
-    <LinearLayout
-        android:layout_width="wrap_content"
+
+    <RelativeLayout
+        android:id="@+id/rl_login_bind"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:orientation="horizontal">
+        android:paddingLeft="@dimen/dp_15"
+        android:paddingRight="@dimen/dp_15"
+        android:paddingTop="@dimen/dp_30"
+        android:paddingBottom="@dimen/dp_10"
+        android:background="@drawable/bg_login_state"
+        android:orientation="horizontal"
+        android:visibility="gone">
 
-        <Button
-            android:id="@+id/button1"
-            android:layout_width="wrap_content"
+        <TextView
+            android:id="@+id/tv_login_info"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_toLeftOf="@+id/bt_bind_state"
+            android:layout_alignWithParentIfMissing="true"
+            android:drawablePadding="@dimen/dp_5"
+            android:textSize="@dimen/sp_22"
             android:textColor="@color/white"/>
-        <Button
-            android:id="@+id/button2"
-            android:layout_width="wrap_content"
+
+        <TextView
+            android:id="@+id/bt_bind_state"
+            android:layout_width="@dimen/dp_130"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/dp_5"
+            android:background="@drawable/bg_bind_button_white"
+            android:layout_alignParentRight="true"
+            android:paddingBottom="@dimen/dp_5"
+            android:paddingTop="@dimen/dp_5"
+            android:gravity="center"
+            android:text="@string/text_bind"
+            android:textSize="@dimen/sp_22"
+            android:textColor="@color/white"
+            android:visibility="gone"/>
+    </RelativeLayout>
 
-            android:textColor="@color/white"/>
-    </LinearLayout>
+    <FrameLayout
+        android:id="@+id/fl_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 
-
-
-    <include layout="@layout/layout_no_network"
-        android:visibility="gone"/>
+    <!--<include layout="@layout/layout_no_network"-->
+        <!--android:visibility="gone"/>-->
 
 </RelativeLayout>

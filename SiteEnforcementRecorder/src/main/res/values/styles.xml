@@ -27,7 +27,7 @@
         <item name="android:windowFullscreen">true</item>
         <item name="android:windowDisablePreview">true</item>
         <!--<item name="android:windowIsTranslucent">true</item>-->
-        <item name="android:windowBackground">@color/ble_bg</item>
+        <item name="android:windowBackground">@color/black</item>
     </style>
 
     <!-- 进度条样式 -->
@@ -41,7 +41,7 @@
     </style>
 
     <!-- 进度条样式 -->
-    <style name="exit_account_dialog" parent="@android:style/Theme.Dialog">
+    <style name="my_progress_dialog" parent="@android:style/Theme.Dialog">
         <item name="android:windowFrame">@null</item> <!-- Dialog的windowFrame框为无 -->
         <item name="android:windowIsFloating">false</item> <!-- 是否漂现在activity上 -->
         <item name="android:windowIsTranslucent">true</item> <!-- 是否半透明 -->

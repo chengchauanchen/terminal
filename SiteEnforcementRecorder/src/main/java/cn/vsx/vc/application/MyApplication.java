@@ -1,8 +1,6 @@
 package cn.vsx.vc.application;
 
-import android.app.AlarmManager;
 import android.app.Application;
-import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -29,9 +27,6 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
-import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.vc.receiver.AccountValidReceiver;
 import cn.vsx.vc.service.PTTButtonEventService;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -59,22 +54,25 @@ public class MyApplication extends Application {
 	/**标记个呼来或者请求图形来，是否做了接受或拒绝的操作，默认是false*/
 	public boolean isPrivateCallOrVideoLiveHand = false;
 	//
-	private AlarmManager accountValidAlarmManager;
-	private PendingIntent accountValidPendingIntent;
-	//通知账号有效的间隔时间
-	public static final long ACCOUNT_VALID_TIME = 8 * 60 * 60 * 1000;
+//	private AlarmManager accountValidAlarmManager;
+//	private PendingIntent accountValidPendingIntent;
+//	//通知账号有效的间隔时间
+//	public static final long ACCOUNT_VALID_TIME = 8 * 60 * 60 * 1000;
 //	public static final long ACCOUNT_VALID_TIME =  30 * 1000;
 
 	@Override
 	public void onCreate() {
 		instance = this;
 		super.onCreate();
-		SpecificSDK.init(this);
+		init();
 		registerActivityLifecycleCallbacks(new SimpleActivityLifecycle());
-		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
 		ZXingLibrary.initDisplayOpinion(this);
 	}
 
+	public void init(){
+		SpecificSDK.init(this);
+		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
+	}
 
 	public void setIsContactsPersonal(boolean isContactsIndividual){
 		this.isContactsIndividual = isContactsIndividual;
@@ -155,64 +153,64 @@ public class MyApplication extends Application {
 		}
 	};
 
-	/**
-	 * 获取AlarmManager
-	 *
-	 * @return
-	 */
-	public AlarmManager getAccountValidAlarmManager() {
-		if (accountValidAlarmManager == null) {
-			accountValidAlarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
-		}
-		return accountValidAlarmManager;
-	}
+//	/**
+//	 * 获取AlarmManager
+//	 *
+//	 * @return
+//	 */
+//	public AlarmManager getAccountValidAlarmManager() {
+//		if (accountValidAlarmManager == null) {
+//			accountValidAlarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+//		}
+//		return accountValidAlarmManager;
+//	}
 
-	/**
-	 * 获取PendingIntent
-	 */
-	private PendingIntent getAccountValidPendingIntent() {
-		if (accountValidPendingIntent == null) {
-			Intent intent = new Intent(this, AccountValidReceiver.class);
-			intent.setAction("vsxin.action.accountvalid");
-			accountValidPendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-		}
-		return accountValidPendingIntent;
-	}
+//	/**
+//	 * 获取PendingIntent
+//	 */
+//	private PendingIntent getAccountValidPendingIntent() {
+//		if (accountValidPendingIntent == null) {
+//			Intent intent = new Intent(this, AccountValidReceiver.class);
+//			intent.setAction("vsxin.action.accountvalid");
+//			accountValidPendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+//		}
+//		return accountValidPendingIntent;
+//	}
 
-	/**
-	 * 开启8小时解绑的倒计时
-	 *
-	 * @param endTime 到期时间
-	 */
-	public void startAccountValidAlarmManager(long endTime) {
-		logger.info("AccountValidAlarmManager---" + "startAccountValidAlarmManager:endTime-" + endTime);
-		getAccountValidAlarmManager().set(AlarmManager.RTC_WAKEUP, endTime, getAccountValidPendingIntent());
-	}
+//	/**
+//	 * 开启8小时解绑的倒计时
+//	 *
+//	 * @param endTime 到期时间
+//	 */
+//	public void startAccountValidAlarmManager(long endTime) {
+//		logger.info("AccountValidAlarmManager---" + "startAccountValidAlarmManager:endTime-" + endTime);
+//		getAccountValidAlarmManager().set(AlarmManager.RTC_WAKEUP, endTime, getAccountValidPendingIntent());
+//	}
 
-	/**
-	 * 关闭8小时解绑的倒计时
-	 */
-	public void cancelAccountValidAlarmManager() {
-		logger.info("AccountValidAlarmManager---" + "cancelAccountValidAlarmManager");
-		getAccountValidAlarmManager().cancel(getAccountValidPendingIntent());
-	}
+//	/**
+//	 * 关闭8小时解绑的倒计时
+//	 */
+//	public void cancelAccountValidAlarmManager() {
+//		logger.info("AccountValidAlarmManager---" + "cancelAccountValidAlarmManager");
+//		getAccountValidAlarmManager().cancel(getAccountValidPendingIntent());
+//	}
 
-	/**
-	 * 开启倒计时
-	 */
-	public void startAccountValidClock(){
-		//停止之前的账号解绑的倒计时
-		MyApplication.instance.cancelAccountValidAlarmManager();
-		long time = TerminalFactory.getSDK().getParam(Params.NFC_BEAN_TIME, 0L);
-		if(time != 0){
-			if(time+ACCOUNT_VALID_TIME<=System.currentTimeMillis()){
-				//保存账号解绑时间信息
-				TerminalFactory.getSDK().putParam(Params.NFC_BEAN_TIME, 0L);
-				//清空账号信息
-				DataUtil.clearNFCBean();
-			}else{
-				startAccountValidAlarmManager(time + ACCOUNT_VALID_TIME);
-			}
-		}
-	}
+//	/**
+//	 * 开启倒计时
+//	 */
+//	public void startAccountValidClock(){
+//		//停止之前的账号解绑的倒计时
+//		MyApplication.instance.cancelAccountValidAlarmManager();
+//		long time = TerminalFactory.getSDK().getParam(Params.NFC_BEAN_TIME, 0L);
+//		if(time != 0){
+//			if(time+ACCOUNT_VALID_TIME<=System.currentTimeMillis()){
+//				//保存账号解绑时间信息
+//				TerminalFactory.getSDK().putParam(Params.NFC_BEAN_TIME, 0L);
+//				//清空账号信息
+//				DataUtil.clearRecorderBindBean();
+//			}else{
+//				startAccountValidAlarmManager(time + ACCOUNT_VALID_TIME);
+//			}
+//		}
+//	}
 }

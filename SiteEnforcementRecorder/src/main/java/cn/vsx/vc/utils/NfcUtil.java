@@ -25,12 +25,17 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.util.Arrays;
 
-import cn.vsx.hamster.terminalsdk.model.NFCBean;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 
 public class NfcUtil {
 
-    private Logger logger = Logger.getLogger(getClass());
+    private static Logger logger = Logger.getLogger(NfcUtil.class.getName());
     public static final String TAG = "NfcUtil---";
+
+    public static final int NFC_ENABLE_FALSE_NONE=1;
+    public static final int NFC_ENABLE_FALSE_SHOW=2;
+    public static final int NFC_ENABLE_FALSE_JUMP=3;
+    public static final int NFC_ENABLE_NONE=4;
 
     public static final int RESULT_CODE_SUCCESS=0;
     public static final int RESULT_CODE_TYPE_ERROR=1;
@@ -47,7 +52,7 @@ public class NfcUtil {
     private static final String AID = "f22eca0ca7eb9ed0022a64e4fff5c34b";
     private static final String HEADER = "00A40400";
     //nfc
-    private  NfcAdapter mNfcAdapter;
+    private static NfcAdapter mNfcAdapter;
     private  IntentFilter[] mIntentFilter = null;
     private  PendingIntent mPendingIntent = null;
     private  String[][] mTechList = null;
@@ -58,30 +63,38 @@ public class NfcUtil {
      * 构造函数，用于初始化nfc
      */
     public NfcUtil(Context context) {
-        nfcCheck(context,false);
+        nfcCheck(context);
         nfcInit(context);
     }
 
     /**
      * 检查NFC是否打开
      */
-    public  void nfcCheck(Context context,boolean show) {
-        mNfcAdapter = NfcAdapter.getDefaultAdapter(context);
-        String content = "";
-        if (mNfcAdapter == null) {
-             content = "该设备不支持NFC功能";
-            logger.info(TAG + content);
-        } else {
-            if (!mNfcAdapter.isEnabled()) {
-                content = "NFC没有打开";
+    public static int nfcCheck(Context context) {
+        if(context!=null){
+            mNfcAdapter = NfcAdapter.getDefaultAdapter(context);
+            String content = "";
+            if (mNfcAdapter == null) {
+                content = "该设备不支持NFC功能";
                 logger.info(TAG + content);
-            }else{
-                content = "NFC已打开";
-                logger.info(TAG + content);
+                return NFC_ENABLE_FALSE_NONE;
+            } else {
+                if (!mNfcAdapter.isEnabled()) {
+                    content = "NFC没有打开";
+                    logger.info(TAG + content);
+                    return NFC_ENABLE_FALSE_JUMP;
+                }else{
+                    content = "NFC已打开";
+                    logger.info(TAG + content);
+                    return NFC_ENABLE_FALSE_SHOW;
+                }
             }
-        }
-        if(show){
-            ToastUtil.showToast(context,content);
+//            if(show){
+//                ToastUtil.showToast(context,content);
+//            }
+
+        }else{
+            return NFC_ENABLE_NONE;
         }
     }
 
@@ -134,9 +147,9 @@ public class NfcUtil {
                 }
             logger.info(TAG + "NfcAdapter.ACTION_NDEF_DISCOVERED:proccessIntent：content:"+content);
             if(onReadListener!=null){
-                NFCBean nfcBean = getNFCData(content);
-                if(nfcBean != null){
-                    onReadListener.onReadResult(RESULT_CODE_SUCCESS,NfcAdapter.ACTION_NDEF_DISCOVERED,RESULT_CONTENT_SUCCESS,nfcBean);
+                RecorderBindTranslateBean bean = getRecorderBindTranslateBean(content);
+                if(bean != null){
+                    onReadListener.onReadResult(RESULT_CODE_SUCCESS,NfcAdapter.ACTION_NDEF_DISCOVERED,RESULT_CONTENT_SUCCESS,bean);
                 }else{
                     onReadListener.onReadResult(RESULT_CODE_ERROR,NfcAdapter.ACTION_TECH_DISCOVERED,RESULT_CONTENT_ERROR,null);
                 }
@@ -171,7 +184,7 @@ public class NfcUtil {
                     String accountNumber = new String(payload, "UTF-8");
                     logger.info(TAG + "NfcAdapter.ACTION_TECH_DISCOVERED:proccessIntent：content:"+accountNumber);
                     if(onReadListener!=null){
-                        onReadListener.onReadResult(RESULT_CODE_SUCCESS,NfcAdapter.ACTION_TECH_DISCOVERED,RESULT_CONTENT_SUCCESS,getNFCData(accountNumber));
+                        onReadListener.onReadResult(RESULT_CODE_SUCCESS,NfcAdapter.ACTION_TECH_DISCOVERED,RESULT_CONTENT_SUCCESS, getRecorderBindTranslateBean(accountNumber));
                     }
                 } else {
                     String info = bytesToString(result);
@@ -273,13 +286,13 @@ public class NfcUtil {
      * @param content
      * @return
      */
-    public static NFCBean getNFCData(String content) {
-        NFCBean bean = null;
+    public static RecorderBindTranslateBean getRecorderBindTranslateBean(String content) {
+        RecorderBindTranslateBean bean = null;
         if(TextUtils.isEmpty(content)){
             return bean;
         }
         try{
-            bean =  new Gson().fromJson(content, NFCBean.class);
+            bean =  new Gson().fromJson(content, RecorderBindTranslateBean.class);
         }catch (Exception e){
             e.printStackTrace();
             bean = null;
@@ -300,7 +313,7 @@ public class NfcUtil {
      * 写入数据结果的回调
      */
     public interface OnReadListener{
-        void onReadResult(int resultCode, String readType, String resultDescribe, NFCBean bean);
+        void onReadResult(int resultCode, String readType, String resultDescribe, RecorderBindTranslateBean bean);
     }
 
     public NfcAdapter getmNfcAdapter() {

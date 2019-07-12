@@ -25,7 +25,7 @@
             android:paddingRight="@dimen/dp_20"
             android:paddingBottom="@dimen/dp_10"
             android:paddingTop="@dimen/dp_10"
-            android:src="@drawable/back"/>
+            android:src="@drawable/icon_back"/>
 
         <TextView
             android:layout_width="wrap_content"

@@ -27,6 +27,7 @@ public class Constants {
     public final static int TYPE_GROUP=101;
     public final static int TYPE_DEPARTMENT=102;
     public final static int TYPE_USER=103;
+    public final static int TYPE_TEMP_GROUP=104;
 
     public final static int FORCE_KILL = 0;
     public final static int LOGINED = 1;
@@ -38,6 +39,21 @@ public class Constants {
     public final static String PTTEVEVT_ACTION = "ptt_event_action";
     public static final String PTTEVEVT_ACTION_DOWN = "android.intent.action.PPTEVEVT_ACTION_DOWN";
     public static final String PTTEVEVT_ACTION_UP = "android.intent.action.PPTEVEVT_ACTION_UP";
+
+
+    public static final int LOGIN_BIND_STATE_IDLE = 0;//未登录
+    public static final int LOGIN_BIND_STATE_LOGIN = 1;//已登录
+    public static final int LOGIN_BIND_STATE_BIND = 2;//已绑定
+
+    public static final String FRAGMENT_TAG_MENU = "menuFragment";//menuFragment
+    public static final String FRAGMENT_TAG_BIND = "bindFragment";//bindFragment
+    public static final String FRAGMENT_TAG_NFC = "nfcFragment";//nfcFragment
+    public static final String FRAGMENT_TAG_QR = "qrScanFragment";//qrScanFragment
+    public static final String FRAGMENT_TAG_INPUT = "inputPoliceIdFragment";//inputPoliceIdFragment
+    public static final String FRAGMENT_TAG_SET = "setFragment";//setFragment
+    public static final String FRAGMENT_TAG_SET_SERVER = "setServerFragment";//setServerFragment
+    public static final String FRAGMENT_TAG_GROUP_CHANGE = "groupChangeFragment";//groupChangeFragment
+    public static final String FRAGMENT_TAG_GROUP_SEARCH = "groupSearchFragment";//groupSearchFragment
 
 
 }

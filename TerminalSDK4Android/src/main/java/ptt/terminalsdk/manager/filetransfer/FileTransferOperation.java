@@ -255,6 +255,7 @@ public class FileTransferOperation {
                             if (object != null) {
                                 String success = object.getString(RESULT_SUCCESS);
                                 if (RESULT_SUCCESS_TRUE.equals(success)) {
+                                    uploadFileByPath(path, 0, 0L,false);
                                     deleteBITFileTreeBean(list);
                                 } else {
                                     logger.error(TAG + "uploadFileTreeBean:result;" + object.getString(RESULT_MSG));

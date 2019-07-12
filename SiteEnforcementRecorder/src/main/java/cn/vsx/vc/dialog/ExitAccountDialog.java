@@ -14,8 +14,8 @@ public class ExitAccountDialog extends Dialog {
     private LinearLayout llExitAccount;
     private OnClickListener mOnClickListener;
 
-    public ExitAccountDialog(Context context,OnClickListener mOnClickListener) {
-		super(context, R.style.exit_account_dialog);
+    public ExitAccountDialog(Context context,boolean showExitAccount,OnClickListener mOnClickListener) {
+		super(context, R.style.my_progress_dialog);
 		this.context = context;
 		this.mOnClickListener = mOnClickListener;
 		
@@ -36,6 +36,7 @@ public class ExitAccountDialog extends Dialog {
             }
             dismiss();
         });
+        llExitAccount.setVisibility(showExitAccount?View.VISIBLE:View.GONE);
 		setContentView(view);
 		setCancelable(true);
     }

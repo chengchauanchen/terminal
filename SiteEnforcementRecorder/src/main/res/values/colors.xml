@@ -339,8 +339,8 @@
     <color name="search_all_contacts_background">#F3F4F8</color>
     <color name="search_all_line">#000000</color>
     <color name="search_all_text_color">#33A7FC</color>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorPrimary">#000000</color>
+    <color name="colorPrimaryDark">#000000</color>
     <color name="colorAccent">#71a3df</color>
 
 
@@ -535,7 +535,13 @@
     <color name="red_40">#66ff3737</color>
     <color name="red_ff">#ff3737</color>
     <color name="transparent_20">#33000000</color>
+    <color name="transparent_90">#e6000000</color>
+    <color name="transparent_80">#cc000000</color>
+    <color name="transparent_50">#80000000</color>
     <color name="white_40">#66ffffff</color>
+    <color name="white_20">#33ffffff</color>
+    <color name="white_50">#80ffffff</color>
+    <color name="white_70">#b3ffffff</color>
 
     <color name="register_button_enable">#800091ff</color>
     <color name="register_button_press">#330091ff</color>
@@ -543,7 +549,12 @@
     <color name="exit_account_dialog_go_back_bg">#4d19d1ff</color>
     <color name="exit_account_dialog_exit_account_bg">#4dff9d4e</color>
 
-    #19d1ff
-    #ff9d4e
+    <color name="load_result_success">#42a5f6</color>
+    <color name="blue_42">#42a5f6</color>
+    <color name="blue_42_50">#8042a5f6</color>
+    <color name="load_result_error">#ff4f4f</color>
+    <color name="green_22">#22d922</color>
+
+
 
 </resources>
