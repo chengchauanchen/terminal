@@ -19,6 +19,7 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.List;
 
+import cn.com.cybertech.pdk.utils.DisplayUtil;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
@@ -56,12 +57,14 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private ItemClickListener listener;
     private CatalogItemClickListener catalogItemClickListener;
     private int contractType;
+    private int recorderLiveRightMargin = 0;
 
     public ContactAdapter(Context context, List<ContactItemBean> datas,List<CatalogBean> catalogNames, int contractType){
         this.mContext = context;
         this.mDatas = datas;
         this.catalogNames = catalogNames;
         this.contractType = contractType;
+        recorderLiveRightMargin = DisplayUtil.dip2px(context,12);
     }
 
     @Override
@@ -263,6 +266,46 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 userViewHolder.llCallTo.setVisibility(View.VISIBLE);
                 userViewHolder.llLiveTo.setVisibility(View.VISIBLE);
             }
+
+        }else if(getItemViewType(position) == Constants.TYPE_RECORDER){
+            //执法记录仪
+            UserViewHolder userViewHolder = (UserViewHolder) holder;
+            final Member member = (Member) mDatas.get(position).getBean();
+            if (member.isBind()) {
+                if(!TextUtils.isEmpty(member.getName())){
+                    userViewHolder.tvName.setText(member.getName() + "");
+                }
+                userViewHolder.tvId.setText(member.getNo() + "");
+                userViewHolder.tvId.setVisibility(View.VISIBLE);
+            }else{
+                userViewHolder.tvName.setText(member.getNo() + "");
+                userViewHolder.tvId.setVisibility(View.GONE);
+            }
+            userViewHolder.ivLogo.setImageResource(R.drawable.icon_recorder);
+            userViewHolder.rBindedLogo.setVisibility(member.isBind()?View.VISIBLE:View.GONE);
+            userViewHolder.llDialTo.setVisibility(View.GONE);
+            userViewHolder.llMessageTo.setVisibility(View.GONE);
+            userViewHolder.llLiveTo.setVisibility(View.VISIBLE);
+            userViewHolder.llCallTo.setVisibility(View.GONE);
+
+            android.widget.LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) userViewHolder.llLiveTo.getLayoutParams();
+            lp.rightMargin = recorderLiveRightMargin;
+            userViewHolder.llLiveTo.setLayoutParams(lp);
+            //请求图像
+            userViewHolder.llLiveTo.setOnClickListener(view -> {
+                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
+                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
+                }else{
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
+                }
+            });
+            //个人信息页面
+            userViewHolder.ivLogo.setOnClickListener(view -> {
+                Intent intent = new Intent(mContext, UserInfoActivity.class);
+                intent.putExtra("userId", member.getNo());
+                intent.putExtra("userName", member.getName());
+                mContext.startActivity(intent);
+            });
         }
     }
 
@@ -326,6 +369,8 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             return Constants.TYPE_DEPARTMENT;
         }else if(bean.getType() == Constants.TYPE_LTE){
             return Constants.TYPE_LTE;
+        }else if(bean.getType() == Constants.TYPE_RECORDER){
+            return Constants.TYPE_RECORDER;
         }else{
             return -1;
         }
@@ -353,6 +398,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     class UserViewHolder extends RecyclerView.ViewHolder{
 
         ImageView ivLogo;
+        ImageView rBindedLogo;
 
         TextView tvName;
 
@@ -369,6 +415,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         public UserViewHolder(View itemView){
             super(itemView);
             ivLogo = itemView.findViewById(R.id.shoutai_user_logo);
+            rBindedLogo = itemView.findViewById(R.id.recorder_binded_logo);
             tvName = itemView.findViewById(R.id.shoutai_tv_member_name);
             tvId = itemView.findViewById(R.id.shoutai_tv_member_id);
             llDialTo = itemView.findViewById(R.id.shoutai_dial_to);

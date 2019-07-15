@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +44,13 @@ public class LteFragment extends BaseFragment{
     private Handler myHandler = new Handler();
     private ContactAdapter mContactAdapter;
 
-    //更新警务通成员信息
+    //更新LTE成员信息
     private ReceiveGetTerminalHandler receiveGetTerminalHandler = new ReceiveGetTerminalHandler() {
         @Override
         public void handler(int depId, String type, List<Department> departments,List<Member> members) {
-            updateData(departments,members);
+            if(TextUtils.equals(TerminalMemberType.TERMINAL_LTE.toString(),type)){
+                updateData(departments,members);
+            }
         }
     };
 

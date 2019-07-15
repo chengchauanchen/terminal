@@ -21,6 +21,7 @@ import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.TerminalMemberStatusEnum;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
@@ -31,6 +32,7 @@ import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.activity.VoipPhoneActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
+import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
@@ -81,8 +83,10 @@ public class GroupMemberAdapter extends BaseAdapter {
             viewHolder.me =  view.findViewById(R.id.me);
             viewHolder.userId =  view.findViewById(R.id.tv_member_id);
             viewHolder.userLogo =  view.findViewById(R.id.user_logo);
+            viewHolder.rBindedLogo =  view.findViewById(R.id.recorder_binded_logo);
             viewHolder.messageTo =  view.findViewById(R.id.message_to);
             viewHolder.callTo =  view.findViewById(R.id.call_to);
+            viewHolder.ivCall =  view.findViewById(R.id.iv_call);
             viewHolder.tvLetter =  view.findViewById(R.id.tv_catagory);
             viewHolder.catagory =  view.findViewById(R.id.catagory);
             viewHolder.line =  view.findViewById(R.id.lay_line);
@@ -106,6 +110,19 @@ public class GroupMemberAdapter extends BaseAdapter {
         viewHolder.userName.setText(member.getName());
         viewHolder.userId.setText(no);
 
+        //是否绑定
+        if(member.type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
+            viewHolder.rBindedLogo.setVisibility(member.isBind()?View.VISIBLE:View.GONE);
+            if (!member.isBind()) {
+                viewHolder.userName.setText(no);
+                viewHolder.userId.setVisibility(View.GONE);
+            }
+        }else{
+            viewHolder.rBindedLogo.setVisibility(View.GONE);
+        }
+
+
+
         if(isDelete){
             viewHolder.messageTo.setVisibility(View.GONE);
             viewHolder.callTo.setVisibility(View.GONE);
@@ -126,9 +143,19 @@ public class GroupMemberAdapter extends BaseAdapter {
                 viewHolder.messageTo.setVisibility(View.VISIBLE);
                 viewHolder.callTo.setVisibility(View.VISIBLE);
                 viewHolder.dialTo.setVisibility(View.VISIBLE);
-            }
 
+                // TODO: 2019/7/11 处理执法记录仪默认账号只显示拉取图像
+                if(member.type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
+                    viewHolder.messageTo.setVisibility(View.GONE);
+                    viewHolder.dialTo.setVisibility(View.GONE);
+                    viewHolder.ivCall.setBackgroundResource(R.drawable.new_live_icon);
+                }else{
+                    viewHolder.ivCall.setBackgroundResource(R.drawable.new_call_icon);
+                }
+            }
         }
+
+
 
         if(position == getCount()-1){
             viewHolder.line.setVisibility(View.GONE);
@@ -166,12 +193,21 @@ public class GroupMemberAdapter extends BaseAdapter {
         });
         //跳转到个呼
         viewHolder.callTo.setOnClickListener(v -> {
-            if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                activeIndividualCall(position);
-        }else {
-                ToastUtil.showToast(mContext,mContext.getString(R.string.text_no_call_permission));
+            //执法记录仪 公用一个按钮，该按钮时请求图像
+            if(member.type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
+                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
+                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
+                }else{
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
+                }
+            }else{
+                //打个呼
+                if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                    activeIndividualCall(position);
+                }else {
+                    ToastUtil.showToast(mContext,mContext.getString(R.string.text_no_call_permission));
+                }
             }
-
         });
         viewHolder.userLogo.setOnClickListener(view1 -> {
             Intent intent = new Intent(mContext, UserInfoActivity.class);
@@ -216,8 +252,10 @@ public class GroupMemberAdapter extends BaseAdapter {
         TextView me;
         TextView userId;
         ImageView userLogo;
+        ImageView rBindedLogo;
         LinearLayout messageTo;
         LinearLayout callTo;
+        ImageView ivCall;
         View line;
         LinearLayout catagory;
         LinearLayout dialTo;

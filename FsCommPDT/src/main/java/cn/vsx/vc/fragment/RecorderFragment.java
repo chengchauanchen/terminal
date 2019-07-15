@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +44,13 @@ public class RecorderFragment extends BaseFragment{
     private Handler myHandler = new Handler();
     private ContactAdapter mContactAdapter;
 
-    //更新警务通成员信息
+    //更新执法记录仪成员信息
     private ReceiveGetTerminalHandler receiveGetTerminalHandler = new ReceiveGetTerminalHandler() {
         @Override
         public void handler(int depId, String type, List<Department> departments,List<Member> members) {
-            updateData(departments,members);
+            if(TextUtils.equals(TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString(),type)){
+                updateData(departments,members);
+            }
         }
     };
 
@@ -73,7 +76,7 @@ public class RecorderFragment extends BaseFragment{
         catalogNames.clear();
         CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
         catalogNames.add(memberCatalogBean);
-        TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), TerminalMemberType.TERMINAL_LTE.toString());
+        TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
     }
 
     /**
@@ -90,7 +93,7 @@ public class RecorderFragment extends BaseFragment{
             //添加成员
             for(Member member : memberList){
                 ContactItemBean<Member> contactItemBean = new ContactItemBean<>();
-                contactItemBean.setType(Constants.TYPE_LTE);
+                contactItemBean.setType(Constants.TYPE_RECORDER);
                 contactItemBean.setBean(member);
                 mDatas.add(contactItemBean);
             }
@@ -129,7 +132,7 @@ public class RecorderFragment extends BaseFragment{
                 List<CatalogBean> catalogBeans = new ArrayList<>(catalogNames.subList(0, position+1));
                 catalogNames.clear();
                 catalogNames.addAll(catalogBeans);
-                TerminalFactory.getSDK().getConfigManager().getTerminal(catalogNames.get(position).getId(), TerminalMemberType.TERMINAL_LTE.toString());
+                TerminalFactory.getSDK().getConfigManager().getTerminal(catalogNames.get(position).getId(), TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
             }
 //            }
         });
@@ -141,14 +144,14 @@ public class RecorderFragment extends BaseFragment{
                 if(!catalogNames.contains(memberCatalogBean)){
                     catalogNames.add(memberCatalogBean);
                 }
-                TerminalFactory.getSDK().getConfigManager().getTerminal(depId, TerminalMemberType.TERMINAL_LTE.toString());
+                TerminalFactory.getSDK().getConfigManager().getTerminal(depId, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
             }
         });
         swipeRefreshLayout.setOnRefreshListener(() -> {
             catalogNames.clear();
             CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
             catalogNames.add(memberCatalogBean);
-            TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), TerminalMemberType.TERMINAL_LTE.toString());
+            TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
             myHandler.postDelayed(() -> {
                 // 加载完数据设置为不刷新状态，将下拉进度收起来
                 swipeRefreshLayout.setRefreshing(false);
@@ -184,7 +187,7 @@ public class RecorderFragment extends BaseFragment{
                 mContactAdapter.notifyDataSetChanged();
             }
             int position = catalogNames.size()-1;
-            TerminalFactory.getSDK().getConfigManager().getTerminal(catalogNames.get(position).getId(), TerminalMemberType.TERMINAL_LTE.toString());
+            TerminalFactory.getSDK().getConfigManager().getTerminal(catalogNames.get(position).getId(), TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
             mRecyclerview.scrollToPosition(0);
 
         }else{

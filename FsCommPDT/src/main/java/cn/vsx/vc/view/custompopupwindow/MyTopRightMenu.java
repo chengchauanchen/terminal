@@ -71,19 +71,21 @@ public class MyTopRightMenu {
             final MenuItem pushItem = new MenuItem(R.drawable.shipin_up, activity.getString(R.string.text_push));
             final MenuItem pullItem = new MenuItem(R.drawable.shipin_hc, activity.getString(R.string.text_pull));
             final MenuItem createItem = new MenuItem(R.drawable.create_temporary_group,activity.getString(R.string.text_create_temporary_groups));
+            final MenuItem nfcItem = new MenuItem(R.drawable.nfc_white,activity.getString(R.string.text_nfc));
             final MenuItem scanItem = new MenuItem(R.drawable.scan,activity.getString(R.string.scan));
-            final MenuItem nfcItem = new MenuItem(R.drawable.scan,activity.getString(R.string.scan));
             final List<MenuItem> items = new ArrayList<>();
             mTopRightMenu.addMenuItem(pullItem);
             mTopRightMenu.addMenuItem(pushItem);
             mTopRightMenu.addMenuItem(createItem);
+            mTopRightMenu.addMenuItem(nfcItem);
             mTopRightMenu.addMenuItem(scanItem);
-//            mTopRightMenu.addMenuItem(nfcItem);
+
             items.add(pullItem);
             items.add(pushItem);
             items.add(createItem);
-            items.add(scanItem);
             items.add(nfcItem);
+            items.add(scanItem);
+
 //            if(items.size() == 1) {
 //                mTopRightMenu.setHeight(240);
 //            }
@@ -174,9 +176,9 @@ public class MyTopRightMenu {
                                         NFCBindingDialog dialog =  new NFCBindingDialog(context, NFCBindingDialog.TYPE_WAIT);
                                         HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
                                         if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
-                                            dialog.showDialog(userId, DataUtil.isTempGroup(userId),hashMap.get(userId + ""));
+                                            dialog.showDialog(userId, hashMap.get(userId + ""));
                                         }else{
-                                            dialog.showDialog(userId, DataUtil.isTempGroup(userId), "");
+                                            dialog.showDialog(userId,  "");
                                         }
                                     }
                                     break;

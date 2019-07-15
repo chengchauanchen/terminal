@@ -57,6 +57,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
         addItemType(Constants.TYPE_CONTRACT_MEMBER, R.layout.item_search_contacts);
         addItemType(Constants.TYPE_CONTRACT_PDT, R.layout.item_search_pdt);
         addItemType(Constants.TYPE_CONTRACT_LTE, R.layout.item_search_lte);
+        addItemType(Constants.TYPE_CONTRACT_RECORDER, R.layout.item_search_recorder);
         addItemType(Constants.TYPE_CHECK_SEARCH_GROUP, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_PC, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_POLICE, R.layout.layout_item_user);
@@ -143,6 +144,20 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 });
 
                 break;
+            case Constants.TYPE_CONTRACT_RECORDER:
+                Member contractRecorder = (Member) item.getBean();
+                holder.setGone(R.id.recorder_binded_logo,contractRecorder.isBind());
+                if(contractRecorder.isBind()){
+                    setKeyWordsView(holder.getView(R.id.tv_member_name),HandleIdUtil.handleName(contractRecorder.getName()));
+                    setKeyWordsView(holder.getView(R.id.tv_member_id),HandleIdUtil.handleId(contractRecorder.getNo()));
+                    holder.setGone(R.id.tv_member_id,true);
+                }else{
+                    setKeyWordsView(holder.getView(R.id.tv_member_name),HandleIdUtil.handleId(contractRecorder.getNo()));
+                    holder.setGone(R.id.tv_member_id,false);
+                }
+                //拉流
+                holder.setOnClickListener(R.id.shoutai_live_to, v ->  OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, contractRecorder));
+                break;
             case Constants.TYPE_CHECK_SEARCH_GROUP:
                 Group group1 = (Group) item.getBean();
                 holder.setImageResource(R.id.shoutai_user_logo,R.drawable.group_photo);
@@ -166,9 +181,20 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 Member member = (Member) item.getBean();
                 ImageView image = holder.getView(R.id.shoutai_user_logo);
                 image.setImageResource(BitmapUtil.getImageResourceByType(member.getType()));
-                holder.setChecked(R.id.checkbox,member.isChecked());
                 setKeyWordsView(holder.getView(R.id.shoutai_tv_member_name),HandleIdUtil.handleName(member.getName()));
                 setKeyWordsView(holder.getView(R.id.shoutai_tv_member_id),HandleIdUtil.handleId(member.getNo()));
+                holder.setGone(R.id.shoutai_tv_member_id,true);
+                if(item.getType() == Constants.TYPE_CHECK_SEARCH_RECODER){
+                    holder.setGone(R.id.recorder_binded_logo,member.isBind());
+                    if(!member.isBind()){
+                        setKeyWordsView(holder.getView(R.id.shoutai_tv_member_name),HandleIdUtil.handleId(member.getNo()));
+                        holder.setGone(R.id.shoutai_tv_member_id,false);
+                    }
+                }else{
+                    holder.setGone(R.id.recorder_binded_logo,false);
+                }
+                holder.setChecked(R.id.checkbox,member.isChecked());
+
                 holder.setOnClickListener(R.id.checkbox, v -> {
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class,member,!member.isChecked(), TerminalMemberType.getInstanceByCode(member.getType()).toString());
                     member.setChecked(!member.isChecked());

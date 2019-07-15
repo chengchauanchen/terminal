@@ -12,7 +12,7 @@ import android.widget.TextView;
 import java.util.List;
 
 
-
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -62,8 +62,19 @@ public class MemberListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
             Member member = (Member) mData.get(position).getBean();
             if (member != null) {
                 userViewHolder.ivLogo.setImageResource(BitmapUtil.getImageResourceByType(member.getType()));
+
                 userViewHolder.tvName.setText(member.getName());
                 userViewHolder.tvId.setText(HandleIdUtil.handleId(member.getNo()));
+                userViewHolder.tvId.setVisibility(View.VISIBLE);
+                if(member.getType() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
+                    userViewHolder.ivRBindedLogo.setVisibility(member.isBind()?View.VISIBLE:View.GONE);
+                    if(!member.isBind()){
+                        userViewHolder.tvName.setText(HandleIdUtil.handleId(member.getNo()));
+                        userViewHolder.tvId.setVisibility(View.GONE);
+                    }
+                }else{
+                    userViewHolder.ivRBindedLogo.setVisibility(View.GONE);
+                }
                 userViewHolder.checkbox.setChecked(member.isChecked());
                 userViewHolder.checkbox.setOnClickListener(v -> {
                     if(null != itemClickListener){
@@ -135,6 +146,7 @@ public class MemberListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     class UserViewHolder extends RecyclerView.ViewHolder{
 
         ImageView ivLogo;
+        ImageView ivRBindedLogo;
 
         TextView tvName;
 
@@ -145,6 +157,7 @@ public class MemberListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         public UserViewHolder(View itemView){
             super(itemView);
             ivLogo = itemView.findViewById(R.id.shoutai_user_logo);
+            ivRBindedLogo = itemView.findViewById(R.id.recorder_binded_logo);
             tvName = itemView.findViewById(R.id.shoutai_tv_member_name);
             tvId = itemView.findViewById(R.id.shoutai_tv_member_id);
             checkbox = itemView.findViewById(R.id.checkbox);

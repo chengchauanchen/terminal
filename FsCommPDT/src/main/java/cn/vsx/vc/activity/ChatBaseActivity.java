@@ -546,9 +546,17 @@ public abstract class ChatBaseActivity extends BaseActivity
                 if(bean!=null){
                     //执法记录仪绑定
                     TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                        int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
-                        HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
-                        TerminalFactory.getSDK().getRecorderBindManager().requestBind(bean.getAccountNo(),bean.getUniqueNo(),userId,hashMap.get(userId + ""));
+                        if(userId!=0){
+                            HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
+                            int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+                            if(hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))){
+                                TerminalFactory.getSDK().getRecorderBindManager().requestBind(memberId,bean.getUniqueNo(),userId,hashMap.get(userId + ""));
+                            }else{
+                                TerminalFactory.getSDK().getRecorderBindManager().requestBind(memberId,bean.getUniqueNo(),userId,"");
+                            }
+                        }else{
+                            ToastUtil.showToast(ChatBaseActivity.this,getString(R.string.text_group_id_abnormal));
+                        }
                     });
                 }else{
                     ToastUtil.showToast(ChatBaseActivity.this,getString(R.string.text_please_scan_correct_qr_recorder));
@@ -1825,12 +1833,16 @@ public abstract class ChatBaseActivity extends BaseActivity
      * 显示刷NFC的弹窗
      */
     private void showNFCDialog() {
-        nfcBindingDialog = new NFCBindingDialog(ChatBaseActivity.this, NFCBindingDialog.TYPE_WAIT);
-        HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
-        if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
-            nfcBindingDialog.showDialog(userId, DataUtil.isTempGroup(userId),hashMap.get(userId + ""));
+        if(userId!=0){
+            nfcBindingDialog = new NFCBindingDialog(ChatBaseActivity.this, NFCBindingDialog.TYPE_WAIT);
+            HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
+            if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
+                nfcBindingDialog.showDialog(userId, hashMap.get(userId + ""));
+            }else{
+                nfcBindingDialog.showDialog(userId, "");
+            }
         }else{
-            nfcBindingDialog.showDialog(userId, DataUtil.isTempGroup(userId), "");
+            ToastUtil.showToast(ChatBaseActivity.this,getString(R.string.text_group_id_abnormal));
         }
     }
 

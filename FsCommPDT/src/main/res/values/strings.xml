@@ -608,6 +608,8 @@
     <string name="text_please_scan_correct_qr_recorder">请扫描有效的二维码</string>
     <string name="text_request_bind_success">绑定请求发送成功</string>
     <string name="text_request_bind_fail">绑定请求发送失败</string>
+    <string name="text_group_id_abnormal">组ID异常</string>
+    <string name="text_nfc">NFC</string>
     <string name="current_group_cannot_cancel_monitor">当前组不能取消监听</string>
     <string name="text_monitor_group">监听组</string>
     <string name="text_monitor_group_list">监听组列表</string>

@@ -315,6 +315,9 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
             case Constants.TYPE_CONTRACT_LTE:
                 TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_LTE.toString(), keywords);
                 break;
+            case Constants.TYPE_CONTRACT_RECORDER:
+                TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString(), keywords);
+                break;
             case Constants.TYPE_CHECK_SEARCH_ACCOUNT:
             case Constants.TYPE_CONTRACT_MEMBER:
                 TerminalFactory.getSDK().getConfigManager().searchAccount(currentPage,PAGE_SIZE, keywords);

@@ -31,6 +31,7 @@ public class Constants{
     public final static int TYPE_ACCOUNT=105;
     public final static int TYPE_FREQUENT=106;
     public final static int TYPE_LTE=107;
+    public final static int TYPE_RECORDER=108;
     //搜索 通讯录的组
     public final static int TYPE_CONTRACT_GROUP=107;
     //搜索 通讯录的成员
