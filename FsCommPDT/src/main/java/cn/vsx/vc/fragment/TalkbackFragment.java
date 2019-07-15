@@ -1235,7 +1235,7 @@ public class TalkbackFragment extends BaseFragment {
     }
 
     private void setVideoIcon() {
-        MyTopRightMenu.offerObject().initview(talkback_add_icon, getActivity());
+        MyTopRightMenu.offerObject().initview(talkback_add_icon, (BaseActivity) getActivity());
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         layoutParams.setMargins(0, 0, 40, 0);
         talkback_add_icon.setVisibility(View.VISIBLE);

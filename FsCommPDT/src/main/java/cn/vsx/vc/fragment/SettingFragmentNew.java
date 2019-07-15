@@ -49,6 +49,7 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.AboutActivity;
+import cn.vsx.vc.activity.BaseActivity;
 import cn.vsx.vc.activity.BleActivity;
 import cn.vsx.vc.activity.HelpWordActivity;
 import cn.vsx.vc.activity.MonitorGroupListActivity;
@@ -290,7 +291,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = () -> mHandler.post(() -> setVideoIcon());
 
     private void setVideoIcon() {
-        MyTopRightMenu.offerObject().initview(add_icon, activity);
+        MyTopRightMenu.offerObject().initview(add_icon, (BaseActivity) activity);
         add_icon.setVisibility(View.VISIBLE);
     }
 

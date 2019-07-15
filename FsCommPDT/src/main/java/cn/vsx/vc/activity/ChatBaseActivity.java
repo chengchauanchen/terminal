@@ -181,7 +181,7 @@ public abstract class ChatBaseActivity extends BaseActivity
     /**
      * 请求存储读取权限
      */
-    private static final int CODE_FNC_REQUEST = 0x15;
+
     private static final int CODE_TRANSPON_REQUEST = 0x16;//转发
 
     protected static final int REQUEST_RECORD_CODE = 999;
@@ -521,7 +521,7 @@ public abstract class ChatBaseActivity extends BaseActivity
 
             }
         } else if (requestCode == CODE_FNC_REQUEST) {
-            checkNFC(false);
+            checkNFC(userId,false);
         } else if (requestCode == CODE_TRANSPON_REQUEST) {
             if (resultCode == RESULT_OK) {
                 //转发返回结果
@@ -1792,7 +1792,7 @@ public abstract class ChatBaseActivity extends BaseActivity
                                     requestVideo();
                                     break;
                                 case ReceiverSendFileCheckMessageHandler.NFC://NFC
-                                    checkNFC(true);
+                                    checkNFC(userId,true);
                                     break;
                                 case ReceiverSendFileCheckMessageHandler.QR_CODE://二维码
 //                                    showQRDialog();
@@ -1806,45 +1806,6 @@ public abstract class ChatBaseActivity extends BaseActivity
         }
     };
 
-    /**
-     * 检查NFC功能，并提示
-     */
-    private void checkNFC(boolean openSetting) {
-        int result = NfcUtil.nfcCheck(this);
-        switch (result) {
-            case NfcUtil.NFC_ENABLE_FALSE_NONE:
-                ToastUtil.showToast(this, getString(R.string.is_not_support_nfc));
-                break;
-            case NfcUtil.NFC_ENABLE_FALSE_JUMP:
-                ToastUtil.showToast(this, this.getString(R.string.is_not_open_nfc));
-                if (openSetting) {
-                    handler.postDelayed(() -> startActivityForResult(new Intent(Settings.ACTION_NFC_SETTINGS), CODE_FNC_REQUEST), 500);
-                }
-                break;
-            case NfcUtil.NFC_ENABLE_FALSE_SHOW:
-                showNFCDialog();
-                break;
-            case NfcUtil.NFC_ENABLE_NONE:
-                break;
-        }
-    }
-
-    /**
-     * 显示刷NFC的弹窗
-     */
-    private void showNFCDialog() {
-        if(userId!=0){
-            nfcBindingDialog = new NFCBindingDialog(ChatBaseActivity.this, NFCBindingDialog.TYPE_WAIT);
-            HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
-            if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
-                nfcBindingDialog.showDialog(userId, hashMap.get(userId + ""));
-            }else{
-                nfcBindingDialog.showDialog(userId, "");
-            }
-        }else{
-            ToastUtil.showToast(ChatBaseActivity.this,getString(R.string.text_group_id_abnormal));
-        }
-    }
 
     /**
      * 扫描二维码

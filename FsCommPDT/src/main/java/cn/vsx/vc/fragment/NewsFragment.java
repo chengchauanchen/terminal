@@ -73,6 +73,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.BaseActivity;
 import cn.vsx.vc.activity.CombatGroupActivity;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.HistoryCombatGroupActivity;
@@ -385,7 +386,7 @@ public class NewsFragment extends BaseFragment {
 
 
     private void setVideoIcon() {
-        MyTopRightMenu.offerObject().initview(add_icon,getActivity() );
+        MyTopRightMenu.offerObject().initview(add_icon, (BaseActivity) getActivity());
         add_icon.setVisibility(View.VISIBLE);
     }
     @Override

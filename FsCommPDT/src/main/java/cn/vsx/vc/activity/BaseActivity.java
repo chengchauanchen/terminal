@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -27,6 +28,7 @@ import org.apache.log4j.Logger;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
 
 import butterknife.ButterKnife;
@@ -45,6 +47,7 @@ import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.NFCBindingDialog;
 import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
@@ -55,6 +58,7 @@ import cn.vsx.vc.receiver.HeadsetPlugReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DialogUtil;
+import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.PhoneAdapter;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -71,6 +75,9 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
     public OnBackListener backListener;
     protected boolean oritationPort;
+
+    protected static final int CODE_FNC_REQUEST = 0x15;
+
     //成员被删除了
     private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
         @Override
@@ -657,6 +664,47 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             }
         }.showDialog();
     });
+
+    /**
+     * 检查NFC功能，并提示
+     */
+    public void checkNFC(int userId,boolean openSetting) {
+        int result = NfcUtil.nfcCheck(this);
+        switch (result) {
+            case NfcUtil.NFC_ENABLE_FALSE_NONE:
+                ToastUtil.showToast(this, getString(R.string.is_not_support_nfc));
+                break;
+            case NfcUtil.NFC_ENABLE_FALSE_JUMP:
+                ToastUtil.showToast(this, this.getString(R.string.is_not_open_nfc));
+                if (openSetting) {
+                    myHandler.postDelayed(() -> startActivityForResult(new Intent(Settings.ACTION_NFC_SETTINGS), CODE_FNC_REQUEST), 500);
+                }
+                break;
+            case NfcUtil.NFC_ENABLE_FALSE_SHOW:
+                showNFCDialog(userId);
+                break;
+            case NfcUtil.NFC_ENABLE_NONE:
+                break;
+        }
+    }
+
+    /**
+     * 显示刷NFC的弹窗
+     */
+    private void showNFCDialog(int userId) {
+        if(userId!=0){
+            NFCBindingDialog nfcBindingDialog = new NFCBindingDialog(BaseActivity.this, NFCBindingDialog.TYPE_WAIT);
+            HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
+            if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
+                nfcBindingDialog.showDialog(userId, hashMap.get(userId + ""));
+            }else{
+                nfcBindingDialog.showDialog(userId, "");
+            }
+        }else{
+            ToastUtil.showToast(BaseActivity.this,getString(R.string.text_group_id_abnormal));
+        }
+    }
+
 
     private void exitApp() {
         Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");

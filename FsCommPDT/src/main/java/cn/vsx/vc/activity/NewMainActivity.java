@@ -1399,6 +1399,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             if(null !=updateManager){
                 updateManager.checkIsAndroidO(false);
             }
+        } else if (requestCode == CODE_FNC_REQUEST) {
+            int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
+            checkNFC(userId,false);
         }else if(requestCode == REQUEST_CODE_SCAN && resultCode == RESULT_OK){
             if (data != null) {
                 String result = data.getStringExtra(Constant.CODED_CONTENT);

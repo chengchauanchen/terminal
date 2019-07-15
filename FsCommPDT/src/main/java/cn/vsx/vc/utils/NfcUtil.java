@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.nfc.NdefRecord;
 import android.nfc.NfcAdapter;
+
+import org.apache.log4j.Logger;
+
 import java.nio.charset.Charset;
 import java.util.Locale;
-import org.apache.log4j.Logger;
 
 
 public class NfcUtil {
@@ -115,4 +117,5 @@ public class NfcUtil {
             NdefRecord.RTD_TEXT, new byte[0], data);
         return ndefRecord;
     }
+
 }

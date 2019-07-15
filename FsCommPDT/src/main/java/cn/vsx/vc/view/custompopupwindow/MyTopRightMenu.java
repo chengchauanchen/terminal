@@ -1,7 +1,6 @@
 package cn.vsx.vc.view.custompopupwindow;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -15,22 +14,18 @@ import com.yzq.zxinglibrary.common.Constant;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.Member;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import cn.vsx.vc.activity.ChatBaseActivity;
+import cn.vsx.vc.activity.BaseActivity;
 import cn.vsx.vc.activity.IncreaseTemporaryGroupMemberActivity;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.dialog.NFCBindingDialog;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.Constants;
@@ -47,7 +42,7 @@ import ptt.terminalsdk.tools.ToastUtil;
 
 public class MyTopRightMenu {
     private static MyTopRightMenu myTopRightMenu;
-    private Activity activity;
+    private BaseActivity activity;
     private static final int REQUEST_PERMISSION_SETTING = 0;
 
     private MyTopRightMenu(){}
@@ -64,7 +59,7 @@ public class MyTopRightMenu {
     }
     private TopRightMenu mTopRightMenu;
 
-    public void initview(final ImageView view, final Activity context){
+    public void initview(final ImageView view, final BaseActivity context){
         this.activity = context;
         view.setOnClickListener(v -> {
             mTopRightMenu = new TopRightMenu(context);
@@ -173,13 +168,7 @@ public class MyTopRightMenu {
                                         context.startActivityForResult(intent, NewMainActivity.REQUEST_CODE_SCAN);
                                     }else if(items.get(position) ==nfcItem){
                                         int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
-                                        NFCBindingDialog dialog =  new NFCBindingDialog(context, NFCBindingDialog.TYPE_WAIT);
-                                        HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
-                                        if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
-                                            dialog.showDialog(userId, hashMap.get(userId + ""));
-                                        }else{
-                                            dialog.showDialog(userId,  "");
-                                        }
+                                        context.checkNFC(userId,true);
                                     }
                                     break;
                                 case SPEAKING:
