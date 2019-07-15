@@ -112,7 +112,7 @@
     <string name="text_menu">菜单</string>
     <string name="text_sure">确定</string>
 
-    <string name="text_imsi_null">请插入sim卡</string>
+    <string name="text_imei_null">获取IMEI信息失败</string>
     <string name="text_member_id">设备号%1$d</string>
     <string name="text_bind_member_id">警务通&#160;%1$d</string>
     <string name="text_nfc_state_error">NFC状态异常</string>

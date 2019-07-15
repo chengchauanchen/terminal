@@ -923,12 +923,12 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
      * 登录
      */
     protected void checkLogin(boolean show,int time){
-        String imsi = MyTerminalFactory.getSDK().getIMSI();
-        logger.debug("获取imsi:"+imsi);
+        String imei = MyTerminalFactory.getSDK().getIMEI();
+        logger.debug("获取imei:"+imei);
         myHandler.postDelayed(() -> {
-            if(TextUtils.isEmpty(imsi)){
+            if(TextUtils.isEmpty(imei)){
                 if(show){
-                    ToastUtil.showToast(this,getString(R.string.text_imsi_null));
+                    ToastUtil.showToast(this,getString(R.string.text_imei_null));
                 }
             }else{
                 login();
