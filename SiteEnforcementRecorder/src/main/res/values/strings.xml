@@ -137,4 +137,5 @@
     <string name="text_request_bind_fail">绑定请求发送失败</string>
     <string name="text_connect_fail_please_input_corrent_ip_and_port">连通失败,请输入正确的IP和端口号</string>
     <string name="text_change_server">切换环境</string>
+    <string name="text_move_task_to_back">后台运行</string>
 </resources>
