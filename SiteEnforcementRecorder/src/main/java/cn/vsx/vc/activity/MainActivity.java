@@ -1257,7 +1257,8 @@ public class MainActivity extends BaseActivity {
                         ||MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus()!=AudioRecordStatus.STATUS_STOPED){
                     exit();
                 }else{
-                    showExitDialog();
+                    ToastUtil.showToast(this, getString(R.string.text_move_task_to_back));
+                    moveTaskToBack(true);
                 }
                 return true;
             default:

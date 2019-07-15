@@ -112,7 +112,7 @@
     <string name="text_menu">菜单</string>
     <string name="text_sure">确定</string>
 
-    <string name="text_imsi_null">请插入sim卡</string>
+    <string name="text_imei_null">获取IMEI信息失败</string>
     <string name="text_member_id">设备号%1$d</string>
     <string name="text_bind_member_id">警务通&#160;%1$d</string>
     <string name="text_nfc_state_error">NFC状态异常</string>
@@ -137,4 +137,5 @@
     <string name="text_request_bind_fail">绑定请求发送失败</string>
     <string name="text_connect_fail_please_input_corrent_ip_and_port">连通失败,请输入正确的IP和端口号</string>
     <string name="text_change_server">切换环境</string>
+    <string name="text_move_task_to_back">后台运行</string>
 </resources>

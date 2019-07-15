@@ -1071,7 +1071,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		if (Util.isEmpty(account)){
 			String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
 			if(!TextUtils.isEmpty(deviceType)&&(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString()))){
-				account = newIMSI();
+				account = newIMEI();
 			}else{
 				TelephonyManager telephonyManager = (TelephonyManager)application.getSystemService(Context.TELEPHONY_SERVICE);
 				WifiManager wm = (WifiManager)application.getSystemService(Context.WIFI_SERVICE);
@@ -1120,6 +1120,24 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			}
 			return imsi;
 //			return "460028027373289";
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "";
+		}
+	}
+	@SuppressLint("MissingPermission")
+	@Override
+	protected String newIMEI() {
+		try {
+			//实例化TelephonyManager对象
+			TelephonyManager telephonyManager = (TelephonyManager) application.getSystemService(Context.TELEPHONY_SERVICE);
+			//获取IMEI号
+			String imei = telephonyManager.getDeviceId();
+			//在次做个验证，也不是什么时候都能获取到的啊
+			if (imei == null) {
+				imei = "";
+			}
+			return imei;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "";
