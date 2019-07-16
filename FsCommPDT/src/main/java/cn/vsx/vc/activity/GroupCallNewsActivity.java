@@ -970,12 +970,11 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             logger.info("转组成功回调消息");
             handler.post(() -> {
                 if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
-                    refreshPtt();
-
-
                     TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
-                    isCurrentGroup = !isCurrentGroup;
+                    isCurrentGroup = true;
+                    refreshPtt();
                 } else {
+                    isCurrentGroup = false;
                     ToastUtil.showToast(GroupCallNewsActivity.this, errorDesc);
                 }
             });

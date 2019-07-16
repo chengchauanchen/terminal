@@ -53,9 +53,9 @@ public class MonitorGroupListAdapter extends RecyclerView.Adapter<RecyclerView.V
         if(group.getNo() == TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
             return SPECIL;
         }
-        if(GroupType.TEMPORARY.toString().equals(group.getGroupType())){
-            return SPECIL;
-        }
+//        if(GroupType.TEMPORARY.toString().equals(group.getGroupType())){
+//            return SPECIL;
+//        }
         if(ResponseGroupType.RESPONSE_TRUE.toString().equals(group.getResponseGroupType())){
             return SPECIL;
         }

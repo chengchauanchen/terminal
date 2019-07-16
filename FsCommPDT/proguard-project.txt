@@ -124,6 +124,7 @@
 -keep class cn.vsx.hamster.errcode.** { *; }
 -keep class cn.vsx.hamster.common.** { *; }
 -keep class cn.vsx.hamster.terminalsdk.model.** { *; }
+-keep class ptt.terminalsdk.bean.** { *; }
 
 -keep class cn.vsx.hamster.terminalsdk.manager.channel** { *; }
 -keep class cn.vsx.hamster.protolbuf.** { *; }
@@ -132,6 +133,7 @@
 -keep class cn.vsx.hamster.terminalsdk.receiveHandler.** { *; }
 -keep class cn.vsx.vc.receiveHandle.** { *; }
 -keep class com.zectec.imageandfileselector.receivehandler.** { *; }
+-keep class ptt.terminalsdk.receiveHandler.** { *; }
 
 -keepattributes *Annotation* #假如项目中有用到注解，应加入这行配置
 -keepattributes Signature #过滤泛型（不写可能会出现类型转换错误，一般情况把这个加上就是了）

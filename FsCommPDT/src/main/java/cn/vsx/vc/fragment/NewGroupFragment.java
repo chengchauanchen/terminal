@@ -107,7 +107,7 @@ public class NewGroupFragment extends BaseFragment{
                 //加入监听
                 if(currentMonitorGroup.get(monitorGroupNo)){
 //                    TerminalFactory.getSDK().getGroupManager().changeGroup(monitorGroupNo);
-                    if(!TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(monitorGroupNo)){
+                    if(null != DataUtil.getTempGroupByGroupNo(monitorGroupNo)&&!TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(monitorGroupNo)){
                         TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().add(monitorGroupNo);
                         TerminalFactory.getSDK().getConfigManager().updateTempMonitorGroup();
                     }
