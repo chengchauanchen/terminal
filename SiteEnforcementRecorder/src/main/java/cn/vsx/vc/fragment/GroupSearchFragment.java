@@ -118,7 +118,7 @@ public class GroupSearchFragment extends Fragment implements View.OnClickListene
                 // 加载完数据设置为不刷新状态，将下拉进度收起来
             }, 1200);
         });
-        groupRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 4));
+        groupRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
         groupAdapter = new GroupAdapter(getContext(), datas);
         groupRecyclerView.setAdapter(groupAdapter);
         groupAdapter.setOnItemClickListener(new GroupAdapter.OnItemClickListener() {

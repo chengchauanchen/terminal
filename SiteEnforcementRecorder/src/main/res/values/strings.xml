@@ -114,7 +114,7 @@
 
     <string name="text_imei_null">获取IMEI信息失败</string>
     <string name="text_member_id">设备号%1$d</string>
-    <string name="text_bind_member_id">警务通&#160;%1$d</string>
+    <string name="text_bind_member_id">%1$s&#160;%2$d</string>
     <string name="text_nfc_state_error">NFC状态异常</string>
     <string name="text_has_no_nfc">该设备不支持NFC</string>
     <string name="text_input_bind_police_id">输入要绑定的ID</string>

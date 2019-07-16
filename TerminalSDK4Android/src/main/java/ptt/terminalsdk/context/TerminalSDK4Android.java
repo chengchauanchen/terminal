@@ -1137,7 +1137,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			if (imei == null) {
 				imei = "";
 			}
-			return imei;
+			return DataUtil.getIMEI15(imei);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "";

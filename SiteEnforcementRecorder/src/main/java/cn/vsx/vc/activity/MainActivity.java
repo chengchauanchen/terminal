@@ -1371,8 +1371,9 @@ public class MainActivity extends BaseActivity {
                Drawable d2= getResources().getDrawable(R.drawable.icon_binded);
                d2.setBounds(0, 0, d2.getMinimumWidth(), d2.getMinimumHeight());
                tvLoginInfo.setCompoundDrawables(d2,null,null,null);
-               tvLoginInfo.setText(String.format(getString(R.string.text_bind_member_id),MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)));
-
+               tvLoginInfo.setText(String.format(getString(R.string.text_bind_member_id),
+                       MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""),
+                       MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)));
                btBindState.setText(getString(R.string.text_unbind));
                btBindState.setVisibility(View.VISIBLE);
                break;
