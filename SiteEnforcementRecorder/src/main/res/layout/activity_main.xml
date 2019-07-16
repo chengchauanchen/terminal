@@ -33,6 +33,8 @@
             android:layout_toLeftOf="@+id/bt_bind_state"
             android:layout_alignWithParentIfMissing="true"
             android:drawablePadding="@dimen/dp_5"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:textSize="@dimen/sp_22"
             android:textColor="@color/white"/>
 
