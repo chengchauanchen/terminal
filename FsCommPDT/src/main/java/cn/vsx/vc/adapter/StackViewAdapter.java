@@ -24,6 +24,7 @@ import java.util.List;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.model.Account;
+import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -173,31 +174,29 @@ public class StackViewAdapter extends BaseAdapter{
             if(!TextUtils.isEmpty(liver)){
                 if(liver.contains("_")){
                     String[] split = liver.split("_");
-//                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                        Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo,false);
-                        if(account!=null){
-//                            myHandler.post(() -> {
-                                if(split.length>1){
-                                    String memberName = split[1];
-
-                                    if(TextUtils.isEmpty(account.getDepartmentName())){
-                                        viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),memberName,HandleIdUtil.handleId(liverNo)));
-                                    }else{
-                                        viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),memberName,HandleIdUtil.handleId(liverNo),account.getDepartmentName()));
-                                    }
-
-                                    viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),memberName));
-                                }else {
-                                    if(TextUtils.isEmpty(account.getDepartmentName())){
-                                        viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),account.getName(),HandleIdUtil.handleId(liverNo)));
-                                    }else{
-                                        viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),account.getName(),HandleIdUtil.handleId(liverNo),account.getDepartmentName()));
-                                    }
-                                    viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),account.getName()));
+                    if(split.length>0){
+                        long uniqueNo = DataUtil.stringToLong(split[0]);
+                        Member member = DataUtil.getMemberByUniqueNo(uniqueNo,false);
+                        if(member!=null){
+                            if(split.length>1){
+                                String memberName = split[1];
+                                if(TextUtils.isEmpty(member.getDepartmentName())){
+                                    viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),memberName,HandleIdUtil.handleId(member.getNo())));
+                                }else{
+                                    viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),memberName,HandleIdUtil.handleId(member.getNo()),member.getDepartmentName()));
                                 }
-//                            });
+
+                                viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),memberName));
+                            }else {
+                                if(TextUtils.isEmpty(member.getDepartmentName())){
+                                    viewHolder.video_member.setText(String.format(context.getString(R.string.text_unknown_sector_name),member.getName(),HandleIdUtil.handleId(member.getNo())));
+                                }else{
+                                    viewHolder.video_member.setText(String.format(context.getString(R.string.text_known_sector_name),member.getName(),HandleIdUtil.handleId(member.getNo()),member.getDepartmentName()));
+                                }
+                                viewHolder.tv_live_theme.setText(String.format(context.getString(R.string.text_living_theme_member_name),member.getName()));
+                            }
                         }
-//                    });
+                    }
                 }else {
                     Log.e("StackViewAdapter","有上报者，但是liver里没有_，无法获取编号和名字");
                 }

@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -255,7 +257,10 @@ public class FileTransferOperation {
                             if (object != null) {
                                 String success = object.getString(RESULT_SUCCESS);
                                 if (RESULT_SUCCESS_TRUE.equals(success)) {
-                                    uploadFileByPath(path, 0, 0L,false);
+                                    String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+                                    if(TerminalMemberType.valueOf(type).getCode() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
+                                        uploadFileByPath(path, 0, 0L,false);
+                                    }
                                     deleteBITFileTreeBean(list);
                                 } else {
                                     logger.error(TAG + "uploadFileTreeBean:result;" + object.getString(RESULT_MSG));

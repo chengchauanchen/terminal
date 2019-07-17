@@ -70,6 +70,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLive
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
@@ -670,11 +671,20 @@ public class ReceiveHandlerService extends Service{
             }else if(terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE){
                 //voip走的个呼状态机
                 if(MyApplication.instance.getIndividualState() ==  IndividualCallState.IDLE && !MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress){
-                    int liverNo = Util.stringToInt(terminalMessage.messageBody.getString(JsonParam.LIVERNO));
+                    String liver = (String) terminalMessage.messageBody.get(JsonParam.LIVER);
                     TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                        cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(liverNo,true);
+                        if(!android.text.TextUtils.isEmpty(liver)){
+                            if(liver.contains("_")) {
+                                String[] split = liver.split("_");
+                                if(split.length>0){
+                                    long uniqueNo = DataUtil.stringToLong(split[0]);
+                                    DataUtil.getMemberByUniqueNo(uniqueNo,true);
+                                }
+                            }
+                        }
                         cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(terminalMessage.messageFromId,true);
                     });
+
                     //判断是否是组内上报，组内上报不弹窗
                     if(!TerminalMessageUtil.isGroupMessage(terminalMessage)){
                         //延迟弹窗，否则判断是否在上报接口返回的是没有在上报

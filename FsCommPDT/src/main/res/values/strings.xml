@@ -617,4 +617,6 @@
     <string name="current_group_cannot_remove">当前组不能移除监听</string>
     <string name="temp_group_cannot_remove">临时组不能移除监听</string>
     <string name="response_group_cannot_remove">响应组不能移除监听</string>
+    <string name="text_input_name_regex">输入2-7位汉字、字母、数字且数字不在首位</string>
+
 </resources>

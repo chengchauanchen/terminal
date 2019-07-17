@@ -1120,6 +1120,9 @@ public class TalkbackFragment extends BaseFragment {
             isScanGroupCall = false;
             change2Listening();
         }
+        //警务通和执法记录仪的绑定关系
+        boolean isBind = MyTerminalFactory.getSDK().getParam(Params.RECORDER_BIND_STATE, false);
+        rlBind.setVisibility(isBind?View.VISIBLE:View.GONE);
     }
 
     @SuppressLint("ClickableViewAccessibility")

@@ -1114,7 +1114,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 }else {
                     long finalLiverUniqueNo = liverUniqueNo;
                     TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                        Member member = cn.vsx.hamster.terminalsdk.tools.DataUtil.getMemberByUniqueNo(finalLiverUniqueNo);
+                        Member member = cn.vsx.hamster.terminalsdk.tools.DataUtil.getMemberByUniqueNo(finalLiverUniqueNo,true);
                         String name = (member!=null)?member.getName():terminalMessage.messageFromName;
                         myHandler.post(() -> {
                             setText(holder.tvContent, String.format(activity.getString(R.string.current_push_member),name));

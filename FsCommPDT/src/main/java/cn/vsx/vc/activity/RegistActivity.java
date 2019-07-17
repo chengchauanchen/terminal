@@ -36,6 +36,8 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import cn.com.cybertech.pdk.UserInfo;
 import cn.com.cybertech.pdk.api.IPstoreHandler.Response;
@@ -345,6 +347,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 String useDepartmentId = departmentId.getText().toString().trim();
                 String useDepartmentName = departmentName.getText().toString().trim();
                 String name = edtName.getText().toString().trim();
+                if(!checkName(name)){
+                    return;
+                }
                 MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, useAccount);
                 MyTerminalFactory.getSDK().putParam(UrlParams.NAME, name);
                 MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_ID, useDepartmentId);
@@ -381,6 +386,24 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 }
             }
         }
+    }
+
+    /**
+     * 检测姓名
+     * @param name
+     * @return
+     */
+    private boolean checkName(String name) {
+        boolean result = false;
+             String pas = "^[a-zA-Z\\u4e00-\\u9fa5][a-zA-Z0-9\\u4e00-\\u9fa5]{2,7}";
+             Pattern p = Pattern.compile(pas);
+             Matcher m = p.matcher(name);
+            if (m.matches()) {
+              result = true;
+             }else{
+              ptt.terminalsdk.tools.ToastUtil.showToast(RegistActivity.this,getString(R.string.text_input_name_regex));
+             }
+        return result;
     }
 
     //模拟警员
