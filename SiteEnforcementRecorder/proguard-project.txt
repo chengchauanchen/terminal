@@ -123,6 +123,8 @@
 
 -keep class cn.vsx.hamster.errcode.** { *; }
 -keep class cn.vsx.hamster.common.** { *; }
+-keep class cn.vsx.hamster.terminalsdk.model.** { *; }
+-keep class ptt.terminalsdk.bean.** { *; }
 
 -keep class cn.vsx.hamster.terminalsdk.manager.channel** { *; }
 -keep class cn.vsx.hamster.protolbuf.** { *; }
@@ -131,6 +133,7 @@
 -keep class cn.vsx.hamster.terminalsdk.receiveHandler.** { *; }
 -keep class cn.vsx.vc.receiveHandle.** { *; }
 -keep class com.zectec.imageandfileselector.receivehandler.** { *; }
+-keep class ptt.terminalsdk.receiveHandler.** { *; }
 
 -keepattributes *Annotation* #假如项目中有用到注解，应加入这行配置
 -keepattributes Signature #过滤泛型（不写可能会出现类型转换错误，一般情况把这个加上就是了）
@@ -138,6 +141,7 @@
 
 -renamesourcefileattribute SourceFile
 -keepattributes SourceFile,LineNumberTable
+-keep class ptt.terminalsdk.tools.ToastUtil
 -keep class cn.vsx.vc.utils.ToastUtil
 
 -keep class com.android.webrtc.audio.** { *; }
@@ -195,3 +199,113 @@
 -keepclassmembers  class **$** extends com.chad.library.adapter.base.BaseViewHolder {
      <init>(...);
 }
+-ignorewarnings
+
+-keepclassmembers class org.easydarwin.video.EasyRTSPClient {
+   public *;
+}
+
+-keepclassmembers class org.easydarwin.video.RTSPClient {
+    private *;
+}
+
+-keepattributes Exceptions,InnerClasses,*Annotation*,Signature,EnclosingMethod
+
+-dontwarn okio.**
+-dontwarn org.bouncycastle.**
+-dontwarn dji.**
+-dontwarn com.dji.**
+-dontwarn sun.**
+-dontwarn java.**
+
+-keepclassmembers enum * {
+    public static <methods>;
+}
+
+-keepnames class * implements java.io.Serializable
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    !static !transient <fields>;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+-keep class * extends android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+
+-keepnames class * implements java.io.Serializable
+-keepclassmembers class * implements java.io.Serializable {
+    static final long serialVersionUID;
+    private static final java.io.ObjectStreamField[] serialPersistentFields;
+    !static !transient <fields>;
+    private void writeObject(java.io.ObjectOutputStream);
+    private void readObject(java.io.ObjectInputStream);
+    java.lang.Object writeReplace();
+    java.lang.Object readResolve();
+}
+-keep class * extends android.os.Parcelable {
+    public static final android.os.Parcelable$Creator *;
+}
+#大疆
+
+-keep,allowshrinking class * extends dji.publics.DJIUI.** {
+    public <methods>;
+}
+
+-keep class net.sqlcipher.** { *; }
+
+-keep class net.sqlcipher.database.* { *; }
+
+-keep class dji.** { *; }
+
+-keep class com.dji.** { *; }
+
+-keep class com.google.** { *; }
+
+-keep class org.bouncycastle.** { *; }
+
+-keep,allowshrinking class org.** { *; }
+
+-keep class com.squareup.wire.** { *; }
+
+-keep class sun.misc.Unsafe { *; }
+
+-keep class com.secneo.** { *; }
+
+-keepclasseswithmembers,allowshrinking class * {
+    native <methods>;
+}
+
+
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
+
+-keep class android.support.v7.widget.SearchView { *; }
+
+-keepclassmembers class * extends android.app.Service
+-keepclassmembers public class * extends android.view.View {
+    void set*(***);
+    *** get*();
+}
+-keepclassmembers class * extends android.app.Activity {
+    public void *(android.view.View);
+}
+-keep class android.support.** { *; }
+-keep class android.media.** { *; }
+-keep class okio.** { *; }
+-keep class com.lmax.disruptor.** {
+    *;
+}
+
+-dontwarn com.mapbox.services.android.location.LostLocationEngine
+-dontwarn com.mapbox.services.android.location.MockLocationEngine
+
+-keep class cn.vsx.yuv.**{ *; }
+
+#海能达SDK
+-keep class com.hytera.**{*;}
+-keep class android.dsp.**{*;}
