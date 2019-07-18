@@ -230,7 +230,10 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     /**
      * 发送绑定操作
      */
-    private ReceiveRequestRecorderBindHandler receiveRequestRecorderBindHandler = (errorCode,errorDesc) -> ToastUtil.showToast(BaseActivity.this,errorDesc);
+    private ReceiveRequestRecorderBindHandler receiveRequestRecorderBindHandler = (errorCode,errorDesc) -> myHandler.post(() -> {
+        ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindFail();
+        ToastUtil.showToast(BaseActivity.this,errorDesc);
+    });
 
     /**
      * 发送绑定请求的响应
@@ -239,6 +242,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         if(resultCode == BaseCommonCode.SUCCESS_CODE){
             ToastUtil.showToast(BaseActivity.this,getString(R.string.text_request_bind_success));
         }else{
+            ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindFail();
             ToastUtil.showToast(BaseActivity.this,(TextUtils.isEmpty(resultDesc))?getString(R.string.text_request_bind_fail):resultDesc);
         }
     };
@@ -259,6 +263,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
      */
     private ReceiveNotifyZfyBoundPhoneMessageHandler receiveNotifyZfyBoundPhoneMessageHandler = (isBound) -> {
         if(!isBound){
+            ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().unbinding();
             ToastUtil.showToast(BaseActivity.this,getString(R.string.text_unbind_success));
             //清空绑定信息
             DataUtil.clearRecorderBindBean();
@@ -267,6 +272,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         }else{
             if(DataUtil.getRecorderBindBean()!=null){
                 ToastUtil.showToast(BaseActivity.this,getString(R.string.text_bind_success));
+                ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindSuccess();
             }
         }
     };
@@ -994,11 +1000,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                     if(!cancelList.isEmpty()){
                         MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(cancelList,false);
                     }
-
-                    int groupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                    List<Integer> addList = new ArrayList<>(1);
-                    addList.add(groupId);
-                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(addList,true);
                 });
             }
         }

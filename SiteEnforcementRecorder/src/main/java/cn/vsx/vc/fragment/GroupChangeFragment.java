@@ -203,12 +203,16 @@ public class GroupChangeFragment extends Fragment implements View.OnClickListene
         @Override
         public void handler(int errorCode, String errorDesc){
             logger.info("收到转组消息：" + errorCode + "/" + errorDesc);
-            if(errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()){
-                ToastUtil.showToast(MyApplication.instance, getString(R.string.text_change_group_success));
-                mHandler.post(() -> groupAdapter.notifyDataSetChanged());
-            }else{
-                ToastUtil.showToast(MyApplication.instance, errorDesc);
-            }
+            mHandler.post(() -> {
+                if(errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()){
+                    ToastUtil.showToast(MyApplication.instance, getString(R.string.text_change_group_success));
+                    ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().changeGroupSuccess();
+                    groupAdapter.notifyDataSetChanged();
+                }else{
+                    ToastUtil.showToast(MyApplication.instance, errorDesc);
+                    ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().changeGroupFail();
+                }
+            });
         }
     };
 

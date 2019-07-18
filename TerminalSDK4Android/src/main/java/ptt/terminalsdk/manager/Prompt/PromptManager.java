@@ -171,6 +171,12 @@ public class PromptManager {
 		soundMap.put(R.raw.request_call_ok, soundPool.load(context, R.raw.request_call_ok, 1));
 		soundMap.put(R.raw.request_call_fail, soundPool.load(context, R.raw.request_call_fail, 1));
 		soundMap.put(R.raw.cease_call, soundPool.load(context, R.raw.cease_call, 1));
+
+		soundMap.put(R.raw.faild_binding, soundPool.load(context, R.raw.faild_binding, 1));
+		soundMap.put(R.raw.faild_changegroup, soundPool.load(context, R.raw.faild_changegroup, 1));
+		soundMap.put(R.raw.success_binding, soundPool.load(context, R.raw.success_binding, 1));
+		soundMap.put(R.raw.success_changegroup, soundPool.load(context, R.raw.success_changegroup, 1));
+		soundMap.put(R.raw.unbinding, soundPool.load(context, R.raw.unbinding, 1));
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveStartCeaseGroupCallHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveTalkWillTimeoutHandler);
@@ -200,6 +206,51 @@ public class PromptManager {
 		}
 	}
 
+
+	/**
+	 * 绑定失败
+	 */
+	public void bindFail(){
+		if(soundPool != null){
+			soundPool.play(soundMap.get(R.raw.faild_binding), 0.5f, 0.5f, 0, 0, 1);
+		}
+	}
+
+	/**
+	 * 切组失败
+	 */
+	public void changeGroupFail(){
+		if(soundPool != null){
+			soundPool.play(soundMap.get(R.raw.faild_changegroup), 0.5f, 0.5f, 0, 0, 1);
+		}
+	}
+
+	/**
+	 * 绑定成功
+	 */
+	public void bindSuccess(){
+		if(soundPool != null){
+			soundPool.play(soundMap.get(R.raw.success_binding), 0.5f, 0.5f, 0, 0, 1);
+		}
+	}
+
+	/**
+	 * 切组成功
+	 */
+	public void changeGroupSuccess(){
+		if(soundPool != null){
+			soundPool.play(soundMap.get(R.raw.success_changegroup), 0.5f, 0.5f, 0, 0, 1);
+		}
+	}
+
+	/**
+	 * 解除绑定
+	 */
+	public void unbinding(){
+		if(soundPool != null){
+			soundPool.play(soundMap.get(R.raw.unbinding), 0.5f, 0.5f, 0, 0, 1);
+		}
+	}
 
 	public void stop(){
 		logger.info("----------sdk提示音管理类 stop()------------");
