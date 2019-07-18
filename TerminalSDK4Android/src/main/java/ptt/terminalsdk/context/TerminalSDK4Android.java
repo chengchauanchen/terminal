@@ -981,7 +981,12 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	public void connectToServer() {
 		uuidByte = StringUtil.hexStringToByteArray(getUuid());
 		accessServerIp = getParam(Params.ACCESS_SERVER_IP, "");
-		accessServerPort = getParam(Params.ACCESS_SERVER_PORT, 0);
+		String protocolType = getParam(Params.PROTOCOL_TYPE, Params.UDP);
+		if(Params.TCP.equals(protocolType)){
+			accessServerPort = getParam(Params.ACCESS_SERVER_TCP_PORT,0);
+		}else if(Params.UDP.equals(protocolType)){
+			accessServerPort = getParam(Params.ACCESS_SERVER_PORT, 0);
+		}
 		logger.info("uuidByte = "+ uuidByte +"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
 
 		Intent messageService = new Intent(application, MessageService.class);
@@ -997,6 +1002,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			messageService.putExtra("uuid", uuidByte);
 			messageService.putExtra("accessServerIp", accessServerIp);
 			messageService.putExtra("accessServerPort", accessServerPort);
+			messageService.putExtra("protocolType",protocolType);
 			application.startService(messageService);
 			logger.info("开始启动服务MessageService, 连接到信令服务");
 		}else {

@@ -10,4 +10,5 @@ interface IMessageService {
     void sendMessage(in byte[] data, PushMessageSendResultHandlerAidl handler);
     void registServerConnectionEstablishedHandler(ServerConnectionEstablishedHandlerAidl handler);
     void unregistServerConnectionEstablishedHandler(ServerConnectionEstablishedHandlerAidl handler);
+    void initConnectionClient(in String protocolType);
 }

@@ -24,7 +24,7 @@ import ptt.terminalsdk.ServerMessageReceivedHandlerAidl;
  * Created by ysl on 2017/8/23.
  */
 
-public class MyUDPClient extends UDPClientBase {
+public class MyUDPClient extends UDPClientBase implements IConnectionClient{
 
     private final Context context;
     private WakeLock wakeLock;
@@ -77,6 +77,7 @@ public class MyUDPClient extends UDPClientBase {
         }
     }
 
+    @Override
     public void registMessageReceivedHandler(final ServerMessageReceivedHandlerAidl handler){
         for (ServerMessageReceivedHandlerAidl handler0 : serverMessageReceivedHandlerAidls){
             if (handler0.asBinder() != handler.asBinder()){
@@ -84,9 +85,13 @@ public class MyUDPClient extends UDPClientBase {
         }
         serverMessageReceivedHandlerAidls.add(handler);
     }
+
+    @Override
     public void unregistMessageReceivedHandler(final ServerMessageReceivedHandlerAidl handler) {
         serverMessageReceivedHandlerAidls.remove(handler);
     }
+
+    @Override
     public void sendMessage(byte[] data, final PushMessageSendResultHandlerAidl handler) {
         if(hasNetworkConnection()){
             logger.debug("发送消息："+data+"----->"+handler.getClass());
@@ -108,15 +113,58 @@ public class MyUDPClient extends UDPClientBase {
             }
         }
     }
+
+    @Override
     public void registServerConnectionEstablishedHandler(final ServerConnectionEstablishedHandlerAidl handler){
         logger.info("MyUDPClient----registServerConnectionEstablishedHandler");
         this.handler = handler;
         registServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
     }
+
+    @Override
     public void unregistServerConnectionEstablishedHandler(final ServerConnectionEstablishedHandlerAidl handler){
         this.handler = handler;
         unregistServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
     }
+
+    @Override
+    public void setUuid(byte[] uuid){
+        super.setUuid(uuid);
+    }
+
+    @Override
+    public void setServerIp(String serverIp){
+        super.setServerIp(serverIp);
+    }
+
+    @Override
+    public void setServerPort(int serverPort){
+        super.setServerPort(serverPort);
+    }
+
+    @Override
+    public boolean isStarted(){
+        return super.isStarted();
+    }
+
+    @Override
+    public void start(){
+        try{
+            super.start();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void stop(){
+        try{
+            super.stop();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
     private ServerConnectionEstablishedHandlerAidl handler;
     private  ServerConnectionEstablishedHandler serverConnectionEstablishedHandler = new ServerConnectionEstablishedHandler() {
         @Override

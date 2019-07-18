@@ -8,7 +8,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
@@ -16,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import de.mindpipe.android.logging.log4j.LogConfigurator;
 import ptt.terminalsdk.IMessageService;
 import ptt.terminalsdk.IMessageService.Stub;
@@ -31,23 +30,20 @@ import ptt.terminalsdk.ServerMessageReceivedHandlerAidl;
 public class MessageService extends Service {
 
     private Logger logger = LoggerFactory.getLogger(MessageService.class);
-    private MyUDPClient myUDPClient;
-    private String accessServerIpTemp;
-    private int accessServerPortTemp;
     private Handler mHandler = new Handler();
     private static final String TAG = "MessageService--";
+    private IConnectionClient connectionClient;
 
     @Override
     public void onCreate() {
         configLogger();
-        myUDPClient = new MyUDPClient(this);
         logger.info("MessageService执行了onCreate()");
     }
 
     @Override
     public void onLowMemory(){
         super.onLowMemory();
-        Log.e("MessageService", "onLowMemory");
+        logger.error("MessageService---onLowMemory");
     }
 
     @Override
@@ -57,7 +53,7 @@ public class MessageService extends Service {
         byte[] uuid = new byte[0];
         String accessServerIp = "";
         int accessServerPort = 0;
-
+        String protocolType = Params.UDP;
         if (intent != null) {
             if (intent.hasExtra("uuid")){
                 uuid = intent.getByteArrayExtra("uuid");
@@ -68,46 +64,50 @@ public class MessageService extends Service {
             if (intent.hasExtra("accessServerPort")){
                 accessServerPort = intent.getIntExtra("accessServerPort", 0);
             }
+            if(intent.hasExtra("protocolType")){
+                protocolType = intent.getStringExtra("protocolType");
+            }
         }
+        logger.info("MessageService ----> onStartCommand： protocolType:"+protocolType+"--uuid = "+uuid+"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
+        initClient(protocolType);
+        startClient(uuid,accessServerIp,accessServerPort);
+        return START_STICKY;
+    }
 
-        logger.info("MessageService ----> onStartCommand： uuid = "+uuid+"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
+    private void initClient(String protocolType){
+        logger.info("initClient---protocolType:"+protocolType);
+        if(connectionClient == null){
+            if(Params.TCP.equals(protocolType)){
+                connectionClient = new MyNettyClient(this);
+            }else if(Params.UDP.equals(protocolType)){
+                connectionClient = new MyUDPClient(this);
+            }else {
+                logger.error("没有获取到通信方式！！");
+            }
+        }
+    }
+    private void startClient(byte[] uuid, String accessServerIp, int accessServerPort){
+
         try {
             if(uuid.length != 0 && accessServerIp.length() != 0 && accessServerPort != 0){
-                logger.info("accessServerIpTemp = "+accessServerIpTemp+"  accessServerPortTemp = "+accessServerPortTemp);
-//                if(!TextUtils.isEmpty(accessServerIpTemp) && accessServerPortTemp !=0){
-//                    logger.info("UDPClient已经启动过了");
-//                    if (!accessServerIp.equals(accessServerIpTemp) || accessServerPort != accessServerPortTemp){
-//                        logger.info("接入服务ip或端口变了");
-//                        myUDPClient.stop();
-//                        accessServerIpTemp = accessServerIp;
-//                        accessServerPortTemp = accessServerPort;
-//                    }
-//                }
-
-                if(myUDPClient.isStarted()){
-                    myUDPClient.stop();
+                if(connectionClient.isStarted()){
+                    connectionClient.stop();
                 }
-                myUDPClient.setUuid(uuid);
-                myUDPClient.setServerIp(accessServerIp);
-                myUDPClient.setServerPort(accessServerPort);
-                try{
-                    myUDPClient.start();
-                    logger.info("MessageService连接到信令服务器，调用了UDPClientBase的start()");
-                }catch(Exception e){
-                    e.printStackTrace();
-                    logger.error("连接到信令服务器时，出现异常", e);
-                    TerminalFactory.getSDK().connectToServer();
-                }
+                connectionClient.setUuid(uuid);
+                connectionClient.setServerIp(accessServerIp);
+                connectionClient.setServerPort(accessServerPort);
+                connectionClient.start();
+                logger.info("MessageService连接到信令服务器，调用了UDPClientBase的start()");
             }else {
                 logger.error("接入服务地址不对！！不能出现这种情况！");
             }
         } catch (Exception e) {
             e.printStackTrace();
             logger.error("连接到信令服务器时，出现异常", e);
+
             //连接失败继续重连
-            TerminalFactory.getSDK().connectToServer();
+//            TerminalFactory.getSDK().connectToServer();
         }
-        return START_STICKY;
     }
 
     @Nullable
@@ -121,7 +121,8 @@ public class MessageService extends Service {
     public boolean onUnbind(Intent intent) {
         logger.info("MessageService执行了onUnbind()");
         try {
-            myUDPClient.stop();
+            connectionClient.stop();
+            connectionClient = null;
             logger.info("MessageService调用了UDPClientBase的stop()");
         } catch (Exception e) {
             e.printStackTrace();
@@ -133,7 +134,8 @@ public class MessageService extends Service {
     public void onDestroy() {
         logger.info("MessageService执行了onDestroy()");
         try {
-            myUDPClient.stop();
+            connectionClient.stop();
+            connectionClient = null;
             logger.info("MessageService调用了UDPClientBase的stop()");
         } catch (Exception e) {
             e.printStackTrace();
@@ -146,31 +148,36 @@ public class MessageService extends Service {
         @Override
         public void registMessageReceivedHandler(final ServerMessageReceivedHandlerAidl handler) throws RemoteException {
             logger.info(TAG+"registMessageReceivedHandler");
-            myUDPClient.registMessageReceivedHandler(handler);
+            connectionClient.registMessageReceivedHandler(handler);
         }
 
         @Override
         public void unregistMessageReceivedHandler(final ServerMessageReceivedHandlerAidl handler) throws RemoteException {
-            myUDPClient.unregistMessageReceivedHandler(handler);
+            connectionClient.unregistMessageReceivedHandler(handler);
         }
 
         @Override
         public void sendMessage(byte[] data, final PushMessageSendResultHandlerAidl handler) {
-            myUDPClient.sendMessage(data, handler);
+            connectionClient.sendMessage(data, handler);
         }
 
         @Override
         public void registServerConnectionEstablishedHandler(final ServerConnectionEstablishedHandlerAidl handler) throws RemoteException {
             logger.info(TAG+"registServerConnectionEstablishedHandler");
-            myUDPClient.registServerConnectionEstablishedHandler(handler);
+            connectionClient.registServerConnectionEstablishedHandler(handler);
         }
 
         @Override
         public void unregistServerConnectionEstablishedHandler(ServerConnectionEstablishedHandlerAidl handler) throws RemoteException {
             logger.info(TAG+"unregistServerConnectionEstablishedHandler");
-            myUDPClient.unregistServerConnectionEstablishedHandler(handler);
+            connectionClient.unregistServerConnectionEstablishedHandler(handler);
         }
 
+        @Override
+        public void initConnectionClient(String protocolType) throws RemoteException{
+            logger.info("initConnectionClient--"+protocolType);
+            initClient(protocolType);
+        }
     };
 
     @SuppressLint("NewApi")/**日志生成文件保存*/

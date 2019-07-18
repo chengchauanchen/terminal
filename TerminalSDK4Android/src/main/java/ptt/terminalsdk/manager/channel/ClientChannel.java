@@ -18,6 +18,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.channel.AbsClientChannel;
 import cn.vsx.hamster.terminalsdk.manager.channel.ClientChannelMessageDispatcher;
 import cn.vsx.hamster.terminalsdk.manager.channel.ServerMessageReceivedHandler;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.IMessageService;
 import ptt.terminalsdk.PushMessageSendResultHandlerAidl;
 import ptt.terminalsdk.ServerConnectionEstablishedHandlerAidl;
@@ -106,6 +107,8 @@ public class ClientChannel extends AbsClientChannel {
 		try {
 			if (!isStarted && messageService != null){
 				logger.info("ClientChannel  start成功!");
+				String protocolType = TerminalFactory.getSDK().getParam(Params.PROTOCOL_TYPE, Params.UDP);
+				messageService.initConnectionClient(protocolType);
 				messageService.registServerConnectionEstablishedHandler(handlerAidl);
 				messageService.registMessageReceivedHandler(handler);
 				isStarted = true;
