@@ -135,6 +135,7 @@ public class NewGroupFragment extends BaseFragment{
                 monitorGroupNo = 0;
             }else {
                 monitorGroupNo = 0;
+                ToastUtil.showToast(getContext(),errorDesc);
             }
         }
     };
