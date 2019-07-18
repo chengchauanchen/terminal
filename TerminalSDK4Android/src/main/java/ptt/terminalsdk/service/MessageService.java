@@ -74,7 +74,7 @@ public class MessageService extends Service {
         return START_STICKY;
     }
 
-    private void initClient(String protocolType){
+    private synchronized void initClient(String protocolType){
         logger.info("initClient---protocolType:"+protocolType);
         if(connectionClient == null){
             if(Params.TCP.equals(protocolType)){
@@ -97,7 +97,7 @@ public class MessageService extends Service {
                 connectionClient.setServerIp(accessServerIp);
                 connectionClient.setServerPort(accessServerPort);
                 connectionClient.start();
-                logger.info("MessageService连接到信令服务器，调用了UDPClientBase的start()");
+                logger.info("MessageService连接到信令服务器，调用了connectionClient的start()");
             }else {
                 logger.error("接入服务地址不对！！不能出现这种情况！");
             }
