@@ -10,7 +10,10 @@ import org.apache.log4j.Logger;
 import java.io.IOException;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.nio.channels.SocketChannel;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.zectec.speex.Speex;
 
 
@@ -42,7 +45,10 @@ public class AudioResourceManager {
     private int audioTrackBufferSize = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT)*4;
     /** 接收socket */
     private DatagramSocket receiveSocket;
+    private SocketChannel sendSocketChannel;
+    private SocketChannel receiveSocketChannel;
     private Logger logger = Logger.getLogger(getClass());
+    private IClient client;
 
     int getSampleRate(){
         return sampleRate;
@@ -94,6 +100,76 @@ public class AudioResourceManager {
             sendSocket.close();
             sendSocket = null;
         }
+    }
+
+    SocketChannel getSendSocketChannel(){
+        try{
+            if(sendSocketChannel == null){
+                sendSocketChannel = SocketChannel.open();
+                sendSocketChannel.configureBlocking(true);
+                sendSocketChannel.socket().setSoTimeout(1000 * 1);
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        return sendSocketChannel;
+    }
+
+    void releaseSendSocketChannel(){
+        if (sendSocketChannel != null) {
+            try {
+                sendSocketChannel.socket().close();
+            } catch (Exception e) {
+                logger.error(e);
+            }
+            try {
+                sendSocketChannel.close();
+            } catch (Exception e) {
+                logger.error(e);
+            }
+        }
+        sendSocketChannel = null;
+    }
+
+    SocketChannel getReceiveSocketChannel(){
+        try{
+            if(receiveSocketChannel == null){
+                receiveSocketChannel = SocketChannel.open();
+                receiveSocketChannel.configureBlocking(true);
+                receiveSocketChannel.socket().setSoTimeout(1000 * 1);
+            }
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+        return receiveSocketChannel;
+    }
+
+    void releaseReceiveSocketChannel(){
+        if (receiveSocketChannel != null) {
+            try {
+                receiveSocketChannel.socket().close();
+            } catch (Exception e) {
+                logger.error(e);
+            }
+            try {
+                receiveSocketChannel.close();
+            } catch (Exception e) {
+                logger.error(e);
+            }
+        }
+        receiveSocketChannel = null;
+    }
+
+    synchronized IClient getClient(){
+        if(client == null){
+            String protocolType = TerminalFactory.getSDK().getParam(Params.PROTOCOL_TYPE, Params.UDP);
+            if(Params.TCP.equals(protocolType)){
+                client = TCPClient.getInstance();
+            }else {
+                client = UDPClient.getInstance();
+            }
+        }
+        return client;
     }
 
     AudioRecord getAudioRecord(){

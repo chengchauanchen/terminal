@@ -11,6 +11,7 @@ import org.ddpush.im.client.v1.ServerConnectionEstablishedHandler;
 import org.ddpush.im.client.v1.netty.NettyClient;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -168,15 +169,15 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     }
 
     @Override
-    public void onReceiveMsg(Object msg){
-        logger.info("收到服务端消息:"+msg);
-//        for(ServerMessageReceivedHandlerAidl handler : serverMessageReceivedHandlerAidls){
-//            try {
-//                handler.handle(data, offset, length);
-//            } catch (RemoteException e) {
-//                e.printStackTrace();
-//            }
-//        }
+    protected void onPushMessage(byte[] data, int offset, int length){
+        logger.info("收到服务端消息:"+ Arrays.toString(data));
+        for(ServerMessageReceivedHandlerAidl handler : serverMessageReceivedHandlerAidls){
+            try {
+                handler.handle(data, offset, length);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     @Override

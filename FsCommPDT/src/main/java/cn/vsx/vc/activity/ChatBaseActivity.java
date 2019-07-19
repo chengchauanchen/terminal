@@ -1895,7 +1895,7 @@ public abstract class ChatBaseActivity extends BaseActivity
 //        if (groupMessageRecord1 != null && groupMessageRecord1.size() > 0) {
 //            logger.info("会话列表刷新成功");
 //            tempPage++;
-//            setData(groupMessageRecord1, false);
+//            init(groupMessageRecord1, false);
 //            if (groupMessageRecord1.size() < PAGE_COUNT) {
 //                //从网络获取
 //                isEnoughPageCount = false;

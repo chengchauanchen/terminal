@@ -70,9 +70,10 @@ public class ReceiveAndPlayWork implements Runnable {
 
     @Override
     public void run() {
+
         Command command;//取出并处理的命令
         Speex speex;//编解码类的对象
-        DatagramSocket receiveSocket;//接收音频数据的通道
+        DatagramSocket receiveSocket = null;//接收音频数据的通道
         short[] playedBuffer = new short[Math.min(AudioResourceManager.INSTANCE.getAudioTrackBufferSize()/2, 960)];//播放数据的缓冲区
         int len;//解码后数据的长度
         byte[] receivedData = new byte[512];//接收到的数据
@@ -83,6 +84,7 @@ public class ReceiveAndPlayWork implements Runnable {
         long receiveCallId;//接收数据的标识（CallId）
         long lastSendReceiveRequestTime;//最后一次发送接受请求的时间
         TimerTask audioTrackNoDataTimeoutTask = null;
+        IClient client;
         while (started){
             try{
                 //从队列中取命令，直到队列中的命令全部取出，才开始执行最新的那一条命令
@@ -98,8 +100,8 @@ public class ReceiveAndPlayWork implements Runnable {
             }
             //开启接收播放，单工通信和双工通信使用相同的处理方式
             if(command.getCmdType() == Command.CmdType.RESUME_RECEIVER || command.getCmdType() == Command.CmdType.START_DUPLEX_COMMUNICATION){
-                receiveSocket = AudioResourceManager.INSTANCE.getReceiveSocket();
-                if(receiveSocket != null){
+                client = AudioResourceManager.INSTANCE.getClient();
+                if(client != null){
                     audioTrack = getAudioTrack(command.getCmdType());
                     speex = AudioResourceManager.INSTANCE.getSpeex4Receiver();
                     lastSendReceiveRequestTime = 0;
