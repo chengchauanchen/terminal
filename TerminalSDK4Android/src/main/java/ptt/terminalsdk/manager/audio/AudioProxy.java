@@ -111,6 +111,13 @@ public class AudioProxy implements IAudioProxy{
 	}
 
 	@Override
+	public void start(String type){
+		realtimeAudio.start();
+
+		record = new Record();
+	}
+
+	@Override
 	public void setVolume(int volume){
 		if(volume % VOLUME_STEP != 0){
 			throw new IllegalArgumentException("设置的音量值"+volume+"不是"+VOLUME_STEP+"的倍数");
@@ -142,12 +149,6 @@ public class AudioProxy implements IAudioProxy{
 		}
 	}
 
-	@Override
-	public void start(){
-		realtimeAudio.start();
-
-		record = new Record();
-	}
 	@Override
 	public void stop(){
 		if(realtimeAudio != null) {

@@ -182,6 +182,7 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
 
     @Override
     public void onDisConnect(){
+        logger.info("onDisConnect---");
         for(ServerConnectionEstablishedHandler connectionEstablishedHandler : connectionEstablishedHandlers){
             connectionEstablishedHandler.handler(false);
         }

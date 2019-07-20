@@ -1243,6 +1243,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		return dataManager;
 	}
 
+	@Override
+	public void audioProxyStart(){
+	}
+
 	/**
 	 * 全局请求的统一配置（以下配置根据自身情况选择性的配置即可）
 	 */

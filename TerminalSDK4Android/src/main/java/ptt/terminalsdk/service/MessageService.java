@@ -93,11 +93,11 @@ public class MessageService extends Service {
                 if(connectionClient.isStarted()){
                     connectionClient.stop();
                 }
+                logger.info("MessageService连接到信令服务器，调用了connectionClient的start()");
                 connectionClient.setUuid(uuid);
                 connectionClient.setServerIp(accessServerIp);
                 connectionClient.setServerPort(accessServerPort);
                 connectionClient.start();
-                logger.info("MessageService连接到信令服务器，调用了connectionClient的start()");
             }else {
                 logger.error("接入服务地址不对！！不能出现这种情况！");
             }
