@@ -9,8 +9,6 @@ import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.DatagramSocket;
-import java.net.SocketException;
-import java.nio.channels.SocketChannel;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -38,15 +36,11 @@ public class AudioResourceManager {
     private AudioRecord audioRecord;
     /** 放音 */    /** 录音缓冲区长度 */
     private int audioRecordBufferSize = AudioRecord.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT)*4;
-    /** 发送socket */
-    private DatagramSocket sendSocket;
     private AudioTrack audioTrack;
     /** 放音缓冲区长度 */
     private int audioTrackBufferSize = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT)*4;
     /** 接收socket */
     private DatagramSocket receiveSocket;
-    private SocketChannel sendSocketChannel;
-    private SocketChannel receiveSocketChannel;
     private Logger logger = Logger.getLogger(getClass());
     private IClient client;
 
@@ -82,82 +76,6 @@ public class AudioResourceManager {
             speex4Receiver.close();
             speex4Receiver = null;
         }
-    }
-
-    DatagramSocket getSendSocket(){
-        if(sendSocket == null){
-            try {
-                sendSocket = new DatagramSocket();
-            } catch (SocketException e) {
-                logger.error("sendSocket创建失败", e);
-            }
-        }
-        return sendSocket;
-    }
-
-    void releaseSendSocket(){
-        if(sendSocket != null){
-            sendSocket.close();
-            sendSocket = null;
-        }
-    }
-
-    SocketChannel getSendSocketChannel(){
-        try{
-            if(sendSocketChannel == null){
-                sendSocketChannel = SocketChannel.open();
-                sendSocketChannel.configureBlocking(true);
-                sendSocketChannel.socket().setSoTimeout(1000 * 1);
-            }
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-        return sendSocketChannel;
-    }
-
-    void releaseSendSocketChannel(){
-        if (sendSocketChannel != null) {
-            try {
-                sendSocketChannel.socket().close();
-            } catch (Exception e) {
-                logger.error(e);
-            }
-            try {
-                sendSocketChannel.close();
-            } catch (Exception e) {
-                logger.error(e);
-            }
-        }
-        sendSocketChannel = null;
-    }
-
-    SocketChannel getReceiveSocketChannel(){
-        try{
-            if(receiveSocketChannel == null){
-                receiveSocketChannel = SocketChannel.open();
-                receiveSocketChannel.configureBlocking(true);
-                receiveSocketChannel.socket().setSoTimeout(1000 * 1);
-            }
-        }catch(IOException e){
-            e.printStackTrace();
-        }
-        return receiveSocketChannel;
-    }
-
-    void releaseReceiveSocketChannel(){
-        if (receiveSocketChannel != null) {
-            try {
-                receiveSocketChannel.socket().close();
-            } catch (Exception e) {
-                logger.error(e);
-            }
-            try {
-                receiveSocketChannel.close();
-            } catch (Exception e) {
-                logger.error(e);
-            }
-        }
-        receiveSocketChannel = null;
     }
 
     synchronized IClient getClient(){
