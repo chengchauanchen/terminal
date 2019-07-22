@@ -79,6 +79,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateUploadFileRateLimitHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.util.StateMachine.IState;
 import cn.vsx.vc.R;
@@ -567,13 +568,12 @@ public class MainActivity extends BaseActivity {
     private ReceiveGetVideoPushUrlHandler receiveGetVideoPushUrlHandler = new ReceiveGetVideoPushUrlHandler() {
         @Override
         public void handler(final String streamMediaServerIp, final int streamMediaServerPort, final long callId) {
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateUploadFileRateLimitHandler.class,true);
             myHandler.postDelayed(() -> {
                 logger.info("自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
                 ip = streamMediaServerIp;
                 port = streamMediaServerPort + "";
                 id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "_" + callId;
-                //如果是组内上报，在组内发送一条上报消息
-//                MessageUtil.sendGroupMessage(streamMediaServerIp,streamMediaServerPort,callId);
                 startPush(streamMediaServerIp, port, id);
             }, 1000);
         }
@@ -1133,6 +1133,7 @@ public class MainActivity extends BaseActivity {
         if(isReportAudio){
             PromptManager.getInstance().stopReport();
         }
+        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateUploadFileRateLimitHandler.class,false);
     }
 
 

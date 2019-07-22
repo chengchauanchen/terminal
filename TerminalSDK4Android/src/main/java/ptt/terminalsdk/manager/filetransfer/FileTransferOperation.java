@@ -26,21 +26,29 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.okhttp.RateLimitingRequestBody;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileRecord;
 import cn.vsx.hamster.terminalsdk.model.FileBean;
 import cn.vsx.hamster.terminalsdk.model.FileTreeBean;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExternStorageSizeHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLocalVideoPushFinishHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberUploadFileMessageHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateUploadFileRateLimitHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import ptt.terminalsdk.broadcastreceiver.FileExpireReceiver;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.FileTransgerUtil;
@@ -88,6 +96,13 @@ public class FileTransferOperation {
     private int pushIndex = 0;
     //是否来自上传推送本地视频文件
     private boolean isPushStreamFromLocalFile;
+    //限速的RequestBody
+    private RateLimitingRequestBody rateLimitingRequestBody;
+    //上传文件限制的速率
+    private static final int UPLOAD_FILE_RATE_LIMIT = 3 * 1000 * 1000;
+    //上传文件不限制的速率
+    private static final int UPLOAD_FILE_RATE_LIMIT_NO = 0;
+
 
     public FileTransferOperation(Context context) {
         this.context = context;
@@ -96,13 +111,13 @@ public class FileTransferOperation {
     public void start() {
         TerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberUploadFileMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLocalVideoPushFinishHandler);
-//        MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);//推送本地视频文件的流地址
+        TerminalFactory.getSDK().registReceiveHandler(receiveUpdateUploadFileRateLimitHandler);//是否限制上传文件的速度
     }
 
     public void stop() {
         TerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberUploadFileMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLocalVideoPushFinishHandler);
-//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);//推送本地视频文件的流地址
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateUploadFileRateLimitHandler);//是否限制上传文件的速度
     }
 
     /**
@@ -126,14 +141,14 @@ public class FileTransferOperation {
     };
 
     /**
-     * 获取上报地址
+     * 开始上报（限制上传文件的速度）
      **/
-    private ReceiveGetVideoPushUrlHandler receiveGetVideoPushUrlHandler = new ReceiveGetVideoPushUrlHandler() {
+    private ReceiveUpdateUploadFileRateLimitHandler receiveUpdateUploadFileRateLimitHandler = new ReceiveUpdateUploadFileRateLimitHandler() {
         @Override
-        public void handler(final String streamMediaServerIp, final int streamMediaServerPort, final long callId) {
-//            if(isPushStreamFromLocalFile){
-//
-//            }
+        public void handler(boolean needLimit) {
+            if(rateLimitingRequestBody!=null){
+                rateLimitingRequestBody.setMaxRate(needLimit?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
+            }
         }
     };
 
@@ -293,24 +308,46 @@ public class FileTransferOperation {
         TerminalFactory.getSDK().getBITStarFileUploadThreadPool().execute(new Runnable() {
             @Override
             public void run() {
-                File file = new File(path);
-                logger.info(TAG + "uploadFileByPath:path:" + path + "-file-exists-" + ( file.exists()));
-                String fileName = FileTransgerUtil.getFileName(path);
-                if (file.exists()) {
-                    Map<String, String> paramsMap = new HashMap<>();
-                    paramsMap.put("name", fileName);
-                    paramsMap.put("memberId", FileTransgerUtil.getPoliceIdInt() + "");
-                    paramsMap.put("uniqueNo", FileTransgerUtil.getPoliceUniqueNo() + "");
-                    if (requestMemberId != 0 && requestUniqueNo!=0) {
-                        paramsMap.put("requestMemberId", requestMemberId + "");
-                        paramsMap.put("requestUniqueNo", requestUniqueNo + "");
-                    }
-                    long startTime = System.currentTimeMillis();
-                    String result = TerminalFactory.getSDK().getHttpClient().postFile(getUploadFileServerUrl() + UPLOAD_FILE_SERVER_PATH, file, paramsMap);
-                    long endTime = System.currentTimeMillis()- startTime;
-                    logger.info(TAG + "uploadFileByPath:url:" + getUploadFileServerUrl() + UPLOAD_FILE_SERVER_PATH + "-fileName-" + fileName + "-result-" + result+"-time-"+endTime);
-                    if (!TextUtils.isEmpty(result)) {
-                        try {
+                    File file = new File(path);
+                    logger.info(TAG + "uploadFileByPath:path:" + path + "-file-exists-" + (file.exists()));
+                    String fileName = FileTransgerUtil.getFileName(path);
+                try {
+                    if (file.exists()) {
+                        long startTime = System.currentTimeMillis();
+                        //使用httpClient
+//                        Map<String, String> paramsMap = new HashMap<>();
+//                        paramsMap.put("name", fileName);
+//                        paramsMap.put("memberId", FileTransgerUtil.getPoliceIdInt() + "");
+//                        paramsMap.put("uniqueNo", FileTransgerUtil.getPoliceUniqueNo() + "");
+//                        if (requestMemberId != 0 && requestUniqueNo != 0) {
+//                            paramsMap.put("requestMemberId", requestMemberId + "");
+//                            paramsMap.put("requestUniqueNo", requestUniqueNo + "");
+//                        }
+//                        String result = TerminalFactory.getSDK().getHttpClient().postFile(getUploadFileServerUrl() + UPLOAD_FILE_SERVER_PATH, file, paramsMap);
+
+                        //使用okhttp
+                        rateLimitingRequestBody = RateLimitingRequestBody.createRequestBody(MediaType.parse("multipart/form-data"), file, getUpLoadFileNeedRateLimit()?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
+                        MultipartBody.Part fileBody = MultipartBody.Part.createFormData("fileStream", fileName, rateLimitingRequestBody);
+                        MultipartBody.Builder builder = new MultipartBody.Builder()
+                                .setType(MultipartBody.FORM)
+                                .addPart(fileBody)
+                                .addFormDataPart("name", fileName)
+                                .addFormDataPart("memberId", FileTransgerUtil.getPoliceIdInt() + "")
+                                .addFormDataPart("uniqueNo", FileTransgerUtil.getPoliceUniqueNo() + "");
+                        if (requestMemberId != 0 && requestUniqueNo != 0) {
+                            builder.addFormDataPart("requestMemberId", requestMemberId + "");
+                            builder.addFormDataPart("requestUniqueNo", requestUniqueNo + "");
+                        }
+                        Request request = new Request.Builder()
+                                .url(getUploadFileServerUrl() + UPLOAD_FILE_SERVER_PATH)
+                                .post(builder.build())
+                                .build();
+                        String result = mOkHttpClient.newCall(request).execute().body().string();
+
+                        long endTime = System.currentTimeMillis() - startTime;
+                        logger.info(TAG + "uploadFileByPath:url:" + getUploadFileServerUrl() + UPLOAD_FILE_SERVER_PATH + "-fileName-" + fileName + "-result-" + result + "-time-" + endTime);
+                        if (!TextUtils.isEmpty(result)) {
+
                             JSONObject object = JSONObject.parseObject(result);
                             if (object != null) {
                                 String success = object.getString(RESULT_SUCCESS);
@@ -327,22 +364,22 @@ public class FileTransferOperation {
                                     checkUpdateExpireFileInfo();
                                 } else {
                                     logger.error(TAG + "uploadFileByPath:result;" + object.getString(RESULT_MSG));
-                                    notifyMemberUploadFileFail(fileName,requestUniqueNo,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE,object.getString(RESULT_MSG));
+                                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, object.getString(RESULT_MSG));
                                 }
                             } else {
                                 logger.info(TAG + "uploadFileByPath:result;解析错误");
-                                notifyMemberUploadFileFail(fileName,requestUniqueNo,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
+                                notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            logger.info(TAG + "uploadFileByPath:result:Exception" + e);
-                            notifyMemberUploadFileFail(fileName,requestUniqueNo,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
+                        } else {
+                            notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_NO_RESPONSE);
                         }
-                    }else{
-                        notifyMemberUploadFileFail(fileName,requestUniqueNo,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_NO_RESPONSE);
+                    } else {
+                        notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
                     }
-                }else{
-                    notifyMemberUploadFileFail(fileName,requestUniqueNo,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE,FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    logger.info(TAG + "uploadFileByPath:result:Exception" + e);
+                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
                 }
             }
         });
@@ -978,5 +1015,20 @@ public class FileTransferOperation {
                     break;
             }
         }
+    }
+
+    private OkHttpClient mOkHttpClient = new OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .writeTimeout(30, TimeUnit.SECONDS)
+            .build();
+
+    /**
+     * 获取限速大小
+     * @return
+     */
+    private boolean getUpLoadFileNeedRateLimit() {
+        VideoLivePushingStateMachine liveStateMachine = TerminalFactory.getSDK().getLiveManager().getVideoLivePushingStateMachine();
+        return (liveStateMachine != null && liveStateMachine.getCurrentState()!= VideoLivePushingState.IDLE);
     }
 }
