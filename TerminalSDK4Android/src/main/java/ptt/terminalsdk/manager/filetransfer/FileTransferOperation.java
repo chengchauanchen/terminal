@@ -132,7 +132,7 @@ public class FileTransferOperation {
 
                 if (list != null && list.size() > 0) {
                     //从数据库中获取文件的信息,并上传
-                    uploadFileByPaths(getRecordsByNames(list), message.getRequestMemberId(),message.getRequestUniqueNo(), false);
+                    uploadFileByPaths(getRecordsByNames(list), message.getRequestMemberId(),message.getRequestUniqueNo(), true);
                     //推送视频文件到流媒体服务器
 //                    pushStreamOfVideoFile(list);
                 }
@@ -274,7 +274,7 @@ public class FileTransferOperation {
                                 if (RESULT_SUCCESS_TRUE.equals(success)) {
                                     String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
                                     if(TerminalMemberType.valueOf(type).getCode() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
-                                        uploadFileByPath(path, 0, 0L,false);
+                                        uploadFileByPath(path, 0, 0L,true);
                                     }
                                     deleteBITFileTreeBean(list);
                                 } else {
@@ -425,7 +425,7 @@ public class FileTransferOperation {
                     }
                     if (uploadList.size() > 0) {
                         //有超过48小时未上传的文件
-                        uploadFileByPaths(uploadList, 0, 0L,false);
+                        uploadFileByPaths(uploadList, 0, 0L,true);
                         showToast("有48小时未上传的文件，开始上传");
                     } else {
                         //没有超过48小时未上传的文件，就把未上传的最早的一条文件信息记录并打开定时任务
