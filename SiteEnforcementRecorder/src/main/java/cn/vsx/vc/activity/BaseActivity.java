@@ -1034,7 +1034,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     /**
      * 退出登录
      */
-    private void loginOut(){
+    private void loginOut(boolean isChangeAccount){
         TerminalFactory.getSDK().notifyReceiveHandler(ReceiverStopAllBusniessHandler.class,false);
         //停止一切业务
         if(TerminalFactory.getSDK().isServerConnected()){
@@ -1049,7 +1049,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().stop();
 //        MyApplication.instance.stopPTTButtonEventService();
         //停止上报或者观看的页面
-        if(TerminalFactory.getSDK().isServerConnected()){
+        if(isChangeAccount&&TerminalFactory.getSDK().isServerConnected()){
             TerminalFactory.getSDK().disConnectToServer();
         }
 //        MyTerminalFactory.getSDK().stop();
@@ -1058,9 +1058,9 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     /**
      * 切换到绑定账号
      */
-    private void changeAccount(){
+    public void changeAccount(){
         //退出账号
-        loginOut();
+        loginOut(true);
         //登录绑定账号
         checkLogin(true,LOGIN_DELAY_TIME);
     }
@@ -1070,13 +1070,17 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
      */
     protected void exitApp(){
         //退出账号
-        loginOut();
+        loginOut(false);
         //清除绑定账号
         DataUtil.clearRecorderBindBean();
-        //停止SDK
-        myHandler.postDelayed(() -> MyTerminalFactory.getSDK().stop(),1000);
         //退出页面
-        myHandler.postDelayed(() -> System.exit(0),2000);
+        for (Activity activity : ActivityCollector.getAllActivity().values()) {
+            activity.finish();
+        }
+        //停止SDK
+        MyTerminalFactory.getSDK().stop();
+        //杀掉进程
+        MyApplication.instance.killAllProcess();
     }
 
     /**

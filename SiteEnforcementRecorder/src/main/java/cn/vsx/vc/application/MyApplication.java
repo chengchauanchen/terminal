@@ -1,5 +1,6 @@
 package cn.vsx.vc.application;
 
+import android.app.ActivityManager;
 import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
@@ -12,6 +13,8 @@ import android.util.Log;
 import com.uuzuche.lib_zxing.activity.ZXingLibrary;
 
 import org.apache.log4j.Logger;
+
+import java.util.List;
 
 import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.TerminalMemberType;
@@ -152,6 +155,19 @@ public class MyApplication extends Application {
 			Log.e("MyApplication", "IndividualCallService服务断开了");
 		}
 	};
+
+	public void killAllProcess() {
+		ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+		if (null != mActivityManager) {
+			List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
+			for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList) {
+				if (runningAppProcessInfo.pid != android.os.Process.myPid()) {
+					android.os.Process.killProcess(runningAppProcessInfo.pid);
+				}
+			}
+			android.os.Process.killProcess(android.os.Process.myPid());
+		}
+	}
 
 //	/**
 //	 * 获取AlarmManager

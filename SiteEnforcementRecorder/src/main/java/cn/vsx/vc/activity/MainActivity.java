@@ -882,7 +882,16 @@ public class MainActivity extends BaseActivity {
      */
     private ReceiveForceOfflineHandler receiveForceOfflineHandler = () -> {
         ToastUtil.showToast(MainActivity.this,getResources().getString(R.string.force_off_line));
-        myHandler.postDelayed(()-> exitApp(),3000);
+        if(cn.vsx.hamster.terminalsdk.tools.DataUtil.getRecorderBindBean()!=null){
+            //绑定账号，退出绑定账号，登录默认账号
+            //清空绑定信息
+            cn.vsx.hamster.terminalsdk.tools.DataUtil.clearRecorderBindBean();
+            //切换到绑定账号
+            changeAccount();
+        }else{
+            //默认账号，退出应用
+            myHandler.postDelayed(()-> exitApp(),2000);
+        }
     };
 
     /**

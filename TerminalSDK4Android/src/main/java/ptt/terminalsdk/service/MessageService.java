@@ -134,7 +134,9 @@ public class MessageService extends Service {
     public void onDestroy() {
         logger.info("MessageService执行了onDestroy()");
         try {
-            connectionClient.stop();
+            if(connectionClient!=null){
+                connectionClient.stop();
+            }
             connectionClient = null;
             logger.info("MessageService调用了UDPClientBase的stop()");
         } catch (Exception e) {
