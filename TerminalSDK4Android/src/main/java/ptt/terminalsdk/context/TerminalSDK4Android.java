@@ -1245,6 +1245,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 	@Override
 	public void audioProxyStart(){
+		getAudioProxy().start(TerminalFactory.getSDK().getParam(Params.PROTOCOL_TYPE,Params.UDP));
 	}
 
 	/**

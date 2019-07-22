@@ -242,7 +242,7 @@ public class RoundProgressBarWidthNumber extends SkinCompatProgressBar  implemen
      * @param attrs
      */
     private void obtainStyledAttributes(AttributeSet attrs) {
-        // init values from custom attributes
+        // initClient values from custom attributes
         final TypedArray attributes = getContext().obtainStyledAttributes(
                 attrs, R.styleable.HorizontalProgressBarWithNumber,0,0);
 

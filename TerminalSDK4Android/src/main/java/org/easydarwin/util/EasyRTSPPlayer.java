@@ -675,7 +675,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
                                 codec.start();
                                 mCodec = codec;
                             } catch (Throwable e) {
-                                Log.e(TAG, String.format("init codec error due to %s", e.getMessage()));
+                                Log.e(TAG, String.format("initClient codec error due to %s", e.getMessage()));
                                 e.fillInStackTrace();
                                 final VideoCodec.VideoDecoderLite decoder = new VideoCodec.VideoDecoderLite();
                                 decoder.create(frameInfo.width, frameInfo.height, mSurface);

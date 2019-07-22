@@ -23,7 +23,7 @@ public class Speex {
     }  
 
     /**
-     * init with compression and samplingRate
+     * initClient with compression and samplingRate
      * @param compression see DEFAULT_COMPRESSION
      * @param samplingRate see DEFAULT_SAMPLING_RATE
      */
@@ -33,7 +33,7 @@ public class Speex {
     }  
 
     /**
-     * init with DEFAULT_COMPRESSION and DEFAULT_SAMPLING_RATE
+     * initClient with DEFAULT_COMPRESSION and DEFAULT_SAMPLING_RATE
      */
     public void init() { 
     	init(DEFAULT_COMPRESSION, DEFAULT_SAMPLING_RATE);   

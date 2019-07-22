@@ -16,7 +16,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -1895,7 +1894,7 @@ public abstract class ChatBaseActivity extends BaseActivity
 //        if (groupMessageRecord1 != null && groupMessageRecord1.size() > 0) {
 //            logger.info("会话列表刷新成功");
 //            tempPage++;
-//            init(groupMessageRecord1, false);
+//            initClient(groupMessageRecord1, false);
 //            if (groupMessageRecord1.size() < PAGE_COUNT) {
 //                //从网络获取
 //                isEnoughPageCount = false;

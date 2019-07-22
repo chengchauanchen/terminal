@@ -38,7 +38,7 @@ public class TxtOverlay {
         //        txt = "movie=/sdcard/qrcode.png [logo];[in][logo] "
         //                + "overlay=" + 0 + ":" + 0
         //                + " [out]";
-        //        if (ctx == 0) throw new RuntimeException("init should be called at first!");
+        //        if (ctx == 0) throw new RuntimeException("initClient should be called at first!");
         if (ctx == 0) return;
         //        WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         //        int width = wm.getDefaultDisplay().getWidth();

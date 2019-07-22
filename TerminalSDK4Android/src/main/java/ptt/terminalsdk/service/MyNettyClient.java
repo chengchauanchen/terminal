@@ -11,7 +11,6 @@ import org.ddpush.im.client.v1.ServerConnectionEstablishedHandler;
 import org.ddpush.im.client.v1.netty.NettyClient;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -113,7 +112,7 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
 
     @Override
     public boolean isStarted(){
-        return isOpen();
+        return started;
     }
 
     private void registServerConnectionEstablishedHandler(ServerConnectionEstablishedHandler handler) {
@@ -122,7 +121,7 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
         }
         logger.info("MyNetty----registServerConnectionEstablishedHandler:"+connectionEstablishedHandlers.toString());
         //部分手机注册在UDPClient启动之后，导致不会触发连接的通知，手动触发一下
-        if(isOpen()){
+        if(started){
             handler.handler(true);
         }
     }
@@ -170,7 +169,6 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
 
     @Override
     protected void onPushMessage(byte[] data, int offset, int length){
-        logger.info("收到服务端消息:"+ Arrays.toString(data));
         for(ServerMessageReceivedHandlerAidl handler : serverMessageReceivedHandlerAidls){
             try {
                 handler.handle(data, offset, length);

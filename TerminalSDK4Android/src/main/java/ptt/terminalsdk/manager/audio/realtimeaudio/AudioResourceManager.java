@@ -1,14 +1,12 @@
 package ptt.terminalsdk.manager.audio.realtimeaudio;
 
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.media.MediaRecorder;
 
 import org.apache.log4j.Logger;
-
-import java.io.IOException;
-import java.net.DatagramSocket;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -40,9 +38,11 @@ public class AudioResourceManager {
     /** 放音缓冲区长度 */
     private int audioTrackBufferSize = AudioTrack.getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT)*4;
     /** 接收socket */
-    private DatagramSocket receiveSocket;
     private Logger logger = Logger.getLogger(getClass());
-    private IClient client;
+
+    private ISendClient sendClient;
+
+    private IReceiveClient receiveClient;
 
     int getSampleRate(){
         return sampleRate;
@@ -78,18 +78,6 @@ public class AudioResourceManager {
         }
     }
 
-    synchronized IClient getClient(){
-        if(client == null){
-            String protocolType = TerminalFactory.getSDK().getParam(Params.PROTOCOL_TYPE, Params.UDP);
-            if(Params.TCP.equals(protocolType)){
-                client = TCPClient.getInstance();
-            }else {
-                client = UDPClient.getInstance();
-            }
-        }
-        return client;
-    }
-
     AudioRecord getAudioRecord(){
         if(audioRecord == null){
             audioRecord = new AudioRecord(MediaRecorder.AudioSource.VOICE_COMMUNICATION, sampleRate, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT, audioRecordBufferSize);
@@ -112,8 +100,37 @@ public class AudioResourceManager {
         return audioRecordBufferSize;
     }
 
+    /**
+     * 发送数据
+     * @return
+     */
+    synchronized ISendClient getSendClient(){
+        if(sendClient == null){
+            String protocolType = TerminalFactory.getSDK().getParam(Params.PROTOCOL_TYPE, Params.UDP);
+            if(Params.TCP.equals(protocolType)){
+                sendClient = TCPSendClient.getInstance();
+            }else {
+                sendClient = UDPSendClient.getInstance();
+            }
+        }
+        return sendClient;
+    }
+
+    synchronized IReceiveClient getReceiveClient(){
+        if(receiveClient == null){
+            String protocolType = TerminalFactory.getSDK().getParam(Params.PROTOCOL_TYPE, Params.UDP);
+            if(Params.TCP.equals(protocolType)){
+                receiveClient = TCPReceiveClient.getInstance();
+            }else {
+                receiveClient = UDPReceiveClient.getInstance();
+            }
+        }
+        return receiveClient;
+    }
+
     private int currentStreamType;
-    AudioTrack getAudioTrack(int streamType){
+
+    private AudioTrack getAudioTrack(int streamType){
         if(audioTrack == null){
             audioTrack = new AudioTrack(streamType, sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT, audioTrackBufferSize, AudioTrack.MODE_STREAM);
             if(audioTrack.getState() != AudioTrack.STATE_INITIALIZED){//如果初始化失败，则再试一次
@@ -137,25 +154,31 @@ public class AudioResourceManager {
         }
     }
 
+    void releaseSendClient(){
+        if(sendClient != null){
+            sendClient.release();
+        }
+    }
+
+    void releaseReceiveClient(){
+        if(receiveClient != null){
+            receiveClient.release();
+        }
+    }
+
     int getAudioTrackBufferSize(){
         return audioTrackBufferSize;
     }
 
-    DatagramSocket getReceiveSocket(){
-        if(receiveSocket == null){
-            try {
-                receiveSocket = new DatagramSocket();
-            } catch (IOException e) {
-                logger.error("receiveChannel创建失败", e);
-            }
+    public AudioTrack getAudioTrack(Command.CmdType cmdType){
+        if(cmdType == Command.CmdType.RESUME_RECEIVER) {//单工通信使用媒体声音模式
+            return AudioResourceManager.INSTANCE.getAudioTrack(AudioManager.STREAM_MUSIC);
         }
-        return receiveSocket;
-    }
-
-    void releaseReceiveSocket(){
-        if(receiveSocket != null){
-            receiveSocket.close();
-            receiveSocket = null;
+        else if(cmdType == Command.CmdType.START_DUPLEX_COMMUNICATION){//双工通信使用电话声音模式
+            return AudioResourceManager.INSTANCE.getAudioTrack(AudioManager.STREAM_VOICE_CALL);
+        }
+        else{//其它模式暂不支持
+            throw new IllegalArgumentException("不支持命令类型：" + cmdType);
         }
     }
 }

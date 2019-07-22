@@ -1,13 +1,8 @@
 package ptt.terminalsdk.manager.audio.realtimeaudio;
 
-import android.media.AudioRecord;
-
 import org.apache.log4j.Logger;
 
-import java.nio.ByteBuffer;
 import java.util.concurrent.BlockingQueue;
-
-import cn.zectec.speex.Speex;
 
 /**
  * Created by zc on 2017/3/24.
@@ -20,7 +15,6 @@ public class CollectAndSendWork implements Runnable {
     /** 采集与发送命令队列 */
     private BlockingQueue<Command> collectAndSendCommandBlockingQueue;
     private Logger logger = Logger.getLogger(getClass());
-    private AudioRecord audioRecord;//录音类的对象
 
     public CollectAndSendWork(BlockingQueue<Command> collectAndSendCommandBlockingQueue){
         if(collectAndSendCommandBlockingQueue == null){
@@ -41,12 +35,7 @@ public class CollectAndSendWork implements Runnable {
     @Override
     public void run() {
         Command command;//取出并处理的命令
-        Speex speex;//编解码类的对象
-        IClient client = null;
-        short[] collectedBuffer = new short[Math.min(AudioResourceManager.INSTANCE.getAudioRecordBufferSize()/2, 960)];//采集数据的缓冲区
-        int len;//采集到数据的长度，编码后数据的长度
-        byte[] sendBuf = new byte[512];//发送音频数据的缓冲区
-        int sendBufHead = 16;//发送的音频数据的数据头长度
+        ISendClient client;
         while (started){
             try{
                 //从队列中取命令，直到队列中的命令全部取出，才开始执行最新的那一条命令
@@ -62,59 +51,23 @@ public class CollectAndSendWork implements Runnable {
             }
             //开启采集发送，单工通信和双工通信使用相同的处理方式
             if(command.getCmdType() == Command.CmdType.RESUME_SENDER || command.getCmdType() == Command.CmdType.START_DUPLEX_COMMUNICATION){
-                client = AudioResourceManager.INSTANCE.getClient();
-                client.init(sendBuf, sendBuf.length);
-                client.setAddress(command.getIp(),command.getPort());
-                speex = AudioResourceManager.INSTANCE.getSpeex4Sender();
-                startRecording();
-                ByteBuffer.wrap(sendBuf).putLong(command.getCallId()).putLong(command.getUniqueNo());
-                while (collectAndSendCommandBlockingQueue.isEmpty() && started) {
-                    len = audioRecord.read(collectedBuffer, 0, collectedBuffer.length);
-                    if(len > 0){
-                        len = speex.encode(collectedBuffer, 0, sendBuf, sendBufHead, len);
-                        if(len > 0){
-                            client.setLength(len + sendBufHead);
-                            client.send(sendBuf);
-                        }
-                    }
+                client = AudioResourceManager.INSTANCE.getSendClient();
+                client.initClient(command);
+                while (collectAndSendCommandBlockingQueue.isEmpty() && started){
+                    client.sendAudioData();
                 }
             }
             //停止采集发送，单工通信和双工通信使用相同的处理方式
             else if(command.getCmdType() == Command.CmdType.PAUSE_SENDER || command.getCmdType() == Command.CmdType.STOP_DUPLEX_COMMUNICATION){
-                AudioResourceManager.INSTANCE.releaseAudioRecord();
-                AudioResourceManager.INSTANCE.releaseSpeex4Sender();
-                if(client != null){
-                    client.release();
-                }
+                AudioResourceManager.INSTANCE.releaseSendClient();
+                AudioResourceManager.INSTANCE.releaseSpeex4Receiver();
+                AudioResourceManager.INSTANCE.releaseAudioTrack();
             }
         }
         logger.info("采集与发送任务执行完毕，销毁可能未销毁的资源");
         //任务执行完毕，销毁可能未销毁的资源
-        AudioResourceManager.INSTANCE.releaseAudioRecord();
-        AudioResourceManager.INSTANCE.releaseSpeex4Sender();
-        if(client != null){
-            client.release();
-        }
-    }
-
-    private void startRecording(){
-        audioRecord = AudioResourceManager.INSTANCE.getAudioRecord();
-        try {
-            if (audioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
-                audioRecord.startRecording();
-            }
-        } catch (IllegalStateException e){
-            logger.error("audioRecord 状态发生异常，重建audioRecord");
-            AudioResourceManager.INSTANCE.releaseAudioRecord();
-            audioRecord = AudioResourceManager.INSTANCE.getAudioRecord();
-            try {
-                if (audioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
-                    audioRecord.startRecording();
-                }
-                logger.info("重建完毕");
-            } catch (IllegalStateException e1){
-                logger.warn("audioRecord重建后依然不能正常工作，放弃此次录音行为", e1);
-            }
-        }
+        AudioResourceManager.INSTANCE.releaseSendClient();
+        AudioResourceManager.INSTANCE.releaseSpeex4Receiver();
+        AudioResourceManager.INSTANCE.releaseAudioTrack();
     }
 }

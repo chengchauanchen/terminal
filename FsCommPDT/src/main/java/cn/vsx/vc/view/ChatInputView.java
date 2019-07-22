@@ -80,17 +80,17 @@ package cn.vsx.vc.view;//package cn.zectec.ptt.view;
 //
 //    public ChatInputView(Context context) {
 //        super(context);
-//        init(context);
+//        initClient(context);
 //    }
 //
 //    public ChatInputView(Context context, @Nullable AttributeSet attrs) {
 //        super(context, attrs);
-//        init(context);
+//        initClient(context);
 //    }
 //
 //    public ChatInputView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
 //        super(context, attrs, defStyleAttr);
-//        init(context);
+//        initClient(context);
 //    }
 //
 //    private void showEmotionLayout() {
@@ -104,7 +104,7 @@ package cn.vsx.vc.view;//package cn.zectec.ptt.view;
 //        //  inputViewLisenter.onEditTextUp();
 //    }
 //
-//    public void init(Context context) {
+//    public void initClient(Context context) {
 //        LayoutInflater.from(context).inflate(R.layout.widget_input_view, this);
 //
 //    }
@@ -500,7 +500,7 @@ package cn.vsx.vc.view;//package cn.zectec.ptt.view;
 ////            @Override
 ////            public Fragment getItem(int position) {
 ////                EmojiFragment emojiFragment = (EmojiFragment) fragmentList.get(position);
-////                emojiFragment.init(Arrays.asList(EmojiconDatas.getData()), 7, 3, new EmojiFragment.OnEmojiListener() {
+////                emojiFragment.initClient(Arrays.asList(EmojiconDatas.getData()), 7, 3, new EmojiFragment.OnEmojiListener() {
 ////                    @Override
 ////                    public void onDeleteImageClicked() {
 ////                        editTextDelete(et_sendmessage);
@@ -654,7 +654,7 @@ package cn.vsx.vc.view;//package cn.zectec.ptt.view;
 //        for (int i = 0; i < itemNames.length; i++) {
 //            chatExtendMenu.registerMenuItem(itemNames[i], itemIcons[i], i, chatExtendMenuItemClickListener);
 //        }
-//        chatExtendMenu.init();
+//        chatExtendMenu.initClient();
 //        final List<View> views = new ArrayList<>();
 //        views.add(chatExtendMenu);
 //
