@@ -6,12 +6,16 @@ import android.media.AudioManager;
 import org.apache.log4j.Logger;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.audio.AudioResourceManager;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
+import cn.vsx.hamster.terminalsdk.manager.audio.RealtimeAudio;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.manager.audio.realtimeaudio.RealtimeAudio;
+import ptt.terminalsdk.manager.audio.realtimeaudio.MyAudioResourceManager;
 import ptt.terminalsdk.manager.audio.record.Record;
+//import cn.vsx.hamster.terminalsdk.manager.audio.RealtimeAudio;
+//import ptt.terminalsdk.manager.audio.realtimeaudio.MyAudioResourceManager;
 
 
 public class AudioProxy implements IAudioProxy{
@@ -32,7 +36,8 @@ public class AudioProxy implements IAudioProxy{
 		audiomanage = (AudioManager)context.getSystemService(Context.AUDIO_SERVICE);
 		maxVolumeMusic = audiomanage.getStreamMaxVolume(AudioManager.STREAM_MUSIC);//获取媒体声音的最大音量
 		maxVolumeCall = audiomanage.getStreamMaxVolume(AudioManager.STREAM_VOICE_CALL);//获取通话声音的最大音量
-		realtimeAudio = new RealtimeAudio();
+		AudioResourceManager audioResourceManager = getAudioResourceManager();
+		realtimeAudio = new RealtimeAudio(audioResourceManager);
 		realtimeAudio.setVolume(TerminalFactory.getSDK().getParam(Params.VOLUME, IAudioProxy.VOLUME_DEFAULT));
 	}
 
@@ -167,5 +172,10 @@ public class AudioProxy implements IAudioProxy{
 	@Override
 	public boolean isSpeakerphoneOn() {
 		return audiomanage.isSpeakerphoneOn();
+	}
+
+	@Override
+	public AudioResourceManager getAudioResourceManager(){
+		return new MyAudioResourceManager();
 	}
 }

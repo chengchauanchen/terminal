@@ -53,6 +53,7 @@ public class UDPReceiveClient implements IReceiveClient{
 
     @Override
     public synchronized void initClient(Command command){
+        logger.info("playedBuffer:"+AudioResourceManager.INSTANCE.getAudioTrackBufferSize());
         this.command = command;
         try {
             receiveSocket = new DatagramSocket();

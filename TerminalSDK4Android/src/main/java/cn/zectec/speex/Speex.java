@@ -1,6 +1,8 @@
 package cn.zectec.speex;
 
-public class Speex {
+import cn.vsx.hamster.terminalsdk.manager.audio.ISpeex;
+
+public class Speex implements ISpeex{
      /** quality 
      * 1 : 4kbps (very noticeable artifacts, usually intelligible) 
      * 2 : 6kbps (very noticeable artifacts, good intelligibility) 
