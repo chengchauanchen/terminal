@@ -67,11 +67,15 @@ public class AudioProxy implements IAudioProxy{
 	}
 	@Override
 	public void playRecord(String fileName, final IAudioPlayComplateHandler handler){
-		record.playRecord(fileName, handler);
+		if(record != null) {
+			record.playRecord(fileName, handler);
+		}
 	}
 	@Override
 	public void stopPlayRecord(){
-		record.stopPlayRecord();
+		if(record != null) {
+			record.stopPlayRecord();
+		}
 	}
 
 	@Override
