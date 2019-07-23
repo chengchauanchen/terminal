@@ -364,7 +364,8 @@ public class FileTransferOperation {
                                     checkUpdateExpireFileInfo();
                                 } else {
                                     logger.error(TAG + "uploadFileByPath:result;" + object.getString(RESULT_MSG));
-                                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, object.getString(RESULT_MSG));
+                                    String resultDesc = TextUtils.isEmpty(object.getString(RESULT_MSG))?FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR:object.getString(RESULT_MSG);
+                                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, resultDesc);
                                 }
                             } else {
                                 logger.info(TAG + "uploadFileByPath:result;解析错误");
