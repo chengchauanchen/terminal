@@ -389,6 +389,7 @@
     <color name="transparent_70_black">#4C000000</color>
     <color name="color_e5e5e5">#E5E5E5</color>
     <color name="transparent_70_white">#4CFFFFFF</color>
+    <color name="white_20">#33FFFFFF</color>
     <color name="md_blue_grey_50">#ECEFF1</color>
     <color name="md_blue_grey_100">#CFD8DC</color>
     <color name="md_blue_grey_200">#B0BBC5</color>
@@ -587,4 +588,7 @@
     <color name="red_ff">#ff3737</color>
     <color name="blue_21bfe2">#21bfe2</color>
     <color name="key_words">#eb403a</color>
+
+    <color name="bind_bg_color">#3300a4ff</color>
+    <color name="bind_text_color">#627f9f</color>
 </resources>
