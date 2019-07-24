@@ -32,7 +32,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -60,7 +59,6 @@ import org.easydarwin.easypusher.BackgroundCameraService;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -70,7 +68,6 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.StopGroupCallReason;
-import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -113,7 +110,6 @@ import cn.vsx.vc.fragment.SearchFragment;
 import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
-import cn.vsx.vc.jump.service.JumpService;
 import cn.vsx.vc.permission.FloatWindowManager;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
@@ -126,7 +122,6 @@ import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
 import cn.vsx.vc.service.CardService;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.ActivityCollector;
-import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SystemUtil;
@@ -1128,8 +1123,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         startService(new Intent(this,CardService.class));
         //清理数据库
         FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
-        //48小时未上传的文件上传
-        manager.checkStartExpireFileAlarm();
+        //48小时未上传的文件上传,警务通暂时不要自动上传48小时未上传的功能
+//        manager.checkStartExpireFileAlarm();
         //上传没有上传的文件信息
         manager.uploadFileTreeBean(null);
 
@@ -1385,6 +1380,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     public static final int REQUEST_CODE_SCAN = 1237;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (!Settings.canDrawOverlays(this)) {
@@ -1406,28 +1402,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             if (data != null) {
                 String result = data.getStringExtra(Constant.CODED_CONTENT);
                 logger.info("扫描二维码结果："+result);
-                RecorderBindTranslateBean bean = DataUtil.getRecorderBindTranslateBean(result);
-                // TODO: 2019/4/10 给注册服务发送扫码结果
-                if(DataUtil.isLegalPcCode(result)) {
-                    //PC登录
-                    Intent intent = new Intent(this, PcLoginActivity.class);
-                    intent.putExtra(Constants.SCAN_DATA, result);
-                    startActivity(intent);
-                }else if(bean!=null){
-                    //执法记录仪绑定
-                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                        int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
-                        HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
-                        int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-                        if(hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))){
-                            TerminalFactory.getSDK().getRecorderBindManager().requestBind(memberId,bean.getUniqueNo(),userId,hashMap.get(userId + ""));
-                        }else{
-                            TerminalFactory.getSDK().getRecorderBindManager().requestBind(memberId,bean.getUniqueNo(),userId,"");
-                        }
-                    });
-                }else{
-                    ToastUtil.showToast(NewMainActivity.this,getString(R.string.text_please_scan_correct_qr_recorder));
-                }
+                int groupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
+                analysisScanData(result,groupId);
             }
         }
     }

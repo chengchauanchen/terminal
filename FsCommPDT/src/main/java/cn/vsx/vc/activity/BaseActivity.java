@@ -21,6 +21,8 @@ import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
 
+import com.yzq.zxinglibrary.android.CaptureActivity;
+import com.yzq.zxinglibrary.bean.ZxingConfig;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.log4j.Logger;
@@ -37,12 +39,14 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseZfyBoundPhoneByRequestMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
@@ -63,6 +67,8 @@ import cn.vsx.vc.utils.PhoneAdapter;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+
+import static cn.vsx.vc.activity.NewMainActivity.REQUEST_CODE_SCAN;
 
 public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack, Actions {
 
@@ -477,7 +483,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         }
         return super.dispatchKeyEvent(event);
     }
-
     /**
      * 设置音量上下键为PTT按钮
      */
@@ -702,6 +707,56 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             }
         }else{
             ToastUtil.showToast(BaseActivity.this,getString(R.string.text_group_id_abnormal));
+        }
+    }
+
+    /**
+     * 跳转到扫码页面
+     */
+    public void goToScanActivity(){
+        Intent intent = new Intent(this, CaptureActivity.class);
+        ZxingConfig config = new ZxingConfig();
+        config.setShowbottomLayout(false);//底部布局（包括闪光灯和相册）
+        config.setPlayBeep(true);//是否播放提示音
+        config.setShake(true);//是否震动
+        config.setReactColor(R.color.ok_blue);
+        config.setScanLineColor(R.color.ok_blue);
+        //config.setShowAlbum(true);//是否显示相册
+        //config.setShowFlashLight(true);//是否显示闪光灯
+        intent.putExtra(com.yzq.zxinglibrary.common.Constant.INTENT_ZXING_CONFIG, config);
+        startActivityForResult(intent, REQUEST_CODE_SCAN);
+    }
+
+    /**
+     * 解析扫码的数据
+     * @param result
+     * @param groupId
+     */
+    protected void analysisScanData(String result, int groupId) {
+        RecorderBindTranslateBean bean = DataUtil.getRecorderBindTranslateBean(result);
+        // TODO: 2019/4/10 给注册服务发送扫码结果
+        if(DataUtil.isLegalPcCode(result)) {
+            //PC登录
+            Intent intent = new Intent(this, PcLoginActivity.class);
+            intent.putExtra(Constants.SCAN_DATA, result);
+            startActivity(intent);
+        }else if(bean!=null){
+            //执法记录仪绑定
+            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                if(groupId!=0){
+                    HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
+                    int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+                    if(hashMap.containsKey(groupId + "") && !android.text.TextUtils.isEmpty(hashMap.get(groupId + ""))){
+                        TerminalFactory.getSDK().getRecorderBindManager().requestBind(memberId,bean.getUniqueNo(),groupId,hashMap.get(groupId + ""));
+                    }else{
+                        TerminalFactory.getSDK().getRecorderBindManager().requestBind(memberId,bean.getUniqueNo(),groupId,"");
+                    }
+                }else{
+                    ToastUtil.showToast(this,getString(R.string.text_group_id_abnormal));
+                }
+            });
+        }else{
+            ToastUtil.showToast(this,getString(R.string.text_please_scan_correct_qr_recorder));
         }
     }
 

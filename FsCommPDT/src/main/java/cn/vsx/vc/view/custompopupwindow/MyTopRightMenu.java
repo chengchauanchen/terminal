@@ -8,9 +8,6 @@ import android.os.Build;
 import android.provider.Settings;
 import android.widget.ImageView;
 
-import com.yzq.zxinglibrary.android.CaptureActivity;
-import com.yzq.zxinglibrary.bean.ZxingConfig;
-import com.yzq.zxinglibrary.common.Constant;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
@@ -24,7 +21,6 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.BaseActivity;
 import cn.vsx.vc.activity.IncreaseTemporaryGroupMemberActivity;
-import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
@@ -155,17 +151,7 @@ public class MyTopRightMenu {
                                             IncreaseTemporaryGroupMemberActivity.startActivity(context, Constants.CREATE_TEMP_GROUP,0);
                                         }
                                     }else if(items.get(position) ==scanItem){
-                                        Intent intent = new Intent(context, CaptureActivity.class);
-                                        ZxingConfig config = new ZxingConfig();
-                                        config.setShowbottomLayout(false);//底部布局（包括闪光灯和相册）
-                                        config.setPlayBeep(true);//是否播放提示音
-                                        config.setShake(true);//是否震动
-                                        config.setReactColor(R.color.ok_blue);
-                                        config.setScanLineColor(R.color.ok_blue);
-                                        //config.setShowAlbum(true);//是否显示相册
-                                        //config.setShowFlashLight(true);//是否显示闪光灯
-                                        intent.putExtra(Constant.INTENT_ZXING_CONFIG, config);
-                                        context.startActivityForResult(intent, NewMainActivity.REQUEST_CODE_SCAN);
+                                        context.goToScanActivity();
                                     }else if(items.get(position) ==nfcItem){
                                         int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
                                         context.checkNFC(userId,true);

@@ -42,13 +42,13 @@ public class SDCardUtil {
                 return pathname.isFile();
             }
         });
-        logger.error("MtpUtils:指定路径下文件:{}" + files + "");
+//        logger.error("MtpUtils:指定路径下文件:{}" + files + "");
         if (files == null)
             return;
         String[] paths = new String[files.length];
         for (int co = 0; co < files.length; co++) {
             paths[co] = files[co].getAbsolutePath();
-            logger.error("MtpUtils:{}" + paths[co] + "");
+//            logger.error("MtpUtils:{}" + paths[co] + "");
             fileScan(context, paths[co]);
         }
     }

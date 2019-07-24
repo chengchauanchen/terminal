@@ -272,8 +272,9 @@ public class FileTransferOperation {
                             if (object != null) {
                                 String success = object.getString(RESULT_SUCCESS);
                                 if (RESULT_SUCCESS_TRUE.equals(success)) {
-                                    String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
-                                    if(TerminalMemberType.valueOf(type).getCode() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
+                                    //判断是否是执法记录仪，是的话就自动上传文件
+                                    // TODO: 2019/7/24  判断是否是执法记录仪,是的话就自动上传文件,随后要改成服务配置参数
+                                    if(isRecorderDevice()){
                                         uploadFileByPath(path, 0, 0L,true);
                                     }
                                     deleteBITFileTreeBean(list);
@@ -292,7 +293,6 @@ public class FileTransferOperation {
             }
         });
     }
-
     /**
      * 根据文件路径上传文件
      *
@@ -836,8 +836,10 @@ public class FileTransferOperation {
      * @param endTime 到期时间
      */
     public void startFileExpireAlarmManager(long endTime) {
-        logger.info(TAG + "startFileExpireAlarmManager:endTime-" + endTime);
-        getAlarmManager().set(AlarmManager.RTC_WAKEUP, endTime, getPendingIntent());
+        if(isRecorderDevice()){
+            logger.info(TAG + "startFileExpireAlarmManager:endTime-" + endTime);
+            getAlarmManager().set(AlarmManager.RTC_WAKEUP, endTime, getPendingIntent());
+        }
     }
 
     /**
@@ -1018,6 +1020,9 @@ public class FileTransferOperation {
         }
     }
 
+    /**
+     * 上传文件的okhttp客户端
+     */
     private OkHttpClient mOkHttpClient = new OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
@@ -1031,5 +1036,14 @@ public class FileTransferOperation {
     private boolean getUpLoadFileNeedRateLimit() {
         VideoLivePushingStateMachine liveStateMachine = TerminalFactory.getSDK().getLiveManager().getVideoLivePushingStateMachine();
         return (liveStateMachine != null && liveStateMachine.getCurrentState()!= VideoLivePushingState.IDLE);
+    }
+
+    /**
+     * 是否是执法记录仪
+     * @return
+     */
+    private boolean isRecorderDevice(){
+        String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+        return TerminalMemberType.valueOf(type).getCode() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode();
     }
 }

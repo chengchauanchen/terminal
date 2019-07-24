@@ -38,8 +38,6 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
-import com.yzq.zxinglibrary.android.CaptureActivity;
-import com.yzq.zxinglibrary.bean.ZxingConfig;
 import com.zectec.imageandfileselector.base.Constant;
 import com.zectec.imageandfileselector.bean.FileInfo;
 import com.zectec.imageandfileselector.bean.Image;
@@ -541,25 +539,7 @@ public abstract class ChatBaseActivity extends BaseActivity
                 String result = data.getStringExtra(com.yzq.zxinglibrary.common.Constant.CODED_CONTENT);
                 logger.info("扫描二维码结果："+result);
                 // TODO: 2019/4/10 给注册服务发送扫码结果
-                RecorderBindTranslateBean bean = DataUtil.getRecorderBindTranslateBean(result);
-                if(bean!=null){
-                    //执法记录仪绑定
-                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                        if(userId!=0){
-                            HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
-                            int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-                            if(hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))){
-                                TerminalFactory.getSDK().getRecorderBindManager().requestBind(memberId,bean.getUniqueNo(),userId,hashMap.get(userId + ""));
-                            }else{
-                                TerminalFactory.getSDK().getRecorderBindManager().requestBind(memberId,bean.getUniqueNo(),userId,"");
-                            }
-                        }else{
-                            ToastUtil.showToast(ChatBaseActivity.this,getString(R.string.text_group_id_abnormal));
-                        }
-                    });
-                }else{
-                    ToastUtil.showToast(ChatBaseActivity.this,getString(R.string.text_please_scan_correct_qr_recorder));
-                }
+                analysisScanData(result,userId);
             }
         }
     }
@@ -1810,17 +1790,12 @@ public abstract class ChatBaseActivity extends BaseActivity
      * 扫描二维码
      */
     private void goToScan(){
-        Intent intent = new Intent(this, CaptureActivity.class);
-        ZxingConfig config = new ZxingConfig();
-        config.setShowbottomLayout(false);//底部布局（包括闪光灯和相册）
-        config.setPlayBeep(true);//是否播放提示音
-        config.setShake(true);//是否震动
-        config.setReactColor(R.color.ok_blue);
-        config.setScanLineColor(R.color.ok_blue);
-        //config.setShowAlbum(true);//是否显示相册
-        //config.setShowFlashLight(true);//是否显示闪光灯
-        intent.putExtra(com.yzq.zxinglibrary.common.Constant.INTENT_ZXING_CONFIG, config);
-        startActivityForResult(intent, REQUEST_CODE_SCAN);
+        if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.IDLE && MyApplication.instance.getVideoLivePushingState() == VideoLivePushingState.IDLE){
+            goToScanActivity();
+        }else{
+            ToastUtil.showToast(this,getString(R.string.text_in_video_function));
+        }
+
     }
     /**
      * 显示扫二维码的弹窗
