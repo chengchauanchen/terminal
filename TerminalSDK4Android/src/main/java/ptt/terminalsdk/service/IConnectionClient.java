@@ -34,4 +34,6 @@ public interface IConnectionClient{
     void start();
 
     void stop();
+
+    boolean isConnected();
 }

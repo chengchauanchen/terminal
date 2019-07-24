@@ -6,15 +6,22 @@ import com.blankj.utilcode.util.ToastUtils;
 
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.util.List;
 
+import dji.common.camera.SettingsDefinitions;
+import dji.common.error.DJIError;
 import dji.common.flightcontroller.CompassCalibrationState;
 import dji.common.flightcontroller.LocationCoordinate3D;
+import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
+import dji.sdk.camera.Camera;
 import dji.sdk.flightcontroller.Compass;
 import dji.sdk.gimbal.Gimbal;
+import dji.sdk.media.DownloadListener;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
  * 作者：ly-xuxiaolong
@@ -26,6 +33,7 @@ import dji.sdk.sdkmanager.DJISDKManager;
 public class AirCraftUtil{
 
     private static Logger logger = Logger.getLogger(AirCraftUtil.class);
+    private static boolean storageSpaceEnough = true;
 
     private static boolean isAircraftConnected() {
         return getProductInstance() != null && getProductInstance() instanceof Aircraft;
@@ -36,6 +44,14 @@ public class AirCraftUtil{
             return null;
         }
         return (Aircraft) getProductInstance();
+    }
+
+    public static synchronized Camera getAircraftCamera(){
+        if(null != getAircraftInstance()){
+            return getAircraftInstance().getCamera();
+        }else {
+            return null;
+        }
     }
 
     /**
@@ -192,5 +208,134 @@ public class AirCraftUtil{
                 logger.error("云台校准失败:"+djiError);
             }
         });
+    }
+
+    public static void init(){
+        Camera camera = getAircraftCamera();
+        if(camera != null){
+            setStorageStateCallBack(camera);
+            setMediaFileCallback(camera);
+        }
+    }
+
+    public static void startShootPhoto(){
+        Camera camera = getAircraftCamera();
+        if(null != camera){
+            //判断存储空间有没有满
+            if(storageSpaceEnough){
+                //相机必须处于拍摄照片模式
+
+                camera.getMode(new CommonCallbacks.CompletionCallbackWith<SettingsDefinitions.CameraMode>(){
+                    @Override
+                    public void onSuccess(SettingsDefinitions.CameraMode cameraMode){
+                        if(cameraMode != SettingsDefinitions.CameraMode.SHOOT_PHOTO){
+                            camera.setMode(SettingsDefinitions.CameraMode.SHOOT_PHOTO, djiError -> {
+                                if(djiError !=null){
+                                    logger.error("设置相机模式失败:"+djiError);
+                                }else {
+                                    camera.getShootPhotoMode(new CommonCallbacks.CompletionCallbackWith<SettingsDefinitions.ShootPhotoMode>(){
+                                        @Override
+                                        public void onSuccess(SettingsDefinitions.ShootPhotoMode shootPhotoMode){
+                                            if(shootPhotoMode != SettingsDefinitions.ShootPhotoMode.SINGLE){
+                                                camera.setShootPhotoMode(SettingsDefinitions.ShootPhotoMode.SINGLE, djiError1 -> {
+                                                    if(djiError1 == null){
+                                                        startShootPhoto(camera);
+                                                    }else {
+                                                        logger.error("设置单张拍照模式失败:"+ djiError1);
+                                                    }
+                                                });
+                                            }else {
+                                                startShootPhoto(camera);
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(DJIError djiError){
+                                            logger.info("获取单张拍照模式失败");
+                                        }
+                                    });
+                                }
+                            });
+                        }else {
+                            startShootPhoto(camera);
+                        }
+                    }
+                    @Override
+                    public void onFailure(DJIError djiError){
+                        logger.info("获取相机模式失败！！--"+djiError);
+                    }
+                });
+            }else {
+                ToastUtils.showShort("存储空间已满，无法拍照");
+            }
+        }
+    }
+
+
+    private static void startShootPhoto(Camera camera){
+        camera.startShootPhoto(djiError -> {
+            if(djiError != null){
+                ToastUtils.showShort(djiError.getDescription());
+                logger.error("拍摄照片失败:"+djiError);
+            }
+        });
+    }
+
+    private static void setMediaFileCallback(Camera camera){
+        camera.setMediaFileCallback(mediaFile -> {
+            File dir = new File(MyTerminalFactory.getSDK().getUAVFileDirectoty());
+            String fileName = mediaFile.getFileName();
+            mediaFile.fetchFileData(dir, fileName, new DownloadListener<String>(){
+                @Override
+                public void onStart(){
+                }
+
+                @Override
+                public void onRateUpdate(long l, long l1, long l2){
+                }
+
+                @Override
+                public void onProgress(long l, long l1){
+                }
+
+                @Override
+                public void onSuccess(String s){
+                    logger.info("文件下载成功:"+s);
+                    //上传到服务器
+                }
+
+                @Override
+                public void onFailure(DJIError djiError){
+                    logger.info("文件下载失败:"+djiError);
+                }
+            });
+        });
+    }
+
+    private static void setStorageStateCallBack(Camera camera){
+        camera.setStorageStateCallBack(storageState -> {
+            //剩余空间
+            int remainingSpaceInMB = storageState.getRemainingSpaceInMB();
+            logger.info("剩余存储空间："+remainingSpaceInMB);
+            if(remainingSpaceInMB < 10){
+                storageSpaceEnough = false;
+            }else {
+                storageSpaceEnough = true;
+            }
+        });
+    }
+
+
+    /**
+     * //设置单张拍照模式
+     */
+    private static void setSingleShootPhotoMode(Camera camera){
+        if(camera !=null){
+            camera.setShootPhotoMode(SettingsDefinitions.ShootPhotoMode.SINGLE, djiError -> {
+                if(null != djiError){
+                    logger.info("设置单张拍照模式失败:"+djiError);
+                }
+            });
+        }
     }
 }

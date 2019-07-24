@@ -90,7 +90,7 @@ public class MessageService extends Service {
 
         try {
             if(uuid.length != 0 && accessServerIp.length() != 0 && accessServerPort != 0){
-                if(connectionClient.isStarted()){
+                if(connectionClient.isConnected()){
                     connectionClient.stop();
                 }
                 logger.info("MessageService连接到信令服务器，调用了connectionClient的start()");

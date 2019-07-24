@@ -1,6 +1,6 @@
 //打无人机包用此代码
 apply plugin: 'com.android.application'
-//apply plugin: 'com.antfortune.freeline'
+apply plugin: 'com.antfortune.freeline'
 Properties props = new Properties()
 props.load(project.rootProject.file('local.properties').newDataInputStream())
 

@@ -183,4 +183,9 @@ public class MyUDPClient extends UDPClientBase implements IConnectionClient{
         sp.edit().putInt(Params.SEQ, byteSeq).commit();
         return (byte) byteSeq;
     }
+
+    @Override
+    public boolean isConnected(){
+        return super.isConnected();
+    }
 }

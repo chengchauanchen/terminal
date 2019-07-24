@@ -48,6 +48,7 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     public MyNettyClient(Context context){
         this.mContext = context;
         sp = context.getSharedPreferences(Params.MESSAGE_SERVICE_PRE_NAME, Context.MODE_PRIVATE);
+        init();
     }
 
     @Override
@@ -121,7 +122,7 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
         }
         logger.info("MyNetty----registServerConnectionEstablishedHandler:"+connectionEstablishedHandlers.toString());
         //部分手机注册在UDPClient启动之后，导致不会触发连接的通知，手动触发一下
-        if(started){
+        if(connected){
             handler.handler(true);
         }
     }
@@ -139,7 +140,11 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     @Override
     public void start(){
         try{
-            super.start();
+            if(isStarted()){
+                super.connect();
+            }else {
+                super.start();
+            }
         }catch(InterruptedException e){
             e.printStackTrace();
         }
@@ -147,13 +152,23 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
 
     @Override
     public void stop(){
+        super.stop();
+        super.close();
+        for (ServerConnectionEstablishedHandler handler : connectionEstablishedHandlers) {
+            handler.handler(false);
+            logger.info("MyNettyClient---stop()--->"+false);
+        }
+    }
+
+    @Override
+    public boolean isConnected(){
+        return super.isConnected();
+    }
+
+    @Override
+    public void connect(){
         try{
-            super.stop();
-            super.close();
-            for (ServerConnectionEstablishedHandler handler : connectionEstablishedHandlers) {
-                handler.handler(false);
-                logger.info("MyNettyClient---stop()--->"+false);
-            }
+            super.connect();
         }catch(InterruptedException e){
             e.printStackTrace();
         }
@@ -184,6 +199,13 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
         for(ServerConnectionEstablishedHandler connectionEstablishedHandler : connectionEstablishedHandlers){
             connectionEstablishedHandler.handler(false);
         }
+    }
+
+    @Override
+    protected void trySystemWake(){
+//        if(wakeLock != null && wakeLock.isHeld() == false){
+//            wakeLock.acquire();
+//        }
     }
 
     @Override

@@ -605,6 +605,16 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				+ File.separator;
 	}
 
+	/**
+	 * 无人机拍照文件存放的路径
+	 * @return
+	 */
+	public String getUAVFileDirectoty(){
+		return Environment.getExternalStorageDirectory()
+				+ File.separator + application.getApplicationInfo().loadLabel(application.getPackageManager())+ File.separator + "uavFile"
+				+ File.separator;
+	}
+
 
 	/**得到存放录制视频和照片的文件目录*/
 	public String getBITRecordesDirectoty(int code){
