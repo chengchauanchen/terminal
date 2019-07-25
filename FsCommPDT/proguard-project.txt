@@ -302,3 +302,11 @@
 #海能达SDK
 -keep class com.hytera.**{*;}
 -keep class android.dsp.**{*;}
+
+#netty混淆
+-keepattributes Signature,InnerClasses
+-keepclasseswithmembers class io.netty.** {
+    *;
+}
+-dontwarn io.netty.**
+-dontwarn sun.**
