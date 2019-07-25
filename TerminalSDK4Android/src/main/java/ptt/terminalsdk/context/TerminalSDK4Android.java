@@ -126,9 +126,9 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	public Application application;
 	private boolean calling = false;
 	private byte[] uuidByte;
+	private boolean bindService;
 	private String accessServerIp;
 	private int accessServerPort;
-	private boolean bindService;
     private VoipManager voipManager;
     private LiveManager liveManager;
 	//DDpush连接
@@ -989,6 +989,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	}
 	@Override
 	public void connectToServer() {
+		disConnectToServer();
 		uuidByte = StringUtil.hexStringToByteArray(getUuid());
 		accessServerIp = getParam(Params.ACCESS_SERVER_IP, "");
 		String protocolType = getParam(Params.PROTOCOL_TYPE, Params.UDP);
@@ -999,13 +1000,14 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 		logger.info("uuidByte = "+ uuidByte +"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
 
+
 		Intent messageService = new Intent(application, MessageService.class);
 
 		logger.error("确定另一个进程messageService的哈希值------------->messageService.hashCode = "+this.messageService);
 
 		//首先要绑定服务，获取service实例，才能注册handler。
 		if (this.messageService == null) {
-			bindService = application.bindService(messageService, messageServiceConn, BIND_AUTO_CREATE);
+			application.bindService(messageService, messageServiceConn, BIND_AUTO_CREATE);
 			logger.info("开始绑定服务MessageService"+bindService);
 		}
 		if (uuidByte.length != 0 && accessServerIp.length() != 0 && accessServerPort != 0) {
@@ -1034,18 +1036,13 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		} catch (Exception e) {
 			logger.error("连接停止时出现异常", e);
 		}
-//		new Handler().postDelayed(new Runnable() {
-//			@Override
-//			public void run() {
-//				connectToServer();
-//			}
-//		}, 1000);
 	}
 	private IMessageService messageService;
 	private ServiceConnection messageServiceConn = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			logger.error("MessageService --- onServiceConnected");
+			bindService = true;
 			messageService = Stub.asInterface(service);
 			clientChannel = null;
 			getClientChannel().registServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
@@ -1055,7 +1052,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			logger.error("MessageServiceon----onServiceDisconnected");
-			connectToServer();
+			bindService = false;
+//			connectToServer();
 		}
 	};
 	public ServiceConnection getMessageServiceConn(){
