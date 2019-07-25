@@ -132,7 +132,7 @@ public class FileTransferOperation {
 
                 if (list != null && list.size() > 0) {
                     //从数据库中获取文件的信息,并上传
-                    uploadFileByPaths(getRecordsByNames(list), message.getRequestMemberId(),message.getRequestUniqueNo(), true);
+                    uploadFileByPaths(getRecordsByNames(list), message.getRequestMemberId(),message.getRequestUniqueNo(), false);
                     //推送视频文件到流媒体服务器
 //                    pushStreamOfVideoFile(list);
                 }
@@ -426,7 +426,7 @@ public class FileTransferOperation {
                     }
                     if (uploadList.size() > 0) {
                         //有超过48小时未上传的文件
-                        uploadFileByPaths(uploadList, 0, 0L,true);
+                        uploadFileByPaths(uploadList, 0, 0L,false);
                         showToast("有48小时未上传的文件，开始上传");
                     } else {
                         //没有超过48小时未上传的文件，就把未上传的最早的一条文件信息记录并打开定时任务
