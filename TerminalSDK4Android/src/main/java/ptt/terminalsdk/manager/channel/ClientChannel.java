@@ -46,6 +46,7 @@ public class ClientChannel extends AbsClientChannel {
 	private ServerConnectionEstablishedHandlerAidl handlerAidl = new ServerConnectionEstablishedHandlerAidl.Stub() {
 		@Override
 		public void handler(boolean connected) throws RemoteException {
+			logger.info("ClientChannel--"+connected+"----"+serverConnectionEstablishedHandlers.size());
 			for (ServerConnectionEstablishedHandler handler : serverConnectionEstablishedHandlers){
 				handler.handler(connected);
 			}

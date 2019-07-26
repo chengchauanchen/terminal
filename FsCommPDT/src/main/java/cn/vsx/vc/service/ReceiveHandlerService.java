@@ -12,6 +12,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,6 +32,7 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
 import com.alibaba.fastjson.JSONObject;
+import com.blankj.utilcode.util.ToastUtils;
 import com.xuchongyang.easyphone.callback.PhoneCallback;
 import com.xuchongyang.easyphone.callback.RegistrationCallback;
 import com.zectec.imageandfileselector.utils.FileUtil;
@@ -89,6 +91,7 @@ import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.PushLiveMemberList;
+import cn.vsx.vc.permission.FloatWindowManager;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
@@ -164,6 +167,10 @@ public class ReceiveHandlerService extends Service{
                 videoStackViewAdapter.setData(data);
             }
         }else if(msg.what == WATCH_LIVE){
+            if(!checkFloatPermission()){
+                startSetting();
+                return;
+            }
             TerminalMessage terminalMessage1 = (TerminalMessage) msg.obj;
             int position = msg.arg1;
             if(position >= 0){
@@ -299,6 +306,10 @@ public class ReceiveHandlerService extends Service{
         @Override
         public void incomingCall(LinphoneCall linphoneCall){
             super.incomingCall(linphoneCall);
+            if(!checkFloatPermission()){
+                startSetting();
+                return;
+            }
             //将状态机至于正在个呼状态
             int code = TerminalFactory.getSDK().getTerminalStateManager().openFunction(TerminalState.INDIVIDUAL_CALLING, IndividualCallState.IDLE);
             if(code == BaseCommonCode.SUCCESS_CODE){
@@ -470,6 +481,10 @@ public class ReceiveHandlerService extends Service{
      * 被动方个呼来了，选择接听或挂断
      */
     private ReceiveNotifyIndividualCallIncommingHandler receiveNotifyIndividualCallIncommingHandler = (mainMemberName, mainMemberId, individualCallType) -> {
+        if(!checkFloatPermission()){
+            startSetting();
+            return;
+        }
         startTranspantActivity();
         Intent individualCallIntent = new Intent(ReceiveHandlerService.this, ReceiveCallComingService.class);
         individualCallIntent.putExtra(Constants.MEMBER_NAME, mainMemberName);
@@ -484,7 +499,10 @@ public class ReceiveHandlerService extends Service{
      */
     private ReceiveCurrentGroupIndividualCallHandler receiveCurrentGroupIndividualCallHandler = (member) -> {
         logger.info("当前呼叫对象:" + member);
-
+        if(!checkFloatPermission()){
+            startSetting();
+            return;
+        }
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_private_call));
             AppKeyUtils.setAppKey(null);
@@ -539,6 +557,10 @@ public class ReceiveHandlerService extends Service{
      **/
     @SuppressWarnings("unchecked")
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId, emergencyType) -> myHandler.post(() -> {
+        if(!checkFloatPermission()){
+            startSetting();
+            return;
+        }
         startTranspantActivity();
         Intent intent = new Intent();
         intent.putExtra(Constants.MEMBER_NAME, mainMemberName);
@@ -583,6 +605,10 @@ public class ReceiveHandlerService extends Service{
     private ReceiveGoWatchRTSPHandler receiveGoWatchRTSPHandler = terminalMessage -> myHandler.post(() -> goWatchGB28121(terminalMessage));
 
     private void goWatchGB28121(TerminalMessage terminalMessage){
+        if(!checkFloatPermission()){
+            startSetting();
+            return;
+        }
         Intent intent = new Intent(ReceiveHandlerService.this,PullGB28181Service.class);
         intent.putExtra(Constants.TERMINALMESSAGE,terminalMessage);
         startService(intent);
@@ -975,6 +1001,10 @@ public class ReceiveHandlerService extends Service{
 
     //接收到上报视频的回调
     private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = (uniqueNoAndType,isGroupPushLive) -> {
+        if(!checkFloatPermission()){
+            startSetting();
+            return;
+        }
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_report));
             AppKeyUtils.setAppKey(null);
@@ -1036,6 +1066,10 @@ public class ReceiveHandlerService extends Service{
      * 请求直播
      */
     private ReceiverRequestVideoHandler receiverRequestVideoHandler = (member) -> {
+        if(!checkFloatPermission()){
+            startSetting();
+            return;
+        }
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_request_report));
             AppKeyUtils.setAppKey(null);
@@ -1277,6 +1311,21 @@ public class ReceiveHandlerService extends Service{
                     startActivity(intent);
                 }
             }
+        }
+    }
+
+    private boolean checkFloatPermission(){
+        return FloatWindowManager.getInstance().checkPermission(this);
+    }
+
+    public void startSetting(){
+        logger.error("没有获取到悬浮窗权限!!!");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+                    Uri.parse("package:" + getPackageName()));
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            ToastUtils.showShort(getString(R.string.open_overlay_permisson));
         }
     }
 }

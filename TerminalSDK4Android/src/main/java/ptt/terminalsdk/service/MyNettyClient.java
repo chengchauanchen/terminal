@@ -7,7 +7,6 @@ import android.net.NetworkInfo;
 import android.os.RemoteException;
 
 import org.apache.log4j.Logger;
-import org.ddpush.im.client.v1.ServerConnectionEstablishedHandler;
 import org.ddpush.im.client.v1.netty.NettyClient;
 
 import java.util.ArrayList;
@@ -30,20 +29,20 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     private Logger logger = Logger.getLogger(getClass());
     private Context mContext;
     private SharedPreferences sp;
-    private List<ServerConnectionEstablishedHandler> connectionEstablishedHandlers = new ArrayList<>();
+//    private List<ServerConnectionEstablishedHandler> connectionEstablishedHandlers = new ArrayList<>();
     private List<ServerMessageReceivedHandlerAidl> serverMessageReceivedHandlerAidls = new ArrayList<>();
 
     private ServerConnectionEstablishedHandlerAidl handler;
-    private  ServerConnectionEstablishedHandler serverConnectionEstablishedHandler = new ServerConnectionEstablishedHandler() {
-        @Override
-        public void handler(boolean connected) {
-            try {
-                handler.handler(connected);
-            } catch (RemoteException e) {
-                e.printStackTrace();
-            }
-        }
-    };
+//    private  ServerConnectionEstablishedHandler serverConnectionEstablishedHandler = new ServerConnectionEstablishedHandler() {
+//        @Override
+//        public void handler(boolean connected) {
+//            try {
+//                handler.handler(connected);
+//            } catch (RemoteException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    };
 
     public MyNettyClient(Context context){
         this.mContext = context;
@@ -80,21 +79,17 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     public void registServerConnectionEstablishedHandler(final ServerConnectionEstablishedHandlerAidl handler){
         logger.info("MyNettyClient----registServerConnectionEstablishedHandler----"+handler);
         this.handler = handler;
-        registServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
+        if(connected){
+            onConnected();
+        }
     }
 
     @Override
     public void unregistServerConnectionEstablishedHandler(ServerConnectionEstablishedHandlerAidl handler){
-        this.handler = handler;
-        unregistServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
+//        this.handler = handler;
+        this.handler = null;
     }
 
-    public void unregistServerConnectionEstablishedHandler(ServerConnectionEstablishedHandler handler) {
-        logger.info("unregistServerConnectionEstablishedHandler--"+connectionEstablishedHandlers);
-        if (connectionEstablishedHandlers.contains(handler)) {
-            connectionEstablishedHandlers.remove(handler);
-        }
-    }
 
     @Override
     public void setUuid(byte[] uuid){
@@ -113,19 +108,10 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
 
     @Override
     public boolean isStarted(){
+        logger.info("netty is Started:"+ started);
         return started;
     }
 
-    private void registServerConnectionEstablishedHandler(ServerConnectionEstablishedHandler handler) {
-        if (!connectionEstablishedHandlers.contains(handler)) {
-            connectionEstablishedHandlers.add(handler);
-        }
-        logger.info("MyNetty----registServerConnectionEstablishedHandler:"+connectionEstablishedHandlers.toString());
-        //部分手机注册在UDPClient启动之后，导致不会触发连接的通知，手动触发一下
-        if(connected){
-            handler.handler(true);
-        }
-    }
 
     @Override
     protected boolean hasNetworkConnection() {
@@ -153,11 +139,10 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     @Override
     public void stop(){
         super.stop();
-        super.close();
-        for (ServerConnectionEstablishedHandler handler : connectionEstablishedHandlers) {
-            handler.handler(false);
-            logger.info("MyNettyClient---stop()--->"+false);
-        }
+//        for (ServerConnectionEstablishedHandler handler : connectionEstablishedHandlers) {
+//            handler.handler(false);
+//            logger.info("MyNettyClient---stop()--->"+false);
+//        }
     }
 
     @Override
@@ -176,10 +161,15 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
 
     @Override
     public void onConnected(){
-        logger.info("onConnected----"+connectionEstablishedHandlers);
-        for(ServerConnectionEstablishedHandler connectionEstablishedHandler : connectionEstablishedHandlers){
-            connectionEstablishedHandler.handler(true);
+        logger.info("onConnected----"+connected);
+        try{
+            handler.handler(true);
+        }catch(RemoteException e){
+            e.printStackTrace();
         }
+        //        for(ServerConnectionEstablishedHandler connectionEstablishedHandler : connectionEstablishedHandlers){
+//            connectionEstablishedHandler.handler(true);
+//        }
     }
 
     @Override
@@ -196,8 +186,10 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     @Override
     public void onDisConnect(){
         logger.info("onDisConnect---");
-        for(ServerConnectionEstablishedHandler connectionEstablishedHandler : connectionEstablishedHandlers){
-            connectionEstablishedHandler.handler(false);
+        try{
+            handler.handler(false);
+        }catch(RemoteException e){
+            e.printStackTrace();
         }
     }
 

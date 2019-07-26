@@ -34,7 +34,6 @@ import com.allen.library.RxHttpUtils;
 import com.allen.library.config.OkHttpConfig;
 import com.allen.library.cookie.store.SPCookieStore;
 import com.allen.library.interfaces.BuildHeadersListener;
-import com.allen.library.manage.RxUrlManager;
 import com.blankj.utilcode.util.GsonUtils;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -104,7 +103,6 @@ import ptt.terminalsdk.manager.gps.GPSManager;
 import ptt.terminalsdk.manager.gps.recoder.LocationManager;
 import ptt.terminalsdk.manager.gps.recoder.RecorderBDGPSManager;
 import ptt.terminalsdk.manager.gps.recoder.RecorderGPSManager;
-import ptt.terminalsdk.manager.http.AppUrlConfig;
 import ptt.terminalsdk.manager.http.MyHttpClient;
 import ptt.terminalsdk.manager.http.ProgressHelper;
 import ptt.terminalsdk.manager.http.ProgressUIListener;
@@ -989,7 +987,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	}
 	@Override
 	public void connectToServer() {
-		disConnectToServer();
+//		disConnectToServer();
 		uuidByte = StringUtil.hexStringToByteArray(getUuid());
 		accessServerIp = getParam(Params.ACCESS_SERVER_IP, "");
 		String protocolType = getParam(Params.PROTOCOL_TYPE, Params.UDP);

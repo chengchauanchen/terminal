@@ -33,6 +33,7 @@ public class MessageService extends Service {
     private Handler mHandler = new Handler();
     private static final String TAG = "MessageService--";
     private IConnectionClient connectionClient;
+    private boolean init = false;
 
     @Override
     public void onCreate() {
@@ -69,8 +70,12 @@ public class MessageService extends Service {
             }
         }
         logger.info("MessageService ----> onStartCommand： protocolType:"+protocolType+"--uuid = "+uuid+"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
-        initClient(protocolType);
-        startClient(uuid,accessServerIp,accessServerPort);
+        if(!init){
+            initClient(protocolType);
+        }
+        if(!connectionClient.isConnected()){
+            startClient(uuid,accessServerIp,accessServerPort);
+        }
         return START_STICKY;
     }
 
@@ -84,6 +89,7 @@ public class MessageService extends Service {
             }else {
                 logger.error("没有获取到通信方式！！");
             }
+            init = true;
         }
     }
     private void startClient(byte[] uuid, String accessServerIp, int accessServerPort){
@@ -133,6 +139,7 @@ public class MessageService extends Service {
     @Override
     public void onDestroy() {
         logger.info("MessageService执行了onDestroy()");
+        init =false;
         try {
             if(connectionClient!=null){
                 connectionClient.stop();
