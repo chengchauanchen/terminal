@@ -124,7 +124,8 @@
             android:launchMode="singleTask"
             android:taskAffinity="cn.vsx.vc.lockscreen"
             android:configChanges="keyboardHidden|orientation|screenSize"
-            android:theme="@style/TranslucentTheme" />
+            android:theme="@style/TranslucentTheme"
+            android:excludeFromRecents="true"/>
         <activity
             android:name=".activity.KilledActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"

@@ -1,5 +1,6 @@
 package cn.vsx.vc.receiver;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.BroadcastReceiver;
@@ -11,16 +12,19 @@ import android.os.PowerManager.WakeLock;
 
 import org.apache.log4j.Logger;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.HeadSetUtil.OnHeadSetListener;
 import cn.vsx.vc.utils.SensorUtil;
+import ptt.terminalsdk.receiveHandler.ReceiveHeadSetPlugHandler;
 
 public class HeadsetPlugReceiver extends BroadcastReceiver {
 	private Logger logger = Logger.getLogger(getClass());
 	private WakeLock wakeLockScreen;
 	private Dialog dialog;
 
+	@SuppressLint("InvalidWakeLockTag")
 	public HeadsetPlugReceiver(Context context) {
 		PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
 		wakeLockScreen = powerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP
@@ -58,7 +62,7 @@ public class HeadsetPlugReceiver extends BroadcastReceiver {
 				}
 				
 				logger.info("耳机拔出，声音类型："+ audioManager.getMode()+"	扬声器状态："+ audioManager.isSpeakerphoneOn());
-				
+				TerminalFactory.getSDK().notifyReceiveHandler(ReceiveHeadSetPlugHandler.class,MyApplication.instance.headset);
 			} else if (intent.getIntExtra("state", 0) == 1) {//耳机插入
 				MyApplication.instance.headset = true;
 				logger.info("耳机插入，声音类型："+ audioManager.getMode()+"	扬声器状态："+ audioManager.isSpeakerphoneOn());
@@ -67,7 +71,7 @@ public class HeadsetPlugReceiver extends BroadcastReceiver {
 				// 注册耳机线控按钮监听
 				HeadSetUtil.getInstance().setOnHeadSetListener(headSetListener);
 				HeadSetUtil.getInstance().open(context);
-
+				TerminalFactory.getSDK().notifyReceiveHandler(ReceiveHeadSetPlugHandler.class,MyApplication.instance.headset);
 			}
 		}
 	}

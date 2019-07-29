@@ -49,6 +49,7 @@ import cn.vsx.vc.view.IndividualCallTimerView;
 import cn.vsx.vc.view.IndividualCallView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.receiveHandler.ReceiveHeadSetPlugHandler;
 import ptt.terminalsdk.tools.ToastUtil;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
@@ -74,6 +75,8 @@ public class CallingService extends BaseService{
     private TextView mTvSpeakingPrompt;
     private IndividualCallView mIctvSpeakingTimeSpeaking;
     private ImageView mIvIndividualCallHangupSpeaking;
+    private ImageView mIvIndividualCallMicroMute;
+    private ImageView mIvIndividualCallHandFree;
     private TextView mTvWaiting;
     private IndividualCallTimerView mPopupICTVSpeakingTime;
     private LinearLayout mIndividualCallSpeaking;
@@ -116,6 +119,8 @@ public class CallingService extends BaseService{
         mTvSpeakingPrompt = rootView.findViewById(R.id.tv_speaking_prompt);
         mIctvSpeakingTimeSpeaking = rootView.findViewById(R.id.ictv_speaking_time_speaking);
         mIvIndividualCallHangupSpeaking = rootView.findViewById(R.id.iv_individual_call_hangup_speaking);
+        mIvIndividualCallMicroMute = rootView.findViewById(R.id.iv_individual_call_micro_mute);
+        mIvIndividualCallHandFree = rootView.findViewById(R.id.iv_individual_call_hand_free);
         //半双工
         mIndividualCallHalfDuplex = rootView.findViewById(R.id.individual_call_half_duplex);
         mIvIndividualCallRetractHalfDuplex = rootView.findViewById(R.id.iv_individual_call_retract_half_duplex);
@@ -145,9 +150,12 @@ public class CallingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveStopCallingServiceHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveHeadSetPlugHandler);
         mLlIndividualCallRetractSpeaking.setOnClickListener(retractListener);
         mIvIndividualCallRetractHalfDuplex.setOnClickListener(retractListener);
         mIvIndividualCallHangupSpeaking.setOnClickListener(stopCallListener);
+        mIvIndividualCallMicroMute.setOnClickListener(microMuteListener);
+        mIvIndividualCallHandFree.setOnClickListener(handFreeListener);
         mIvIndividualCallHangupHalfDuplex.setOnClickListener(stopCallListener);
         mBtnIndividualCallHalfDuplexPtt.setOnTouchListener(halfCallPTTOnTouchListener);
         mPopMinimize.setOnTouchListener(miniPopOnTouchListener);
@@ -200,6 +208,9 @@ public class CallingService extends BaseService{
     @Override
     public void onDestroy(){
         super.onDestroy();
+        setMicrophoneMute(mIvIndividualCallMicroMute,false);
+        //打开默认听筒说话，
+        setSpeakPhoneOn(mIvIndividualCallHandFree,false);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(individualCallPttStatusHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
@@ -207,12 +218,30 @@ public class CallingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveStopCallingServiceHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveHeadSetPlugHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
 
     private View.OnClickListener retractListener = v-> retract();
 
     private View.OnClickListener stopCallListener = v -> stopCall();
+
+    private View.OnClickListener microMuteListener = v -> {
+        boolean isMicrophoneMute = MyTerminalFactory.getSDK().getAudioProxy().isMicrophoneMute();
+        setMicrophoneMute(mIvIndividualCallMicroMute,!isMicrophoneMute);
+        //设置UI
+    };
+
+    private View.OnClickListener handFreeListener = v -> {
+        if(MyApplication.instance.headset){
+            ToastUtil.showToast(this,getString(R.string.text_head_set_can_not_hand_free));
+            //设置为耳机模式
+            setSpeakPhoneOn(mIvIndividualCallHandFree,false);
+        }else{
+            boolean isSpeakerphoneOn = MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn();
+            setSpeakPhoneOn(mIvIndividualCallHandFree,!isSpeakerphoneOn);
+        }
+    };
 
     @SuppressLint("ClickableViewAccessibility")
     private View.OnTouchListener halfCallPTTOnTouchListener = (v, motionEvent) -> {
@@ -402,6 +431,21 @@ public class CallingService extends BaseService{
      */
     private ReceiveStopCallingServiceHandler receiveStopCallingServiceHandler = () -> mHandler.postDelayed(this::individualCallStopped,500);
 
+    /**
+     * 设置是否可以打开扬声器
+     */
+    private ReceiveHeadSetPlugHandler receiveHeadSetPlugHandler = new ReceiveHeadSetPlugHandler(){
+        @Override
+        public void handler(boolean headset){
+            mHandler.post(()-> {
+                if(headset){
+                    //设置为耳机模式
+                    setSpeakPhoneOn(mIvIndividualCallHandFree,false);
+                }
+            });
+        }
+    };
+
 
     private void stopCall(){
 
@@ -489,6 +533,8 @@ public class CallingService extends BaseService{
             mTvMemberNameSpeaking.setText(memberName);
             mTvMemberIdSpeaking.setText(HandleIdUtil.handleId(memberId));
             mTvSpeakingPrompt.setText(getResources().getString(R.string.talking));
+            //打开默认听筒说话，
+            setSpeakPhoneOn(mIvIndividualCallHandFree,false);
         }else if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){
             mTvMemberNameHalfDuplex.setText(memberName);
             mTvMemberIdHalfDuplex.setText(HandleIdUtil.handleId(memberId));
@@ -497,6 +543,7 @@ public class CallingService extends BaseService{
             mBtnIndividualCallHalfDuplexPtt.setEnabled(true);
             startAutoHangUpTimer();//半双工选择接听，开始超时检测
         }
+        setMicrophoneMute(mIvIndividualCallMicroMute,false);
     }
 
     private void recoverSpeakingPop(){
@@ -521,9 +568,6 @@ public class CallingService extends BaseService{
             }
         }
     }
-
-
-
     private void halfPttDownDothing(){
         logger.info("pttDownDoThing执行了 isPttPress：" + MyApplication.instance.isPttPress);
         if(!CheckMyPermission.selfPermissionGranted(CallingService.this, Manifest.permission.RECORD_AUDIO)){//没有录音权限

@@ -1,6 +1,5 @@
 package cn.vsx.vc.fragment;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -11,10 +10,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
+import android.text.Html;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -67,6 +65,7 @@ import cn.vsx.vc.view.view4modularization.PersonInfoLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.service.BluetoothLeService;
 import ptt.terminalsdk.tools.DialogUtil;
+import ptt.terminalsdk.tools.SettingUtils;
 import skin.support.SkinCompatManager;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
@@ -109,6 +108,8 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     private static final int DISABLE_KEYGUARD = 0;
     private LinearLayout ll_group_scan;
 
+    private TextView tvLockScreen;
+
     @Override
     public int getContentViewId() {
         return R.layout.fragment_setting_new;
@@ -130,6 +131,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         btn_lock_screen_setting = (MToggleButton) mRootView.findViewById(R.id.btn_lock_screen_setting);
         add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
         ll_group_scan = mRootView.findViewById(R.id.ll_group_scan);
+        tvLockScreen = mRootView.findViewById(R.id.tv_lock_screen);
         activity = getActivity();
         mRootView.findViewById(R.id.rl_ble).setOnClickListener(this);
         mRootView.findViewById(R.id.ll_helpAndfeedback).setOnClickListener(this);
@@ -137,6 +139,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         mRootView.findViewById(R.id.ll_exit).setOnClickListener(this);
         mRootView.findViewById(R.id.about).setOnClickListener(this);
         ll_group_scan.setOnClickListener(this);
+        tvLockScreen.setOnClickListener(this);
         setVideoIcon();
         setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
         voice_image.setImageResource(BitmapUtil.getVolumeImageResourceByValue(false));
@@ -153,7 +156,8 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
                 soundOff = false;
             }
         });
-
+        String content = getString(R.string.text_temp_set_lock_screen)+"<font color='#95CAFF'>点我设置 >></font>";
+        tvLockScreen.setText(Html.fromHtml(content));
     }
 
     @Override
@@ -175,16 +179,16 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         btn_lock_screen_setting.setOnBtnClick(currState -> {
             // TODO: 2018/6/21 先判断锁屏显示界面权限
             if (currState) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.DISABLE_KEYGUARD) != PackageManager.PERMISSION_GRANTED) {
-                        requestPermissions(new String[]{Manifest.permission.DISABLE_KEYGUARD},
-                                DISABLE_KEYGUARD);
-                    } else {
-                        MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 1);
-                    }
-                } else {
+//                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+//                    if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.DISABLE_KEYGUARD) != PackageManager.PERMISSION_GRANTED) {
+//                        requestPermissions(new String[]{Manifest.permission.DISABLE_KEYGUARD},
+//                                DISABLE_KEYGUARD);
+//                    } else {
+//                        MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 1);
+//                    }
+//                } else {
                     MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 1);
-                }
+//                }
             } else {
                 MyTerminalFactory.getSDK().putParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0);
             }
@@ -450,6 +454,12 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         }else if(i == R.id.ll_group_scan){
             Intent intent = new Intent(context, MonitorGroupListActivity.class);
             startActivity(intent);
+        }else if(i == R.id.tv_lock_screen){
+            //跳转到设置权限页面
+            Intent intent = SettingUtils.gotoPermissionActivity(this.getContext().getPackageName());
+            if(intent!=null){
+                startActivity(intent);
+            }
         }
     }
 

@@ -303,8 +303,7 @@
 -keep class com.hytera.**{*;}
 -keep class android.dsp.**{*;}
 
-#netty混淆
--keepattributes Signature,InnerClasses
+#netty
 -keepclasseswithmembers class io.netty.** {
     *;
 }

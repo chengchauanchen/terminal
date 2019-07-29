@@ -475,13 +475,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_invitation_code_not_correct));
                 } else {
                     if (s.length() == 6) {//长度是六的时候，请求名字
-                        String ip = TerminalFactory.getSDK().getAuthManagerTwo().getTempIp();
-                        String port = TerminalFactory.getSDK().getAuthManagerTwo().getTempPort();
-                        String registPath = "http://"+ ip+":"+port+"/register/private/register";
-                        if (!TextUtils.isEmpty(registPath)) {
-                            logger.info("邀请码输入六位完成；开始到服务器拿名字");
-                            TerminalFactory.getSDK().getAuthManagerTwo().getNameByOrg(registPath,s + "");
-                        }
+                        TerminalFactory.getSDK().getAuthManagerTwo().getNameByOrg(s + "");
                     }
                 }
             }

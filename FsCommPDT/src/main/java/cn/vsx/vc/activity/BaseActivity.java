@@ -20,6 +20,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
 import com.yzq.zxinglibrary.android.CaptureActivity;
 import com.yzq.zxinglibrary.bean.ZxingConfig;
@@ -757,6 +758,38 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             });
         }else{
             ToastUtil.showToast(this,getString(R.string.text_please_scan_correct_qr_recorder));
+        }
+    }
+
+    /**
+     * 设置是否免提
+     * @param result
+     */
+    protected void setSpeakPhoneOn(ImageView imageView,boolean result){
+        if(result){
+            if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
+                MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(result);
+            }
+            if(imageView!=null){
+                imageView.setImageResource(R.drawable.ic_hand_free_2);
+            }
+        }else{
+            if (MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
+                MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(result);
+            }
+            if(imageView!=null){
+                imageView.setImageResource(R.drawable.ic_hand_free_1);
+            }
+        }
+    }
+    /**
+     * 设置是否静音
+     * @param result
+     */
+    protected void setMicrophoneMute(ImageView imageView,boolean result){
+        MyTerminalFactory.getSDK().getAudioProxy().setMicrophoneMute(result);
+        if(imageView!=null){
+            imageView.setImageResource(result?R.drawable.ic_micro_mute_2:R.drawable.ic_micro_mute_1);
         }
     }
 

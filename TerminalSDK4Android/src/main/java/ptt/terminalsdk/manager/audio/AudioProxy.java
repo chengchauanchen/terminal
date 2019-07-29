@@ -169,8 +169,25 @@ public class AudioProxy implements IAudioProxy{
 	}
 
 	@Override
+	public void setMicrophoneMute(boolean result) {
+		if(audiomanage != null){
+			audiomanage.setMicrophoneMute(result);
+		}
+	}
+
+	@Override
+	public boolean isMicrophoneMute() {
+		if(audiomanage != null){
+			return audiomanage.isMicrophoneMute();
+		}
+		return false;
+	}
+
+	@Override
 	public void setSpeakerphoneOn(boolean b) {
-		audiomanage.setSpeakerphoneOn(b);
+		if(audiomanage != null){
+			audiomanage.setSpeakerphoneOn(b);
+		}
 	}
 
 	@Override

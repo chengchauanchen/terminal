@@ -74,8 +74,8 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="@dimen/x35"
-            android:layout_height="@dimen/x60"
+            android:layout_width="51dp"
+            android:layout_height="76.5dp"
             android:layout_gravity="center_horizontal"
             android:src="@drawable/phone_white_x" />
 
@@ -83,9 +83,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginTop="@dimen/dp_5"
+            android:layout_marginTop="@dimen/dp_10"
             android:text="@string/text_terminal"
-            android:textColor="@color/translucent" />
+            android:textSize="@dimen/sp_18"
+            android:textColor="@color/white" />
     </LinearLayout>
 
     <LinearLayout
@@ -93,7 +94,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_marginTop="@dimen/y50"
-        android:layout_marginBottom="@dimen/y30"
+        android:layout_marginBottom="@dimen/dp_50"
         android:gravity="center_horizontal"
         android:orientation="horizontal">
 
@@ -121,10 +122,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="@dimen/dp_10"
+                android:layout_marginTop="@dimen/dp_20"
                 android:text="@string/text_call_hang_up"
                 android:textColor="@color/white"
-                android:textSize="@dimen/sp_16" />
+                android:textSize="@dimen/sp_18" />
         </LinearLayout>
 
         <LinearLayout
@@ -154,10 +155,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginTop="@dimen/dp_10"
+                android:layout_marginTop="@dimen/dp_20"
                 android:text="@string/text_call_answer"
                 android:textColor="@color/white"
-                android:textSize="@dimen/sp_16" />
+                android:textSize="@dimen/sp_18" />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>

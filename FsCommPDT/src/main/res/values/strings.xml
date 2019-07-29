@@ -618,4 +618,10 @@
     <string name="temp_group_cannot_remove">临时组不能移除监听</string>
     <string name="response_group_cannot_remove">响应组不能移除监听</string>
     <string name="text_input_name_regex">输入2-7位汉字、字母、数字且数字不在首位</string>
+
+    <string name="text_call_hand_free">免提</string>
+
+    <string name="text_temp_set_lock_screen">锁屏页面未弹出？找到“锁屏显示”或类似选项，选择“允许”。</string>
+    <string name="text_head_set_can_not_hand_free">耳机模式下，不能打开扬声器</string>
+
 </resources>

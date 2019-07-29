@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.alibaba.fastjson.JSONObject;
@@ -438,5 +439,37 @@ public abstract class BaseService extends Service{
     private void finishTransparentActivity(){
         Intent intent = new Intent(Constants.FINISH_TRANSPARENT);
         sendBroadcast(intent);
+    }
+
+    /**
+     * 设置是否免提
+     * @param result
+     */
+    protected void setSpeakPhoneOn(ImageView imageView, boolean result){
+        if(result){
+            if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
+                MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(result);
+            }
+            if(imageView!=null){
+                imageView.setImageResource(R.drawable.ic_hand_free_2);
+            }
+        }else{
+            if (MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
+                MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(result);
+            }
+            if(imageView!=null){
+                imageView.setImageResource(R.drawable.ic_hand_free_1);
+            }
+        }
+    }
+    /**
+     * 设置是否静音
+     * @param result
+     */
+    protected void setMicrophoneMute(ImageView imageView,boolean result){
+        MyTerminalFactory.getSDK().getAudioProxy().setMicrophoneMute(result);
+        if(imageView!=null){
+            imageView.setImageResource(result?R.drawable.ic_micro_mute_2:R.drawable.ic_micro_mute_1);
+        }
     }
 }

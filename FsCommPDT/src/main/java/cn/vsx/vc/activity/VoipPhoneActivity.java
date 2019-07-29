@@ -30,12 +30,14 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHa
 import cn.vsx.hamster.terminalsdk.tools.DateUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipConnectedHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipErrorHandler;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.IndividualCallView;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.receiveHandler.ReceiveHeadSetPlugHandler;
 
 public class VoipPhoneActivity extends BaseActivity{
 
@@ -49,7 +51,9 @@ public class VoipPhoneActivity extends BaseActivity{
     private TextView memberNameSpeaking;
     private TextView memberPhoneSpeaking;
     private TextView SpeakingPrompt;
-    private ImageView llHangupSpreaking;
+    private ImageView ivHangupSpeaking;
+    private ImageView ivMicroMute;
+    private ImageView ivHandFree;
     private RelativeLayout voipCallRequest;
     private LinearLayout voipCallSpeaking;
     private String phone;
@@ -92,13 +96,17 @@ public class VoipPhoneActivity extends BaseActivity{
         memberNameSpeaking = findViewById(R.id.tv_member_name_speaking);//名字
         memberPhoneSpeaking = findViewById(R.id.tv_member_phone_speaking);//电话
         SpeakingPrompt = findViewById(R.id.tv_speaking_prompt);//通话状态
-        llHangupSpreaking = findViewById(R.id.ll_hangup_speaking);//挂断
+        ivHangupSpeaking = findViewById(R.id.iv_hangup_speaking);//挂断
+        ivMicroMute = findViewById(R.id.iv_micro_mute);//静音
+        ivHandFree = findViewById(R.id.iv_hand_free);//免提
         ictVspeakingTimeSpeaking = findViewById(R.id.ICTV_speaking_time_speaking);//计时器
 
         voipCallRequest.setVisibility(View.VISIBLE);
         voipCallSpeaking.setVisibility(View.GONE);
 
-
+        //打开默认听筒说话，
+        setSpeakPhoneOn(ivHandFree,false);
+        setMicrophoneMute(ivMicroMute,false);
     }
 
     @Override
@@ -109,15 +117,31 @@ public class VoipPhoneActivity extends BaseActivity{
             MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
             mHandler.postDelayed(() -> finish(),500);
         });
-        llHangupSpreaking.setOnClickListener(v -> {
+        ivHangupSpeaking.setOnClickListener(v -> {
             ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
             status = CALL_END + "";
             MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
             mHandler.postDelayed(() -> finish(),500);
         });
+        ivMicroMute.setOnClickListener(v -> {
+            boolean isMicrophoneMute = MyTerminalFactory.getSDK().getAudioProxy().isMicrophoneMute();
+            setMicrophoneMute(ivMicroMute,!isMicrophoneMute);
+        });
+        ivHandFree.setOnClickListener(v -> {
+            if(MyApplication.instance.headset){
+                ptt.terminalsdk.tools.ToastUtil.showToast(this,getString(R.string.text_head_set_can_not_hand_free));
+                //设置为耳机模式
+                setSpeakPhoneOn(ivHandFree,false);
+            }else{
+                boolean isSpeakerphoneOn = MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn();
+                setSpeakPhoneOn(ivHandFree,!isSpeakerphoneOn);
+            }
+        });
+
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipConnectedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallEndHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipErrorHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveHeadSetPlugHandler);
     }
 
     private ReceiveVoipConnectedHandler receiveVoipConnectedHandler = (linphoneCall)->{
@@ -222,6 +246,21 @@ public class VoipPhoneActivity extends BaseActivity{
         });
     };
 
+    /**
+     * 设置是否可以打开扬声器
+     */
+    private ReceiveHeadSetPlugHandler receiveHeadSetPlugHandler = new ReceiveHeadSetPlugHandler(){
+        @Override
+        public void handler(boolean headset){
+            mHandler.post(()-> {
+                if(headset){
+                    //设置为耳机模式
+                    setSpeakPhoneOn(ivHandFree,false);
+                }
+            });
+        }
+    };
+
     @Override
     public void initData() {
         member =(Member) getIntent().getSerializableExtra("member");
@@ -270,9 +309,13 @@ public class VoipPhoneActivity extends BaseActivity{
 
     @Override
     public void doOtherDestroy() {
+        setMicrophoneMute(ivMicroMute,false);
+        //打开默认听筒说话，
+        setSpeakPhoneOn(ivHandFree,false);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipConnectedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipCallEndHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipErrorHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveHeadSetPlugHandler);
 
         if (getSharedPreferences("CallRecord", MODE_PRIVATE).getBoolean("isFirstCall", true)) {//第一次打VOIP电话结束通知消息列表添加电话助手
             SharedPreferences.Editor editor = getSharedPreferences("CallRecord",

@@ -591,4 +591,6 @@
 
     <color name="bind_bg_color">#3300a4ff</color>
     <color name="bind_text_color">#627f9f</color>
+
+    <color name="setting_text_temp">#637e9e</color>
 </resources>

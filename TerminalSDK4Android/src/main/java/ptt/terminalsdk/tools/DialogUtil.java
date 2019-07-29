@@ -51,6 +51,28 @@ public abstract class DialogUtil {
 		return builder.show();
 	}
 
+	public AlertDialog showDialog(String positive,String negative,boolean cancelable) {
+		Builder builder = new Builder(getContext());
+		builder.setTitle(getMessage());
+		builder.setPositiveButton(positive, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+				doConfirmThings();
+			}
+
+		});
+		builder.setNegativeButton(negative, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				dialog.dismiss();
+				doCancelThings();
+			}
+		});
+		builder.setCancelable(cancelable);
+		return builder.show();
+	}
+
 	public abstract CharSequence getMessage();
 
 	public abstract Context getContext();

@@ -157,6 +157,20 @@
 
             </RelativeLayout>
 
+            <TextView
+                android:id="@+id/tv_lock_screen"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/y40"
+                android:layout_marginTop="@dimen/dp_half_one"
+                android:background="@color/itemblue"
+                android:paddingLeft="@dimen/x18"
+                android:paddingRight="@dimen/x18"
+                android:gravity="center_vertical"
+                android:lineSpacingExtra="@dimen/dp_4"
+                android:textColor="@color/setting_text_temp"
+                android:textSize="@dimen/sp_14"
+                android:textStyle="normal"/>
+
             <RelativeLayout
                 android:id="@+id/rl_daytime_mode"
                 android:layout_width="match_parent"

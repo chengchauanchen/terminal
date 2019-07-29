@@ -1131,7 +1131,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				imsi="";
 			}
 			return imsi;
-//			return "460028027373289";
 		} catch (Exception e) {
 			e.printStackTrace();
 			return "";

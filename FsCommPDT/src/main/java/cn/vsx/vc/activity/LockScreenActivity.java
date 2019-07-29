@@ -629,6 +629,7 @@ public class LockScreenActivity extends BaseActivity {
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                unLockScreen();
                 finish();
             }
 
@@ -640,6 +641,15 @@ public class LockScreenActivity extends BaseActivity {
             public void onAnimationRepeat(Animator animation) {
             }
         });
+    }
+
+    private void unLockScreen(){
+        // 屏幕解锁
+        KeyguardManager keyguardManager = (KeyguardManager) this.getSystemService(KEYGUARD_SERVICE);
+        KeyguardManager.KeyguardLock keyguardLock = keyguardManager.newKeyguardLock("unLock");
+        // 屏幕锁定
+        keyguardLock.reenableKeyguard();
+        keyguardLock.disableKeyguard(); // 解锁
     }
 
     private int online_number;
