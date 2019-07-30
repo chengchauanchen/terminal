@@ -623,5 +623,5 @@
 
     <string name="text_temp_set_lock_screen">锁屏页面未弹出？找到“锁屏显示”或类似选项，选择“允许”。</string>
     <string name="text_head_set_can_not_hand_free">耳机模式下，不能打开扬声器</string>
-
+    <string name="text_pull_data_error">播放数据错误</string>
 </resources>

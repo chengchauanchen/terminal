@@ -473,6 +473,8 @@ public class ReceiveHandlerService extends Service{
             });
         }else if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
             goWatchGB28121(terminalMessage);
+        }else if(terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
+            goWatchOutGB28121(terminalMessage);
         }
     }
 
@@ -601,14 +603,43 @@ public class ReceiveHandlerService extends Service{
         }
     });
 
-    private ReceiveGoWatchRTSPHandler receiveGoWatchRTSPHandler = terminalMessage -> myHandler.post(() -> goWatchGB28121(terminalMessage));
+    /**
+     * 获取到观看GB28181和OutGB28181的通知
+     */
+    private ReceiveGoWatchRTSPHandler receiveGoWatchRTSPHandler = terminalMessage -> myHandler.post(() -> {
+        if(terminalMessage!=null){
+            if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+                goWatchGB28121(terminalMessage);
+            }else if(terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
+                goWatchOutGB28121(terminalMessage);
+            }
+        }
+    });
 
+    /**
+     * 观看GB28181
+     * @param terminalMessage
+     */
     private void goWatchGB28121(TerminalMessage terminalMessage){
         if(!checkFloatPermission()){
             startSetting();
             return;
         }
         Intent intent = new Intent(ReceiveHandlerService.this,PullGB28181Service.class);
+        intent.putExtra(Constants.TERMINALMESSAGE,terminalMessage);
+        startService(intent);
+    }
+
+    /**
+     * 观看OutGB28181
+     * @param terminalMessage
+     */
+    private void goWatchOutGB28121(TerminalMessage terminalMessage){
+        if(!checkFloatPermission()){
+            startSetting();
+            return;
+        }
+        Intent intent = new Intent(ReceiveHandlerService.this,PullOutGB28181Service.class);
         intent.putExtra(Constants.TERMINALMESSAGE,terminalMessage);
         startService(intent);
     }
