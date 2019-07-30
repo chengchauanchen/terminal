@@ -810,6 +810,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             // 绑定安全VPN服务
             Intent intent = new Intent();
             intent.setAction(SEC_VPN_SERVICE_ACTION_NAME);
+            //试一下sec.vpn这个包名
             Intent intent1 = new Intent(createExplicitFromImplicitIntent(this,intent));
             startService(intent1);
             bindService(intent1, secVpnServiceConnection, BIND_AUTO_CREATE);

@@ -12,7 +12,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -1320,12 +1319,9 @@ public class ReceiveHandlerService extends Service{
 
     public void startSetting(){
         logger.error("没有获取到悬浮窗权限!!!");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                    Uri.parse("package:" + getPackageName()));
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            ToastUtils.showShort(getString(R.string.open_overlay_permisson));
-        }
+        ToastUtils.showShort(getString(R.string.open_overlay_permisson));
+        myHandler.postDelayed(()->{
+            FloatWindowManager.getInstance().requestPermission(getApplicationContext());
+        },500);
     }
 }

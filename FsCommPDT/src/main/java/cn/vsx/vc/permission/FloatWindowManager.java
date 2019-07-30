@@ -109,6 +109,38 @@ public class FloatWindowManager {
         }
     }
 
+    /**
+     * 不弹窗，直接打开设置界面
+     * @param context
+     */
+    public void requestPermission(Context context){
+        if (Build.VERSION.SDK_INT < 23) {
+            if (RomUtils.checkIsMiuiRom()) {
+                MiuiUtils.applyMiuiPermission(context);
+            } else if (RomUtils.checkIsMeizuRom()) {
+                MeizuUtils.applyPermission(context);
+            } else if (RomUtils.checkIsHuaweiRom()) {
+                HuaweiUtils.applyPermission(context);
+            } else if (RomUtils.checkIs360Rom()) {
+                QikuUtils.applyPermission(context);
+            } else if (RomUtils.checkIsOppoRom()) {
+                OppoUtils.applyOppoPermission(context);
+            }
+        }else {
+            if (RomUtils.checkIsMeizuRom()) {
+                meizuROMPermissionApply(context);
+            }else {
+                try{
+                    commonROMPermissionApplyInternal(context);
+                }catch(NoSuchFieldException e){
+                    e.printStackTrace();
+                }catch(IllegalAccessException e){
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
     public void applyPermission(Context context) {
         if (Build.VERSION.SDK_INT < 23) {
             if (RomUtils.checkIsMiuiRom()) {
