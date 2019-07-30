@@ -1756,9 +1756,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() ||
             terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())){
-                if(viewType == MESSAGE_GB28181_RECODE_RECEIVED){
-                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGoWatchRTSPHandler.class,terminalMessage);
-                }
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGoWatchRTSPHandler.class,terminalMessage);
             }else {
                 ToastUtil.showToast(activity, activity.getString(R.string.text_has_no_image_receiver_authority));
             }

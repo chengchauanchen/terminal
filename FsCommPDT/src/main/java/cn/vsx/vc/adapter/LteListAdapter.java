@@ -16,6 +16,7 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -94,6 +95,7 @@ public class LteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     //String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
                     //String gb28181RtspUrl = gateWayUrl+"DevAor="+gb28181No;
                     TerminalMessage terminalMessage = new TerminalMessage();
+                    terminalMessage.messageType = MessageType.GB28181_RECORD.getCode();
                     terminalMessage.messageBody = new JSONObject();
                     terminalMessage.messageBody.put(JsonParam.GB28181_RTSP_URL,gb28181No);
                     terminalMessage.messageBody.put(JsonParam.DEVICE_NAME,member.getName());

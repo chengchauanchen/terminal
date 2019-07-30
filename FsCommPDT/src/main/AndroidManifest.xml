@@ -312,6 +312,10 @@
             android:enabled="true"
             android:exported="false" />
         <service
+            android:name=".service.PullOutGB28181Service"
+            android:enabled="true"
+            android:exported="false" />
+        <service
             android:name=".service.SwitchCameraService"
             android:enabled="true"
             android:exported="false" />
