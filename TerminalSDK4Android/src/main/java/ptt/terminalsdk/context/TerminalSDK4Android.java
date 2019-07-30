@@ -2,6 +2,7 @@ package ptt.terminalsdk.context;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -93,6 +94,7 @@ import ptt.terminalsdk.BuildConfig;
 import ptt.terminalsdk.IMessageService;
 import ptt.terminalsdk.IMessageService.Stub;
 import ptt.terminalsdk.broadcastreceiver.NetWorkConnectionChangeReceiver;
+import ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver;
 import ptt.terminalsdk.manager.MyDataManager;
 import ptt.terminalsdk.manager.Prompt.PromptManager;
 import ptt.terminalsdk.manager.audio.AudioProxy;
@@ -118,8 +120,11 @@ import ptt.terminalsdk.tools.HttpUtil;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.MODE_PRIVATE;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.*;
 
 public class TerminalSDK4Android extends TerminalSDKBaseImpl {
+
+
 	private SharedPreferences account;
 	public Application application;
 	private boolean calling = false;
@@ -137,6 +142,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private boolean isBindOnlineService;
 	private boolean isBindBleService;
 	private boolean isBindedUVCCameraService;
+	private VPNConnectionChangeReceiver vpnConnectionChangeReceiver;
 
 	public TerminalSDK4Android (Application mApplication){
 		application = mApplication;
@@ -157,6 +163,24 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		IntentFilter netFilter = new IntentFilter();
 		netFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
 		application.registerReceiver(netWorkConnectionChangeReceiver,netFilter);
+
+		// 广播接收器，用来监听SSL服务发出的广播
+		vpnConnectionChangeReceiver = new VPNConnectionChangeReceiver();
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(ACTION_INTENT_STARTSERVER_INPROC);
+		filter.addAction(ACTION_INTENT_STARTSERVER_SUCCESS);
+		filter.addAction(ACTION_INTENT_STARTSERVER_FAILURE);
+		filter.addAction(ACTION_INTENT_DOWNLOADCFG_SUCCESS);
+		filter.addAction(ACTION_INTENT_STOPSERVER_SUCCESS);
+		filter.addAction(ACTION_INTENT_NETWORK_CONNECTED);
+		filter.addAction(ACTION_INTENT_NETWORK_DISCONNECTED);
+		filter.addAction(ACTION_INTENT_TUNNEL_CONNECTED);
+		filter.addAction(ACTION_INTENT_TUNNEL_FAILURE);
+		filter.addAction(ACTION_INTENT_TUNNEL_FAILURE_AUTH);
+		filter.addAction(ACTION_INTENT_CHECKCARRIERS_SUCCESS);
+		filter.addAction(ACTION_INTENT_CHECKCARRIERS_FAILURE);
+		application.registerReceiver(vpnConnectionChangeReceiver, filter);
+
 		//个呼通讯录，请求的是自己的列表，还是所有成员列表
 		putParam(Params.REQUEST_ALL, false);
 		startUVCCameraService(application);
@@ -189,6 +213,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		getVideoProxy().stop();
 		PromptManager.getInstance().stop();
 		application.unregisterReceiver(netWorkConnectionChangeReceiver);
+		application.unregisterReceiver(vpnConnectionChangeReceiver);
 		stopUVCCameraService();
 		getVoipCallManager().destroy(application);//VOIP服务注销
 		putParam(Params.CURRENT_SPEAKER,"");
@@ -822,11 +847,11 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 	public boolean hasNetwork() {
 	    ConnectivityManager cm = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
+	    if(cm == null){
+			return false;
+		}
 	    NetworkInfo netInfo = cm.getActiveNetworkInfo();
-	    if (netInfo != null && netInfo.isConnected()) {
-	        return true;
-	    }
-	    return false;
+		return netInfo != null && netInfo.isConnected();
 	}
 	@Override
 	public boolean isServerConnected(){
