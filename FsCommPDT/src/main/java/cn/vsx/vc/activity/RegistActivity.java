@@ -798,17 +798,24 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         }
 
         ll_regist.setVisibility(View.GONE);
-        startVPNService();
+        //襄阳包就启动安全VPN服务
+        if(apkType.equals(AuthManagerTwo.XIANGYANGPOLICESTORE) || apkType.equals(AuthManagerTwo.XIANGYANG)){
+            startVPNService();
+        }
         judgePermission();
     }
 
     private void startVPNService(){
-        // 绑定安全VPN服务
-        Intent intent = new Intent();
-        intent.setAction(SEC_VPN_SERVICE_ACTION_NAME);
-        Intent intent1 = new Intent(createExplicitFromImplicitIntent(this,intent));
-        startService(intent1);
-        bindService(intent1, secVpnServiceConnection, BIND_AUTO_CREATE);
+        try{
+            // 绑定安全VPN服务
+            Intent intent = new Intent();
+            intent.setAction(SEC_VPN_SERVICE_ACTION_NAME);
+            Intent intent1 = new Intent(createExplicitFromImplicitIntent(this,intent));
+            startService(intent1);
+            bindService(intent1, secVpnServiceConnection, BIND_AUTO_CREATE);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     private void initDialog() {
