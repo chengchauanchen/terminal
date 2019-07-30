@@ -552,8 +552,8 @@ public class MainActivity extends BaseActivity {
         MainActivity.this.runOnUiThread(() -> {
             if (!connected) {
                 ToastUtil.showToast(MainActivity.this,getString(R.string.text_network_is_disconnect));
-//                stopPush(false);
-//                showLoginAndBindUI(Constants.LOGIN_BIND_STATE_IDLE);
+                stopPush(false);
+                showLoginAndBindUI(Constants.LOGIN_BIND_STATE_IDLE);
             } else {
                 //上传未上传的文件信息
                 MyTerminalFactory.getSDK().getFileTransferOperation().uploadFileTreeBean(null);
