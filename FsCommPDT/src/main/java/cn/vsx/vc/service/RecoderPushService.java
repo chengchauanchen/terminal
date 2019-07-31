@@ -2,6 +2,7 @@ package cn.vsx.vc.service;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Matrix;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
@@ -163,6 +164,7 @@ public class RecoderPushService extends BaseService{
 
     @Override
     protected void showPopMiniView(){
+        layoutParams.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
         mRlRecoderView.setVisibility(View.GONE);
         mPopupMiniLive.setVisibility(View.VISIBLE);
         windowManager.removeView(rootView);
@@ -237,6 +239,16 @@ public class RecoderPushService extends BaseService{
     @Override
     protected void setRootView(){
         rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_recoder_push, null);
+    }
+
+    @Override
+    protected void initWindow() {
+        super.initWindow();
+        //如果屏幕宽度小于高度就开启横屏
+//        mSvLive.setRotation(90.0f);
+        if(screenWidth < screenHeight){
+            layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+        }
     }
 
     @Override
@@ -677,6 +689,9 @@ public class RecoderPushService extends BaseService{
                 int newOffsetX = layoutParams.x;
                 int newOffsetY = layoutParams.y;
                 if(Math.abs(newOffsetX - oddOffsetX) <= 30 && Math.abs(newOffsetY - oddOffsetY) <= 30){
+                    if(screenWidth < screenHeight){
+                        layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+                    }
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverCloseKeyBoardHandler.class);
                     if(pushRTSPClient != null){
                         pushRTSPClient.stop();

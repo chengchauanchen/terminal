@@ -1369,23 +1369,35 @@ public class NewsFragment extends BaseFragment {
                         if (TempGroupType.TO_HELP_COMBAT.toString().equals(tempGroupType)) {
                             saveHistoryHelpCombatMessageToSql(tempGroupNo);
                         }
-                    }
-                }else {
-                    Iterator<TerminalMessage> iterator = messageList.iterator();
-                    while (iterator.hasNext()){
-                        TerminalMessage next = iterator.next();
-                        if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息
-                            if(next.messageToId == tempGroupNo){
-                                iterator.remove();
-                                break;
-                            }
+                        if(tempGroupType.equals(TempGroupType.COMMON_TEAM_GROUP.toString())){
+                            deleteGroupItem(tempGroupNo);
+                            mMessageListAdapter.notifyDataSetChanged();
                         }
                     }
+                }else {
+                    deleteGroupItem(tempGroupNo);
                     mMessageListAdapter.notifyDataSetChanged();
                 }
             });
         }
     };
+
+    /**
+     * 删除组的消息入口
+     * @param tempGroupNo
+     */
+    private void deleteGroupItem(int tempGroupNo){
+        Iterator<TerminalMessage> iterator = messageList.iterator();
+        while (iterator.hasNext()){
+            TerminalMessage next = iterator.next();
+            if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()){//组消息
+                if(next.messageToId == tempGroupNo){
+                    iterator.remove();
+                    break;
+                }
+            }
+        }
+    }
 
     private ReceiveGetGroupByNoHandler receiveGetGroupByNoHandler = group -> mHandler.post(new Runnable(){
         @Override

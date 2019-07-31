@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.dsp.bean.CInt2Pracel;
 import android.dsp.bean.CInt4Pracel;
 import android.os.Build;
@@ -63,6 +64,13 @@ public class SwitchCameraService extends BaseService{
     @SuppressLint("InflateParams")
     protected void setRootView(){
         rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_switch_camera_service, null);
+    }
+
+    @Override
+    protected void initWindow() {
+        super.initWindow();
+        //如果屏幕宽度小于高度就开启横屏
+        layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
     }
 
     @Override

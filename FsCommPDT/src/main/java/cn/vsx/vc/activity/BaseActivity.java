@@ -435,12 +435,11 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 }
                 return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:// 减小音量
-                //如果当前是禁呼的组，点击音量键控制是无效的
-                if (GroupUtils.currentIsForbid()) {
-                    return true;
-                }
                 if (MyTerminalFactory.getSDK().getParam(Params.VOLUME_DOWN, false)) {
-                    groupCallByVolumeKey(event, false);
+                    //如果当前是禁呼的组，点击音量键控制是无效的
+                    if (!GroupUtils.currentIsForbid()) {
+                        groupCallByVolumeKey(event, false);
+                    }
                     return true;
                 } else {
                     if (System.currentTimeMillis() - lastVolumeDownTime > 500) {
@@ -523,9 +522,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 if (MyApplication.instance.volumePress) {
                     MyApplication.instance.isClickVolumeToCall = false;
                     if (onPTTVolumeBtnStatusChangedListener != null) {
-                        if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE) {
-                            onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(GroupCallSpeakState.END);
-                        }
+                        onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(GroupCallSpeakState.END);
                     }
                     MyApplication.instance.volumePress = false;
                 }
