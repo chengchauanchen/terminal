@@ -6,6 +6,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Message;
 import android.util.Log;
@@ -105,6 +106,13 @@ public class CallingService extends BaseService{
     @Override
     protected void setRootView(){
         rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_individual_call, null);
+    }
+
+    @Override
+    protected void initWindow() {
+        super.initWindow();
+        //如果屏幕宽度小于高度就开启横屏
+        layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
     }
 
     @Override

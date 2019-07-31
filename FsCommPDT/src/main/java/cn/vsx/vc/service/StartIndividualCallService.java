@@ -2,6 +2,7 @@ package cn.vsx.vc.service;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -60,6 +61,13 @@ public class StartIndividualCallService extends BaseService{
     @Override
     protected void setRootView(){
         rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_start_individual_call, null);
+    }
+
+    @Override
+    protected void initWindow() {
+        super.initWindow();
+        //如果屏幕宽度小于高度就开启横屏
+        layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
     }
 
     @Override
@@ -188,6 +196,7 @@ public class StartIndividualCallService extends BaseService{
                 int newOffsetX = layoutParams.x;
                 int newOffsetY = layoutParams.y;
                 if(Math.abs(newOffsetX - oddOffsetX) <= 30 && Math.abs(newOffsetY - oddOffsetY) <= 30){
+                    layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverCloseKeyBoardHandler.class);
                     windowManager.removeView(rootView);
                     windowManager.addView(rootView, layoutParams1);

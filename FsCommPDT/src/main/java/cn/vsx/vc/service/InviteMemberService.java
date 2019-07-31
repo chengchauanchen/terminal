@@ -184,6 +184,13 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     }
 
     @Override
+    protected void initWindow() {
+        super.initWindow();
+        //如果屏幕宽度小于高度就开启横屏
+        layoutParams1.screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+    }
+
+    @Override
     protected void findView() {
         //编辑主题
         mLlEditTheme = rootView.findViewById(R.id.ll_live_edit_theme);
