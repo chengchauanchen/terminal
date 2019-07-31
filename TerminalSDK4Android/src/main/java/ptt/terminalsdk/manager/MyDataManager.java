@@ -81,4 +81,13 @@ public class MyDataManager extends DataManager{
     public static List<GroupBean> getDepAllGroup(){
         return depAllGroup;
     }
+
+    /**
+     * 在账号改变的时候，删除相关的数据,比如（sp中会存储之前的当前组信息，改变账号的时候需要删除）
+     */
+    public void clearDataByAccountChanged(){
+        logger.info("在账号改变的时候，删除相关的数据:");
+        //删除之前账号的当前组
+        TerminalFactory.getSDK().putParam(Params.CURRENT_GROUP_ID, 0);
+    }
 }

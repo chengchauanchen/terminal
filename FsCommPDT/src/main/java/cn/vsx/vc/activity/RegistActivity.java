@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -126,7 +127,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     View view_pop;
     private int reAuthCount;
     private ProgressDialog myProgressDialog;
-    private Handler myHandler = new Handler();
+    private Handler myHandler = new Handler(Looper.getMainLooper());
     private String orgHint;
     private String nameHint;
     public Logger logger = Logger.getLogger(getClass());
@@ -209,6 +210,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         myHandler.postDelayed(() -> exit(), 3000);
                     }
                 } else if (resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()) {
+                    //没有注册服务地址，去探测地址
+                    if (availableIPlist.isEmpty()) {
+                        TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
+                    }
                     changeProgressMsg(getResources().getString(R.string.auth_fail));
                     myHandler.postDelayed(() -> {
                         ll_regist.setVisibility(View.VISIBLE);
@@ -431,14 +436,17 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
      */
     private boolean checkName(String name) {
         boolean result = false;
-             String pas = "^[a-zA-Z\\u4e00-\\u9fa5][a-zA-Z0-9\\u4e00-\\u9fa5]{2,7}";
-             Pattern p = Pattern.compile(pas);
-             Matcher m = p.matcher(name);
+        if (!TextUtils.isEmpty(name)&&name.length()>=2&&name.length()<=7) {
+            String pas = "^[a-zA-Z\\u4e00-\\u9fa5][a-zA-Z0-9\\u4e00-\\u9fa5]*$";
+            Pattern p = Pattern.compile(pas);
+            Matcher m = p.matcher(name);
             if (m.matches()) {
-              result = true;
-             }else{
-              ptt.terminalsdk.tools.ToastUtil.showToast(RegistActivity.this,getString(R.string.text_input_name_regex));
-             }
+                result = true;
+            }
+        }
+        if(!result){
+            ptt.terminalsdk.tools.ToastUtil.showToast(RegistActivity.this,getString(R.string.text_input_name_regex));
+        }
         return result;
     }
 
