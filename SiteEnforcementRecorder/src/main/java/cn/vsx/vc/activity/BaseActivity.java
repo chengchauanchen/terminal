@@ -287,6 +287,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentClearHandler.class);
         //退出账号，清空绑定账号
         DataUtil.clearRecorderBindBean();
+
         //清空认证url
         TerminalFactory.getSDK().putParam(Params.AUTH_URL, "");
         //切换到绑定账号
@@ -1053,11 +1054,14 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             TerminalFactory.getSDK().disConnectToServer();
         }
         if(!isChangeAccount){
+            //解除预览图像的service
             if(this instanceof MainActivity){
                 MainActivity mainActivity = (MainActivity) this;
                 mainActivity.stopLiveService();
             }
         }
+        //切换账号的时候，清除账号相关的信息
+        TerminalFactory.getSDK().getDataManager().clearDataByAccountChanged();
 //        MyTerminalFactory.getSDK().stop();
     }
 
@@ -1099,8 +1103,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         loginOut(false);
         //清除绑定账号
         DataUtil.clearRecorderBindBean();
-        //清除sp
-        DeleteData.deleteSharedPreferences();
         //停止SDK
         MyTerminalFactory.getSDK().stop();
         //退出页面
