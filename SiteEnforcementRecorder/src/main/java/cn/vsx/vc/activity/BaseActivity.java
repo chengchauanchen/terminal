@@ -261,12 +261,14 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
      */
     private ReceiveNotifyZfyBoundPhoneMessageHandler receiveNotifyZfyBoundPhoneMessageHandler = (isBound) -> {
         if(!isBound){
-            ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().unbinding();
-            ToastUtil.showToast(BaseActivity.this,getString(R.string.text_unbind_success));
-            //清空绑定信息
-            DataUtil.clearRecorderBindBean();
-            //切换到绑定账号
-            changeAccount();
+            if(DataUtil.getRecorderBindBean()!=null){
+                ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().unbinding();
+                ToastUtil.showToast(BaseActivity.this,getString(R.string.text_unbind_success));
+                //清空绑定信息
+                DataUtil.clearRecorderBindBean();
+                //切换到绑定账号
+                changeAccount();
+            }
         }else{
             if(DataUtil.getRecorderBindBean()!=null){
                 ToastUtil.showToast(BaseActivity.this,getString(R.string.text_bind_success));
