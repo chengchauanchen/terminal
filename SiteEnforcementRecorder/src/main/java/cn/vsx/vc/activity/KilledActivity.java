@@ -12,6 +12,7 @@ import android.view.Window;
 import android.view.WindowManager;
 
 import cn.vsx.vc.R;
+import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.utils.SystemUtil;
 
 /**
@@ -24,7 +25,9 @@ public class KilledActivity extends FragmentActivity {
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            finish();
+            KilledActivity.this.finish();
+            //杀掉进程
+            MyApplication.instance.killAllProcess();
         }
     };
 

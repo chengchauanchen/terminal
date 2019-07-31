@@ -97,6 +97,7 @@ import cn.vsx.vc.utils.VolumeToastUitl;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
+import ptt.terminalsdk.tools.DeleteData;
 import ptt.terminalsdk.tools.DialogUtil;
 
 public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack, Actions, NfcUtil.OnReadListener {
@@ -114,7 +115,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     private long videoKeyLongPressStartTime = 0;
     private long audioKeyLongPressStartTime = 0;
     private long menuKeyLongPressStartTime = 0;
-//
+    //
     private boolean videoKeyIsLongPress = false;
     private boolean audioKeyIsLongPress = false;
     private boolean menuKeyIsLongPress = false;
@@ -181,10 +182,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
                 TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
                 MyApplication.instance.stopPTTButtonEventService();
-                DataUtil.clearRecorderBindBean();
-                startActivity(new Intent(BaseActivity.this, KilledActivity.class));
-                BaseActivity.this.finish();
-
+                forbid();
             });
         }
     };
@@ -624,17 +622,17 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         switch (keyCode){
             case KeyEvent.KEYCODE_VOLUME_UP:
                 // 增大音量
-                    if (System.currentTimeMillis() - lastVolumeUpTime > 500) {
-                        MyTerminalFactory.getSDK().getAudioProxy().volumeUp();
-                        if (MyTerminalFactory.getSDK().getAudioProxy().getVolume() > 0) {
-                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false, 1);
-                        } else {
-                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true, 1);
-                        }
-                        lastVolumeUpTime = System.currentTimeMillis();
+                if (System.currentTimeMillis() - lastVolumeUpTime > 500) {
+                    MyTerminalFactory.getSDK().getAudioProxy().volumeUp();
+                    if (MyTerminalFactory.getSDK().getAudioProxy().getVolume() > 0) {
+                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, false, 1);
+                    } else {
+                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true, 1);
                     }
-                    //显示音量的Toast
-                    VolumeToastUitl.showToastWithImg(this,MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "%");
+                    lastVolumeUpTime = System.currentTimeMillis();
+                }
+                //显示音量的Toast
+                VolumeToastUitl.showToastWithImg(this,MyTerminalFactory.getSDK().getAudioProxy().getVolume() + "%");
                 return true;
             case KeyEvent.KEYCODE_VOLUME_DOWN:
                 if(!audioKeyIsLongPress){
@@ -659,11 +657,11 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 return true;
             case 287:
                 //录音按键
-                    if(MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus() == AudioRecordStatus.STATUS_STOPED){
-                        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverAudioButtonEventHandler.class,true);
-                    }else{
-                        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverAudioButtonEventHandler.class,false);
-                    }
+                if(MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus() == AudioRecordStatus.STATUS_STOPED){
+                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverAudioButtonEventHandler.class,true);
+                }else{
+                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverAudioButtonEventHandler.class,false);
+                }
                 return true;
             case KeyEvent.KEYCODE_DPAD_LEFT:
             case 286:
@@ -1052,6 +1050,12 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         if(isChangeAccount&&TerminalFactory.getSDK().isServerConnected()){
             TerminalFactory.getSDK().disConnectToServer();
         }
+        if(!isChangeAccount){
+            if(this instanceof MainActivity){
+                MainActivity mainActivity = (MainActivity) this;
+                mainActivity.stopLiveService();
+            }
+        }
 //        MyTerminalFactory.getSDK().stop();
     }
 
@@ -1073,6 +1077,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         loginOut(false);
         //清除绑定账号
         DataUtil.clearRecorderBindBean();
+        //清除sp
+        DeleteData.deleteSharedPreferences();
         //退出页面
         for (Activity activity : ActivityCollector.getAllActivity().values()) {
             activity.finish();
@@ -1081,6 +1087,23 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().stop();
         //杀掉进程
         MyApplication.instance.killAllProcess();
+    }
+
+    /**
+     * 遥毙
+     */
+    protected void forbid(){
+        //退出账号
+        loginOut(false);
+        //清除绑定账号
+        DataUtil.clearRecorderBindBean();
+        //清除sp
+        DeleteData.deleteSharedPreferences();
+        //停止SDK
+        MyTerminalFactory.getSDK().stop();
+        //退出页面
+        startActivity(new Intent(BaseActivity.this, KilledActivity.class));
+        BaseActivity.this.finish();
     }
 
     /**
