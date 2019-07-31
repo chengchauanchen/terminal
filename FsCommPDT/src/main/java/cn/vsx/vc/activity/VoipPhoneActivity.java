@@ -195,9 +195,9 @@ public class VoipPhoneActivity extends BaseActivity{
                 terminalMessage.messageBody=new JSONObject();
                 terminalMessage.messageVersion=0;
                 terminalMessage.resultCode=0;
-                new Thread(() -> {
-                    MyTerminalFactory.getSDK().getTerminalMessageManager().sendMessageToApplyServer(terminalMessage,"bbbb");  //转发通话记录给应用服务
-                }).start();
+//                new Thread(() -> {
+//                    MyTerminalFactory.getSDK().getTerminalMessageManager().sendMessageToApplyServer(terminalMessage,"bbbb");  //转发通话记录给应用服务
+//                }).start();
 
 
 
