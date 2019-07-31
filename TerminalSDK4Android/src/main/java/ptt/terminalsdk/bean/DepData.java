@@ -99,8 +99,21 @@ public class DepData{
             public void setChildren(Object children){
                 this.children = children;
             }
+
+            @Override
+            public String toString(){
+                return "DeptListBean{" + "id=" + id + ", name='" + name + '\'' + ", departmentVersion=" + departmentVersion + ", parentId=" + parentId + ", children=" + children + '}';
+            }
         }
 
+        @Override
+        public String toString(){
+            return "MemberGroupsBean{" + "deptList=" + deptList + ", groupList=" + groupList + '}';
+        }
+    }
 
+    @Override
+    public String toString(){
+        return "DepData{" + "memberGroups=" + memberGroups + '}';
     }
 }

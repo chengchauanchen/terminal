@@ -2,7 +2,6 @@ package ptt.terminalsdk.context;
 
 import android.annotation.SuppressLint;
 import android.app.Application;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +23,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.StatFs;
 import android.os.storage.StorageManager;
+import android.support.annotation.NonNull;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -57,10 +57,12 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -90,6 +92,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor;
 import ptt.terminalsdk.BuildConfig;
 import ptt.terminalsdk.IMessageService;
 import ptt.terminalsdk.IMessageService.Stub;
@@ -105,6 +108,7 @@ import ptt.terminalsdk.manager.gps.GPSManager;
 import ptt.terminalsdk.manager.gps.recoder.LocationManager;
 import ptt.terminalsdk.manager.gps.recoder.RecorderBDGPSManager;
 import ptt.terminalsdk.manager.gps.recoder.RecorderGPSManager;
+import ptt.terminalsdk.manager.http.LoggingInterceptor;
 import ptt.terminalsdk.manager.http.MyHttpClient;
 import ptt.terminalsdk.manager.http.ProgressHelper;
 import ptt.terminalsdk.manager.http.ProgressUIListener;
@@ -120,7 +124,18 @@ import ptt.terminalsdk.tools.HttpUtil;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.MODE_PRIVATE;
-import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.*;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.ACTION_INTENT_CHECKCARRIERS_FAILURE;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.ACTION_INTENT_CHECKCARRIERS_SUCCESS;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.ACTION_INTENT_DOWNLOADCFG_SUCCESS;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.ACTION_INTENT_NETWORK_CONNECTED;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.ACTION_INTENT_NETWORK_DISCONNECTED;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.ACTION_INTENT_STARTSERVER_FAILURE;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.ACTION_INTENT_STARTSERVER_INPROC;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.ACTION_INTENT_STARTSERVER_SUCCESS;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.ACTION_INTENT_STOPSERVER_SUCCESS;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.ACTION_INTENT_TUNNEL_CONNECTED;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.ACTION_INTENT_TUNNEL_FAILURE;
+import static ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver.ACTION_INTENT_TUNNEL_FAILURE_AUTH;
 
 public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
@@ -1320,7 +1335,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 					}
 				})
 				//添加自定义拦截器
-				//.setAddInterceptor()
+				.setAddInterceptor(new LoggingInterceptor())
 				//开启缓存策略(默认false)
 				//1、在有网络的时候，先去读缓存，缓存时间到了，再去访问网络获取数据；
 				//2、在没有网络的时候，去读缓存中的数据。
@@ -1347,7 +1362,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				//全局超时配置
 				.setConnectTimeout(10)
 				//全局是否打开请求log日志
-				.setDebug(BuildConfig.DEBUG)
+				.setDebug(false)
 				.build();
 
 		return okHttpClient;

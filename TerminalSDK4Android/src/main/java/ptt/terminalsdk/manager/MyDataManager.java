@@ -51,6 +51,7 @@ public class MyDataManager extends DataManager{
         paramsMap.put("type", RequestDataType.DEPARTMENTS_GROUPS_DATA.toString());
         paramsMap.put("memberId", String.valueOf(TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L)));
         paramsMap.put("id", String.valueOf(TerminalFactory.getSDK().getParam(Params.CURRENT_DEP_ID,0L)));
+
         ApiManager.getFileServerApi()
                 .getDeptData(paramsMap)
                 .subscribeOn(Schedulers.io())
@@ -63,12 +64,18 @@ public class MyDataManager extends DataManager{
 
                     @Override
                     protected void onSuccess(DepData depData){
-                        List<GroupBean> groupList = depData.getMemberGroups().getGroupList();
-                        depAllGroup.clear();
-                        depAllGroup.addAll(groupList);
-                        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateDepGroupHandler.class,groupList);
+                        logger.info("请求当前组部门下的所有组:"+depData);
+                        if(depData != null && depData.getMemberGroups() !=null){
+                            List<GroupBean> groupList = depData.getMemberGroups().getGroupList();
+                            depAllGroup.clear();
+                            depAllGroup.addAll(groupList);
+                            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateDepGroupHandler.class,groupList);
+                        }else {
+                            logger.info("请求当前组部门下的所有组数据为null");
+                        }
                     }
                 });
+
     }
 
     public static List<GroupBean> getDepAllGroup(){

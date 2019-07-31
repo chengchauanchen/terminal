@@ -163,4 +163,9 @@ public class GroupBean{
     public void setAdminTerminalMemberUniqueNo(List<String> adminTerminalMemberUniqueNo){
         this.adminTerminalMemberUniqueNo = adminTerminalMemberUniqueNo;
     }
+
+    @Override
+    public String toString(){
+        return "GroupBean{" + "id=" + id + ", deptId=" + deptId + ", createdMemberNo=" + createdMemberNo + ", createdMemberUniqueNo=" + createdMemberUniqueNo + ", createdMemberName='" + createdMemberName + '\'' + ", no=" + no + ", name='" + name + '\'' + ", groupType='" + groupType + '\'' + ", uniqueNo=" + uniqueNo + ", departmentName='" + departmentName + '\'' + ", tempGroupType='" + tempGroupType + '\'' + ", businessId='" + businessId + '\'' + ", processingState='" + processingState + '\'' + ", responseGroupType='" + responseGroupType + '\'' + ", adminTerminalMemberUniqueNo=" + adminTerminalMemberUniqueNo + '}';
+    }
 }
