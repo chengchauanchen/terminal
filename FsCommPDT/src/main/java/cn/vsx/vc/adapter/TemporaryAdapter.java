@@ -2229,4 +2229,33 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     public boolean isForWardMore(){
         return isForWardMore;
     }
+
+    /**
+     * 设置头像显示
+     */
+//    private void handlerAvatar(TerminalMessage terminalMessage, int position, ChatViewHolder holder) {
+//        String terminalMemberMode = null;
+//        if(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) == terminalMessage.messageFromId){
+//            terminalMemberMode =  MyTerminalFactory.getSDK().getParam(Params.TERMINAL_MEMBER_MODE, "");
+//        }else{
+//            terminalMemberMode = DataUtil.getMemberByMemberNo(terminalMessage.messageFromId).getTerminalMemberMode();
+//        }
+//        if(DataUtil.checkTerminalTypeIsCar(terminalMemberMode)){
+//            //车辆
+//            if(activity!=null&&!activity.isDestroyed()) {
+//                Glide.with(activity).load(DataUtil.getTerminalTypeHeadImage(terminalMemberMode)).asBitmap().into(holder.ivAvatar);
+//            }
+//
+//        }else{
+//            //人员
+//            if(activity!=null&&!activity.isDestroyed()) {
+//                Glide.with(activity)
+//                        .load(DataUtil.getMemberByMemberNo(terminalMessage.messageFromId).avatarUrl)
+//                        .asBitmap()
+//                        .placeholder(R.drawable.user_photo)//加载中显示的图片
+//                        .error(R.drawable.user_photo)//加载失败时显示的图片
+//                        .into(holder.ivAvatar);
+//            }
+//        }
+//    }
 }

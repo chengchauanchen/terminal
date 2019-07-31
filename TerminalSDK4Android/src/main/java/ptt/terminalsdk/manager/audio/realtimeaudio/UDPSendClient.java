@@ -10,7 +10,6 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import cn.zectec.speex.Speex;
 
@@ -84,7 +83,6 @@ public class UDPSendClient implements ISendClient{
 
     private void sendData(){
         try{
-            logger.info("UDP发送音频数据---sendBuf:"+ Arrays.toString(sendDp.getData()));
             sendSocket.send(sendDp);
         }catch(IOException e){
             logger.warn("音频数据发送失败", e);
