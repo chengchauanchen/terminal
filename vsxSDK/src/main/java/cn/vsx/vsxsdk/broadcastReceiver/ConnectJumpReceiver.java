@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.util.Log;
 
 import cn.vsx.vsxsdk.VsxSDK;
-import cn.vsx.vsxsdk.service.VsxReceivedService;
 
 /**
  * 连接JumpService 的广播消息
@@ -19,7 +18,7 @@ public class ConnectJumpReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.e("广播","收到JumpService启动了的广播，可以尝试连接");
+        Log.e("--vsx--广播","收到JumpService启动了的广播，可以尝试连接");
         VsxSDK.getInstance().connectJumpService(context,true);
     }
 }

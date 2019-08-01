@@ -23,7 +23,7 @@ public class ConnectMessageReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         String packageName = intent.getStringExtra(PACKAGE_NAME);
-        Log.e("广播", "收到绿之云的MessageService启动了的广播，可以尝试连接" + ",包名：" + packageName);
+        Log.e("--vsx--广播", "收到绿之云的MessageService启动了的广播，可以尝试连接" + ",包名：" + packageName);
 
         ThirdSendMessage.getInstance().connectReceivedService(context, packageName, true);
     }

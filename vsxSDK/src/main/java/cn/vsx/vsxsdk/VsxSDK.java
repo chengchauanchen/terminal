@@ -131,7 +131,7 @@ public class VsxSDK {
             public void onServiceConnected(ComponentName name, IBinder service) {
                 iJump = Stub.asInterface(service);
                 //跳转服务连接成功后，通知 融合通信 连接第三方应用的消息接收服务
-                Log.e("VsxSDK","连接JumpService成功");
+                Log.e("--vsx--VsxSDK","连接JumpService成功");
                 if(isNotice){//是否通知第三方连接 JumpService
                     try {
                         noticeConnectReceivedService(context);

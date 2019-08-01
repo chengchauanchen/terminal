@@ -46,7 +46,7 @@ public class RegisterBroadcastReceiver {
         intent.setAction(MESSAGE_ACTION);
         intent.putExtra(ParamKey.PACKAGE_NAME,getPackageName(context));
         context.sendBroadcast(intent);//发送标准广播
-        Log.e("广播","发送标准广播__MESSAGE_ACTION");
+        Log.e("--vsx--广播","发送标准广播__MESSAGE_ACTION");
     }
 
     private String getPackageName(Context context){

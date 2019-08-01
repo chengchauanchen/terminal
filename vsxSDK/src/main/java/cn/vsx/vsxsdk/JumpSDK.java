@@ -295,5 +295,7 @@ public class JumpSDK implements JumpInterface {
     private void doCacheCommandAndLaunchedVSXApp(String json,int type){
         CommandCache.getInstance().setCommandCacheData(json, type);
         launchedVSXApp(context);
+        //如果异常，重新发送连接广播
+        //VsxSDK.getInstance().getRegisterBroadcastReceiver().sendMessageActionBroadcast(context);
     }
 }

@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        VsxSDK.getInstance().getJumpSDK().registerConnectJumpReceiver(this);
+//        VsxSDK.getInstance().getJumpSDK().registerConnectJumpReceiver(this);
         initView();
     }
 
@@ -152,6 +152,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        VsxSDK.getInstance().getJumpSDK().unregisterConnectJumpReceiver(this);
+//        VsxSDK.getInstance().getJumpSDK().unregisterConnectJumpReceiver(this);
     }
 }
