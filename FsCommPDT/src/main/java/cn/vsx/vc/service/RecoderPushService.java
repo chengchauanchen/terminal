@@ -219,9 +219,7 @@ public class RecoderPushService extends BaseService{
 
     @Override
     public void onDestroy(){
-        if(pushRTSPClient != null){
-            pushRTSPClient.stop();
-        }
+        finishVideoLive();
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
@@ -565,8 +563,12 @@ public class RecoderPushService extends BaseService{
 
     private void finishVideoLive(){
         stopPull();
-        mRlRecoderView.setVisibility(View.GONE);
-        mPopupMiniLive.setVisibility(View.GONE);
+        if(mRlRecoderView!=null){
+            mRlRecoderView.setVisibility(View.GONE);
+        }
+        if(mPopupMiniLive!=null){
+            mPopupMiniLive.setVisibility(View.GONE);
+        }
         stopBusiness();
     }
 
@@ -576,7 +578,6 @@ public class RecoderPushService extends BaseService{
             pushRTSPClient.stop();
             pushRTSPClient = null;
         }
-        TerminalFactory.getSDK().getLiveManager().ceaseLiving();
     }
 
     private void onVideoSizeChange(){

@@ -247,9 +247,7 @@ public class UVCPushService extends BaseService{
     @Override
     public void onDestroy(){
         //处理当正在录像的时候，异常退出处理
-        if(mUvcMediaStream!=null){
-            mUvcMediaStream.stopRecord();
-        }
+        finishVideoLive();
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
@@ -631,7 +629,6 @@ public class UVCPushService extends BaseService{
             mUvcMediaStream = null;
             logger.info("---->>>>页面关闭，停止推送视频");
         }
-        TerminalFactory.getSDK().getLiveManager().ceaseLiving();
     }
 
     private void startCamera(){

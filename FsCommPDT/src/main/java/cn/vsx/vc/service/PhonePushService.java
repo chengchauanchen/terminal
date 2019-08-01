@@ -275,9 +275,7 @@ public class PhonePushService extends BaseService{
     @Override
     public void onDestroy(){
         //处理当正在录像的时候，异常退出处理
-        if(mMediaStream!=null){
-            mMediaStream.stopRecord();
-        }
+        finishVideoLive();
         super.onDestroy();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
@@ -292,8 +290,12 @@ public class PhonePushService extends BaseService{
     }
 
     private void hideAllView(){
-        mPopupMiniLive.setVisibility(View.GONE);
-        mRlPhonePushLive.setVisibility(View.GONE);
+        if(mPopupMiniLive !=null){
+            mPopupMiniLive.setVisibility(View.GONE);
+        }
+        if(mRlPhonePushLive !=null){
+            mRlPhonePushLive.setVisibility(View.GONE);
+        }
     }
 
     /**
@@ -709,7 +711,6 @@ public class PhonePushService extends BaseService{
 
     private void finishVideoLive(){
         mHandler.removeCallbacksAndMessages(null);
-        MyTerminalFactory.getSDK().getLiveManager().ceaseLiving();
         PromptManager.getInstance().stopRing();//停止响铃
         stopPush();
         hideAllView();
