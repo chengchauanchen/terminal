@@ -85,7 +85,7 @@ public class LiveRequestService extends BaseService{
         mTvLiveRequestName.setText(HandleIdUtil.handleName(memberName));
         mTvLiveRequestId.setText(HandleIdUtil.handleId(memberId));
 
-        int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(memberId,uniqueNo, "");
+        int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(memberId,uniqueNo, "",false);
         if(requestCode == BaseCommonCode.SUCCESS_CODE){
         }else{
             ptt.terminalsdk.tools.ToastUtil.livingFailToast(LiveRequestService.this, requestCode, TerminalErrorCode.LIVING_REQUEST.getErrorCode());
