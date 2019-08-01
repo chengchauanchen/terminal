@@ -3,7 +3,8 @@ package cn.vsx.vc.jump.broadcastReceiver;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
+
+import org.apache.log4j.Logger;
 
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
 
@@ -18,13 +19,13 @@ import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
  */
 public class ConnectMessageReceiver extends BroadcastReceiver {
 
+    protected static Logger logger = Logger.getLogger(ConnectMessageReceiver.class);
     public static final String PACKAGE_NAME = "PackageName";
 
     @Override
     public void onReceive(Context context, Intent intent) {
         String packageName = intent.getStringExtra(PACKAGE_NAME);
-        Log.e("--vsx--广播", "收到绿之云的MessageService启动了的广播，可以尝试连接" + ",包名：" + packageName);
-
+        logger.info("--vsxSDK--"+"收到广播--正在连接--"+packageName);
         ThirdSendMessage.getInstance().connectReceivedService(context, packageName, true);
     }
 }

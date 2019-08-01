@@ -7,7 +7,7 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.util.Log;
 
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 import cn.vsx.vc.jump.broadcastReceiver.RegisterBroadcastReceiver;
 import cn.vsx.vc.jump.constant.ParamKey;
@@ -20,6 +20,8 @@ import static android.content.Context.BIND_AUTO_CREATE;
  * 给第三方app传递消息
  */
 public class ThirdSendMessage {
+
+    protected static Logger logger = Logger.getLogger(ThirdSendMessage.class);
 
     private static ThirdSendMessage sendMessage;
     private Context mContext;
@@ -71,7 +73,7 @@ public class ThirdSendMessage {
      * @param context
      */
     private void startJumpService(Context context){
-        Log.e("JumpService","startJumpService");
+        logger.info("--vsxSDK--"+"startJumpService");
         context.startService(new Intent(context, JumpService.class));
     }
 
@@ -100,7 +102,7 @@ public class ThirdSendMessage {
                 //连接成功后，将之前的注册全部干掉，重新注册
                 IReceivedVSXMessage iReceivedVSXMessage = IReceivedVSXMessage.Stub.asInterface(service);
                 //连接成功 将连接对象放入连接池中
-                Log.e("connectReceivedService","连接成功");
+                logger.info("--vsxSDK--"+"connectReceivedService-连接成功");
                 Connect3rdParty.getInstance().addConnect(packageName,iReceivedVSXMessage);
                 if(isNotice){//是否通知第三方连接 JumpService
                     try {

@@ -7,6 +7,9 @@ import android.os.RemoteException;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import org.apache.log4j.Logger;
+
+import cn.vsx.hamster.terminalsdk.TerminalSDKBaseImpl;
 import cn.vsx.vc.IJump;
 import cn.vsx.vc.jump.command.FactoryCommand;
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
@@ -15,6 +18,8 @@ import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
  * 第三方应用与本应用通信Service
  */
 public class JumpService extends Service {
+
+    protected static Logger logger = Logger.getLogger(JumpService.class);
 
     @Nullable
     @Override
@@ -40,7 +45,7 @@ public class JumpService extends Service {
          */
         @Override
         public void noticeConnectReceivedService(String packageName) throws RemoteException {
-            Log.e("JumpService","接收到"+packageName+"发送过来的连接ReceivedService通知");
+            logger.info("--vsxSDK--"+"接收到"+packageName+"发送过来的连接ReceivedService通知");
             ThirdSendMessage.getInstance().connectReceivedService(getApplicationContext(),packageName,false);
         }
     }
