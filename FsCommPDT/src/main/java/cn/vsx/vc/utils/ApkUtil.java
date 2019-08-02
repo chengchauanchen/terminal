@@ -17,10 +17,9 @@ public class ApkUtil{
         return MyTerminalFactory.getSDK().getParam(Params.SHOW_LTE, false);
     }
 
-    //是否为市局的包
+    //是否为安监
     public static boolean isAnjian(){
         return MyTerminalFactory.getSDK().getParam(Params.IS_ANJIAN, false);
-//        return true;
     }
 
 }
