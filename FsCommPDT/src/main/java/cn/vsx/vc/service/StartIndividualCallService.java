@@ -24,6 +24,7 @@ import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveStopCallingServiceHandler;
 import cn.vsx.vc.receiveHandle.ReceiveStopStartReceiveCallServiceHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.SensorUtil;
@@ -72,9 +73,12 @@ public class StartIndividualCallService extends BaseService{
 
     @Override
     protected void findView(){
+        //头像
+        ImageView ivMemberPortraitRequest = rootView.findViewById(R.id.iv_member_portrait_request);
+        ivMemberPortraitRequest.setImageResource(BitmapUtil.getUserPhoto());
+
         mRlIndividualCallRequest = rootView.findViewById(R.id.rl_individual_call_request);
         mIvIndividualCallRetractRequest = rootView.findViewById(R.id.iv_individual_call_retract_request);
-//        mIvMemberPortraitRequest = rootView.findViewById(R.id.iv_member_portrait_request);
         mTvMemberNameRequest = rootView.findViewById(R.id.tv_member_name_request);
         mTvMemberIdRequest = rootView.findViewById(R.id.tv_member_id_request);
         mLlIndividualCallHangupRequest = rootView.findViewById(R.id.ll_individual_call_hangup_request);

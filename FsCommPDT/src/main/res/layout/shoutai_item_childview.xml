@@ -22,8 +22,7 @@
             android:id="@+id/shoutai_user_logo"
             android:layout_width="@dimen/x30"
             android:layout_height="@dimen/x30"
-            android:layout_marginLeft="@dimen/x20"
-            android:background="@drawable/user_photo" />
+            android:layout_marginLeft="@dimen/x20"/>
 
         <LinearLayout
             android:layout_width="wrap_content"

@@ -19,8 +19,7 @@
             android:layout_height="@dimen/size_avatar"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
-            android:scaleType="fitXY"
-            android:src="@drawable/user_photo" />
+            android:scaleType="fitXY" />
 
         <TextView
             android:id="@+id/timestamp"

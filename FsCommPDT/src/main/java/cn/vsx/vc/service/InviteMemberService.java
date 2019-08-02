@@ -321,44 +321,75 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         if (Constants.PUSH.equals(type)) {
             if (pushing) {
                 //推送图像
-                mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
-                        Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
-                mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
-                        TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
-                tabText = Arrays.asList(getResources().getStringArray((ApkUtil.showLteApk())?
-                        R.array.invite_member_tab_text_push_image_lte:R.array.invite_member_tab_text_push_image));
+                if(ApkUtil.isAnjian()){
+                    mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                            Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
+                    mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                            TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
+                    tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_push_image_anjian));
+                }else{
+                    mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                            Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
+                    mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                            TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
+                    tabText = Arrays.asList(getResources().getStringArray((ApkUtil.showLteApk())?
+                            R.array.invite_member_tab_text_push_image_lte:R.array.invite_member_tab_text_push_image));
+                }
             } else {
                 //上报图像
-                mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
-                        Constants.TYPE_CHECK_SEARCH_POLICE);
-                mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
-                        TerminalMemberType.TERMINAL_PHONE.toString());
-                tabText = Arrays.asList(getResources().getStringArray((ApkUtil.showLteApk())?
-                        R.array.invite_member_tab_text_push_lte:R.array.invite_member_tab_text_push));
+                if(ApkUtil.isAnjian()){
+                    mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                            Constants.TYPE_CHECK_SEARCH_POLICE);
+                    mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                            TerminalMemberType.TERMINAL_PHONE.toString());
+                    tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_push_anjian));
+                }else{
+                    mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                            Constants.TYPE_CHECK_SEARCH_POLICE);
+                    mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                            TerminalMemberType.TERMINAL_PHONE.toString());
+                    tabText = Arrays.asList(getResources().getStringArray((ApkUtil.showLteApk())?
+                            R.array.invite_member_tab_text_push_lte:R.array.invite_member_tab_text_push));
+                }
             }
         } else if (Constants.PULL.equals(type)) {
             if (pulling) {
                 //推送图像
-                mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
-                        Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
-                mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
-                        TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
-                tabText = Arrays.asList(getResources().getStringArray((ApkUtil.showLteApk())?
-                        R.array.invite_member_tab_text_push_image_lte:R.array.invite_member_tab_text_push_image));
+                if(ApkUtil.isAnjian()){
+                    mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                            Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
+                    mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                            TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
+                    tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_push_image_anjian));
+                }else{
+                    mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                            Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
+                    mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                            TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
+                    tabText = Arrays.asList(getResources().getStringArray((ApkUtil.showLteApk())?
+                            R.array.invite_member_tab_text_push_image_lte:R.array.invite_member_tab_text_push_image));
+                }
             } else {
                 //请求图像
-                mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_POLICE,Constants.TYPE_CHECK_SEARCH_UAV,
-                        Constants.TYPE_CHECK_SEARCH_RECODER);
-                mTabTypes = Arrays.asList(TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_UAV.toString(),
-                        TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
-                tabText = Arrays.asList(getResources().getStringArray((ApkUtil.showLteApk())?
-                        R.array.invite_member_tab_text_pull_lte:R.array.invite_member_tab_text_pull));
+                if(ApkUtil.isAnjian()){
+                    mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_POLICE,Constants.TYPE_CHECK_SEARCH_UAV);
+                    mTabTypes = Arrays.asList(TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_UAV.toString());
+                    tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_pull_anjian));
+                }else {
+                    mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_POLICE,Constants.TYPE_CHECK_SEARCH_UAV,
+                            Constants.TYPE_CHECK_SEARCH_RECODER);
+                    mTabTypes = Arrays.asList(TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_UAV.toString(),
+                            TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
+                    tabText = Arrays.asList(getResources().getStringArray((ApkUtil.showLteApk())?
+                            R.array.invite_member_tab_text_pull_lte:R.array.invite_member_tab_text_pull));
+                }
+
             }
         }
         searchTypes.addAll(mSearchTypes);
         tabTypes.addAll(mTabTypes);
         //包含lte
-        if(ApkUtil.showLteApk()){
+        if((!ApkUtil.isAnjian())&&ApkUtil.showLteApk()){
             searchTypes.add(Constants.TYPE_CHECK_SEARCH_LTE);
             tabTypes.add(TerminalMemberType.TERMINAL_LTE.toString());
         }

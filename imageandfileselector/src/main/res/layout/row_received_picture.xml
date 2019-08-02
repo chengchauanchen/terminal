@@ -26,8 +26,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginLeft="@dimen/margin_chat_activity"
-            android:scaleType="fitXY"
-            android:src="@drawable/user_photo" />
+            android:scaleType="fitXY" />
 
         <RelativeLayout
             android:id="@+id/bubble"

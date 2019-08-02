@@ -85,6 +85,8 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 break;
             case Constants.TYPE_CONTRACT_MEMBER:
                 Account account = (Account) item.getBean();
+                ImageView ivLogoMember = holder.getView(R.id.iv_member_portrait);
+                ivLogoMember.setImageResource(BitmapUtil.getUserPhoto());
                 TextView memberName = holder.getView(R.id.tv_member_name);
                 TextView memberId = holder.getView(R.id.tv_member_id);
                 setKeyWordsView(memberName,HandleIdUtil.handleName(account.getName()));
@@ -103,8 +105,9 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 holder.setOnClickListener(R.id.iv_search_call, v -> indivudualCall(account));
                 break;
             case Constants.TYPE_CONTRACT_PDT:
-
                 Member contractpdt = (Member) item.getBean();
+                ImageView ivLogoPdt = holder.getView(R.id.iv_member_portrait);
+                ivLogoPdt.setImageResource(BitmapUtil.getUserPhoto());
                 TextView memberNamePdt = holder.getView(R.id.tv_member_name);
                 TextView memberIdPdt = holder.getView(R.id.tv_member_id);
                 setKeyWordsView(memberNamePdt,HandleIdUtil.handleName(contractpdt.getName()));
@@ -125,6 +128,8 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
 
             case Constants.TYPE_CONTRACT_LTE:
                 Member contractLte = (Member) item.getBean();
+                ImageView ivLogoLte = holder.getView(R.id.iv_member_portrait);
+                ivLogoLte.setImageResource(BitmapUtil.getUserPhoto());
                 setKeyWordsView(holder.getView(R.id.tv_member_name),HandleIdUtil.handleName(contractLte.getName()));
                 setKeyWordsView(holder.getView(R.id.tv_member_id),HandleIdUtil.handleId(contractLte.getNo()));
 
@@ -205,7 +210,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 break;
             case Constants.TYPE_CHECK_SEARCH_ACCOUNT:
                 Account account1 = (Account) item.getBean();
-                holder.setImageResource(R.id.shoutai_user_logo,R.drawable.user_photo);
+                holder.setImageResource(R.id.shoutai_user_logo,BitmapUtil.getUserPhoto());
                 holder.setText(R.id.shoutai_tv_member_name, account1.getName());
                 holder.setText(R.id.shoutai_tv_member_id, String.valueOf(account1.getNo()));
                 holder.setChecked(R.id.checkbox,account1.isChecked());

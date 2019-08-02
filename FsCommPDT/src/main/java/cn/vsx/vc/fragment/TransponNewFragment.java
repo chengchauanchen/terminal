@@ -29,6 +29,7 @@ import cn.vsx.vc.receiveHandle.OnSearchListener;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSelectedMemberHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSelectedFragmentHandler;
+import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.TabView;
@@ -101,7 +102,11 @@ public class TransponNewFragment extends Fragment implements View.OnClickListene
         //tabview
         mTabGroup = view.findViewById(R.id.tab_group);
         mTabPolice = view.findViewById(R.id.tab_police);
-
+        if(ApkUtil.isAnjian()){
+            mTabPolice.setName(getString(R.string.text_person));
+        }else{
+            mTabPolice.setName(getString(R.string.text_police_service));
+        }
     }
 
 

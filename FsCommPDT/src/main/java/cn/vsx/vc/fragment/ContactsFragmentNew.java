@@ -97,7 +97,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     private Handler mHandler = new Handler();
     private DialPopupwindow dialPopupwindow;
     private boolean soundOff;
-    private RelativeLayout isLte;
 
     public ContactsFragmentNew() {
     }
@@ -144,7 +143,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
         TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
         TextViewCompat.setTextAppearance(recoder_tv, R.style.contacts_title_unchecked_text);
-        initLteView();
+        initTabView();
         group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
         shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
         jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
@@ -168,12 +167,24 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         });
     }
 
-    private void initLteView(){
-        isLte = mRootView.findViewById(R.id.is_lte);
-        if(ApkUtil.showLteApk()){
-            isLte.setVisibility(View.VISIBLE);
-        }else {
+    private void initTabView(){
+        RelativeLayout is_shoutai = mRootView.findViewById(R.id.is_shoutai);
+        RelativeLayout isLte = mRootView.findViewById(R.id.is_lte);
+        RelativeLayout is_recoder = mRootView.findViewById(R.id.is_recoder);
+        if(ApkUtil.isAnjian()){
+            is_shoutai.setVisibility(View.GONE);
             isLte.setVisibility(View.GONE);
+            is_recoder.setVisibility(View.GONE);
+            jingwutong_tv.setText(getString(R.string.text_person));
+        }else{
+            jingwutong_tv.setText(getString(R.string.text_police_service));
+            is_shoutai.setVisibility(View.VISIBLE);
+            is_recoder.setVisibility(View.VISIBLE);
+            if(ApkUtil.showLteApk()){
+                isLte.setVisibility(View.VISIBLE);
+            }else {
+                isLte.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -387,44 +398,48 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         if (policeAffairsFragment == null) {
             policeAffairsFragment = new NewPoliceAffairsFragment();
         }
-
         if (handPlatformFragment == null) {
             handPlatformFragment = new NewHandPlatformFragment();
         }
-
         if (recorderFragment == null) {
             recorderFragment = new RecorderFragment();
         }
-        //只有市局的包才有LTE
-        if(ApkUtil.showLteApk()){
-            if (lteFragment == null) {
-                lteFragment = new LteFragment();
-            }
-            transaction.add(R.id.contacts_viewPager, groupFragmentNew)
-                    .add(R.id.contacts_viewPager, policeAffairsFragment)
-                    .add(R.id.contacts_viewPager, handPlatformFragment)
-                    .add(R.id.contacts_viewPager, lteFragment)
-                    .add(R.id.contacts_viewPager, recorderFragment)
-                    .hide(policeAffairsFragment)
-                    .hide(handPlatformFragment)
-                    .hide(lteFragment)
-                    .hide(recorderFragment)
-                    .show(groupFragmentNew);
-            transaction.commit();
-
-        }else {
-            transaction.add(R.id.contacts_viewPager, groupFragmentNew)
-                    .add(R.id.contacts_viewPager, policeAffairsFragment)
-                    .add(R.id.contacts_viewPager, handPlatformFragment)
-                    .add(R.id.contacts_viewPager, recorderFragment)
-                    .hide(policeAffairsFragment)
-                    .hide(handPlatformFragment)
-                    .hide(recorderFragment)
-                    .show(groupFragmentNew);
-            transaction.commit();
+        if (lteFragment == null) {
+            lteFragment = new LteFragment();
         }
-
-
+        //判断是否是安监
+        if(ApkUtil.isAnjian()){
+            transaction.add(R.id.contacts_viewPager, groupFragmentNew)
+                    .add(R.id.contacts_viewPager, policeAffairsFragment)
+                    .hide(policeAffairsFragment)
+                    .show(groupFragmentNew);
+            transaction.commit();
+        }else{
+            //只有市局的包才有LTE
+            if(ApkUtil.showLteApk()){
+                transaction.add(R.id.contacts_viewPager, groupFragmentNew)
+                        .add(R.id.contacts_viewPager, policeAffairsFragment)
+                        .add(R.id.contacts_viewPager, handPlatformFragment)
+                        .add(R.id.contacts_viewPager, lteFragment)
+                        .add(R.id.contacts_viewPager, recorderFragment)
+                        .hide(policeAffairsFragment)
+                        .hide(handPlatformFragment)
+                        .hide(lteFragment)
+                        .hide(recorderFragment)
+                        .show(groupFragmentNew);
+                transaction.commit();
+            }else {
+                transaction.add(R.id.contacts_viewPager, groupFragmentNew)
+                        .add(R.id.contacts_viewPager, policeAffairsFragment)
+                        .add(R.id.contacts_viewPager, handPlatformFragment)
+                        .add(R.id.contacts_viewPager, recorderFragment)
+                        .hide(policeAffairsFragment)
+                        .hide(handPlatformFragment)
+                        .hide(recorderFragment)
+                        .show(groupFragmentNew);
+                transaction.commit();
+            }
+        }
         currentFragment = groupFragmentNew;
         imgbtn_dial.setVisibility(View.GONE);
     }

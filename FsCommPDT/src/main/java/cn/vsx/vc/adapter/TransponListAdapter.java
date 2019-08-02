@@ -10,10 +10,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.ChatMember;
+import cn.vsx.vc.utils.BitmapUtil;
 
 /**
  * Created by gt358 on 2017/9/15.
@@ -58,7 +57,7 @@ public class TransponListAdapter extends BaseAdapter {
         if(chatLists.get(position).isGroup()){
             holder.iv_user_logo.setImageResource(R.drawable.group_photo);
         }else{
-            holder.iv_user_logo.setImageResource(R.drawable.user_photo);
+            holder.iv_user_logo.setImageResource(BitmapUtil.getUserPhoto());
         }
         holder.tv_user_name.setText(chatLists.get(position).getName());
 

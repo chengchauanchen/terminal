@@ -83,6 +83,7 @@ import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
 import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
 import cn.vsx.vc.utils.ActivityCollector;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.MyDataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -1284,11 +1285,12 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
      */
     private void handlerAvatar(TerminalMessage terminalMessage, int position, ChatViewHolder holder) {
         if(activity!=null&&!activity.isDestroyed()){
+            int drawable = BitmapUtil.getUserPhoto();
             Glide.with(activity)
-                    .load(com.zectec.imageandfileselector.R.drawable.user_photo)
+                    .load(drawable)
                     .asBitmap()
-                    .placeholder(com.zectec.imageandfileselector.R.drawable.user_photo)//加载中显示的图片
-                    .error(com.zectec.imageandfileselector.R.drawable.user_photo)//加载失败时显示的图片
+                    .placeholder(drawable)//加载中显示的图片
+                    .error(drawable)//加载失败时显示的图片
                     .into(holder.ivAvatar);
         }
     }

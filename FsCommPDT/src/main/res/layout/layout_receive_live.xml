@@ -15,8 +15,7 @@
             android:id="@+id/iv_avatar_report"
             android:layout_width="@dimen/dp_60"
             android:layout_height="@dimen/dp_60"
-            android:layout_marginLeft="@dimen/dp_20"
-            android:src="@drawable/user_photo" />
+            android:layout_marginLeft="@dimen/dp_20" />
 
         <LinearLayout
             android:layout_width="0dp"
@@ -29,7 +28,6 @@
                 android:id="@+id/tv_live_report_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="pad"
                 android:textColor="@color/white"
                 android:textSize="@dimen/tv_live_request_name_textsize" />
 
@@ -37,7 +35,6 @@
                 android:id="@+id/tv_live_report_id"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1000000"
                 android:textColor="@color/white"
                 android:textSize="@dimen/tv_live_request_id_textsize" />
         </LinearLayout>

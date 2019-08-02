@@ -78,6 +78,7 @@ import cn.vsx.vc.receiveHandle.ReceiverIndividualCallFromMsgItemHandler;
 import cn.vsx.vc.receiveHandle.ReceiverReplayGroupMergeTransmitVoiceHandler;
 import cn.vsx.vc.service.PullLivingService;
 import cn.vsx.vc.utils.AnimationsContainer;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -125,11 +126,9 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
     public boolean isDownloading;
     public boolean isDownloadingPicture;
     public boolean isEnable = true;
-    public List<TerminalMessage> uploadMessages = new ArrayList<>();
     public LoadingCircleView loadingView;
     public ProgressBar downloadProgressBar;//正在下载的条目对应的ProgressBar
     public TextView download_tv_progressBars;//正在下载的条目对应的tv_progressBars
-    public Map<Integer, Integer> progressPercentMap = new HashMap<>();
     public String liveTheme;
     private boolean mIsLongClick = false;//文本消息是否长按
     List<ImageBean> mImgList = new ArrayList<>();
@@ -851,11 +850,12 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
      * 设置头像显示
      */
     private void handlerAvatar(TerminalMessage terminalMessage, MergeTransmitViewHolder holder, int position) {
+        int drawable = BitmapUtil.getUserPhoto();
         Glide.with(activity)
-                .load(com.zectec.imageandfileselector.R.drawable.user_photo)
+                .load(drawable)
                 .asBitmap()
-                .placeholder(com.zectec.imageandfileselector.R.drawable.user_photo)//加载中显示的图片
-                .error(com.zectec.imageandfileselector.R.drawable.user_photo)//加载失败时显示的图片
+                .placeholder(drawable)//加载中显示的图片
+                .error(drawable)//加载失败时显示的图片
                 .into(holder.ivAvatar);
         holder.ivAvatar.setVisibility(View.VISIBLE);
         if(position > 0 && position < chatMessageList.size()){

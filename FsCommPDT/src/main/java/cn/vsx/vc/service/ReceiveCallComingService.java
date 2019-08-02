@@ -26,6 +26,7 @@ import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveStopCallingServiceHandler;
 import cn.vsx.vc.receiveHandle.ReceiveStopStartReceiveCallServiceHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.InputMethodUtil;
@@ -77,6 +78,9 @@ public class ReceiveCallComingService extends BaseService{
 
     @Override
     protected void findView(){
+        //头像
+        ImageView ivMemberPortraitChooice = rootView.findViewById(R.id.iv_member_portrait_chooice);
+        ivMemberPortraitChooice.setImageResource(BitmapUtil.getUserPhoto());
         mRlCallChooice = rootView.findViewById(R.id.rl_call_chooice);
         mIndividualCallRetractEmergency = rootView.findViewById(R.id.individual_call_retract_emergency);
 //        mIvMemberPortraitChooice = rootView.findViewById(R.id.iv_member_portrait_chooice);

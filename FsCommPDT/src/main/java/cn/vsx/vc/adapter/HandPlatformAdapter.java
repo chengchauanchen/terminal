@@ -20,6 +20,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.ShouTaiBean;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -103,6 +104,7 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
         } else {
             viewHolderPerson = (ViewHolderPerson) convertView.getTag();
         }
+        viewHolderPerson.shoutai_user_logo.setImageResource(BitmapUtil.getUserPhoto());
         viewHolderPerson.shoutai_tv_member_name.setText(list.get(groupPosition).memberList.get(childPosition).getName());
         String phoneNo = list.get(groupPosition).memberList.get(childPosition).phone;
         String id = HandleIdUtil.handleId(list.get(groupPosition).memberList.get(childPosition).id);
@@ -157,11 +159,14 @@ public class HandPlatformAdapter extends BaseExpandableListAdapter {
 
         LinearLayout shoutai_message_to;
 
+        ImageView shoutai_user_logo;
+
         TextView shoutai_tv_member_name;
 
         TextView shoutai_tv_member_id;
 
         public ViewHolderPerson(View rootView) {
+            shoutai_user_logo = rootView.findViewById(R.id.shoutai_user_logo);
             shoutai_call_to = rootView.findViewById(R.id.shoutai_call_to);
             shoutai_message_to = rootView.findViewById(R.id.shoutai_message_to);
             shoutai_tv_member_name = rootView.findViewById(R.id.shoutai_tv_member_name);

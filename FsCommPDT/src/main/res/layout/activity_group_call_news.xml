@@ -249,10 +249,10 @@
         android:id="@+id/ll_speaker">
 
         <ImageView
+            android:id="@+id/iv_user_photo"
             android:layout_width="@dimen/x30"
             android:layout_height="@dimen/x30"
-            android:layout_marginLeft="@dimen/x20"
-            android:src="@drawable/user_photo" />
+            android:layout_marginLeft="@dimen/x20" />
 
         <TextView
             android:textStyle="bold"

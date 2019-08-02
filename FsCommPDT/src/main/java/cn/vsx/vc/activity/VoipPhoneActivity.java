@@ -34,6 +34,7 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipConnectedHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipErrorHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.IndividualCallView;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -84,6 +85,8 @@ public class VoipPhoneActivity extends BaseActivity{
             return;
         }
         //请求界面
+        ImageView ivMemberPortraitRequest = findViewById(R.id.iv_member_portrait_request);
+        ivMemberPortraitRequest.setImageResource(BitmapUtil.getUserPhoto());
         voipCallRequest = findViewById(R.id.voip_call_request);
         memberNameRequest = findViewById(R.id.tv_member_name_request);//名字
         memberPhoneRequest = findViewById(R.id.tv_member_phone_request);//电话
@@ -92,6 +95,8 @@ public class VoipPhoneActivity extends BaseActivity{
 
 
         //通话界面
+        ImageView ivMemberPortraitSpeaking = findViewById(R.id.iv_member_portrait_speaking);
+        ivMemberPortraitSpeaking.setImageResource(BitmapUtil.getUserPhoto());
         voipCallSpeaking = findViewById(R.id.voip_call_speaking);
         memberNameSpeaking = findViewById(R.id.tv_member_name_speaking);//名字
         memberPhoneSpeaking = findViewById(R.id.tv_member_phone_speaking);//电话

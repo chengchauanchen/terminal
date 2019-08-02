@@ -37,6 +37,7 @@ import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -145,6 +146,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 }
             });
             //个人信息页面
+            userViewHolder.ivLogo.setImageResource(BitmapUtil.getUserPhoto());
             userViewHolder.ivLogo.setOnClickListener(view -> {
                 Intent intent = new Intent(mContext, UserInfoActivity.class);
                 intent.putExtra("userId", account.getNo());
@@ -198,6 +200,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 }
             });
             //个人信息页面
+            userViewHolder.ivLogo.setImageResource(BitmapUtil.getUserPhoto());
             userViewHolder.ivLogo.setOnClickListener(view -> {
                 Intent intent = new Intent(mContext, UserInfoActivity.class);
                 intent.putExtra("userId", member.getNo());
@@ -250,6 +253,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 }
             });
             //个人信息页面
+            userViewHolder.ivLogo.setImageResource(BitmapUtil.getUserPhoto());
             userViewHolder.ivLogo.setOnClickListener(view -> {
                 Intent intent = new Intent(mContext, UserInfoActivity.class);
                 intent.putExtra("userId", member.getNo());

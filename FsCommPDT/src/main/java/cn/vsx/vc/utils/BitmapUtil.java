@@ -245,4 +245,26 @@ public class BitmapUtil {
 		int value = MyTerminalFactory.getSDK().getAudioProxy().getVolume();
 		return (value <=0)?R.drawable.volume_off_call:(isBlue)?R.drawable.volume_silence:R.drawable.horn;
 	}
+
+	/**
+	 * 获取用户的头像
+	 * @return
+	 */
+	public static int getUserPhoto(){
+		if(ApkUtil.isAnjian()){
+			return R.drawable.user_photo_anjian;
+		}
+		return R.drawable.user_photo;
+	}
+
+	/**
+	 * 获取用户的头像圆
+	 * @return
+	 */
+	public static int getUserPhotoRound(){
+		if(ApkUtil.isAnjian()){
+			return R.drawable.user_photo_anjian_round;
+		}
+		return R.drawable.member_icon_new;
+	}
 }

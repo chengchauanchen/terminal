@@ -16,8 +16,7 @@
             android:id="@+id/iv_member_portrait_chooice"
             android:layout_width="@dimen/dp_60"
             android:layout_height="@dimen/dp_60"
-            android:layout_margin="@dimen/dp_12"
-            android:background="@drawable/user_photo" />
+            android:layout_margin="@dimen/dp_12" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -30,7 +29,6 @@
                 android:id="@+id/tv_member_name_chooice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1002"
                 android:textColor="@color/white"
                 android:textSize="@dimen/sp_20" />
 

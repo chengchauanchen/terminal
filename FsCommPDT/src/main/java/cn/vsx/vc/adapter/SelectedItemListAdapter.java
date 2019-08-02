@@ -10,8 +10,6 @@ import android.widget.TextView;
 
 import java.util.List;
 
-
-
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -68,7 +66,7 @@ public class SelectedItemListAdapter extends RecyclerView.Adapter<RecyclerView.V
         }else if (contactItemBean.getBean() instanceof Account){
             Account account = (Account) contactItemBean.getBean();
             if(account != null){
-                userViewHolder.ivLogo.setImageResource(R.drawable.user_photo);
+                userViewHolder.ivLogo.setImageResource(BitmapUtil.getUserPhoto());
                 userViewHolder.tvName.setText(account.getName());
                 userViewHolder.tvId.setText(HandleIdUtil.handleId(account.getNo()));
                 userViewHolder.ivDelete.setOnClickListener(v -> {

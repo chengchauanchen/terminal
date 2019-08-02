@@ -30,6 +30,7 @@ import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -124,7 +125,7 @@ public class LteListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
                 }
             });
-
+            userViewHolder.ivLogo.setImageResource(BitmapUtil.getUserPhoto());
             userViewHolder.ivLogo.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

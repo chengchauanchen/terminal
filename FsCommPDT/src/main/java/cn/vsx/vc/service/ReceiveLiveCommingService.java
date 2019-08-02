@@ -7,6 +7,7 @@ import android.os.Build;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -16,6 +17,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSwitchCameraViewHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -56,7 +58,8 @@ public class ReceiveLiveCommingService extends BaseService{
 
     @Override
     protected void findView(){
-        //        mIvAvatarReport = rootView.findViewById(R.id.iv_avatar_report);
+        ImageView mIvAvatarReport = rootView.findViewById(R.id.iv_avatar_report);
+        mIvAvatarReport.setImageResource(BitmapUtil.getUserPhoto());
         mTvLiveReportName = rootView.findViewById(R.id.tv_live_report_name);
         mTvLiveReportId = rootView.findViewById(R.id.tv_live_report_id);
         mLlLiveRespondRefuseTotal = rootView.findViewById(R.id.ll_live_respond_refuse_total);

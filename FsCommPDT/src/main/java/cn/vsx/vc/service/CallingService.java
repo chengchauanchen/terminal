@@ -43,6 +43,7 @@ import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveStopCallingServiceHandler;
 import cn.vsx.vc.receiveHandle.ReceiveStopStartReceiveCallServiceHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.SensorUtil;
@@ -120,7 +121,6 @@ public class CallingService extends BaseService{
         //正在通话
         mIndividualCallSpeaking = rootView.findViewById(R.id.individual_call_speaking);
         mLlIndividualCallRetractSpeaking = rootView.findViewById(R.id.ll_individual_call_retract_speaking);
-//        mIvMemberPortraitSpeaking = rootView.findViewById(R.id.iv_member_portrait_speaking);
         mTvSpeakingToast = rootView.findViewById(R.id.tv_speaking_toast);
         mTvMemberNameSpeaking = rootView.findViewById(R.id.tv_member_name_speaking);
         mTvMemberIdSpeaking = rootView.findViewById(R.id.tv_member_id_speaking);
@@ -142,6 +142,12 @@ public class CallingService extends BaseService{
         mPopMinimize = rootView.findViewById(R.id.pop_minimize);
         mTvWaiting = rootView.findViewById(R.id.tv_waiting);
         mPopupICTVSpeakingTime = rootView.findViewById(R.id.popup_ICTV_speaking_time);
+
+        //头像
+        ImageView ivMemberPortraitSpeaking = rootView.findViewById(R.id.iv_member_portrait_speaking);
+        ivMemberPortraitSpeaking.setImageResource(BitmapUtil.getUserPhoto());
+        ImageView ivMemberPortraitChooice = rootView.findViewById(R.id.iv_member_portrait_half_duplex);
+        ivMemberPortraitChooice.setImageResource(BitmapUtil.getUserPhoto());
     }
 
     @Override

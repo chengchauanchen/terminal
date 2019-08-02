@@ -37,6 +37,7 @@ import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.model.Picture;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.MyDataUtil;
@@ -158,12 +159,12 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
         if(!TextUtils.isEmpty(account.getPhone())){
             userPhone.setText(account.getPhone());
         }
-
+        int drawable = BitmapUtil.getUserPhoto();
         Glide.with(UserInfoActivity.this)
-                .load(R.drawable.user_photo)
+                .load(drawable)
                 .asBitmap()
-                .placeholder(R.drawable.user_photo)//加载中显示的图片
-                .error(R.drawable.user_photo)//加载失败时显示的图片
+                .placeholder(drawable)//加载中显示的图片
+                .error(drawable)//加载失败时显示的图片
                 .into(userLogo);
         initBottomMenu();
     }

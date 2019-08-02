@@ -57,6 +57,7 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.MyDataUtil;
@@ -147,6 +148,10 @@ public class PhonePushService extends BaseService{
         mIvLiveAddmember = rootView.findViewById(R.id.iv_live_addmember);
 
         mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
+
+        ImageView ivLiveSpeakingHead = rootView.findViewById(R.id.iv_live_speaking_head);
+        ivLiveSpeakingHead.setImageResource(BitmapUtil.getUserPhotoRound());
+
     }
 
     @SuppressLint("ClickableViewAccessibility")

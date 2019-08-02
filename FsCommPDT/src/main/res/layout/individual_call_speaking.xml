@@ -34,8 +34,7 @@
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:layout_gravity="center_vertical"
-            android:layout_margin="12dp"
-            android:background="@drawable/user_photo" />
+            android:layout_margin="12dp" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -49,7 +48,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/y2"
-                android:text="张星星"
                 android:textColor="@color/white"
                 android:textSize="@dimen/sp_20" />
 
@@ -58,7 +56,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/y2"
-                android:text="123456789"
                 android:textColor="@color/white"
                 android:textSize="@dimen/sp_15" />
         </LinearLayout>

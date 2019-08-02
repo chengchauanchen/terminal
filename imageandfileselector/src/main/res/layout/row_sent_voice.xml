@@ -39,7 +39,6 @@
             android:layout_toLeftOf="@+id/cb_forward"
             android:layout_alignWithParentIfMissing="true"
             android:layout_marginRight="@dimen/margin_chat_activity"
-            android:background="@drawable/user_photo"
             android:scaleType="fitXY" />
 
         <RelativeLayout

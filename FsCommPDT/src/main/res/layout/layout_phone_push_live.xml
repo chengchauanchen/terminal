@@ -68,10 +68,10 @@
         android:visibility="gone">
 
         <ImageView
+            android:id="@+id/iv_live_speaking_head"
             android:layout_width="@dimen/dp_50"
             android:layout_height="@dimen/dp_50"
-            android:layout_marginRight="@dimen/x15"
-            android:src="@drawable/member_icon_new" />
+            android:layout_marginRight="@dimen/x15" />
 
         <LinearLayout
             android:layout_width="wrap_content"

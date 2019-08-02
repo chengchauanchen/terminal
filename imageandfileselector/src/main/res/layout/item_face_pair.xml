@@ -53,7 +53,6 @@
         android:id="@+id/iv_photo_face_pair"
         android:layout_width="@dimen/dp_26"
         android:layout_height="@dimen/dp_26"
-        android:layout_marginRight="@dimen/dp_6"
-        android:src="@drawable/user_photo"/>
+        android:layout_marginRight="@dimen/dp_6" />
 
 </LinearLayout>

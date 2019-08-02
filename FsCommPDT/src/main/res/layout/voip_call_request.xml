@@ -21,8 +21,7 @@
             android:id="@+id/iv_member_portrait_request"
             android:layout_width="@dimen/dp_60"
             android:layout_height="@dimen/dp_60"
-            android:layout_margin="@dimen/dp_12"
-            android:background="@drawable/user_photo" />
+            android:layout_margin="@dimen/dp_12" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -36,7 +35,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/y2"
-                android:text="张星星"
                 android:textColor="@color/white"
                 android:textSize="@dimen/sp_20" />
 
@@ -45,7 +43,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/y2"
-                android:text="123456789"
                 android:textColor="@color/white"
                 android:textSize="@dimen/sp_15" />
 

@@ -12,6 +12,7 @@ import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.model.CallRecord;
 import cn.vsx.vc.R;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.view.RoundProgressBar;
 
 public class PhoneAssistantListAdapter extends BaseAdapter {
@@ -43,6 +44,7 @@ public class PhoneAssistantListAdapter extends BaseAdapter {
         if (convertView == null) {
             holder = new ViewHolder();
             convertView = View.inflate(activity, R.layout.item_phone_assistant, null);
+            holder.ivLogo  =  convertView.findViewById(R.id.shoutai_user_logo);
             holder.memberName  =  convertView.findViewById(R.id.member_name);
             holder.callRecords = convertView.findViewById(R.id.call_records);
             holder.phone = convertView.findViewById(R.id.phone);
@@ -55,7 +57,7 @@ public class PhoneAssistantListAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
 
         }
-
+        holder.ivLogo.setImageResource(BitmapUtil.getUserPhoto());
         holder.memberName.setText(list.get(position).getMemberName());
         holder.callRecords.setText(list.get(position).getCallRecords());
         holder.phone.setText(list.get(position).getPhone());
@@ -90,6 +92,7 @@ public class PhoneAssistantListAdapter extends BaseAdapter {
     }
 
     static class ViewHolder {
+        ImageView ivLogo;
         TextView memberName;
         TextView callRecords;
         TextView phone;
@@ -97,6 +100,7 @@ public class PhoneAssistantListAdapter extends BaseAdapter {
         ProgressBar progressBar;
         TextView time;
         ImageView status;
+
     }
 
 

@@ -64,6 +64,7 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.InviteMemberLiverMember;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -243,7 +244,6 @@ public class PullLivingService extends BaseService{
         mSvLive = rootView.findViewById(R.id.sv_live);
         mLiveVedioTheme = rootView.findViewById(R.id.live_vedioTheme);
         mIvLiveRetract = rootView.findViewById(R.id.iv_live_retract);
-        //        mLiveVedioIcon = rootView.findViewById(R.id.live_vedioIcon);
         mLiveVedioName = rootView.findViewById(R.id.live_vedioName);
         mLiveVedioId = rootView.findViewById(R.id.live_vedioId);
         mLlLiveLookHangup = rootView.findViewById(R.id.ll_live_look_hangup);
@@ -254,6 +254,12 @@ public class PullLivingService extends BaseService{
         mTvLiveGroupName = rootView.findViewById(R.id.tv_live_groupName);
         mTvLiveSpeakingId = rootView.findViewById(R.id.tv_live_speakingId);
         mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
+
+
+        ImageView mLiveVedioIcon = rootView.findViewById(R.id.live_vedioIcon);
+        mLiveVedioIcon.setImageResource(BitmapUtil.getUserPhotoRound());
+        ImageView ivLiveSpeakingHead = rootView.findViewById(R.id.iv_live_speaking_head);
+        ivLiveSpeakingHead.setImageResource(BitmapUtil.getUserPhotoRound());
 
     }
 

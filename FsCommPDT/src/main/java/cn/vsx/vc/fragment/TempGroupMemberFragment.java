@@ -26,6 +26,7 @@ import cn.vsx.vc.adapter.SelectAdapter;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSelectedMemberHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSelectedFragmentHandler;
+import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.view.TabView;
 
@@ -102,6 +103,14 @@ public class TempGroupMemberFragment extends Fragment implements View.OnClickLis
         mTabPolice = view.findViewById(R.id.tab_police);
         mTabRecoder = view.findViewById(R.id.tab_recoder);
         mTabUav = view.findViewById(R.id.tab_uav);
+
+        if(ApkUtil.isAnjian()){
+            mTabPolice.setName(getString(R.string.text_person));
+            mTabRecoder.setVisibility(View.GONE);
+        }else{
+            mTabRecoder.setVisibility(View.VISIBLE);
+            mTabPolice.setName(getString(R.string.text_police_service));
+        }
     }
 
     private void initTab(){

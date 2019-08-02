@@ -21,6 +21,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.model.ShouTaiBean;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -103,6 +104,7 @@ public class PoliceAffairsAdapter extends BaseExpandableListAdapter {
         }else {
             viewHolderPerson = (ViewHolderPerson) convertView.getTag();
         }
+        viewHolderPerson.jignwutong_user_logo.setImageResource(BitmapUtil.getUserPhoto());
         Member member = list.get(groupPosition).memberList.get(childPosition);
         String phoneNo = member.phone;
         String id = HandleIdUtil.handleId(member.id);
@@ -160,11 +162,13 @@ public class PoliceAffairsAdapter extends BaseExpandableListAdapter {
 
         LinearLayout jingwutong_message_to;
 
+        ImageView jignwutong_user_logo;
         TextView jingwutong_tv_member_name;
 
         TextView jingwutong_tv_member_id;
 
         public ViewHolderPerson(View rootView) {
+            jignwutong_user_logo = rootView.findViewById(R.id.jignwutong_user_logo);
             jingwutong_call_to = rootView.findViewById(R.id.jingwutong_call_to);
             jingwutong_message_to = rootView.findViewById(R.id.jingwutong_message_to);
             jingwutong_tv_member_name = rootView.findViewById(R.id.jingwutong_tv_member_name);

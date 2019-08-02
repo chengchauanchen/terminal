@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -19,6 +20,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -51,7 +53,8 @@ public class LiveRequestService extends BaseService{
 
     @Override
     protected void findView(){
-        //        mIvAvatarRequest =  rootView.findViewById(R.id.iv_avatar_request);
+        ImageView mIvAvatarRequest =  rootView.findViewById(R.id.iv_avatar_request);
+        mIvAvatarRequest.setImageResource(BitmapUtil.getUserPhoto());
         mTvLiveRequestName =  rootView.findViewById(R.id.tv_live_request_name);
         mTvLiveRequestId =  rootView.findViewById(R.id.tv_live_request_id);
         mLlLiveRequestStopTotal = rootView.findViewById(R.id.ll_live_request_stop_total);

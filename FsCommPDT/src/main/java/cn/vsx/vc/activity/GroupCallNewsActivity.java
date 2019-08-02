@@ -72,6 +72,7 @@ import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.MyDataUtil;
@@ -225,6 +226,10 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                         .getDisplayMetrics()));
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         groupCallList.setLayoutManager(linearLayoutManager);
+        //头像
+        ImageView ivUserPhoto = (ImageView) findViewById(R.id.iv_user_photo);
+        ivUserPhoto.setImageResource(BitmapUtil.getUserPhoto());
+
 //        super.rl_include_listview = rlIncludeListview;
         super.newsBarGroupName = newsBarGroupName;
         super.sflCallList = sflCallList;

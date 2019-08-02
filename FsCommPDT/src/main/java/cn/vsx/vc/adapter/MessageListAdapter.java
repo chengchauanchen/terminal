@@ -29,6 +29,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -154,7 +155,7 @@ public class MessageListAdapter extends BaseAdapter {
             if (terminalMessage.messageType == MessageType.HYPERLINK.getCode()) {
                 viewHolder.iv_user_photo.setBackgroundResource(R.drawable.face_recognition_photo);
             } else {
-                viewHolder.iv_user_photo.setBackgroundResource(R.drawable.user_photo);
+                viewHolder.iv_user_photo.setBackgroundResource(BitmapUtil.getUserPhoto());
             }
         }
 

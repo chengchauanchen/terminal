@@ -24,6 +24,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandle
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.UserInfoActivity;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -66,11 +67,12 @@ public class PersonInfoLayout extends LinearLayout {
         userId.setText("警号:"+ HandleIdUtil.handleId(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)));
         userName.setText(MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""));
         logger.info("用户头像："+TerminalFactory.getSDK().getParam(UrlParams.AVATAR_URL));
+        int drawable = BitmapUtil.getUserPhoto();
         Glide.with(context)
                 .load(TerminalFactory.getSDK().getParam(UrlParams.AVATAR_URL))
                 .asBitmap()
-                .placeholder(R.drawable.user_photo)//加载中显示的图片
-                .error(R.drawable.user_photo)//加载失败时显示的图片
+                .placeholder(drawable)//加载中显示的图片
+                .error(drawable)//加载失败时显示的图片
                 .into(userLogo);
     }
 

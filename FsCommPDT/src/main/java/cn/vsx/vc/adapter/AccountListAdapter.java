@@ -11,13 +11,12 @@ import android.widget.TextView;
 
 import java.util.List;
 
-
-
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 
@@ -60,7 +59,7 @@ public class AccountListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
             UserViewHolder userViewHolder = (UserViewHolder) holder;
             Account account = (Account) mData.get(position).getBean();
             if (account != null) {
-                userViewHolder.ivLogo.setImageResource(R.drawable.user_photo);
+                userViewHolder.ivLogo.setImageResource(BitmapUtil.getUserPhoto());
                 userViewHolder.tvName.setText(account.getName());
                 userViewHolder.tvId.setText(HandleIdUtil.handleId(account.getNo()));
                 userViewHolder.checkbox.setChecked(account.isChecked());
