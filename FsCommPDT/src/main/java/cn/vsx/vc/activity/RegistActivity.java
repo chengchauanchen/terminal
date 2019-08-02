@@ -147,6 +147,12 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             try{
                 //获取身份证号
                 String userID = secVpnService.getTfInfo().getUserID();
+                String userName = secVpnService.getTfInfo().getUserName();
+                logger.info("获取到身份证号为："+userID+"------姓名："+userName);
+                MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, userID);
+                MyTerminalFactory.getSDK().putParam(UrlParams.NAME, userName);
+                MyTerminalFactory.getSDK().putParam(UrlParams.XIANGYANG_STORE,true);
+                requestDrawOverLays();
             }catch(RemoteException e){
                 e.printStackTrace();
             }
@@ -157,6 +163,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             secVpnService = null;
         }
     };
+    private String apkType;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -788,7 +795,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 return;//finish()之后该活动会继续执行后面的代码，你可以logCat验证，加return避免可能的exception
             }
         }
-        String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
+        apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
         //市局包隐藏模拟警员
         if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)
                 || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)) {
@@ -806,10 +813,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         }
 
         ll_regist.setVisibility(View.GONE);
-        //襄阳包就启动安全VPN服务
-        if(apkType.equals(AuthManagerTwo.XIANGYANGPOLICESTORE) || apkType.equals(AuthManagerTwo.XIANGYANG)){
-            startVPNService();
-        }
         judgePermission();
     }
 
@@ -895,8 +898,13 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 netWorkDialog.dismiss();
             }
             changeProgressMsg(getString(R.string.text_get_info_now));
-            authorize();//认证并获取user信息
-            requestDrawOverLays();
+            //襄阳包就启动安全VPN服务
+            if(apkType.equals(AuthManagerTwo.XIANGYANGPOLICESTORE) || apkType.equals(AuthManagerTwo.XIANGYANG)){
+                startVPNService();
+            }else {
+                authorize();//认证并获取user信息
+                requestDrawOverLays();
+            }
         } else {
             if (netWorkDialog != null && !netWorkDialog.isShowing()) {
                 netWorkDialog.show();

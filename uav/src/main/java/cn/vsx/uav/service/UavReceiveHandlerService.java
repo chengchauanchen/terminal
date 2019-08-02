@@ -13,6 +13,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MountType;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.uav.activity.UavPushActivity;
 import cn.vsx.uav.utils.AirCraftUtil;
 import cn.vsx.vc.service.ReceiveHandlerService;
 import dji.common.flightcontroller.ConnectionFailSafeBehavior;
@@ -60,8 +61,11 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
                 myHandler.sendEmptyMessageDelayed(UPLOAD_UAV_LOCATION,uploadTime);
                 //无人机连上时自动上报
                 if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
-                    Intent intent = new Intent(getApplicationContext(), AircraftPushService.class);
-                    startService(intent);
+                    Intent intent = new Intent(getApplicationContext(), UavPushActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+//                    Intent intent = new Intent(getApplicationContext(), AircraftPushService.class);
+//                    startService(intent);
                 }else {
                     ToastUtil.showToast(getApplicationContext(),"没有图像上报的权限，不能自动上报");
                 }
