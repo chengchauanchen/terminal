@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#00000000">
+
+    <RelativeLayout
+        android:id="@+id/rl_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp"
+        android:background="#0d182b"
+        android:splitMotionEvents="false">
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:text="测试组呼"
+            android:textColor="#ffffff"
+            android:textStyle="bold"
+            android:textSize="24sp" />
+
+        <LinearLayout
+            android:id="@+id/ll_all_count"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tv_title"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="测试次数："
+                android:textColor="#ffffff"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/et_all_count"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:text="1000"
+                android:singleLine="true"
+                android:inputType="numberDecimal"
+                android:digits="1234567890"
+                android:textColor="#ff11aca6"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="次"
+                android:textColor="#ffffff"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_time_interval"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ll_all_count"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="间隔时间："
+                android:textColor="#ffffff"
+                android:textSize="20sp" />
+
+            <EditText
+                android:id="@+id/et_time_interval"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:text="5"
+                android:singleLine="true"
+                android:inputType="number"
+                android:digits="1234567890"
+                android:textColor="#ff11aca6"
+                android:textSize="20sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="秒"
+                android:textColor="#ffffff"
+                android:textSize="20sp" />
+
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tx_result_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/ll_time_interval"
+            android:layout_marginTop="15dp"
+            android:textColor="#ffffff"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tx_result"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tx_result_title"
+            android:layout_marginTop="5dp"
+            android:text=""
+            android:textColor="#ffffff"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/tx_end"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tx_result"
+            android:layout_marginTop="5dp"
+            android:text="测试结束"
+            android:textColor="#ffffff"
+            android:textSize="16sp" />
+        <LinearLayout
+            android:id="@+id/ll_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/tx_end"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/bt_start"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="@drawable/bg_button_1"
+                android:padding="10dp"
+                android:gravity="center"
+                android:text="开始测试"
+                android:textColor="#ffffff"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/bt_end"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="10dp"
+                android:background="@drawable/bg_button_2"
+                android:padding="10dp"
+                android:gravity="center"
+                android:text="结束测试"
+                android:textColor="#ffffff"
+                android:textSize="16sp" />
+        </LinearLayout>
+
+
+        <TextView
+            android:id="@+id/tv_close"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignBottom="@+id/tv_title"
+            android:layout_alignTop="@+id/tv_title"
+            android:gravity="center_vertical"
+            android:text="关闭"
+            android:textColor="#FF5959"
+            android:textSize="20sp" />
+    </RelativeLayout>
+</FrameLayout>

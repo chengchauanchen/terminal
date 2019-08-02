@@ -132,6 +132,9 @@
             android:enabled="true"/>
         <service android:name=".service.FileExpireService"
             android:enabled="true"/>
+        <service android:name=".service.TestGroupCallService"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 
 </manifest>

@@ -356,7 +356,6 @@
                 android:name="android.nfc.cardemulation.host_apdu_service"
                 android:resource="@xml/aid_list" />
         </service>
-    
         <activity
             android:name=".activity.JumpActivity"
             android:exported="true"

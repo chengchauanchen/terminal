@@ -94,8 +94,10 @@ import ptt.terminalsdk.bean.GroupBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.MyDataManager;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.receiveHandler.ReceiveTestGroupCallHandler;
 import ptt.terminalsdk.receiveHandler.ReceiveUpdateDepGroupHandler;
 import ptt.terminalsdk.service.BluetoothLeService;
+import ptt.terminalsdk.service.TestGroupCallService;
 import ptt.terminalsdk.tools.PhoneAdapter;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -903,6 +905,26 @@ public class TalkbackFragment extends BaseFragment {
         }
     };
 
+    /**
+     * 收到测试组呼
+     */
+    private ReceiveTestGroupCallHandler receiveTestGroupCallHandler = new ReceiveTestGroupCallHandler() {
+        @Override
+        public void handler(boolean isStart) {
+            myHandler.post(() -> {
+                if(isStart){
+                    //开始组呼
+                    pttDownDoThing();
+                }else{
+                    //结束组呼
+                    pttUpDoThing();
+                }
+            });
+        }
+    };
+
+
+
     //GH880手机PTT按钮事件
     public class GotaKeHandler extends IGotaKeyHandler.Stub {
 
@@ -1123,6 +1145,12 @@ public class TalkbackFragment extends BaseFragment {
         //警务通和执法记录仪的绑定关系
         boolean isBind = MyTerminalFactory.getSDK().getParam(Params.RECORDER_BIND_STATE, false);
         rlBind.setVisibility(isBind?View.VISIBLE:View.GONE);
+
+        //测试组呼
+        mRootView.findViewById(R.id.tv_test_group_call).setOnClickListener(v -> {
+            Intent intent = new Intent(context, TestGroupCallService.class);
+            context.startService(intent);
+        });
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -1186,6 +1214,7 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupViewHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveTestGroupCallHandler);
 
         ((BaseActivity) context).setOnPTTVolumeBtnStatusChangedListener(new OnPTTVolumeBtnStatusChangedListenerImp());
 
@@ -1571,6 +1600,7 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupViewHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyZfyBoundPhoneMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTestGroupCallHandler);
         try {
             getContext().unregisterReceiver(mBatInfoReceiver);
             getActivity().unregisterReceiver(mbtBroadcastReceiver);
@@ -1780,4 +1810,5 @@ public class TalkbackFragment extends BaseFragment {
         super.onResume();
         setPttText();
     }
+
 }
