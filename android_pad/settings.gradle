@@ -1,0 +1,49 @@
+include ':app',
+        ':Common-Architecture',
+        //terminal相关 TerminalCommon
+        ':TerminalSDK',
+        ':StateMachine',
+        ':TerminalSDK4Android',
+        ':SpecificSDK4GPTT',
+
+        //流媒体相关 StreamMedia
+        ':rtmpClient',
+        ':rtspclient',
+        //ProtoBuf
+        ':ProtoBuf',
+        //PDT
+        ':PDT-Common',
+        ':PDT-ErrorCode',
+        //DDPush
+        ':DDPushClient',
+        ':DDPushCommon',
+        //':DDPushServer',
+        //voip电话
+        ':easylinphone'
+
+//terminal相关 TerminalCommon
+project(':TerminalSDK').projectDir = new File('VsxinSDK/TerminalCommon/TerminalSDK')
+project(':StateMachine').projectDir = new File('VsxinSDK/TerminalCommon/StateMachine')
+project(':TerminalSDK4Android').projectDir = new File('VsxinSDK/TerminalCommon/TerminalSDK4Android')
+//project(':SpecificSDK4GPTT').projectDir = new File('VsxinSDK/TerminalCommon/SpecificSDK4GPTT')
+
+//流媒体相关 StreamMedia
+project(':rtmpClient').projectDir = new File('VsxinSDK/StreamMedia/rtmpClient')
+project(':rtspclient').projectDir = new File('VsxinSDK/StreamMedia/rtspclient')
+
+//ProtoBuf
+project(':ProtoBuf').projectDir = new File('VsxinSDK/ProtoBuf')
+
+//PDT
+project(':PDT-Common').projectDir = new File('VsxinSDK/PDT/PDT-Common')
+project(':PDT-ErrorCode').projectDir = new File('VsxinSDK/PDT/PDT-ErrorCode')
+
+//DDPush
+project(':DDPushClient').projectDir = new File('VsxinSDK/DDPush/DDPushClient')
+project(':DDPushCommon').projectDir = new File('VsxinSDK/DDPush/DDPushCommon')
+//project(':DDPushServer').projectDir = new File('VsxinSDK/DDPush/DDPushServer')
+
+//EasyLinPhone voip电话
+project(':easylinphone').projectDir = new File('VsxinSDK/EasyLinPhone/easylinphone')
+
+//project(':imageandfileselector').projectDir = new File('VsxinSDK/imageandfileselector')

@@ -1,0 +1,50 @@
+<resources>
+
+    <style name="Theme.AppCompat.Light.NoActionBar.FullScreen" parent="@style/Theme.AppCompat.Light">
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item><!--无标题-->
+        <item name="android:windowActionBar">false</item><!--无ActionBar-->
+        <item name="android:windowFullscreen">true</item><!--全屏即无通知栏-->
+        <item name="android:windowContentOverlay">@null</item><!--是否有遮盖-->
+    </style>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowNoTitle">true</item><!--无标题-->
+        <item name="android:windowActionBar">false</item><!--无ActionBar-->
+        <item name="android:windowFullscreen">true</item><!--全屏即无通知栏-->
+        <item name="android:windowContentOverlay">@null</item><!--是否有遮盖-->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+    </style>
+
+    <!-- 进度条样式 -->
+    <style name="progress_dialog" parent="@android:style/Theme.Dialog">
+        <item name="android:windowFrame">@null</item> <!-- Dialog的windowFrame框为无 -->
+        <item name="android:windowIsFloating">false</item> <!-- 是否漂现在activity上 -->
+        <item name="android:windowIsTranslucent">true</item> <!-- 是否半透明 -->
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <declare-styleable name="BottomView">
+        <attr name="selected" format="boolean" />
+        <attr name="text" format="string" />
+        <attr name="textSize" format="dimension" />
+        <attr name="src" format="reference" />
+        <attr name="textColor" format="reference" />
+    </declare-styleable>
+
+    <style name="bottom_unselect_text_color">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="bottom_select_text_color">
+        <item name="android:textColor">@color/color_00A4FF</item>
+    </style>
+
+</resources>

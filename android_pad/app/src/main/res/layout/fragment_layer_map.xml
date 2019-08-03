@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_marginLeft="200dp"
+    android:background="@android:color/transparent">
+
+    <LinearLayout
+        android:id="@+id/ll_layer_map"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_black70transparent"
+        android:gravity="center_vertical"
+        android:minHeight="73px"
+        android:orientation="horizontal"
+        android:paddingLeft="40px"
+        android:paddingRight="@dimen/dp_40">
+
+        <TextView
+            android:id="@+id/tv_layer_map"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="地图图层"
+            android:textColor="@color/white"
+            android:textSize="27px" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:src="@mipmap/down_arrow_icon" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/ll_type_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/ll_layer_map"
+        android:background="@color/color_374350"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/ll_all_layer"
+            android:paddingLeft="35px"
+            android:paddingRight="35px"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="113px">
+            <CheckBox
+                android:checked="true"
+                android:clickable="false"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                android:id="@+id/checkbox"
+                android:padding="10px"
+                android:text="全部图层"
+                android:textSize="28px"
+                android:textColor="@color/white"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:button="@drawable/checkbox_layer_shape" />
+            <!--<RadioGroup-->
+                <!--android:orientation="horizontal"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent">-->
+                <!--<RadioButton-->
+                    <!--android:checked="true"-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:paddingHorizontal="10dp"-->
+                    <!--android:button="@drawable/checkbox_layer_shape"-->
+                    <!--android:text="全部图层"-->
+                    <!--android:textSize="20px"-->
+                    <!--android:textColor="@color/white"/>-->
+
+                <!--<RadioButton-->
+                    <!--android:layout_width="0dp"-->
+                    <!--android:layout_weight="1"-->
+                    <!--android:layout_height="match_parent"-->
+                    <!--android:paddingHorizontal="10dp"-->
+                    <!--android:button="@drawable/checkbox_layer_shape"-->
+                    <!--android:text="仅当前组"-->
+                    <!--android:textSize="20px"-->
+                    <!--android:textColor="@color/white"/>-->
+            <!--</RadioGroup>-->
+
+
+        </LinearLayout>
+
+        <com.scwang.smartrefresh.layout.SmartRefreshLayout
+            android:id="@+id/refreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scrollbars="none" />
+        </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+    </LinearLayout>
+
+</RelativeLayout>

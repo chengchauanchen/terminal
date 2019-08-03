@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/member_info_bg_icon"
+    android:orientation="vertical">
+
+    <ImageView
+        android:padding="30px"
+        android:id="@+id/iv_close"
+        android:layout_alignParentRight="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@mipmap/ico_close"/>
+
+    <ImageView
+        android:layout_centerHorizontal="true"
+        android:id="@+id/iv_type_icon"
+        android:layout_marginTop="226px"
+        android:src="@mipmap/ic_phone"
+        android:scaleType="fitXY"
+        android:layout_width="47px"
+        android:layout_height="69px" />
+
+
+    <LinearLayout
+        android:id="@+id/ll_member_info"
+        android:layout_below="@id/iv_type_icon"
+        android:layout_marginTop="144px"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/tv_member_name"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="32px"
+            android:text="赵全 106525"/>
+
+        <TextView
+            android:layout_marginTop="24px"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="27px"
+            android:text="洪山分局关南派出所"/>
+
+        <LinearLayout
+            android:layout_marginTop="20px"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="27px"
+                android:text="移动电话："/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_42A5F6"
+                android:textSize="27px"
+                android:text="13545213172"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="20px"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="27px"
+                android:text="前进速度："/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_F6B37F"
+                android:textSize="27px"
+                android:text="2km/h"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_marginTop="20px"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="27px"
+            android:text="定位时间：2018-11-24 20:37:02"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_below="@id/ll_member_info"
+        android:layout_marginTop="107px"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:src="@mipmap/ic_phone"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:id="@+id/iv_message"
+                android:src="@mipmap/ic_messige"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:id="@+id/iv_push_video"
+                android:src="@mipmap/ic_video"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:id="@+id/iv_individual_call"
+                android:src="@mipmap/ic_call"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="66px"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <ImageView
+                android:src="@mipmap/ic_track"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:src="@mipmap/ic_temporary"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:src="@mipmap/ic_current_monitor_blue"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+
+            <ImageView
+                android:src="@mipmap/ic_zhu_monitor_white"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+    </LinearLayout>
+
+</RelativeLayout>
