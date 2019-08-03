@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/shape_black70transparent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:id="@+id/tab_content"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dip">
+    </FrameLayout>
+
+    <View
+        android:id="@+id/v_line"
+        android:layout_width="fill_parent"
+        android:layout_height="1px"
+        android:layout_above="@+id/rg"
+        android:background="@color/black" />
+
+    <!--tab选项-->
+    <LinearLayout
+        android:id="@+id/rg"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="118dp"
+        android:orientation="horizontal">
+
+        <RadioButton
+            android:id="@+id/btn_message_page"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:button="@null"
+            android:drawablePadding="2dp"
+            android:drawableTop="@drawable/select_bottom_tab_message_icon"
+            android:gravity="center"
+            android:paddingTop="5dp"
+            android:text="消息"
+            android:textColor="@drawable/select_bottom_tab_message_text_color"
+            android:textSize="20sp" />
+
+        <RadioButton
+            android:id="@+id/btn_contects_page"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:button="@null"
+            android:drawablePadding="2dp"
+            android:drawableTop="@drawable/select_bottom_tab_contects_icon"
+            android:gravity="center"
+            android:paddingTop="5dp"
+            android:text="通讯录"
+            android:textColor="@drawable/select_bottom_tab_message_text_color"
+            android:textSize="20sp" />
+
+        <RadioButton
+            android:id="@+id/btn_mine_page"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:button="@null"
+            android:drawablePadding="2dp"
+            android:drawableTop="@drawable/select_bottom_tab_me_icon"
+            android:gravity="center"
+            android:paddingTop="5dp"
+            android:text="我"
+            android:textColor="@drawable/select_bottom_tab_message_text_color"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

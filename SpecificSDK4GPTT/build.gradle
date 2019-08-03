@@ -41,6 +41,7 @@ dependencies {
     compile "com.android.support:appcompat-v7:$support_version"
     testCompile 'junit:junit:4.12'
     compile project(':TerminalSDK4Android')
+    api project(':Common-Architecture')
 }
 
 //uploadArchives{

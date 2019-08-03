@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#008577</color>
+    <color name="colorPrimaryDark">#00574B</color>
+    <color name="colorAccent">#D81B60</color>
+
+    <color name="red">#FF0000</color><!--红色 -->
+
+
+    <color name="regist_bg">#000000</color>
+    <color name="regist_title">#637e9e</color>
+    <color name="regist_item_bg">#13223f</color>
+    <color name="regist_edit_hint">#65809e</color>
+    <color name="regist_edit">#71a3e0</color>
+    <color name="dodgerblue">#1E90FF</color><!--闪兰色 -->
+
+    <color name="regist_btn_bg">#003c69</color>
+    <color name="regist_btn_pre_bg">#FFC125</color>
+    <color name="regist_button">#809eb6</color>
+    <color name="regist_host_name">#637e9e</color>
+    <color name="regist_host_text">#65809e</color>
+    <color name="regist_pop_bg">#efefef</color>
+    <color name="transparent">#00000000</color><!--透明 -->
+    <color name="regist_add_host_name">#0091ff</color>
+    <color name="loading_tv">#71a3df</color>
+
+    <color name="color_70000000">#70000000</color>
+    <color name="color_60000000">#60000000</color>
+    <color name="color_80000000">#80000000</color>
+    <color name="color_90000000">#90000000</color>
+
+    <color name="color_00A4FF">#00A4FF</color>
+    <color name="color_42A5F6">#42A5F6</color>
+    <color name="color_F6B37F">#F6B37F</color>
+    <color name="color_374350">#374350</color>
+    <color name="color_600E050A">#600E050A</color>
+    <color name="color_272828">#272828</color>
+    <color name="white">#ffffff</color>
+</resources>

@@ -1,0 +1,66 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.jakewharton.butterknife'
+Properties props = new Properties()
+props.load(project.rootProject.file('local.properties').newDataInputStream())
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId rootProject.ext.android["applicationId"]
+        minSdkVersion rootProject.ext.android["minSdkVersion"]
+        targetSdkVersion rootProject.ext.android["targetSdkVersion"]
+        versionCode rootProject.ext.android["versionCode"]
+        versionName rootProject.ext.android["versionName"]
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        multiDexEnabled true
+
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a"
+        }
+    }
+
+    signingConfigs {
+        keystore {
+            storeFile file(props['release.keystore'])
+            keyAlias = props['keyAlias']
+            keyPassword = props['keyPassword']
+            storePassword = props['storePassword']
+        }
+
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true//去掉不用资源
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+            signingConfig signingConfigs.keystore
+        }
+        debug {
+            minifyEnabled false
+            shrinkResources false//去掉不用资源
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+            signingConfig signingConfigs.keystore
+        }
+    }
+    //用于支持lambda表达式
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    annotationProcessor rootProject.ext.dependencies["butterknife-compiler"]
+
+    implementation 'android.arch.lifecycle:runtime:1.1.1'
+    implementation 'android.arch.lifecycle:extensions:1.1.1'
+    implementation 'android.arch.lifecycle:reactivestreams:1.1.1'
+    annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
+
+    api project(':SpecificSDK4GPTT')
+
+
+}
