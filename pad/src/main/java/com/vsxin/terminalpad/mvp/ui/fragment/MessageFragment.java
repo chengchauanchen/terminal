@@ -6,20 +6,12 @@ import com.ixiaoma.xiaomabus.architecture.mvp.refresh.adapter.BaseRecycleViewAda
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.fragment.RefreshRecycleViewFragment;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.presenter.MessagePresenter;
-import com.vsxin.terminalpad.mvp.contract.presenter.NoticePresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMessageView;
-import com.vsxin.terminalpad.mvp.contract.view.INoticeView;
-import com.vsxin.terminalpad.mvp.entity.MessageBean;
-import com.vsxin.terminalpad.mvp.entity.NoticeBean;
 import com.vsxin.terminalpad.mvp.ui.adapter.MessageAdapter;
-import com.vsxin.terminalpad.mvp.ui.adapter.NoticeAdapter;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
-import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
  * @author qzw
@@ -48,6 +40,7 @@ public class MessageFragment extends RefreshRecycleViewFragment<TerminalMessage,
     @Override
     protected void initData() {
         getPresenter().loadMessages();
+        getPresenter().getAllMessageFromServer();
     }
 
 

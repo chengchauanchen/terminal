@@ -44,16 +44,9 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
     /**
      * 会话列表list,线程安全的
      */
-    private List<TerminalMessage> conversations = Collections.synchronizedList(new ArrayList<>());
-
-    public void setConversations(List<TerminalMessage> terminalMessages) {
-        this.conversations.clear();
-        this.conversations.addAll(terminalMessages);
-    }
-
-    public List<TerminalMessage> getConversations() {
-        return conversations;
-    }
+    private List<TerminalMessage> messageList = Collections.synchronizedList(new ArrayList<>());
+    //消息列表，在子线程中使用
+    private List<TerminalMessage> terminalMessageData = new ArrayList<>();
 
     public MessagePresenter(Context mContext) {
         super(mContext);
@@ -63,16 +56,13 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
      * 获取本地缓存消息
      */
     public void loadMessages() {
-        List<TerminalMessage> messageList = TerminalFactory.getSDK().getTerminalMessageManager().getMessageList();
-        getView().getLogger().info("从数据库取出消息列表：" + messageList);
-        setConversations(messageList);
-        getView().notifyDataSetChanged(getConversations());
-
-        //当本地没有消息记录时，添加主组消息到messageList中，通过主组的uniqueNo查询主组最新一条消息记录
-        if (messageList.isEmpty()) {
-            getConversations().add(addMainGroupMessage());
+        synchronized(MessagePresenter.this){
+            terminalMessageData.clear();
+            clearData();
+            List<TerminalMessage> messageList = TerminalFactory.getSDK().getTerminalMessageManager().getMessageList();
+            getView().getLogger().info("从数据库取出消息列表：" + messageList);
+            addData(messageList);
         }
-        getAllMessageToServer();
     }
 
     /**
@@ -117,12 +107,12 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
      * ReceivePersonMessageNotifyDateHandler
      * GetAllMessageRecordHandler
      */
-    private void getAllMessageToServer() {
+    public void getAllMessageFromServer() {
         //同步服务器消息
         MyTerminalFactory.getSDK().getThreadPool().execute(() ->
                 MyTerminalFactory.getSDK()
                         .getTerminalMessageManager()
-                        .getAllMessageRecordNewMethod(getConversations()));
+                        .getAllMessageRecordNewMethod(messageList));
     }
 
 
@@ -132,8 +122,8 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
      * 通知一个状态而已
      */
     private ReceivePersonMessageNotifyDateHandler receivePersonMessageNotifyDateHandler = (int resultCode, String resultDes) -> {
-        getView().getLogger().info("同步消息 结束后（不管有无数据）都会回调 resultCode=" + resultCode + ",resultDes=" + resultDes + ",size=" + getConversations().size());
-        getView().notifyDataSetChanged(getConversations());
+        getView().getLogger().info("同步消息 结束后（不管有无数据）都会回调 resultCode=" + resultCode + ",resultDes=" + resultDes + ",size=" + messageList.size());
+        getView().notifyDataSetChanged(messageList);
     };
 
     /**
@@ -147,6 +137,7 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
             //Todo 1消息排序，2更新未读消息数
 
         } else {//消息不为空
+                //在子线程中把数据处理好之后再用主线程更新UI
             for (TerminalMessage message:messageRecord){
                 updateConversation(message);
             }
@@ -193,6 +184,7 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
         updateConversation(terminalMessage);
         sortAndSaveConversationList();
         getView().notifyDataSetChanged(getConversations());
+        1
     };
 
     /**
@@ -204,7 +196,7 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
         //是否为别人发的消息
         boolean isReceiver = terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
 
-        if (getConversations().isEmpty()) {
+        if (messageList.isEmpty()) {
             if (isReceiver) {
                 //如果是别人发的消息，未读直接+1
                 terminalMessage.unReadCount = 1;
@@ -372,20 +364,20 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
      * 保存会话列表到本地数据库
      */
     private void saveConversationListToDB() {
-        getView().getLogger().info("---------保存消息列表---------" + getConversations());
+        getView().getLogger().info("---------保存消息列表---------" + messageList);
         //该方法本身为同步方法,线程安全
-        MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(getConversations());
+        MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(messageList);
     }
 
     /**
      * 排序并保存会话列表
      */
     private synchronized void sortAndSaveConversationList() {
-        if (!getConversations().isEmpty()) {
+        if (!messageList.isEmpty()) {
             //去掉不存在的组消息
             removeNotExistGroup();
             //再按照时间来排序
-            Collections.sort(getConversations(), (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
+            Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
             //置顶当前组,暂无需这个功能
             //setFirstMessage();
             //再保存到数据库
@@ -399,7 +391,7 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
      * 去掉在通讯录里不存在的组
      */
     private void removeNotExistGroup() {
-        Iterator<TerminalMessage> iterator = getConversations().iterator();
+        Iterator<TerminalMessage> iterator = messageList.iterator();
         while (iterator.hasNext()) {
             TerminalMessage next = iterator.next();
             if (next.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {//组消息
@@ -411,5 +403,24 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
                 }
             }
         }
+    }
+
+    private synchronized void clearData(){
+        messageList.clear();
+    }
+
+    private synchronized void removeData(int position){
+        messageList.remove(position);
+    }
+
+    private synchronized void addData(List<TerminalMessage> terminalMessages){
+        messageList.addAll(terminalMessages);
+    }
+
+    private synchronized void addData(TerminalMessage terminalMessage){
+        messageList.add(terminalMessage);
+    }
+    private synchronized void addData(int position ,TerminalMessage terminalMessage){
+        messageList.add(position,terminalMessage);
     }
 }
