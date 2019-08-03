@@ -491,10 +491,12 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
     private void goOn() {
         changeProgressMsg(getString(R.string.text_start_success));
         myHandler.removeCallbacksAndMessages(null);
-        myHandler.postDelayed(() -> hideProgressDialog(), 3000);
-
-        MainMapActivity.startActivity(this);
-        finish();
+//        myHandler.postDelayed(() -> hideProgressDialog(), 3000);
+        myHandler.postDelayed(() -> {
+            hideProgressDialog();
+            MainMapActivity.startActivity(this);
+            finish();
+        }, 3000);
 //        try{
 //            Class clazz;
 //            String type = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE, "");

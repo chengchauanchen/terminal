@@ -83,8 +83,8 @@
     <string name="i_pushing_video">我正在上报视频</string>
     <string name="text_has_no_video_receiver_authority">您还没有图像接受权限</string>
     <string name="text_pushing_video_name">%1$s正在上报图像</string>
-    
-    
+
+
     <string name="text_image_assistant">图像助手</string>
     <string name="text_telephone_assistant">电话助手</string>
     <string name="text_to_warning">警情</string>
@@ -134,4 +134,7 @@
     <string name="text_unknown_sector_name">%1$s&#160;%2$s&#160;未知部门</string>
     <string name="text_known_sector_name">%1$s&#160;%2$s&#160;%3$s</string>
     <string name="text_finish_watching_time">结束观看&#160;&#160;&#160;&#160;观看时长：%1$s</string>
+    <string name="response_group_cannot_cancel_monitor">响应组不能取消监听!</string>
+    <string name="current_group_cannot_cancel_monitor">当前组不能取消监听</string>
+    <string name="monitor_more_than_five">监听组达到上限，请取消一个后再添加</string>
 </resources>
