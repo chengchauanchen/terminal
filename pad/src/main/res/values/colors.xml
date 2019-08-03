@@ -35,5 +35,12 @@
     <color name="color_374350">#374350</color>
     <color name="color_600E050A">#600E050A</color>
     <color name="color_272828">#272828</color>
-    <color name="white">#ffffff</color>
+    
+    
+    <color name="itemblue">#13223f</color>
+    <color name="news_item_text_name">#95CAFF</color>
+    <color name="news_item_text_type">#637e9e</color>
+    <color name="news_item_text_time">#637e9e</color>
+    <color name="pre_speak_bg">#3B4255</color>
+    <color name="speaking_bg">#FF4F51</color>
 </resources>

@@ -46,6 +46,7 @@ public class MessageFragment extends RefreshRecycleViewFragment<TerminalMessage,
 
     @Override
     public void notifyDataSetChanged(List<TerminalMessage> terminalMessages) {
+//        messageAdapter.notifyDataSetChanged();
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
@@ -67,6 +68,7 @@ public class MessageFragment extends RefreshRecycleViewFragment<TerminalMessage,
     @Override
     protected BaseRecycleViewAdapter createAdapter() {
         messageAdapter = new MessageAdapter(getContext());
+//        messageAdapter.setDatas(getPresenter().getData());
         return messageAdapter;
     }
 

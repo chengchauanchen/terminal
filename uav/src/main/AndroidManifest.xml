@@ -14,10 +14,13 @@
         android:persistent="true"
         android:theme="@style/AppTheme"
         tools:replace="label, theme">
+        <service
+            android:name=".service.PushService"
+            android:enabled="true"
+            android:exported="true"></service>
         <activity
             android:name=".activity.UavPushActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"></activity>
-        <!-- DJI SDK -->
+            android:configChanges="keyboardHidden|orientation|screenSize" /> <!-- DJI SDK -->
         <uses-library android:name="com.android.future.usb.accessory" />
         <activity
             android:name="dji.sdk.sdkmanager.DJIAoaControllerActivity"
