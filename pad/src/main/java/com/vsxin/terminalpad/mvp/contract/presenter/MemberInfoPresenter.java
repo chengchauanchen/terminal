@@ -13,14 +13,15 @@ import com.vsxin.terminalpad.prompt.PromptManager;
 import com.vsxin.terminalpad.receiveHandler.ReceiverActivePushVideoHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
 import com.vsxin.terminalpad.utils.MemberUtil;
-import com.vsxin.terminalpad.utils.NumberUtil;
 import com.vsxin.terminalpad.utils.MyDataUtil;
+import com.vsxin.terminalpad.utils.NumberUtil;
 import com.vsxin.terminalpad.utils.SensorUtil;
 
 import java.util.List;
 
 import cn.vsx.SpecificSDK.OperateReceiveHandlerUtilSync;
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.IndividualCallType;
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -191,7 +192,10 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
      * @param individualCallType
      */
     private void callAnswer(int individualCallType){
-        individualCallStopped();
+//        individualCallStopped();
+        if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){
+          getView().startHalfDuplexIndividualCall();
+        }
     }
 
     /**

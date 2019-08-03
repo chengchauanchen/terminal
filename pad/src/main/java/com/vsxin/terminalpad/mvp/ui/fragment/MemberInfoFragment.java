@@ -1,6 +1,5 @@
 package com.vsxin.terminalpad.mvp.ui.fragment;
 
-import android.Manifest;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -14,26 +13,15 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpFragment;
 import com.vsxin.terminalpad.R;
-import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.presenter.MemberInfoPresenter;
-import com.vsxin.terminalpad.mvp.contract.view.IMainMapView;
 import com.vsxin.terminalpad.mvp.contract.view.IMemberInfoView;
 import com.vsxin.terminalpad.mvp.entity.MemberInfoBean;
-import com.vsxin.terminalpad.mvp.ui.activity.MainMapActivity;
-import com.vsxin.terminalpad.mvp.ui.widget.ChooseDevicesDialog;
-import com.vsxin.terminalpad.receiveHandler.ReceiverActivePushVideoHandler;
-
-import java.io.Serializable;
+import com.vsxin.terminalpad.utils.Constants;
 
 import butterknife.BindView;
-import cn.vsx.SpecificSDK.OperateReceiveHandlerUtilSync;
-import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Account;
-import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.manager.audio.CheckMyPermission;
-import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * @author qzw
@@ -45,6 +33,7 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
     private static final String PARAM_JSON = "paramJson";
     private static final String PARAM_ENUM = "paramEnum";
     private static final String FRAGMENT_TAG = "memberInfo";
+    private static final String HDICFragment_TAG = "halfDuplexIndividualCallFragment";
 
     @BindView(R.id.iv_close)
     ImageView iv_close;
@@ -64,6 +53,9 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
     @BindView(R.id.iv_message)
     ImageView iv_message;//个人聊天界面
 
+
+    MemberInfoBean memberInfo;
+
     @Override
     protected int getLayoutResID() {
         return R.layout.fragment_member_info;
@@ -73,7 +65,7 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
     protected void initViews(View view) {
         getPresenter().registReceiveHandler();
 
-        MemberInfoBean memberInfo = (MemberInfoBean) getArguments().getSerializable(PARAM_JSON);
+        memberInfo = (MemberInfoBean) getArguments().getSerializable(PARAM_JSON);
         MemberTypeEnum memberTypeEnum = (MemberTypeEnum) getArguments().getSerializable(PARAM_ENUM);
         getLogger().info("memberInfo:"+new Gson().toJson(memberInfo));
         getLogger().info(memberTypeEnum.toString());
@@ -95,7 +87,7 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
             public void onClick(View v) {
 //                getPresenter().goToChooseDevices(memberInfo.getNo(), ChooseDevicesDialog.TYPE_CALL_PRIVATE);
                 //getPresenter().goToChooseDevices("10000120", ChooseDevicesDialog.TYPE_CALL_PRIVATE);
-                getPresenter().startIndividualCall("10000367", TerminalMemberType.TERMINAL_PHONE);
+                getPresenter().startIndividualCall("10000195", TerminalMemberType.TERMINAL_PC);
             }
         });
 
@@ -148,6 +140,23 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
                 getPresenter().showChooseDevicesDialog(account,type);
             }
         });
+    }
+
+    /**
+     * 半双工个呼
+     */
+    @Override
+    public void startHalfDuplexIndividualCall() {
+        HalfDuplexIndividualCallFragment fragment = new HalfDuplexIndividualCallFragment();
+        Bundle args = new Bundle();
+        args.putString(Constants.MEMBER_NAME, (memberInfo!=null)?memberInfo.getName():"");
+        args.putString(Constants.MEMBER_ID, (memberInfo!=null)?memberInfo.getNo():"");
+        fragment.setArguments(args);
+        FragmentManager supportFragmentManager = getActivity().getSupportFragmentManager();
+        //replace 会将上一个Fragment干掉
+        FragmentTransaction fragmentTransaction = supportFragmentManager.beginTransaction();
+        fragmentTransaction.replace(R.id.fl_layer_member_info, fragment, HDICFragment_TAG);
+        fragmentTransaction.commit();
     }
 
     @Override

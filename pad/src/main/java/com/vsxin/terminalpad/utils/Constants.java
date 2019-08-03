@@ -131,4 +131,5 @@ public class Constants {
     public static int INCREASE_MEMBER = 1;
    //是否是强制类型
     public static final String EMERGENCY_TYPE = "emergencyType";
+
 }

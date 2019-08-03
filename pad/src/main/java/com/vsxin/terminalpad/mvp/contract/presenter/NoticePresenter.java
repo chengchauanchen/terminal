@@ -1,9 +1,6 @@
 package com.vsxin.terminalpad.mvp.contract.presenter;
 
 import android.content.Context;
-import android.content.Intent;
-import android.os.Message;
-import android.support.v4.util.TimeUtils;
 import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSONObject;
@@ -81,17 +78,13 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
         getView().getLogger().info("NoticePresenter 被动方个呼来了，选择接听或挂断");
 
         startPromptSound();//开启提示音 个呼进来提示音
-
         NoticeBean notice = new NoticeBean();
         notice.setNoticeType(NoticeTypeEnum.CALL);
         notice.setInOrOut(NoticeInOrOutEnum.IN);
         notice.setInCall(NoticeInCallEnum.CALL_IN_WAIT);
-
         notice.setMemberName(mainMemberName);
         notice.setMemberId(mainMemberId);
-
         notice.setStartTime(TimeUtil.getCurrentTime());
-
         noticeBeans.add(notice);
         getView().notifyDataSetChanged(noticeBeans);
     };

@@ -100,4 +100,43 @@ public class PadApplication extends App {
         mAppStatus = aStatus;
     }
 
+
+    public VideoLivePlayingState getVideoLivePlayingState(){
+        VideoLivePlayingStateMachine liveStateMachine = TerminalFactory.getSDK().getLiveManager().getVideoLivePlayingStateMachine();
+        if (liveStateMachine != null){
+            return liveStateMachine.getCurrentState();
+        }
+        return null;
+    }
+    public VideoLivePushingState getVideoLivePushingState(){
+        VideoLivePushingStateMachine liveStateMachine = TerminalFactory.getSDK().getLiveManager().getVideoLivePushingStateMachine();
+        if (liveStateMachine != null){
+            return liveStateMachine.getCurrentState();
+        }
+        return null;
+    }
+    public IndividualCallState getIndividualState(){
+        IndividualCallStateMachine individualCallStateMachine = TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine();
+        if (individualCallStateMachine != null){
+            return individualCallStateMachine.getCurrentState();
+        }
+        return null;
+    }
+
+    public GroupCallListenState getGroupListenenState(){
+        GroupCallListenStateMachine groupCallListenStateMachine = TerminalFactory.getSDK().getGroupCallManager().getGroupCallListenStateMachine();
+        if (groupCallListenStateMachine != null){
+            return groupCallListenStateMachine.getCurrentState();
+        }
+        return null;
+    }
+
+    public GroupCallSpeakState getGroupSpeakState(){
+        GroupCallSpeakStateMachine groupCallSpeakStateMachine = TerminalFactory.getSDK().getGroupCallManager().getGroupCallSpeakStateMachine();
+        if (groupCallSpeakStateMachine != null){
+            return groupCallSpeakStateMachine.getCurrentState();
+        }
+        return null;
+    }
+
 }
