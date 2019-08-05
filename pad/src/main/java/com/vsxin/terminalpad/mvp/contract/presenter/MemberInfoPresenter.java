@@ -7,6 +7,7 @@ import android.content.Context;
 import com.ixiaoma.xiaomabus.architecture.mvp.BasePresenter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
+import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.view.IMemberInfoView;
 import com.vsxin.terminalpad.mvp.ui.widget.ChooseDevicesDialog;
 import com.vsxin.terminalpad.prompt.PromptManager;
@@ -55,9 +56,10 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
 
     /**
      * 打个呼
+     *
      * @param memberNo
      */
-    public void startIndividualCall(String memberNo,TerminalMemberType type){
+    public void startIndividualCall(String memberNo, TerminalMemberType type) {
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
             Account account = DataUtil.getAccountByMemberNo(NumberUtil.strToInt(memberNo), true);
             Member member = MemberUtil.getMemberForTerminalMemberType(account, type);
@@ -75,13 +77,14 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
     public void goToChooseDevices(String memberNo, int type) {
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
             Account account = DataUtil.getAccountByMemberNo(NumberUtil.strToInt(memberNo), true);
-            getView().showChooseDevicesDialog(account,type);
+            getView().showChooseDevicesDialog(account, type);
         });
     }
 
     /**
      * 显示选择框
      * 按之前逻辑，打电话是有选择框出现
+     *
      * @param account
      * @param type
      */
@@ -115,20 +118,20 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
         //MyApplication.instance.isCallState = true;
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
-            if(member!=null){
+            if (member != null) {
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
-            }else {
-                ToastUtil.showToast(getContext(),getContext().getString(R.string.text_get_member_info_fail));
+            } else {
+                ToastUtil.showToast(getContext(), getContext().getString(R.string.text_get_member_info_fail));
             }
         } else {
-            ToastUtil.showToast(getContext(),getContext().getString(R.string.text_network_connection_abnormal_please_check_the_network));
+            ToastUtil.showToast(getContext(), getContext().getString(R.string.text_network_connection_abnormal_please_check_the_network));
         }
     }
 
     /**
      * 注册监听
      */
-    public void registReceiveHandler(){
+    public void registReceiveHandler() {
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCurrentGroupIndividualCallHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
@@ -137,7 +140,7 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
     /**
      * 取消监听
      */
-    public void unregistReceiveHandler(){
+    public void unregistReceiveHandler() {
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveCurrentGroupIndividualCallHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartIndividualCallHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
@@ -149,25 +152,25 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
     private ReceiveCurrentGroupIndividualCallHandler receiveCurrentGroupIndividualCallHandler = (member) -> {
         getView().getLogger().info("当前呼叫对象:" + member);
 
-        if(PadApplication.getPadApplication().getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
-            ToastUtil.showToast(getContext(),getContext().getString(R.string.text_watching_can_not_private_call));
+        if (PadApplication.getPadApplication().getVideoLivePlayingState() != VideoLivePlayingState.IDLE) {
+            ToastUtil.showToast(getContext(), getContext().getString(R.string.text_watching_can_not_private_call));
             return;
         }
-        if(PadApplication.getPadApplication().getVideoLivePushingState() != VideoLivePushingState.IDLE){
-            ToastUtil.showToast(getContext(),getContext().getString(R.string.text_pushing_can_not_private_call));
+        if (PadApplication.getPadApplication().getVideoLivePushingState() != VideoLivePushingState.IDLE) {
+            ToastUtil.showToast(getContext(), getContext().getString(R.string.text_pushing_can_not_private_call));
             return;
         }
-        if(PadApplication.getPadApplication().getIndividualState() != IndividualCallState.IDLE){
-            ToastUtil.showToast(getContext(),getContext().getString(R.string.text_personal_calling_can_not_do_others));
+        if (PadApplication.getPadApplication().getIndividualState() != IndividualCallState.IDLE) {
+            ToastUtil.showToast(getContext(), getContext().getString(R.string.text_personal_calling_can_not_do_others));
             return;
         }
 
         SensorUtil.getInstance().registSensor();
         PromptManager.getInstance().IndividualCallRequestRing();
-        int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(member.getId(),member.getUniqueNo(),"");
-        if (resultCode == BaseCommonCode.SUCCESS_CODE){
+        int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(member.getId(), member.getUniqueNo(), "");
+        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
             ToastUtil.individualCallFailToast(getContext(), resultCode);
-        }else {
+        } else {
             ToastUtil.individualCallFailToast(getContext(), resultCode);
         }
     };
@@ -177,10 +180,10 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
      */
     private ReceiveResponseStartIndividualCallHandler receiveResponseStartIndividualCallHandler = (resultCode, resultDesc, individualCallType) -> {
         getView().getLogger().info("ReceiveResponseStartIndividualCallHandler====" + "resultCode:" + resultCode + "=====resultDesc:" + resultDesc);
-        if(resultCode == BaseCommonCode.SUCCESS_CODE){//对方接听
+        if (resultCode == BaseCommonCode.SUCCESS_CODE) {//对方接听
             getView().getLogger().info("对方接受了你的个呼:" + resultCode + resultDesc + "callType;" + individualCallType);
             callAnswer(individualCallType);
-        }else{//对方拒绝
+        } else {//对方拒绝
             ToastUtil.showToast(getContext(), resultDesc);
             //发送通知关闭CallingService(防止已经跳转到CallingService)
             individualCallStopped();
@@ -192,7 +195,7 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
      * @param individualCallType
      */
     private void callAnswer(int individualCallType){
-//        individualCallStopped();
+        //individualCallStopped();
         if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){
           getView().startHalfDuplexIndividualCall();
         }
@@ -202,16 +205,16 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
      * 被动方通知个呼停止，界面---------静默状态
      */
     private ReceiveNotifyIndividualCallStoppedHandler receiveNotifyIndividualCallStoppedHandler = (methodResult, resultDesc) -> {
-        if(SignalServerErrorCode.getInstanceByCode(methodResult) != null){
+        if (SignalServerErrorCode.getInstanceByCode(methodResult) != null) {
             ToastUtil.showToast(MyTerminalFactory.getSDK().application, resultDesc);
-        }else{
+        } else {
             ToastUtil.showToast(MyTerminalFactory.getSDK().application, getContext().getString(R.string.other_stop_call));
         }
         individualCallStopped();
     };
 
 
-    private void individualCallStopped(){
+    private void individualCallStopped() {
         //发送通知关闭StartIndividualCallService和ReceiveCallComingService
         PromptManager.getInstance().IndividualHangUpRing();
         PromptManager.getInstance().delayedStopRing();
@@ -222,25 +225,25 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
     /**
      * 自己主动上报视频，并邀请 其他人来观看
      */
-    public void pushVideo(){
-        if (!PadApplication.getPadApplication().isPttPress){//是否按下组呼键(是否在组呼)
+    public void pushVideo() {
+        if (!PadApplication.getPadApplication().isPttPress) {//是否按下组呼键(是否在组呼)
             if (!CheckMyPermission.selfPermissionGranted(getContext(), Manifest.permission.RECORD_AUDIO)) {//没有录音权限
-                CheckMyPermission.permissionPrompt((Activity)getContext(), Manifest.permission.RECORD_AUDIO);
+                CheckMyPermission.permissionPrompt((Activity) getContext(), Manifest.permission.RECORD_AUDIO);
                 return;
             }
             if (!CheckMyPermission.selfPermissionGranted(getContext(), Manifest.permission.CAMERA)) {//没有相机权限
-                CheckMyPermission.permissionPrompt((Activity)getContext(), Manifest.permission.CAMERA);
+                CheckMyPermission.permissionPrompt((Activity) getContext(), Manifest.permission.CAMERA);
                 return;
             }
 
             if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())) {
-                ToastUtil.showToast(getContext(),getContext().getString(R.string.text_has_no_image_report_authority));
+                ToastUtil.showToast(getContext(), getContext().getString(R.string.text_has_no_image_report_authority));
                 return;
             }
             //Todo 模拟发个 mate7的uniqueNo
             long uniqueNo = 156015606669449299L;
-            String pushInviteMember =  MyDataUtil.getPushInviteMemberData(uniqueNo, ReceiveObjectMode.MEMBER.toString());
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,pushInviteMember,false);
+            String pushInviteMember = MyDataUtil.getPushInviteMemberData(uniqueNo, ReceiveObjectMode.MEMBER.toString());
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, pushInviteMember, false);
         }
     }
 
@@ -248,35 +251,54 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
 
     /**
      * 自己主动请求他人上报视频，给我看
+     *
      */
-    public void pullVideo(){
+    public void pullVideo(TerminalMemberType type) {
         if (!PadApplication.getPadApplication().isPttPress) {
             if (!CheckMyPermission.selfPermissionGranted(getContext(), Manifest.permission.RECORD_AUDIO)) {//没有录音权限
-                CheckMyPermission.permissionPrompt((Activity)getContext(), Manifest.permission.RECORD_AUDIO);
+                CheckMyPermission.permissionPrompt((Activity) getContext(), Manifest.permission.RECORD_AUDIO);
                 return;
             }
             //判断终端权限
             if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())) {
-                ToastUtil.showToast(getContext(),getContext().getString(R.string.text_has_no_image_request_authority));
+                ToastUtil.showToast(getContext(), getContext().getString(R.string.text_has_no_image_request_authority));
                 return;
             }
 
-            //测试环境222
-            //Account account = DataUtil.getAccountByMemberNo(10000367, true);
-            //开发环境100
-            Account account = DataUtil.getAccountByMemberNo(10000120, true);
-            Member paramMember = null;
-            if (account != null && !account.getMembers().isEmpty()) {
-                List<Member> members = account.getMembers();
-                for (Member member : members) {
-                    if (TerminalMemberType.TERMINAL_PHONE.getCode() == member.getType()) {
-                        paramMember = member;
-                        break;
-                    }
-                }
+            if (TerminalMemberType.TERMINAL_PHONE == type) {
+                //警务通
+                pullVideoForMemberNo(10000367,TerminalMemberType.TERMINAL_PHONE);
+            } else if (TerminalMemberType.TERMINAL_BODY_WORN_CAMERA == type) {
+                //执法记录仪
+                pullVideoForMemberNo(77000002,TerminalMemberType.TERMINAL_BODY_WORN_CAMERA);
+            }else if(TerminalMemberType.TERMINAL_LTE == type){
+                //LTE
+                //pullVideoForMemberNo(77000002,TerminalMemberType.TERMINAL_LTE);
+            }else if(TerminalMemberType.TERMINAL_UAV == type){
+                //无人机
+            }else{
+                ToastUtil.showToast(getContext(), "暂不支持拉取该设备视频");
+                return;
             }
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, paramMember);
         }
+    }
+
+    /**
+     * 通过memberNo 拉取视频 主要用于 警务通，执法记录仪
+     * @param memberNo
+     * @param type
+     */
+    private void pullVideoForMemberNo(int memberNo,TerminalMemberType type){
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            Account account = DataUtil.getAccountByMemberNo(memberNo, true);
+            Member member = MemberUtil.getMemberForTerminalMemberType(account, type);
+            //拉取账号的警务通终端
+            if (member == null) {
+                ToastUtil.showToast(getContext(), getContext().getString(R.string.text_has_no_image_request_authority));
+                return;
+            }
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
+        });
     }
 
     /*******************************************别人请求我上报视频************************************************/

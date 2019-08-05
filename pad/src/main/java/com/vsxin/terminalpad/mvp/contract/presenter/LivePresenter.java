@@ -87,6 +87,7 @@ public class LivePresenter extends BasePresenter<ILiveView> {
     private RtspReceiver mResultReceiver;
     private int mLiveWidth;
     private int mLiveHeight;
+    private String gb28181Url;
 
     public LivePresenter(Context mContext) {
         super(mContext);
@@ -351,7 +352,7 @@ public class LivePresenter extends BasePresenter<ILiveView> {
                 ToastUtil.showToast(getContext(), getContext().getString(R.string.pushing_stream));
             }
         } else {
-            getView().setMediaStream(new MediaStream(MyTerminalFactory.getSDK().application, surface, true));
+            getView().setMediaStream(new MediaStream(getContext(), surface, true));
             startCamera();
         }
         pushcount = 0;
@@ -428,9 +429,12 @@ public class LivePresenter extends BasePresenter<ILiveView> {
         return degrees;
     }
 
+
+
     public void finishVideoLive() {
         stopBusiness();
         stopPush();
+        stopPull();
         getView().isShowLiveView(false);
     }
 
@@ -443,7 +447,6 @@ public class LivePresenter extends BasePresenter<ILiveView> {
             getView().setMediaStream(null);
             getView().getLogger().info("---->>>>页面关闭，停止推送视频");
         }
-        TerminalFactory.getSDK().getLiveManager().ceaseLiving();
     }
 
     private class PushCallback implements InitCallback {
@@ -507,6 +510,12 @@ public class LivePresenter extends BasePresenter<ILiveView> {
     }
     /******************************************2自己主动请求别人上报**********************************************/
 
+   private boolean isGB28181Live = false;
+
+    public boolean isGB28181Live() {
+        return isGB28181Live;
+    }
+
     /**
      * 请求直播
      */
@@ -558,11 +567,11 @@ public class LivePresenter extends BasePresenter<ILiveView> {
      * 我请求 别人 直播
      */
     private void requestOtherLive(Member member) {
+        isGB28181Live = false;
         PromptManager.getInstance().IndividualCallRequestRing();//响铃
-
         int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMemberLive(member.getNo(), member.getUniqueNo(), "",false);
         if (requestCode == BaseCommonCode.SUCCESS_CODE) {
-            getView().isShowLiveView(true);
+            //getView().isShowLiveView(true);
         } else {
             ToastUtil.livingFailToast(getContext(), requestCode, TerminalErrorCode.LIVING_REQUEST.getErrorCode());
             stopRequestOtherLive();
@@ -577,9 +586,20 @@ public class LivePresenter extends BasePresenter<ILiveView> {
      * @param terminalMessage
      */
     private void goWatchGB28121(TerminalMessage terminalMessage) {
-//        Intent intent = new Intent(ReceiveHandlerService.this, PullGB28181Service.class);
-//        intent.putExtra(Constants.TERMINALMESSAGE, terminalMessage);
-//        startService(intent);
+        isGB28181Live = true;
+        if(terminalMessage.messageBody.containsKey(JsonParam.GB28181_RTSP_URL)){
+            setPushAuthority();
+            String deviceId = terminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL);
+            String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
+            gb28181Url = gateWayUrl + "DevAor=" + deviceId;
+            getView().getLogger().info("播放地址："+ gb28181Url);
+            //拉取LTE 上报视频
+            getView().startGB28121Pull();
+        }
+        if(terminalMessage.messageBody.containsKey(JsonParam.DEVICE_NAME)){
+            String deviceName = terminalMessage.messageBody.getString(JsonParam.DEVICE_NAME);
+            getView().getLogger().info(deviceName+"正在上报图像");
+        }
     }
 
     /**
@@ -681,58 +701,66 @@ public class LivePresenter extends BasePresenter<ILiveView> {
         } else {
             getView().getLogger().info("rtspUrl ----> " + rtspUrl);
             PromptManager.getInstance().stopRing();
-//            Intent intent = new Intent(LiveRequestService.this,PullLivingService.class);
-//            intent.putExtra(Constants.WATCH_TYPE,Constants.RECEIVE_WATCH);
-//            intent.putExtra(Constants.RTSP_URL,rtspUrl);
-//            intent.putExtra(Constants.LIVE_MEMBER,liveMember);
-//            startService(intent);
-//            mHandler.postDelayed(this::removeView,500);
             this.rtspUrl = rtspUrl;
-            getView().startPull(rtspUrl);
+            getView().startPull();
         }
     };
 
     private boolean rtspPlay = true;
 
-    public void startPull(TextureView sv_live) {
+    public void startPull(SurfaceTexture surface) {
         getView().isShowLiveView(true);
-
         getView().getLogger().info("开始播放");
-        if (!rtspPlay) {//RTMP
-            //rtmp播放
-            //测试url
-//            url = "rtmp://202.69.69.180:443/webcast/bshdlive-pc";
-//            if(null != surface.getSurfaceTexture()){
-//                rtmpClient = new RTMPEasyPlayerClient(this, MyTerminalFactory.getSDK().getLiveConfigManager().getRTMPPlayKey(), surface, null, null);
-//                rtmpClient.play(url);
-//            }
-        } else {//rtsp 播放
-
-            if (null == mResultReceiver) {
-                mResultReceiver = new RtspReceiver(new Handler(),sv_live);
-            }
-            if (null != sv_live.getSurfaceTexture()) {
-                mStreamRender = new EasyRTSPClient(getContext(), MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(), sv_live.getSurfaceTexture(), mResultReceiver);
-                try {
-                    if (!android.text.TextUtils.isEmpty(rtspUrl)) {
-                        mStreamRender.start(rtspUrl, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    getView().getLogger().error(e.toString());
+        if (null == mResultReceiver) {
+            mResultReceiver = new RtspReceiver(new Handler(),surface);
+        }
+        if (null != surface) {
+            mStreamRender = new EasyRTSPClient(getContext(), MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(), surface, mResultReceiver);
+            try {
+                if (!TextUtils.isEmpty(rtspUrl)) {
+                    mStreamRender.start(rtspUrl, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
+                getView().getLogger().error(e.toString());
             }
+        }
+    }
+
+    /**
+     * 拉取LTE 上报视频
+     * @param surface
+     */
+    public void startPullGB28121(SurfaceTexture surface){
+        if(!TextUtils.isEmpty(gb28181Url)){
+            getView().isShowLiveView(true);
+            if (null == mResultReceiver) {
+                mResultReceiver = new RtspReceiver(new Handler(),surface);
+            }
+            mStreamRender = new EasyRTSPClient(getContext(), MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(),
+                    surface, mResultReceiver);
+            try {
+                if (gb28181Url != null) {
+                    mStreamRender.start(gb28181Url, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                getView().getLogger().error("LTE上报 :"+e.toString());
+            }
+        }else {
+            ToastUtil.showToast(getContext(),getContext().getString(R.string.no_rtsp_data));
+            stopBusiness();
         }
     }
 
     private class RtspReceiver extends ResultReceiver {
 
         private int pullcount;
-        private TextureView sv_live;
+        private SurfaceTexture surface;
 
-        private RtspReceiver(Handler handler,TextureView sv_live){
+        private RtspReceiver(Handler handler,SurfaceTexture surface){
             super(handler);
-            this.sv_live = sv_live;
+            this.surface = surface;
         }
 
         @Override
@@ -762,8 +790,12 @@ public class LivePresenter extends BasePresenter<ILiveView> {
                         try{
                             Thread.sleep(300);
                             getView().getLogger().error("请求第" + pullcount + "次");
-                            if(sv_live != null && sv_live.getVisibility() == View.VISIBLE && sv_live.getSurfaceTexture() != null){
-                                getView().startPull(rtspUrl);
+                            if(surface != null){
+                                if(isGB28181Live){
+                                    getView().startGB28121Pull();
+                                }else{
+                                    getView().startPull();
+                                }
                                 pullcount++;
                             }else{
                                 ToastUtil.showToast(getContext(), getContext().getString(R.string.push_stoped));
@@ -831,6 +863,10 @@ public class LivePresenter extends BasePresenter<ILiveView> {
 
     /******************************************4别人邀请我观看视频****************************************************/
     //ReceiveGetRtspStreamUrlHandler
+
+
+
+
 
 
 

@@ -1,5 +1,6 @@
 package com.vsxin.terminalpad.mvp.ui.fragment;
 
+import android.Manifest;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -17,15 +18,19 @@ import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.presenter.MemberInfoPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMemberInfoView;
 import com.vsxin.terminalpad.mvp.entity.MemberInfoBean;
+import com.vsxin.terminalpad.mvp.ui.activity.MainMapActivity;
 import com.vsxin.terminalpad.utils.Constants;
+import com.vsxin.terminalpad.utils.NumberUtil;
 
 import butterknife.BindView;
 import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 
 /**
  * @author qzw
- *
+ * <p>
  * 地图气泡点击-成员详情页
  */
 public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoPresenter> implements IMemberInfoView {
@@ -33,6 +38,7 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
     private static final String PARAM_JSON = "paramJson";
     private static final String PARAM_ENUM = "paramEnum";
     private static final String FRAGMENT_TAG = "memberInfo";
+
     private static final String HDICFragment_TAG = "halfDuplexIndividualCallFragment";
 
     @BindView(R.id.iv_close)
@@ -52,9 +58,8 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
 
     @BindView(R.id.iv_message)
     ImageView iv_message;//个人聊天界面
-
-
-    MemberInfoBean memberInfo;
+    private MemberInfoBean memberInfo;
+    private MemberTypeEnum memberTypeEnum;
 
     @Override
     protected int getLayoutResID() {
@@ -66,11 +71,11 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
         getPresenter().registReceiveHandler();
 
         memberInfo = (MemberInfoBean) getArguments().getSerializable(PARAM_JSON);
-        MemberTypeEnum memberTypeEnum = (MemberTypeEnum) getArguments().getSerializable(PARAM_ENUM);
-        getLogger().info("memberInfo:"+new Gson().toJson(memberInfo));
+        memberTypeEnum = (MemberTypeEnum) getArguments().getSerializable(PARAM_ENUM);
+        getLogger().info("memberInfo:" + new Gson().toJson(memberInfo));
         getLogger().info(memberTypeEnum.toString());
 
-        if(memberTypeEnum!=null){
+        if (memberTypeEnum != null) {
             iv_type_icon.setImageResource(memberTypeEnum.getResId());
         }
 
@@ -87,7 +92,8 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
             public void onClick(View v) {
 //                getPresenter().goToChooseDevices(memberInfo.getNo(), ChooseDevicesDialog.TYPE_CALL_PRIVATE);
                 //getPresenter().goToChooseDevices("10000120", ChooseDevicesDialog.TYPE_CALL_PRIVATE);
-                getPresenter().startIndividualCall("10000195", TerminalMemberType.TERMINAL_PC);
+                getPresenter().startIndividualCall("10000367", TerminalMemberType.TERMINAL_PHONE);
+                //getPresenter().startIndividualCall("10000367", TerminalMemberType.TERMINAL_PHONE);
             }
         });
 
@@ -95,7 +101,8 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
         iv_push_video.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                pushVideo();
+                //pushVideo();
+                pullVideo();
             }
         });
 
@@ -103,21 +110,17 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
         iv_message.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                pullVideo();
+                //pullVideo();
             }
         });
     }
 
     /**
+     * 拉取他人上报视频
      * 自己主动请求别人上报
      */
     private void pullVideo() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                getPresenter().pullVideo();
-            }
-        }).start();
+        getPresenter().pullVideo(memberTypeEnum.getTerminalMemberType());
     }
 
     /**
@@ -137,7 +140,7 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                getPresenter().showChooseDevicesDialog(account,type);
+                getPresenter().showChooseDevicesDialog(account, type);
             }
         });
     }
@@ -169,10 +172,16 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
         super.onDestroy();
         getLogger().info("MemberInfoFragment 销毁了");
         getPresenter().unregistReceiveHandler();
+        if (memberInfo != null && memberTypeEnum != null) {
+            String no = memberInfo.getNo();
+            String type = memberTypeEnum.getType();
+            ((MainMapActivity) getContext()).closeInfoBoxToMap(no, type);
+        }
     }
 
     /**
      * 开启 MemberInfoFragment
+     *
      * @param fragmentActivity
      * @param json
      */
