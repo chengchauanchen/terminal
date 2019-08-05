@@ -360,6 +360,7 @@ public class HalfDuplexIndividualCallFragment extends MvpFragment<IHalfDuplexInd
      * 关闭Fragment
      */
     private void closeFragment(){
+        // TODO: 2019/8/3 空指针异常
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         Fragment memberInfo = fragmentManager.findFragmentByTag(HDICFragment_TAG);
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
@@ -373,6 +374,7 @@ public class HalfDuplexIndividualCallFragment extends MvpFragment<IHalfDuplexInd
     public void onDestroy() {
         super.onDestroy();
         getLogger().info("MemberInfoFragment 销毁了");
+        mHandler.removeCallbacksAndMessages(null);
         getPresenter().unregistReceiveHandler();
     }
 

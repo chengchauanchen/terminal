@@ -21,5 +21,7 @@ public interface ILiveView extends IBaseView {
 
     void setMediaStream(MediaStream mediaStream);
 
-    void startPull(String rtspUrl);
+    void startPull();
+
+    void startGB28121Pull();
 }

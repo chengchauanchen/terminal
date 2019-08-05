@@ -60,7 +60,7 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
  * <p>
  * 主页地图
  */
-public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter> implements IMainMapView{
+public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter> implements IMainMapView {
 
     @BindView(R.id.web_map)
     WebView web_map;
@@ -72,8 +72,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     Button bnt_group_call;
     private GroupCallInstruction groupCallInstruction;
 
-    public static void startActivity(Context context){
-        context.startActivity(new Intent(context,MainMapActivity.class));
+    public static void startActivity(Context context) {
+        context.startActivity(new Intent(context, MainMapActivity.class));
     }
 
     @Override
@@ -113,8 +113,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                 if (progress >= 100) {
                     //地图加载完成后，显示所有图层
                     getPresenter().defaultLoadAllLayer();
-                    MemberInfoBean memberInfoBean = new Gson().fromJson("", MemberInfoBean.class);
-                    MemberInfoFragment.startMemberInfoFragment(MainMapActivity.this, memberInfoBean, MemberTypeEnum.PHONE);
+                    //MemberInfoBean memberInfoBean = new Gson().fromJson("", MemberInfoBean.class);
+                   // MemberInfoFragment.startMemberInfoFragment(MainMapActivity.this, memberInfoBean, MemberTypeEnum.PHONE);
                 }
             }
         });
@@ -139,12 +139,11 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
         String memberId = HandleIdUtil.handleId(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
         Long memberUniqueno = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
-        int depId =MyTerminalFactory.getSDK().getParam(Params.DEP_ID, 0);
+        int depId = MyTerminalFactory.getSDK().getParam(Params.DEP_ID, 0);
         String format = String.format("no=%s&code=%s&dept_id=%s", memberId, memberUniqueno, depId);
-        getLogger().info("http://192.168.1.187:9011/offlineMap/indexPad.html?"+format);
-        web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?"+format);
+        getLogger().info("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
+        web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
     }
-
 
 
     private void inflaterFragment() {
@@ -157,23 +156,27 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         //拿到fragment的manager对象
         FragmentManager supportFragmentManager = getSupportFragmentManager();
         //事务(防止花屏)
-        FragmentTransaction fragmentTransaction =  supportFragmentManager.beginTransaction();
+        FragmentTransaction fragmentTransaction = supportFragmentManager.beginTransaction();
 
         //表示使用SoundFragment 去替换之前的fragment
-        fragmentTransaction.replace(R.id.fl_small_map,smallMapFragment);
-        fragmentTransaction.replace(R.id.fl_notice,noticeFragment);
-        fragmentTransaction.replace(R.id.fl_live,liveFragment);
+        fragmentTransaction.replace(R.id.fl_small_map, smallMapFragment);
+        fragmentTransaction.replace(R.id.fl_notice, noticeFragment);
+        fragmentTransaction.replace(R.id.fl_live, liveFragment);
 
-        fragmentTransaction.replace(R.id.fl_map_layer,layerMapFragment);
-        fragmentTransaction.replace(R.id.fl_vsx,vsxFragment);
+        fragmentTransaction.replace(R.id.fl_map_layer, layerMapFragment);
+        fragmentTransaction.replace(R.id.fl_vsx, vsxFragment);
 
         //提交事务
         fragmentTransaction.commit();
     }
 
     @Override
-    public void drawMapLayer(String type,boolean isShow){
-        web_map.loadUrl("javascript:abstractIndexObj.showResourceToMap('"+type+"',"+isShow+")");
+    public void drawMapLayer(String type, boolean isShow) {
+        web_map.loadUrl("javascript:abstractIndexObj.showResourceToMap('" + type + "'," + isShow + ")");
+    }
+
+    public void closeInfoBoxToMap(String no, String type) {
+        web_map.loadUrl("javascript:abstractIndexObj.closeInfoBoxToMap('" + no + "'," + "'" + type + "')");
     }
 
     @Override
@@ -216,7 +219,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                 case MotionEvent.ACTION_CANCEL:
                     v.performClick();
                     PadApplication.getPadApplication().isPttPress = false;
-                    getLogger().info("ACTION_UP，ACTION_CANCEL，ptt按钮抬起，停止组呼：" +PadApplication.getPadApplication().isPttPress);
+                    getLogger().info("ACTION_UP，ACTION_CANCEL，ptt按钮抬起，停止组呼：" + PadApplication.getPadApplication().isPttPress);
                     pttUpDoThing();
                     break;
                 default:

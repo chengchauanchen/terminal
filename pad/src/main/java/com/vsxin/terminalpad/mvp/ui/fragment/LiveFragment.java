@@ -77,9 +77,15 @@ public class LiveFragment extends MvpFragment<ILiveView, LivePresenter> implemen
     }
 
     @Override
-    public void startPull(String rtspUrl) {
-        getPresenter().startPull(sv_live);
+    public void startPull() {
+        getPresenter().startPull(sv_live.getSurfaceTexture());
     }
+
+    @Override
+    public void startGB28121Pull() {
+        getPresenter().startPullGB28121(sv_live.getSurfaceTexture());
+    }
+
 
     @Override
     public void isShowLiveView(boolean isShow) {
@@ -115,7 +121,13 @@ public class LiveFragment extends MvpFragment<ILiveView, LivePresenter> implemen
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height){
             getLogger().info("onSurfaceTextureAvailable----->" + surface);
-            getPresenter().pushStream(surface);
+            //TODO 要注意拉流 和 推流 这逻辑还不一样哦 这里只写拉流得逻辑
+
+            if(getPresenter().isGB28181Live()){
+                getPresenter().startPullGB28121(surface);
+            }else{
+                getPresenter().startPull(surface);
+            }
         }
 
         @Override
