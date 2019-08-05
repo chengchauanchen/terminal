@@ -89,8 +89,8 @@
 
     <Button
         android:id="@+id/btn_individual_call_half_duplex_ptt"
-        android:layout_width="300px"
-        android:layout_height="60px"
+        android:layout_width="500px"
+        android:layout_height="100px"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="80px"

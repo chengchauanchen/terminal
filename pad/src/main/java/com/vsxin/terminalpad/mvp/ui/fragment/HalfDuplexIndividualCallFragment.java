@@ -72,6 +72,7 @@ public class HalfDuplexIndividualCallFragment extends MvpFragment<IHalfDuplexInd
 
     private static final int AUTOHANGUP = 0;
     private static final String HDICFragment_TAG = "halfDuplexIndividualCallFragment";
+    private boolean isPress = false;
 
 
     @SuppressLint("HandlerLeak")
@@ -114,7 +115,15 @@ public class HalfDuplexIndividualCallFragment extends MvpFragment<IHalfDuplexInd
             stopBusiness();
         });
         mBtnIndividualCallHalfDuplexPtt.setOnTouchListener(halfCallPTTOnTouchListener);
-
+//        mBtnIndividualCallHalfDuplexPtt.setOnClickListener(v -> {
+//            if(isPress){
+//                isPress = false;
+//                halfPttUpDothing();
+//            }else{
+//                isPress = true;
+//                halfPttDownDothing();
+//            }
+//        });
         recoverSpeakingPop();
         MyTerminalFactory.getSDK().getIndividualCallManager().responseIndividualCall(true);
         PromptManager.getInstance().stopRing();
@@ -360,7 +369,6 @@ public class HalfDuplexIndividualCallFragment extends MvpFragment<IHalfDuplexInd
      * 关闭Fragment
      */
     private void closeFragment(){
-        // TODO: 2019/8/3 空指针异常
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
         Fragment memberInfo = fragmentManager.findFragmentByTag(HDICFragment_TAG);
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

@@ -7,7 +7,6 @@ import android.content.Context;
 import com.ixiaoma.xiaomabus.architecture.mvp.BasePresenter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
-import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.view.IMemberInfoView;
 import com.vsxin.terminalpad.mvp.ui.widget.ChooseDevicesDialog;
 import com.vsxin.terminalpad.prompt.PromptManager;
@@ -18,11 +17,8 @@ import com.vsxin.terminalpad.utils.MyDataUtil;
 import com.vsxin.terminalpad.utils.NumberUtil;
 import com.vsxin.terminalpad.utils.SensorUtil;
 
-import java.util.List;
-
 import cn.vsx.SpecificSDK.OperateReceiveHandlerUtilSync;
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.IndividualCallType;
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -35,7 +31,6 @@ import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallStoppedHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
@@ -133,7 +128,6 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
      */
     public void registReceiveHandler() {
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCurrentGroupIndividualCallHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
     }
 
@@ -142,7 +136,6 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
      */
     public void unregistReceiveHandler() {
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveCurrentGroupIndividualCallHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartIndividualCallHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
     }
 
@@ -174,32 +167,6 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
             ToastUtil.individualCallFailToast(getContext(), resultCode);
         }
     };
-
-    /**
-     * 主动方请求个呼回应
-     */
-    private ReceiveResponseStartIndividualCallHandler receiveResponseStartIndividualCallHandler = (resultCode, resultDesc, individualCallType) -> {
-        getView().getLogger().info("ReceiveResponseStartIndividualCallHandler====" + "resultCode:" + resultCode + "=====resultDesc:" + resultDesc);
-        if (resultCode == BaseCommonCode.SUCCESS_CODE) {//对方接听
-            getView().getLogger().info("对方接受了你的个呼:" + resultCode + resultDesc + "callType;" + individualCallType);
-            callAnswer(individualCallType);
-        } else {//对方拒绝
-            ToastUtil.showToast(getContext(), resultDesc);
-            //发送通知关闭CallingService(防止已经跳转到CallingService)
-            individualCallStopped();
-        }
-    };
-
-    /**
-     *
-     * @param individualCallType
-     */
-    private void callAnswer(int individualCallType){
-        //individualCallStopped();
-        if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){
-          getView().startHalfDuplexIndividualCall();
-        }
-    }
 
     /**
      * 被动方通知个呼停止，界面---------静默状态

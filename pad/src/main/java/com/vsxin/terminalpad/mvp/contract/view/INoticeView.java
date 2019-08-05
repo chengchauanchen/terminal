@@ -14,4 +14,6 @@ import java.util.List;
 public interface INoticeView extends IRefreshView<NoticeBean> {
 
     void notifyDataSetChanged(List<NoticeBean> noticeBeans);
+
+    void startHalfDuplexIndividualCall(NoticeBean bean);
 }

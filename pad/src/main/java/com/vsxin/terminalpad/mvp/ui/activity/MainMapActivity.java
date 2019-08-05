@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.support.annotation.RequiresApi;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MotionEvent;
@@ -17,21 +19,18 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
 
-import com.google.gson.Gson;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpActivity;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.js.TerminalPadJs;
-import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.presenter.MainMapPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMainMapView;
-import com.vsxin.terminalpad.mvp.entity.MemberInfoBean;
 import com.vsxin.terminalpad.mvp.ui.fragment.LayerMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.LiveFragment;
-import com.vsxin.terminalpad.mvp.ui.fragment.MemberInfoFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.NoticeFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.SmallMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.VsxFragment;
@@ -44,9 +43,32 @@ import cn.vsx.SpecificSDK.OperateReceiveHandlerUtilSync;
 import cn.vsx.SpecificSDK.instruction.groupCall.GroupCallInstruction;
 import cn.vsx.SpecificSDK.instruction.groupCall.SendGroupCallListener;
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.CallMode;
+import cn.vsx.hamster.common.MemberChangeType;
+import cn.vsx.hamster.common.ResponseGroupType;
+import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
+import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupByNoHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -64,13 +86,35 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
     @BindView(R.id.web_map)
     WebView web_map;
-
     @BindView(R.id.fl_layer_member_info)
     FrameLayout fl_layer_member_info;
-
-    @BindView(R.id.bnt_group_call)
-    Button bnt_group_call;
+//    @BindView(R.id.bnt_group_call)
+//    RelativeLayout bnt_group_call;
+    @BindView(R.id.iv_group_call_bg)
+    ImageView bnt_group_call;
+    @BindView(R.id.tx_ptt_time)
+    TextView tx_ptt_time;
+    @BindView(R.id.tx_ptt_group_name)
+    TextView tx_ptt_group_name;
     private GroupCallInstruction groupCallInstruction;
+
+    private int timeProgress;
+
+    private Handler mHandler = new Handler(Looper.getMainLooper()){
+        @Override
+        public void handleMessage(Message msg) {
+            if (msg.what == 1) {
+                timeProgress--;
+                if (timeProgress <= 0) {
+                    mHandler.removeMessages(1);
+                    pttUpDoThing();
+                } else {
+                    tx_ptt_time.setText(String.valueOf(timeProgress));
+                    mHandler.sendEmptyMessageDelayed(1, 1000);
+                }
+            }
+        }
+    };
 
     public static void startActivity(Context context) {
         context.startActivity(new Intent(context, MainMapActivity.class));
@@ -83,7 +127,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
-        //registReceiveHandler();
+        registReceiveHandler();
         inflaterFragment();
         initWebMap();
         initPPT();
@@ -192,7 +236,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //unregistReceiveHandler();
+        unregistReceiveHandler();
         groupCallInstruction.unBindReceiveHandler();
     }
 
@@ -201,6 +245,32 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     @SuppressLint("ClickableViewAccessibility")
     private void initPPT() {
         bnt_group_call.setOnTouchListener(new OnPttTouchListenerImplementation());
+//        bnt_group_call.setOnClickListener(v -> {
+////            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+////                Account account = DataUtil.getAccountByMemberNo(10000195, true);
+////                Member member = MemberUtil.getMemberForTerminalMemberType(account, TerminalMemberType.TERMINAL_PC);
+////                    //MyApplication.instance.isCallState = true;
+////                    boolean network = MyTerminalFactory.getSDK().hasNetwork();
+////                    if (network) {
+////                        if (member != null) {
+////                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+////                        } else {
+////                            ToastUtil.showToast(this, this.getString(R.string.text_get_member_info_fail));
+////                        }
+////                    } else {
+////                        ToastUtil.showToast(this, this.getString(R.string.text_network_connection_abnormal_please_check_the_network));
+////                    }
+////            });
+//            if(PadApplication.getPadApplication().isPttPress){
+//                PadApplication.getPadApplication().isPttPress = false;
+//                pttUpDoThing();
+//            }else{
+//                PadApplication.getPadApplication().isPttPress = true;
+//                pttDownDoThing();
+//            }
+//        });
+        setCurrentGroupView();
+        setPttText();
     }
 
     private final class OnPttTouchListenerImplementation implements OnTouchListener {
@@ -249,16 +319,16 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         if (PadApplication.getPadApplication().getIndividualState() != IndividualCallState.IDLE) {
 
         }
-//        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
-//        getLogger().info("PTT按下以后resultCode:" + resultCode);
-//        if (resultCode == BaseCommonCode.SUCCESS_CODE) {//允许组呼了
-//            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);
-//            change2PreSpeaking();
-//        } else if (resultCode == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {
-//            change2Waiting();
-//        } else {//组呼失败的提示
-//            ToastUtil.groupCallFailToast(this, resultCode);
-//        }
+        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
+        getLogger().info("PTT按下以后resultCode:" + resultCode);
+        if (resultCode == BaseCommonCode.SUCCESS_CODE) {//允许组呼了
+            com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);
+            change2PreSpeaking();
+        } else if (resultCode == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {
+            change2Waiting();
+        } else {//组呼失败的提示
+            ToastUtil.groupCallFailToast(this, resultCode);
+        }
 
         groupCallInstruction.startGroupCall(new SendGroupCallListener() {
             @Override
@@ -304,6 +374,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     //PTT抬起以后
     private void pttUpDoThing() {
         getLogger().info("ptt.pttUpDoThing执行了 isPttPress：" + PadApplication.getPadApplication().isPttPress);
+        mHandler.post(() -> tx_ptt_time.setText("PTT"));
         MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
         if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
             return;
@@ -317,7 +388,6 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         }
         MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
-
     }
 
 
@@ -329,11 +399,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
             return;
         }
         if (!GroupUtils.currentIsForbid()) {
-            if (!TextUtils.isEmpty(MyTerminalFactory.getSDK().getParam(Params.CURRENT_SPEAKER))) {
-
-            }
             //只有当前组不是禁呼的才恢复PPT的状态
-            bnt_group_call.setText(R.string.press_blank_space_talk_text);
+            bnt_group_call.setImageResource(R.drawable.bg_group_call_can_speak);
             bnt_group_call.setEnabled(true);
 //        talkback_add_icon.setEnabled(true);
         }
@@ -348,7 +415,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         if (PadApplication.getPadApplication().getGroupListenenState() == LISTENING) {
             return;
         }
-        bnt_group_call.setText(R.string.text_ready_to_speak);
+
+        bnt_group_call.setImageResource(R.drawable.bg_group_call_wait);
         bnt_group_call.setEnabled(true);
     }
 
@@ -357,7 +425,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
      */
     private void change2Waiting() {
         getLogger().info("ptt.change2Waiting准备说话");
-        bnt_group_call.setText(R.string.text_ready_to_speak);
+        bnt_group_call.setImageResource(R.drawable.bg_group_call_wait);
         bnt_group_call.setEnabled(true);
     }
 
@@ -375,96 +443,19 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                 return;
             }
             getLogger().info("扫描组在组呼");
-            bnt_group_call.setText(R.string.press_blank_space_talk_text);
+            bnt_group_call.setImageResource(R.drawable.bg_group_call_can_speak);
         } else {
-            bnt_group_call.setText(R.string.button_press_to_line_up);
+            bnt_group_call.setImageResource(R.drawable.bg_group_call_other_speaking);
             getLogger().info("主界面，ptt被禁了  isPttPress：" + PadApplication.getPadApplication().isPttPress);
         }
     }
-
-
-//    /**
-//     * 注册监听
-//     */
-//    public void registReceiveHandler(){
-//        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCallingCannotClickHandler);
-//        MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
-//    }
-//
-//    /**
-//     * 取消监听
-//     */
-//    public void unregistReceiveHandler(){
-//        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveCallingCannotClickHandler);
-//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
-//    }
-//
-//    /**
-//     * PTT按下时不可切换
-//     */
-//    private ReceiveCallingCannotClickHandler receiveCallingCannotClickHandler = new ReceiveCallingCannotClickHandler() {
-//
-//        @Override
-//        public void handler(final boolean isCannotCheck) {
-//            getLogger().info("change_group_show_area被禁了 ？ isCannotCheck：" + isCannotCheck);
-//        }
-//    };
-//
-//    /**
-//     * 主动方请求组呼的消息
-//     */
-//    private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
-//        @Override
-//        public void handler(final int methodResult, final String resultDesc, int groupId) {
-//            getLogger().info("主动方请求组呼的消息：" + methodResult + "-------" + resultDesc);
-//            getLogger().info("主动方请求组呼的消息：" + MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode());
-//
-//            if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
-//
-//                if (methodResult == BaseCommonCode.SUCCESS_CODE) {//请求成功，开始组呼
-//                    change2Speaking();
-//                    MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
-//                } else if (methodResult == SignalServerErrorCode.RESPONSE_GROUP_IS_DISABLED.getErrorCode()) {//响应组为禁用状态，低级用户无法组呼
-//
-//                    ToastUtil.showToast(MainMapActivity.this, resultDesc);
-//                    int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-//                    Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId);
-//                    if (!groupByGroupNo.isHighUser()) {
-//                        change2Forbid();
-//                    } else {
-//                        change2Silence();
-//                    }
-//                } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
-//                    ToastUtil.showToast(MainMapActivity.this, getString(R.string.cannot_talk));
-//                    change2Silence();
-//                } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
-//                    change2Waiting();
-//                } else {
-//                    if (PadApplication.getPadApplication().getGroupListenenState() != LISTENING) {
-//                        change2Silence();
-//                    } else {
-//                        isScanGroupCall = false;
-//                        change2Listening();
-//                    }
-//                }
-//            } else {
-//                ToastUtil.toast(MainMapActivity.this, resultDesc);
-//                if (PadApplication.getPadApplication().getGroupListenenState() != GroupCallListenState.LISTENING) {
-//                    change2Silence();
-//                } else {
-//                    change2Listening();
-//                }
-//            }
-//
-//        }
-//    };
 
     /**
      * 开始说话
      */
     private void change2Speaking() {
         getLogger().info("ptt.change2Speaking()松开结束");
-        bnt_group_call.setText(R.string.button_release_end);
+        bnt_group_call.setImageResource(R.drawable.bg_group_call_speaking);
         if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
             MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(true);
         }
@@ -475,11 +466,370 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
      */
     private void change2Forbid() {
         getLogger().info("ptt.change2Forbid()按住排队");
-        bnt_group_call.setText(R.string.text_no_group_calls);
+        bnt_group_call.setImageResource(R.drawable.bg_group_call_other_speaking);
         getLogger().info("主界面，ptt被禁了  isPttPress：" + PadApplication.getPadApplication().isPttPress);
         bnt_group_call.setEnabled(false);
         if (PadApplication.getPadApplication().isPttPress) {
             pttUpDoThing();
         }
+    }
+
+
+    private void setCurrentGroupView() {
+        int currentGroupNo = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+        String groupName = DataUtil.getGroupName(currentGroupNo);
+        String groupDepartmentName = DataUtil.getGroupDepartmentName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
+        if (android.text.TextUtils.isEmpty(groupName) || android.text.TextUtils.isEmpty(groupDepartmentName)) {
+            TerminalFactory.getSDK().getDataManager().getGroupByNo(currentGroupNo);
+        } else {
+            tx_ptt_group_name.setText(groupName);
+        }
+    }
+
+
+    private void setPttText() {
+        int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+        Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId);
+        //响应组  普通用户  不在响应状态
+        if (ResponseGroupType.RESPONSE_TRUE.toString().equals(groupByGroupNo.getResponseGroupType()) &&
+                !groupByGroupNo.isHighUser() &&
+                !TerminalFactory.getSDK().getGroupCallManager().getActiveResponseGroup().contains(currentGroupId)) {
+            change2Forbid();
+        } else if (PadApplication.getPadApplication().getGroupListenenState() != GroupCallListenState.IDLE) {
+            change2Listening();
+        } else if (PadApplication.getPadApplication().getGroupSpeakState() == GroupCallSpeakState.GRANTING) {
+            change2PreSpeaking();
+        } else if (PadApplication.getPadApplication().getGroupSpeakState() == GroupCallSpeakState.WAITING) {
+            change2Waiting();
+        } else if (PadApplication.getPadApplication().getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
+            change2Speaking();
+        } else {
+            change2Silence();
+        }
+    }
+
+    /**
+     * 网络连接状态
+     */
+    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
+
+        @Override
+        public void handler(final boolean connected) {
+            getLogger().info("主fragment收到服务是否连接的通知----->" + connected);
+            mHandler.post(() -> setCurrentGroupView());
+        }
+    };
+
+    /**
+     * 登陆响应的消息
+     */
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = new ReceiveLoginResponseHandler() {
+        @Override
+        public void handler(int resultCode, String resultDes) {
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                mHandler.post(() -> {
+                    //当前文件夹、组数据的显示设置
+                    setCurrentGroupView();
+                });
+            }
+        }
+    };
+
+    /**
+     * 更新所有数据信息
+     */
+    private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = new ReceiveUpdateAllDataCompleteHandler() {
+        @Override
+        public void handler(int errorCode, String errorDesc) {
+            if (errorCode == BaseCommonCode.SUCCESS_CODE) {
+                mHandler.post(() -> {
+                    //当前文件夹、组数据的显示设置
+                    setCurrentGroupView();
+                });
+            }
+        }
+    };
+
+    /**
+     * 更新配置信息
+     */
+    private ReceiveUpdateConfigHandler receiveUpdateConfigHandler = new ReceiveUpdateConfigHandler() {
+        @Override
+        public void handler() {
+            mHandler.post(() -> {
+                setCurrentGroupView();//当前的组和文件夹名字重置
+//                setVideoIcon();
+//                setScanGroupIcon();
+//                if (groupScanId != 0 && MyApplication.instance.getGroupListenenState() == LISTENING) {
+//                    setCurrentGroupScanView(groupScanId);
+//                }
+            });
+        }
+    };
+
+    /**
+     * 强制切组
+     */
+    private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler() {
+
+        @Override
+        public void handler(int memberId, int toGroupId, boolean forceSwitchGroup, String tempGroupType) {
+            if (!forceSwitchGroup) {
+                return;
+            }
+            getLogger().info("TalkbackFragment收到强制切组： toGroupId：" + toGroupId);
+            mHandler.post(() -> {
+                setCurrentGroupView();
+                if ((!MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN, false) && !MyTerminalFactory.getSDK().getParam(Params.GUARD_MAIN_GROUP, false))
+                        || PadApplication.getPadApplication().getGroupListenenState() != LISTENING) {
+                    change2Silence();
+                }
+            });
+        }
+    };
+
+    /**
+     * 主动方请求组呼的消息
+     */
+    private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
+        @Override
+        public void handler(final int methodResult, final String resultDesc, int groupId) {
+            getLogger().info("主动方请求组呼的消息：" + methodResult + "-------" + resultDesc);
+            getLogger().info("主动方请求组呼的消息：" + MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode());
+            if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
+
+                if (methodResult == BaseCommonCode.SUCCESS_CODE) {//请求成功，开始组呼
+                    mHandler.post(() -> {
+                        mHandler.removeMessages(1);
+                        timeProgress = 60;
+                        tx_ptt_time.setText(String.valueOf(timeProgress));
+                        mHandler.sendEmptyMessageDelayed(1, 1000);
+                        change2Speaking();
+                        MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
+                    });
+                } else if (methodResult == SignalServerErrorCode.RESPONSE_GROUP_IS_DISABLED.getErrorCode()) {//响应组为禁用状态，低级用户无法组呼
+
+                    ToastUtil.showToast(MainMapActivity.this, resultDesc);
+                    int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                    Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId);
+                    if (!groupByGroupNo.isHighUser()) {
+                        mHandler.post(() -> change2Forbid());
+                    } else {
+                        mHandler.post(() -> change2Silence());
+                    }
+                } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
+                    mHandler.post(() -> ToastUtil.showToast(MainMapActivity.this, getString(R.string.cannot_talk)));
+                    change2Silence();
+                } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
+                    mHandler.post(() -> change2Waiting());
+                } else {
+                    mHandler.post(() -> {
+                        if (PadApplication.getPadApplication().getGroupListenenState() != LISTENING) {
+                            change2Silence();
+                        } else {
+                            isScanGroupCall = false;
+                            change2Listening();
+                        }
+                    });
+                }
+            } else {
+                ToastUtil.toast(MainMapActivity.this, resultDesc);
+                mHandler.post(() -> {
+                    if (PadApplication.getPadApplication().getGroupListenenState() != GroupCallListenState.LISTENING) {
+                        change2Silence();
+                    } else {
+                        change2Listening();
+                    }
+                });
+            }
+        }
+    };
+
+    /**
+     * 主动方停止组呼的消息
+     */
+    private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = new ReceiveCeaseGroupCallConformationHander() {
+        @Override
+        public void handler(int resultCode, String resultDesc) {
+            getLogger().info("主动方停止组呼的消息ReceiveCeaseGroupCallConformationHander" + "/" + PadApplication.getPadApplication().getGroupListenenState());
+            mHandler.post(() -> {
+                if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
+                    if (PadApplication.getPadApplication().getGroupListenenState() == GroupCallListenState.LISTENING) {
+                        isScanGroupCall = false;
+                        change2Listening();
+                    } else {
+                        //如果是停止组呼
+                        PadApplication.getPadApplication().isPttPress = false;
+                        mHandler.removeMessages(1);
+                        timeProgress = 60;
+                        change2Silence();
+                    }
+                }
+            });
+        }
+    };
+
+    /**
+     * 被动方组呼来了
+     */
+    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
+        @Override
+        public void handler(int memberId, final String memberName, final int groupId, String groupName, CallMode currentCallMode) {
+            getLogger().info("触发了被动方组呼来了receiveGroupCallIncommingHandler:" + "curreneCallMode " + currentCallMode + "-----" + PadApplication.getPadApplication().getGroupSpeakState());
+            if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
+                ToastUtil.showToast(MainMapActivity.this, getString(R.string.text_has_no_group_call_listener_authority));
+            }
+            mHandler.post(() -> {
+                //是组扫描的组呼,且当前组没人说话，变文件夹和组名字
+                if (groupId != MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)) {
+                    isScanGroupCall = true;
+//                    groupScanId = groupId;
+//                    setCurrentGroupScanView(groupId, groupName);
+                }
+                //是当前组的组呼,且扫描组有人说话，变文件夹和组名字
+                if (groupId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0) && PadApplication.getPadApplication().getGroupListenenState() == LISTENING) {
+                    isScanGroupCall = false;
+//                    setCurrentGroupScanView(groupId, groupName);
+                }
+                MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, memberName);
+            });
+
+//            speakingId = groupId;
+//            speakingName = memberName;
+
+            if (currentCallMode == CallMode.GENERAL_CALL_MODE) {
+                mHandler.post(() -> {
+                    if (PadApplication.getPadApplication().getGroupSpeakState() == GroupCallSpeakState.GRANTING
+                            ||PadApplication.getPadApplication().getGroupSpeakState() == GroupCallSpeakState.WAITING) {
+                        change2Waiting();
+                    } else if (PadApplication.getPadApplication().getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
+                        //什么都不用做
+                    } else {
+                        change2Listening();
+                    }
+                });
+            }
+        }
+    };
+
+    /**
+     * 被动方组呼停止
+     */
+    private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler() {
+
+        @Override
+        public void handler(int reasonCode) {
+            mHandler.post(() -> {
+//                groupScanId = 0;
+                MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
+                setCurrentGroupView();
+                getLogger().info("被动方停止组呼" + "/" + PadApplication.getPadApplication().getGroupListenenState() + PadApplication.getPadApplication().isPttPress);
+                if (MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE) {
+                    if (PadApplication.getPadApplication().isPttPress && PadApplication.getPadApplication().getGroupSpeakState() == GroupCallSpeakState.IDLE) {
+                        //别人停止组呼，如果自己还是在按着，重新请求组呼
+                        change2Speaking();
+                    } else {
+                        change2Silence();
+                    }
+                }
+            });
+        }
+    };
+
+    private ReceiveResponseGroupActiveHandler receiveResponseGroupActiveHandler = new ReceiveResponseGroupActiveHandler() {
+        @Override
+        public void handler(boolean isActive, int responseGroupId) {
+            //如果时间到了，还在响应组会话界面，将PTT禁止
+            Group groupByGroupNo = TerminalFactory.getSDK().getGroupByGroupNo(responseGroupId);
+            if (TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0) == responseGroupId && !isActive &&
+                    !groupByGroupNo.isHighUser()) {
+                mHandler.post(() -> change2Forbid());
+            }
+        }
+    };
+
+    private ReceiveGetGroupByNoHandler receiveGetGroupByNoHandler = group -> mHandler.post(new Runnable() {
+        @Override
+        public void run() {
+            mHandler.post(() -> {
+                tx_ptt_group_name.setText(group.getName());
+            });
+        }
+    });
+
+    /**
+     * 切组后的消息回调
+     */
+    private ReceiveChangeGroupHandler receiveChangeGroupHandler = new ReceiveChangeGroupHandler() {
+        @Override
+        public void handler(final int errorCode, String errorDesc) {
+            mHandler.post(() -> {
+                setCurrentGroupView();
+                setPttText();
+            });
+        }
+    };
+
+    // 警情临时组处理完成，终端需要切到主组，刷新通讯录
+    private ReceiveResponseChangeTempGroupProcessingStateHandler receiveResponseChangeTempGroupProcessingStateHandler = (resultCode, resultDesc) -> {
+        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+            int mainGroupId = MyTerminalFactory.getSDK().getParam(Params.MAIN_GROUP_ID, 0);
+            MyTerminalFactory.getSDK().getGroupManager().changeGroup(mainGroupId);
+        }
+    };
+
+    /**
+     * 成员信息改变
+     */
+    private ReceiveNotifyMemberChangeHandler receiveNotifyMemberChangeHandler = new ReceiveNotifyMemberChangeHandler() {
+
+        @Override
+        public void handler(MemberChangeType memberChangeType) {
+            getLogger().info("触发了receiveNotifyMemberChangeHandler：" + memberChangeType);
+//            online_number = MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers().size();
+            if (memberChangeType == MemberChangeType.MEMBER_ACTIVE_GROUP_CALL) {
+                mHandler.post(() -> change2Silence());
+
+            } else if (memberChangeType == MemberChangeType.MEMBER_PROHIBIT_GROUP_CALL) {
+                mHandler.post(() -> change2Forbid());
+            }
+//            mHandler.post(() -> tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members), online_number)));
+
+
+        }
+    };
+
+    public void registReceiveHandler() {
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseGroupActiveHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGetGroupByNoHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberChangeHandler);
+    }
+
+    public void unregistReceiveHandler() {
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseGroupActiveHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetGroupByNoHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
     }
 }

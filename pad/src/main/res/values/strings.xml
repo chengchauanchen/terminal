@@ -146,4 +146,11 @@
     <string name="no_recorde_permisson">没有录音权限</string>
     <string name="i_pre_speaking">我准备说话</string>
     <string name="no_get_temporary_group_id">没有获取到临时组id</string>
+    <string name="text_please_open_wuhan_police_work_first">请先打开武汉移动警务！</string>
+    <string name="text_client_id_is_empty">client_id 为空！</string>
+    <string name="text_client_id_is_illegal">client_id 非法！</string>
+    <string name="text_authorization_code_illegal">授权码 非法！</string>
+    <string name="text_unknown_error">未知错误！</string>
+    <string name="text_access_token_expire">access_token过期！</string>
+    <string name="text_unauthorized_resources">资源未授权！</string>
 </resources>

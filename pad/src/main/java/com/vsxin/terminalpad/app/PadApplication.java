@@ -100,6 +100,9 @@ public class PadApplication extends App {
         mAppStatus = aStatus;
     }
 
+    public void setTerminalMemberType(){
+        SpecificSDK.setTerminalMemberType(TerminalMemberType.TERMINAL_PAD.toString());
+    }
 
     public VideoLivePlayingState getVideoLivePlayingState(){
         VideoLivePlayingStateMachine liveStateMachine = TerminalFactory.getSDK().getLiveManager().getVideoLivePlayingStateMachine();

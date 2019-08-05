@@ -25,6 +25,7 @@ import java.util.Map;
 import cn.vsx.SpecificSDK.OperateReceiveHandlerUtilSync;
 import cn.vsx.SpecificSDK.StateMachineUtils;
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.IndividualCallType;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.util.JsonParam;
@@ -180,6 +181,7 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
             //刷新
             getView().notifyDataSetChanged(noticeBeans);
 
+            callAnswer(noticeBean,individualCallType);
         } else {//对方拒绝
             getView().getLogger().info("NoticePresenter 对方拒绝了你的个呼:" + resultCode + resultDesc + "callType;" + individualCallType);
 
@@ -194,6 +196,8 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
             noticeBean.setStopTime(TimeUtil.getCurrentTime());
             //刷新
             getView().notifyDataSetChanged(noticeBeans);
+            ToastUtil.showToast(getContext(), resultDesc);
+            stopPromptSound();
         }
     };
 
@@ -230,6 +234,17 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
     private void stopPromptSound() {
         PromptManager.getInstance().IndividualHangUpRing();
         PromptManager.getInstance().delayedStopRing();
+    }
+
+    /**
+     * @param bean
+     * @param individualCallType
+     */
+    private void callAnswer(NoticeBean bean,int individualCallType){
+        //individualCallStopped();
+        if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){
+            getView().startHalfDuplexIndividualCall(bean);
+        }
     }
 
     public void registReceiveHandler() {

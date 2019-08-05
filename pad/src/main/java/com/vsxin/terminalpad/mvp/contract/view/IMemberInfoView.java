@@ -15,5 +15,4 @@ public interface IMemberInfoView extends IBaseView {
 
     void showChooseDevicesDialog(Account account, int type);
 
-    void startHalfDuplexIndividualCall();
 }

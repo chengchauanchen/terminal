@@ -2,12 +2,20 @@ package com.vsxin.terminalpad.mvp.ui.activity;
 
 import android.Manifest.permission;
 import android.app.AlertDialog;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -33,10 +41,24 @@ import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
+import cn.com.cybertech.pdk.UserInfo;
+import cn.com.cybertech.pdk.api.IPstoreHandler;
+import cn.com.cybertech.pdk.api.PstoreAPIImpl;
+import cn.com.cybertech.pdk.api.UserObject;
+import cn.com.cybertech.pdk.auth.Oauth2AccessToken;
+import cn.com.cybertech.pdk.auth.PstoreAuth;
+import cn.com.cybertech.pdk.auth.PstoreAuthListener;
+import cn.com.cybertech.pdk.auth.sso.SsoHandler;
+import cn.com.cybertech.pdk.exception.PstoreAuthException;
+import cn.com.cybertech.pdk.exception.PstoreException;
+import cn.com.cybertech.pdk.exception.PstoreUserException;
+import cn.com.cybertech.pdk.utils.GsonUtils;
 import cn.vsx.SpecificSDK.SpecificSDK;
+import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -52,7 +74,10 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHan
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.tools.DeleteData;
+import ptt.terminalsdk.tools.DialogUtil;
 import ptt.terminalsdk.tools.ToastUtil;
+import sec.vpn.ISecVpnService;
 
 /**
  * @author qzw
@@ -77,7 +102,9 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
     @BindView(R.id.et_user_name)
     EditText et_user_name;//姓名
 
-
+    private String apkType;
+    // 安全VPN服务名称
+    private static final String SEC_VPN_SERVICE_ACTION_NAME = "sec.vpn.service";
     @Override
     protected int getLayoutResID() {
         return R.layout.activity_register;
@@ -129,7 +156,11 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
                 registerUser();
             }
         });
-
+        apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
+        //襄阳包就启动安全VPN服务
+        if(apkType.equals(AuthManagerTwo.XIANGYANGPOLICESTORE) || apkType.equals(AuthManagerTwo.XIANGYANG)){
+            startVPNService();
+        }
         judgePermission();
     }
 
@@ -211,14 +242,59 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
                 netWorkDialog.dismiss();
             }
             changeProgressMsg(getString(R.string.text_get_info_now));
-            //authorize();//取第三方app（武汉警务平台）认证并获取user信息
-            requestDrawOverLays();
+            //襄阳包就启动安全VPN服务
+            if(apkType.equals(AuthManagerTwo.XIANGYANGPOLICESTORE) || apkType.equals(AuthManagerTwo.XIANGYANG)){
+                startVPNService();
+            }else {
+                authorize();//认证并获取user信息
+                requestDrawOverLays();
+            }
         } else {
             if (netWorkDialog != null && !netWorkDialog.isShowing()) {
                 netWorkDialog.show();
             }
         }
     }
+
+    private void startVPNService(){
+        try{
+            // 绑定安全VPN服务
+            Intent intent = new Intent();
+            intent.setAction(SEC_VPN_SERVICE_ACTION_NAME);
+            //试一下sec.vpn这个包名
+            Intent intent1 = new Intent(createExplicitFromImplicitIntent(this,intent));
+            startService(intent1);
+            bindService(intent1, secVpnServiceConnection, BIND_AUTO_CREATE);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    private ISecVpnService secVpnService;
+    private ServiceConnection secVpnServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service)
+        {
+            secVpnService = ISecVpnService.Stub.asInterface(service);
+            try{
+                //获取身份证号
+                String userID = secVpnService.getTfInfo().getUserID();
+                String userName = secVpnService.getTfInfo().getUserName();
+                logger.info("获取到身份证号为："+userID+"------姓名："+userName);
+                MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, userID);
+                MyTerminalFactory.getSDK().putParam(UrlParams.NAME, userName);
+                MyTerminalFactory.getSDK().putParam(UrlParams.XIANGYANG_STORE,true);
+                requestDrawOverLays();
+            }catch(RemoteException e){
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            secVpnService = null;
+        }
+    };
 
     private AlertDialog netWorkDialog;
     public static final int OPEN_NET_CODE = 1236;
@@ -283,6 +359,16 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
     }
 
     private void start() {
+        //vpn没有启动时先启动VPN
+        try{
+            if(secVpnService != null && !secVpnService.sv_isStarted()){
+//              secVpnService.sv_setServerAddr("20.50.0.11", "10009");
+                secVpnService.sv_start();
+            }
+        }catch(RemoteException e){
+            e.printStackTrace();
+        }
+
         //sdk提示音管理类
         PromptManager.getInstance().start();
         //进入注册界面了，先判断有没有认证地址
@@ -336,6 +422,267 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case CheckMyPermission.REQUEST_EXTERNAL_STORAGE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission Granted
+                    judgePermission();
+                } else {
+                    // Permission Denied
+                    permissionDenied(permission.WRITE_EXTERNAL_STORAGE);
+                }
+                break;
+            case CheckMyPermission.REQUEST_PHONE_STATE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission Granted
+                    judgePermission();
+                } else {
+                    // Permission Denied
+                    permissionDenied(permission.READ_PHONE_STATE);
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
+    }
+
+    private void permissionDenied(final String permissionName) {
+        new DialogUtil() {
+            @Override
+            public CharSequence getMessage() {
+//                            return "4GPTT需要访问您设备上的照片、媒体内容和文件，否则无法工作；去打开权限?";
+                return CheckMyPermission.getDesForPermission(permissionName);
+            }
+
+            @Override
+            public Context getContext() {
+                return RegisterActivity.this;
+            }
+
+            @Override
+            public void doConfirmThings() {
+                //点击确定时跳转到设置界面
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                intent.setData(uri);
+                startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
+
+            }
+
+            @Override
+            public void doCancelThings() {
+                RegisterActivity.this.finish();
+            }
+        }.showDialog();
+    }
+
+    // 替换为应用在PSTORE中注册时生成的值
+    protected static final String CLIENT_ID = "40B2984FC648ECA7F4CEE84C0F234F80";//"B8994F7212536DEBB21D8BE1FDE75F22"
+
+    private void authorize() {
+        Map<String, String> userInfo = UserInfo.getUserInfo(RegisterActivity.this);
+
+        logger.info("请求userInfo：" + userInfo);
+
+        if (userInfo != null) {
+            if (!(userInfo.get("account") + "").equals(MyTerminalFactory.getSDK().getParam(UrlParams.ACCOUNT, ""))) {
+                logger.error("获取到的警号变了，删除所有数据！！！！");
+                DeleteData.deleteAllData();
+            }
+            TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, true);
+            PadApplication.getPadApplication().setApkType();
+            PadApplication.getPadApplication().setAppKey();
+            PadApplication.getPadApplication().setTerminalMemberType();
+            MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, userInfo.get("account") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.NAME, userInfo.get("name") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.PHONE, userInfo.get("phone") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_ID, userInfo.get("dept_id") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_NAME, userInfo.get("dept_name") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, userInfo.get("idcard") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.SEX, userInfo.get("sex") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.EMAIL, userInfo.get("email") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.AVATAR_URL, userInfo.get("avatar_url") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.COMPANY, userInfo.get("company") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.POSITION, userInfo.get("position") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.ROLE_CODE, userInfo.get("role_code") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.ROLE_NAME, userInfo.get("role_name") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.PRIVILEGE_CODE, userInfo.get("privilege_code") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.PRIVILEGE_NAME, userInfo.get("privilege_name") + "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.EXTRA_1, userInfo.get("extra_1") + "");
+
+        } else {
+            TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, false);
+            PadApplication.getPadApplication().setTerminalMemberType();
+            String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,AuthManagerTwo.POLICESTORE);
+            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)|| AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)){
+                ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_please_open_wuhan_police_work_first));
+            }
+
+        }
+    }
+
+    private void reauthorize() {
+        PstoreAuth auth = new PstoreAuth(this, CLIENT_ID);
+        SsoHandler mSsoHandler = new SsoHandler(this, auth);
+        mSsoHandler.authorizeRefresh(new AuthListener());
+    }
+
+    private PstoreAPIImpl pstoreAPI = new PstoreAPIImpl();
+
+    /**
+     * onComplete回掉后执行：
+     * 1. 使用access_token去APP SERVER登录;
+     * 2. 若未绑定账号，则先绑定账号；
+     * 3. 若有其他问题，则解决；
+     * 4. 进入APP。
+     * 具体流程见文档（android-pstore-sdk-v2.xx）2.1流程图。
+     */
+    class AuthListener implements PstoreAuthListener {
+
+        @Override
+        public void onComplete(Oauth2AccessToken accessToken) {
+            logger.info("onComplete-------------->" + accessToken.toBundle());
+            pstoreAPI.requestUserInfo(RegisterActivity.this, response, CLIENT_ID, accessToken.getToken());
+        }
+
+        @Override
+        public void onPstoreException(PstoreException pstoreException) {
+            if (pstoreException instanceof PstoreAuthException) {
+                PstoreAuthException e = (PstoreAuthException) pstoreException;
+                switch (e.getErrorCode()) {
+                    // client_id 为空
+                    case PstoreAuthException.ERROR_CLIENTID_NULL:
+                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_client_id_is_empty));
+                        break;
+                    // client_id 非法
+                    case PstoreAuthException.ERROR_CLIENTID_ILLEGAL:
+                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_client_id_is_illegal));
+                        break;
+                    // 授权码非法
+                    case PstoreAuthException.ERROR_GRANT_CODE_ILLEGAL:
+                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_authorization_code_illegal));
+                        break;
+                    default:
+                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_unknown_error));
+                        break;
+                }
+                logger.error("AuthPstoreAuthException：" + pstoreException.getMessage());
+            } else {
+                // Unknown exception. pstoreException.getMessage()
+                logger.error("Auth未知错误：" + pstoreException.getMessage());
+            }
+            finishActivity();
+        }
+
+        @Override
+        public void onCancel() {
+        }
+    }
+
+    private IPstoreHandler.Response response = new IPstoreHandler.Response() {
+        @Override
+        public void onResponse(Bundle bundle) {
+            Map<String, String> userInfo = UserInfo.getUserInfo(RegisterActivity.this);
+            logger.info("请求userInfo：" + userInfo);
+
+            String userJson = GsonUtils.toJson(UserInfo.getUser(RegisterActivity.this));
+            logger.info("请求userJson：" + userJson);
+
+            logger.error("请求user0：" + bundle.toString());
+            UserObject user = UserObject.fromBundle(bundle);
+            logger.info("请求user1：" + user);
+            PadApplication.getPadApplication().setTerminalMemberType();
+            MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, user.getAccount());
+            MyTerminalFactory.getSDK().putParam(UrlParams.NAME, user.getName());
+            MyTerminalFactory.getSDK().putParam(UrlParams.PHONE, user.getPhone());
+            MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_ID, user.getDeptId());
+            MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_NAME, user.getDeptName());
+            MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.SEX, "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.EMAIL, "");
+//            MyTerminalFactory.getSDK().putParam(UrlParams.AVATAR_URL, "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.COMPANY, "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.POSITION, "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.ROLE_CODE, "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.ROLE_NAME, "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.PRIVILEGE_CODE, "");
+            MyTerminalFactory.getSDK().putParam(UrlParams.PRIVILEGE_NAME, "");
+        }
+
+        @Override
+        public void onPstoreException(PstoreException e) {
+            if (e instanceof PstoreUserException) {
+                PstoreUserException e1 = (PstoreUserException) e;
+                logger.error("请求user的错误码：" + e1.getErrorCode());
+
+                switch (e1.getErrorCode()) {
+                    // access_token过期
+                    case PstoreUserException.ERROR_ACCESS_TOKEN_EXPIRED:
+                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_access_token_expire));
+                        reauthorize();
+                        break;
+                    // 资源未授权
+                    case PstoreUserException.ERROR_RES_UNAUTHORIZED:
+                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_unauthorized_resources));
+                        break;
+                    // 未知错误
+                    case PstoreUserException.ERROR_UNKONWN:
+                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_unknown_error));
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                // Unknown exception. pstoreException.getMessage()
+                logger.error("请求user未知错误：" + e.getMessage());
+            }
+            finishActivity();
+        }
+    };
+
+    private void finishActivity() {
+        myHandler.postDelayed(() -> finish(), 2000);
+    }
+
+    /***
+     * Android L (lollipop, API 21) introduced a new problem when trying to invoke implicit intent,
+     * "java.lang.IllegalArgumentException: Service Intent must be explicit"
+     *
+     * If you are using an implicit intent, and know only 1 target would answer this intent,
+     * This method will help you turn the implicit intent into the explicit form.
+     *
+     * Inspired from SO answer: http://stackoverflow.com/a/26318757/1446466
+     * @param context
+     * @param implicitIntent - The original implicit intent
+     * @return Explicit Intent created from the implicit original intent
+     */
+    public static Intent createExplicitFromImplicitIntent(Context context, Intent implicitIntent) {
+        // Retrieve all services that can match the given intent
+        PackageManager pm = context.getPackageManager();
+        List<ResolveInfo> resolveInfo = pm.queryIntentServices(implicitIntent, 0);
+
+        // Make sure only one match was found
+        if (resolveInfo == null || resolveInfo.size() != 1) {
+            return null;
+        }
+
+        // Get component info and create ComponentName
+        ResolveInfo serviceInfo = resolveInfo.get(0);
+        String packageName = serviceInfo.serviceInfo.packageName;
+        String className = serviceInfo.serviceInfo.name;
+        ComponentName component = new ComponentName(packageName, className);
+
+        // Create a new intent. Use the old one for extras and such reuse
+        Intent explicitIntent = new Intent(implicitIntent);
+
+        // Set the component to be explicit
+        explicitIntent.setComponent(component);
+
+        return explicitIntent;
+    }
+
     /**
      * 获取可用的IP列表
      * 回调在 子线程
@@ -363,7 +710,6 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             hideProgressDialog();
         }
     };
-
 
     /**
      * 认证回调

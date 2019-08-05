@@ -10,6 +10,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity
             android:name="com.vsxin.terminalpad.MainActivity"
             android:screenOrientation="landscape" />
@@ -33,9 +34,10 @@
         <!-- ########################惟实信配置项###############################-->
         <meta-data
             android:name="APKTYPE"
-            android:value="common"/>
+            android:value="${apk_type}" />
+            <!--android:value="common"/>-->
         <!--看代码中好像没有给其赋值，都注释掉了-->
-        <!--android:value="${apk_type}" />-->
+
         <!--平台KEY-->
         <meta-data
             android:name="cn.vsx.sdk.API_KEY"

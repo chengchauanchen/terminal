@@ -5,6 +5,7 @@ props.load(project.rootProject.file('local.properties').newDataInputStream())
 
 android {
     compileSdkVersion 28
+    flavorDimensions "default"
     defaultConfig {
         applicationId rootProject.ext.android["applicationId"]
         minSdkVersion rootProject.ext.android["minSdkVersion"]
@@ -43,6 +44,29 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
             signingConfig signingConfigs.keystore
         }
+    }
+
+    productFlavors {
+        common {
+//            buildConfigField "String" ,"apk_type","common"
+        }
+        policeTest {
+//            buildConfigField "String", "apk_type","policeTest"
+        }
+        policeStore {
+//            buildConfigField "String", "apk_type","policeStore"
+        }
+        xiangYang {
+//            buildConfigField "String" ,"apk_type","common"
+        }
+        xiangYangPoliceStore {
+//            buildConfigField "String", "apk_type","policeStore"
+        }
+        tejing{
+        }
+    }
+    productFlavors.all {
+        flavor -> flavor.manifestPlaceholders = [apk_type: name]
     }
     //用于支持lambda表达式
     compileOptions {

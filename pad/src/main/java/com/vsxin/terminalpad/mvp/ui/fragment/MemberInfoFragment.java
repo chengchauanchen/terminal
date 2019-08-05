@@ -1,6 +1,5 @@
 package com.vsxin.terminalpad.mvp.ui.fragment;
 
-import android.Manifest;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -19,14 +18,10 @@ import com.vsxin.terminalpad.mvp.contract.presenter.MemberInfoPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMemberInfoView;
 import com.vsxin.terminalpad.mvp.entity.MemberInfoBean;
 import com.vsxin.terminalpad.mvp.ui.activity.MainMapActivity;
-import com.vsxin.terminalpad.utils.Constants;
-import com.vsxin.terminalpad.utils.NumberUtil;
 
 import butterknife.BindView;
 import cn.vsx.hamster.common.TerminalMemberType;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 
 /**
  * @author qzw
@@ -38,8 +33,6 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
     private static final String PARAM_JSON = "paramJson";
     private static final String PARAM_ENUM = "paramEnum";
     private static final String FRAGMENT_TAG = "memberInfo";
-
-    private static final String HDICFragment_TAG = "halfDuplexIndividualCallFragment";
 
     @BindView(R.id.iv_close)
     ImageView iv_close;
@@ -92,7 +85,7 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
             public void onClick(View v) {
 //                getPresenter().goToChooseDevices(memberInfo.getNo(), ChooseDevicesDialog.TYPE_CALL_PRIVATE);
                 //getPresenter().goToChooseDevices("10000120", ChooseDevicesDialog.TYPE_CALL_PRIVATE);
-                getPresenter().startIndividualCall("10000367", TerminalMemberType.TERMINAL_PHONE);
+                getPresenter().startIndividualCall("10000195", TerminalMemberType.TERMINAL_PHONE);
                 //getPresenter().startIndividualCall("10000367", TerminalMemberType.TERMINAL_PHONE);
             }
         });
@@ -143,23 +136,6 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
                 getPresenter().showChooseDevicesDialog(account, type);
             }
         });
-    }
-
-    /**
-     * 半双工个呼
-     */
-    @Override
-    public void startHalfDuplexIndividualCall() {
-        HalfDuplexIndividualCallFragment fragment = new HalfDuplexIndividualCallFragment();
-        Bundle args = new Bundle();
-        args.putString(Constants.MEMBER_NAME, (memberInfo!=null)?memberInfo.getName():"");
-        args.putString(Constants.MEMBER_ID, (memberInfo!=null)?memberInfo.getNo():"");
-        fragment.setArguments(args);
-        FragmentManager supportFragmentManager = getActivity().getSupportFragmentManager();
-        //replace 会将上一个Fragment干掉
-        FragmentTransaction fragmentTransaction = supportFragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fl_layer_member_info, fragment, HDICFragment_TAG);
-        fragmentTransaction.commit();
     }
 
     @Override
