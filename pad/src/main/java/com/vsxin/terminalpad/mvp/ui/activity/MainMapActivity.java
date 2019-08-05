@@ -21,6 +21,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpActivity;
@@ -34,6 +35,7 @@ import com.vsxin.terminalpad.mvp.ui.fragment.LiveFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.NoticeFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.SmallMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.VsxFragment;
+import com.vsxin.terminalpad.receiveHandler.ReceiveUpdateMainFrgamentPTTButtonHandler;
 import com.vsxin.terminalpad.utils.HandleIdUtil;
 
 import org.apache.http.util.TextUtils;
@@ -88,8 +90,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     WebView web_map;
     @BindView(R.id.fl_layer_member_info)
     FrameLayout fl_layer_member_info;
-//    @BindView(R.id.bnt_group_call)
-//    RelativeLayout bnt_group_call;
+    @BindView(R.id.rl_group_call)
+    RelativeLayout rl_group_call;
     @BindView(R.id.iv_group_call_bg)
     ImageView bnt_group_call;
     @BindView(R.id.tx_ptt_time)
@@ -99,18 +101,20 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     private GroupCallInstruction groupCallInstruction;
 
     private int timeProgress;
+    //组呼倒计时
+    private static final int HANDLER_GROUP_TIME = 1;
 
     private Handler mHandler = new Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(Message msg) {
-            if (msg.what == 1) {
+            if (msg.what == HANDLER_GROUP_TIME) {
                 timeProgress--;
                 if (timeProgress <= 0) {
-                    mHandler.removeMessages(1);
+                    mHandler.removeMessages(HANDLER_GROUP_TIME);
                     pttUpDoThing();
                 } else {
                     tx_ptt_time.setText(String.valueOf(timeProgress));
-                    mHandler.sendEmptyMessageDelayed(1, 1000);
+                    mHandler.sendEmptyMessageDelayed(HANDLER_GROUP_TIME, 1000);
                 }
             }
         }
@@ -244,31 +248,31 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
     @SuppressLint("ClickableViewAccessibility")
     private void initPPT() {
-        bnt_group_call.setOnTouchListener(new OnPttTouchListenerImplementation());
-//        bnt_group_call.setOnClickListener(v -> {
-////            TerminalFactory.getSDK().getThreadPool().execute(() -> {
-////                Account account = DataUtil.getAccountByMemberNo(10000195, true);
-////                Member member = MemberUtil.getMemberForTerminalMemberType(account, TerminalMemberType.TERMINAL_PC);
-////                    //MyApplication.instance.isCallState = true;
-////                    boolean network = MyTerminalFactory.getSDK().hasNetwork();
-////                    if (network) {
-////                        if (member != null) {
-////                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
-////                        } else {
-////                            ToastUtil.showToast(this, this.getString(R.string.text_get_member_info_fail));
-////                        }
-////                    } else {
-////                        ToastUtil.showToast(this, this.getString(R.string.text_network_connection_abnormal_please_check_the_network));
-////                    }
-////            });
-//            if(PadApplication.getPadApplication().isPttPress){
-//                PadApplication.getPadApplication().isPttPress = false;
-//                pttUpDoThing();
-//            }else{
-//                PadApplication.getPadApplication().isPttPress = true;
-//                pttDownDoThing();
-//            }
-//        });
+//        bnt_group_call.setOnTouchListener(new OnPttTouchListenerImplementation());
+        bnt_group_call.setOnClickListener(v -> {
+//            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+//                Account account = DataUtil.getAccountByMemberNo(10000195, true);
+//                Member member = MemberUtil.getMemberForTerminalMemberType(account, TerminalMemberType.TERMINAL_PC);
+//                    //MyApplication.instance.isCallState = true;
+//                    boolean network = MyTerminalFactory.getSDK().hasNetwork();
+//                    if (network) {
+//                        if (member != null) {
+//                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+//                        } else {
+//                            ToastUtil.showToast(this, this.getString(R.string.text_get_member_info_fail));
+//                        }
+//                    } else {
+//                        ToastUtil.showToast(this, this.getString(R.string.text_network_connection_abnormal_please_check_the_network));
+//                    }
+//            });
+            if(PadApplication.getPadApplication().isPttPress){
+                PadApplication.getPadApplication().isPttPress = false;
+                pttUpDoThing();
+            }else{
+                PadApplication.getPadApplication().isPttPress = true;
+                pttDownDoThing();
+            }
+        });
         setCurrentGroupView();
         setPttText();
     }
@@ -374,7 +378,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     //PTT抬起以后
     private void pttUpDoThing() {
         getLogger().info("ptt.pttUpDoThing执行了 isPttPress：" + PadApplication.getPadApplication().isPttPress);
-        mHandler.post(() -> tx_ptt_time.setText("PTT"));
+        mHandler.post(() -> tx_ptt_time.setText(getString(R.string.text_ptt)));
         MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
         if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
             return;
@@ -600,10 +604,10 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
                 if (methodResult == BaseCommonCode.SUCCESS_CODE) {//请求成功，开始组呼
                     mHandler.post(() -> {
-                        mHandler.removeMessages(1);
+                        mHandler.removeMessages(HANDLER_GROUP_TIME);
                         timeProgress = 60;
                         tx_ptt_time.setText(String.valueOf(timeProgress));
-                        mHandler.sendEmptyMessageDelayed(1, 1000);
+                        mHandler.sendEmptyMessageDelayed(HANDLER_GROUP_TIME, 1000);
                         change2Speaking();
                         MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
                     });
@@ -660,8 +664,9 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                     } else {
                         //如果是停止组呼
                         PadApplication.getPadApplication().isPttPress = false;
-                        mHandler.removeMessages(1);
+                        mHandler.removeMessages(HANDLER_GROUP_TIME);
                         timeProgress = 60;
+                        tx_ptt_time.setText(getString(R.string.text_ptt));
                         change2Silence();
                     }
                 }
@@ -751,9 +756,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     private ReceiveGetGroupByNoHandler receiveGetGroupByNoHandler = group -> mHandler.post(new Runnable() {
         @Override
         public void run() {
-            mHandler.post(() -> {
-                tx_ptt_group_name.setText(group.getName());
-            });
+            mHandler.post(() -> tx_ptt_group_name.setText(group.getName()));
         }
     });
 
@@ -799,6 +802,17 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         }
     };
 
+    /**
+     * 更新ptt按钮的显示和隐藏
+     */
+    private ReceiveUpdateMainFrgamentPTTButtonHandler receiveUpdateMainFrgamentPTTButtonHandler = new ReceiveUpdateMainFrgamentPTTButtonHandler() {
+
+        @Override
+        public void handler(boolean show) {
+                mHandler.post(() -> rl_group_call.setVisibility(show?View.VISIBLE:View.GONE));
+        }
+    };
+
     public void registReceiveHandler() {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
@@ -814,6 +828,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberChangeHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateMainFrgamentPTTButtonHandler);
     }
 
     public void unregistReceiveHandler() {
@@ -831,5 +846,6 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateMainFrgamentPTTButtonHandler);
     }
 }

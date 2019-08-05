@@ -65,7 +65,7 @@
                 android:layout_marginTop="93px"/>
 
             <RelativeLayout
-                android:id="@+id/bnt_group_call"
+                android:id="@+id/rl_group_call"
                 android:layout_width="180px"
                 android:layout_height="180px"
                 android:layout_alignParentRight="true"
