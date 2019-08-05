@@ -17,6 +17,7 @@ import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeInCallEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeInOrOutEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeOutCallEnum;
+import com.vsxin.terminalpad.mvp.contract.constant.NoticeOutLiveEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.presenter.NoticePresenter;
 import com.vsxin.terminalpad.mvp.entity.NoticeBean;
@@ -172,12 +173,31 @@ public class NoticeAdapter extends BaseRecycleViewAdapter<NoticeBean, RecyclerVi
 
     private void bindLiveViewHolder(LiveViewHolder liveViewHolder, NoticeBean noticeBean, int position) {
         liveViewHolder.tv_name.setText(noticeBean.getMemberName());
-        liveViewHolder.tv_accept_live.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {//接收直播
-                noticePresenter.acceptLive(noticeBean);
+        liveViewHolder.tv_member_no.setText(noticeBean.getMemberId() + "");
+
+//        liveViewHolder.tv_accept_live.setOnClickListener(new OnClickListener() {
+//            @Override
+//            public void onClick(View v) {//接收直播
+//                noticePresenter.acceptLive(noticeBean);
+//            }
+//        });
+
+        if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//主动 请求他人上报
+            if (noticeBean.getOutLive() == NoticeOutLiveEnum.LIVE_OUT_REPORT) {//主动 上报
+            } else if (noticeBean.getOutLive() == NoticeOutLiveEnum.LIVE_OUT_INVITE) {//主动 邀请他人直播 邀请中
+                liveViewHolder.tv_accept_live.setText("正在请求");
+            } else if (noticeBean.getOutLive() == NoticeOutLiveEnum.LIVE_OUT_INVITE_REFUSE) {//主动 邀请他人直播 邀请被拒绝
+                liveViewHolder.tv_accept_live.setText("拒绝上报");
+            } else if (noticeBean.getOutLive() == NoticeOutLiveEnum.LIVE_OUT_INVITE_AGREE) {//主动 邀请他人直播 邀请同意
+                liveViewHolder.tv_accept_live.setText("正在观看");
+            } else if (noticeBean.getOutLive() == NoticeOutLiveEnum.LIVE_OUT_WATCH) {//主动 邀请他人直播 正在观看
+                liveViewHolder.tv_accept_live.setText("正在观看");
+            } else if (noticeBean.getOutLive() == NoticeOutLiveEnum.LIVE_OUT_TIME_OUT) {//超时
+                liveViewHolder.tv_accept_live.setText("请求超时");
+            }else if (noticeBean.getOutLive() == NoticeOutLiveEnum.LIVE_OUT_END) {//结束
+                liveViewHolder.tv_accept_live.setText("结束上报");
             }
-        });
+        }
     }
 
     /**
@@ -229,13 +249,14 @@ public class NoticeAdapter extends BaseRecycleViewAdapter<NoticeBean, RecyclerVi
     static class LiveViewHolder extends RecyclerView.ViewHolder {
 
         private final TextView tv_name;
+        private final TextView tv_member_no;
         private final TextView tv_accept_live;
 
         public LiveViewHolder(View itemView) {
             super(itemView);
-
-            tv_name = itemView.findViewById(R.id.tv_name);
-            tv_accept_live = itemView.findViewById(R.id.tv_accept_live);
+            tv_name = itemView.findViewById(R.id.tv_name);//名称
+            tv_member_no = itemView.findViewById(R.id.tv_member_no);//警号
+            tv_accept_live = itemView.findViewById(R.id.tv_accept_live);//描述
         }
     }
 

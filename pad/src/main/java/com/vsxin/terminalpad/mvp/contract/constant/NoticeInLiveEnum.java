@@ -12,9 +12,10 @@ public enum NoticeInLiveEnum {
      */
     LIVE_IN_INVITE("被动 他人请求我直播 等待接听", 1),
     LIVE_IN_INVITE_REFUSE("被动 他人请求我直播 拒绝", 2),
-    LIVE_IN_INVITE_AGREE("被动 他人请求我直播 同意", 4),
-    LIVE_IN_WATCH("主动 他人直播邀请我观看", 5),
-    LIVE_IN_END("通话结束", 6);
+    LIVE_IN_INVITE_AGREE("被动 他人请求我直播 同意", 3),
+    LIVE_IN_WATCH("主动 他人直播邀请我观看", 4),
+    LIVE_IN_END("通话结束", 5),
+    LIVE_IN_TIME_OUT("超时", 6);
 
     private String remarks;
     private int state;

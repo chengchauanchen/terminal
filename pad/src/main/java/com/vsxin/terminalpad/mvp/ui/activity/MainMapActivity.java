@@ -189,8 +189,9 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         Long memberUniqueno = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
         int depId = MyTerminalFactory.getSDK().getParam(Params.DEP_ID, 0);
         String format = String.format("no=%s&code=%s&dept_id=%s", memberId, memberUniqueno, depId);
-        getLogger().info("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
-        web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
+        getLogger().info("http://192.168.1.222:9011/offlineMapForLin/indexPad.html?" + format);
+        //web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
+        web_map.loadUrl("http://192.168.1.222:9011/offlineMapForLin/indexPad.html?" + format);
     }
 
 

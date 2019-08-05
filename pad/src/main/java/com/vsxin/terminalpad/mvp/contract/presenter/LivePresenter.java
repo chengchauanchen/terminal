@@ -16,6 +16,8 @@ import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveView;
 import com.vsxin.terminalpad.prompt.PromptManager;
+import com.vsxin.terminalpad.receiveHandler.ReceivePullLivingHandler;
+import com.vsxin.terminalpad.receiveHandler.ReceiveStartPullLiveHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiveGoWatchRTSPHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverActivePushVideoHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
@@ -561,6 +563,8 @@ public class LivePresenter extends BasePresenter<ILiveView> {
                 requestOtherLive(member);
 
             }
+            //通知拉取成功，正在观看 notice
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveStartPullLiveHandler.class,member);
         }
     };
 
@@ -726,14 +730,18 @@ public class LivePresenter extends BasePresenter<ILiveView> {
     public void startPull(SurfaceTexture surface) {
         getView().isShowLiveView(true);
         getView().getLogger().info("开始播放");
+        //通知拉取成功，正在观看 notice
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceivePullLivingHandler.class);
         if (null == mResultReceiver) {
             mResultReceiver = new RtspReceiver(new Handler(),surface);
         }
         if (null != surface) {
+            getView().getLogger().info("开始播放 null != surface");
             mStreamRender = new EasyRTSPClient(getContext(), MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(), surface, mResultReceiver);
             try {
                 if (!TextUtils.isEmpty(rtspUrl)) {
                     mStreamRender.start(rtspUrl, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
+                    getView().getLogger().info("开始播放 mStreamRender.start(rtspUrl)");
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -758,6 +766,8 @@ public class LivePresenter extends BasePresenter<ILiveView> {
                 if (gb28181Url != null) {
                     mStreamRender.start(gb28181Url, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
                 }
+                //通知拉取成功，正在观看 notice
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceivePullLivingHandler.class);
             } catch (Exception e) {
                 e.printStackTrace();
                 getView().getLogger().error("LTE上报 :"+e.toString());

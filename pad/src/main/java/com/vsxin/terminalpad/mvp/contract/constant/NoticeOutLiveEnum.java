@@ -15,7 +15,8 @@ public enum NoticeOutLiveEnum {
     LIVE_OUT_INVITE_REFUSE("主动 邀请他人直播 邀请被拒绝", 3),
     LIVE_OUT_INVITE_AGREE("主动 邀请他人直播 邀请同意", 4),
     LIVE_OUT_WATCH("主动 邀请他人直播 正在观看", 5),
-    LIVE_OUT_END("主动 邀请他人直播 结束观看", 6);
+    LIVE_OUT_END("主动 邀请他人直播 结束观看", 6),
+    LIVE_OUT_TIME_OUT("超时", 7);
 
     private String remarks;
     private int state;
