@@ -16,6 +16,8 @@ android {
             targetCompatibility JavaVersion.VERSION_1_8
         }
         multiDexEnabled true
+
+        buildConfigField 'String', 'HIKVISIONCAMERADATAURL', '\"http://223.75.53.194:9011/camera/getHikvisionCameraData\"'
     }
 
     buildTypes {

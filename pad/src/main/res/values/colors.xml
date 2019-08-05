@@ -603,9 +603,7 @@
 
     <color name="bind_bg_color">#3300a4ff</color>
     <color name="bind_text_color">#627f9f</color>
-
-    <color name="setting_text_temp">#637e9e</color>
-
+    
     <color name="group_call_can_speak_1">#cc0091ff</color>
     <color name="group_call_can_speak_2">#330091ff</color>
     <color name="group_call_other_speaking_1">#cc42596b</color>
@@ -614,5 +612,6 @@
     <color name="group_call_speaking_2">#33f42d2d</color>
     <color name="group_call_wait_1">#ccd9a556</color>
     <color name="group_call_wait_2">#33d9a556</color>
+    <color name="setting_text_temp">#637e9e</color>
 
 </resources>

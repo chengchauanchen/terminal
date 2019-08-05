@@ -16,6 +16,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.data.DataManager;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import io.reactivex.schedulers.Schedulers;
+import ptt.terminalsdk.BuildConfig;
 import ptt.terminalsdk.bean.DepData;
 import ptt.terminalsdk.bean.GroupBean;
 import ptt.terminalsdk.manager.http.AppUrlConfig;
@@ -37,6 +38,8 @@ public class MyDataManager extends DataManager{
     @Override
     protected void setUrl(JSONObject resultJsonObject){
         super.setUrl(resultJsonObject);
+        // TODO: 2019/8/5 海康摄像头地址暂时写在build.gradle 里
+        TerminalFactory.getSDK().putParam(Params.HIKVISION_CAMERADATA_URL, BuildConfig.HIKVISIONCAMERADATAURL);
         //认证成功之后配置BaseUrl
         AppUrlConfig.setFileServerUrl("http://" + TerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP) + ":" + TerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0));
         RxUrlManager.getInstance().setMultipleUrl(AppUrlConfig.getAllUrl());

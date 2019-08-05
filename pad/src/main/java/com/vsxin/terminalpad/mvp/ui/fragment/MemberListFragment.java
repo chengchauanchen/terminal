@@ -8,16 +8,11 @@ import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpFragment;
 import com.vsxin.terminalpad.R;
-import com.vsxin.terminalpad.mvp.contract.presenter.MemberInfoPresenter;
 import com.vsxin.terminalpad.mvp.contract.presenter.MemberListPresenter;
-import com.vsxin.terminalpad.mvp.contract.view.IMainMapView;
-import com.vsxin.terminalpad.mvp.contract.view.IMemberInfoView;
 import com.vsxin.terminalpad.mvp.contract.view.IMemberListView;
-import com.vsxin.terminalpad.mvp.ui.activity.MainMapActivity;
 
 import butterknife.BindView;
 

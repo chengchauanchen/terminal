@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/shape_black70transparent"
+    android:fitsSystemWindows="true">
+
+    <LinearLayout
+        android:id="@+id/rl_topbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:gravity="center_vertical">
+    
+        <ImageView
+            android:id="@+id/news_bar_return"
+            android:layout_width="46px"
+            android:layout_height="34px"
+            android:src="@drawable/news_bar_return"
+            android:layout_marginLeft="10px" />
+        <View
+            android:id="@+id/news_bar_line"
+            android:layout_width="0.5px"
+            android:layout_height="30px"
+            android:layout_marginLeft="11px"
+            android:layout_marginRight="11px"
+            android:background="@color/group_call_news_bar_line" />
+    
+    
+    
+        <TextView
+            android:id="@+id/tv_chat_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/group_call_news_group_name"
+            android:textSize="25px" />
+
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"/>
+
+        <ImageView
+            android:id="@+id/iv_call"
+            android:layout_width="@dimen/dp_38"
+            android:layout_height="@dimen/dp_38"
+            android:padding="@dimen/dp_5"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/individual_ic_mobile"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_10"/>
+
+        <ImageView
+            android:id="@+id/individual_news_phone"
+            android:layout_width="@dimen/dp_38"
+            android:layout_height="@dimen/dp_38"
+            android:padding="@dimen/dp_5"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/phone"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_10"/>
+
+        <ImageView
+            android:id="@+id/individual_news_info"
+            android:layout_width="@dimen/dp_38"
+            android:layout_height="@dimen/dp_38"
+            android:padding="@dimen/dp_5"
+            android:layout_alignParentRight="true"
+            android:src="@drawable/individual_info"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_10"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_below="@+id/rl_topbar"
+        >
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+    
+            <com.scwang.smartrefresh.layout.SmartRefreshLayout
+                android:id="@+id/refreshLayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+        
+                <com.vsxin.terminalpad.view.FixedRecyclerView
+                    android:id="@+id/recyclerView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent"
+                    android:overScrollMode="never" />
+            </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+        </RelativeLayout>
+
+        <com.vsxin.terminalpad.view.FunctionHidePlus
+            android:id="@+id/funcation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </com.vsxin.terminalpad.view.FunctionHidePlus>
+
+    </LinearLayout>
+    
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/noNetWork"
+        android:background="@drawable/nonet"
+        android:layout_width="match_parent"
+        android:layout_height="50px"
+        android:orientation="horizontal"
+        android:layout_below="@id/rl_topbar">
+        <ImageView
+            android:src="@drawable/duanwang"
+            android:layout_marginLeft="30px"
+            android:layout_gravity="center"
+            android:layout_width="30px"
+            android:layout_height="30px" />
+        <TextView
+            android:layout_marginLeft="30px"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13px"
+            android:text="@string/text_disconnection_of_network_connection"/>
+    </LinearLayout>
+    <FrameLayout
+        android:id="@+id/fl_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/transparent"
+        android:visibility="gone"
+        android:focusable="true"
+        android:clickable="true"
+        />
+    <com.vsxin.terminalpad.view.VolumeViewLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:layout_centerInParent="true"
+    android:id="@+id/volume_layout"
+    />
+
+
+</RelativeLayout>

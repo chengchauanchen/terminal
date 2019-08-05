@@ -87,4 +87,8 @@ dependencies {
     api project(':SpecificSDK4GPTT')
     api project(':imageandfileselector')
 
+    implementation 'skin.support:skin-support:2.2.3'
+    // skin-support 基础控件支持
+    implementation 'skin.support:skin-support-design:2.2.3'
+
 }

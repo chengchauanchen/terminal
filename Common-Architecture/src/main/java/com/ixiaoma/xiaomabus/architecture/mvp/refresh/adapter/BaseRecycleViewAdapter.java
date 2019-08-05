@@ -11,6 +11,7 @@ import java.util.List;
  */
 public abstract class BaseRecycleViewAdapter<T,VH extends RecyclerView.ViewHolder> extends RecyclerView.Adapter<VH> {
     protected Context mContext;
+    protected ItemClickListener itemClickListener;
 
     public BaseRecycleViewAdapter(Context mContext) {
         this.mContext = mContext;
@@ -29,6 +30,13 @@ public abstract class BaseRecycleViewAdapter<T,VH extends RecyclerView.ViewHolde
         this.datas = datas;
     }
 
+    public interface ItemClickListener{
+        void onItemClick(int position);
+    }
+
+    public void setItemClickListener(ItemClickListener itemClickListener){
+        this.itemClickListener = itemClickListener;
+    }
 
 }
 

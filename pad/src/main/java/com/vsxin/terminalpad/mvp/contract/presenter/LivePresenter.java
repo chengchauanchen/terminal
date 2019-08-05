@@ -9,7 +9,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
-import android.view.View;
 
 import com.alibaba.fastjson.JSONObject;
 import com.ixiaoma.xiaomabus.architecture.mvp.BasePresenter;
@@ -17,6 +16,7 @@ import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveView;
 import com.vsxin.terminalpad.prompt.PromptManager;
+import com.vsxin.terminalpad.receiveHandler.ReceiveGoWatchRTSPHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverActivePushVideoHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
 import com.vsxin.terminalpad.utils.SensorUtil;
@@ -34,6 +34,7 @@ import java.util.List;
 import cn.vsx.SpecificSDK.OperateReceiveHandlerUtilSync;
 import cn.vsx.SpecificSDK.StateMachineUtils;
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -562,6 +563,20 @@ public class LivePresenter extends BasePresenter<ILiveView> {
             }
         }
     };
+
+    private ReceiveGoWatchRTSPHandler receiveGoWatchRTSPHandler = new ReceiveGoWatchRTSPHandler(){
+        @Override
+        public void handler(TerminalMessage terminalMessage){
+            if(terminalMessage!=null){
+                if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+                    goWatchGB28121(terminalMessage);
+                }else if(terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
+//                    goWatchOutGB28121(terminalMessage);
+                }
+            }
+        }
+    };
+
 
     /**
      * 我请求 别人 直播

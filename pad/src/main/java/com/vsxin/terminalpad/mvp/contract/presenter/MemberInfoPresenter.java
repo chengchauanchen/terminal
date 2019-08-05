@@ -240,9 +240,10 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
                 pullVideoForMemberNo(77000002,TerminalMemberType.TERMINAL_BODY_WORN_CAMERA);
             }else if(TerminalMemberType.TERMINAL_LTE == type){
                 //LTE
-                //pullVideoForMemberNo(77000002,TerminalMemberType.TERMINAL_LTE);
+                pullVideoForMemberNo(77000002,TerminalMemberType.TERMINAL_LTE);
             }else if(TerminalMemberType.TERMINAL_UAV == type){
                 //无人机
+                pullVideoForMemberNo(88000088,TerminalMemberType.TERMINAL_UAV);
             }else{
                 ToastUtil.showToast(getContext(), "暂不支持拉取该设备视频");
                 return;

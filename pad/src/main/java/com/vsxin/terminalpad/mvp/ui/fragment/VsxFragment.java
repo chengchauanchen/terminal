@@ -8,9 +8,7 @@ import android.widget.RadioButton;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpFragment;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.constant.FragmentTagConstants;
-import com.vsxin.terminalpad.mvp.contract.presenter.MainMapPresenter;
 import com.vsxin.terminalpad.mvp.contract.presenter.MainPresenter;
-import com.vsxin.terminalpad.mvp.contract.view.IMainMapView;
 import com.vsxin.terminalpad.mvp.contract.view.IMainView;
 
 import butterknife.BindView;
@@ -32,7 +30,7 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
     @BindView(R.id.btn_mine_page)
     RadioButton btn_mine_page;
 
-    private MessageFragment messageFragment;
+    private MessageListListFragment messageListFragment;
     private ContactsFragment contactsFragment;
     private MeFragment meFragment;
 
@@ -106,11 +104,11 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
         setChecked(currentPage);
         switch (currentPage) {
             case 0:
-                if (messageFragment == null) {
-                    messageFragment = new MessageFragment();
-                    transaction.add(R.id.tab_content, messageFragment, FragmentTagConstants.MESSAGE);
+                if (messageListFragment == null) {
+                    messageListFragment = new MessageListListFragment();
+                    transaction.add(R.id.tab_content, messageListFragment, FragmentTagConstants.MESSAGE);
                 } else {
-                    transaction.show(messageFragment);
+                    transaction.show(messageListFragment);
                 }
                 break;
             case 1:
@@ -137,8 +135,8 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
     }
 
     private void hideFragments(FragmentTransaction transaction) {
-        if (messageFragment != null) {
-            transaction.hide(messageFragment);
+        if (messageListFragment != null) {
+            transaction.hide(messageListFragment);
         }
         if (contactsFragment != null) {
             transaction.hide(contactsFragment);

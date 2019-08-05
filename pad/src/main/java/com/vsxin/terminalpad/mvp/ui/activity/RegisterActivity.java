@@ -693,21 +693,23 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             logger.info("1.RegisterActivity---收到可用IP列表" + ",主线程" + SystemUtils.isMainThread());
             availableIPlist.clear();
             String tempName = xcDropDownListView.getText();
-            if (availableIP.size() > 0) {
-                availableIPMap = availableIP;
-                availableIPlist.add(getString(R.string.text_selection_unit));
-                availableIPlist.addAll(SetToListUtil.setToArrayList(availableIP));
-                availableIPlist.add(company);
-                xcDropDownListView.setItemsData(availableIPlist);
-            } else {
-                availableIPlist.add(getString(R.string.text_selection_unit));
-                availableIPlist.add(company);
-                xcDropDownListView.setItemsData(availableIPlist);
-            }
-            if (!TextUtils.isEmpty(tempName)) {
-                xcDropDownListView.setText(tempName);
-            }
-            hideProgressDialog();
+            myHandler.post(()->{
+                if (availableIP.size() > 0) {
+                    availableIPMap = availableIP;
+                    availableIPlist.add(getString(R.string.text_selection_unit));
+                    availableIPlist.addAll(SetToListUtil.setToArrayList(availableIP));
+                    availableIPlist.add(company);
+                    xcDropDownListView.setItemsData(availableIPlist);
+                } else {
+                    availableIPlist.add(getString(R.string.text_selection_unit));
+                    availableIPlist.add(company);
+                    xcDropDownListView.setItemsData(availableIPlist);
+                }
+                if (!TextUtils.isEmpty(tempName)) {
+                    xcDropDownListView.setText(tempName);
+                }
+                hideProgressDialog();
+            });
         }
     };
 

@@ -5,7 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.RefreshPresenter;
-import com.vsxin.terminalpad.mvp.contract.view.IMessageView;
+import com.vsxin.terminalpad.mvp.contract.view.IMessageListView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,7 +43,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
  * <p>
  * app模块-消息模块
  */
-public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessageView> {
+public class MessageListPresenter extends RefreshPresenter<TerminalMessage, IMessageListView> {
     private static final String TAG = "MessagePresenter";
     /**
      * 会话列表list,线程安全的
@@ -54,7 +54,7 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
 
-    public MessagePresenter(Context mContext) {
+    public MessageListPresenter(Context mContext) {
         super(mContext);
     }
 
@@ -62,7 +62,7 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
      * 获取本地缓存消息
      */
     public void loadMessages() {
-        synchronized(MessagePresenter.this){
+        synchronized(MessageListPresenter.this){
             terminalMessageData.clear();
             clearData();
             List<TerminalMessage> messageList = TerminalFactory.getSDK().getTerminalMessageManager().getMessageList();
@@ -150,7 +150,7 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
         getView().getLogger().info(TAG + ":返回所有 同步的消息:" + messageRecord.size());
 
         //加上同步，防止更新消息时又来新的消息，导致错乱
-        synchronized(MessagePresenter.this){
+        synchronized(MessageListPresenter.this){
             //更新未读消息和聊天界面
             if(messageRecord.isEmpty()){
                 mHandler.post(() -> {
@@ -225,7 +225,7 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
      */
     private ReceiveNotifyDataMessageHandler mReceiveNotifyDataMessageHandler = terminalMessage -> {
         getView().getLogger().info("MessagePresenter---收到新消息"+terminalMessage);
-        synchronized(MessagePresenter.this){
+        synchronized(MessageListPresenter.this){
             terminalMessageData.clear();
             terminalMessageData.addAll(messageList);
             for(TerminalMessage next : terminalMessageData){
@@ -660,7 +660,7 @@ public class MessagePresenter extends RefreshPresenter<TerminalMessage, IMessage
      * 对聊天列表排序
      */
     private void sortMessageList(){
-        synchronized(MessagePresenter.this){
+        synchronized(MessageListPresenter.this){
             if(!messageList.isEmpty()){
                 setNewGroupList();
                 //            setNewMemberList();

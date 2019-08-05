@@ -18,6 +18,8 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
+import skin.support.SkinCompatManager;
+import skin.support.design.app.SkinMaterialViewInflater;
 
 /**
  * @author qzw
@@ -28,6 +30,8 @@ public class PadApplication extends App {
     public static int mAppStatus = AppStatusConstants.FORCE_KILL;//App运行状态，是否被强杀
 
     public boolean isPttPress = false;//组呼是否按下
+    public boolean isPlayVoice = false;//是否正在播放组呼
+
 
     /**标记个呼来或者请求图形来，是否做了接受或拒绝的操作，默认是false*/
     public boolean isPrivateCallOrVideoLiveHand = false;
@@ -47,9 +51,9 @@ public class PadApplication extends App {
         initVsxinSDK();
         registerActivityLifecycle();
         initCatchGroup();
-
-        setApkType();
-        setAppKey();
+        SkinCompatManager.withoutActivity(this)                         // 基础控件换肤初始化
+                .addInflater(new SkinMaterialViewInflater())            // material design 控件换肤初始化[可选]
+                .loadSkin();
 
     }
 
@@ -60,7 +64,6 @@ public class PadApplication extends App {
         SpecificSDK.init(this);
         //设置终端类型未 pad
         SpecificSDK.setTerminalMemberType(TerminalMemberType.TERMINAL_PAD.toString());
-//        SpecificSDK.setTerminalMemberType(TerminalMemberType.TERMINAL_PHONE.toString());//暂时先模拟警务通
     }
 
     /**

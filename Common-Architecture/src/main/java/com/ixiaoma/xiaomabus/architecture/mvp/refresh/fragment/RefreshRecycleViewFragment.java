@@ -1,6 +1,7 @@
 package com.ixiaoma.xiaomabus.architecture.mvp.refresh.fragment;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 
 import com.ixiaoma.xiaomabus.architecture.R;
@@ -106,6 +107,7 @@ public  abstract class RefreshRecycleViewFragment<D,V extends IBaseView,P extend
                 refreshLayout.finishLoadMore();
             }
         }
+        Log.e("RefreshRecycleViewFragm", "data.size():" + data.size());
         mSuperAdapter.getDatas().addAll(data);
         mSuperAdapter.notifyDataSetChanged();
 

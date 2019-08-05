@@ -1,21 +1,228 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <include layout="@layout/titler_bar" />
-
-    <com.scwang.smartrefresh.layout.SmartRefreshLayout
-        android:id="@+id/refreshLayout"
+    android:fitsSystemWindows="true"
+    android:background="@drawable/shape_black70transparent"
+    xmlns:zhy="http://schemas.android.com/apk/res-auto">
+    
+    <LinearLayout
+        android:id="@+id/rl_topbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerView"
-            android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:gravity="center_vertical"
+        android:layout_marginTop="10px"
+        android:layout_marginBottom="10px"
+        >
+        <ImageView
+            android:id="@+id/news_bar_return"
+            android:layout_width="46px"
+            android:layout_height="34px"
+            android:src="@drawable/news_bar_return"
+            android:layout_marginLeft="10px" />
+        
+        <View
+            android:id="@+id/news_bar_line"
+            android:layout_width="0.5px"
+            android:layout_height="30px"
+            android:layout_marginLeft="11px"
+            android:layout_marginRight="11px"
+            android:background="@color/group_call_news_bar_line" />
+        
+        <TextView
+            android:id="@+id/tv_chat_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/group_call_news_group_name"
+            android:textSize="25px" />
+        
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="match_parent"
-            android:scrollbars="none" />
-    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+            
+            <ImageView
+                android:id="@+id/group_live_history"
+                android:layout_width="40px"
+                android:layout_height="40px"
+                android:layout_marginRight="12px"
+                android:src="@drawable/group_live_history"
+                android:padding="5px"/>
+            
+            <ImageView
+                android:id="@+id/group_call_activity_member_info"
+                android:layout_width="40px"
+                android:layout_height="40px"
+                android:layout_marginRight="12px"
+                android:src="@drawable/group_member"
+                android:padding="5px"/>
+        </LinearLayout>
+        
+    </LinearLayout>
+    
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5px"
+        android:background="@color/diver_bg"
+        android:layout_below="@id/rl_topbar"/>
+    
+    <com.vsxin.terminalpad.view.FunctionHidePlus
+        android:id="@+id/funcation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        />
+    
+    <RelativeLayout
+        android:id="@+id/rl_include_listview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/funcation"
+        android:layout_below="@id/rl_topbar"
+        >
+        
+        
+        <com.scwang.smartrefresh.layout.SmartRefreshLayout
+            android:id="@+id/refreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            
+            <com.vsxin.terminalpad.view.FixedRecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/transparent"
+                android:overScrollMode="never" />
+        </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+        
+        <!--进度条-->
+        <RelativeLayout
+            android:id="@+id/progress_group_call"
+            android:layout_width="180px"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:paddingBottom="10px"
+            android:paddingTop="10px"
+            android:visibility="gone"
+            >
+            
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3px"
+                android:text="@string/text_I_am_talking"
+                android:textColor="@color/gruop_call_news_progress_total_time"
+                android:textSize="15px"
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/group_call_time_progress"
+                />
+            
+            <com.vsxin.terminalpad.view.RoundProgressBarWidthNumber
+                android:id="@+id/group_call_time_progress"
+                android:layout_marginLeft="35px"
+                android:padding="10px"
+                android:layout_width="130px"
+                android:layout_height="80px"
+                zhy:progress_unreached_color="@color/group_call_news_progress_reached"
+                zhy:progress_reached_color="@color/group_call_news_progress_unreached"
+                zhy:progress_reached_bar_height="30px"
+                zhy:radius="45px"
+                zhy:progress_text_size="40px"
+                android:max="609"/>
+        
+        </RelativeLayout>
+        
+        <!--准备说话-->
+        <TextView
+            android:id="@+id/tv_pre_speak"
+            android:background="@drawable/black_round_bg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:text="@string/text_ready_to_speak"
+            android:textColor="@color/group_call_news_prepare_speak_text"
+            android:textSize="16px"
+            android:paddingLeft="30px"
+            android:paddingRight="30px"
+            android:paddingTop="5px"
+            android:paddingBottom="5px"
+            android:visibility="gone"/>
+    
+    </RelativeLayout>
+    
+    <!--组内正在上报的人数-->
+    <LinearLayout
+        android:id="@+id/ll_living"
+        android:layout_width="match_parent"
+        android:layout_height="40px"
+        android:background="@color/blue_008_60"
+        android:layout_below="@+id/rl_topbar"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:visibility="gone">
+        
+        <ImageView
+            android:layout_width="27.4dp"
+            android:layout_height="15dp"
+            android:src="@drawable/video_icon" />
+        
+        <TextView
+            android:id="@+id/tv_living_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10px"
+            android:singleLine="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"
+            android:text="3人  正在上报"
+            android:textColor="@color/white"
+            android:textSize="16px" />
+    
+    </LinearLayout>
+    
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/noNetWork"
+        android:background="@drawable/nonet"
+        android:layout_width="match_parent"
+        android:layout_height="50px"
+        android:orientation="horizontal"
+        android:layout_below="@id/rl_topbar">
+        <ImageView
+            android:src="@drawable/duanwang"
+            android:layout_marginLeft="30px"
+            android:layout_gravity="center"
+            android:layout_width="30px"
+            android:layout_height="30px" />
+        <TextView
+            android:layout_marginLeft="30px"
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="13px"
+            android:text="@string/text_disconnection_of_network_connection"/>
+    </LinearLayout>
+    
+    <FrameLayout
+        android:id="@+id/fl_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/transparent"
+        android:visibility="gone"
+        android:focusable="true"
+        android:clickable="true"
+        />
+    <com.vsxin.terminalpad.view.VolumeViewLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_centerInParent="true"
+        android:id="@+id/volume_layout"
+        />
 
-</LinearLayout>
+</RelativeLayout>

@@ -12,7 +12,7 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
  * <p>
  * app模块-消息模块
  */
-public interface IMessageView extends IRefreshView<TerminalMessage> {
+public interface IMessageListView extends IRefreshView<TerminalMessage> {
 
     void notifyDataSetChanged(List<TerminalMessage> terminalMessages);
 }
