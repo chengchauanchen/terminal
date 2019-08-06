@@ -108,6 +108,11 @@ public abstract class MessageBaseFragment<V extends IBaseMessageView,P extends B
     }
 
     @Override
+    public int getUserId(){
+        return userId;
+    }
+
+    @Override
     public void notifyItemRangeInserted(int startPosition, int endPosition){
         mSuperAdapter.notifyItemRangeInserted(startPosition,endPosition);
     }

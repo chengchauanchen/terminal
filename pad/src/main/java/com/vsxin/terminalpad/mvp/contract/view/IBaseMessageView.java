@@ -24,6 +24,8 @@ public interface IBaseMessageView extends IRefreshView<TerminalMessage>{
 
     boolean isGroup();
 
+    int getUserId();
+
     void notifyItemRangeInserted(int startPosition, int endPosition);
 
     void smoothScrollBy(int start, int end);
