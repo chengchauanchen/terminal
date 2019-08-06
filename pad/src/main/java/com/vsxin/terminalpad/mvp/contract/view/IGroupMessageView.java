@@ -17,4 +17,6 @@ public interface IGroupMessageView extends IBaseMessageView{
     void change2Listening();
 
     void refreshPtt();
+
+    void changeGroup(final int errorCode, final String errorDesc);
 }

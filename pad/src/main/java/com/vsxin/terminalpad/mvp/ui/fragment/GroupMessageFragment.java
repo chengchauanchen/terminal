@@ -71,6 +71,7 @@ public class GroupMessageFragment extends MessageBaseFragment<IGroupMessageView,
         super.initData();
         isCurrentGroup = (userId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
         TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateMainFrgamentPTTButtonHandler.class,false);
+        refreshPtt();
     }
 
     @Override
@@ -291,6 +292,18 @@ public class GroupMessageFragment extends MessageBaseFragment<IGroupMessageView,
         }else {
             ptt.setBackgroundResource(R.drawable.shape_news_ptt_wait);
             ptt.setText(R.string.text_no_group_calls);
+        }
+    }
+
+    @Override
+    public void changeGroup(int errorCode, String errorDesc) {
+        if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
+            TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
+            isCurrentGroup = true;
+            refreshPtt();
+        } else {
+            isCurrentGroup = false;
+            ToastUtil.showToast(getActivity(), errorDesc);
         }
     }
 
