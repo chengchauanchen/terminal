@@ -3,6 +3,7 @@ package com.vsxin.terminalpad.utils;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.Context;
+import android.hardware.Camera;
 import android.os.Looper;
 
 import java.util.List;
@@ -48,5 +49,27 @@ public class SystemUtils {
      */
     public static boolean isMainThread() {
         return Looper.getMainLooper().getThread() == Thread.currentThread();
+    }
+
+    /**
+     * 照相机是否可用
+     */
+    public static boolean cameraIsCanUse() {
+        boolean isCanUse = true;
+        Camera mCamera = null;
+        try { mCamera = Camera.open();
+            Camera.Parameters mParameters = mCamera.getParameters();
+            mCamera.setParameters(mParameters);
+        }catch (Exception e) {
+            isCanUse = false;
+        } if (mCamera != null) {
+            try {
+                mCamera.release();
+            }catch (Exception e) {
+                e.printStackTrace();
+                return isCanUse;
+            }
+        }
+        return isCanUse;
     }
 }

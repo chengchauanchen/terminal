@@ -4,12 +4,16 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MotionEvent;
@@ -40,6 +44,7 @@ import com.vsxin.terminalpad.mvp.ui.fragment.VsxFragment;
 import com.vsxin.terminalpad.receiveHandler.ReceiveUpdateMainFrgamentPTTButtonHandler;
 import com.vsxin.terminalpad.utils.HandleIdUtil;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
+import com.vsxin.terminalpad.utils.SystemUtils;
 
 import org.apache.http.util.TextUtils;
 
@@ -104,6 +109,15 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     //组呼倒计时
     private static final int HANDLER_GROUP_TIME = 1;
 
+    private boolean onRecordAudioDenied;
+    private boolean onLocationDenied;
+    private boolean onCameraDenied;
+
+    public static final int OVERLAY_PERMISSION_REQ_CODE = 1234;
+    public static final int REQUEST_INSTALL_PACKAGES_CODE = 1235;
+    public static final int GET_UNKNOWN_APP_SOURCES = 1236;
+//    public static final int REQUEST_CODE_SCAN = 1237;
+
     private Handler mHandler = new Handler(Looper.getMainLooper()){
         @Override
         public void handleMessage(Message msg) {
@@ -135,7 +149,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         inflaterFragment();
         initWebMap();
         initPPT();
-
+        judgePermission();
         groupCallInstruction = new GroupCallInstruction(this);
         groupCallInstruction.bindReceiveHandler();
     }
@@ -236,6 +250,132 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     @Override
     public MainMapPresenter createPresenter() {
         return new MainMapPresenter(this);
+    }
+
+    /**
+     * 必须要有录音和相机的权限，APP才能去视频页面
+     */
+    private void judgePermission() {
+
+        //6.0以下判断相机权限
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M  ){
+            if(!SystemUtils.cameraIsCanUse()){
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CheckMyPermission.REQUEST_CAMERA);
+            }
+        }else {
+            if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.RECORD_AUDIO)){
+                if(CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+                    if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
+                        CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
+                    }
+                    //                    else {
+                    //                        CheckMyPermission.permissionPrompt(this,Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    //                    }
+                }else {
+                    CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
+                }
+            }else {
+                //如果权限被拒绝，申请下一个权限
+                if(onRecordAudioDenied){
+                    if(CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+                        if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
+                            CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
+                        }
+                    }else {
+                        if(onLocationDenied){
+                            if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
+                                if(!onCameraDenied){
+                                    CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
+                                }
+                            }
+                        }else {
+                            CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
+                        }
+                    }
+                }else{
+                    CheckMyPermission.permissionPrompt(this, Manifest.permission.RECORD_AUDIO);
+                }
+            }
+        }
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (!Settings.canDrawOverlays(this)) {
+                    // SYSTEM_ALERT_WINDOW permission not granted...
+                    ToastUtil.showToast(MainMapActivity.this, getString(R.string.open_overlay_permisson));
+                } else {
+                }
+            }
+//        }else if(requestCode == GET_UNKNOWN_APP_SOURCES){
+//            if(null !=updateManager){
+//                updateManager.checkIsAndroidO(false);
+//            }
+//        } else if (requestCode == CODE_FNC_REQUEST) {
+//            int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
+//            checkNFC(userId,false);
+//        }else if(requestCode == REQUEST_CODE_SCAN && resultCode == RESULT_OK){
+//            if (data != null) {
+//                String result = data.getStringExtra(Constant.CODED_CONTENT);
+//                logger.info("扫描二维码结果："+result);
+//                int groupId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
+//                analysisScanData(result,groupId);
+//            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case CheckMyPermission.REQUEST_RECORD_AUDIO:
+                onRecordAudioDenied = true;
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    judgePermission();
+                }else {
+                    permissionDenied(requestCode);
+                }
+                break;
+            case CheckMyPermission.REQUEST_CAMERA:
+                onCameraDenied = true;
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    judgePermission();
+                }else {
+                    permissionDenied(requestCode);
+                }
+                break;
+            case CheckMyPermission.REQUEST_LOCATION:
+                onLocationDenied = true;
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    judgePermission();
+                }else {
+                    permissionDenied(requestCode);
+                }
+                break;
+            case REQUEST_INSTALL_PACKAGES_CODE:
+                if(grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED){
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+                    startActivityForResult(intent, GET_UNKNOWN_APP_SOURCES);
+                }
+            default:
+                break;
+
+        }
+    }
+
+    private void permissionDenied(int requestCode){
+        if(requestCode == CheckMyPermission.REQUEST_RECORD_AUDIO){
+            ToastUtil.showToast(this, getString(R.string.text_audio_frequency_is_not_open_audio_is_not_used));
+        }else if(requestCode ==CheckMyPermission.REQUEST_CAMERA){
+            ToastUtil.showToast(this, getString(R.string.text_camera_not_open_audio_is_not_used));
+        }else if(requestCode ==CheckMyPermission.REQUEST_LOCATION){
+            ToastUtil.showToast(this, getString(R.string.text_location_not_open_locat_is_not_used));
+        }
+        //        judgePermission();
     }
 
     @Override
