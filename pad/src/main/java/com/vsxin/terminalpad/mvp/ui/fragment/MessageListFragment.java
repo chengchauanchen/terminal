@@ -24,7 +24,7 @@ import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
  * <p>
  * app模块-消息模块
  */
-public class MessageListListFragment extends RefreshRecycleViewFragment<TerminalMessage, IMessageListView, MessageListPresenter> implements IMessageListView{
+public class MessageListFragment extends RefreshRecycleViewFragment<TerminalMessage, IMessageListView, MessageListPresenter> implements IMessageListView{
 
     private TextView tv_group_name;
 
@@ -38,7 +38,6 @@ public class MessageListListFragment extends RefreshRecycleViewFragment<Terminal
         super.initViews(view);
         tv_group_name = view.findViewById(R.id.tv_group_name);
         getPresenter().registReceiveHandler();
-
         refreshLayout.setEnableRefresh(false);
         refreshLayout.setEnableLoadMore(false);
         getPresenter().setAdapter(recyclerView, mSuperAdapter);
@@ -57,11 +56,11 @@ public class MessageListListFragment extends RefreshRecycleViewFragment<Terminal
                 int userId = terminalMessage.messageToId;
                 String groupName = terminalMessage.messageToName;
                 long uniqueNo = terminalMessage.messageToUniqueNo;
-                FragmentManage.startFragment(getActivity(), GroupMessageListFragment.newInstance(userId,groupName,uniqueNo));
+                FragmentManage.startFragment(getActivity(), GroupMessageFragment.newInstance(userId,groupName,uniqueNo));
             }else {
                 int userId = TerminalMessageUtil.getNo(terminalMessage);
                 String groupName = TerminalMessageUtil.getTitleName(terminalMessage);
-                FragmentManage.startFragment(getActivity(), PersonMessageListFragment.newInstance(userId,groupName));
+                FragmentManage.startFragment(getActivity(), PersonMessageFragment.newInstance(userId,groupName));
             }
         });
     }

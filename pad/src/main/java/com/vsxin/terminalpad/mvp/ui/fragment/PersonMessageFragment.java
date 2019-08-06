@@ -13,19 +13,19 @@ import com.vsxin.terminalpad.mvp.contract.view.IPersonMessageView;
  * 描述：
  * 修订历史：
  */
-public class PersonMessageListFragment extends MessageBaseFragment<IPersonMessageView, PersonMessagePresenter> implements IPersonMessageView{
+public class PersonMessageFragment extends MessageBaseFragment<IPersonMessageView, PersonMessagePresenter> implements IPersonMessageView{
 
     @Override
     protected int getLayoutResID(){
         return R.layout.activity_individual_news;
     }
 
-    public static PersonMessageListFragment newInstance(int userId, String userName){
+    public static PersonMessageFragment newInstance(int userId, String userName){
         Bundle args = new Bundle();
         args.putInt("userId", userId);
         args.putString("userName", userName);
         args.putBoolean("isGroup", false);
-        PersonMessageListFragment fragment = new PersonMessageListFragment();
+        PersonMessageFragment fragment = new PersonMessageFragment();
         fragment.setArguments(args);
         return fragment;
     }

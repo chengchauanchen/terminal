@@ -1,5 +1,6 @@
 package com.vsxin.terminalpad.mvp.ui.fragment;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -50,16 +51,18 @@ public abstract class MessageBaseFragment<V extends IBaseMessageView,P extends B
         iv_back = view.findViewById(R.id.news_bar_return);
         ptt = view.findViewById(R.id.btn_ptt);
         iv_back.setOnClickListener(this);
+
         getPresenter().registReceiveHandler();
     }
 
     @Override
     protected void initData(){
+        Log.e("MessageBaseFragment", "initData");
         this.userId = getArguments().getInt("userId", userId);
         this.userName = getArguments().getString("userName", userName);
         this.uniqueNo = getArguments().getLong("uniqueNo", 0L);
         this.isGroup = getArguments().getBoolean("isGroup", true);
-
+        refreshLayout.setEnableLoadMore(false);
         tv_title.setText(userName);
         getPresenter().setAdapter(recyclerView, mSuperAdapter);
         getPresenter().getMessageFromServer(isGroup,uniqueNo,userId,10);

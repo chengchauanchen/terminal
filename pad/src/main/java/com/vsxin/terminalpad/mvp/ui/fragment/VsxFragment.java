@@ -30,7 +30,7 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
     @BindView(R.id.btn_mine_page)
     RadioButton btn_mine_page;
 
-    private MessageListListFragment messageListFragment;
+    private MessageListFragment messageListFragment;
     private ContactsFragment contactsFragment;
     private MeFragment meFragment;
 
@@ -105,7 +105,7 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
         switch (currentPage) {
             case 0:
                 if (messageListFragment == null) {
-                    messageListFragment = new MessageListListFragment();
+                    messageListFragment = new MessageListFragment();
                     transaction.add(R.id.tab_content, messageListFragment, FragmentTagConstants.MESSAGE);
                 } else {
                     transaction.show(messageListFragment);

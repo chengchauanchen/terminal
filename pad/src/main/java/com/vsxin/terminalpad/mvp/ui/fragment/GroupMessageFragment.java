@@ -42,7 +42,7 @@ import ptt.terminalsdk.tools.ToastUtil;
  * 描述：消息记录界面
  * 修订历史：
  */
-public class GroupMessageListFragment extends MessageBaseFragment<IGroupMessageView, GroupMessagePresenter> implements IGroupMessageView{
+public class GroupMessageFragment extends MessageBaseFragment<IGroupMessageView, GroupMessagePresenter> implements IGroupMessageView{
 
 
     private boolean isCurrentGroup;
@@ -79,13 +79,13 @@ public class GroupMessageListFragment extends MessageBaseFragment<IGroupMessageV
         TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateMainFrgamentPTTButtonHandler.class,true);
     }
 
-    public static GroupMessageListFragment newInstance(int userId, String userName, long uniqueNo){
+    public static GroupMessageFragment newInstance(int userId, String userName, long uniqueNo){
         Bundle args = new Bundle();
         args.putInt("userId", userId);
         args.putString("userName", userName);
         args.putBoolean("isGroup", true);
         args.putLong("uniqueNo",uniqueNo);
-         GroupMessageListFragment fragment = new GroupMessageListFragment();
+         GroupMessageFragment fragment = new GroupMessageFragment();
         fragment.setArguments(args);
         return fragment;
     }
