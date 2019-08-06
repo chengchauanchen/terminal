@@ -32,7 +32,7 @@ public class TerminalPadJs {
      */
     @JavascriptInterface
     public void memberInfo(String memberInfo, String memberType) {
-        logger.info("气泡：" + memberInfo);
+        logger.info("气泡：" + memberInfo+"数据:"+memberInfo);
         MemberTypeEnum typeEnum;
         switch (memberType) {
             case MemberTypeConstans.PATROL://巡逻船
@@ -55,6 +55,12 @@ public class TerminalPadJs {
                 break;
             case MemberTypeConstans.CAMERA://摄像头
                 typeEnum = MemberTypeEnum.CAMERA;
+                break;
+            case MemberTypeConstans.BALL://布控球
+                typeEnum = MemberTypeEnum.BALL;
+                break;
+                case MemberTypeConstans.DRONE_OPERATOR://布控球
+                typeEnum = MemberTypeEnum.DRONE_OPERATOR;
                 break;
             default:
                 typeEnum = null;

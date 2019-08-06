@@ -18,7 +18,9 @@ public enum MemberTypeEnum {
     LTE("LTE", MemberTypeConstans.LTE,R.mipmap.ic_lte_layer,true,TerminalMemberType.TERMINAL_LTE),
     UAV("无人机", MemberTypeConstans.UAV,R.mipmap.ic_uav_layer,true,TerminalMemberType.TERMINAL_UAV),
     VIDEO("执法仪", MemberTypeConstans.VIDEO,R.mipmap.iv_video_layer,true,TerminalMemberType.TERMINAL_BODY_WORN_CAMERA),
-    CAMERA("摄像头", MemberTypeConstans.CAMERA,R.mipmap.ic_camera_layer,true,null);
+    CAMERA("摄像头", MemberTypeConstans.CAMERA,R.mipmap.ic_camera_layer,true,null),
+    BALL("布控球", MemberTypeConstans.BALL,R.mipmap.ic_camera_layer,true,null),
+    DRONE_OPERATOR("飞手", MemberTypeConstans.DRONE_OPERATOR,0,true,null);
 
     private String name;
     private String type;

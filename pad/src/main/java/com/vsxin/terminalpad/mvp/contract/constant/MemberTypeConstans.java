@@ -26,6 +26,8 @@ public class MemberTypeConstans {
     public static final String UAV = "uav";//无人机
     public static final String VIDEO = "video";//执法仪
     public static final String CAMERA = "camera";//摄像头
+    public static final String BALL = "ball";//布控球
+    public static final String DRONE_OPERATOR = "droneOperator";//飞手
 
 
     /**
@@ -40,7 +42,8 @@ public class MemberTypeConstans {
         memberTypeEnums.add(MemberTypeEnum.LTE);
         memberTypeEnums.add(MemberTypeEnum.UAV);
         memberTypeEnums.add(MemberTypeEnum.VIDEO);
-        memberTypeEnums.add(MemberTypeEnum.CAMERA);
+        //memberTypeEnums.add(MemberTypeEnum.CAMERA);
+        memberTypeEnums.add(MemberTypeEnum.BALL);
         return memberTypeEnums;
 
     }

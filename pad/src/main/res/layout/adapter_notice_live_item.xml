@@ -24,6 +24,7 @@
         android:textSize="27px" />
 
     <TextView
+        android:id="@+id/tv_member_no"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="5dp"

@@ -31,6 +31,7 @@
             android:orientation="vertical">
 
             <FrameLayout
+                android:visibility="invisible"
                 android:id="@+id/fl_small_map"
                 android:layout_width="450px"
                 android:layout_height="0dip"

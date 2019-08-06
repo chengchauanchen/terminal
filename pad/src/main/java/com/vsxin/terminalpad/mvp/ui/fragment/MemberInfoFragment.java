@@ -65,10 +65,9 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
 
         memberInfo = (MemberInfoBean) getArguments().getSerializable(PARAM_JSON);
         memberTypeEnum = (MemberTypeEnum) getArguments().getSerializable(PARAM_ENUM);
-        getLogger().info("memberInfo:" + new Gson().toJson(memberInfo));
-        getLogger().info(memberTypeEnum.toString());
-
         if (memberTypeEnum != null) {
+            getLogger().info("memberInfo:" + new Gson().toJson(memberInfo));
+            getLogger().info(memberTypeEnum.toString());
             iv_type_icon.setImageResource(memberTypeEnum.getResId());
         }
 

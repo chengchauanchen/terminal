@@ -8,12 +8,18 @@ import com.ixiaoma.xiaomabus.architecture.mvp.refresh.RefreshPresenter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeInCallEnum;
+import com.vsxin.terminalpad.mvp.contract.constant.NoticeInLiveEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeInOrOutEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeOutCallEnum;
+import com.vsxin.terminalpad.mvp.contract.constant.NoticeOutLiveEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.view.INoticeView;
 import com.vsxin.terminalpad.mvp.entity.NoticeBean;
 import com.vsxin.terminalpad.prompt.PromptManager;
+import com.vsxin.terminalpad.receiveHandler.ReceivePullLivingHandler;
+import com.vsxin.terminalpad.receiveHandler.ReceiveStartPullLiveHandler;
+import com.vsxin.terminalpad.receiveHandler.ReceiveStopPullLiveHandler;
+import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
 import com.vsxin.terminalpad.utils.SensorUtil;
 import com.vsxin.terminalpad.utils.TimeUtil;
 
@@ -28,6 +34,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.IndividualCallType;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
@@ -37,10 +44,13 @@ import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
+import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerIndividualCallTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerLiveTimeoutHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberNotLivingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNobodyRequestVideoLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
@@ -48,7 +58,11 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLive
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberStopWatchMessageHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
@@ -92,21 +106,20 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
 
     /**
      * 停止个呼  主动/被动 停止 都会走这个吗？？？？
-     *
+     * <p>
      * 被动 对方停止个呼 回调
-     *
+     * <p>
      * 主动 我停止个呼，不会有回调
-     *
      */
     private ReceiveNotifyIndividualCallStoppedHandler receiveNotifyIndividualCallStoppedHandler = (methodResult, resultDesc) -> {
         getView().getLogger().info("NoticePresenter 个呼停止");
         stopPromptSound();
 
         NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
-        if(noticeBean.getNoticeType()==NoticeTypeEnum.CALL){//是否是个呼
-            if(noticeBean.getInOrOut()==NoticeInOrOutEnum.IN){//打进来的
+        if (noticeBean.getNoticeType() == NoticeTypeEnum.CALL) {//是否是个呼
+            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.IN) {//打进来的
                 noticeBean.setInCall(NoticeInCallEnum.CALL_IN_END);//通话结束
-            }else{//拨出去的
+            } else {//拨出去的
                 noticeBean.setOutCall(NoticeOutCallEnum.CALL_OUT_END);//通话结束
             }
         }
@@ -123,23 +136,23 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
     private ReceiveCurrentGroupIndividualCallHandler receiveCurrentGroupIndividualCallHandler = (member) -> {
         getView().getLogger().info("当前呼叫对象:" + member);
 
-        if(PadApplication.getPadApplication().getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
-            ToastUtil.showToast(getContext(),getContext().getString(R.string.text_watching_can_not_private_call));
+        if (PadApplication.getPadApplication().getVideoLivePlayingState() != VideoLivePlayingState.IDLE) {
+            ToastUtil.showToast(getContext(), getContext().getString(R.string.text_watching_can_not_private_call));
             return;
         }
-        if(PadApplication.getPadApplication().getVideoLivePushingState() != VideoLivePushingState.IDLE){
-            ToastUtil.showToast(getContext(),getContext().getString(R.string.text_pushing_can_not_private_call));
+        if (PadApplication.getPadApplication().getVideoLivePushingState() != VideoLivePushingState.IDLE) {
+            ToastUtil.showToast(getContext(), getContext().getString(R.string.text_pushing_can_not_private_call));
             return;
         }
-        if(PadApplication.getPadApplication().getIndividualState() != IndividualCallState.IDLE){
-            ToastUtil.showToast(getContext(),getContext().getString(R.string.text_personal_calling_can_not_do_others));
+        if (PadApplication.getPadApplication().getIndividualState() != IndividualCallState.IDLE) {
+            ToastUtil.showToast(getContext(), getContext().getString(R.string.text_personal_calling_can_not_do_others));
             return;
         }
 
         SensorUtil.getInstance().registSensor();
         PromptManager.getInstance().IndividualCallRequestRing();
-        int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(member.getId(),member.getUniqueNo(),"");
-        if (resultCode == BaseCommonCode.SUCCESS_CODE){
+        int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(member.getId(), member.getUniqueNo(), "");
+        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
             NoticeBean notice = new NoticeBean();
             notice.setNoticeType(NoticeTypeEnum.CALL);
             notice.setInOrOut(NoticeInOrOutEnum.OUT);
@@ -153,7 +166,7 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
             noticeBeans.add(notice);
             getView().notifyDataSetChanged(noticeBeans);
 
-        }else {
+        } else {
             ToastUtil.individualCallFailToast(getContext(), resultCode);
             stopIndividualCall();
         }
@@ -170,10 +183,10 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
             getView().getLogger().info("NoticePresenter 对方接受了你的个呼:" + resultCode + resultDesc + "callType;" + individualCallType);
 
             NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
-            if(noticeBean.getNoticeType()==NoticeTypeEnum.CALL){//是否是个呼
-                if(noticeBean.getInOrOut()==NoticeInOrOutEnum.IN){//打进来的
+            if (noticeBean.getNoticeType() == NoticeTypeEnum.CALL) {//是否是个呼
+                if (noticeBean.getInOrOut() == NoticeInOrOutEnum.IN) {//打进来的
                     noticeBean.setInCall(NoticeInCallEnum.CALL_IN_CONNECT);//正在通话中
-                }else{//拨出去的
+                } else {//拨出去的
                     noticeBean.setOutCall(NoticeOutCallEnum.CALL_OUT_CONNECT);//正在通话中
                 }
             }
@@ -186,10 +199,10 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
             getView().getLogger().info("NoticePresenter 对方拒绝了你的个呼:" + resultCode + resultDesc + "callType;" + individualCallType);
 
             NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
-            if(noticeBean.getNoticeType()==NoticeTypeEnum.CALL){//是否是个呼
-                if(noticeBean.getInOrOut()==NoticeInOrOutEnum.IN){//打进来的
+            if (noticeBean.getNoticeType() == NoticeTypeEnum.CALL) {//是否是个呼
+                if (noticeBean.getInOrOut() == NoticeInOrOutEnum.IN) {//打进来的
                     noticeBean.setInCall(NoticeInCallEnum.CALL_IN_REFUSE);//拒接接听
-                }else{//拨出去的
+                } else {//拨出去的
                     noticeBean.setOutCall(NoticeOutCallEnum.CALL_OUT_REFUSE);//拒接接听
                 }
             }
@@ -209,10 +222,10 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
         stopPromptSound();
         NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
 
-        if(noticeBean.getNoticeType()==NoticeTypeEnum.CALL){//是否是个呼
-            if(noticeBean.getInOrOut()==NoticeInOrOutEnum.IN){//打进来的
+        if (noticeBean.getNoticeType() == NoticeTypeEnum.CALL) {//是否是个呼
+            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.IN) {//打进来的
                 noticeBean.setInCall(NoticeInCallEnum.CALL_IN_TIME_OUT);//超时未接听
-            }else{//拨出去的
+            } else {//拨出去的
                 noticeBean.setOutCall(NoticeOutCallEnum.CALL_OUT_TIME_OUT);//超时未接听
             }
         }
@@ -261,9 +274,19 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerLiveTimeoutHandler);
         //邀请我观看
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
-    }
 
-    public void unRegistReceiveHandler() {
+        //主动请求他人上报
+        MyTerminalFactory.getSDK().registReceiveHandler(receiverRequestVideoHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseStartLiveHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerLiveTimeoutHandler2);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberNotLivingHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receivePullLivingHandler);//正在观看
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveStartPullLiveHandler);//请求他人上报
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveStopPullLiveHandler);//主动结束观看上报
+
+    }    public void unRegistReceiveHandler() {
         //被动接收 个呼
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
@@ -279,6 +302,17 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerLiveTimeoutHandler);
         //邀请我观看
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveNotifyDataMessageHandler);
+
+        //主动请求他人上报
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiverRequestVideoHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseStartLiveHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerLiveTimeoutHandler2);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberNotLivingHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receivePullLivingHandler);
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveStartPullLiveHandler);//请求他人上报
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveStopPullLiveHandler);//主动结束观看上报
     }
 
     /**
@@ -548,4 +582,155 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
             ToastUtil.livingFailToast(getContext(), resultCode, TerminalErrorCode.LIVING_PLAYING.getErrorCode());
         }
     }
+
+    /***************************************自己主动请求别人上报*************************************************/
+    /**
+     * 请求直播
+     */
+
+    private ReceiveStartPullLiveHandler receiveStartPullLiveHandler = (member) -> {
+        NoticeBean notice = new NoticeBean();
+        notice.setNoticeType(NoticeTypeEnum.LIVE);
+        notice.setInOrOut(NoticeInOrOutEnum.OUT);
+        ////主动 邀请他人直播 邀请中
+        notice.setOutLive(NoticeOutLiveEnum.LIVE_OUT_INVITE);
+        notice.setMemberName(member.getName());
+        notice.setMemberId(member.getId());
+        notice.setStartTime(TimeUtil.getCurrentTime());
+        noticeBeans.add(notice);
+        getView().notifyDataSetChanged(noticeBeans);
+    };
+
+    /**
+     * 这个回调只会执行一次
+     */
+    private ReceiverRequestVideoHandler receiverRequestVideoHandler = (member) -> {
+    };
+
+    /**
+     * 对方拒绝直播，通知界面关闭响铃页
+     **/
+    private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc) -> {
+
+        NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
+
+        if (noticeBean.getNoticeType() == NoticeTypeEnum.LIVE) {//是否是直播
+            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//打出去
+                noticeBean.setOutLive(NoticeOutLiveEnum.LIVE_OUT_INVITE_REFUSE);//请求被拒绝
+            } else {//被动接收
+                noticeBean.setInLive(NoticeInLiveEnum.LIVE_IN_END);//超时未接听
+            }
+        }
+        noticeBean.setStopTime(TimeUtil.getCurrentTime());
+        //刷新
+        getView().notifyDataSetChanged(noticeBeans);
+    };
+
+    /**
+     * 超时未回复answer 通知界面关闭
+     **/
+    private ReceiveAnswerLiveTimeoutHandler receiveAnswerLiveTimeoutHandler2 = () -> {
+        NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
+
+        if (noticeBean.getNoticeType() == NoticeTypeEnum.LIVE) {//是否是直播
+            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//打出去
+                noticeBean.setOutLive(NoticeOutLiveEnum.LIVE_OUT_TIME_OUT);//超时
+            } else {//被动接收
+                noticeBean.setInLive(NoticeInLiveEnum.LIVE_IN_TIME_OUT);//超时
+            }
+        } else {//个呼
+            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//打出去
+                noticeBean.setOutCall(NoticeOutCallEnum.CALL_OUT_TIME_OUT);//超时
+            } else {//被动接收
+                noticeBean.setInCall(NoticeInCallEnum.CALL_IN_TIME_OUT);//超时
+            }
+        }
+        noticeBean.setStopTime(TimeUtil.getCurrentTime());
+        //刷新
+        getView().notifyDataSetChanged(noticeBeans);
+    };
+
+    /**
+     * 通知直播停止 通知界面关闭视频页
+     **/
+    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> {
+        NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
+        if (noticeBean.getNoticeType() == NoticeTypeEnum.LIVE) {//是否是直播
+            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//打出去
+                noticeBean.setOutLive(NoticeOutLiveEnum.LIVE_OUT_END);//超时
+            } else {//被动接收
+                noticeBean.setInLive(NoticeInLiveEnum.LIVE_IN_END);//超时
+            }
+        } else {//个呼
+            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//打出去
+                noticeBean.setOutCall(NoticeOutCallEnum.CALL_OUT_END);//超时
+            } else {//被动接收
+                noticeBean.setInCall(NoticeInCallEnum.CALL_IN_END);//超时
+            }
+        }
+        noticeBean.setStopTime(TimeUtil.getCurrentTime());
+        //刷新
+        getView().notifyDataSetChanged(noticeBeans);
+    };
+
+    /**
+     * 去观看时，发现没有在直播，关闭界面吧
+     */
+    private ReceiveMemberNotLivingHandler receiveMemberNotLivingHandler = callId -> {
+        NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
+        if (noticeBean.getNoticeType() == NoticeTypeEnum.LIVE) {//是否是直播
+            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//打出去
+                noticeBean.setOutLive(NoticeOutLiveEnum.LIVE_OUT_END);//直播结束
+            } else {//被动接收
+                noticeBean.setInLive(NoticeInLiveEnum.LIVE_IN_END);//直播结束
+            }
+        }
+        noticeBean.setStopTime(TimeUtil.getCurrentTime());
+        //刷新
+        getView().notifyDataSetChanged(noticeBeans);
+    };
+
+    /**
+     * 通知终端停止观看直播
+     **/
+    private ReceiveNotifyMemberStopWatchMessageHandler receiveNotifyMemberStopWatchMessageHandler = message -> {
+        NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
+        if (noticeBean.getNoticeType() == NoticeTypeEnum.LIVE) {//是否是直播
+            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//打出去
+                noticeBean.setOutLive(NoticeOutLiveEnum.LIVE_OUT_END);//直播结束
+            } else {//被动接收
+                noticeBean.setInLive(NoticeInLiveEnum.LIVE_IN_END);//直播结束
+            }
+        }
+        noticeBean.setStopTime(TimeUtil.getCurrentTime());
+        //刷新
+        getView().notifyDataSetChanged(noticeBeans);
+    };
+
+    private ReceivePullLivingHandler receivePullLivingHandler = () -> {
+        NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
+        if (noticeBean.getNoticeType() == NoticeTypeEnum.LIVE) {//是否是直播
+            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//打出去
+                noticeBean.setOutLive(NoticeOutLiveEnum.LIVE_OUT_WATCH);//正在观看
+            } else {//被动接收
+                noticeBean.setInLive(NoticeInLiveEnum.LIVE_IN_WATCH);//正在观看
+            }
+        }
+        //刷新
+        getView().notifyDataSetChanged(noticeBeans);
+    };
+
+    private ReceiveStopPullLiveHandler receiveStopPullLiveHandler = ()->{
+        NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
+        if (noticeBean.getNoticeType() == NoticeTypeEnum.LIVE) {//是否是直播
+            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//打出去
+                noticeBean.setOutLive(NoticeOutLiveEnum.LIVE_OUT_END);//直播结束
+            } else {//被动接收
+                noticeBean.setInLive(NoticeInLiveEnum.LIVE_IN_END);//直播结束
+            }
+        }
+        noticeBean.setStopTime(TimeUtil.getCurrentTime());
+        //刷新
+        getView().notifyDataSetChanged(noticeBeans);
+    };
 }
