@@ -1206,6 +1206,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     protected static final String CLIENT_ID = "40B2984FC648ECA7F4CEE84C0F234F80";//"B8994F7212536DEBB21D8BE1FDE75F22"
 
     private void authorize() {
+
         Map<String, String> userInfo = UserInfo.getUserInfo(RegistActivity.this);
 
         logger.info("请求userInfo：" + userInfo);
@@ -1244,6 +1245,15 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_open_wuhan_police_work_first));
             }
 
+
+
+            //获取身份证号
+//            String userID = "420800197103163958";
+//            String userName = "身份证测试";
+//            logger.info("获取到身份证号为："+userID+"------姓名："+userName);
+//            MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, userID);
+//            MyTerminalFactory.getSDK().putParam(UrlParams.NAME, userName);
+//            MyTerminalFactory.getSDK().putParam(UrlParams.XIANGYANG_STORE,true);
         }
     }
 
