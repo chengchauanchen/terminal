@@ -43,8 +43,8 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.ToastUtil;
 
-import static cn.vsx.SpecificSDK.StateMachineUtils.revertStateMachine;
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
+import static com.vsxin.terminalpad.utils.StateMachineUtils.revertStateMachine;
 
 /**
  * @author qzw

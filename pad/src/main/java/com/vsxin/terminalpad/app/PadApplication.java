@@ -5,7 +5,6 @@ import com.vsxin.terminalpad.utils.CommonGroupUtil;
 import com.vsxin.terminalpad.utils.SystemUtils;
 
 import cn.vsx.SpecificSDK.SpecificSDK;
-import cn.vsx.SpecificSDK.application.App;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;

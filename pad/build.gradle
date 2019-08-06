@@ -91,4 +91,5 @@ dependencies {
     // skin-support 基础控件支持
     implementation 'skin.support:skin-support-design:2.2.3'
 
+    api project(':Common-Architecture')
 }

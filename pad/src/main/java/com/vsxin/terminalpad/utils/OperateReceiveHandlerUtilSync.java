@@ -1,4 +1,4 @@
-package cn.vsx.SpecificSDK;
+package com.vsxin.terminalpad.utils;
 
 import org.apache.log4j.Logger;
 

@@ -1,4 +1,4 @@
-package cn.vsx.SpecificSDK.instruction;
+package com.vsxin.terminalpad.instruction;
 
 import android.content.Context;
 

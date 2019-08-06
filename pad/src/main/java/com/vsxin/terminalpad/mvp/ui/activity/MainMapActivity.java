@@ -27,6 +27,8 @@ import android.widget.TextView;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpActivity;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
+import com.vsxin.terminalpad.instruction.groupCall.GroupCallInstruction;
+import com.vsxin.terminalpad.instruction.groupCall.SendGroupCallListener;
 import com.vsxin.terminalpad.js.TerminalPadJs;
 import com.vsxin.terminalpad.mvp.contract.presenter.MainMapPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMainMapView;
@@ -37,13 +39,11 @@ import com.vsxin.terminalpad.mvp.ui.fragment.SmallMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.VsxFragment;
 import com.vsxin.terminalpad.receiveHandler.ReceiveUpdateMainFrgamentPTTButtonHandler;
 import com.vsxin.terminalpad.utils.HandleIdUtil;
+import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.http.util.TextUtils;
 
 import butterknife.BindView;
-import cn.vsx.SpecificSDK.OperateReceiveHandlerUtilSync;
-import cn.vsx.SpecificSDK.instruction.groupCall.GroupCallInstruction;
-import cn.vsx.SpecificSDK.instruction.groupCall.SendGroupCallListener;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;

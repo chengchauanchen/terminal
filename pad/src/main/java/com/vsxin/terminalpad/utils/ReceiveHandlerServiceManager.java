@@ -1,12 +1,4 @@
-package cn.vsx.SpecificSDK;
-
-import android.content.ComponentName;
-import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.IBinder;
-import android.util.Log;
-
-import static android.content.Context.BIND_AUTO_CREATE;
+package com.vsxin.terminalpad.utils;
 
 /**
  * 接收消息服务 管理类

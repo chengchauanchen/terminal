@@ -1,22 +1,18 @@
-package cn.vsx.SpecificSDK.instruction.groupCall;
+package com.vsxin.terminalpad.instruction.groupCall;
 
 import android.content.Context;
 
-import org.apache.log4j.Logger;
+import com.vsxin.terminalpad.app.App;
+import com.vsxin.terminalpad.instruction.BaseInstruction;
 
 import java.lang.ref.WeakReference;
 
-import cn.vsx.SpecificSDK.OperateReceiveHandlerUtilSync;
-import cn.vsx.SpecificSDK.R;
-import cn.vsx.SpecificSDK.application.App;
-import cn.vsx.SpecificSDK.instruction.BaseInstruction;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.Group;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
@@ -26,7 +22,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveStartCeaseGroupCallHandl
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTalkWillTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.ToastUtil;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 
@@ -63,7 +58,7 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
  * GroupCallSpeakWaitingStateHandler:
  * ReceiveRequestGroupCallConformationHandler
  */
-public class GroupCallInstruction extends BaseInstruction {
+public class GroupCallInstruction extends BaseInstruction{
 
     private WeakReference<SendGroupCallListener> sendGroupCallListener;
 

@@ -15,9 +15,9 @@ import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
 import com.vsxin.terminalpad.utils.MemberUtil;
 import com.vsxin.terminalpad.utils.MyDataUtil;
 import com.vsxin.terminalpad.utils.NumberUtil;
+import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
 import com.vsxin.terminalpad.utils.SensorUtil;
 
-import cn.vsx.SpecificSDK.OperateReceiveHandlerUtilSync;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.TerminalMemberType;

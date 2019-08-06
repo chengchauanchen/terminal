@@ -19,11 +19,11 @@ import com.vsxin.terminalpad.mvp.entity.CatalogBean;
 import com.vsxin.terminalpad.receiveHandler.ReceiverMonitorViewClickHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverShowGroupFragmentHandler;
 import com.vsxin.terminalpad.utils.Constants;
+import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.vsx.SpecificSDK.OperateReceiveHandlerUtilSync;
 import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Department;

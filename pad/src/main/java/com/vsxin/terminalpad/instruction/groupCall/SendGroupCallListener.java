@@ -1,4 +1,4 @@
-package cn.vsx.SpecificSDK.instruction.groupCall;
+package com.vsxin.terminalpad.instruction.groupCall;
 
 public interface SendGroupCallListener {
     void speaking();//开始

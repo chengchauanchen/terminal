@@ -6,7 +6,6 @@ import android.hardware.Camera;
 import android.view.MotionEvent;
 import android.view.TextureView;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -15,13 +14,12 @@ import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpFragment;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.presenter.LivePresenter;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveView;
-import com.vsxin.terminalpad.receiveHandler.ReceivePullLivingHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiveStopPullLiveHandler;
+import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
 
 import org.easydarwin.push.MediaStream;
 
 import butterknife.BindView;
-import cn.vsx.SpecificSDK.OperateReceiveHandlerUtilSync;
 
 
 /**

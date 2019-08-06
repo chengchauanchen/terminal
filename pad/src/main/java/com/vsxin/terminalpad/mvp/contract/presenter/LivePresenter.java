@@ -16,12 +16,14 @@ import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveView;
 import com.vsxin.terminalpad.prompt.PromptManager;
+import com.vsxin.terminalpad.receiveHandler.ReceiveGoWatchRTSPHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceivePullLivingHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiveStartPullLiveHandler;
-import com.vsxin.terminalpad.receiveHandler.ReceiveGoWatchRTSPHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverActivePushVideoHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
+import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
 import com.vsxin.terminalpad.utils.SensorUtil;
+import com.vsxin.terminalpad.utils.StateMachineUtils;
 
 import org.easydarwin.push.EasyPusher;
 import org.easydarwin.push.InitCallback;
@@ -33,8 +35,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import cn.vsx.SpecificSDK.OperateReceiveHandlerUtilSync;
-import cn.vsx.SpecificSDK.StateMachineUtils;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.TerminalMemberType;
