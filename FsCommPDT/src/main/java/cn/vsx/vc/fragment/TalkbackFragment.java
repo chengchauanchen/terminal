@@ -227,8 +227,10 @@ public class TalkbackFragment extends BaseFragment {
                         myHandler.post(() -> change2Silence());
                     }
                 } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
-                    myHandler.post(() -> ToastUtil.showToast(context, getString(R.string.cannot_talk)));
-                    change2Silence();
+                    myHandler.post(() -> {
+                        ToastUtil.showToast(context, getString(R.string.cannot_talk));
+                        change2Silence();
+                    });
                 } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
                     myHandler.post(() -> change2Waiting());
                 } else {
