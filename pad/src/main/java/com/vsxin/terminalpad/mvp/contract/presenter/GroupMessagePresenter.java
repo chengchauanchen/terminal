@@ -13,6 +13,7 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
@@ -38,6 +39,7 @@ public class GroupMessagePresenter extends BaseMessagePresenter<IGroupMessageVie
         TerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
+        TerminalFactory.getSDK().registReceiveHandler(mReceiveChangeGroupHandler);
     }
 
     @Override
@@ -47,6 +49,7 @@ public class GroupMessagePresenter extends BaseMessagePresenter<IGroupMessageVie
         TerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
+        TerminalFactory.getSDK().unregistReceiveHandler(mReceiveChangeGroupHandler);
     }
 
     /**
@@ -136,5 +139,16 @@ public class GroupMessagePresenter extends BaseMessagePresenter<IGroupMessageVie
             //            }
 //            setViewEnable(true);
         });
+    };
+
+    /***  主动切组成功 ***/
+    private ReceiveChangeGroupHandler mReceiveChangeGroupHandler = new ReceiveChangeGroupHandler() {
+        @Override
+        public void handler(final int errorCode, final String errorDesc) {
+            getView().getLogger().info("转组成功回调消息");
+            mHandler.post(() -> {
+                getView().changeGroup(errorCode,errorDesc);
+            });
+        }
     };
 }

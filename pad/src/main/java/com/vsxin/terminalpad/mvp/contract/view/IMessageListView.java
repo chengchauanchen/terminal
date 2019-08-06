@@ -15,4 +15,6 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 public interface IMessageListView extends IRefreshView<TerminalMessage> {
 
     void notifyDataSetChanged(List<TerminalMessage> terminalMessages);
+
+    void updateGroupName();
 }

@@ -810,6 +810,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
         @Override
         public void handler(boolean show) {
+            getLogger().info("ReceiveUpdateMainFrgamentPTTButtonHandler : "+show);
                 mHandler.post(() -> rl_group_call.setVisibility(show?View.VISIBLE:View.GONE));
         }
     };

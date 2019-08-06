@@ -16,8 +16,10 @@ import java.util.List;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
  * @author qzw
@@ -74,6 +76,11 @@ public class MessageListFragment extends RefreshRecycleViewFragment<TerminalMess
                 refreshOrLoadMore(terminalMessages);
             }
         });
+    }
+
+    @Override
+    public void updateGroupName() {
+        tv_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
     }
 
     @Override

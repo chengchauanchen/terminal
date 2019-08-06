@@ -9,6 +9,7 @@ import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.presenter.ContactsPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IContactsView;
 import com.vsxin.terminalpad.mvp.ui.adapter.ContactsAdapter;
+import com.vsxin.terminalpad.utils.FragmentManage;
 
 import java.util.List;
 
@@ -52,15 +53,9 @@ public class ContactsFragment extends RefreshRecycleViewFragment<GroupAndDepartm
             getPresenter().onFolderClickListener(v, depId, name, isTempGroup);
         });
         contactsAdapter.setItemOnClickListener(group -> {
-            ToastUtil.showToast(getActivity(),"点击事件");
-//                Intent intent = new Intent(getContext(), GroupCallNewsActivity.class);
-//                intent.putExtra("isGroup", true);
-//                intent.putExtra("uniqueNo",group.getUniqueNo());
-//                intent.putExtra("userId", group.getNo());//组id
-//                intent.putExtra("userName", group.getName());
-//                intent.putExtra("speakingId",group.getId());
-//                intent.putExtra("speakingName",group.getName());
-//                getContext().startActivity(intent);
+            if(group!=null){
+                FragmentManage.startFragment(getActivity(), GroupMessageFragment.newInstance(group.getNo(),group.getName(),group.getUniqueNo()));
+            }
         });
 
         //组名
