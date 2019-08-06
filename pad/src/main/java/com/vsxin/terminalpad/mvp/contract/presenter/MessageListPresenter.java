@@ -281,6 +281,7 @@ public class MessageListPresenter extends RefreshPresenter<TerminalMessage, IMes
         @Override
         public void handler(final int errorCode, String errorDesc) {
             getView().getLogger().info("切组后的消息回调");
+            mHandler.post(() -> getView().updateGroupName());
         }
     };
 
@@ -291,6 +292,7 @@ public class MessageListPresenter extends RefreshPresenter<TerminalMessage, IMes
         @Override
         public void handler(int memberId, int toGroupId, boolean forceSwitchGroup, String tempGroupType) {
             getView().getLogger().info("强制切组");
+            mHandler.post(() -> getView().updateGroupName());
         }
     };
 
