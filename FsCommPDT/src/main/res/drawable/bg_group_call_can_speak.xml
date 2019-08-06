@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:width="180px" android:height="180px">
+        <shape android:shape="oval" >
+            <solid android:color="@color/group_call_can_speak_2"/>
+        </shape>
+    </item>
+
+    <item android:width="140px" android:height="140px" android:left="20px" android:top="20px">
+        <shape android:shape="oval" >
+            <solid android:color="@color/group_call_can_speak_1"/>
+        </shape>
+    </item>
+
+</layer-list>

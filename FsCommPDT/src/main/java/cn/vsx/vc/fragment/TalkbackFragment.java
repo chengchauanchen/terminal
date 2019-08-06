@@ -147,6 +147,9 @@ public class TalkbackFragment extends BaseFragment {
                         timeProgress = 60;
                         change2Silence();
                     }
+                    int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                    setCurrentGroupScanView(currentGroupId);
+                    tx_ptt_group_name.setVisibility(View.GONE);
                 }
                 setViewEnable(true);
             });
@@ -210,6 +213,8 @@ public class TalkbackFragment extends BaseFragment {
                         change2Speaking();
                         MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
                         setViewEnable(false);
+                        setCurrentGroupScanView(groupId);
+                        tx_ptt_group_name.setText(DataUtil.getGroupName(groupId));
                     });
                 } else if (methodResult == SignalServerErrorCode.RESPONSE_GROUP_IS_DISABLED.getErrorCode()) {//响应组为禁用状态，低级用户无法组呼
 
@@ -253,6 +258,10 @@ public class TalkbackFragment extends BaseFragment {
     private IGotaKeyMonitor keyMointor;
     private IGotaKeyHandler gotaKeyHandler;
     private boolean isScanGroupCall;//是否扫描组在组呼
+    private ImageView iv_group_call_bg;
+    private RelativeLayout rl_group_call;
+    private TextView tx_ptt_time;
+    private TextView tx_ptt_group_name;
 
     public void setViewEnable(boolean isEanble) {
         talkback_change_session.setEnabled(isEanble);
@@ -1096,13 +1105,34 @@ public class TalkbackFragment extends BaseFragment {
         talkback_change_session = (ImageView) mRootView.findViewById(R.id.talkback_change_session);
         rlBind = (RelativeLayout) mRootView.findViewById(R.id.rl_bind);
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
+        iv_group_call_bg = mRootView.findViewById(R.id.iv_group_call_bg);
+        rl_group_call = mRootView.findViewById(R.id.rl_group_call);
+        tx_ptt_time = mRootView.findViewById(R.id.tx_ptt_time);
+        tx_ptt_group_name = mRootView.findViewById(R.id.tx_ptt_group_name);
+
         getContext().registerReceiver(mBatInfoReceiver, filter);
         //GH880手机按键服务
         keyMointor = (IGotaKeyMonitor) context.getSystemService("gotakeymonitor");
 
         getActivity().registerReceiver(mbtBroadcastReceiver, makeGattUpdateIntentFilter());
 //        mGestureDetector = new GestureDetector(context, gestureListener);
+        iv_group_call_bg.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View v){
 
+                if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE){
+                    pttUpDoThing();
+                    int oldGroupId = TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0);
+                    TerminalFactory.getSDK().putParam(Params.CURRENT_GROUP_ID,oldGroupId);
+                }else{
+                    int currentGroup = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+                    TerminalFactory.getSDK().putParam(Params.OLD_CURRENT_GROUP_ID,currentGroup);
+                    //市局宽带组111
+                    TerminalFactory.getSDK().putParam(Params.CURRENT_GROUP_ID,102917);
+                    pttDownDoThing();
+                }
+            }
+        });
         iv_volume_off_call.setVisibility(View.VISIBLE);
         iv_volume_off_call.setImageResource(BitmapUtil.getVolumeImageResourceByValue(true));
         iv_volume_off_call.setOnClickListener(view -> {

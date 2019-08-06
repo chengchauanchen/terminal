@@ -8,7 +8,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
-
+        
         <View
             android:id="@+id/view"
             android:layout_width="match_parent"
@@ -332,6 +332,46 @@
             android:text="@string/press_to_talk_text"
             android:textColor="@color/ptt_silence_text"
             android:textSize="@dimen/sp_20" />
+    
+    
+        <RelativeLayout
+            android:id="@+id/rl_group_call"
+            android:layout_width="180px"
+            android:layout_height="180px"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:layout_gravity="right|bottom"
+            android:layout_marginBottom="80px"
+            android:layout_marginRight="30px">
+        
+            <ImageView
+                android:id="@+id/iv_group_call_bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/bg_group_call_can_speak"/>
+        
+            <TextView
+                android:id="@+id/tx_ptt_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PTT_2"
+                android:textSize="38px"
+                android:textColor="@color/white"
+                android:layout_centerInParent="true"/>
+        
+            <TextView
+                android:id="@+id/tx_ptt_group_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingLeft="30px"
+                android:paddingRight="30px"
+                android:singleLine="true"
+                android:ellipsize="end"
+                android:textSize="24px"
+                android:textColor="@color/white"
+                android:layout_below="@+id/tx_ptt_time"/>
+        </RelativeLayout>
     </RelativeLayout>
 
 
