@@ -594,7 +594,7 @@
 
     <color name="setting_text_temp">#637e9e</color>
     
-    <color name="group_call_can_speak_1">#0091ff</color>
+    <color name="group_call_can_speak_1">#990091ff</color>
     <color name="group_call_can_speak_2">#330091ff</color>
     <color name="group_call_other_speaking_1">#42596b</color>
     <color name="group_call_other_speaking_2">#33002643</color>

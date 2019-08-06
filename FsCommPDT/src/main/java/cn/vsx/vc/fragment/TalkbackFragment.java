@@ -149,7 +149,7 @@ public class TalkbackFragment extends BaseFragment {
                     }
                     int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
                     setCurrentGroupScanView(currentGroupId);
-                    tx_ptt_group_name.setVisibility(View.GONE);
+                    tx_ptt_group_name.setText("");
                 }
                 setViewEnable(true);
             });

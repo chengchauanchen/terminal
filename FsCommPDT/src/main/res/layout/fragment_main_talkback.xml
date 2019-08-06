@@ -342,7 +342,8 @@
             android:layout_alignParentBottom="true"
             android:layout_gravity="right|bottom"
             android:layout_marginBottom="80px"
-            android:layout_marginRight="30px">
+            android:layout_marginRight="30px"
+            android:visibility="gone">
         
             <ImageView
                 android:id="@+id/iv_group_call_bg"
