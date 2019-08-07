@@ -15,9 +15,10 @@
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
         android:layout_alignParentBottom="true"
         android:layout_marginBottom="@dimen/dp_40"
-        android:layout_marginLeft="@dimen/dp_30"
+        android:layout_marginRight="@dimen/dp_30"
         android:textSize="@dimen/sp_20"
         android:textColor="@color/white"
         style="@style/ShadleStyle" />
@@ -129,6 +130,20 @@
         android:layout_marginRight="@dimen/dp_30"
         android:focusable="true"
         style="@style/ShadleStyle"/>
+
+    <TextView
+        android:id="@+id/tv_live_content"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/sp_20"
+        android:textColor="@color/white"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="@dimen/dp_40"
+        android:layout_marginLeft="@dimen/dp_30"
+        android:focusable="true"
+        style="@style/ShadleStyle"/>
+
 
     <TextView
         android:id="@+id/tv_log_upload"

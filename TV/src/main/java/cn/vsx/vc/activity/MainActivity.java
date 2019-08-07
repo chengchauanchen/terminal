@@ -53,6 +53,7 @@ import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.RotationImageType;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -122,6 +123,9 @@ public class MainActivity extends BaseActivity {
     TextView tv_version_name;
     @Bind(R.id.tv_log_upload)
     TextView tv_log_upload;
+
+    @Bind(R.id.tv_live_content)
+    TextView tv_live_content;
 
     private String streamMediaServerUrl;//收到的直播流rtsp地址
     //    private int mType = Client.TRANSTYPE_TCP;
@@ -202,8 +206,8 @@ public class MainActivity extends BaseActivity {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
-//        tv_user_id.setText(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "");
-//        tv_user_name.setText(MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""));
+        tv_user_id.setText(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "");
+        tv_user_name.setText(MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""));
 
         tv_version_name.setOnFocusChangeListener(onFocusChangeListener);
         tv_log_upload.setOnFocusChangeListener(onFocusChangeListener);
@@ -413,6 +417,7 @@ public class MainActivity extends BaseActivity {
     private ReceiveGetRtspStreamUrlHandler receiveGetRtspStreamUrlHandler = (rtspUrl, liveMember, callId) -> handler.post(() -> {
         MainActivity.this.liveMember = liveMember;
         MainActivity.this.callId = callId;
+        checkStartPull(rtspUrl, getShowContent(liveMember));
         //获取上报者的信息
         if (liveMember != null) {
             TerminalFactory.getSDK().getThreadPool().execute(() -> {
@@ -420,13 +425,11 @@ public class MainActivity extends BaseActivity {
                 if (member != null) {
                     handler.post(() -> {
                         MainActivity.this.showContent = getShowContent(member);
-                        tv_title.setText(MainActivity.this.showContent);
+                        tv_live_content.setText(MainActivity.this.showContent);
                     });
                 }
             });
         }
-
-        checkStartPull(rtspUrl, "");
     });
 
     /**
@@ -642,8 +645,10 @@ public class MainActivity extends BaseActivity {
     private View.OnFocusChangeListener onFocusChangeListener = (v, hasFocus) -> {
         if (hasFocus) {
             ViewCompat.animate(v).scaleX(1.2f).scaleY(1.2f).start();
+            v.setBackgroundColor(getResources().getColor(R.color.transparent_20));
         } else {
             ViewCompat.animate(v).scaleX(1.0f).scaleY(1.0f).start();
+			v.setBackgroundColor(getResources().getColor(R.color.TRANSPARENT));
         }
     };
 
@@ -734,7 +739,7 @@ public class MainActivity extends BaseActivity {
         try {
             if (streamMediaServerUrl != null) {
                 //显示上报图像的信息
-                tv_title.setText((MainActivity.this.showContent != null) ? MainActivity.this.showContent : "");
+                tv_title.setText((MainActivity.this.message != null) ? MainActivity.this.message.getMessageFromName() + " 推送的图像" : "");
                 mStreamRender.stop();
                 mStreamRender.start(streamMediaServerUrl, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
             }
@@ -930,7 +935,10 @@ public class MainActivity extends BaseActivity {
             streamMediaServerUrl = url;
             MainActivity.this.showContent = showContent;
             if (svLive.getSurfaceTexture() != null) {
-                startPull(svLive.getSurfaceTexture());
+                handler.post(() -> {
+                    tv_live_content.setText(MainActivity.this.showContent);
+                    startPull(svLive.getSurfaceTexture());
+                });
             }
             PromptManager.getInstance().stopRing();
             toWatchNext(true);
@@ -947,6 +955,9 @@ public class MainActivity extends BaseActivity {
         if (!liveDescList.isEmpty()) {
             myHandler.postDelayed(() -> {
                 rotationIndex++;
+                if(rotationIndex>=liveDescList.size()){
+                    rotationIndex = 0;
+                }
                 if (rotationIndex >= 0 && rotationIndex < liveDescList.size()) {
                     allFinishWatchLive();
                     startRotationLive();
@@ -1008,7 +1019,8 @@ public class MainActivity extends BaseActivity {
      * @param isShow
      */
     private void showForeground(boolean isShow) {
-        if (foreground == null || icon == null || llTempt == null)
+        if (foreground == null || icon == null || llTempt == null
+                ||tv_user_id == null || tv_user_name == null)
             return;
 //                tv_user_id == null || tv_user_name == null)
 
@@ -1016,16 +1028,18 @@ public class MainActivity extends BaseActivity {
             foreground.setVisibility(View.VISIBLE);
             icon.setVisibility(View.VISIBLE);
             llTempt.setVisibility(View.VISIBLE);
-//            tv_user_id.setVisibility(View.VISIBLE);
-//            tv_user_name.setVisibility(View.VISIBLE);
+            tv_user_id.setVisibility(View.VISIBLE);
+            tv_user_name.setVisibility(View.VISIBLE);
             tv_log_upload.setVisibility(View.VISIBLE);
+            tv_title.setText("");
+            tv_live_content.setText("");
         } else {
             pullcount = 0;
             foreground.setVisibility(View.INVISIBLE);
             icon.setVisibility(View.INVISIBLE);
             llTempt.setVisibility(View.INVISIBLE);
-//            tv_user_id.setVisibility(View.INVISIBLE);
-//            tv_user_name.setVisibility(View.INVISIBLE);
+            tv_user_id.setVisibility(View.INVISIBLE);
+            tv_user_name.setVisibility(View.INVISIBLE);
             tv_log_upload.setVisibility(View.GONE);
         }
     }
@@ -1274,7 +1288,8 @@ public class MainActivity extends BaseActivity {
         RotationLiveBean bean = DataUtil.getRotationLiveBean(string);
         if(!TextUtils.isEmpty(string)&&bean!=null){
             PTTProtolbuf.NotifyDataMessage.Builder builder = PTTProtolbuf.NotifyDataMessage.newBuilder();
-            builder.setMessageFromName("");
+            Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(message.getRequestMemberId(),false);
+            builder.setMessageFromName((account!=null)?account.getName():"");
             builder.setMessageFromNo(message.getRequestMemberId());
             builder.setMessageFromUniqueNo(message.getRequestUniqueNo());
             builder.setMessageToName(MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""));

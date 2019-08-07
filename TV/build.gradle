@@ -9,8 +9,8 @@ android {
         applicationId "cn.vsx.vc"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 5
-        versionName "1.0.4"
+        versionCode 6
+        versionName "1.0.5"
 
         multiDexEnabled true
 
@@ -64,6 +64,12 @@ android {
 //            buildConfigField "String", "apk_type","policeTest"
         }
         policeStore{
+//            buildConfigField "String", "apk_type","policeStore"
+        }
+        xiangYang {
+//            buildConfigField "String" ,"apk_type","common"
+        }
+        xiangYangPoliceStore {
 //            buildConfigField "String", "apk_type","policeStore"
         }
     }
