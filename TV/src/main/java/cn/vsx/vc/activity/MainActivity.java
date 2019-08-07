@@ -425,7 +425,9 @@ public class MainActivity extends BaseActivity {
                 if (member != null) {
                     handler.post(() -> {
                         MainActivity.this.showContent = getShowContent(member);
-                        tv_live_content.setText(MainActivity.this.showContent);
+                        if(foreground!=null&&foreground.getVisibility() != View.VISIBLE){
+                            tv_live_content.setText(MainActivity.this.showContent);
+                        }
                     });
                 }
             });
@@ -676,7 +678,9 @@ public class MainActivity extends BaseActivity {
     private ReceiveNotifyPushPartyLiveMessageHandler receiveNotifyPushPartyLiveMessageHandler = (message) -> {
         handler.post(() -> {
             myHandler.removeCallbacksAndMessages(null);
-            prepareStartRotationLive(addRotationLiveData(message));
+            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                prepareStartRotationLive(addRotationLiveData(message));
+            });
         });
     };
 
@@ -1058,8 +1062,10 @@ public class MainActivity extends BaseActivity {
      * 结束观看
      */
     private void finishWatchLive() {
-        showForeground(true);
-        showConnectToOtherView(noLive);
+        handler.post(() -> {
+            showForeground(true);
+            showConnectToOtherView(noLive);
+        });
     }
 
     /**
@@ -1289,6 +1295,7 @@ public class MainActivity extends BaseActivity {
         if(!TextUtils.isEmpty(string)&&bean!=null){
             PTTProtolbuf.NotifyDataMessage.Builder builder = PTTProtolbuf.NotifyDataMessage.newBuilder();
             Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(message.getRequestMemberId(),false);
+            logger.info("analysisRotationLiveData---message:"+message+"--account:"+account);
             builder.setMessageFromName((account!=null)?account.getName():"");
             builder.setMessageFromNo(message.getRequestMemberId());
             builder.setMessageFromUniqueNo(message.getRequestUniqueNo());
