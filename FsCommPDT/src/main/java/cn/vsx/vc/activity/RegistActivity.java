@@ -164,6 +164,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         }
     };
     private String apkType;
+    private Button btn_idcard_login;
+    private LinearLayout ll_idcard_info;
+    private EditText et_idcard;
+    private EditText et_name;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -406,7 +410,19 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                     changeProgressMsg(getString(R.string.authing));
                 }
-            } else {
+            } else if(ll_idcard_info.getVisibility() == View.VISIBLE){
+                //身份证号登陆
+                String userID = et_idcard.getText().toString().trim();
+                String userName = et_name.getText().toString().trim();
+                MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, userID);
+                MyTerminalFactory.getSDK().putParam(UrlParams.NAME, userName);
+                MyTerminalFactory.getSDK().putParam(UrlParams.XIANGYANG_STORE,true);
+                int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
+                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                    changeProgressMsg(getString(R.string.authing));
+                }
+            }
+            else {
                 //注册
                 String useOrg = userOrg.getText().toString().trim();
                 String useName = userName.getText().toString().trim();
@@ -455,6 +471,23 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             ptt.terminalsdk.tools.ToastUtil.showToast(RegistActivity.this,getString(R.string.text_input_name_regex));
         }
         return result;
+    }
+
+    private class IdcardLoginClickListener implements OnClickListener{
+        @Override
+        public void onClick(View v){
+            if(ll_idcard_info.getVisibility() == View.GONE){
+                userOrg.setVisibility(View.GONE);
+                userName.setVisibility(View.GONE);
+                ll_idcard_info.setVisibility(View.VISIBLE);
+                btn_idcard_login.setText(R.string.text_invitation_code_regist);
+            }else {
+                userOrg.setVisibility(View.VISIBLE);
+                userName.setVisibility(View.VISIBLE);
+                ll_idcard_info.setVisibility(View.GONE);
+                btn_idcard_login.setText("模拟身份证号登陆");
+            }
+        }
     }
 
     //模拟警员
@@ -786,6 +819,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         xcd_available_ip = (XCDropDownListView) findViewById(R.id.xcd_available_ip);
         ll_regist = (LinearLayout) findViewById(R.id.ll_regist);
         view_pop = (View) findViewById(R.id.view_pop);
+        btn_idcard_login = findViewById(R.id.btn_idcard_login);
+        ll_idcard_info = findViewById(R.id.ll_idcard_info);
+        et_idcard = findViewById(R.id.et_idcard);
+        et_name = findViewById(R.id.et_name);
         if (!this.isTaskRoot()) { //判断该Activity是不是任务空间的源Activity，“非”也就是说是被系统重新实例化出来
             //如果你就放在launcher Activity中话，这里可以直接return了
             Intent mainIntent = getIntent();
@@ -800,6 +837,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)
                 || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)) {
             btnAddMember.setVisibility(View.GONE);
+            btn_idcard_login.setVisibility(View.GONE);
         }
         initPopupWindow();
         initDialog();
@@ -1028,7 +1066,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         btnAddMember.setOnClickListener(new OnSwitchingModeClickListener());
         btn_confirm.setOnClickListener(new OnClickListenerImplementation());
         xcd_available_ip.setOnXCDropDownListViewClickListeren(new XCDClickListener());
-
+        btn_idcard_login.setOnClickListener(new IdcardLoginClickListener());
         if (viewHolder == null) {
             return;
         }
