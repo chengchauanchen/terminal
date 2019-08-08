@@ -104,8 +104,7 @@
         android:layout_below="@+id/icon_vsxin"
         android:layout_marginTop="@dimen/dp_20"
         android:layout_marginLeft="@dimen/dp_30"
-        style="@style/ShadleStyle"
-        android:visibility="gone"/>
+        style="@style/ShadleStyle" />
 
     <TextView
         android:id="@+id/tv_user_id"
@@ -116,8 +115,7 @@
         android:layout_below="@+id/tv_user_name"
         android:layout_marginTop="@dimen/dp_10"
         android:layout_marginLeft="@dimen/dp_30"
-        style="@style/ShadleStyle"
-        android:visibility="gone"/>
+        style="@style/ShadleStyle" />
 
     <TextView
         android:id="@+id/tv_version_name"
