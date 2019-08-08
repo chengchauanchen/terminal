@@ -1130,7 +1130,7 @@ public class TalkbackFragment extends BaseFragment {
                     int currentGroup = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
                     TerminalFactory.getSDK().putParam(Params.OLD_CURRENT_GROUP_ID,currentGroup);
                     //市局宽带组111
-                    TerminalFactory.getSDK().putParam(Params.CURRENT_GROUP_ID,102917);
+                    TerminalFactory.getSDK().putParam(Params.CURRENT_GROUP_ID,72088905);
                     pttDownDoThing();
                 }
             }
