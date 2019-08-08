@@ -2,8 +2,8 @@
 <manifest package="cn.vsx.uav"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="29"
-    android:versionName="1.0.29">
+    android:versionCode="30"
+    android:versionName="1.0.30">
     
     <application
         android:name=".UavApplication"
@@ -14,13 +14,10 @@
         android:persistent="true"
         android:theme="@style/AppTheme"
         tools:replace="label, theme">
-        <service
-            android:name=".service.PushService"
-            android:enabled="true"
-            android:exported="true"></service>
         <activity
             android:name=".activity.UavPushActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize" /> <!-- DJI SDK -->
+            android:configChanges="keyboardHidden|orientation|screenSize"></activity>
+        <!-- DJI SDK -->
         <uses-library android:name="com.android.future.usb.accessory" />
         <activity
             android:name="dji.sdk.sdkmanager.DJIAoaControllerActivity"
@@ -40,7 +37,7 @@
         -->
         <meta-data
             android:name="com.dji.sdk.API_KEY"
-            android:value="0da676a00587efebd02ded1a" />
+            android:value="01f506c0b0c3837ad3ce33ae" />
         
         <service
             android:name=".service.AircraftPushService"
