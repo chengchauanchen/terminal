@@ -423,12 +423,12 @@ public class MainActivity extends BaseActivity {
             TerminalFactory.getSDK().getThreadPool().execute(() -> {
                 Member member = TerminalFactory.getSDK().getConfigManager().getMemberByNo(liveMember.getUniqueNo());
                 if (member != null) {
-                    handler.post(() -> {
+                    handler.postDelayed(() -> {
                         MainActivity.this.showContent = getShowContent(member);
                         if(foreground!=null&&foreground.getVisibility() != View.VISIBLE){
                             tv_live_content.setText(MainActivity.this.showContent);
                         }
-                    });
+                    },2*1000);
                 }
             });
         }
@@ -722,7 +722,7 @@ public class MainActivity extends BaseActivity {
                 }
             });
             if (messageTimerTask != null) {
-                MyTerminalFactory.getSDK().getTimer().schedule(messageTimerTask, 5000);
+                MyTerminalFactory.getSDK().getTimer().schedule(messageTimerTask, 3000);
             }
         } else {
             handler.post(() -> {
