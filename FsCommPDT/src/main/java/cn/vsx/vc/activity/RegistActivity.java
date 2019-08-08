@@ -864,7 +864,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             startService(intent1);
             bindService(intent1, secVpnServiceConnection, BIND_AUTO_CREATE);
         }catch(Exception e){
-            e.printStackTrace();
+            logger.error("绑定安全VPN服务失败："+e);
+            requestDrawOverLays();
         }
     }
 
