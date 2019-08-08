@@ -73,9 +73,8 @@ public class MessageService extends Service {
         if(!init){
             initClient(protocolType);
         }
-        if(!connectionClient.isConnected()){
-            startClient(uuid,accessServerIp,accessServerPort);
-        }
+        startClient(uuid,accessServerIp,accessServerPort);
+
         return START_STICKY;
     }
 
