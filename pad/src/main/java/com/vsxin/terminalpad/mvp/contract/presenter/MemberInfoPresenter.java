@@ -7,10 +7,12 @@ import android.content.Context;
 import com.ixiaoma.xiaomabus.architecture.mvp.BasePresenter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
+import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.view.IMemberInfoView;
 import com.vsxin.terminalpad.mvp.ui.widget.ChooseDevicesDialog;
 import com.vsxin.terminalpad.prompt.PromptManager;
 import com.vsxin.terminalpad.receiveHandler.ReceiverActivePushVideoHandler;
+import com.vsxin.terminalpad.receiveHandler.ReceiverRequestLteBullHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
 import com.vsxin.terminalpad.utils.MemberUtil;
 import com.vsxin.terminalpad.utils.MyDataUtil;
@@ -218,12 +220,16 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
 
     /**
      * 自己主动请求他人上报视频，给我看
-     *
      */
-    public void pullVideo(TerminalMemberType type) {
+    public void pullVideo(MemberTypeEnum type) {
         if (!PadApplication.getPadApplication().isPttPress) {
             if (!CheckMyPermission.selfPermissionGranted(getContext(), Manifest.permission.RECORD_AUDIO)) {//没有录音权限
                 CheckMyPermission.permissionPrompt((Activity) getContext(), Manifest.permission.RECORD_AUDIO);
+                return;
+            }
+
+            if (!CheckMyPermission.selfPermissionGranted(getContext(), Manifest.permission.CAMERA)) {//没有录音权限
+                CheckMyPermission.permissionPrompt((Activity) getContext(), Manifest.permission.CAMERA);
                 return;
             }
             //判断终端权限
@@ -232,31 +238,44 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
                 return;
             }
 
-            if (TerminalMemberType.TERMINAL_PHONE == type) {
+            if (MemberTypeEnum.PHONE == type) {//ok  警务通拉视频掩饰20秒左右,才有视频过来
                 //警务通
-                pullVideoForMemberNo(10000367,TerminalMemberType.TERMINAL_PHONE);
-            } else if (TerminalMemberType.TERMINAL_BODY_WORN_CAMERA == type) {
+//                String number = NumberUtil.checkMemberNo("011075");
+//                int no = NumberUtil.strToInt(number);
+//                if(no==0){
+//                    ToastUtil.showToast(getContext(), "警员编号异常");
+//                    return;
+//                }
+                pullVideoForMemberNo(88011075, TerminalMemberType.TERMINAL_PHONE);
+            } else if (MemberTypeEnum.VIDEO == type) {//ok
                 //执法记录仪
-                pullVideoForMemberNo(77000002,TerminalMemberType.TERMINAL_BODY_WORN_CAMERA);
-            }else if(TerminalMemberType.TERMINAL_LTE == type){
-                //LTE
-                pullVideoForMemberNo(77000002,TerminalMemberType.TERMINAL_LTE);
-            }else if(TerminalMemberType.TERMINAL_UAV == type){
+                pullVideoForMemberNo(77000000, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA);
+            }else if (MemberTypeEnum.UAV == type) {//ok
                 //无人机
-                pullVideoForMemberNo(88000088,TerminalMemberType.TERMINAL_UAV);
-            }else{
+                pullVideoForMemberNo(88000369, TerminalMemberType.TERMINAL_UAV);
+            }  else if (MemberTypeEnum.LTE == type) {
+                //LTE rtsp://59.32.1.174:554/DevAor=34020100001320000021
+                String rtsp = "rtsp://192.168.20.188:554/DevAor=34020100001320000021";
+                pullVideoForRtspUrl(rtsp);
+//                pullVideoForMemberNo(10000369, TerminalMemberType.TERMINAL_LTE);
+            } else if (MemberTypeEnum.BALL == type) {
+                //不控球  rtsp://59.32.1.174:554/DevAor=32010000001320000114
+                String rtsp = "rtsp://192.168.20.188:554/DevAor=32010000001320000114";
+                pullVideoForRtspUrl(rtsp);
+//                pullVideoForMemberNo(10000368, TerminalMemberType.TERMINAL_LTE);
+            } else {
                 ToastUtil.showToast(getContext(), "暂不支持拉取该设备视频");
-                return;
             }
         }
     }
 
     /**
      * 通过memberNo 拉取视频 主要用于 警务通，执法记录仪
+     *
      * @param memberNo
      * @param type
      */
-    private void pullVideoForMemberNo(int memberNo,TerminalMemberType type){
+    private void pullVideoForMemberNo(int memberNo, TerminalMemberType type) {
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
             Account account = DataUtil.getAccountByMemberNo(memberNo, true);
             Member member = MemberUtil.getMemberForTerminalMemberType(account, type);
@@ -267,6 +286,14 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
             }
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
         });
+    }
+
+    /**
+     * 通过memberNo 拉取视频 主要用于 不控球
+     * @param rtspUrl
+     */
+    private void pullVideoForRtspUrl(String rtspUrl) {
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestLteBullHandler.class, rtspUrl);
     }
 
     /*******************************************别人请求我上报视频************************************************/

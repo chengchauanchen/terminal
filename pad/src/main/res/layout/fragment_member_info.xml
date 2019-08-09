@@ -41,6 +41,7 @@
             android:text="赵全 106525"/>
 
         <TextView
+            android:id="@+id/tv_department"
             android:layout_marginTop="24px"
             android:gravity="center"
             android:layout_width="match_parent"
@@ -62,6 +63,7 @@
                 android:text="移动电话："/>
 
             <TextView
+                android:id="@+id/tv_phone"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/color_42A5F6"
@@ -82,6 +84,7 @@
                 android:text="前进速度："/>
 
             <TextView
+                android:id="@+id/tv_speed"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/color_F6B37F"
@@ -90,6 +93,7 @@
         </LinearLayout>
 
         <TextView
+            android:id="@+id/tv_time"
             android:layout_marginTop="20px"
             android:gravity="center"
             android:layout_width="match_parent"

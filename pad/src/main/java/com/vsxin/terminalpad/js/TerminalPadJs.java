@@ -32,7 +32,7 @@ public class TerminalPadJs {
      */
     @JavascriptInterface
     public void memberInfo(String memberInfo, String memberType) {
-        logger.info("气泡：" + memberInfo+"数据:"+memberInfo);
+        logger.info("气泡：" + memberInfo + "数据:" + memberInfo);
         MemberTypeEnum typeEnum;
         switch (memberType) {
             case MemberTypeConstans.PATROL://巡逻船
@@ -59,7 +59,7 @@ public class TerminalPadJs {
             case MemberTypeConstans.BALL://布控球
                 typeEnum = MemberTypeEnum.BALL;
                 break;
-                case MemberTypeConstans.DRONE_OPERATOR://布控球
+            case MemberTypeConstans.DRONE_OPERATOR://布控球
                 typeEnum = MemberTypeEnum.DRONE_OPERATOR;
                 break;
             default:
@@ -69,7 +69,7 @@ public class TerminalPadJs {
 
         try {
             MemberInfoBean memberInfoBean = new Gson().fromJson(memberInfo, MemberInfoBean.class);
-            MemberInfoFragment.startMemberInfoFragment((FragmentActivity) context, memberInfoBean,typeEnum);
+            MemberInfoFragment.startMemberInfoFragment((FragmentActivity) context, memberInfoBean, typeEnum);
         } catch (Exception e) {
             e.printStackTrace();
             logger.info("数据解析异常");

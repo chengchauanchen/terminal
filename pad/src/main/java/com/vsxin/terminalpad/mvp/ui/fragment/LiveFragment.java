@@ -80,12 +80,20 @@ public class LiveFragment extends MvpFragment<ILiveView, LivePresenter> implemen
 
     @Override
     public void startPull() {
-        getPresenter().startPull(sv_live.getSurfaceTexture());
+        if(sv_live!=null && sv_live.getSurfaceTexture()!=null){
+            getPresenter().startPull(sv_live.getSurfaceTexture());
+        }else{
+            isShowLiveView(true);
+        }
     }
 
     @Override
     public void startGB28121Pull() {
-        getPresenter().startPullGB28121(sv_live.getSurfaceTexture());
+        if(sv_live!=null && sv_live.getSurfaceTexture()!=null){
+            getPresenter().startPullGB28121(sv_live.getSurfaceTexture());
+        }else{
+            isShowLiveView(true);
+        }
     }
 
 

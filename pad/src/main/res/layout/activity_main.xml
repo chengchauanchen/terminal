@@ -118,4 +118,11 @@
         android:layout_width="641px"
         android:layout_height="match_parent" />
 
+    <ImageView
+        android:layout_marginBottom="20px"
+        android:layout_gravity="center|bottom"
+        android:id="@+id/iv_load_web"
+        android:layout_width="90px"
+        android:layout_height="90px"
+        android:src="@mipmap/ic_load"/>
 </FrameLayout>

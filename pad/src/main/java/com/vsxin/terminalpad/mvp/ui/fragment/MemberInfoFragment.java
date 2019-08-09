@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
@@ -18,10 +19,12 @@ import com.vsxin.terminalpad.mvp.contract.presenter.MemberInfoPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMemberInfoView;
 import com.vsxin.terminalpad.mvp.entity.MemberInfoBean;
 import com.vsxin.terminalpad.mvp.ui.activity.MainMapActivity;
+import com.vsxin.terminalpad.utils.TimeUtil;
 
 import butterknife.BindView;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Account;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * @author qzw
@@ -41,7 +44,19 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
     ImageView iv_type_icon;
 
     @BindView(R.id.tv_member_name)
-    TextView tv_member_name;
+    TextView tv_member_name;//名称
+
+    @BindView(R.id.tv_department)
+    TextView tv_department;//部门
+
+    @BindView(R.id.tv_phone)
+    TextView tv_phone;//电话号
+
+    @BindView(R.id.tv_speed)
+    TextView tv_speed;//速度
+
+    @BindView(R.id.tv_time)
+    TextView tv_time;//时间
 
     @BindView(R.id.iv_individual_call)
     ImageView iv_individual_call;//发起个呼
@@ -70,6 +85,9 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
             getLogger().info(memberTypeEnum.toString());
             iv_type_icon.setImageResource(memberTypeEnum.getResId());
         }
+        if(memberInfo!=null){
+            bindMemberInfo(memberInfo);
+        }
 
         iv_close.setOnClickListener(new OnClickListener() {
             @Override
@@ -82,10 +100,12 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
         iv_individual_call.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-//                getPresenter().goToChooseDevices(memberInfo.getNo(), ChooseDevicesDialog.TYPE_CALL_PRIVATE);
-                //getPresenter().goToChooseDevices("10000120", ChooseDevicesDialog.TYPE_CALL_PRIVATE);
-                getPresenter().startIndividualCall("10000195", TerminalMemberType.TERMINAL_PHONE);
-                //getPresenter().startIndividualCall("10000367", TerminalMemberType.TERMINAL_PHONE);
+                //手台个呼
+                if(memberTypeEnum!=null && memberTypeEnum==MemberTypeEnum.HAND){
+                    getPresenter().startIndividualCall("72020850", TerminalMemberType.TERMINAL_PDT);
+                }else{
+                    ToastUtil.showToast(getContext(),"暂不支持该设备个呼");
+                }
             }
         });
 
@@ -98,7 +118,7 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
             }
         });
 
-        //请求别人上报视频
+        //会话界面
         iv_message.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -107,12 +127,20 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
         });
     }
 
+    private void bindMemberInfo(MemberInfoBean memberInfo) {
+        tv_member_name.setText(memberInfo.getName());
+        tv_department.setText(TextUtils.isEmpty(memberInfo.getDeptName())?"武汉市公安局":memberInfo.getDeptName());
+        //tv_phone.setText(memberInfo);
+//        tv_speed.setText(memberInfo.getSpeed());
+        tv_time.setText("定位时间："+ TimeUtil.getCurrentTimeYMD());
+    }
+
     /**
      * 拉取他人上报视频
      * 自己主动请求别人上报
      */
     private void pullVideo() {
-        getPresenter().pullVideo(memberTypeEnum.getTerminalMemberType());
+        getPresenter().pullVideo(memberTypeEnum);
     }
 
     /**
@@ -186,6 +214,4 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
         }
         fragmentTransaction.commit();
     }
-
-
 }
