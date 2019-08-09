@@ -246,7 +246,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             if(apkType.equals(AuthManagerTwo.XIANGYANGPOLICESTORE) || apkType.equals(AuthManagerTwo.XIANGYANG)){
                 startVPNService();
             }else {
-                authorize();//认证并获取user信息
+                // todo authorize();//认证并获取user信息
                 requestDrawOverLays();
             }
         } else {

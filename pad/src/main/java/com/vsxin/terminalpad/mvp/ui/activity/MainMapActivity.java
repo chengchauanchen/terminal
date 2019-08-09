@@ -16,11 +16,15 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
+import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
@@ -103,6 +107,9 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     TextView tx_ptt_time;
     @BindView(R.id.tx_ptt_group_name)
     TextView tx_ptt_group_name;
+
+    @BindView(R.id.iv_load_web)
+    ImageView iv_load_web;
     private GroupCallInstruction groupCallInstruction;
 
     private int timeProgress;
@@ -150,8 +157,22 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         initWebMap();
         initPPT();
         judgePermission();
-        groupCallInstruction = new GroupCallInstruction(this);
-        groupCallInstruction.bindReceiveHandler();
+        //TerminalFactory.getSDK().putParam(Params.VOLUME, realtimeAudio.getVolume());
+        //组呼结束后,就被设置成静音了,先这个设置一个默认值
+        MyTerminalFactory.getSDK().getAudioProxy().setVolume(100);
+//        groupCallInstruction = new GroupCallInstruction(this);
+//        groupCallInstruction.bindReceiveHandler();
+
+        iv_load_web.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                reloadWebView();
+            }
+        });
+    }
+
+    private void reloadWebView(){
+        web_map.reload(); //刷新
     }
 
     /**
@@ -168,19 +189,23 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         web_map.getSettings().setDomStorageEnabled(true); // 开启 DOM storage API 功能
         web_map.getSettings().setDatabaseEnabled(true);   //开启 database storage API 功能
         web_map.setVerticalScrollBarEnabled(false); //垂直不显示滚动条
-        web_map.setWebChromeClient(new WebChromeClient() {
 
+        web_map.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
+        web_map.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);  //设置 缓存模式
+
+        web_map.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int progress) {
                 if (progress >= 100) {
                     //地图加载完成后，显示所有图层
                     getPresenter().defaultLoadAllLayer();
-                    //MemberInfoBean memberInfoBean = new Gson().fromJson("", MemberInfoBean.class);
-                   // MemberInfoFragment.startMemberInfoFragment(MainMapActivity.this, memberInfoBean, MemberTypeEnum.PHONE);
+                    getLogger().info("web_map===加载完成");
+                    ToastUtil.showToast(MainMapActivity.this,"地图加载完成");
                 }
             }
-        });
 
+
+        });
 
         web_map.setWebViewClient(new WebViewClient() {
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -191,21 +216,38 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                getLogger().info("shouldOverrideUrlLoading=====request.getUrl()="+url.toString());
                 return super.shouldOverrideUrlLoading(view, url);
             }
 
-        });
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
+                getLogger().info("shouldInterceptRequest=====request.getUrl()="+url.toString());
+                return super.shouldInterceptRequest(view, url);
+            }
 
+            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                getLogger().info("shouldInterceptRequest=====request.getUrl()="+request.getUrl().toString());
+                return super.shouldInterceptRequest(view, request);
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url){
+                web_map.loadUrl(url);
+            }
+        });
         // 将Android里面定义的类对象AndroidJs暴露给javascript
         web_map.addJavascriptInterface(new TerminalPadJs(this), "TerminalPadJs");
 
         String memberId = HandleIdUtil.handleId(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
         Long memberUniqueno = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
         int depId = MyTerminalFactory.getSDK().getParam(Params.DEP_ID, 0);
-        String format = String.format("no=%s&code=%s&dept_id=%s", memberId, memberUniqueno, depId);
-        getLogger().info("http://192.168.1.222:9011/offlineMapForLin/indexPad.html?" + format);
+        String format = String.format("no=%s&code=%s&dept_id=%s", "88"+memberId, memberUniqueno, depId);
+        getLogger().info("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
         //web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
-        web_map.loadUrl("http://192.168.1.222:9011/offlineMapForLin/indexPad.html?" + format);
+        web_map.loadUrl("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
     }
 
 
@@ -382,7 +424,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     protected void onDestroy() {
         super.onDestroy();
         unregistReceiveHandler();
-        groupCallInstruction.unBindReceiveHandler();
+//        groupCallInstruction.unBindReceiveHandler();
     }
 
     /******************************************组呼********************************************/
@@ -475,42 +517,42 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
             ToastUtil.groupCallFailToast(this, resultCode);
         }
 
-        groupCallInstruction.startGroupCall(new SendGroupCallListener() {
-            @Override
-            public void speaking() {
-                getLogger().info("speaking");
-            }
-
-            @Override
-            public void readySpeak() {
-                getLogger().info("readySpeak");
-            }
-
-            @Override
-            public void forbid() {
-                getLogger().info("forbid");
-            }
-
-            @Override
-            public void waite() {
-                getLogger().info("waite");
-            }
-
-            @Override
-            public void silence() {
-                getLogger().info("silence");
-            }
-
-            @Override
-            public void listening() {
-                getLogger().info("listening");
-            }
-
-            @Override
-            public void fail() {
-                getLogger().info("fail");
-            }
-        });
+//        groupCallInstruction.startGroupCall(new SendGroupCallListener() {
+//            @Override
+//            public void speaking() {
+//                getLogger().info("speaking");
+//            }
+//
+//            @Override
+//            public void readySpeak() {
+//                getLogger().info("readySpeak");
+//            }
+//
+//            @Override
+//            public void forbid() {
+//                getLogger().info("forbid");
+//            }
+//
+//            @Override
+//            public void waite() {
+//                getLogger().info("waite");
+//            }
+//
+//            @Override
+//            public void silence() {
+//                getLogger().info("silence");
+//            }
+//
+//            @Override
+//            public void listening() {
+//                getLogger().info("listening");
+//            }
+//
+//            @Override
+//            public void fail() {
+//                getLogger().info("fail");
+//            }
+//        });
 
     }
 
@@ -989,5 +1031,25 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateMainFrgamentPTTButtonHandler);
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                exit();
+                return true;
+            default:
+                return super.onKeyDown(keyCode, event);
+        }
+    }
+
+    public void exit(){
+        // 判断是否点了一次后退
+        if (PadApplication.getPadApplication().getIndividualState() != IndividualCallState.SPEAKING) {
+            // 在2秒之内点击第二次
+            moveTaskToBack(true);//把程序变成后台的
+            // finish完成之后当前进程依然在
+        }
     }
 }

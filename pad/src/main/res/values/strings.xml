@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">terminal-pad</string>
+    <string name="app_name">融合通信Pad</string>
     <!--<string name="app_name">融合通信</string>-->
     <!-- <string name="app_name">宽带对讲</string> -->
     <string name="authing">正在认证...</string>

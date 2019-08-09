@@ -17,26 +17,23 @@ public class NumberUtil {
         return num;
     }
 
-
     /**
      * 如果memberNo为6位，默认加"88"
-     *
      * @param memberNo
      * @return
      */
-    private static int checkMemberNo(int memberNo) {
-        String memberNoStr = memberNo + "";
+    public static String checkMemberNo(String memberNo) {
         if (length(memberNo) <= 6) {
-            memberNoStr = "88" + memberNoStr;
+            memberNo = "88" + memberNo;
         } else {
             return memberNo;
         }
-        return Integer.parseInt(memberNoStr);
+        return memberNo;
     }
 
 
-    public static int length(int number) {
-        int length = (number + " ").length();
+    private static int length(String number) {
+        int length = number.length();
         return length;
     }
 }
