@@ -1,6 +1,6 @@
 //打无人机包用此代码
 apply plugin: 'com.android.application'
-apply plugin: 'com.antfortune.freeline'
+//apply plugin: 'com.antfortune.freeline'
 Properties props = new Properties()
 props.load(project.rootProject.file('local.properties').newDataInputStream())
 
@@ -54,19 +54,20 @@ android {
 
     productFlavors {
         common {
-//            buildConfigField "String" ,"apk_type","common"
-        }
-        policeTest {
-//            buildConfigField "String", "apk_type","policeTest"
         }
         policeStore {
-//            buildConfigField "String", "apk_type","policeStore"
+        }
+        policeStoreOut {
         }
         xiangYang {
-//            buildConfigField "String" ,"apk_type","common"
         }
         xiangYangPoliceStore {
-//            buildConfigField "String", "apk_type","policeStore"
+        }
+        teJing {
+        }
+        chuTianYun {
+        }
+        jiaXing {
         }
     }
     productFlavors.all {
@@ -80,7 +81,7 @@ android {
     applicationVariants.all { variant ->
         variant.outputs.all() { output ->
             def flavor = variant.productFlavors[0]
-            def fileName = "${variant.flavorName}_${signTime()}.${variant.versionName}_${variant.versionCode}.apk"
+            def fileName = "uav_${variant.flavorName}_${signTime()}.${variant.versionName}_${variant.versionCode}.apk"
             /*//默认打包方式，打包到app的子目录下
             outputFileName = fileName*/
             //修改打包路径，工程apkpackage文件夹下

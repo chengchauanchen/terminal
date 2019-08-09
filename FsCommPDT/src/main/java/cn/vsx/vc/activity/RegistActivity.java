@@ -834,8 +834,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         }
         apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
         //市局包隐藏模拟警员
-        if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)
-                || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)) {
+        if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)) {
             btnAddMember.setVisibility(View.GONE);
             btn_idcard_login.setVisibility(View.GONE);
         }
@@ -998,7 +997,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         if (TextUtils.isEmpty(authUrl)) {
             //平台包或者没获取到类型，直接用AuthManager中的地址,
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-            if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)||
+            if (AuthManagerTwo.POLICESTORE.equals(apkType) ||
                     AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType) || TextUtils.isEmpty(apkType)) {
                 String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
                 if (defaultAddress.length >= 2) {
@@ -1280,7 +1279,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, false);
             MyApplication.instance.setTerminalMemberType();
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,AuthManagerTwo.POLICESTORE);
-            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)|| AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)){
+            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)){
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_open_wuhan_police_work_first));
             }
 
