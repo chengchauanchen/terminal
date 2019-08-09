@@ -53,21 +53,20 @@ android {
 
     productFlavors {
         common {
-//            buildConfigField "String" ,"apk_type","common"
-        }
-        policeTest {
-//            buildConfigField "String", "apk_type","policeTest"
         }
         policeStore {
-//            buildConfigField "String", "apk_type","policeStore"
+        }
+        policeStoreOut {
         }
         xiangYang {
-//            buildConfigField "String" ,"apk_type","common"
         }
         xiangYangPoliceStore {
-//            buildConfigField "String", "apk_type","policeStore"
         }
-        tejing{
+        teJing {
+        }
+        chuTianYun {
+        }
+        jiaXing {
         }
     }
     productFlavors.all {
