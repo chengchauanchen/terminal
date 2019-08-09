@@ -57,21 +57,14 @@ android {
     }
 
     productFlavors {
-        common {
-//            buildConfigField "String" ,"apk_type","common"
-        }
-        policeTest{
-//            buildConfigField "String", "apk_type","policeTest"
-        }
-        policeStore{
-//            buildConfigField "String", "apk_type","policeStore"
-        }
-        xiangYang {
-//            buildConfigField "String" ,"apk_type","common"
-        }
-        xiangYangPoliceStore {
-//            buildConfigField "String", "apk_type","policeStore"
-        }
+        common {}
+        policeStore {}
+        policeStoreOut {}
+        xiangYang {}
+        xiangYangPoliceStore {}
+        teJing {}
+        chuTianYun {}
+        jiaXing {}
     }
     productFlavors.all {
         flavor -> flavor.manifestPlaceholders = [apk_type: name]
@@ -84,7 +77,7 @@ android {
     applicationVariants.all { variant ->
         variant.outputs.all() { output ->
             def flavor = variant.productFlavors[0]
-            def fileName = "${variant.flavorName}_${signTime()}.${variant.versionName}_${variant.versionCode}.apk"
+            def fileName = "hdmi_${variant.flavorName}_${signTime()}.${variant.versionName}_${variant.versionCode}.apk"
             /*//默认打包方式，打包到app的子目录下
             outputFileName = fileName*/
             //修改打包路径，工程apkpackage文件夹下
