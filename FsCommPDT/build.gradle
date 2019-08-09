@@ -80,7 +80,7 @@ android {
     applicationVariants.all { variant ->
         variant.outputs.all() { output ->
             def flavor = variant.productFlavors[0]
-            def fileName = "${variant.flavorName}_${signTime()}_${variant.versionName}_${variant.versionCode}.apk"
+            def fileName = "phone_${variant.flavorName}_${signTime()}_${variant.versionName}_${variant.versionCode}.apk"
             /*//默认打包方式，打包到app的子目录下
             outputFileName = fileName*/
             //修改打包路径，工程apkpackage文件夹下
