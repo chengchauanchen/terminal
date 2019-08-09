@@ -52,35 +52,33 @@ android {
     }
 
     productFlavors {
-        common {
-//            buildConfigField "String" ,"apk_type","common"
-        }
-        policeTest{
-//            buildConfigField "String", "apk_type","policeTest"
-        }
-        policeStore{
-//            buildConfigField "String", "apk_type","policeStore"
-        }
-        xiangYang {
-//            buildConfigField "String" ,"apk_type","common"
-        }
-        xiangYangPoliceStore {
-//            buildConfigField "String", "apk_type","policeStore"
-        }
+        companyTest{}
+        companyDevelop{}
+        baiDuYunYanShi{}
+        anJianTest{}
+        policeTest{}
+        policeStore{}
+        policeStoreOut{}
+        xiangYang{}
+        xiangYangOut{}
+        xiangYangPoliceStore{}
+        chuTianYun{}
+        jiaXing{}
     }
     productFlavors.all {
-//        variant ->
-//            variant.outputs.all() { output ->
-//                def flavor = variant.productFlavors[0]
-//                def fileName = "${variant.flavorName}_${signTime()}.${variant.versionName}_${variant.versionCode}.apk"
-//                /*//默认打包方式，打包到app的子目录下
-//                outputFileName = fileName*/
-//                //修改打包路径，工程apkpackage文件夹下
-//                //也可以在打包时手动选择对应目录
-//                def des = output.packageApplication.outputDirectory.toPath().relativize(rootDir.toPath()).toFile()
-//                outputFileName = new File("$des/apkpackage", fileName)
-//            }
-                flavor -> flavor.manifestPlaceholders = [apk_type: name]
+        flavor -> flavor.manifestPlaceholders = [apk_type: name]
+    }
+    applicationVariants.all { variant ->
+            variant.outputs.all() { output ->
+                def flavor = variant.productFlavors[0]
+                def fileName = "recorder_${variant.flavorName}_${signTime()}.${variant.versionName}_${variant.versionCode}.apk"
+                /*//默认打包方式，打包到app的子目录下
+                outputFileName = fileName*/
+                //修改打包路径，工程apkpackage文件夹下
+                //也可以在打包时手动选择对应目录
+                def des = output.packageApplication.outputDirectory.toPath().relativize(rootDir.toPath()).toFile()
+                outputFileName = new File("$des/apkpackage", fileName)
+            }
     }
     packagingOptions {
         exclude 'META-INF/LICENSE'
@@ -109,6 +107,10 @@ android {
     configurations.all {
         resolutionStrategy.force 'com.android.support:support-annotations:26.1.0'
     }
+}
+
+def signTime() {
+    return new Date().format("MM-dd")
 }
 
 repositories {

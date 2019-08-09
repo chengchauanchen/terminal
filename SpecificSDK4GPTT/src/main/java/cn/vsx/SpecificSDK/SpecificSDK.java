@@ -303,7 +303,12 @@ public class SpecificSDK extends TerminalSDK4Android {
         MyTerminalFactory.getSDK().start();
         //根据前面获取到的type，这里设置地址(不同的类型对应的地址不一样)
         //设置注册服务地址
-        MyTerminalFactory.getSDK().getAuthManagerTwo().initIp();
+        String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+        if(!TextUtils.isEmpty(deviceType)&&TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString())){
+            MyTerminalFactory.getSDK().getAuthManagerTwo().initIpSingle();
+        }else{
+            MyTerminalFactory.getSDK().getAuthManagerTwo().initIp();
+        }
         //保存录像，录音，照片的存储路径
         MyTerminalFactory.getSDK().getFileTransferOperation().initExternalUsableStorage();
         SpecificSDK.setTerminalMemberType(TerminalMemberType.TERMINAL_PHONE.toString());
