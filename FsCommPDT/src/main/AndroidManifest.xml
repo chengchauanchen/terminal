@@ -68,7 +68,7 @@
         android:name="android.hardware.usb.accessory"
         android:required="true" />
     
-    <!--打无人机包的时候把Applicationd的name属性去掉即可-->
+    <!--打无人机包的时候把Application的name属性去掉即可-->
     <!--android:name=".application.MyApplication"-->
     <application
         android:name=".application.MyApplication"
