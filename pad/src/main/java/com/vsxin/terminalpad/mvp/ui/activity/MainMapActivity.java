@@ -172,7 +172,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     }
 
     private void reloadWebView(){
-        web_map.reload(); //刷新
+//        web_map.reload(); //刷新
     }
 
     /**
@@ -235,7 +235,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
             @Override
             public void onPageFinished(WebView view, String url){
-                web_map.loadUrl(url);
+                //web_map.loadUrl(url);
             }
         });
         // 将Android里面定义的类对象AndroidJs暴露给javascript
