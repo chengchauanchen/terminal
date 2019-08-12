@@ -309,7 +309,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      * 根据类型和状态显示不同的布局
      *
      * 请求图像：警务通、无人机、执法记录仪
-     * 上报图像：组、PC、警务通
+     * 上报图像：组、PC、警务通、HDMI
      * 推送图像：组、PC、警务通、HDMI
      *
      * @param
@@ -319,38 +319,20 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         List<Integer> mSearchTypes = null;
         List<String> mTabTypes = null;
         if (Constants.PUSH.equals(type)) {
-            if (pushing) {
-                //推送图像
-                if(ApkUtil.isAnjian()){
-                    mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
-                            Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
-                    mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
-                            TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
-                    tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_push_image_anjian));
-                }else{
-                    mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
-                            Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
-                    mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
-                            TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
-                    tabText = Arrays.asList(getResources().getStringArray((ApkUtil.showLteApk())?
-                            R.array.invite_member_tab_text_push_image_lte:R.array.invite_member_tab_text_push_image));
-                }
-            } else {
-                //上报图像
-                if(ApkUtil.isAnjian()){
-                    mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
-                            Constants.TYPE_CHECK_SEARCH_POLICE);
-                    mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
-                            TerminalMemberType.TERMINAL_PHONE.toString());
-                    tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_push_anjian));
-                }else{
-                    mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
-                            Constants.TYPE_CHECK_SEARCH_POLICE);
-                    mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
-                            TerminalMemberType.TERMINAL_PHONE.toString());
-                    tabText = Arrays.asList(getResources().getStringArray((ApkUtil.showLteApk())?
-                            R.array.invite_member_tab_text_push_lte:R.array.invite_member_tab_text_push));
-                }
+            //推送图像和上报图像
+            if(ApkUtil.isAnjian()){
+                mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                        Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
+                mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                        TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
+                tabText = Arrays.asList(getResources().getStringArray(R.array.invite_member_tab_text_push_image_anjian));
+            }else{
+                mSearchTypes = Arrays.asList(Constants.TYPE_CHECK_SEARCH_GROUP,Constants.TYPE_CHECK_SEARCH_PC,
+                        Constants.TYPE_CHECK_SEARCH_POLICE, Constants.TYPE_CHECK_SEARCH_HDMI);
+                mTabTypes = Arrays.asList(Constants.TYPE_GROUP_STRING,TerminalMemberType.TERMINAL_PC.toString(),
+                        TerminalMemberType.TERMINAL_PHONE.toString(),TerminalMemberType.TERMINAL_HDMI.toString());
+                tabText = Arrays.asList(getResources().getStringArray((ApkUtil.showLteApk())?
+                        R.array.invite_member_tab_text_push_image_lte:R.array.invite_member_tab_text_push_image));
             }
         } else if (Constants.PULL.equals(type)) {
             if (pulling) {
