@@ -52,22 +52,14 @@ android {
     }
 
     productFlavors {
-        common {
-        }
-        policeStore {
-        }
-        policeStoreOut {
-        }
-        xiangYang {
-        }
-        xiangYangPoliceStore {
-        }
-        teJing {
-        }
-        chuTianYun {
-        }
-        jiaXing {
-        }
+        common {}
+        policeStore {}
+        policeStoreOut {}
+        xiangYang {}
+        xiangYangPoliceStore {}
+        teJing {}
+        chuTianYun {}
+        jiaXing {}
     }
     productFlavors.all {
         flavor -> flavor.manifestPlaceholders = [apk_type: name]
