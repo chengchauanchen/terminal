@@ -156,14 +156,12 @@ public class AudioManager {
         if (mRecorder != null) {
             try {
                 mRecorder.stop();
-            } catch (IllegalStateException e) {
+            } catch (Exception e) {
                 // TODO 如果当前java状态和jni里面的状态不一致，
                 //e.printStackTrace();
                 mRecorder = null;
                 mRecorder = new MediaRecorder();
                 mRecorder.stop();
-            }catch(Exception e){
-                e.printStackTrace();
             }finally{
                 //将录音对象保存
                 //记录录音结束时间和结束时文件长度
