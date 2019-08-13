@@ -52,5 +52,10 @@
             android:name=".activity.UavMainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleTask" />
+    
+        <service
+            android:name=".service.PushService"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 </manifest>

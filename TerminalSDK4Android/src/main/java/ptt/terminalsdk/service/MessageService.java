@@ -184,7 +184,9 @@ public class MessageService extends Service {
         @Override
         public void initConnectionClient(String protocolType) throws RemoteException{
             logger.info("initConnectionClient--"+protocolType);
-            initClient(protocolType);
+            if(!init){
+                initClient(protocolType);
+            }
         }
     };
 

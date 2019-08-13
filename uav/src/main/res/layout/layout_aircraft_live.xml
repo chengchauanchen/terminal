@@ -195,8 +195,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/signal"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="20dp">
+            android:layout_centerHorizontal="true">
             <!--点击小部件可打开扬声器设置面板。
                 如果附件不存在或不受支持，小部件将自动隐藏。-->
             <dji.ux.widget.SpeakerWidget
@@ -277,8 +276,40 @@
                     android:layout_width="125dp"
                     android:layout_height="35dp" />
             </LinearLayout>
-        
         </RelativeLayout>
+    
+        <LinearLayout
+            android:id="@+id/rl_invite"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/signal"
+            android:layout_marginTop="@dimen/x40"
+            android:orientation="horizontal">
+        
+            <LinearLayout
+                android:id="@+id/ll_aircraft_live_invite_member"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:visibility="visible">
+            
+                <ImageView
+                    android:id="@+id/iv_live_addmember"
+                    android:layout_width="@dimen/x48"
+                    android:layout_height="@dimen/x48"
+                    android:background="@drawable/yaoqing" />
+            </LinearLayout>
+        </LinearLayout>
+    
+        <dji.ux.widget.controls.CameraControlsWidget
+            android:id="@+id/CameraCapturePanel"
+            android:layout_width="50dp"
+            android:layout_height="213dp"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/rl_invite"/>
         
         <!--此面板显示与曝光相关的所有相机设置。
       它允许根据所连接的相机选择曝光模式（自动，光圈优先，快门优先和手动）。
@@ -287,44 +318,45 @@
             android:id="@+id/cameraSettingExposurePanel"
             android:layout_width="180dp"
             android:layout_height="263dp"
-            android:layout_below="@id/signal"
-            android:layout_toLeftOf="@+id/iv_menu"
+            android:layout_toLeftOf="@id/CameraCapturePanel"
+            android:layout_alignTop="@id/CameraCapturePanel"
             android:gravity="center"
             android:visibility="gone"
-            android:layout_marginTop="65dp"
             tools:ignore="RtlHardcoded" />
         <!--此面板显示与曝光无关的所有相机设置。
         它分为三个部分： - 图像设置 - 视频设置 - 通用设置-->
-        <cn.vsx.uav.view.MyCameraSettingAdvancedPanel
+        <dji.ux.panel.CameraSettingAdvancedPanel
             android:id="@+id/cameraSettingAdvancedPanel"
             android:layout_width="180dp"
             android:layout_height="263dp"
-            android:layout_below="@id/signal"
-            android:layout_toLeftOf="@+id/iv_menu"
-            android:gravity="center"
-            android:visibility="gone"
-            android:layout_marginTop="65dp"
-            tools:ignore="RtlHardcoded" />
-        
-        <ImageView
-            android:id="@+id/iv_setting"
-            android:layout_width="60dp"
-            android:layout_height="40dp"
             android:layout_alignParentRight="true"
             android:layout_below="@id/signal"
             android:layout_marginTop="65dp"
-            android:background="@drawable/camera_setting_uncheck" />
+            android:gravity="center"
+            android:visibility="gone"
+            tools:ignore="RtlHardcoded" />
         
-        <ImageView
-            android:id="@+id/iv_menu"
-            android:layout_width="60dp"
-            android:layout_height="40dp"
-            android:layout_below="@id/signal"
-            android:layout_marginRight="5dp"
-            android:layout_marginTop="65dp"
-            android:layout_toLeftOf="@id/iv_setting"
-            android:background="@drawable/camera_menu_uncheck"
-            android:gravity="center" />
+        <!--<ImageView-->
+            <!--android:id="@+id/iv_setting"-->
+            <!--android:layout_width="60dp"-->
+            <!--android:layout_height="40dp"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:layout_below="@id/signal"-->
+            <!--android:layout_marginTop="65dp"-->
+            <!--android:background="@drawable/camera_setting_uncheck"-->
+            <!--android:visibility="gone" />-->
+        
+        <!--<ImageView-->
+            <!--android:id="@+id/iv_menu"-->
+            <!--android:layout_width="60dp"-->
+            <!--android:layout_height="40dp"-->
+            <!--android:layout_below="@id/signal"-->
+            <!--android:layout_marginRight="5dp"-->
+            <!--android:layout_marginTop="65dp"-->
+            <!--android:layout_toLeftOf="@id/iv_setting"-->
+            <!--android:background="@drawable/camera_menu_uncheck"-->
+            <!--android:gravity="center"-->
+            <!--android:visibility="gone" />-->
         <!--缩放-->
         <ImageView
             android:id="@+id/iv_aircraft_live_retract"
@@ -332,18 +364,9 @@
             android:layout_height="@dimen/y18"
             android:layout_alignParentRight="true"
             android:layout_marginRight="@dimen/x10"
-            android:layout_marginTop="@dimen/x10"
+            android:layout_marginTop="@dimen/x30"
             android:background="@drawable/new_call_reset_icon" />
         
-        
-        <!--<dji.ux.widget.controls.CameraControlsWidget-->
-        <!--android:id="@+id/CameraCapturePanel"-->
-        <!--android:layout_alignParentRight="true"-->
-        <!--android:layout_below="@id/camera"-->
-        <!--android:layout_width="50dp"-->
-        <!--android:layout_height="213dp"-->
-        <!--android:layout_marginTop="5dp"-->
-        <!--/>-->
         <!--直方图-->
         <dji.ux.widget.HistogramWidget
             android:layout_width="150dp"
@@ -363,24 +386,25 @@
             
             <Button
                 android:id="@+id/btn_home_location"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_marginBottom="5dp"
-                android:visibility="gone"
-                android:background="@drawable/home_location_false" />
+                android:background="@drawable/home_location_false"
+                android:visibility="gone" />
             
             <Button
                 android:id="@+id/btn_check_obstacle"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_marginBottom="5dp"
                 android:background="@drawable/check_obstacle_open" />
             
             <Button
                 android:id="@+id/btn_go_home"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:layout_marginTop="10dp"
+                android:visibility="gone"
                 android:background="@drawable/not_go_home" />
             
             <Button
@@ -388,19 +412,19 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:layout_marginTop="10dp"
-                android:visibility="gone"
-                android:background="@mipmap/ic_launcher" />
+                android:background="@mipmap/ic_launcher"
+                android:visibility="gone" />
             <!--这两个控件只能在activity中使用-->
-            <!--<dji.ux.widget.TakeOffWidget-->
-            <!--android:layout_width="40dp"-->
-            <!--android:layout_height="40dp"-->
-            <!--android:layout_marginBottom="5dp" />-->
-            <!---->
-            <!--<dji.ux.widget.ReturnHomeWidget-->
-            <!--android:layout_width="40dp"-->
-            <!--android:layout_height="40dp"-->
-            <!--android:layout_marginBottom="5dp"-->
-            <!--android:layout_marginTop="5dp" />-->
+            <dji.ux.widget.TakeOffWidget
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginBottom="5dp" />
+            
+            <dji.ux.widget.ReturnHomeWidget
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp" />
         </LinearLayout>
         
         <LinearLayout
@@ -432,32 +456,6 @@
             android:scrollbars="none"
             android:visibility="gone" />
         
-        <LinearLayout
-            android:id="@+id/rl_invite"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:layout_marginRight="@dimen/x10"
-            android:orientation="horizontal">
-            
-            <LinearLayout
-                android:id="@+id/ll_aircraft_live_invite_member"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center_horizontal"
-                android:orientation="vertical"
-                android:visibility="visible">
-                
-                <ImageView
-                    android:id="@+id/iv_live_addmember"
-                    android:layout_width="@dimen/x48"
-                    android:layout_height="@dimen/x48"
-                    android:background="@drawable/yaoqing" />
-            </LinearLayout>
-        </LinearLayout>
-        
         <RelativeLayout
             android:id="@+id/map_min_rl"
             android:layout_width="wrap_content"
@@ -482,7 +480,6 @@
                 android:background="@drawable/bg_map_cover_corners"
                 android:visibility="visible" />
         </RelativeLayout>
-    
     </RelativeLayout>
     
     <RelativeLayout
@@ -518,7 +515,8 @@
                 android:background="@drawable/bg_map_cover_corners" />
         </RelativeLayout>
     </RelativeLayout>
-
-    <include layout="@layout/layout_no_network"
-        android:visibility="gone"/>
+    
+    <include
+        layout="@layout/layout_no_network"
+        android:visibility="gone" />
 </RelativeLayout>

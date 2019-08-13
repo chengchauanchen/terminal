@@ -2,10 +2,11 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <include layout="@layout/layout_aircraft_live"
-        android:id="@+id/aircraft_live"/>
+    <!--<include layout="@layout/layout_aircraft_live"-->
+        <!--android:id="@+id/aircraft_live"/>-->
     
-    <!--缩小化 -->
-    <include layout="@layout/popup_mini_live"
-        android:id="@+id/popup_mini_live"/>
+    <TextureView
+        android:id="@+id/sv_live_pop"
+        android:layout_width="142dp"
+        android:layout_height="80dp"/>
 </RelativeLayout>

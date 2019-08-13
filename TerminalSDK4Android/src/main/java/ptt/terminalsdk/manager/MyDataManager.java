@@ -15,6 +15,7 @@ import cn.vsx.hamster.common.RequestDataType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.data.DataManager;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import ptt.terminalsdk.BuildConfig;
 import ptt.terminalsdk.bean.DepData;
@@ -58,7 +59,7 @@ public class MyDataManager extends DataManager{
         ApiManager.getFileServerApi()
                 .getDeptData(paramsMap)
                 .subscribeOn(Schedulers.io())
-                .observeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new CommonObserver<DepData>(){
                     @Override
                     protected void onError(String errorMsg){

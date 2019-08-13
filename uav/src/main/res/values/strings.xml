@@ -592,4 +592,5 @@
     <string name="list_data_is_empty">暂无数据</string>
     <string name="main_group_message_cannot_delete">主组消息不能删除</string>
     <string name="please_select_delete_member">请选择要删除的成员</string>
+    <string name="dji_sdk_regist_fail">大疆SDK注册失败</string>
 </resources>

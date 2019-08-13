@@ -1,5 +1,6 @@
 package cn.vsx.uav.activity;
 
+import android.app.AlertDialog;
 import android.os.AsyncTask;
 import android.os.Message;
 import android.util.Log;
@@ -8,8 +9,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.vc.activity.NewMainActivity;
+import cn.vsx.uav.R;
+import cn.vsx.uav.UavApplication;
 import cn.vsx.uav.utils.AirCraftUtil;
+import cn.vsx.vc.activity.NewMainActivity;
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
 import dji.common.realname.AircraftBindingState;
@@ -45,6 +48,7 @@ public class UavMainActivity extends NewMainActivity{
         super.initData();
         logger.info("UavMainActivity---initData");
         startSDKRegistration();
+        UavApplication.getApplication().startPushService();
     }
 
     private AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);
@@ -60,6 +64,7 @@ public class UavMainActivity extends NewMainActivity{
                             logger.info("注册大疆sdk："+djiError.getDescription());
                             DJISDKManager.getInstance().startConnectionToProduct();
                         } else {
+                            showDialog(djiError.getDescription());
                             ToastUtil.showToast(getApplicationContext(),"大疆SDK注册失败");
                             logger.error("注册大疆sdk："+djiError.getDescription());
                         }
@@ -190,5 +195,17 @@ public class UavMainActivity extends NewMainActivity{
         if(msg.what == MSG_INFORM_ACTIVATION){
             loginToActivationIfNeeded();
         }
+    }
+
+    private void showDialog(String msg){
+        new AlertDialog.Builder(this)
+                .setTitle(R.string.dji_sdk_regist_fail)
+                .setMessage(msg)
+                .setCancelable(true)
+                .setNegativeButton(R.string.text_sure, (dialog, which) -> {
+
+                })
+                .show();
+
     }
 }

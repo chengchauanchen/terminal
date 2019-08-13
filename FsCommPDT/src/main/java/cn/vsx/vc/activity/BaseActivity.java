@@ -131,7 +131,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     }
 
 
-    private Handler myHandler = new Handler(Looper.getMainLooper());
+    protected Handler myHandler = new Handler(Looper.getMainLooper());
 
 
     /**

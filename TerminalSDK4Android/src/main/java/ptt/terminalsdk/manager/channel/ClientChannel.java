@@ -107,12 +107,12 @@ public class ClientChannel extends AbsClientChannel {
 	public void start() {
 		try {
 			if (!isStarted && messageService != null){
-				logger.info("ClientChannel  start成功!");
 				String protocolType = TerminalFactory.getSDK().getParam(Params.PROTOCOL_TYPE, Params.UDP);
 				messageService.initConnectionClient(protocolType);
 				messageService.registServerConnectionEstablishedHandler(handlerAidl);
 				messageService.registMessageReceivedHandler(handler);
 				isStarted = true;
+				logger.info("ClientChannel  start成功!");
 			}else {
 				logger.error("ClientChannel  start失败");
 				isStarted = false;

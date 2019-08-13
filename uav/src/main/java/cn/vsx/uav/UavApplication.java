@@ -9,6 +9,7 @@ import android.util.Log;
 
 import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.uav.service.PushService;
 import cn.vsx.uav.service.UavReceiveHandlerService;
 import cn.vsx.vc.application.MyApplication;
 
@@ -20,6 +21,16 @@ import cn.vsx.vc.application.MyApplication;
  * 修订历史：
  */
 public class UavApplication extends MyApplication{
+
+    private PushService pushService;
+    private static UavApplication app;
+
+
+    @Override
+    public void onCreate(){
+        super.onCreate();
+        app = this;
+    }
 
     @Override
     protected void attachBaseContext(Context base){
@@ -59,5 +70,37 @@ public class UavApplication extends MyApplication{
             }
             stopService(new Intent(this, UavReceiveHandlerService.class));
         }
+
+        if(pushServiceConnection != null){
+            if(pushService !=null){
+                unbindService(pushServiceConnection);
+            }
+            stopService(new Intent(this, PushService.class));
+        }
+    }
+
+    public static UavApplication getApplication(){
+        return app;
+    }
+
+    public PushService getPushService(){
+        return pushService;
+    }
+
+    private ServiceConnection pushServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.e("UavApplication", "PushService----onServiceConnected");
+            pushService = ((PushService.PushServiceBinder) service).getService();
+        }
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            pushService = null;
+        }
+    };
+
+    public void startPushService(){
+        Intent intent = new Intent(this, PushService.class);
+        isBinded=bindService(intent,pushServiceConnection,BIND_AUTO_CREATE);
     }
 }

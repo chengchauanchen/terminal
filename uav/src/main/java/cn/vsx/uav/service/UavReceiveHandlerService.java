@@ -13,6 +13,7 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MountType;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.uav.activity.UavPushActivity;
 import cn.vsx.uav.utils.AirCraftUtil;
 import cn.vsx.vc.service.ReceiveHandlerService;
 import dji.common.flightcontroller.ConnectionFailSafeBehavior;
@@ -32,6 +33,7 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
 
     private static final int UPLOAD_UAV_LOCATION = 9;
     private long uploadTime = 30*1000;
+    private boolean uavConnected;
 
     @Override
     public void onCreate(){
@@ -46,33 +48,39 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
     }
 
     private ReceiveAirCraftStatusChangedHandler receiveAirCraftStatusChangedHandler = connected -> {
-        MyTerminalFactory.getSDK().getLiveManager().sendAircraftConnectStatus(connected);
         if(connected){
             Aircraft aircraft = AirCraftUtil.getAircraftInstance();
             if(aircraft == null){
                 ToastUtil.showToast(getApplicationContext(),"aircraft为null");
                 logger.error("aircraft为null");
             }else {
-                setConnectionFailBehavior();
-                myHandler.postDelayed(() -> checkBattery(aircraft),2000);
-                setUploadTime();
-                //无人机连上时自动位置
-                myHandler.sendEmptyMessageDelayed(UPLOAD_UAV_LOCATION,uploadTime);
-                //无人机连上时自动上报
-                if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
-//                    Intent intent = new Intent(getApplicationContext(), UavPushActivity.class);
-//                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                    startActivity(intent);
-                    Intent intent = new Intent(getApplicationContext(), AircraftPushService.class);
-                    startService(intent);
-                }else {
-                    ToastUtil.showToast(getApplicationContext(),"没有图像上报的权限，不能自动上报");
+                if(!uavConnected){
+                    MyTerminalFactory.getSDK().getLiveManager().sendAircraftConnectStatus(true);
+                    setConnectionFailBehavior();
+                    myHandler.postDelayed(() -> checkBattery(aircraft),2000);
+                    setUploadTime();
+                    //无人机连上时自动位置
+                    myHandler.sendEmptyMessageDelayed(UPLOAD_UAV_LOCATION,uploadTime);
+                    //无人机连上时自动上报
+                    if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
+                        Intent intent = new Intent(getApplicationContext(),UavPushActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        //                    Intent intent = new Intent(getApplicationContext(), AircraftPushService.class);
+                        //                    startService(intent);
+                    }else {
+                        ToastUtil.showToast(getApplicationContext(),"没有图像上报的权限，不能自动上报");
+                    }
                 }
             }
 
         }else {
-            myHandler.removeMessages(UPLOAD_UAV_LOCATION);
+            if(uavConnected){
+                MyTerminalFactory.getSDK().getLiveManager().sendAircraftConnectStatus(false);
+                myHandler.removeMessages(UPLOAD_UAV_LOCATION);
+            }
         }
+        uavConnected = connected;
     };
 
     @Override

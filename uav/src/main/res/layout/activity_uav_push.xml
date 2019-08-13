@@ -5,7 +5,4 @@
     <include layout="@layout/layout_aircraft_live"
         android:id="@+id/aircraft_live"/>
     
-    <!--缩小化 -->
-    <include layout="@layout/popup_mini_live"
-        android:id="@+id/popup_mini_live"/>
 </RelativeLayout>

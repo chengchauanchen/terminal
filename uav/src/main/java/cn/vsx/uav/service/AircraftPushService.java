@@ -619,7 +619,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         mLlAircraftLiveInviteMember = rootView.findViewById(R.id.ll_aircraft_live_invite_member);
         mIvLiveAddmember = rootView.findViewById(R.id.iv_live_addmember);
         iv_menu = rootView.findViewById(R.id.iv_menu);
-        iv_setting = rootView.findViewById(R.id.iv_setting);
+//        iv_setting = rootView.findViewById(R.id.iv_setting);
         cameraSettingAdvancedPanel = rootView.findViewById(R.id.cameraSettingAdvancedPanel);
         cameraSettingExposurePanel = rootView.findViewById(R.id.cameraSettingExposurePanel);
         mAircraftRoot = rootView.findViewById(R.id.aircraft_root);
