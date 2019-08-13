@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -154,8 +153,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 						for (Activity activity : ActivityCollector.getAllActivity().values()) {
 							activity.finish();
 						}
-						TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
-						TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
 						MyApplication.instance.isClickVolumeToCall = false;
 						MyApplication.instance.isPttPress = false;
 						//停止上报或者观看的页面
@@ -187,15 +184,10 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 		public void handler(boolean forbid) {
 			logger.error("收到遥毙，此时forbid状态为：" + forbid);
 			if (forbid) {
-				myHandler.post(new Runnable() {
-					@Override
-					public void run() {
-						TerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, true);
-						TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
-						startActivity(new Intent(BaseActivity.this, KilledActivity.class));
-						BaseActivity.this.finish();
+				myHandler.post(() -> {
+					startActivity(new Intent(BaseActivity.this, KilledActivity.class));
+					BaseActivity.this.finish();
 
-					}
 				});
 			}
 		}

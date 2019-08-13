@@ -26,8 +26,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONObject;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 import org.apache.log4j.Logger;
 import org.easydarwin.video.EasyRTSPClient;
@@ -42,11 +40,9 @@ import java.util.TimerTask;
 
 import butterknife.Bind;
 import cn.vsx.hamster.common.Authority;
-import cn.vsx.hamster.common.MemberChangeType;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.TerminalMemberType;
-import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
@@ -128,7 +124,6 @@ public class MainActivity extends BaseActivity {
     TextView tv_live_content;
 
     private String streamMediaServerUrl;//收到的直播流rtsp地址
-    //    private int mType = Client.TRANSTYPE_TCP;
     private boolean isQuiteApp;//是否退出App
     private static final String STATE = "state";
     private static final int MSG_STATE = 1;
@@ -143,9 +138,6 @@ public class MainActivity extends BaseActivity {
     private int rotationIndex = 0;
     //轮播图像的时间间隔
     private static final int ROTATION_TIME = 15 * 1000;
-    //    private boolean isCamera;
-//    private String cameraName;
-//    private String cameraNo;
     private Handler myHandler = new Handler(Looper.getMainLooper());
     private final int OPEN_ACCESSIBILITY_SETTING_REQUESTCODE = 130;
     private int pullcount;
@@ -301,11 +293,8 @@ public class MainActivity extends BaseActivity {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity: isRegisted" + isRegisted);
                 handler.post(() -> showConnectToOtherView(tv_connect_to_other_success));
-
                 handler.postDelayed(() -> showConnectToOtherView(noLive), 1000);
                 if (isRegisted) {//注册过，在后台登录，session超时也走这
-//                    TerminalFactory.getSDK().getAuthManagerTwo().login();
-                    logger.info("信令服务器通知NotifyForceRegisterMessage消息，在MainActivity中登录了");
                 } else {//没注册过，关掉主界面，去注册界面
                     startActivity(new Intent(MainActivity.this, RegistActivity.class));
                     MainActivity.this.finish();
@@ -339,7 +328,6 @@ public class MainActivity extends BaseActivity {
             } else {
                 handler.post(() -> {
                     stopPull(false);
-                    logger.info("设置网络断开的UI显示");
                     showForeground(true);
                     showToast("网络连接已断开");
                     if (noLive != null) {
@@ -352,7 +340,7 @@ public class MainActivity extends BaseActivity {
     };
 
     private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler = () -> {
-//            handler.post(() -> tv_user_name.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "")));
+            handler.post(() -> tv_user_name.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "")));
     };
 
     private ReceiveLoginResponseHandler mReceiveLoginResponseHandler = (resultCode, resultDesc) -> handler.post(() -> {
@@ -362,8 +350,9 @@ public class MainActivity extends BaseActivity {
                 noLive.setText("暂无图像");
             }
             showConnectToOtherView(noLive);
-            //登录响应成功，把第一次登录标记置为false；
-            MyTerminalFactory.getSDK().putParam(Params.IS_FIRST_LOGIN, false);
+            if (MainActivity.this.message != null) {
+                requestToWatchLiving(MainActivity.this.message);
+            }
         } else {
             showToast("请重新登录");
             handler.postDelayed(() -> {
@@ -423,12 +412,12 @@ public class MainActivity extends BaseActivity {
             TerminalFactory.getSDK().getThreadPool().execute(() -> {
                 Member member = TerminalFactory.getSDK().getConfigManager().getMemberByNo(liveMember.getUniqueNo());
                 if (member != null) {
-                    handler.postDelayed(() -> {
+                    handler.post(() -> {
                         MainActivity.this.showContent = getShowContent(member);
-                        if(foreground!=null&&foreground.getVisibility() != View.VISIBLE){
+                        if(tv_title!=null&&!TextUtils.isEmpty(tv_title.getText().toString())){
                             tv_live_content.setText(MainActivity.this.showContent);
                         }
-                    },2*1000);
+                    });
                 }
             });
         }
@@ -440,7 +429,6 @@ public class MainActivity extends BaseActivity {
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> handler.post(() -> {
         //需要判断停止直播的是不是当前观看的
         cancelTask();
-        allFinishWatchLive();
         showToast("图像上报已结束!");
         toWatchNext(false);
     });
@@ -450,7 +438,6 @@ public class MainActivity extends BaseActivity {
      **/
     private ReceiveAnswerLiveTimeoutHandler mReceiveAnswerLiveTimeoutHandler = () -> handler.post(() -> {
         showToast("回答超时！");
-        allFinishWatchLive();
         toWatchNext(false);
     });
 
@@ -459,7 +446,6 @@ public class MainActivity extends BaseActivity {
      */
     private ReceiveMemberNotLivingHandler mReceiveMemberNotLivingHandler = callId -> handler.post(() -> {
         showToast("图像上报已结束!");
-        allFinishWatchLive();
         cancelTask();
         toWatchNext(false);
     });
@@ -556,7 +542,6 @@ public class MainActivity extends BaseActivity {
                         }
                     } else {
                         ceaseWatching();
-                        allFinishWatchLive();
                         sendMessage("图像上报已结束");
                         toWatchNext(false);
                     }
@@ -565,7 +550,6 @@ public class MainActivity extends BaseActivity {
                 } else {
                     logger.info("sjl_错误日志");
                     sendMessage(resultDataString);
-                    allFinishWatchLive();
                     toWatchNext(false);
                 }
             } else if (resultCode == EasyRTSPClient.RESULT_RECORD_BEGIN) {
@@ -607,7 +591,7 @@ public class MainActivity extends BaseActivity {
      */
     private ReceiveNotifyMemberChangeHandler receiveNotifyMemberChangeHandler = memberChangeType -> {
         logger.info("setting的memberChangeType" + memberChangeType);
-//        handler.post(() -> tv_user_name.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "")));
+        handler.post(() -> tv_user_name.setText(TerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "")));
     };
 
     private final class OnClickListenerImplementationLogUpload implements
@@ -676,11 +660,8 @@ public class MainActivity extends BaseActivity {
      * 收到轮播推送的通知
      **/
     private ReceiveNotifyPushPartyLiveMessageHandler receiveNotifyPushPartyLiveMessageHandler = (message) -> {
-        handler.post(() -> {
-            myHandler.removeCallbacksAndMessages(null);
-            TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                prepareStartRotationLive(addRotationLiveData(message));
-            });
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            prepareStartRotationLive(addRotationLiveData(message));
         });
     };
 
@@ -715,14 +696,15 @@ public class MainActivity extends BaseActivity {
                 }
             };
             handler.post(() -> {
-                allFinishWatchLive();
+//                allFinishWatchLive();
+                clearLiveInfoView();
                 if (noLive != null) {
                     noLive.setText("图像连接中...");
                     showConnectToOtherView(noLive);
                 }
             });
             if (messageTimerTask != null) {
-                MyTerminalFactory.getSDK().getTimer().schedule(messageTimerTask, 3000);
+                MyTerminalFactory.getSDK().getTimer().schedule(messageTimerTask, (liveDescList.isEmpty())?3000:0);
             }
         } else {
             handler.post(() -> {
@@ -808,7 +790,7 @@ public class MainActivity extends BaseActivity {
             if (!Util.isEmpty(result)) {
                 JSONObject jsonObject = JSONObject.parseObject(result);
                 boolean living = jsonObject.getBoolean("living");
-                Long endChatTime = jsonObject.getLong("endChatTime");
+//                Long endChatTime = jsonObject.getLong("endChatTime");
                 if (living) {
                     int resultCode = MyTerminalFactory.getSDK().getLiveManager().requestToWatchLiving(message);
                     if (resultCode == 0) {
@@ -818,7 +800,6 @@ public class MainActivity extends BaseActivity {
                         ToastUtil.livingFailToast(MainActivity.this, resultCode, TerminalErrorCode.LIVING_PLAYING.getErrorCode());
                         handler.post(() -> {
                             cancelTask();
-                            allFinishWatchLive();
                             toWatchNext(false);
                         });
                     }
@@ -826,7 +807,6 @@ public class MainActivity extends BaseActivity {
                     handler.post(() -> {
                         showToast("图像上报已结束");
                         cancelTask();
-                        allFinishWatchLive();
                         toWatchNext(false);
                     });
                 }
@@ -867,7 +847,6 @@ public class MainActivity extends BaseActivity {
             }
             handler.post(() -> {
                 showToast("获取视频地址失败");
-                allFinishWatchLive();
                 toWatchNext(false);
             });
         });
@@ -903,7 +882,7 @@ public class MainActivity extends BaseActivity {
         if (liveList != null && !liveList.isEmpty()) {
             //停止观看
             clearRotationLive();
-            allFinishWatchLive();
+//            allFinishWatchLive();
             //添加数据
             liveDescList.addAll(liveList);
             startRotationLive();
@@ -963,13 +942,17 @@ public class MainActivity extends BaseActivity {
                     rotationIndex = 0;
                 }
                 if (rotationIndex >= 0 && rotationIndex < liveDescList.size()) {
-                    allFinishWatchLive();
+//                    allFinishWatchLive();
                     startRotationLive();
                 }else {
                     allFinishWatchLive();
                     clearRotationLive();
                 }
             }, delay ? ROTATION_TIME : 0);
+        }else{
+            if(!delay){
+                allFinishWatchLive();
+            }
         }
     }
 
@@ -1026,7 +1009,6 @@ public class MainActivity extends BaseActivity {
         if (foreground == null || icon == null || llTempt == null
                 ||tv_user_id == null || tv_user_name == null)
             return;
-//                tv_user_id == null || tv_user_name == null)
 
         if (isShow) {
             foreground.setVisibility(View.VISIBLE);
@@ -1074,6 +1056,7 @@ public class MainActivity extends BaseActivity {
     private void clearRotationLive() {
         rotationIndex = 0;
         liveDescList.clear();
+        myHandler.removeCallbacksAndMessages(null);
     }
 
     private void recoverStateMachine() {
@@ -1241,6 +1224,18 @@ public class MainActivity extends BaseActivity {
             content.append(devicesName).append(" ").append(deviceDeptName).append("\n").append("上报图像");
         }
         return content.toString();
+    }
+
+    /**
+     * 清除显示推送图像和上报图像用户信息
+     */
+    private void clearLiveInfoView() {
+        if(tv_live_content!=null){
+            tv_live_content.setText("");
+        }
+        if(tv_title!=null){
+            tv_title.setText("");
+        }
     }
 
     /**
