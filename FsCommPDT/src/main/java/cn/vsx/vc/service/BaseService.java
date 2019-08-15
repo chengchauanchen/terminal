@@ -136,14 +136,13 @@ public abstract class BaseService extends Service{
         return super.onStartCommand(intent, flags, startId);
     }
 
-    @SuppressLint("InvalidWakeLockTag")
 
     protected void initWakeLock(){
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         if(null != powerManager){
             //noinspection deprecation
             wakeLock = powerManager.newWakeLock(PowerManager.ACQUIRE_CAUSES_WAKEUP |
-                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "wakeLock");
+                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "vsx:BaseServiceTag");
         }
     }
 

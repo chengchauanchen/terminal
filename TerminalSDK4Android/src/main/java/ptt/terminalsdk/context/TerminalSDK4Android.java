@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -23,7 +25,6 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.StatFs;
 import android.os.storage.StorageManager;
-import android.support.annotation.NonNull;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -57,13 +58,10 @@ import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -92,8 +90,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-import okhttp3.logging.HttpLoggingInterceptor;
-import ptt.terminalsdk.BuildConfig;
 import ptt.terminalsdk.IMessageService;
 import ptt.terminalsdk.IMessageService.Stub;
 import ptt.terminalsdk.broadcastreceiver.NetWorkConnectionChangeReceiver;
@@ -855,7 +851,9 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	public WakeLock getWakeLock(){
 		if(wakeLock == null){
 			PowerManager pm = (PowerManager) application.getSystemService(Context.POWER_SERVICE);
-			wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "OnlineService");
+			if(pm != null){
+				wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "vsx:tag");
+			}
 		}
 		return wakeLock;
 	}
@@ -1327,10 +1325,11 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 					@Override
 					public Map<String, String> buildHeaders() {
 						HashMap<String, String> hashMap = new HashMap<>();
-						hashMap.put("appVersion", BuildConfig.VERSION_NAME);
+						hashMap.put("appVersion", getVersionName());
+						hashMap.put("Accept", "application/json");
+						hashMap.put("Content-type",
+								"application/x-www-form-urlencoded");
 						hashMap.put("client", "android");
-						hashMap.put("token", "your_token");
-						hashMap.put("other_header", URLEncoder.encode("中文需要转码"));
 						return hashMap;
 					}
 				})
@@ -1366,5 +1365,16 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				.build();
 
 		return okHttpClient;
+	}
+
+	private String getVersionName(){
+		String localVersion = "";
+		try{
+			PackageInfo packageInfo = application.getApplicationContext().getPackageManager().getPackageInfo(application.getPackageName(), 0);
+			localVersion = packageInfo.versionName;
+		}catch(PackageManager.NameNotFoundException e){
+			e.printStackTrace();
+		}
+		return localVersion;
 	}
 }

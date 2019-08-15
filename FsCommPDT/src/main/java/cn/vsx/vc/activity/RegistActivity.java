@@ -446,6 +446,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     ToastUtils.showShort(R.string.text_please_select_unit);
                 } else {
                     changeProgressMsg(getString(R.string.text_registing));
+
                     TerminalFactory.getSDK().getAuthManagerTwo().regist(useName, useOrg);
                 }
             }
@@ -834,7 +835,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         }
         apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
         //市局包隐藏模拟警员
-        if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)) {
+        if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)
+            || AuthManagerTwo.XIANGYANG.equals(apkType)) {
             btnAddMember.setVisibility(View.GONE);
             btn_idcard_login.setVisibility(View.GONE);
         }
@@ -858,7 +860,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             // 绑定安全VPN服务
             Intent intent = new Intent();
             intent.setAction(SEC_VPN_SERVICE_ACTION_NAME);
-            //试一下sec.vpn这个包名
             Intent intent1 = new Intent(createExplicitFromImplicitIntent(this,intent));
             startService(intent1);
             bindService(intent1, secVpnServiceConnection, BIND_AUTO_CREATE);

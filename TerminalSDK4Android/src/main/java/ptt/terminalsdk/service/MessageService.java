@@ -56,6 +56,7 @@ public class MessageService extends Service {
         int accessServerPort = 0;
         String protocolType = Params.UDP;
         if (intent != null) {
+
             if (intent.hasExtra("uuid")){
                 uuid = intent.getByteArrayExtra("uuid");
             }
@@ -72,10 +73,11 @@ public class MessageService extends Service {
         logger.info("MessageService ----> onStartCommand： protocolType:"+protocolType+"--uuid = "+uuid+"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
         if(!init){
             initClient(protocolType);
+            // TODO: 2019/8/14 临时解决，应该会有问题
+            startClient(uuid,accessServerIp,accessServerPort);
         }
-        startClient(uuid,accessServerIp,accessServerPort);
 
-        return START_STICKY;
+        return super.onStartCommand(intent,flags,startId);
     }
 
     private synchronized void initClient(String protocolType){
