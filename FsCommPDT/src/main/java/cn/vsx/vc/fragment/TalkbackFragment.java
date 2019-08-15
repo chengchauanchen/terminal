@@ -640,7 +640,13 @@ public class TalkbackFragment extends BaseFragment {
     private final class OnGroupChangedListenerImplementation implements OnGroupChangedListener {
         @Override
         public void onGroupChanged(final int groupId, String groupName) {
-            myHandler.post(() -> MyTerminalFactory.getSDK().getGroupManager().changeGroup(groupId));
+            myHandler.post(() -> {
+                if(groupId>0){
+                    MyTerminalFactory.getSDK().getGroupManager().changeGroup(groupId);
+                }else{
+                    ToastUtil.showToast(context,getString(R.string.text_change_group_data_wrong));
+                }
+            });
         }
     }
 
