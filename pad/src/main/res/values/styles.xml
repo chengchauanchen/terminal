@@ -39,6 +39,10 @@
         <attr name="textColor" format="reference" />
     </declare-styleable>
 
+    <declare-styleable name="PullLivePlayer">
+        <attr name="loadText" format="string" />
+    </declare-styleable>
+
     <style name="bottom_unselect_text_color">
         <item name="android:textColor">@color/white</item>
     </style>

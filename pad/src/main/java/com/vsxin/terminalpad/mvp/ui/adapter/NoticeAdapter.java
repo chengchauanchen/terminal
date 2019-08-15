@@ -15,6 +15,7 @@ import com.baidu.location.LLSInterface;
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.adapter.BaseRecycleViewAdapter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeInCallEnum;
+import com.vsxin.terminalpad.mvp.contract.constant.NoticeInLiveEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeInOrOutEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeOutCallEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeOutLiveEnum;
@@ -175,12 +176,7 @@ public class NoticeAdapter extends BaseRecycleViewAdapter<NoticeBean, RecyclerVi
         liveViewHolder.tv_name.setText(noticeBean.getMemberName());
         liveViewHolder.tv_member_no.setText(noticeBean.getMemberId() + "");
 
-//        liveViewHolder.tv_accept_live.setOnClickListener(new OnClickListener() {
-//            @Override
-//            public void onClick(View v) {//接收直播
-//                noticePresenter.acceptLive(noticeBean);
-//            }
-//        });
+        OnClickListener liveOnClickListener = null;
 
         if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//主动 请求他人上报
             if (noticeBean.getOutLive() == NoticeOutLiveEnum.LIVE_OUT_REPORT) {//主动 上报
@@ -197,6 +193,28 @@ public class NoticeAdapter extends BaseRecycleViewAdapter<NoticeBean, RecyclerVi
             }else if (noticeBean.getOutLive() == NoticeOutLiveEnum.LIVE_OUT_END) {//结束
                 liveViewHolder.tv_accept_live.setText("结束上报");
             }
+        }else{//他人请求我上报视频
+            if(noticeBean.isForce()){//是否强制上报
+
+            }else {
+                if(noticeBean.getInLive() == NoticeInLiveEnum.LIVE_IN_INVITE){//等待接听
+                    liveViewHolder.tv_accept_live.setText("点击接听");
+                    liveOnClickListener = v->{
+                        noticePresenter.acceptLive(noticeBean);
+                    };
+                }else if(noticeBean.getInLive() == NoticeInLiveEnum.LIVE_IN_INVITE_REFUSE){//拒绝 直播
+                    liveViewHolder.tv_accept_live.setText("拒绝");
+                }else if(noticeBean.getInLive() == NoticeInLiveEnum.LIVE_IN_INVITE_AGREE){//同意 直播
+                    liveViewHolder.tv_accept_live.setText("同意");
+                }else if(noticeBean.getInLive() == NoticeInLiveEnum.LIVE_IN_WATCH){//邀请我观看
+                    liveViewHolder.tv_accept_live.setText("邀请我观看");
+                }else if(noticeBean.getInLive() == NoticeInLiveEnum.LIVE_IN_END){//通话结束
+                    liveViewHolder.tv_accept_live.setText("通话结束");
+                }else if(noticeBean.getInLive() == NoticeInLiveEnum.LIVE_IN_TIME_OUT){//超时
+                    liveViewHolder.tv_accept_live.setText("超时");
+                }
+            }
+            liveViewHolder.tv_accept_live.setOnClickListener(liveOnClickListener);
         }
     }
 
