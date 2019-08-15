@@ -26,18 +26,30 @@ import ptt.terminalsdk.ServerMessageReceivedHandlerAidl;
 
 public class MyUDPClient extends UDPClientBase implements IConnectionClient{
 
+    private static MyUDPClient instance;
     private final Context context;
     private WakeLock wakeLock;
     private List<ServerMessageReceivedHandlerAidl> serverMessageReceivedHandlerAidls = new ArrayList<>();
     private SharedPreferences sp;
 
-    public MyUDPClient(Context context){
+    private MyUDPClient(Context context){
         this.context = context;
         if(wakeLock == null){
             PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
             wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyUDPClient");
         }
         sp = context.getSharedPreferences(Params.MESSAGE_SERVICE_PRE_NAME, Context.MODE_PRIVATE);
+    }
+
+    public static MyUDPClient newInstance(Context context){
+        if(instance == null){
+            synchronized(MyUDPClient.class){
+                if(instance == null){
+                    instance = new MyUDPClient(context);
+                }
+            }
+        }
+        return instance;
     }
 
     @Override

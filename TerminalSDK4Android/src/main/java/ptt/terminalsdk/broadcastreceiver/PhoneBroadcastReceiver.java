@@ -34,7 +34,7 @@ public class PhoneBroadcastReceiver extends BroadcastReceiver {
 					break;
 				case TelephonyManager.CALL_STATE_IDLE://空闲状态0
 					MyTerminalFactory.getSDK().setCalling(false);
-					TerminalFactory.getSDK().reConnectToSignalServer();
+					TerminalFactory.getSDK().connectToServer();
 					break;
 			}
 		}

@@ -1066,9 +1066,9 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			if (bindService && messageServiceConn != null) {
 				application.unbindService(messageServiceConn);
 				application.stopService(new Intent(application, MessageService.class));
+				logger.error("停止与服务器的连接");
 			}
 			messageService = null;
-			logger.error("停止与服务器的连接");
 		} catch (Exception e) {
 			logger.error("连接停止时出现异常", e);
 		}

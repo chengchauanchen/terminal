@@ -33,6 +33,7 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     private List<ServerMessageReceivedHandlerAidl> serverMessageReceivedHandlerAidls = new ArrayList<>();
 
     private ServerConnectionEstablishedHandlerAidl handler;
+    private static MyNettyClient instance;
 //    private  ServerConnectionEstablishedHandler serverConnectionEstablishedHandler = new ServerConnectionEstablishedHandler() {
 //        @Override
 //        public void handler(boolean connected) {
@@ -44,10 +45,21 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
 //        }
 //    };
 
-    public MyNettyClient(Context context){
+    private MyNettyClient(Context context){
         this.mContext = context;
         sp = context.getSharedPreferences(Params.MESSAGE_SERVICE_PRE_NAME, Context.MODE_PRIVATE);
         init();
+    }
+
+    public static MyNettyClient newInstance(Context context){
+        if(instance == null){
+            synchronized(MyNettyClient.class){
+                if(instance == null){
+                    instance = new MyNettyClient(context);
+                }
+            }
+        }
+        return instance;
     }
 
     @Override

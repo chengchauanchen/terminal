@@ -33,7 +33,6 @@ public class MessageService extends Service {
     private Handler mHandler = new Handler();
     private static final String TAG = "MessageService--";
     private IConnectionClient connectionClient;
-    private boolean init = false;
 
     @Override
     public void onCreate() {
@@ -71,26 +70,20 @@ public class MessageService extends Service {
             }
         }
         logger.info("MessageService ----> onStartCommand： protocolType:"+protocolType+"--uuid = "+uuid+"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
-        if(!init){
-            initClient(protocolType);
-            // TODO: 2019/8/14 临时解决，应该会有问题
-            startClient(uuid,accessServerIp,accessServerPort);
-        }
+        initClient(protocolType);
+        startClient(uuid,accessServerIp,accessServerPort);
 
         return super.onStartCommand(intent,flags,startId);
     }
 
     private synchronized void initClient(String protocolType){
         logger.info("initClient---protocolType:"+protocolType);
-        if(connectionClient == null){
-            if(Params.TCP.equals(protocolType)){
-                connectionClient = new MyNettyClient(this);
-            }else if(Params.UDP.equals(protocolType)){
-                connectionClient = new MyUDPClient(this);
-            }else {
-                logger.error("没有获取到通信方式！！");
-            }
-            init = true;
+        if(Params.TCP.equals(protocolType)){
+            connectionClient = MyNettyClient.newInstance(this);
+        }else if(Params.UDP.equals(protocolType)){
+            connectionClient = MyUDPClient.newInstance(this);
+        }else {
+            logger.error("没有获取到通信方式！！");
         }
     }
     private void startClient(byte[] uuid, String accessServerIp, int accessServerPort){
@@ -140,7 +133,6 @@ public class MessageService extends Service {
     @Override
     public void onDestroy() {
         logger.info("MessageService执行了onDestroy()");
-        init =false;
         try {
             if(connectionClient!=null){
                 connectionClient.stop();
@@ -186,9 +178,7 @@ public class MessageService extends Service {
         @Override
         public void initConnectionClient(String protocolType) throws RemoteException{
             logger.info("initConnectionClient--"+protocolType);
-            if(!init){
-                initClient(protocolType);
-            }
+            initClient(protocolType);
         }
     };
 
