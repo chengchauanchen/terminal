@@ -71,7 +71,8 @@ public class ChangeGroupView extends FrameLayout{
 						worker.wait();
 					}
 					if(commandQueue.size() == 0 && onGroupChangedListener != null){
-						onGroupChangedListener.onGroupChanged(getGroupData(currentDataIndex).getNo(), getGroupData(currentDataIndex).getName());
+						GroupBean bean = getGroupData(currentDataIndex);
+						onGroupChangedListener.onGroupChanged((bean!=null)?bean.getNo():0, (bean!=null)?bean.getName():"");
 					}
 				} catch (InterruptedException e) {
 					e.printStackTrace();
@@ -308,7 +309,8 @@ public class ChangeGroupView extends FrameLayout{
 	}
 
 	private GroupBean getGroupData(int index){
-		return data.get(getDataRealIndex(index));
+		int i = getDataRealIndex(index);
+		return (i >= 0 && i < data.size())?data.get(i):null;
 	}
 
 	private int getDataRealIndex(int index){
