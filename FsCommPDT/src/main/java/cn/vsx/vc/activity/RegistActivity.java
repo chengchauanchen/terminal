@@ -857,6 +857,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     private void startVPNService(){
         try{
+            logger.info("开始绑定VPN");
             // 绑定安全VPN服务
             Intent intent = new Intent();
             intent.setAction(SEC_VPN_SERVICE_ACTION_NAME);
@@ -984,9 +985,13 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private void start() {
         //vpn没有启动时先启动VPN
         try{
+            if(secVpnService == null){
+                logger.info("vpn没有绑定成功");
+            }
             if(secVpnService != null && !secVpnService.sv_isStarted()){
-//              secVpnService.sv_setServerAddr("20.50.0.11", "10009");
+                secVpnService.sv_setServerAddr("20.50.0.11", "10009");
                 secVpnService.sv_start();
+                logger.info("vpn没有启动，开始启动vpn");
             }
         }catch(RemoteException e){
             e.printStackTrace();

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources >
-    <string name="app_name">融合通信</string>
+    <!--<string name="app_name">融合通信</string>-->
+    <string name="app_name">襄阳融合通信测试</string>
     <!-- <string name="app_name">宽带对讲</string> -->
     <string name="authing">正在认证...</string>
     <string name="auth_fail">认证失败...</string>
