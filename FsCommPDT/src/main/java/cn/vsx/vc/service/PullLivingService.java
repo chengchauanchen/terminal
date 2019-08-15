@@ -113,6 +113,7 @@ public class PullLivingService extends BaseService{
 
     public PullLivingService(){}
 
+    @Override
     @SuppressLint({"WrongConstant", "ClickableViewAccessibility"})
     protected void initListener(){
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);

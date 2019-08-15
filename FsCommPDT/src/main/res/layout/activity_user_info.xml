@@ -38,7 +38,6 @@
                     android:id="@+id/user_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="张星星"
                     android:textColor="@color/user_info_text_black"
                     android:textSize="@dimen/sp_18" />
 
@@ -57,7 +56,6 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/user_name"
                     android:layout_marginBottom="@dimen/x1"
-                    android:text="NO:00123456"
                     android:textColor="@color/user_info_text_gray"
                     android:textSize="@dimen/sp_14" />
             </RelativeLayout>

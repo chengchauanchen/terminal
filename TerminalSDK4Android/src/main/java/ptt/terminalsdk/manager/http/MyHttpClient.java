@@ -94,7 +94,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 			if (null != response) {
 				String responseString = new String(EntityUtils.toByteArray(response.getEntity()), DEFAULT_ENCODING);
 				logger.info("发送了一个get请求：url="+url+",收到的信息为："+responseString);
-				logger.info("responseString" + responseString);
+//				logger.info("responseString" + responseString);
 				return responseString;
 			}
 		} catch (Exception e) {

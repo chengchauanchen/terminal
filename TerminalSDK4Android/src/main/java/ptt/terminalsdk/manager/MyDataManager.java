@@ -49,6 +49,7 @@ public class MyDataManager extends DataManager{
     /**
      * 更新当前组部门下的所有组
      */
+    @Override
     public void updateDepAllGroup(){
         //查询所在部门的组
         Map<String, String> paramsMap = new HashMap<>();
@@ -89,6 +90,7 @@ public class MyDataManager extends DataManager{
     /**
      * 在账号改变的时候，删除相关的数据,比如（sp中会存储之前的当前组信息，改变账号的时候需要删除）
      */
+    @Override
     public void clearDataByAccountChanged(){
         logger.info("在账号改变的时候，删除相关的数据:");
         //删除之前账号的当前组

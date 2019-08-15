@@ -312,10 +312,11 @@ public class CallingService extends BaseService{
                     hideAllView();
                     if(individualCallType == IndividualCallType.FULL_DUPLEX.getCode()){
                         mIndividualCallSpeaking.setVisibility(View.VISIBLE);
+                        //全双工时，才注册检测感应器
+                        SensorUtil.getInstance().registSensor();
                     }else if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){
                         mIndividualCallHalfDuplex.setVisibility(View.VISIBLE);
                     }
-                    SensorUtil.getInstance().registSensor();
                 }
                 break;
         }
@@ -395,7 +396,7 @@ public class CallingService extends BaseService{
      */
     private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = (methodResult, resultDesc,groupId) -> {
         if(MyTerminalFactory.getSDK().getGroupCallManager().getCurrentCallMode() == CallMode.GENERAL_CALL_MODE && MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
-            if(MyApplication.instance.isPttPress){
+//            if(MyApplication.instance.isPttPress){
                 mHandler.post(() -> {
                     if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){
                         if(methodResult == 0){
@@ -422,7 +423,7 @@ public class CallingService extends BaseService{
                         }
                     }
                 });
-            }
+//            }
         }
     };
 
@@ -532,7 +533,7 @@ public class CallingService extends BaseService{
 
     @Override
     protected void initView(Intent intent){
-        SensorUtil.getInstance().registSensor();
+        SensorUtil.getInstance().unregistSensor();
         individualCallType = intent.getIntExtra(Constants.CALL_TYPE, 0);
         String memberName = intent.getStringExtra(Constants.MEMBER_NAME);
         int memberId = intent.getIntExtra(Constants.MEMBER_ID, 0);
@@ -544,6 +545,8 @@ public class CallingService extends BaseService{
         MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
         mPopupICTVSpeakingTime.setVisibility(View.VISIBLE);
         if(individualCallType == IndividualCallType.FULL_DUPLEX.getCode()){
+            //全双工时，才注册检测感应器
+            SensorUtil.getInstance().registSensor();
             mTvMemberNameSpeaking.setText(memberName);
             mTvMemberIdSpeaking.setText(HandleIdUtil.handleId(memberId));
             mTvSpeakingPrompt.setText(getResources().getString(R.string.talking));

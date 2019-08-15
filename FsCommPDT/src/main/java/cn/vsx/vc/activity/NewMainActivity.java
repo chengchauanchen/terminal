@@ -277,14 +277,14 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler(final boolean isCannotCheck) {
             logger.info("raidobutton被禁了 ？ isCannotCheck：" + isCannotCheck);
-            bv_talk_back.setEnabled(!isCannotCheck);
-            bv_talk_back.setClickable(!isCannotCheck);
-            bv_person_contacts.setEnabled(!isCannotCheck);
-            bv_person_contacts.setClickable(!isCannotCheck);
-            bv_group_contacts.setEnabled(!isCannotCheck);
-            bv_group_contacts.setClickable(!isCannotCheck);
-            bv_setting.setEnabled(!isCannotCheck);
-            bv_setting.setClickable(!isCannotCheck);
+//            bv_talk_back.setEnabled(!isCannotCheck);
+//            bv_talk_back.setClickable(!isCannotCheck);
+//            bv_person_contacts.setEnabled(!isCannotCheck);
+//            bv_person_contacts.setClickable(!isCannotCheck);
+//            bv_group_contacts.setEnabled(!isCannotCheck);
+//            bv_group_contacts.setClickable(!isCannotCheck);
+//            bv_setting.setEnabled(!isCannotCheck);
+//            bv_setting.setClickable(!isCannotCheck);
             if (!MyApplication.instance.isMoved) {
                 synchronized (MyApplication.instance) {
                     logger.info("-------ReceiveCallingCannotClickHandler--------" + MyApplication.instance.isChanging);
@@ -947,6 +947,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         //注册 连接jumpService的广播
         ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().register(this);
+
+//        GetPublicKey.getSignInfo(this);
     }
 
     @Override
