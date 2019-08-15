@@ -28,8 +28,18 @@ public class NoticeBean extends BaseBean {
     private NoticeInLiveEnum inLive;//被动 上报/观看
     private NoticeOutLiveEnum outLive;//主动 上报/观看
 
+    private boolean isForce;//是否强制上报
+
     private Long startTime;//开始时间
     private Long stopTime;//结束时间
+
+    public boolean isForce() {
+        return isForce;
+    }
+
+    public void setForce(boolean force) {
+        isForce = force;
+    }
 
     public String getMemberName() {
         return memberName;

@@ -328,15 +328,15 @@ public class LivePresenter extends BasePresenter<ILiveView> {
         }
     }
 
-    public void startPush(TextureView sv_live) {
+    public void startPush(SurfaceTexture surface) {
         if (TextUtils.isEmpty(ip) || TextUtils.isEmpty(port) || TextUtils.isEmpty(id)) {
             return;
         }
-        getView().getLogger().info("mMediaStream:" + getView().getmMediaStream() + "----SurfaceTexture:" + sv_live.getSurfaceTexture());
+        getView().getLogger().info("mMediaStream:" + getView().getmMediaStream() + "----SurfaceTexture:" + surface);
         if (getView().getmMediaStream() == null) {
-            if (sv_live.getSurfaceTexture() != null) {
+            if (surface != null) {
                 getView().isShowLiveView(true);
-                pushStream(sv_live.getSurfaceTexture());
+                pushStream(surface);
             } else {
                 ToastUtil.showToast(getContext(), getContext().getString(R.string.push_failed));
                 finishVideoLive();
@@ -781,23 +781,6 @@ public class LivePresenter extends BasePresenter<ILiveView> {
         //通知拉取成功，正在观看 notice
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceivePullLivingHandler.class);
         mHandler.postDelayed(()-> initEasyPlay(surface),1200);
-        //initEasyPlay(surface);
-//        if (null == mResultReceiver) {
-//            mResultReceiver = new RtspReceiver(new Handler(), surface);
-//        }
-//        if (null != surface) {
-//            getView().getLogger().info("开始播放 null != surface");
-//            mStreamRender = new EasyRTSPClient(getContext(), MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(), surface, mResultReceiver);
-//            try {
-//                if (!TextUtils.isEmpty(rtspUrl)) {
-//                    mStreamRender.start(rtspUrl, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
-//                    getView().getLogger().info("开始播放 mStreamRender.start(rtspUrl)");
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//                getView().getLogger().error(e.toString());
-//            }
-//        }
     }
 
 

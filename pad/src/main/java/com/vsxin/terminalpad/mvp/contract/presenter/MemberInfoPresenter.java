@@ -246,7 +246,8 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
 //                    ToastUtil.showToast(getContext(), "警员编号异常");
 //                    return;
 //                }
-                pullVideoForMemberNo(88011075, TerminalMemberType.TERMINAL_PHONE);
+//                pullVideoForMemberNo(88011075, TerminalMemberType.TERMINAL_PHONE);
+                pullVideoForMemberNo(88021205, TerminalMemberType.TERMINAL_PHONE);
             } else if (MemberTypeEnum.VIDEO == type) {//ok
                 //执法记录仪
                 pullVideoForMemberNo(77000000, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA);

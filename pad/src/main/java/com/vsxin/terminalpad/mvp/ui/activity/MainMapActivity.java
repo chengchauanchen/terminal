@@ -14,6 +14,7 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
@@ -32,16 +33,21 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpActivity;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.instruction.groupCall.GroupCallInstruction;
 import com.vsxin.terminalpad.instruction.groupCall.SendGroupCallListener;
 import com.vsxin.terminalpad.js.TerminalPadJs;
+import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.presenter.MainMapPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMainMapView;
+import com.vsxin.terminalpad.mvp.entity.MemberInfoBean;
 import com.vsxin.terminalpad.mvp.ui.fragment.LayerMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.LiveFragment;
+import com.vsxin.terminalpad.mvp.ui.fragment.LiveFragment2;
+import com.vsxin.terminalpad.mvp.ui.fragment.MemberInfoFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.NoticeFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.SmallMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.VsxFragment;
@@ -125,7 +131,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     public static final int GET_UNKNOWN_APP_SOURCES = 1236;
 //    public static final int REQUEST_CODE_SCAN = 1237;
 
-    private Handler mHandler = new Handler(Looper.getMainLooper()){
+    private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == HANDLER_GROUP_TIME) {
@@ -163,16 +169,12 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 //        groupCallInstruction = new GroupCallInstruction(this);
 //        groupCallInstruction.bindReceiveHandler();
 
-        iv_load_web.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                reloadWebView();
-            }
-        });
+        iv_load_web.setOnClickListener(view -> reloadWebView());
     }
 
-    private void reloadWebView(){
+    private void reloadWebView() {
 //        web_map.reload(); //刷新
+        MemberInfoFragment.startMemberInfoFragment(this, null, MemberTypeEnum.PHONE);
     }
 
     /**
@@ -200,7 +202,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                     //地图加载完成后，显示所有图层
                     getPresenter().defaultLoadAllLayer();
                     getLogger().info("web_map===加载完成");
-                    ToastUtil.showToast(MainMapActivity.this,"地图加载完成");
+                    ToastUtil.showToast(MainMapActivity.this, "地图加载完成");
                 }
             }
 
@@ -216,25 +218,25 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                getLogger().info("shouldOverrideUrlLoading=====request.getUrl()="+url.toString());
+                getLogger().info("shouldOverrideUrlLoading=====request.getUrl()=" + url.toString());
                 return super.shouldOverrideUrlLoading(view, url);
             }
 
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-                getLogger().info("shouldInterceptRequest=====request.getUrl()="+url.toString());
+                getLogger().info("shouldInterceptRequest=====request.getUrl()=" + url.toString());
                 return super.shouldInterceptRequest(view, url);
             }
 
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                getLogger().info("shouldInterceptRequest=====request.getUrl()="+request.getUrl().toString());
+                getLogger().info("shouldInterceptRequest=====request.getUrl()=" + request.getUrl().toString());
                 return super.shouldInterceptRequest(view, request);
             }
 
             @Override
-            public void onPageFinished(WebView view, String url){
+            public void onPageFinished(WebView view, String url) {
                 //web_map.loadUrl(url);
             }
         });
@@ -244,7 +246,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         String memberId = HandleIdUtil.handleId(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
         Long memberUniqueno = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
         int depId = MyTerminalFactory.getSDK().getParam(Params.DEP_ID, 0);
-        String format = String.format("no=%s&code=%s&dept_id=%s", "88"+memberId, memberUniqueno, depId);
+        String format = String.format("no=%s&code=%s&dept_id=%s", "88" + memberId, memberUniqueno, depId);
         getLogger().info("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
         //web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
         web_map.loadUrl("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
@@ -254,7 +256,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     private void inflaterFragment() {
         SmallMapFragment smallMapFragment = new SmallMapFragment();
         NoticeFragment noticeFragment = new NoticeFragment();
-        LiveFragment liveFragment = new LiveFragment();
+        LiveFragment2 liveFragment = new LiveFragment2();
         LayerMapFragment layerMapFragment = new LayerMapFragment();
         VsxFragment vsxFragment = new VsxFragment();
 
@@ -300,41 +302,41 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     private void judgePermission() {
 
         //6.0以下判断相机权限
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M  ){
-            if(!SystemUtils.cameraIsCanUse()){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            if (!SystemUtils.cameraIsCanUse()) {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CheckMyPermission.REQUEST_CAMERA);
             }
-        }else {
-            if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.RECORD_AUDIO)){
-                if(CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)){
-                    if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
+        } else {
+            if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.RECORD_AUDIO)) {
+                if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                    if (!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.CAMERA)) {
                         CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
                     }
                     //                    else {
                     //                        CheckMyPermission.permissionPrompt(this,Manifest.permission.WRITE_EXTERNAL_STORAGE);
                     //                    }
-                }else {
+                } else {
                     CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
                 }
-            }else {
+            } else {
                 //如果权限被拒绝，申请下一个权限
-                if(onRecordAudioDenied){
-                    if(CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)){
-                        if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
+                if (onRecordAudioDenied) {
+                    if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                        if (!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.CAMERA)) {
                             CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
                         }
-                    }else {
-                        if(onLocationDenied){
-                            if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
-                                if(!onCameraDenied){
+                    } else {
+                        if (onLocationDenied) {
+                            if (!CheckMyPermission.selfPermissionGranted(this, Manifest.permission.CAMERA)) {
+                                if (!onCameraDenied) {
                                     CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
                                 }
                             }
-                        }else {
+                        } else {
                             CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
                         }
                     }
-                }else{
+                } else {
                     CheckMyPermission.permissionPrompt(this, Manifest.permission.RECORD_AUDIO);
                 }
             }
@@ -378,7 +380,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                 onRecordAudioDenied = true;
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     judgePermission();
-                }else {
+                } else {
                     permissionDenied(requestCode);
                 }
                 break;
@@ -386,7 +388,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                 onCameraDenied = true;
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     judgePermission();
-                }else {
+                } else {
                     permissionDenied(requestCode);
                 }
                 break;
@@ -394,12 +396,12 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                 onLocationDenied = true;
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     judgePermission();
-                }else {
+                } else {
                     permissionDenied(requestCode);
                 }
                 break;
             case REQUEST_INSTALL_PACKAGES_CODE:
-                if(grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED){
+                if (grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED) {
                     Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
                     startActivityForResult(intent, GET_UNKNOWN_APP_SOURCES);
                 }
@@ -409,12 +411,12 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         }
     }
 
-    private void permissionDenied(int requestCode){
-        if(requestCode == CheckMyPermission.REQUEST_RECORD_AUDIO){
+    private void permissionDenied(int requestCode) {
+        if (requestCode == CheckMyPermission.REQUEST_RECORD_AUDIO) {
             ToastUtil.showToast(this, getString(R.string.text_audio_frequency_is_not_open_audio_is_not_used));
-        }else if(requestCode ==CheckMyPermission.REQUEST_CAMERA){
+        } else if (requestCode == CheckMyPermission.REQUEST_CAMERA) {
             ToastUtil.showToast(this, getString(R.string.text_camera_not_open_audio_is_not_used));
-        }else if(requestCode ==CheckMyPermission.REQUEST_LOCATION){
+        } else if (requestCode == CheckMyPermission.REQUEST_LOCATION) {
             ToastUtil.showToast(this, getString(R.string.text_location_not_open_locat_is_not_used));
         }
         //        judgePermission();
@@ -448,10 +450,10 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 //                        ToastUtil.showToast(this, this.getString(R.string.text_network_connection_abnormal_please_check_the_network));
 //                    }
 //            });
-            if(PadApplication.getPadApplication().isPttPress){
+            if (PadApplication.getPadApplication().isPttPress) {
                 PadApplication.getPadApplication().isPttPress = false;
                 pttUpDoThing();
-            }else{
+            } else {
                 PadApplication.getPadApplication().isPttPress = true;
                 pttDownDoThing();
             }
@@ -888,7 +890,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
             if (currentCallMode == CallMode.GENERAL_CALL_MODE) {
                 mHandler.post(() -> {
                     if (PadApplication.getPadApplication().getGroupSpeakState() == GroupCallSpeakState.GRANTING
-                            ||PadApplication.getPadApplication().getGroupSpeakState() == GroupCallSpeakState.WAITING) {
+                            || PadApplication.getPadApplication().getGroupSpeakState() == GroupCallSpeakState.WAITING) {
                         change2Waiting();
                     } else if (PadApplication.getPadApplication().getGroupSpeakState() == GroupCallSpeakState.GRANTED) {
                         //什么都不用做
@@ -992,8 +994,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
         @Override
         public void handler(boolean show) {
-            getLogger().info("ReceiveUpdateMainFrgamentPTTButtonHandler : "+show);
-                mHandler.post(() -> rl_group_call.setVisibility(show?View.VISIBLE:View.GONE));
+            getLogger().info("ReceiveUpdateMainFrgamentPTTButtonHandler : " + show);
+            mHandler.post(() -> rl_group_call.setVisibility(show ? View.VISIBLE : View.GONE));
         }
     };
 
@@ -1044,7 +1046,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         }
     }
 
-    public void exit(){
+    public void exit() {
         // 判断是否点了一次后退
         if (PadApplication.getPadApplication().getIndividualState() != IndividualCallState.SPEAKING) {
             // 在2秒之内点击第二次

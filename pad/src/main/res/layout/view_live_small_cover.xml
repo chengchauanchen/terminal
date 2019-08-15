@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rl_live_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/ll_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="30px"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_phone_layer" />
+
+        <TextView
+            android:id="@+id/tv_member_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5px"
+            android:text="赵强"
+            android:textColor="@color/white"
+            android:textSize="27px" />
+
+        <TextView
+            android:id="@+id/tv_member_no"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5px"
+            android:text="771245"
+            android:textColor="@color/white"
+            android:textSize="27px" />
+
+        <TextView
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20px"
+            android:text="00:12:25"
+            android:textColor="@color/white"
+            android:textSize="27px" />
+
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:id="@+id/ll_group_call_member"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ll_title"
+        android:background="@drawable/live_member_goup_call_shape"
+        android:gravity="center_vertical"
+        android:paddingLeft="30px"
+        android:paddingTop="10px"
+        android:paddingRight="30px"
+        android:paddingBottom="10px">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_phone_layer" />
+
+        <TextView
+            android:id="@+id/tv_group_call_member"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5px"
+            android:text="赵强"
+            android:textColor="@color/white"
+            android:textSize="27px" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_phone_layer" />
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="30px">
+
+        <ImageView
+            android:id="@+id/iv_group_call"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:src="@mipmap/ic_max_screen" />
+
+        <ImageView
+            android:id="@+id/iv_share_live"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="55px"
+            android:src="@mipmap/ic_share_live" />
+
+        <ImageView
+            android:id="@+id/iv_full_screen"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="55px"
+            android:src="@mipmap/ic_max_screen" />
+
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_break_live"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:src="@mipmap/ic_break_live" />
+</RelativeLayout>

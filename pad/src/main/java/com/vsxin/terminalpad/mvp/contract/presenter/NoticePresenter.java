@@ -257,58 +257,58 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
     }
 
     public void registReceiveHandler() {
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallIncommingHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
-
-        //主动发起 个呼
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCurrentGroupIndividualCallHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);
-        //别人邀请我上报视频
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveNobodyRequestVideoLiveHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerLiveTimeoutHandler);
-        //邀请我观看
-        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
-
-        //主动请求他人上报
-        MyTerminalFactory.getSDK().registReceiveHandler(receiverRequestVideoHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseStartLiveHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerLiveTimeoutHandler2);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberNotLivingHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receivePullLivingHandler);//正在观看
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveStartPullLiveHandler);//请求他人上报
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveStopPullLiveHandler);//主动结束观看上报
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallIncommingHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
+//
+//        //主动发起 个呼
+//        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCurrentGroupIndividualCallHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);
+//        //别人邀请我上报视频
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveNobodyRequestVideoLiveHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerLiveTimeoutHandler);
+//        //邀请我观看
+//        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
+//
+//        //主动请求他人上报
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiverRequestVideoHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseStartLiveHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerLiveTimeoutHandler2);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberNotLivingHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
+//        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receivePullLivingHandler);//正在观看
+//        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveStartPullLiveHandler);//请求他人上报
+        //OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveStopPullLiveHandler);//主动结束观看上报
 
     }    public void unRegistReceiveHandler() {
         //被动接收 个呼
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallIncommingHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
-
-        //主动发起 个呼
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveCurrentGroupIndividualCallHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartIndividualCallHandler);
-
-        //别人邀请我上报视频
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNobodyRequestVideoLiveHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerLiveTimeoutHandler);
-        //邀请我观看
-        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveNotifyDataMessageHandler);
-
-        //主动请求他人上报
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiverRequestVideoHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseStartLiveHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerLiveTimeoutHandler2);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberNotLivingHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receivePullLivingHandler);
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveStartPullLiveHandler);//请求他人上报
-        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveStopPullLiveHandler);//主动结束观看上报
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallIncommingHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
+//
+//        //主动发起 个呼
+//        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveCurrentGroupIndividualCallHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartIndividualCallHandler);
+//
+//        //别人邀请我上报视频
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingIncommingHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNobodyRequestVideoLiveHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerLiveTimeoutHandler);
+//        //邀请我观看
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveNotifyDataMessageHandler);
+//
+//        //主动请求他人上报
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiverRequestVideoHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseStartLiveHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerLiveTimeoutHandler2);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberNotLivingHandler);
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
+//        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receivePullLivingHandler);
+//        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveStartPullLiveHandler);//请求他人上报
+        //OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveStopPullLiveHandler);//主动结束观看上报
     }
 
     /**
@@ -345,13 +345,16 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
      * 接收/拒绝
      **/
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId, emergencyType) -> {
-//        NoticeBean notice = new NoticeBean();
-//        notice.setNoticeType(NoticeBean.LIVE);
-//        notice.setMemberName(mainMemberName);
-//        notice.setMemberId(mainMemberId);
-//        notice.setEmergencyType(emergencyType);
-//        noticeBeans.add(notice);
-//        getView().notifyDataSetChanged(noticeBeans);
+        NoticeBean notice = new NoticeBean();
+        notice.setNoticeType(NoticeTypeEnum.LIVE);
+        notice.setInOrOut(NoticeInOrOutEnum.IN);
+        notice.setInLive(NoticeInLiveEnum.LIVE_IN_INVITE);
+        notice.setMemberName(mainMemberName);
+        notice.setMemberId(mainMemberId);
+        notice.setForce(emergencyType);//是否强制上报
+        notice.setStartTime(TimeUtil.getCurrentTime());
+        noticeBeans.add(notice);
+        getView().notifyDataSetChanged(noticeBeans);
 
         if (emergencyType) {//强制上报图像
             //如果在组呼或者听组呼时  就停止
@@ -716,17 +719,17 @@ public class NoticePresenter extends RefreshPresenter<NoticeBean, INoticeView> {
         getView().notifyDataSetChanged(noticeBeans);
     };
 
-    private ReceiveStopPullLiveHandler receiveStopPullLiveHandler = ()->{
-        NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
-        if (noticeBean.getNoticeType() == NoticeTypeEnum.LIVE) {//是否是直播
-            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//打出去
-                noticeBean.setOutLive(NoticeOutLiveEnum.LIVE_OUT_END);//直播结束
-            } else {//被动接收
-                noticeBean.setInLive(NoticeInLiveEnum.LIVE_IN_END);//直播结束
-            }
-        }
-        noticeBean.setStopTime(TimeUtil.getCurrentTime());
-        //刷新
-        getView().notifyDataSetChanged(noticeBeans);
-    };
+//    private ReceiveStopPullLiveHandler receiveStopPullLiveHandler = ()->{
+//        NoticeBean noticeBean = noticeBeans.get(noticeBeans.size() - 1);//取最后一个
+//        if (noticeBean.getNoticeType() == NoticeTypeEnum.LIVE) {//是否是直播
+//            if (noticeBean.getInOrOut() == NoticeInOrOutEnum.OUT) {//打出去
+//                noticeBean.setOutLive(NoticeOutLiveEnum.LIVE_OUT_END);//直播结束
+//            } else {//被动接收
+//                noticeBean.setInLive(NoticeInLiveEnum.LIVE_IN_END);//直播结束
+//            }
+//        }
+//        noticeBean.setStopTime(TimeUtil.getCurrentTime());
+//        //刷新
+//        getView().notifyDataSetChanged(noticeBeans);
+//    };
 }

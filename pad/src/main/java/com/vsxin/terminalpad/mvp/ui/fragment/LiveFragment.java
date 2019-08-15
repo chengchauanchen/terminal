@@ -41,6 +41,11 @@ public class LiveFragment extends MvpFragment<ILiveView, LivePresenter> implemen
     private WindowManager windowManager;
     private MediaStream mMediaStream;
 
+    private static int PULL_LIVE = 1;//拉取视频
+    private static int PUSH_LIVE = 2;//上报视频
+
+    private static int LIVE_TYPE=0;
+
 
     @Override
     protected int getLayoutResID() {
@@ -70,16 +75,24 @@ public class LiveFragment extends MvpFragment<ILiveView, LivePresenter> implemen
 
     @Override
     public void startPush() {
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                getPresenter().startPush(sv_live);
-            }
-        });
+//        getActivity().runOnUiThread(new Runnable() {
+//            @Override
+//            public void run() {
+//                getPresenter().startPush(sv_live);
+//            }
+//        });
+        LIVE_TYPE=PUSH_LIVE;
+        if(sv_live!=null && sv_live.getSurfaceTexture()!=null){
+            getPresenter().startPush(sv_live.getSurfaceTexture());
+        }else{
+            isShowLiveView(true);
+        }
     }
 
     @Override
     public void startPull() {
+        LIVE_TYPE=PULL_LIVE;
+
         if(sv_live!=null && sv_live.getSurfaceTexture()!=null){
             getPresenter().startPull(sv_live.getSurfaceTexture());
         }else{
@@ -89,6 +102,7 @@ public class LiveFragment extends MvpFragment<ILiveView, LivePresenter> implemen
 
     @Override
     public void startGB28121Pull() {
+        LIVE_TYPE=PULL_LIVE;
         if(sv_live!=null && sv_live.getSurfaceTexture()!=null){
             getPresenter().startPullGB28121(sv_live.getSurfaceTexture());
         }else{
@@ -133,10 +147,14 @@ public class LiveFragment extends MvpFragment<ILiveView, LivePresenter> implemen
             getLogger().info("onSurfaceTextureAvailable----->" + surface);
             //TODO 要注意拉流 和 推流 这逻辑还不一样哦 这里只写拉流得逻辑
 
-            if (getPresenter().isGB28181Live()) {
-                getPresenter().startPullGB28121(surface);
-            } else {
-                getPresenter().startPull(surface);
+            if(LIVE_TYPE==PULL_LIVE){
+                if (getPresenter().isGB28181Live()) {
+                    getPresenter().startPullGB28121(surface);
+                } else {
+                    getPresenter().startPull(surface);
+                }
+            }else if (LIVE_TYPE==PUSH_LIVE){
+                getPresenter().startPush(surface);
             }
         }
 

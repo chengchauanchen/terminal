@@ -89,41 +89,27 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
             bindMemberInfo(memberInfo);
         }
 
-        iv_close.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                closeMemberInfoFragment(getActivity());
-            }
-        });
+        iv_close.setOnClickListener(v -> closeMemberInfoFragment(getActivity()));
 
         //发起个呼
-        iv_individual_call.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //手台个呼
-                if(memberTypeEnum!=null && memberTypeEnum==MemberTypeEnum.HAND){
-                    getPresenter().startIndividualCall("72020850", TerminalMemberType.TERMINAL_PDT);
-                }else{
-                    ToastUtil.showToast(getContext(),"暂不支持该设备个呼");
-                }
+        iv_individual_call.setOnClickListener(v -> {
+            //手台个呼
+            if(memberTypeEnum!=null && memberTypeEnum==MemberTypeEnum.HAND){
+                getPresenter().startIndividualCall("72020850", TerminalMemberType.TERMINAL_PDT);
+            }else{
+                ToastUtil.showToast(getContext(),"暂不支持该设备个呼");
             }
         });
 
         //上报视频
-        iv_push_video.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //pushVideo();
-                pullVideo();
-            }
+        iv_push_video.setOnClickListener(v -> {
+            //pushVideo();
+            pullVideo();
         });
 
         //会话界面
-        iv_message.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //pullVideo();
-            }
+        iv_message.setOnClickListener(v -> {
+            //pullVideo();
         });
     }
 
