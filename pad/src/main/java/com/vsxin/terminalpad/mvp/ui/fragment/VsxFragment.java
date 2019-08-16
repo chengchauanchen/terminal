@@ -27,12 +27,12 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
     @BindView(R.id.btn_contects_page)
     RadioButton btn_contects_page;
 
-    @BindView(R.id.btn_mine_page)
-    RadioButton btn_mine_page;
+//    @BindView(R.id.btn_mine_page)
+//    RadioButton btn_mine_page;
 
     private MessageListFragment messageListFragment;
     private ContactsFragment contactsFragment;
-    private MeFragment meFragment;
+//    private MeFragment meFragment;
 
 
     @Override
@@ -66,12 +66,12 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
                 switchFragment(1);//通信录
             }
         });
-        btn_mine_page.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switchFragment(2);//我
-            }
-        });
+//        btn_mine_page.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                switchFragment(2);//我
+//            }
+//        });
     }
 
 
@@ -80,18 +80,18 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
             case 0:
                 btn_message_page.setChecked(true);
                 btn_contects_page.setChecked(false);
-                btn_mine_page.setChecked(false);
+//                btn_mine_page.setChecked(false);
                 break;
             case 1:
                 btn_message_page.setChecked(false);
                 btn_contects_page.setChecked(true);
-                btn_mine_page.setChecked(false);
+//                btn_mine_page.setChecked(false);
                 break;
-            case 2:
-                btn_message_page.setChecked(false);
-                btn_contects_page.setChecked(false);
-                btn_mine_page.setChecked(true);
-                break;
+//            case 2:
+//                btn_message_page.setChecked(false);
+//                btn_contects_page.setChecked(false);
+//                btn_mine_page.setChecked(true);
+//                break;
             default:
                 break;
         }
@@ -119,14 +119,14 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
                     transaction.show(contactsFragment);
                 }
                 break;
-            case 2:
-                if (meFragment == null) {
-                    meFragment = new MeFragment();
-                    transaction.add(R.id.tab_content, meFragment, FragmentTagConstants.ME);
-                } else {
-                    transaction.show(meFragment);
-                }
-                break;
+//            case 2:
+//                if (meFragment == null) {
+//                    meFragment = new MeFragment();
+//                    transaction.add(R.id.tab_content, meFragment, FragmentTagConstants.ME);
+//                } else {
+//                    transaction.show(meFragment);
+//                }
+//                break;
             default:
                 break;
 
@@ -141,9 +141,9 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
         if (contactsFragment != null) {
             transaction.hide(contactsFragment);
         }
-        if (meFragment != null) {
-            transaction.hide(meFragment);
-        }
+//        if (meFragment != null) {
+//            transaction.hide(meFragment);
+//        }
     }
 
     @Override

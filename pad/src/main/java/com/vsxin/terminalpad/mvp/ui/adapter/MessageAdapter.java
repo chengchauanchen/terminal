@@ -10,7 +10,6 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -56,6 +55,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -157,6 +157,15 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
         inflater = activity.getLayoutInflater();
     }
 
+    public void refreshPersonContactsAdapter(int mposition,List<TerminalMessage> terminalMessageList, boolean isPlaying, boolean isSameItem) {
+        this.mposition = mposition;
+        this.datas = terminalMessageList;
+        this.isPlaying = isPlaying;
+        this.isSameItem = isSameItem;
+        Collections.sort(terminalMessageList);
+        notifyDataSetChanged();
+    }
+
 
     public void setIsGroup(boolean isGroup) {
         this.isGroupChat = isGroup;
@@ -171,13 +180,15 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
     }
 
     private void setText(TextView textView, String content) {
-        if (textView != null)
+        if (textView != null) {
             textView.setText(content);
+        }
     }
 
     private void setViewVisibility(View view, int visiable) {
-        if (view != null)
+        if (view != null) {
             view.setVisibility(visiable);
+        }
     }
 
     private void setProgress(ProgressBar progressBar, int progress) {
@@ -187,8 +198,9 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
     }
 
     private void setViewChecked(CheckBox view, boolean isChecked) {
-        if (view != null)
+        if (view != null) {
             view.setChecked(isChecked);
+        }
     }
 
 
@@ -629,34 +641,34 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
 
     private void setListener(final int viewType, final ChatViewHolder holder, final TerminalMessage terminalMessage, final int position) {
         //长按消息条目
-        holder.reBubble.setOnLongClickListener(v -> {
-
-            if (terminalMessage.messageType == MessageType.AFFICHE.getCode() ||
-                    terminalMessage.messageType == MessageType.CALL_RECORD.getCode()||
-                    terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
-                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
-                    terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() ||
-                    terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode() ||
-                    terminalMessage.messageType == MessageType.MULTI_PATH_VIDEO_PUSH.getCode() ||
-                    terminalMessage.messageType == MessageType.VIDEO_ENTRANCE.getCode()){
-                logger.info("不能转发和撤回");
-                return false;
-            }
-            if (!isEnable){
-                return false;
-            }
-            if(upload){
-                ToastUtil.showToast(activity,activity.getString(R.string.text_in_upload_can_not_forward));
-                return false;
-            }
-
-//            new TranspondDialog(activity, terminalMessage).showView();
-            if (!terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID)){
-                terminalMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
-            }
-            transponMessage = (TerminalMessage) terminalMessage.clone();
-            return false;
-        });
+//        holder.reBubble.setOnLongClickListener(v -> {
+//
+//            if (terminalMessage.messageType == MessageType.AFFICHE.getCode() ||
+//                    terminalMessage.messageType == MessageType.CALL_RECORD.getCode()||
+//                    terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
+//                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
+//                    terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() ||
+//                    terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode() ||
+//                    terminalMessage.messageType == MessageType.MULTI_PATH_VIDEO_PUSH.getCode() ||
+//                    terminalMessage.messageType == MessageType.VIDEO_ENTRANCE.getCode()){
+//                logger.info("不能转发和撤回");
+//                return false;
+//            }
+//            if (!isEnable){
+//                return false;
+//            }
+//            if(upload){
+//                ToastUtil.showToast(activity,activity.getString(R.string.text_in_upload_can_not_forward));
+//                return false;
+//            }
+//
+////            new TranspondDialog(activity, terminalMessage).showView();
+//            if (!terminalMessage.messageBody.containsKey(JsonParam.TOKEN_ID)){
+//                terminalMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
+//            }
+//            transponMessage = (TerminalMessage) terminalMessage.clone();
+//            return false;
+//        });
         //个呼单独处理
         if(terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode()){
             holder.llCallTempt.setOnClickListener(new View.OnClickListener() {//点击消息条目
@@ -678,8 +690,9 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
             holder.llCallListener.setOnClickListener(new View.OnClickListener() {//点击消息条目
                 @Override
                 public void onClick(View v) {
-                    if (!isEnable)
+                    if (!isEnable) {
                         return;
+                    }
                     long currentTime = Calendar.getInstance().getTimeInMillis();
 
                     if (currentTime - lastClickTime > MIN_CLICK_DELAY_TIME) {//防止频繁点击操作<1秒
@@ -692,8 +705,9 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
             });
         }else{
             holder.reBubble.setOnClickListener(v -> {
-                if (!isEnable)
+                if (!isEnable) {
                     return;
+                }
                 long currentTime = Calendar.getInstance().getTimeInMillis();
 
                 if (currentTime - lastClickTime > MIN_CLICK_DELAY_TIME) {//防止频繁点击操作<1秒
@@ -742,8 +756,9 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
         /**  点击失败按钮重新发送  **/
         if (!isReceiver(terminalMessage) && holder.ivMsgStatus != null) {
             holder.ivMsgStatus.setOnClickListener(v -> {
-                if (!isEnable)
+                if (!isEnable) {
                     return;
+                }
                 int messageType = terminalMessage.messageType;
                 terminalMessage.resultCode = -1;
                 setViewVisibility(holder.ivMsgStatus, View.GONE);
@@ -918,8 +933,9 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
         }
 
         if (terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode()
-                || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode())
+                || terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
             return;
+        }
         /**  消息是否发送失败 **/
         if (!isReceiver(terminalMessage)) {//发送方
             if (terminalMessage.resultCode != 0) {
@@ -1355,8 +1371,9 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
                     timeStr = "0"+minutes + ":" + "0"+sec ;
                 }
             }
-        } else
+        } else {
             timeStr = +sec + "秒";
+        }
 
         return timeStr;
     }
@@ -1373,8 +1390,9 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
             MyTerminalFactory.getSDK().download(terminalMessage, true);
         }else {
             String content = FileUtil.getStringFromFile(file);
-            if (TextUtils.isEmpty(content))
+            if (TextUtils.isEmpty(content)) {
                 content = activity.getString(R.string.text_get_no_content);
+            }
             setText(holder.tvContent, content);
         }
     }

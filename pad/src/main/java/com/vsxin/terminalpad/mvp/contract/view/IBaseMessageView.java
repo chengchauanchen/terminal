@@ -6,6 +6,8 @@ import com.ixiaoma.xiaomabus.architecture.mvp.refresh.IRefreshView;
 
 import java.util.List;
 
+import cn.vsx.hamster.terminalsdk.model.Account;
+import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 
 /**
@@ -17,14 +19,22 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
  */
 public interface IBaseMessageView extends IRefreshView<TerminalMessage>{
     void notifyDataSetChanged(List<TerminalMessage> terminalMessages);
+    void notifyDataSetChanged();
+    void notifyItemChanged(int position);
 
     void setListSelection(int position);
+
+    void setSmoothScrollToPosition(int position);
 
     void stopReFreshing();
 
     boolean isGroup();
 
     int getUserId();
+
+    void downloadProgress(float percent, TerminalMessage terminalMessage);
+
+    void downloadFinish(TerminalMessage terminalMessage, boolean success);
 
     void notifyItemRangeInserted(int startPosition, int endPosition);
 
@@ -33,4 +43,22 @@ public interface IBaseMessageView extends IRefreshView<TerminalMessage>{
     Context getContext();
 
     void scrollMyListViewToBottom();
+
+    void showProgressDialog();
+
+    void dismissProgressDialog();
+
+    void showMsg(String msg);
+    void showMsg(int resouce);
+
+    void chooseDevicesDialog(int type, Account account);
+
+    void callPhone(String phone);
+
+    void goToVoIpActivity(Member member);
+
+    void refreshPersonContactsAdapter(int mposition, List<TerminalMessage> terminalMessageList, boolean isPlaying, boolean isSameItem);
+
+
+
 }

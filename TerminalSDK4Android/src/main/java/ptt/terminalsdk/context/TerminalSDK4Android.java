@@ -592,37 +592,43 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	};
 
 	/**得到文字记录的存储位置*/
-	public String getWordRecordDirectory(){
+	@Override
+    public String getWordRecordDirectory(){
 		return Environment.getExternalStorageDirectory()
 				+ File.separator + application.getApplicationInfo().loadLabel(application.getPackageManager()) + File.separator + "wordRecord"
 				+ File.separator;
 	}
 	/**得到图片记录的存储位置*/
-	public String getPhotoRecordDirectory(){
+	@Override
+    public String getPhotoRecordDirectory(){
 		return Environment.getExternalStorageDirectory()
 				+ File.separator + application.getApplicationInfo().loadLabel(application.getPackageManager()) + File.separator + "photoRecord"
 				+ File.separator;
 	}
 	/**得到录音记录的存储位置*/
-	public String getAudioRecordDirectory(){
+	@Override
+    public String getAudioRecordDirectory(){
 		return Environment.getExternalStorageDirectory()
                 + File.separator + application.getApplicationInfo().loadLabel(application.getPackageManager()) + File.separator + "audioRecord"
                 + File.separator;
 	}
 	/**得到视频记录的存储位置*/
-	public String getVideoRecordDirectory(){
+	@Override
+    public String getVideoRecordDirectory(){
 		return Environment.getExternalStorageDirectory()
 				+ File.separator + application.getApplicationInfo().loadLabel(application.getPackageManager()) + File.separator + "videoRecord"
 				+ File.separator;
 	}
 	/**得到文件的存储位置*/
-	public String getFileRecordDirectory() {
+	@Override
+    public String getFileRecordDirectory() {
 		return Environment.getExternalStorageDirectory()
 				+ File.separator + application.getApplicationInfo().loadLabel(application.getPackageManager())+ File.separator + "file"
 				+ File.separator;
 	}
 	/**得到日志的存储位置*/
-	public String getLogDirectory() {
+	@Override
+    public String getLogDirectory() {
 		return Environment.getExternalStorageDirectory()
 					+ File.separator + application.getApplicationInfo().loadLabel(application.getPackageManager())+ File.separator + "logs"
 					+ File.separator;
@@ -651,26 +657,31 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 
 	/**得到存放录制视频和照片的文件目录*/
-	public String getBITRecordesDirectoty(int code){
+	@Override
+    public String getBITRecordesDirectoty(int code){
 		return getBITDirectoryByCode(code) + File.separator + "Android/data/" + application.getPackageName()+ File.separator;
 	}
 
 	/**得到存放录制视频文件的目录*/
-	public String getBITVideoRecordesDirectoty(int code){
+	@Override
+    public String getBITVideoRecordesDirectoty(int code){
 		return getBITDirectoryByCode(code) + File.separator + "Android/data/" + application.getPackageName() + "/VideoRecord"+ File.separator;
 	}
 
 	/**得到存放照片文件的目录*/
-	public String getBITPhotoRecordedDirectoty(int code){
+	@Override
+    public String getBITPhotoRecordedDirectoty(int code){
 		return getBITDirectoryByCode(code) + File.separator + "Android/data/" + application.getPackageName() + "/PhotoRecord"+ File.separator;
 	}
 
 	/**得到存放录音文件的目录*/
-	public String getBITAudioRecordedDirectoty(int code){
+	@Override
+    public String getBITAudioRecordedDirectoty(int code){
 		return getBITDirectoryByCode(code) + File.separator + "Android/data/" + application.getPackageName() + "/AudioRecord"+ File.separator;
 	}
 	/**判断外部存储可用*/
-	public boolean checkeExternalStorageIsAvailable(int code) {
+	@Override
+    public boolean checkeExternalStorageIsAvailable(int code) {
 		if(code == BitStarFileDirectory.USB.getCode()){
 			return Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState());
 		}else if(code == BitStarFileDirectory.SDCARD.getCode()){
@@ -680,7 +691,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		return false;
 	}
 	/**获取外部存储可用空间的大小*/
-	public long getExternalUsableSize(int code) {
+	@Override
+    public long getExternalUsableSize(int code) {
 		String sdcardDir = null;
 		if(code == BitStarFileDirectory.USB.getCode()){
 			if(checkeExternalStorageIsAvailable(code)){
@@ -858,6 +870,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		return wakeLock;
 	}
 
+	@Override
 	public boolean hasNetwork() {
 	    ConnectivityManager cm = (ConnectivityManager) application.getSystemService(Context.CONNECTIVITY_SERVICE);
 	    if(cm == null){
@@ -999,16 +1012,19 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (progressBar != null)
+                if (progressBar != null) {
 					progressBar.setVisibility(View.GONE);
-                if (textView != null)
+				}
+                if (textView != null) {
 					textView.setVisibility(View.GONE);
+				}
             }
         }, 2000);
 	}
 
 
 	private SQLiteDBManager sqliteDBManager;
+	@Override
 	public SQLiteDBManager getSQLiteDBManager() {
 		if (sqliteDBManager == null){
 			sqliteDBManager = SQLiteDBManager.getSQLiteDBManager(application);
@@ -1098,7 +1114,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private ServerConnectionEstablishedHandler serverConnectionEstablishedHandler = new ServerConnectionEstablishedHandler() {
 		@Override
 		public void handler(boolean connected) {
-			logger.info("***********UDPClientBase**************connected = "+connected);
+			logger.info("***********ClientBase**************connected = "+connected);
 			Established = connected;
 			notifyReceiveHandler(ReceiveServerConnectionEstablishedHandler.class, connected);
 		}

@@ -8,7 +8,8 @@
     <LinearLayout
         android:id="@+id/rl_topbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
+        android:minHeight="87px"
         android:gravity="center_vertical">
     
         <ImageView
@@ -45,9 +46,9 @@
 
         <ImageView
             android:id="@+id/iv_call"
-            android:layout_width="@dimen/dp_38"
-            android:layout_height="@dimen/dp_38"
-            android:padding="@dimen/dp_5"
+            android:layout_width="46px"
+            android:layout_height="46px"
+            android:padding="5px"
             android:layout_alignParentRight="true"
             android:src="@drawable/individual_ic_mobile"
             android:layout_centerVertical="true"
@@ -55,9 +56,9 @@
 
         <ImageView
             android:id="@+id/individual_news_phone"
-            android:layout_width="@dimen/dp_38"
-            android:layout_height="@dimen/dp_38"
-            android:padding="@dimen/dp_5"
+            android:layout_width="46px"
+            android:layout_height="46px"
+            android:padding="5px"
             android:layout_alignParentRight="true"
             android:src="@drawable/phone"
             android:layout_centerVertical="true"
@@ -65,9 +66,9 @@
 
         <ImageView
             android:id="@+id/individual_news_info"
-            android:layout_width="@dimen/dp_38"
-            android:layout_height="@dimen/dp_38"
-            android:padding="@dimen/dp_5"
+            android:layout_width="46px"
+            android:layout_height="46px"
+            android:padding="5px"
             android:layout_alignParentRight="true"
             android:src="@drawable/individual_info"
             android:layout_centerVertical="true"

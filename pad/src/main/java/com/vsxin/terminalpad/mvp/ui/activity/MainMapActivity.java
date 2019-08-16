@@ -14,10 +14,8 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -33,19 +31,15 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpActivity;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.instruction.groupCall.GroupCallInstruction;
-import com.vsxin.terminalpad.instruction.groupCall.SendGroupCallListener;
 import com.vsxin.terminalpad.js.TerminalPadJs;
 import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.presenter.MainMapPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMainMapView;
-import com.vsxin.terminalpad.mvp.entity.MemberInfoBean;
 import com.vsxin.terminalpad.mvp.ui.fragment.LayerMapFragment;
-import com.vsxin.terminalpad.mvp.ui.fragment.LiveFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.LiveFragment2;
 import com.vsxin.terminalpad.mvp.ui.fragment.MemberInfoFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.NoticeFragment;
@@ -248,8 +242,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         int depId = MyTerminalFactory.getSDK().getParam(Params.DEP_ID, 0);
         String format = String.format("no=%s&code=%s&dept_id=%s", "88" + memberId, memberUniqueno, depId);
         getLogger().info("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
-        //web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
-        web_map.loadUrl("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
+        web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
+//        web_map.loadUrl("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
     }
 
 

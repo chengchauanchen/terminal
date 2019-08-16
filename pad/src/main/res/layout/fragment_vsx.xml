@@ -26,6 +26,8 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:minHeight="118dp"
+        android:paddingRight="50px"
+        android:paddingLeft="50px"
         android:orientation="horizontal">
 
         <RadioButton
@@ -68,7 +70,8 @@
             android:paddingTop="5dp"
             android:text="我"
             android:textColor="@drawable/select_bottom_tab_message_text_color"
-            android:textSize="20sp" />
+            android:textSize="20sp"
+            android:visibility="gone"/>
 
     </LinearLayout>
 

@@ -10,10 +10,9 @@
     <LinearLayout
         android:id="@+id/rl_topbar"
         android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
-        android:layout_marginTop="10px"
-        android:layout_marginBottom="10px"
+        android:minHeight="87px"
         >
         <ImageView
             android:id="@+id/news_bar_return"
@@ -48,19 +47,19 @@
             
             <ImageView
                 android:id="@+id/group_live_history"
-                android:layout_width="40px"
-                android:layout_height="40px"
+                android:layout_width="46px"
+                android:layout_height="46px"
                 android:layout_marginRight="12px"
-                android:src="@drawable/group_live_history"
-                android:padding="5px"/>
+                android:padding="5px"
+                android:src="@drawable/group_live_history" />
             
             <ImageView
                 android:id="@+id/group_call_activity_member_info"
-                android:layout_width="40px"
-                android:layout_height="40px"
+                android:layout_width="46px"
+                android:layout_height="46px"
                 android:layout_marginRight="12px"
-                android:src="@drawable/group_member"
-                android:padding="5px"/>
+                android:padding="5px"
+                android:src="@drawable/group_member" />
         </LinearLayout>
         
     </LinearLayout>

@@ -47,32 +47,44 @@ android {
     }
 
     productFlavors {
-        common {
-//            buildConfigField "String" ,"apk_type","common"
-        }
-        policeTest {
-//            buildConfigField "String", "apk_type","policeTest"
-        }
-        policeStore {
-//            buildConfigField "String", "apk_type","policeStore"
-        }
-        xiangYang {
-//            buildConfigField "String" ,"apk_type","common"
-        }
-        xiangYangPoliceStore {
-//            buildConfigField "String", "apk_type","policeStore"
-        }
-        tejing{
-        }
+        common {}
+        policeStore {}
+        policeStoreOut {}
+        xiangYang {}
+        xiangYangPoliceStore {}
+        teJing {}
+        chuTianYun {}
+        jiaXing {}
     }
     productFlavors.all {
         flavor -> flavor.manifestPlaceholders = [apk_type: name]
     }
+    //版本比较多时，自定义导出的APK名称，不同的渠道编出的APK的文件名应该是不一样的
+    //Android插件3.0迁移指南所示：
+    //用all()而不是each()
+    //如果您只更改文件名（这是您的情况），请使用outputFileName而不是output.outputFile
+    applicationVariants.all { variant ->
+        variant.outputs.all() { output ->
+            def flavor = variant.productFlavors[0]
+            def fileName = "pad_${variant.flavorName}_${signTime()}_${variant.versionName}_${variant.versionCode}.apk"
+            /*//默认打包方式，打包到app的子目录下
+            outputFileName = fileName*/
+            //修改打包路径，工程apkpackage文件夹下
+            //也可以在打包时手动选择对应目录
+            def des = output.packageApplication.outputDirectory.toPath().relativize(rootDir.toPath()).toFile()
+            outputFileName = new File("$des/apkpackage", fileName)
+        }
+    }
+
     //用于支持lambda表达式
     compileOptions {
         targetCompatibility 1.8
         sourceCompatibility 1.8
     }
+}
+
+def signTime() {
+    return new Date().format("MM-dd")
 }
 
 dependencies {

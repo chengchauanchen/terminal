@@ -22,9 +22,10 @@
             android:textSize="27px" />
 
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="46px"
+            android:layout_height="46px"
             android:layout_alignParentRight="true"
+            android:padding="5px"
             android:src="@mipmap/add_icon" />
     </LinearLayout>
 
