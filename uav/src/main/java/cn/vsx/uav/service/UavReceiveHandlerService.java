@@ -11,11 +11,17 @@ import java.util.Map;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MountType;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.uav.activity.UavPushActivity;
 import cn.vsx.uav.utils.AirCraftUtil;
+import cn.vsx.util.StateMachine.IState;
+import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.service.ReceiveHandlerService;
+import cn.vsx.vc.utils.Constants;
 import dji.common.flightcontroller.ConnectionFailSafeBehavior;
 import dji.sdk.battery.Battery;
 import dji.sdk.products.Aircraft;
@@ -59,6 +65,9 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
                     setConnectionFailBehavior();
                     myHandler.postDelayed(() -> checkBattery(aircraft),2000);
                     setUploadTime();
+                    //校准
+                    AirCraftUtil.calibratCompass();
+                    AirCraftUtil.setFileListener();
                     //无人机连上时自动位置
                     myHandler.sendEmptyMessageDelayed(UPLOAD_UAV_LOCATION,uploadTime);
                     //无人机连上时自动上报
@@ -196,5 +205,30 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
      */
     private void setUploadTime() {
         uploadTime = 10*1000;
+    }
+
+    @Override
+    protected void onVideoLiveComming(String mainMemberName, int mainMemberId, boolean emergencyType){
+        if(emergencyType){
+            //强制上报图像
+            //如果在组呼或者听组呼时  就停止
+            Map<TerminalState, IState<?>> currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
+            if(currentStateMap.containsKey(TerminalState.GROUP_CALL_LISTENING)||currentStateMap.containsKey(TerminalState.GROUP_CALL_SPEAKING)){
+                TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
+            }
+            myHandler.post(() -> PromptManager.getInstance().startReportByNotity());
+            MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
+            //自动打开上报
+            Intent intent = new Intent(getApplicationContext(),UavPushActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }else{
+            Intent intent = new Intent();
+            intent.putExtra(Constants.MEMBER_NAME, mainMemberName);
+            intent.putExtra(Constants.MEMBER_ID, mainMemberId);
+            intent.putExtra(Constants.THEME,"");
+            intent.setClass(UavReceiveHandlerService.this, UavReceiveLiveCommingService.class);
+            startService(intent);
+        }
     }
 }

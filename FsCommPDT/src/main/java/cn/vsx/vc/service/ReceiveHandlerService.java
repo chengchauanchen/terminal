@@ -558,6 +558,10 @@ public class ReceiveHandlerService extends Service{
      **/
     @SuppressWarnings("unchecked")
     private ReceiveNotifyLivingIncommingHandler receiveNotifyLivingIncommingHandler = (mainMemberName, mainMemberId, emergencyType) -> myHandler.post(() -> {
+        onVideoLiveComming(mainMemberName, mainMemberId, emergencyType);
+    });
+
+    protected void onVideoLiveComming(String mainMemberName, int mainMemberId, boolean emergencyType){
         if(!checkFloatPermission()){
             startSetting();
             return;
@@ -577,7 +581,7 @@ public class ReceiveHandlerService extends Service{
 
             }else{
                 //外置摄像头没连接，弹窗选择是否用执法记录仪
-                intent.setClass(ReceiveHandlerService.this,SwitchCameraService.class);
+                intent.setClass(ReceiveHandlerService.this, SwitchCameraService.class);
                 intent.putExtra(Constants.CAMERA_TYPE,Constants.RECODER_CAMERA);
                 intent.putExtra(Constants.TYPE,Constants.RECEIVE_PUSH);
                 startService(intent);
@@ -601,7 +605,7 @@ public class ReceiveHandlerService extends Service{
                 startService(intent);
             }
         }
-    });
+    }
 
     /**
      * 获取到观看GB28181和OutGB28181的通知

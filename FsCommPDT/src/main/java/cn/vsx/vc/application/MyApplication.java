@@ -6,6 +6,8 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.support.multidex.MultiDex;
 import android.util.Log;
@@ -214,6 +216,16 @@ public class MyApplication extends Application {
 		return null;
 	}
 
+	public String getVersionName(){
+		String localVersion = "";
+		try{
+			PackageInfo packageInfo = getApplicationContext().getPackageManager().getPackageInfo(getPackageName(), 0);
+			localVersion = packageInfo.versionName;
+		}catch(PackageManager.NameNotFoundException e){
+			e.printStackTrace();
+		}
+		return localVersion;
+	}
 
 	protected void killAllProcess() {
 		ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);

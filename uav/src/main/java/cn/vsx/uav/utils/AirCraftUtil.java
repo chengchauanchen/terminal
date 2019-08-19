@@ -9,16 +9,19 @@ import org.apache.log4j.Logger;
 import java.io.File;
 import java.util.List;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.uav.receiveHandler.ReceiveAircraftFilesHandler;
+import cn.vsx.uav.receiveHandler.ReceiveCalibrationStateCallbackHandler;
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
-import dji.common.flightcontroller.CompassCalibrationState;
 import dji.common.flightcontroller.LocationCoordinate3D;
 import dji.common.util.CommonCallbacks;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.Camera;
 import dji.sdk.flightcontroller.Compass;
 import dji.sdk.gimbal.Gimbal;
-import dji.sdk.media.DownloadListener;
+import dji.sdk.media.MediaFile;
+import dji.sdk.media.MediaManager;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -116,6 +119,14 @@ public class AirCraftUtil{
         return longitude !=0.0 && !Double.isNaN(longitude) && longitude >=- 180 && longitude <= 180;
     }
 
+    public static MediaManager getMediaManager(){
+        if(getAircraftCamera() != null){
+            return getAircraftCamera().getMediaManager();
+        }else {
+            return null;
+        }
+    }
+
     /**
      * @return 指南针是否需要校准
      */
@@ -139,28 +150,11 @@ public class AirCraftUtil{
         if(aircraft !=null){
             Compass compass = aircraft.getFlightController().getCompass();
             boolean hasError = compass.hasError();
+            logger.info("指南针是否需要校准:"+hasError);
             if(hasError){
                 //校准回调
                 compass.setCalibrationStateCallback(compassCalibrationState -> {
-                    if(compassCalibrationState == CompassCalibrationState.HORIZONTAL){
-                        //指南针水平校准。用户应水平握住飞机并将其旋转360度。
-                        ToastUtils.showShort("水平握住飞机并将其旋转360度");
-                    }else if(compassCalibrationState == CompassCalibrationState.VERTICAL){
-                        //指南针垂直校准。使用者应垂直握住飞机，使机头指向地面，并将飞机旋转360度。
-                        ToastUtils.showShort("垂直握住飞机，使机头指向地面，并将飞机旋转360度");
-                    }else if(compassCalibrationState == CompassCalibrationState.SUCCESSFUL){
-                        //指南针校准成功
-                        ToastUtils.showShort("指南针校准成功");
-                    }else if(compassCalibrationState == CompassCalibrationState.FAILED){
-                        //指南针校准失败。确保指南针附近没有磁铁或金属物体，然后重试。
-                        ToastUtils.showShort("指南针校准失败。确保指南针附近没有磁铁或金属物体，然后重试");
-                    }else if(compassCalibrationState == CompassCalibrationState.NOT_CALIBRATING){
-                        //正常状态。指南针不在校准中。
-                        ToastUtils.showShort("正常状态。指南针不在校准中");
-                    }else if(compassCalibrationState == CompassCalibrationState.UNKNOWN){
-                        //指南针校准状态未知。
-                        ToastUtils.showShort("指南针校准状态未知");
-                    }
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCalibrationStateCallbackHandler.class,compassCalibrationState);
                 });
                 compass.startCalibration(djiError -> {
                     if(djiError == null){
@@ -193,29 +187,23 @@ public class AirCraftUtil{
         gimbal.setStateCallback(gimbalState -> {
             int calibrationProgress = gimbalState.getCalibrationProgress();
             logger.info("calibrationProgress:"+calibrationProgress);
-            boolean calibrationSuccessful = gimbalState.isCalibrationSuccessful();
-            if(calibrationSuccessful){
-                ToastUtils.showShort("云台校准成功");
-            }else {
-                ToastUtils.showShort("云台校准失败");
+            if(calibrationProgress == 100){
+                boolean calibrationSuccessful = gimbalState.isCalibrationSuccessful();
+                if(calibrationSuccessful){
+                    ToastUtils.showShort("云台校准成功");
+                }else {
+                    ToastUtils.showShort("云台校准失败");
+                }
             }
         });
         gimbal.startCalibration(djiError -> {
             if(djiError == null){
-                ToastUtils.showShort("云台开始校准");
+                ToastUtils.showShort("开始云台校准");
             }else {
                 ToastUtils.showShort("云台校准失败");
                 logger.error("云台校准失败:"+djiError);
             }
         });
-    }
-
-    public static void init(){
-        Camera camera = getAircraftCamera();
-        if(camera != null){
-            setStorageStateCallBack(camera);
-            setMediaFileCallback(camera);
-        }
     }
 
     public static void startShootPhoto(){
@@ -271,46 +259,23 @@ public class AirCraftUtil{
         }
     }
 
+    public static void setFileListener(){
+        Camera camera = getAircraftCamera();
+        if(camera != null){
+            setStorageStateCallBack(camera);
+//            setMediaFileCallback(camera);
+        }
+    }
 
     private static void startShootPhoto(Camera camera){
         camera.startShootPhoto(djiError -> {
             if(djiError != null){
                 ToastUtils.showShort(djiError.getDescription());
-                logger.error("拍摄照片失败:"+djiError);
+                logger.error("拍摄照片失败:"+djiError.getDescription());
             }
         });
     }
 
-    private static void setMediaFileCallback(Camera camera){
-        camera.setMediaFileCallback(mediaFile -> {
-            File dir = new File(MyTerminalFactory.getSDK().getUAVFileDirectoty());
-            String fileName = mediaFile.getFileName();
-            mediaFile.fetchFileData(dir, fileName, new DownloadListener<String>(){
-                @Override
-                public void onStart(){
-                }
-
-                @Override
-                public void onRateUpdate(long l, long l1, long l2){
-                }
-
-                @Override
-                public void onProgress(long l, long l1){
-                }
-
-                @Override
-                public void onSuccess(String s){
-                    logger.info("文件下载成功:"+s);
-                    //上传到服务器
-                }
-
-                @Override
-                public void onFailure(DJIError djiError){
-                    logger.info("文件下载失败:"+djiError);
-                }
-            });
-        });
-    }
 
     private static void setStorageStateCallBack(Camera camera){
         camera.setStorageStateCallBack(storageState -> {
@@ -326,16 +291,29 @@ public class AirCraftUtil{
     }
 
 
-    /**
-     * //设置单张拍照模式
-     */
-    private static void setSingleShootPhotoMode(Camera camera){
-        if(camera !=null){
-            camera.setShootPhotoMode(SettingsDefinitions.ShootPhotoMode.SINGLE, djiError -> {
-                if(null != djiError){
-                    logger.info("设置单张拍照模式失败:"+djiError);
+
+    public static void getFileList(){
+        if(getMediaManager() != null){
+            getMediaManager().refreshFileListOfStorageLocation(SettingsDefinitions.StorageLocation.SDCARD, new CommonCallbacks.CompletionCallback() {
+                @Override
+                public void onResult(DJIError djiError) {
+                    if (djiError == null){
+                        List<MediaFile> medias = getMediaManager().getSDCardFileListSnapshot();
+                        for(MediaFile media : medias){
+                            fetchFileData(media);
+                        }
+                        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveAircraftFilesHandler.class,medias);
+                    }else {
+                        ToastUtils.showShort("获取文件失败："+djiError.getDescription());
+                    }
                 }
             });
         }
+    }
+
+    public static void fetchFileData(MediaFile mediaFile){
+        File dir = new File(MyTerminalFactory.getSDK().getUAVFileDirectoty());
+        String fileName = mediaFile.getFileName();
+        mediaFile.fetchFileData(dir, fileName, new DownloadHandler<String>());
     }
 }

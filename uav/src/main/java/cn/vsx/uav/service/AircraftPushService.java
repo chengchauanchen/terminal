@@ -307,11 +307,11 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
     private View.OnClickListener onMenuClickListener = v -> {
         if(cameraSettingAdvancedPanel.getVisibility() == View.VISIBLE){
             cameraSettingAdvancedPanel.setVisibility(View.GONE);
-            iv_menu.setImageResource(R.drawable.camera_menu_uncheck);
+            iv_menu.setImageResource(R.drawable.camera_menu_uncheck1);
         }else{
             if(cameraSettingExposurePanel.getVisibility() == View.VISIBLE){
                 cameraSettingExposurePanel.setVisibility(View.GONE);
-                iv_menu.setImageResource(R.drawable.camera_menu_uncheck);
+                iv_menu.setImageResource(R.drawable.camera_menu_uncheck1);
                 iv_setting.setImageResource(R.drawable.camera_setting_uncheck);
             }else{
                 initCameraSettingView();
@@ -368,7 +368,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         }else{
             if(cameraSettingAdvancedPanel.getVisibility() == View.VISIBLE){
                 cameraSettingAdvancedPanel.setVisibility(View.GONE);
-                iv_menu.setImageResource(R.drawable.camera_menu_uncheck);
+                iv_menu.setImageResource(R.drawable.camera_menu_uncheck1);
                 iv_setting.setImageResource(R.drawable.camera_setting_uncheck);
             }else{
                 cameraSettingExposurePanel.setVisibility(View.VISIBLE);
@@ -616,7 +616,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         mTvAircraftLiveSpeakingId = rootView.findViewById(R.id.tv_aircraft_live_speakingId);
         mIvAircraftLiveRetract = rootView.findViewById(R.id.iv_aircraft_live_retract);
         mLvAircraftLiveMemberInfo = rootView.findViewById(R.id.lv_aircraft_live_member_info);
-        mLlAircraftLiveInviteMember = rootView.findViewById(R.id.ll_aircraft_live_invite_member);
+//        mLlAircraftLiveInviteMember = rootView.findViewById(R.id.ll_aircraft_live_invite_member);
         mIvLiveAddmember = rootView.findViewById(R.id.iv_live_addmember);
         iv_menu = rootView.findViewById(R.id.iv_menu);
 //        iv_setting = rootView.findViewById(R.id.iv_setting);
@@ -943,6 +943,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
         if(null != airCraftMediaStream && airCraftMediaStream.isStreaming()){
             logger.info(TAG+"结束无人机推流");
             airCraftMediaStream.stopStream();
+            airCraftMediaStream.stopRecord();
         }
         TerminalFactory.getSDK().getLiveManager().ceaseLiving();
     }

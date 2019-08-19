@@ -556,6 +556,11 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		Intent onlineService = new Intent(application, OnlineService.class);
 		Intent bleService = new Intent(application, BluetoothLeService.class);
 		if (application != null) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				application.startForegroundService(onlineService);
+			} else {
+				application.startService(onlineService);
+			}
 			application.startService(onlineService);
 			isBindOnlineService = application.bindService(onlineService,onlineServiceConn,BIND_AUTO_CREATE);
 			application.startService(bleService);

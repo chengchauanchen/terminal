@@ -593,4 +593,6 @@
     <string name="main_group_message_cannot_delete">主组消息不能删除</string>
     <string name="please_select_delete_member">请选择要删除的成员</string>
     <string name="dji_sdk_regist_fail">大疆SDK注册失败</string>
+    <string name="click_close_voice">点击关闭语音</string>
+    <string name="uav_disconnect">无人机未连接</string>
 </resources>

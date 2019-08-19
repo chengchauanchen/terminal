@@ -35,6 +35,7 @@ public class MyDataManager extends DataManager{
 
     private Logger logger = Logger.getLogger(getClass());
     private static List<GroupBean> depAllGroup = new ArrayList<>();
+    private boolean uavVoiceOpen = true;
 
     @Override
     protected void setUrl(JSONObject resultJsonObject){
@@ -95,5 +96,15 @@ public class MyDataManager extends DataManager{
         logger.info("在账号改变的时候，删除相关的数据:");
         //删除之前账号的当前组
         TerminalFactory.getSDK().putParam(Params.CURRENT_GROUP_ID, 0);
+    }
+
+    @Override
+    public boolean isUavVoiceOpen(){
+        return uavVoiceOpen;
+    }
+
+    @Override
+    public void setUavVoiceOpen(boolean uavVoiceOpen){
+        this.uavVoiceOpen = uavVoiceOpen;
     }
 }

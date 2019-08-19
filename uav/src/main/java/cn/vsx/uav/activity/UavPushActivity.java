@@ -2,6 +2,7 @@ package cn.vsx.uav.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.PointF;
 import android.graphics.SurfaceTexture;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.AdaptScreenUtils;
 import com.blankj.utilcode.util.ScreenUtils;
 import com.blankj.utilcode.util.ToastUtils;
 
@@ -50,9 +52,9 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.uav.R;
 import cn.vsx.uav.UavApplication;
+import cn.vsx.uav.receiveHandler.ReceiveCalibrationStateCallbackHandler;
 import cn.vsx.uav.service.PushService;
 import cn.vsx.uav.utils.AirCraftUtil;
-import cn.vsx.uav.utils.ScreenSwitchUtils;
 import cn.vsx.uav.view.CustomWebView;
 import cn.vsx.vc.activity.BaseActivity;
 import cn.vsx.vc.adapter.MemberEnterAdapter;
@@ -60,9 +62,12 @@ import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.service.InviteMemberService;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
+import cn.vsx.vc.utils.ScreenState;
+import cn.vsx.vc.utils.ScreenSwitchUtils;
 import cn.vsx.vc.utils.ToastUtil;
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
+import dji.common.flightcontroller.CompassCalibrationState;
 import dji.common.mission.waypoint.Waypoint;
 import dji.common.mission.waypoint.WaypointMission;
 import dji.common.mission.waypoint.WaypointMissionDownloadEvent;
@@ -81,7 +86,9 @@ import dji.sdk.mission.waypoint.WaypointMissionOperatorListener;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.ux.panel.CameraSettingAdvancedPanel;
+import dji.ux.panel.CameraSettingExposurePanel;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.DialogUtils;
 
 public class UavPushActivity extends BaseActivity{
 
@@ -92,8 +99,6 @@ public class UavPushActivity extends BaseActivity{
     private TextView mTvAircraftLiveSpeakingId;
     private ImageView mIvAircraftLiveRetract;
     private ListView mLvAircraftLiveMemberInfo;
-    private LinearLayout mLlAircraftLiveInviteMember;
-    private ImageView mIvLiveAddmember;
     private RelativeLayout mAircraftLive;
 
     private RelativeLayout mAircraftRoot;
@@ -116,6 +121,8 @@ public class UavPushActivity extends BaseActivity{
     private Button btnHomeLocation;
     private Button btn_auto_flight;
     protected LinearLayout mLlNoNetwork;
+    private ImageView iv_menu;
+    private ImageView iv_setting;
 
     private Runnable hideFocusView = this::hideFocusView;
     private FlightController mFlightController;
@@ -126,7 +133,7 @@ public class UavPushActivity extends BaseActivity{
     private WaypointMissionFinishedAction mFinishedAction = WaypointMissionFinishedAction.NO_ACTION;
     //飞机的朝向
     private WaypointMissionHeadingMode mHeadingMode = WaypointMissionHeadingMode.AUTO;
-
+    private CameraSettingExposurePanel cameraSettingExposurePanel;
     //所有的巡航点
     private List<Waypoint> waypointList = new ArrayList<>();
     //默认飞行高度和速度
@@ -140,6 +147,14 @@ public class UavPushActivity extends BaseActivity{
     private long textureAvailableTime;
     private PushService pushService;
     private boolean uavConnected = true;
+    private ImageView mIvPush;
+    private ImageView mIvPreview;
+    private ImageView mIvTakePhoto;
+    private Button mBtnVoice;
+    private Button mBtnStopPush;
+    private LinearLayout mLlCloseVoice;
+    private ImageView mIvCloseVoice;
+    private View mVDrakBackgroupd;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -152,10 +167,17 @@ public class UavPushActivity extends BaseActivity{
             ToastUtils.showShort("无人机没有连接，不能上报");
             finish();
         }
+        ScreenSwitchUtils.init(this).setPortraitEnable(false);
+        ScreenSwitchUtils.init(this).setCurrentState(ScreenState.SCREEN_ORIENTATION_LANDSCAPE);
         super.onCreate(savedInstanceState);
-
     }
 
+    @Override
+    public Resources getResources(){
+        return AdaptScreenUtils.adaptHeight(super.getResources(),1200);
+    }
+
+    @Override
     protected void setOritation() {
         this.oritationPort = false;
     }
@@ -167,7 +189,7 @@ public class UavPushActivity extends BaseActivity{
 
     @Override
     public void onBackPressed(){
-        super.onBackPressed();
+//        super.onBackPressed();
 //        finish();
     }
 
@@ -182,12 +204,10 @@ public class UavPushActivity extends BaseActivity{
         mTvAircraftLiveSpeakingId = findViewById(R.id.tv_aircraft_live_speakingId);
         mIvAircraftLiveRetract = findViewById(R.id.iv_aircraft_live_retract);
         mLvAircraftLiveMemberInfo = findViewById(R.id.lv_aircraft_live_member_info);
-        mLlAircraftLiveInviteMember = findViewById(R.id.ll_aircraft_live_invite_member);
-        mIvLiveAddmember = findViewById(R.id.iv_live_addmember);
-//        iv_menu = findViewById(R.id.iv_menu);
-//        iv_setting = findViewById(R.id.iv_setting);
+        iv_menu = findViewById(R.id.iv_menu);
+        iv_setting = findViewById(R.id.iv_setting);
         cameraSettingAdvancedPanel = findViewById(R.id.cameraSettingAdvancedPanel);
-//        cameraSettingExposurePanel = findViewById(R.id.cameraSettingExposurePanel);
+        cameraSettingExposurePanel = findViewById(R.id.cameraSettingExposurePanel);
         mAircraftRoot = findViewById(R.id.aircraft_root);
         btnCheckObstacle = findViewById(R.id.btn_check_obstacle);
         btnGoHome = findViewById(R.id.btn_go_home);
@@ -202,17 +222,30 @@ public class UavPushActivity extends BaseActivity{
         btn_auto_flight = findViewById(R.id.btn_auto_flight);
 
         mLlNoNetwork = findViewById(R.id.ll_no_network);
+        mIvPush = findViewById(R.id.iv_push);
+        mIvPreview = findViewById(R.id.iv_preview);
+        mIvTakePhoto = findViewById(R.id.iv_take_photo);
+        mBtnVoice = findViewById(R.id.btn_voice);
+        mBtnStopPush = findViewById(R.id.btn_stop_push);
+        mLlCloseVoice = findViewById(R.id.ll_close_voice);
+        mIvCloseVoice = findViewById(R.id.iv_close_voice);
+        mVDrakBackgroupd = findViewById(R.id.v_drak_backgroupd);
     }
 
     @Override
     public void initListener(){
+        mIvCloseVoice.setOnClickListener(onCloseVoiceClickListener);
+        mBtnStopPush.setOnClickListener(oStopButtonClickListener);
+        mIvTakePhoto.setOnClickListener(onTakePhotoClickListener);
+        mBtnVoice.setOnClickListener(onVoiceButtonClickListener);
+        mIvPreview.setOnClickListener(onPreViewClickListener);
+        mIvPush.setOnClickListener(onInviteMemberClickListener);
         pushService.setVideoFeederListeners();
-        mLlAircraftLiveInviteMember.setOnClickListener(onInviteMemberClickListener);
         mIvAircraftLiveRetract.setOnClickListener(onRetractClickListener);
         mSvAircraftLive.setSurfaceTextureListener(surfaceTextureListener);
         mapAircraftLive.setSurfaceTextureListener(surfaceTextureListener);
-//        iv_menu.setOnClickListener(onMenuClickListener);
-//        iv_setting.setOnClickListener(onSettingClickListener);
+        iv_menu.setOnClickListener(onMenuClickListener);
+        iv_setting.setOnClickListener(onSettingClickListener);
         mSvAircraftLive.setOnTouchListener(surfaceOnTouchListener);
         btnCheckObstacle.setOnClickListener(onObstacleClickListener);
         btnGoHome.setOnClickListener(onGoHomeClickListener);
@@ -236,8 +269,9 @@ public class UavPushActivity extends BaseActivity{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);//通知有人加入或离开
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);//自己发起直播的响应
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveAirCraftStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseMyselfLiveHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveCalibrationStateCallbackHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveAirCraftStatusChangedHandler);
     }
 
     @Override
@@ -254,6 +288,7 @@ public class UavPushActivity extends BaseActivity{
         initGoHomeView();
         initHomeLocationView();
         addListener();
+        TerminalFactory.getSDK().getDataManager().setUavVoiceOpen(true);
         if(MyTerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap().isEmpty()){
             requestStartLive();
         }else{
@@ -263,6 +298,8 @@ public class UavPushActivity extends BaseActivity{
 
     @Override
     public void doOtherDestroy(){
+        pushService.finishVideoLive();
+        AdaptScreenUtils.closeAdapt(getResources());
         removeListener();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveStopUAVPatrolHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUAVPatrolHandler);
@@ -270,9 +307,9 @@ public class UavPushActivity extends BaseActivity{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);//通知有人加入或离开
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);//自己发起直播的响应
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAirCraftStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseMyselfLiveHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAirCraftStatusChangedHandler);
     }
 
     @Override
@@ -411,6 +448,8 @@ public class UavPushActivity extends BaseActivity{
                     }
                 });
             }
+        }else {
+            ToastUtils.showShort(R.string.uav_disconnect);
         }
     }
 
@@ -605,6 +644,37 @@ public class UavPushActivity extends BaseActivity{
         startService(intent);
     };
 
+    private View.OnClickListener onPreViewClickListener = v -> {
+        if(AirCraftUtil.getAircraftInstance() != null){
+            // TODO: 2019/8/16
+            AirCraftUtil.getFileList();
+        }
+    };
+
+    private View.OnClickListener onVoiceButtonClickListener = v -> {
+        if(TerminalFactory.getSDK().getDataManager().isUavVoiceOpen()){
+            mBtnVoice.setBackground(getResources().getDrawable(R.drawable.uav_voice_close));
+            TerminalFactory.getSDK().getDataManager().setUavVoiceOpen(false);
+        }else {
+            mBtnVoice.setBackground(getResources().getDrawable(R.drawable.uav_voice_open));
+            TerminalFactory.getSDK().getDataManager().setUavVoiceOpen(true);
+        }
+    };
+
+    private View.OnClickListener onTakePhotoClickListener = v -> {
+        if(AirCraftUtil.getAircraftInstance() == null){
+            ToastUtils.showShort(R.string.uav_disconnect);
+            return;
+        }
+        AirCraftUtil.startShootPhoto();
+    };
+
+    private View.OnClickListener oStopButtonClickListener = v -> {
+        pushService.finishVideoLive();
+        finish();
+    };
+
+    private View.OnClickListener onCloseVoiceClickListener = v -> mLlCloseVoice.setVisibility(View.GONE);
 
     /**
      * 开启防碰撞
@@ -630,6 +700,22 @@ public class UavPushActivity extends BaseActivity{
     private void hideFocusView(){
         if(focusViewAdd){
             mAircraftRoot.removeView(imageView);
+            focusViewAdd = false;
+        }
+    }
+
+    private void showFocusView(MotionEvent event){
+        if(!focusViewAdd){
+            ViewGroup.MarginLayoutParams margin = new ViewGroup.MarginLayoutParams(imageView.getLayoutParams());
+            margin.leftMargin = (int) event.getX();
+            margin.topMargin = (int) event.getY();
+            RelativeLayout.LayoutParams focusLayoutParams = new RelativeLayout.LayoutParams(margin);
+            focusLayoutParams.height = 100;//设置图片的高度
+            focusLayoutParams.width = 100; //设置图片的宽度
+            imageView.setLayoutParams(focusLayoutParams);
+            imageView.setScaleType(ImageView.ScaleType.FIT_XY);//使图片充满控件大小
+            mAircraftRoot.addView(imageView);
+            focusViewAdd = true;
         }
     }
 
@@ -695,21 +781,6 @@ public class UavPushActivity extends BaseActivity{
 
     }
 
-    private void showFocusView(MotionEvent event){
-        if(!focusViewAdd){
-            ViewGroup.MarginLayoutParams margin = new ViewGroup.MarginLayoutParams(imageView.getLayoutParams());
-            margin.leftMargin = (int) event.getX();
-            margin.topMargin = (int) event.getY();
-            RelativeLayout.LayoutParams focusLayoutParams = new RelativeLayout.LayoutParams(margin);
-            focusLayoutParams.height = 100;//设置图片的高度
-            focusLayoutParams.width = 100; //设置图片的宽度
-            imageView.setLayoutParams(focusLayoutParams);
-            imageView.setScaleType(ImageView.ScaleType.FIT_XY);//使图片充满控件大小
-            mAircraftRoot.addView(imageView);
-            focusViewAdd = true;
-        }
-    }
-
     /**
      * x和y的范围是0-1，屏幕左上角为[0.0,0.0]
      */
@@ -749,7 +820,7 @@ public class UavPushActivity extends BaseActivity{
             Surface surface1 = new Surface(surface);
             pushService.initYuvPlayer();
             pushService.startPush(surfaceWidth, surfaceHeight, surface1);
-
+            pushService.startRecord();
             textureAvailableTime = System.currentTimeMillis();
         }
 
@@ -790,9 +861,54 @@ public class UavPushActivity extends BaseActivity{
         }
     };
 
+    private View.OnClickListener onMenuClickListener = v -> {
+        if(AirCraftUtil.getAircraftInstance() == null){
+            ToastUtils.showShort(R.string.uav_disconnect);
+            return;
+        }
+        if(cameraSettingAdvancedPanel.getVisibility() == View.VISIBLE){
+            cameraSettingAdvancedPanel.setVisibility(View.GONE);
+            iv_menu.setImageResource(R.drawable.camera_menu_uncheck);
+        }else{
+            if(cameraSettingExposurePanel.getVisibility() == View.VISIBLE){
+                cameraSettingExposurePanel.setVisibility(View.GONE);
+                iv_menu.setImageResource(R.drawable.camera_menu_uncheck);
+                iv_setting.setImageResource(R.drawable.camera_setting_uncheck1);
+            }else{
+                initCameraSettingView();
+                cameraSettingAdvancedPanel.setVisibility(View.VISIBLE);
+                iv_menu.setImageResource(R.drawable.camera_menu_checked);
+            }
+        }
+    };
+
+    private View.OnClickListener onSettingClickListener = v -> {
+        if(AirCraftUtil.getAircraftInstance() == null){
+            ToastUtils.showShort(R.string.uav_disconnect);
+            return;
+        }
+        if(cameraSettingExposurePanel.getVisibility() == View.VISIBLE){
+            cameraSettingExposurePanel.setVisibility(View.GONE);
+            iv_setting.setImageResource(R.drawable.camera_setting_uncheck1);
+        }else{
+            if(cameraSettingAdvancedPanel.getVisibility() == View.VISIBLE){
+                cameraSettingAdvancedPanel.setVisibility(View.GONE);
+                iv_menu.setImageResource(R.drawable.camera_menu_uncheck1);
+                iv_setting.setImageResource(R.drawable.camera_setting_uncheck1);
+            }else{
+                cameraSettingExposurePanel.setVisibility(View.VISIBLE);
+                iv_setting.setImageResource(R.drawable.camera_setting_checked);
+            }
+        }
+    };
+
     private View.OnClickListener onObstacleClickListener = v -> {
         Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-        if(aircraft != null && null != aircraft.getFlightController() && null != aircraft.getFlightController().getFlightAssistant()){
+        if(aircraft == null){
+            ToastUtils.showShort(R.string.uav_disconnect);
+            return;
+        }
+        if(null != aircraft.getFlightController() && null != aircraft.getFlightController().getFlightAssistant()){
             aircraft.getFlightController().getFlightAssistant().getCollisionAvoidanceEnabled(new CommonCallbacks.CompletionCallbackWith<Boolean>(){
                 @Override
                 public void onSuccess(Boolean aBoolean){
@@ -817,7 +933,11 @@ public class UavPushActivity extends BaseActivity{
 
     private View.OnClickListener onGoHomeClickListener = v -> {
         Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-        if(aircraft !=null && null != aircraft.getFlightController()){
+        if(aircraft == null){
+            ToastUtils.showShort(R.string.uav_disconnect);
+            return;
+        }
+        if(null != aircraft.getFlightController()){
             if(aircraft.getFlightController().getState().isGoingHome()){
                 cancelGoHome();
             }else{
@@ -826,7 +946,13 @@ public class UavPushActivity extends BaseActivity{
         }
     };
 
-    private View.OnClickListener setHomeLocationListener =  v -> setHomeLocation();
+    private View.OnClickListener setHomeLocationListener =  v -> {
+        if(AirCraftUtil.getAircraftInstance() == null){
+            ToastUtils.showShort(R.string.uav_disconnect);
+            return;
+        }
+        setHomeLocation();
+    };
 
     @SuppressLint("ClickableViewAccessibility")
     public View.OnTouchListener mapOnTouchListener = (v, event) -> {
@@ -948,16 +1074,19 @@ public class UavPushActivity extends BaseActivity{
         myHandler.post(() -> onNetworkChanged(connected));
     };
 
-    private ReceiveAirCraftStatusChangedHandler receiveAirCraftStatusChangedHandler = connected -> {
-        if(!connected){
-            if(uavConnected){
-                myHandler.post(()->{
-                    pushService.finishVideoLive();
-                    finish();
-                });
+    private ReceiveAirCraftStatusChangedHandler receiveAirCraftStatusChangedHandler = new ReceiveAirCraftStatusChangedHandler(){
+        @Override
+        public void handler(boolean connected){
+            if(!connected){
+                mVDrakBackgroupd.setVisibility(View.VISIBLE);
+                mBtnStopPush.setVisibility(View.VISIBLE);
+                mIvTakePhoto.setImageResource(R.drawable.uav_take_photo_disable);
+            }else {
+                mVDrakBackgroupd.setVisibility(View.GONE);
+                mBtnStopPush.setVisibility(View.GONE);
+                mIvTakePhoto.setImageResource(R.drawable.uav_take_photo);
             }
         }
-        uavConnected = connected;
     };
 
     private void onNetworkChanged(boolean connected){
@@ -974,4 +1103,50 @@ public class UavPushActivity extends BaseActivity{
             finish();
         }
     };
+
+    private CompassCalibrationState lastState;
+    private ReceiveCalibrationStateCallbackHandler receiveCalibrationStateCallbackHandler = this::showDialog;
+
+    private boolean checkShowDialog(CompassCalibrationState lastState,CompassCalibrationState currentState){
+        return lastState != currentState;
+    }
+
+    private void showDialog(CompassCalibrationState compassCalibrationState){
+        if(compassCalibrationState == CompassCalibrationState.HORIZONTAL){
+            if(checkShowDialog(lastState,compassCalibrationState)){
+                //指南针水平校准。用户应水平握住飞机并将其旋转360度。
+                myHandler.post(()-> DialogUtils.showDialog(UavPushActivity.this,"水平握住飞机并将其旋转360度"));
+            }
+        }else if(compassCalibrationState == CompassCalibrationState.VERTICAL){
+            if(checkShowDialog(lastState,compassCalibrationState)){
+                //指南针垂直校准。使用者应垂直握住飞机，使机头指向地面，并将飞机旋转360度。
+                myHandler.post(()-> DialogUtils.showDialog(UavPushActivity.this,"垂直握住飞机，使机头指向地面，并将飞机旋转360度"));
+
+            }
+        }else if(compassCalibrationState == CompassCalibrationState.SUCCESSFUL){
+            if(checkShowDialog(lastState,compassCalibrationState)){
+                //指南针校准成功
+                myHandler.post(()->DialogUtils.showDialog(UavPushActivity.this,"指南针校准成功"));
+
+            }
+        }else if(compassCalibrationState == CompassCalibrationState.FAILED){
+            if(checkShowDialog(lastState,compassCalibrationState)){
+                //指南针校准失败。确保指南针附近没有磁铁或金属物体，然后重试
+                myHandler.post(()-> DialogUtils.showDialog(UavPushActivity.this,"指南针校准失败。确保指南针附近没有磁铁或金属物体，然后重试"));
+
+            }
+        }else if(compassCalibrationState == CompassCalibrationState.NOT_CALIBRATING){
+            if(checkShowDialog(lastState,compassCalibrationState)){
+                //正常状态。指南针不在校准中
+                myHandler.post(()-> DialogUtils.showDialog(UavPushActivity.this,"正常状态。指南针不在校准中"));
+
+            }
+        }else if(compassCalibrationState == CompassCalibrationState.UNKNOWN){
+            if(checkShowDialog(lastState,compassCalibrationState)){
+                //指南针校准状态未知
+                myHandler.post(()-> DialogUtils.showDialog(UavPushActivity.this,"指南针校准状态未知"));
+            }
+        }
+        lastState = compassCalibrationState;
+    }
 }

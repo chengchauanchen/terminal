@@ -520,8 +520,8 @@ public class MediaStream {
             if (overlay != null)
                 overlay.release();
             if (mMuxer != null) {
-//                mMuxer.release();
-//                mMuxer = null;
+                mMuxer.release();
+                mMuxer = null;
             }
         } catch (Exception e) {
             logger.info(e.getMessage());
@@ -611,8 +611,8 @@ public class MediaStream {
             mCamera = null;
         }
         if (mMuxer != null) {
-//            mMuxer.release();
-//            mMuxer = null;
+            mMuxer.release();
+            mMuxer = null;
         }
     }
 

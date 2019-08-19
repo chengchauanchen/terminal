@@ -21,10 +21,12 @@ import org.easydarwin.push.EasyPusher;
 import org.easydarwin.push.InitCallback;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExternStorageSizeHandler;
 import cn.vsx.uav.R;
 import cn.vsx.uav.activity.UavPushActivity;
 import cn.vsx.uav.utils.AirCraftUtil;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.service.BaseService;
 import cn.vsx.vc.utils.ToastUtil;
@@ -32,6 +34,7 @@ import cn.vsx.yuv.YuvPlayer;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.VideoFeeder;
 import dji.sdk.sdkmanager.DJISDKManager;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class PushService extends BaseService implements YuvPlayer.YuvDataListener{
 
@@ -80,6 +83,7 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
                 Surface surface1 = new Surface(surface);
                 initYuvPlayer();
                 startPush(surfaceWidth, surfaceHeight, surface1);
+                startRecord();
             }
 
             @Override
@@ -106,6 +110,7 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
 
     @Override
     protected void initListener(){
+        TerminalFactory.getSDK().registReceiveHandler(mReceiveExternStorageSizeHandler);
         mSvLivePop.setOnTouchListener((v, event) -> {
             //触摸点到边界屏幕的距离
             int x = (int) event.getRawX();
@@ -164,6 +169,7 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     @Override
     public void onDestroy(){
         super.onDestroy();
+        TerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);
         if(DJISDKManager.getInstance().getProduct() != null){
             VideoFeeder.getInstance().getPrimaryVideoFeed().removeVideoDataListener(mReceivedVideoDataListener);
         }
@@ -171,8 +177,14 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
 
     public void startPush(int surfaceWidth, int surfaceHeight, Surface surface1){
         yuvPlayer.start(surfaceWidth, surfaceHeight, 16, surface1);
-        if(!airCraftMediaStream.isStreaming()){
+        if(airCraftMediaStream != null && !airCraftMediaStream.isStreaming()){
             airCraftMediaStream.startPreView(1280, 720);
+        }
+    }
+
+    public void startRecord(){
+        if(airCraftMediaStream != null){
+            airCraftMediaStream.startRecord();
         }
     }
 
@@ -221,7 +233,9 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
 
     @Override
     public void onDataRecv(byte[] data, int width, int height){
-        airCraftMediaStream.push(data, width, height);
+        if(airCraftMediaStream != null){
+            airCraftMediaStream.push(data, width, height);
+        }
     }
 
     public void setVideoFeederListeners(){
@@ -318,9 +332,10 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
 
     private void stopAircraftPush(){
         logger.info(TAG+"stopAircraftPush");
-        if(null != airCraftMediaStream && airCraftMediaStream.isStreaming()){
+        if(null != airCraftMediaStream){
             logger.info(TAG+"结束无人机推流");
             airCraftMediaStream.stopStream();
+            airCraftMediaStream.stopRecord();
             airCraftMediaStream = null;
         }
         TerminalFactory.getSDK().getLiveManager().ceaseLiving();
@@ -342,4 +357,23 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
             dialogAdd = false;
         }
     }
+
+    /**
+     *通知存储空间不足
+     */
+    private ReceiveExternStorageSizeHandler mReceiveExternStorageSizeHandler = memorySize -> mHandler.post(() -> {
+        if (memorySize < 100) {
+            ToastUtil.showToast(PushService.this, getString(R.string.toast_tempt_insufficient_storage_space));
+            PromptManager.getInstance().startExternNoStorage();
+            if(airCraftMediaStream != null&& airCraftMediaStream.isRecording()){
+                //停止录像
+                airCraftMediaStream.stopRecord();
+            }
+            //上传没有上传的文件，删除已经上传的文件
+            MyTerminalFactory.getSDK().getFileTransferOperation().externNoStorageOperation();
+        } else if (memorySize < 200){
+            PromptManager.getInstance().startExternStorageNotEnough();
+            ToastUtil.showToast(PushService.this, getString(cn.vsx.vc.R.string.toast_tempt_storage_space_is_in_urgent_need));
+        }
+    });
 }

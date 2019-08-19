@@ -1,4 +1,4 @@
-package cn.vsx.uav.utils;
+package cn.vsx.vc.utils;
 
 import android.app.Activity;
 import android.content.Context;
@@ -28,34 +28,46 @@ public class ScreenSwitchUtils{
     private SensorManager sm;
     private OrientationSensorListener listener;
     private Sensor sensor;
-    private boolean landscape = true;//横屏
+    private ScreenState currentState;
+    private boolean portraitEnable = true;
 
+    @SuppressWarnings("handlerLeak")
     private Handler mHandler = new Handler() {
+        @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case 888:
                     int orientation = msg.arg1;
 //                    Log.d(TAG, "orientation:" + orientation);
                     if (orientation > 45 && orientation < 135) {
-                        if(landscape){
-                            Log.d(TAG, "反向横屏");
-                            mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-                            landscape = false;
+                        if(currentState != ScreenState.SCREEN_ORIENTATION_REVERSE_LANDSCAPE){
+                            Log.d(TAG, "切换成反向横屏");
+                            if(mActivity != null){
+                                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+                            }
+                            currentState = ScreenState.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
                         }
                     } else if (orientation > 135 && orientation < 225) {
 
                     } else if (orientation > 225 && orientation < 315) {
-                        if (!landscape) {
+                        if (currentState != ScreenState.SCREEN_ORIENTATION_LANDSCAPE) {
                             Log.d(TAG, "切换成横屏");
-                            mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                            landscape = true;
+                            if(mActivity != null){
+                                mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                            }
+
+                            currentState = ScreenState.SCREEN_ORIENTATION_LANDSCAPE;
                         }
                     } else if ((orientation > 315 && orientation < 360) || (orientation > 0 && orientation < 45)) {
-//                        if (!isPortrait) {
-//                            Log.d(TAG,"切换成竖屏");
-//                            mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-//                            isPortrait = true;
-//                        }
+                        if(portraitEnable){
+                            if (currentState != ScreenState.SCREEN_ORIENTATION_PORTRAIT) {
+                                Log.d(TAG,"切换成竖屏");
+                                if(mActivity != null){
+                                    mActivity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                                }
+                                currentState = ScreenState.SCREEN_ORIENTATION_PORTRAIT;
+                            }
+                        }
                     }
                     break;
                 default:
@@ -77,6 +89,14 @@ public class ScreenSwitchUtils{
         return mInstance;
     }
 
+    public void setCurrentState(ScreenState screenState){
+        this.currentState = screenState;
+    }
+
+    public void setPortraitEnable(boolean enable){
+        this.portraitEnable = enable;
+    }
+
     private ScreenSwitchUtils(Context context) {
         // 注册重力感应器,监听屏幕旋转
         sm = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
@@ -93,6 +113,7 @@ public class ScreenSwitchUtils{
     /** 停止监听 */
     public void stop() {
         sm.unregisterListener(listener);
+        mHandler.removeCallbacksAndMessages(null);
     }
 
 
@@ -116,9 +137,11 @@ public class ScreenSwitchUtils{
             rotateHandler = handler;
         }
 
+        @Override
         public void onAccuracyChanged(Sensor arg0, int arg1) {
         }
 
+        @Override
         public void onSensorChanged(SensorEvent event) {
             float[] values = event.values;
             int orientation = ORIENTATION_UNKNOWN;

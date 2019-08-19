@@ -148,8 +148,12 @@ public class ReceiveLiveCommingService extends BaseService{
 
     
     private View.OnClickListener acceptOnClickListener = v -> {
+        onAcceptLive();
+    };
+
+    protected void onAcceptLive(){
         if(MyApplication.instance.usbAttached){
-            Intent intent = new Intent(ReceiveLiveCommingService.this,SwitchCameraService.class);
+            Intent intent = new Intent(ReceiveLiveCommingService.this, SwitchCameraService.class);
             intent.putExtra(Constants.TYPE,Constants.RECEIVE_PUSH);
             intent.putExtra(Constants.CAMERA_TYPE,Constants.UVC_CAMERA);
             intent.putExtra(Constants.THEME,"");
@@ -165,7 +169,7 @@ public class ReceiveLiveCommingService extends BaseService{
                 startPhonePushService();
             }
         }
-    };
+    }
 
     private View.OnClickListener refuseOnClickListener = v -> {
         ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.refused));

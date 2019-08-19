@@ -32,6 +32,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -154,9 +155,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
      */
     TimerTask liveTimerTask;
 
-    private boolean onRecordAudioDenied;
-    private boolean onLocationDenied;
-    private boolean onCameraDenied;
+    protected boolean onRecordAudioDenied;
+    protected boolean onLocationDenied;
+    protected boolean onCameraDenied;
 
     /**当提示框自己消失，或者手动点击关闭按钮；未读消息+1；
      * 通知TalkbackFragment消息图标上小气泡的数字+1；*/
@@ -1050,18 +1051,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     @Override
     public void initData() {
         logger.info("NewMainActivity---initData");
-//        if(!SoulPermission.getInstance().checkSpecialPermission(Special.SYSTEM_ALERT)){
-//            Log.e("NewMainActivity", "未开启悬浮窗权限");
-//            myHandler.postDelayed(this::exitApp,2000);
-//            ToastUtil.showToast(NewMainActivity.this, getString(R.string.open_overlay_permisson));
-//            return;
-//        }
-//        if(!FloatWindowManager.getInstance().checkPermission(this)){
-//            Log.e("NewMainActivity", "未开启悬浮窗权限");
-//            myHandler.postDelayed(this::exitApp,2000);
-//            ToastUtil.showToast(NewMainActivity.this, getString(R.string.open_overlay_permisson));
-//            return;
-//        }
         WindowManager windowManager = (WindowManager) getSystemService(Service.WINDOW_SERVICE);
         width = windowManager.getDefaultDisplay().getWidth();
         height = windowManager.getDefaultDisplay().getHeight();
@@ -1106,7 +1095,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
         //不是平台线上包打开自动更新
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-        if(!AuthManagerTwo.POLICESTORE.equals(apkType)){
+        if(!TextUtils.equals(AuthManagerTwo.POLICESTORE,apkType) && !TextUtils.equals(AuthManagerTwo.XIANGYANGPOLICESTORE,apkType)){
             //版本自动更新检测
             if (MyTerminalFactory.getSDK().getParam(Params.IS_AUTO_UPDATE, false) && !MyApplication.instance.isUpdatingAPP) {
                 updateManager = new UpdateManager(NewMainActivity.this);
@@ -1463,7 +1452,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     /**
      * 必须要有录音和相机的权限，APP才能去视频页面
      */
-    private void judgePermission() {
+    protected void judgePermission() {
 
         //6.0以下判断相机权限
         if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M  ){

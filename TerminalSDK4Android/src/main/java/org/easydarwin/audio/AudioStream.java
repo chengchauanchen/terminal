@@ -7,6 +7,7 @@ import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.MediaRecorder;
 import android.os.Process;
+import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.log4j.Logger;
@@ -20,6 +21,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 import cn.vsx.hamster.common.CallMode;
+import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.common.UrlParams;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -62,8 +66,10 @@ public class AudioStream{
     };
     private Thread mWriter;
     private MediaFormat newFormat;
+    private final String type;
 
     public AudioStream() {
+        type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         int i = 0;
@@ -257,7 +263,9 @@ public class AudioStream{
                     Iterator<Pusher> it = p.iterator();
                     while (it.hasNext()){
                         Pusher ps = it.next();
-                        ps.push(mBuffer.array(), 0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000, 0);
+                        if(checkIfPush()){
+                            ps.push(mBuffer.array(), 0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000, 0);
+                        }
                     }
 
                     mMediaCodec.releaseOutputBuffer(index, false);
@@ -276,6 +284,15 @@ public class AudioStream{
                     Log.e(TAG, "Message: " + index);
                 }
             } while (mWriter != null);
+        }
+    }
+
+    private boolean checkIfPush(){
+        logger.info("终端类型:"+type+"是否开启声音："+TerminalFactory.getSDK().getDataManager().isUavVoiceOpen());
+        if(TextUtils.equals(type, TerminalMemberType.TERMINAL_UAV.name())){
+            return TerminalFactory.getSDK().getDataManager().isUavVoiceOpen();
+        }else {
+            return false;
         }
     }
 

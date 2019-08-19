@@ -1,18 +1,20 @@
 package cn.vsx.uav.activity;
 
-import android.app.AlertDialog;
+import android.Manifest;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.uav.R;
 import cn.vsx.uav.UavApplication;
 import cn.vsx.uav.utils.AirCraftUtil;
 import cn.vsx.vc.activity.NewMainActivity;
+import cn.vsx.vc.utils.SystemUtil;
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
 import dji.common.realname.AircraftBindingState;
@@ -26,6 +28,8 @@ import dji.sdk.realname.AppActivationManager;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.useraccount.UserAccountManager;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.tools.DialogUtils;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -49,6 +53,51 @@ public class UavMainActivity extends NewMainActivity{
         logger.info("UavMainActivity---initData");
         startSDKRegistration();
         UavApplication.getApplication().startPushService();
+    }
+
+    //todo 需要申请电话权限
+    @Override
+    protected void judgePermission(){
+        //6.0以下判断相机权限
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M  ){
+            if(!SystemUtil.cameraIsCanUse()){
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CheckMyPermission.REQUEST_CAMERA);
+            }
+        }else {
+            if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.RECORD_AUDIO)){
+                if(CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+                    if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
+                        CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
+                    }
+                    //                    else {
+                    //                        CheckMyPermission.permissionPrompt(this,Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    //                    }
+                }else {
+                    CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
+                }
+            }else {
+                //如果权限被拒绝，申请下一个权限
+                if(onRecordAudioDenied){
+                    if(CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)){
+                        if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
+                            CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
+                        }
+                    }else {
+                        if(onLocationDenied){
+                            if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
+                                if(!onCameraDenied){
+                                    CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
+                                }
+                            }
+                        }else {
+                            CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
+                        }
+                    }
+                }else{
+                    CheckMyPermission.permissionPrompt(this, Manifest.permission.RECORD_AUDIO);
+                }
+            }
+        }
     }
 
     private AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);
@@ -198,14 +247,6 @@ public class UavMainActivity extends NewMainActivity{
     }
 
     private void showDialog(String msg){
-        new AlertDialog.Builder(this)
-                .setTitle(R.string.dji_sdk_regist_fail)
-                .setMessage(msg)
-                .setCancelable(true)
-                .setNegativeButton(R.string.text_sure, (dialog, which) -> {
-
-                })
-                .show();
-
+        DialogUtils.showDialog(this,msg);
     }
 }

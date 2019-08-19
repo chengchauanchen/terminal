@@ -1,14 +1,20 @@
 package org.easydarwin.push;
 
 import android.content.Context;
+import android.content.Intent;
 import android.media.MediaCodecInfo;
 import android.media.MediaCodecList;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import org.apache.log4j.Logger;
 import org.easydarwin.audio.AudioStream;
+import org.easydarwin.easypusher.BackgroundCameraService;
 import org.easydarwin.muxer.EasyMuxer;
 import org.easydarwin.sw.JNIUtil;
 import org.easydarwin.sw.TxtOverlay;
@@ -25,6 +31,9 @@ import java.util.List;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import dagger.Module;
 import dagger.Provides;
+import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
+import ptt.terminalsdk.tools.FileTransgerUtil;
 
 import static android.graphics.ImageFormat.NV21;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420PackedPlanar;
@@ -35,7 +44,7 @@ import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_TI_FormatYUV4
 @Module
 public class AirCraftMediaStream {
     Pusher mEasyPusher;
-    static final String TAG = "MediaStream";
+    static final String TAG = "AirCraftMediaStream";
     int width = 640, height = 480;
     boolean pushStream = false;//是否要推送数据
     private Context mApplicationContext;
@@ -46,12 +55,37 @@ public class AirCraftMediaStream {
     private AudioStream audioStream ;
     public static AirCraftMediaStream.CodecInfo info = new AirCraftMediaStream.CodecInfo();
     public Logger logger = Logger.getLogger(AirCraftMediaStream.class);
-
+    private final HandlerThread mCameraThread;
+    private final Handler mCameraHandler;
+    //录制每个视频片段的时间
+    private static final int VIDEO_RECODE_PER_TIME = 5 * 60 * 1000;
 
     public AirCraftMediaStream(Context context) {
         mApplicationContext = context;
         mEasyPusher = new EasyPusher();
-
+        mCameraThread = new HandlerThread("CAMERA") {
+            @Override
+            public void run() {
+                try {
+                    super.run();
+                } catch (Throwable e) {
+                    logger.debug("mCameraThread---e:" + e.toString());
+                    Intent intent = new Intent(mApplicationContext, BackgroundCameraService.class);
+                    mApplicationContext.stopService(intent);
+                } finally {
+                    logger.info("HandlerThread---执行finally");
+                    stopRecord();
+                    stopStream();
+                }
+            }
+        };
+        mCameraThread.start();
+        mCameraHandler = new Handler(mCameraThread.getLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                super.handleMessage(msg);
+            }
+        };
     }
 
     public static ArrayList<CodecInfo> listEncoders(String mime) {
@@ -146,31 +180,61 @@ public class AirCraftMediaStream {
         return false;
     }
 
+    private String tempFile;
+    private String dataStr;
+    private long millis;
+    private String fileIndex;
 
     public synchronized void startRecord() {
-
-        long millis = PreferenceManager.getDefaultSharedPreferences(mApplicationContext).getInt("record_interval", 300000);
-        mMuxer = new EasyMuxer(new File(recordPath, new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date())).toString(), millis);
-        if (mVC == null || audioStream == null) {
-            throw new IllegalStateException("you need to start preview before startRecord!");
+        if (Thread.currentThread() != mCameraThread) {
+            mCameraHandler.post(() -> startRecord());
+            return;
         }
-        mVC.setMuxer(mMuxer);
-        audioStream.setMuxer(mMuxer);
+        logger.info(TAG + "---startRecord");
+        //检测内存卡的size
+        if (TextUtils.isEmpty(tempFile)) {
+            FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
+            operation.checkExternalUsableSize();
+            dataStr = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+            millis = PreferenceManager.getDefaultSharedPreferences(mApplicationContext).getInt("record_interval", VIDEO_RECODE_PER_TIME);
+            fileIndex = FileTransgerUtil.getRecodeFileIndex(1);
+            String fileName = FileTransgerUtil.getVideoRecodeFileName(dataStr, fileIndex);
+            File videoRecord = new File(MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory()), fileName);
+            if (!videoRecord.exists()) {
+                videoRecord.getParentFile().mkdirs();
+            }
+            tempFile = videoRecord.toString();
+            mMuxer = new EasyMuxer(tempFile, millis);
+            mMuxer.setmContext(mApplicationContext);
+            mMuxer.setDateStr(dataStr, fileIndex);
+
+            if (mVC == null || audioStream == null) {
+                throw new IllegalStateException("you need to start preview before startRecord!");
+            }
+            logger.info(TAG + "---setMuxer");
+            mVC.setMuxer(mMuxer);
+            audioStream.setMuxer(mMuxer);
+        }
     }
 
 
     public synchronized void stopRecord() {
-
+        if (Thread.currentThread() != mCameraThread) {
+            mCameraHandler.post(() -> stopRecord());
+            return;
+        }
         if (mVC == null || audioStream == null) {
             //            nothing
         } else {
             mVC.setMuxer(null);
             audioStream.setMuxer(null);
         }
-        if (mMuxer != null) {
+        MyTerminalFactory.getSDK().renovateVideoRecord(tempFile);
+        if (mMuxer != null){
             mMuxer.release();
         }
         mMuxer = null;
+        tempFile = null;
     }
 
 
@@ -217,8 +281,6 @@ public class AirCraftMediaStream {
         return pushStream;
     }
 
-
-
     public void stopStream() {
         if (audioStream != null) {
             audioStream.removePusher(mEasyPusher);
@@ -250,15 +312,6 @@ public class AirCraftMediaStream {
     public void push(byte[] data, int width, int height){
         this.width = width;
         this.height = height;
-//        if(System.currentTimeMillis() - firstTime <= 10*1000){
-//            try (FileOutputStream fos = new FileOutputStream(path,true)) {
-//                fos.write(data);
-//                //fos.close(); There is no more need for this line since you had created the instance of "fos" inside the try. And this will automatically close the OutputStream
-//            }catch(Exception e){
-//                e.printStackTrace();
-//            }
-//        }
-//        save2file(data, String.format("/sdcard/yuv_%d_%d.yuv", height, width));
 
         if (PreferenceManager.getDefaultSharedPreferences(mApplicationContext).getBoolean("key_enable_video_overlay", false)) {
 //            String txt = String.format("drawtext=fontfile=" + mApplicationContext.getFileStreamPath("SIMYOU.ttf") + ": text='%s%s':x=(w-text_w)/2:y=H-60 :fontcolor=white :box=1:boxcolor=0x00000000@0.3", "EasyPusher", new SimpleDateFormat("yyyy-MM-ddHHmmss").format(new Date()));

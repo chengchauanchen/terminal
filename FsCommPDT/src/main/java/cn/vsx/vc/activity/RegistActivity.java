@@ -983,6 +983,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     private void start() {
+        String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+        logger.info("apkType:"+apkType+"----deviceType:"+deviceType+"----versionName:"+MyApplication.instance.getVersionName());
         //vpn没有启动时先启动VPN
         try{
             if(secVpnService == null){
