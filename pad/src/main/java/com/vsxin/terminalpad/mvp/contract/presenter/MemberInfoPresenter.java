@@ -247,7 +247,7 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
 //                    return;
 //                }
 //                pullVideoForMemberNo(88011075, TerminalMemberType.TERMINAL_PHONE);
-                pullVideoForMemberNo(88021205, TerminalMemberType.TERMINAL_PHONE);
+                pullVideoForMemberNo(88020446, TerminalMemberType.TERMINAL_PHONE);
             } else if (MemberTypeEnum.VIDEO == type) {//ok
                 //执法记录仪
                 pullVideoForMemberNo(77000000, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA);

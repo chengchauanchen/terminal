@@ -40,19 +40,19 @@ public class LivePlayerPresenter extends BasePresenter<ILivePlayerView> {
     /*********************拉流**********************/
 
     protected Handler mHandler = new Handler(Looper.getMainLooper());
+
     /**
      * 播放视频
      */
-    public void startPullLive(SurfaceTexture surface,String rtspUrl) {
+    public void startPullLive(SurfaceTexture surface, String rtspUrl) {
         this.rtspUrl = rtspUrl;
         getView().show(true);
         mHandler.postDelayed(() -> initEasyPlay(surface), 1200);
     }
 
-    public void stopPullLive(){
+    public void stopPullLive() {
         stopBusiness();
         stopPull();
-        getView().show(false);
     }
 
     /**
@@ -72,19 +72,17 @@ public class LivePlayerPresenter extends BasePresenter<ILivePlayerView> {
     }
 
     public void initEasyPlay(SurfaceTexture surface) {
+        getView().getLogger().info("-----initEasyPlay-----");
         if (null == mPullRtspReceiver) {
             mPullRtspReceiver = new LivePlayerPresenter.PullRtspReceiver(new Handler());
         }
         if (null != surface) {//说明没有显示出来
-            getView().getLogger().info("开始播放 rtspUrl=:"+rtspUrl);
-            if(mStreamRender==null){
-                mStreamRender = new EasyRTSPClient(
-                        getContext(),
-                        MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(),
-                        surface,
-                        mPullRtspReceiver);
-            }
-
+            getView().getLogger().info("-----正在播放----- rtspUrl=:" + rtspUrl);
+            mStreamRender = new EasyRTSPClient(
+                    getContext(),
+                    MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(),
+                    surface,
+                    mPullRtspReceiver);
             try {
                 if (!TextUtils.isEmpty(rtspUrl)) {
                     mStreamRender.start(
@@ -92,7 +90,7 @@ public class LivePlayerPresenter extends BasePresenter<ILivePlayerView> {
                             RTSPClient.TRANSTYPE_TCP,
                             RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG,
                             "", "", null);
-                    getView().getLogger().info("正在播放");
+                    getView().getLogger().info("-----正在播放-----");
                 }
             } catch (Exception e) {
                 e.printStackTrace();

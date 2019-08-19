@@ -9,28 +9,4 @@
         android:id="@+id/lp_live_player"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-
-
-    <!--<TextureView-->
-    <!--android:id="@+id/sv_live"-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="match_parent"-->
-    <!--android:layout_centerInParent="true"-->
-    <!--android:visibility="visible"-->
-    <!--android:keepScreenOn="true" />-->
-
-    <ImageView
-        android:id="@+id/iv_break_live"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:src="@mipmap/ic_break_live" />
-
-    <ImageView
-        android:id="@+id/iv_max_screen"
-        android:layout_centerInParent="true"
-        android:layout_alignParentBottom="true"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@mipmap/ic_max_screen"/>
 </RelativeLayout>

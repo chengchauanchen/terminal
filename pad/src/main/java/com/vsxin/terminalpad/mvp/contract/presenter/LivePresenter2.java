@@ -53,6 +53,8 @@ import ptt.terminalsdk.tools.ToastUtil;
 
 public class LivePresenter2 extends BasePresenter<ILiveView2> {
 
+    protected Handler mHandler = new Handler(Looper.getMainLooper());
+
     public LivePresenter2(Context mContext) {
         super(mContext);
     }
@@ -236,37 +238,39 @@ public class LivePresenter2 extends BasePresenter<ILiveView2> {
 
     };
 
+
+
     /**
      * 对方拒绝直播，通知界面关闭响铃页
      **/
-    private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc) -> {
+    private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc)-> mHandler.post(() -> {
         ToastUtil.showToast(getContext(), resultDesc);
         getView().stopPullLive();
-    };
+    });
 
     /**
-     * 超时未回复answer 通知界面关闭
+     * 响应超时
      **/
-    private ReceiveAnswerLiveTimeoutHandler receiveAnswerLiveTimeoutHandler = () -> {
+    private ReceiveAnswerLiveTimeoutHandler receiveAnswerLiveTimeoutHandler = ()-> mHandler.post(() -> {
         ToastUtil.showToast(getContext(), getContext().getString(R.string.other_no_answer));
         getView().stopPullLive();
-    };
+    });
 
     /**
      * 通知直播停止 通知界面关闭视频页
      **/
-    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) ->{
-        ToastUtil.showToast(getContext(), getContext().getString(R.string.push_stoped));
+    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc)-> mHandler.post(() -> {
+        ToastUtil.showToast(getContext(), getContext().getString(R.string.other_no_answer));
         getView().stopPullLive();
-    };
+    });
 
     /**
      * 去观看时，发现没有在直播，关闭界面吧
-     */
-    private ReceiveMemberNotLivingHandler receiveMemberNotLivingHandler = callId -> {
-        ToastUtil.showToast(getContext(), getContext().getString(R.string.push_stoped));
+     **/
+    private ReceiveMemberNotLivingHandler receiveMemberNotLivingHandler = callId-> mHandler.post(() -> {
+        ToastUtil.showToast(getContext(), getContext().getString(R.string.other_no_answer));
         getView().stopPullLive();
-    };
+    });
 
     /**
      * 主动方停止组呼
@@ -287,8 +291,6 @@ public class LivePresenter2 extends BasePresenter<ILiveView2> {
         getView().stopPullLive();
     };
 
-    protected Handler mHandler = new Handler(Looper.getMainLooper());
-
     /**
      * 获取到rtsp地址，开始播放视频
      */
@@ -299,7 +301,10 @@ public class LivePresenter2 extends BasePresenter<ILiveView2> {
         } else {
             getView().getLogger().info("rtspUrl ----> " + rtspUrl);
             PromptManager.getInstance().stopRing();
-            mHandler.postDelayed(() -> getView().startPullLive(rtspUrl), 1200);
+            mHandler.postDelayed(() -> {
+                getView().setMemberInfo(liveMember);//设置成员信息
+                getView().startPullLive(rtspUrl);//播放
+            }, 1200);
         }
     };
 }

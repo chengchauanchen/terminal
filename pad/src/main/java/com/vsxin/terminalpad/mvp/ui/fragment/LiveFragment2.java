@@ -1,6 +1,7 @@
 package com.vsxin.terminalpad.mvp.ui.fragment;
 
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
@@ -8,11 +9,14 @@ import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpFragment;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.presenter.LivePresenter2;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveView2;
+import com.vsxin.terminalpad.mvp.ui.widget.LiveFullScreenCoverView;
 import com.vsxin.terminalpad.mvp.ui.widget.LivePlayer;
+import com.vsxin.terminalpad.mvp.ui.widget.LiveSmallCoverView;
 import com.vsxin.terminalpad.receiveHandler.ReceiveStopPullLiveHandler;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
 
 import butterknife.BindView;
+import cn.vsx.hamster.terminalsdk.model.Member;
 
 
 /**
@@ -27,12 +31,8 @@ public class LiveFragment2 extends MvpFragment<ILiveView2, LivePresenter2> imple
 
     @BindView(R.id.lp_live_player)
     LivePlayer livePlayer;
-
-    @BindView(R.id.iv_break_live)
-    ImageView iv_break_live;//退出直播
-
-    @BindView(R.id.iv_max_screen)
-    ImageView iv_max_screen;//全屏
+    private LiveSmallCoverView liveSmallCoverView;
+    private LiveFullScreenCoverView liveFullScreenCoverView;
 
     @Override
     protected int getLayoutResID() {
@@ -42,20 +42,22 @@ public class LiveFragment2 extends MvpFragment<ILiveView2, LivePresenter2> imple
     @Override
     protected void initViews(View view) {
         getPresenter().registReceiveHandler();
-
-        //退出
-        iv_break_live.setOnClickListener(v -> {
-            livePlayer.stopPullLive();
-            //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveStopPullLiveHandler.class);
-        });
-
-        //全屏
-        iv_max_screen.setOnClickListener(v -> livePlayer.enterFullScreen());
     }
 
     @Override
     protected void initData() {
+        liveSmallCoverView = new LiveSmallCoverView(getContext());
+        liveFullScreenCoverView = new LiveFullScreenCoverView(getContext());
 
+        livePlayer.setSmallCoverView(liveSmallCoverView);
+        livePlayer.setFullScreenCoverView(liveFullScreenCoverView);
+
+        //退出
+        liveSmallCoverView.setQuitLiveClickListener(v -> livePlayer.stopPullLive());
+        //全屏
+        liveSmallCoverView.setFullScreenClickListener(v -> livePlayer.enterFullScreen());
+        //关闭全屏
+        liveFullScreenCoverView.setQuitLiveClickListener(v -> livePlayer.exitFullScreen());
     }
 
     @Override
@@ -66,6 +68,11 @@ public class LiveFragment2 extends MvpFragment<ILiveView2, LivePresenter2> imple
     @Override
     public void stopPullLive() {
         livePlayer.stopPullLive();
+    }
+
+    @Override
+    public void setMemberInfo(Member member) {
+        liveSmallCoverView.setMemberInfo(member.getName(),member.getNo()+"");
     }
 
     @Override

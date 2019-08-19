@@ -28,8 +28,13 @@ public class LiveSmallCoverView extends MvpLinearLayout<ILiveSmallCoverView, Liv
     private ImageView iv_full_screen;
     private ImageView iv_break_live;
 
+    private OnClickListener quitLiveClickListener;//退出
+    private OnClickListener fullScreenClickListener;//全屏
+    private OnClickListener shareLiveClickListener;//分享
+
     public LiveSmallCoverView(Context context) {
         super(context);
+        initView();
     }
 
     public LiveSmallCoverView(Context context, AttributeSet attrs) {
@@ -52,14 +57,77 @@ public class LiveSmallCoverView extends MvpLinearLayout<ILiveSmallCoverView, Liv
 
         //组呼按钮
         iv_group_call = findViewById(R.id.iv_group_call);
+
         //分享
         iv_share_live = findViewById(R.id.iv_share_live);
         //全屏
         iv_full_screen = findViewById(R.id.iv_full_screen);
-
         //退出
         iv_break_live = findViewById(R.id.iv_break_live);
 
+        //退出
+        iv_break_live.setOnClickListener(v -> {
+            if (quitLiveClickListener != null) {
+                quitLiveClickListener.onClick(v);
+            }
+        });
+        //全屏
+        iv_full_screen.setOnClickListener(v -> {
+            if (fullScreenClickListener != null) {
+                fullScreenClickListener.onClick(v);
+            }
+        });
+        //分享
+        iv_share_live.setOnClickListener(v -> {
+            if (shareLiveClickListener != null) {
+                shareLiveClickListener.onClick(v);
+            }
+        });
+    }
+
+    /**
+     * 设置上报人信息
+     * @param name
+     * @param no
+     */
+    public void setMemberInfo(String name,String no){
+        tv_member_name.setText(name);
+        tv_member_no.setText(no);
+    }
+
+    /**
+     * 设置当前组呼人员名称
+     * @param name
+     */
+    public void setCurrentGroupCallMember(String name){
+        tv_group_call_member.setText(name);
+    }
+
+    /**
+     * 退出
+     *
+     * @param quitLiveClickListener
+     */
+    public void setQuitLiveClickListener(OnClickListener quitLiveClickListener) {
+        this.quitLiveClickListener = quitLiveClickListener;
+    }
+
+    /**
+     * 全屏
+     *
+     * @param fullScreenClickListener
+     */
+    public void setFullScreenClickListener(OnClickListener fullScreenClickListener) {
+        this.fullScreenClickListener = fullScreenClickListener;
+    }
+
+    /**
+     * 分享
+     *
+     * @param shareLiveClickListener
+     */
+    public void setShareLiveClickListener(OnClickListener shareLiveClickListener) {
+        this.shareLiveClickListener = shareLiveClickListener;
     }
 
     @Override
