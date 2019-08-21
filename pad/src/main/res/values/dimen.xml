@@ -108,7 +108,18 @@
     <dimen name="chat_image_height">400px</dimen>
     <dimen name="chat_video_image_size">50px</dimen>
 
+    <dimen name="regist_edit_bg_round_size">10px</dimen>
+    <dimen name="regist_item_height">80px</dimen>
+    <dimen name="regist_item_interval">20px</dimen>
+    <dimen name="regist_button_interval">40px</dimen>
 
-    ImageView
+    <dimen name="regist_ip_back_top">40px</dimen>
+    <dimen name="regist_ip_back_left">40px</dimen>
+    <dimen name="regist_ip_ok_size">80px</dimen>
+    <dimen name="regist_ip_ok_width">180px</dimen>
+
+    <dimen name="progress_dialog_size">200px</dimen>
+    <dimen name="progress_dialog_text_size">40px</dimen>
+    <dimen name="icon_ptt_size">50px</dimen>
 
 </resources>

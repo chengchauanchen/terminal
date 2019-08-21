@@ -1,5 +1,8 @@
 package com.vsxin.terminalpad.app;
 
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+
 import com.vsxin.terminalpad.mvp.contract.constant.AppStatusConstants;
 import com.vsxin.terminalpad.utils.CommonGroupUtil;
 import com.vsxin.terminalpad.utils.SystemUtils;
@@ -107,6 +110,7 @@ public class PadApplication extends App {
         SpecificSDK.setTerminalMemberType(TerminalMemberType.TERMINAL_PAD.toString());
     }
 
+    @Override
     public VideoLivePlayingState getVideoLivePlayingState(){
         VideoLivePlayingStateMachine liveStateMachine = TerminalFactory.getSDK().getLiveManager().getVideoLivePlayingStateMachine();
         if (liveStateMachine != null){
@@ -114,6 +118,7 @@ public class PadApplication extends App {
         }
         return null;
     }
+    @Override
     public VideoLivePushingState getVideoLivePushingState(){
         VideoLivePushingStateMachine liveStateMachine = TerminalFactory.getSDK().getLiveManager().getVideoLivePushingStateMachine();
         if (liveStateMachine != null){
@@ -121,6 +126,7 @@ public class PadApplication extends App {
         }
         return null;
     }
+    @Override
     public IndividualCallState getIndividualState(){
         IndividualCallStateMachine individualCallStateMachine = TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine();
         if (individualCallStateMachine != null){
@@ -129,6 +135,7 @@ public class PadApplication extends App {
         return null;
     }
 
+    @Override
     public GroupCallListenState getGroupListenenState(){
         GroupCallListenStateMachine groupCallListenStateMachine = TerminalFactory.getSDK().getGroupCallManager().getGroupCallListenStateMachine();
         if (groupCallListenStateMachine != null){
@@ -137,12 +144,24 @@ public class PadApplication extends App {
         return null;
     }
 
+    @Override
     public GroupCallSpeakState getGroupSpeakState(){
         GroupCallSpeakStateMachine groupCallSpeakStateMachine = TerminalFactory.getSDK().getGroupCallManager().getGroupCallSpeakStateMachine();
         if (groupCallSpeakStateMachine != null){
             return groupCallSpeakStateMachine.getCurrentState();
         }
         return null;
+    }
+
+    public String getVersionName(){
+        String localVersion = "";
+        try{
+            PackageInfo packageInfo = getApplicationContext().getPackageManager().getPackageInfo(getPackageName(), 0);
+            localVersion = packageInfo.versionName;
+        }catch(PackageManager.NameNotFoundException e){
+            e.printStackTrace();
+        }
+        return localVersion;
     }
 
 }

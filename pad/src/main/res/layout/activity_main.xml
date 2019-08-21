@@ -72,7 +72,7 @@
                 android:layout_alignParentRight="true"
                 android:layout_alignParentBottom="true"
                 android:layout_gravity="right|bottom"
-                android:layout_marginBottom="80px"
+                android:layout_marginBottom="120px"
                 android:layout_marginRight="30px">
 
                 <ImageView
@@ -85,9 +85,15 @@
                     android:id="@+id/tx_ptt_time"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="PTT"
                     android:textSize="35px"
                     android:textColor="@color/white"
+                    android:layout_centerInParent="true"/>
+
+                <ImageView
+                    android:id="@+id/iv_ptt"
+                    android:layout_width="@dimen/icon_ptt_size"
+                    android:layout_height="@dimen/icon_ptt_size"
+                    android:src="@drawable/icon_ptt"
                     android:layout_centerInParent="true"/>
 
                 <TextView

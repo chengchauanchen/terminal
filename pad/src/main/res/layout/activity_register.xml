@@ -1,287 +1,240 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/regist"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/regist_bg"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <View
-        android:id="@+id/view_pop"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/regist_bg" />
 
     <LinearLayout
         android:id="@+id/ll_regist"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:alpha="0.8"
         android:orientation="vertical"
         android:weightSum="10">
 
-        <ImageView
-            android:layout_width="40px"
-            android:layout_height="60px"
-            android:layout_gravity="center"
-            android:paddingLeft="5px"
-            android:layout_marginBottom="10px"
-            android:layout_marginTop="20px"
-            android:src="@mipmap/pdtlogo" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="5px"
-            android:text="@string/app_name"
-            android:textColor="@color/regist_title"
-            android:textSize="20px" />
+            <ImageView
+                android:layout_width="600px"
+                android:layout_height="300px"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="20px"
+                android:src="@drawable/regist_icon" />
+        </RelativeLayout>
 
         <LinearLayout
-
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="bottom"
-            android:layout_marginTop="10px"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:orientation="vertical">
+            android:layout_height="0dp"
+            android:layout_weight="7"
+            android:gravity="center_horizontal"
+            android:weightSum="10">
 
             <LinearLayout
-
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:weightSum="10">
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="5"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:orientation="vertical">
 
                 <com.vsxin.terminalpad.mvp.ui.widget.XCDropDownListView
                     android:id="@+id/xcd_available_ip"
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_weight="8"
-                    android:gravity="center_vertical"/>
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="7px"
-                android:gravity="center_horizontal"
-                android:weightSum="10">
+                    android:gravity="center_vertical" />
 
                 <EditText
                     android:id="@+id/et_invitation_code"
-                    android:layout_width="0dp"
-                    android:layout_height="40px"
-                    android:layout_marginTop="4px"
-                    android:layout_weight="8"
-                    android:background="@drawable/regist_org_shape_a"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/regist_item_height"
+                    android:layout_marginTop="@dimen/regist_item_interval"
+                    android:background="@drawable/bg_round_regist_edit"
+                    android:gravity="center"
                     android:hint="@string/regist_org_hint"
                     android:inputType="date"
                     android:maxLines="1"
-                    android:paddingLeft="10px"
-                    android:paddingRight="10px"
-                    android:textColorHint="@color/regist_edit_hint"
-                    android:textColor="@color/regist_edit"
-                    android:textCursorDrawable="@drawable/color_cursor">
-
-                </EditText>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="7px"
-                android:gravity="center_horizontal"
-                android:orientation="horizontal"
-                android:weightSum="10">
+                    android:textColor="@color/regist_edit_text_color"
+                    android:textColorHint="@color/regist_edit_text_hint_color"
+                    android:textCursorDrawable="@drawable/color_cursor"
+                    android:textSize="@dimen/chat_text_size"
+                    android:visibility="visible" />
 
                 <EditText
                     android:id="@+id/et_user_name"
-                    android:layout_width="0dp"
-                    android:layout_height="40px"
-                    android:layout_marginTop="4px"
-                    android:layout_weight="8"
-                    android:background="@drawable/regist_org_shape_a"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/regist_item_height"
+                    android:layout_marginTop="@dimen/regist_item_interval"
+                    android:background="@drawable/bg_round_regist_edit"
+                    android:gravity="center"
                     android:hint="@string/regist_name_hint"
                     android:inputType="text"
                     android:maxLines="1"
-                    android:paddingLeft="10px"
-                    android:paddingRight="10px"
-                    android:textColorHint="@color/regist_edit_hint"
-                    android:textColor="@color/regist_edit"
-                    android:textCursorDrawable="@drawable/color_cursor">
+                    android:textColor="@color/regist_edit_text_color"
+                    android:textColorHint="@color/regist_edit_text_hint_color"
+                    android:textCursorDrawable="@drawable/color_cursor"
+                    android:textSize="@dimen/chat_text_size"
+                    android:visibility="visible" />
 
-                </EditText>
+                <LinearLayout
+                    android:id="@+id/ll_reauth_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/regist_item_interval"
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
-            </LinearLayout>
+                    <EditText
+                        android:id="@+id/account"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/regist_item_height"
+                        android:background="@drawable/bg_round_regist_edit"
+                        android:gravity="center"
+                        android:hint="@string/regist_police_no_hint"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textColor="@color/regist_edit_text_color"
+                        android:textColorHint="@color/regist_edit_text_hint_color"
+                        android:textCursorDrawable="@drawable/color_cursor"
+                        android:textSize="@dimen/chat_text_size" />
 
+                    <EditText
+                        android:id="@+id/name"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/regist_item_height"
+                        android:layout_marginTop="@dimen/regist_item_interval"
+                        android:background="@drawable/bg_round_regist_edit"
+                        android:gravity="center"
+                        android:hint="@string/regist_police_name_hint"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textColor="@color/regist_edit_text_color"
+                        android:textColorHint="@color/regist_edit_text_hint_color"
+                        android:textCursorDrawable="@drawable/color_cursor"
+                        android:textSize="@dimen/chat_text_size" />
 
-            <LinearLayout
-                android:visibility="gone"
-                android:id="@+id/ll_reauth_info"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="7px"
-                android:gravity="center_horizontal"
-                android:orientation="vertical"
-                android:weightSum="10">
+                    <EditText
+                        android:id="@+id/departmentId"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/regist_item_height"
+                        android:layout_marginTop="@dimen/regist_item_interval"
+                        android:background="@drawable/bg_round_regist_edit"
+                        android:gravity="center"
+                        android:hint="@string/regist_department_number_hint"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textColor="@color/regist_edit_text_color"
+                        android:textColorHint="@color/regist_edit_text_hint_color"
+                        android:textCursorDrawable="@drawable/color_cursor"
+                        android:textSize="@dimen/chat_text_size" />
 
-                <EditText
-                    android:id="@+id/account"
-                    android:layout_width="255px"
-                    android:layout_height="40px"
-                    android:layout_marginTop="3px"
-                    android:layout_weight="8"
-                    android:background="@drawable/regist_org_shape_a"
-                    android:hint="@string/regist_police_no_hint"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:paddingLeft="10px"
-                    android:paddingRight="10px"
-                    android:textColorHint="@color/regist_edit_hint"
-                    android:textColor="@color/regist_edit"
-                    android:textCursorDrawable="@drawable/color_cursor" />
+                    <EditText
+                        android:id="@+id/departmentName"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/regist_item_height"
+                        android:layout_marginTop="@dimen/regist_item_interval"
+                        android:background="@drawable/bg_round_regist_edit"
+                        android:gravity="center"
+                        android:hint="@string/regist_department_name_hint"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textColor="@color/regist_edit_text_color"
+                        android:textColorHint="@color/regist_edit_text_hint_color"
+                        android:textCursorDrawable="@drawable/color_cursor"
+                        android:textSize="@dimen/chat_text_size" />
 
-                <EditText
-                    android:id="@+id/name"
-                    android:layout_width="255px"
-                    android:layout_height="20px"
-                    android:layout_marginTop="3px"
-                    android:background="@drawable/regist_org_shape_a"
-                    android:hint="@string/regist_police_name_hint"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:paddingLeft="10px"
-                    android:paddingRight="10px"
-                    android:textColorHint="@color/regist_edit_hint"
-                    android:textColor="@color/regist_edit"
-                    android:textCursorDrawable="@drawable/color_cursor" />
+                </LinearLayout>
 
-                <EditText
-                    android:id="@+id/departmentId"
-                    android:layout_width="255px"
-                    android:layout_height="20px"
-                    android:layout_marginTop="3px"
-                    android:layout_weight="8"
-                    android:background="@drawable/regist_org_shape_a"
-                    android:hint="@string/regist_department_number_hint"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:paddingLeft="10px"
-                    android:paddingRight="10px"
-                    android:textColorHint="@color/regist_edit_hint"
-                    android:textColor="@color/regist_edit"
-                    android:textCursorDrawable="@drawable/color_cursor" />
-                <EditText
-                    android:id="@+id/departmentName"
-                    android:layout_width="255px"
-                    android:layout_height="20px"
-                    android:layout_marginTop="3px"
-                    android:layout_weight="8"
-                    android:background="@drawable/regist_org_shape_a"
-                    android:hint="@string/regist_department_name_hint"
-                    android:inputType="text"
-                    android:maxLines="1"
-                    android:paddingLeft="10px"
-                    android:paddingRight="10px"
-                    android:textColorHint="@color/regist_edit_hint"
-                    android:textColor="@color/regist_edit"
-                    android:textCursorDrawable="@drawable/color_cursor" />
+                <!--模拟身份证号登陆-->
+                <LinearLayout
+                    android:id="@+id/ll_idcard_info"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/regist_item_interval"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
-            </LinearLayout>
+                    <EditText
+                        android:id="@+id/et_idcard"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/regist_item_height"
+                        android:background="@drawable/bg_round_regist_edit"
+                        android:gravity="center"
+                        android:hint="@string/text_input_id_card"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textColor="@color/regist_edit_text_color"
+                        android:textColorHint="@color/regist_edit_text_hint_color"
+                        android:textCursorDrawable="@drawable/color_cursor"
+                        android:textSize="@dimen/chat_text_size" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15px"
-                android:gravity="center_horizontal"
-                android:weightSum="10">
+                    <EditText
+                        android:id="@+id/et_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/regist_item_height"
+                        android:background="@drawable/bg_round_regist_edit"
+                        android:layout_marginTop="@dimen/regist_item_interval"
+                        android:gravity="center"
+                        android:hint="@string/regist_police_name_hint"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:textColor="@color/regist_edit_text_color"
+                        android:textColorHint="@color/regist_edit_text_hint_color"
+                        android:textCursorDrawable="@drawable/color_cursor"
+                        android:textSize="@dimen/chat_text_size" />
 
-                <Button
-                    android:id="@+id/btn_addMember"
-                    android:layout_width="0dp"
-                    android:layout_height="32px"
-                    android:layout_weight="3"
-                    android:background="@drawable/regist_button_shape"
-                    android:text="@string/simulated_police_officer"
-                    android:textSize="18px"
-                    android:textColor="@color/regist_button" />
+                </LinearLayout>
 
-            </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/regist_button_interval"
+                    android:gravity="center_horizontal"
+                    android:orientation="horizontal"
+                    android:weightSum="10">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15px"
-                android:gravity="center_horizontal"
-                android:weightSum="10">
+                    <Button
+                        android:id="@+id/btn_addMember"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/regist_item_height"
+                        android:layout_weight="4"
+                        android:background="@drawable/regist_button_shape"
+                        android:text="@string/simulated_police_officer"
+                        android:textColor="@color/regist_botton_text_color"
+                        android:textSize="@dimen/chat_text_size" />
+
+                    <Button
+                        android:id="@+id/btn_idcard_login"
+                        android:layout_width="0dp"
+                        android:layout_height="@dimen/regist_item_height"
+                        android:layout_marginLeft="15px"
+                        android:layout_weight="4"
+                        android:background="@drawable/regist_button_shape"
+                        android:text="@string/text_id_card_data_login"
+                        android:textColor="@color/regist_botton_text_color"
+                        android:textSize="@dimen/chat_text_size" />
+
+                </LinearLayout>
 
                 <Button
                     android:id="@+id/btn_confirm"
-                    android:layout_width="0dp"
-                    android:layout_height="32px"
-                    android:layout_weight="8"
+                    android:layout_width="match_parent"
+                    android:layout_height="@dimen/regist_item_height"
+                    android:layout_marginTop="@dimen/regist_button_interval"
                     android:background="@drawable/regist_button_shape"
                     android:text="@string/regist_button"
-                    android:textSize="18sp"
-                    android:textColor="@color/regist_button" />
+                    android:textColor="@color/regist_botton_text_color"
+                    android:textSize="@dimen/chat_text_size" />
 
             </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15px"
-                android:gravity="center_horizontal"
-                android:weightSum="10">
-
-            </LinearLayout>
-
-
-
-            <TextView
-                android:id="@+id/tv_version_prompt"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginBottom="13dp"
-                android:layout_marginRight="18dp"
-                android:layout_weight="1"
-                android:textColor="@color/black"
-                android:visibility="gone"/>
-
         </LinearLayout>
     </LinearLayout>
-
-    <RelativeLayout
-        android:id="@+id/rl_login"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentTop="true"
-        android:layout_toEndOf="@+id/ll_regist"
-        android:layout_toRightOf="@+id/ll_regist"
-        android:orientation="vertical"
-        android:visibility="gone"
-        android:weightSum="10">
-
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="32dp"
-            android:background="@mipmap/pdtlogo" />
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="125dp"
-            android:layout_alignParentBottom="true" />
-
-    </RelativeLayout>
-
-</RelativeLayout>
+</FrameLayout>

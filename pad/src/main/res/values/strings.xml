@@ -430,6 +430,7 @@
     <string name="text_regist_fail_please_check_all_info_is_correct">注册失败，请检查各项信息是否正确！</string>
     <string name="text_error_desc">errorDesc</string>
     <string name="text_selection_unit">选择单位</string>
+    <string name="text_add_unit">添加单位</string>
     <string name="text_please_select_unit">请选择单位</string>
     <string name="text_please_input_invitation_code">请输入邀请码</string>
     <string name="text_please_input_invitation_code_by_six_number">请输入六位数字邀请码</string>
@@ -624,4 +625,6 @@
     <string name="text_temp_set_lock_screen">锁屏页面未弹出？找到“锁屏显示”或类似选项，选择“允许”。</string>
     <string name="text_head_set_can_not_hand_free">耳机模式下，不能打开扬声器</string>
     <string name="text_pull_data_error">播放数据错误</string>
+    <string name="text_id_card_data_login">模拟身份证号登陆</string>
+    <string name="text_input_id_card">请输入身份证号</string>
 </resources>

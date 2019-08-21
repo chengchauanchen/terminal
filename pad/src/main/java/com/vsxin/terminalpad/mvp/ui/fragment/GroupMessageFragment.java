@@ -17,7 +17,6 @@ import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.presenter.GroupMessagePresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IGroupMessageView;
-import com.vsxin.terminalpad.receiveHandler.ReceiveUpdateMainFrgamentPTTButtonHandler;
 import com.vsxin.terminalpad.utils.Constants;
 import com.vsxin.terminalpad.utils.FragmentManage;
 import com.vsxin.terminalpad.view.RoundProgressBarWidthNumber;
@@ -89,7 +88,7 @@ public class GroupMessageFragment extends MessageBaseFragment<IGroupMessageView,
     protected void initData(){
         super.initData();
         isCurrentGroup = (userId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
-        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateMainFrgamentPTTButtonHandler.class,false);
+//        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateMainFrgamentPTTButtonHandler.class,false);
         getGroupLivingList();
         refreshPtt();
     }
@@ -105,7 +104,7 @@ public class GroupMessageFragment extends MessageBaseFragment<IGroupMessageView,
     @Override
     public void onDestroyView(){
         super.onDestroyView();
-        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateMainFrgamentPTTButtonHandler.class,true);
+//        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateMainFrgamentPTTButtonHandler.class,true);
     }
 
     public static GroupMessageFragment newInstance(int userId, String userName, long uniqueNo){

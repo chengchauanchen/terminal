@@ -2,6 +2,7 @@ package com.vsxin.terminalpad.mvp.ui.widget;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,6 +17,8 @@ import android.widget.TextView;
 import com.vsxin.terminalpad.R;
 
 import java.util.ArrayList;
+
+import static com.blankj.utilcode.util.StringUtils.getString;
 
 /**
  * Created by zckj on 2017/6/30.
@@ -166,10 +169,10 @@ public class XCDropDownListView extends LinearLayout {
             // 设置数据
             final String text = mData.get(position).toString();
             listItemView.tv.setText(text);
-            if(text.equals("添加单位")){
-                listItemView.tv.setTextColor(ContextCompat.getColor(getContext(),R.color.regist_add_host_name));
+            if(TextUtils.equals(getString(R.string.text_add_unit),text)||TextUtils.equals(getString(R.string.text_selection_unit),text)){
+                listItemView.tv.setTextColor(ContextCompat.getColor(getContext(),R.color.regist_edit_text_other_color));
             }else {
-                listItemView.tv.setTextColor(ContextCompat.getColor(getContext(),R.color.regist_host_name));
+                listItemView.tv.setTextColor(ContextCompat.getColor(getContext(),R.color.regist_edit_text_color));
             }
             listItemView.layout.setOnClickListener(v -> {
                 // TODO Auto-generated method stub

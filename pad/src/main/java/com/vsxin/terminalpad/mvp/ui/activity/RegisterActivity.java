@@ -13,14 +13,23 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupWindow;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpActivity;
@@ -31,7 +40,6 @@ import com.vsxin.terminalpad.mvp.contract.presenter.RegisterPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IRegisterView;
 import com.vsxin.terminalpad.mvp.ui.widget.ProgressDialog;
 import com.vsxin.terminalpad.mvp.ui.widget.XCDropDownListView;
-import com.vsxin.terminalpad.mvp.ui.widget.XCDropDownListView.XCDropDownListViewClickListeren;
 import com.vsxin.terminalpad.prompt.PromptManager;
 import com.vsxin.terminalpad.utils.NetworkUtil;
 import com.vsxin.terminalpad.utils.SetToListUtil;
@@ -43,6 +51,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import butterknife.BindView;
 import cn.com.cybertech.pdk.UserInfo;
@@ -71,6 +81,8 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
+import cn.vsx.hamster.terminalsdk.tools.JudgeWhetherConnect;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
@@ -88,7 +100,10 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
 
     public Logger logger = Logger.getLogger(getClass());
     private int reAuthCount = 0;
-    private Handler myHandler = new Handler();
+    private Handler myHandler = new Handler(Looper.getMainLooper());
+
+    @BindView(R.id.ll_regist)//全布局
+     LinearLayout ll_regist;
 
     @BindView(R.id.xcd_available_ip)//选择环境
     XCDropDownListView xcDropDownListView;
@@ -102,9 +117,44 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
     @BindView(R.id.et_user_name)
     EditText et_user_name;//姓名
 
+    @BindView(R.id.btn_addMember)
+    Button btnAddMember;//模拟警员
+    @BindView(R.id.btn_idcard_login)
+    Button btn_idcard_login;//模拟身份证登录
+
+
+    @BindView(R.id.ll_reauth_info)
+    LinearLayout llreAuthInfo;//模拟警员
+    @BindView(R.id.account)
+    EditText account;//
+    @BindView(R.id.name)
+    EditText edtName;//
+    @BindView(R.id.departmentId)
+    EditText departmentId;//
+    @BindView(R.id.departmentName)
+    EditText departmentName;//
+
+    @BindView(R.id.ll_idcard_info)
+    LinearLayout ll_idcard_info;//模拟身份证号登陆
+    @BindView(R.id.et_idcard)
+    EditText et_idcard;//
+    @BindView(R.id.et_name)
+    EditText et_name;//
+
     private String apkType;
     // 安全VPN服务名称
     private static final String SEC_VPN_SERVICE_ACTION_NAME = "sec.vpn.service";
+
+    //添加单位的PopupWindow
+    private PopupWindow popupWindow;
+    //添加单位的布局根view
+    //添加单位的ViewHolder
+    private ViewHolder viewHolder;
+    private boolean isCheckSuccess;//联通校验是否通过
+    private boolean isCheckFinished;//联通校验是否完成
+
+    public String selectIp;
+    public String selectPort;
     @Override
     protected int getLayoutResID() {
         return R.layout.activity_register;
@@ -115,31 +165,41 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
 
         //将app设置为登录状态
         PadApplication.setmAppStatus(AppStatusConstants.LOGINED);
+        //市局包隐藏模拟警员
+        if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)
+                || AuthManagerTwo.XIANGYANG.equals(apkType)) {
+            btnAddMember.setVisibility(View.GONE);
+            btn_idcard_login.setVisibility(View.GONE);
+        }
+
+        initPopupWindow();
         initDialog();
-
-        xcDropDownListView.setOnXCDropDownListViewClickListeren(new XCDropDownListViewClickListeren() {
-            @Override
-            public void onXCDropDownListViewClickListeren(int position) {
-                if (availableIPlist.size() == 2) {
-                    if (position != 0) {
-
-                    }
+        isCheckSuccess = false;
+        xcDropDownListView.setOnXCDropDownListViewClickListeren(position -> {
+            if (availableIPlist.size() == 2) {
+                if (position != 0) {
+                    popupWindow.showAsDropDown(xcDropDownListView);
+                    viewHolder.iv_regist_connect_efficacy_ok.setVisibility(View.GONE);
+                    viewHolder.tv_regist_connect_efficacy.setVisibility(View.VISIBLE);
                 }
-                if (availableIPlist.size() > 2) {
-                    if (position == (availableIPlist.size() - 1)) {
-                    } else if (position != 0) {
-                        String name = availableIPlist.get(position);
-                        availableIPlist.remove(name);
-                        availableIPlist.remove(getString(R.string.text_selection_unit));
-                        availableIPlist.add(0, name);
-                        xcDropDownListView.setItemsData(availableIPlist);
-                        String selectIp = availableIPMap.get(name).getIp();
-                        String selectPort = availableIPMap.get(name).getPort();
-                        //认证
-                        int resultCode = MyTerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
-                        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                            changeProgressMsg(getString(R.string.authing));
-                        }
+            }
+            if (availableIPlist.size() > 2) {
+                if (position == (availableIPlist.size() - 1)) {
+                    popupWindow.showAsDropDown(xcDropDownListView);
+                    viewHolder.iv_regist_connect_efficacy_ok.setVisibility(View.GONE);
+                    viewHolder.tv_regist_connect_efficacy.setVisibility(View.VISIBLE);
+                } else if (position != 0) {
+                    String name = availableIPlist.get(position);
+                    availableIPlist.remove(name);
+                    availableIPlist.remove(getString(R.string.text_selection_unit));
+                    availableIPlist.add(0, name);
+                    xcDropDownListView.setItemsData(availableIPlist);
+                    selectIp = availableIPMap.get(name).getIp();
+                    selectPort = availableIPMap.get(name).getPort();
+                    //认证
+                    int resultCode = MyTerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
+                    if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                        changeProgressMsg(getString(R.string.authing));
                     }
                 }
             }
@@ -150,17 +210,13 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             myProgressDialog.setCancelable(false);
         }
 
-        btn_confirm.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                registerUser();
-            }
-        });
+        btn_confirm.setOnClickListener(v -> registerUser());
         apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
         //襄阳包就启动安全VPN服务
         if(apkType.equals(AuthManagerTwo.XIANGYANGPOLICESTORE) || apkType.equals(AuthManagerTwo.XIANGYANG)){
             startVPNService();
         }
+        ll_regist.setVisibility(View.GONE);
         judgePermission();
     }
 
@@ -168,9 +224,69 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
      * 注册用户
      */
     private void registerUser() {
-        String invitationCode = et_invitation_code.getText().toString().trim();
-        String userName = et_user_name.getText().toString().trim();
-        getPresenter().registerUser(userName,invitationCode);
+        String itemsData = xcDropDownListView.getItemsData();
+
+        if (TextUtils.equals(getString(R.string.text_add_unit),itemsData)) {
+            ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_please_select_unit));
+            return;
+        }
+        if (llreAuthInfo.getVisibility() == View.VISIBLE) {
+            //模拟警员
+            String useAccount = account.getText().toString().trim();
+            String useDepartmentId = departmentId.getText().toString().trim();
+            String useDepartmentName = departmentName.getText().toString().trim();
+            String name = edtName.getText().toString().trim();
+            if(!checkName(name)){
+                return;
+            }
+            MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, useAccount);
+            MyTerminalFactory.getSDK().putParam(UrlParams.NAME, name);
+            MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_ID, useDepartmentId);
+            MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_NAME, useDepartmentName);
+            int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                changeProgressMsg(getString(R.string.authing));
+            }
+        } else if(ll_idcard_info.getVisibility() == View.VISIBLE){
+            //身份证号登陆
+            String userID = et_idcard.getText().toString().trim();
+            String userName = et_name.getText().toString().trim();
+            MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, userID);
+            MyTerminalFactory.getSDK().putParam(UrlParams.NAME, userName);
+            MyTerminalFactory.getSDK().putParam(UrlParams.XIANGYANG_STORE,true);
+            int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                changeProgressMsg(getString(R.string.authing));
+            }
+        }
+        else {
+            //注册
+            String useOrg = et_invitation_code.getText().toString().trim();
+            String useName = et_user_name.getText().toString().trim();
+
+            if (TextUtils.isEmpty(useOrg)) {
+                ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_please_input_invitation_code));
+                return;
+            } else if (!DataUtil.isLegalOrg(useOrg) || useOrg.length() != 6) {
+                ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_please_input_invitation_code_by_six_number));
+                return;
+            } else if (TextUtils.isEmpty(useName)) {
+                ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_please_input_name));
+                return;
+            } else if (!DataUtil.isLegalName(useName) || useName.length() > 12 || useName.length() < 2) {
+                ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_please_input_correct_name));
+                return;
+            }
+            String registIP = TerminalFactory.getSDK().getAuthManagerTwo().getTempIp();
+            String registPort = TerminalFactory.getSDK().getAuthManagerTwo().getTempPort();
+            if (TextUtils.isEmpty(registIP) || TextUtils.isEmpty(registPort)) {
+                ToastUtils.showShort(R.string.text_please_select_unit);
+            } else {
+                changeProgressMsg(getString(R.string.text_registing));
+
+                TerminalFactory.getSDK().getAuthManagerTwo().regist(useName, useOrg);
+            }
+        }
     }
 
     @Override
@@ -190,6 +306,22 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
         //退出消息
         MyTerminalFactory.getSDK().registReceiveHandler(receiveExitHandler);
 
+        //注册添加单位的监听
+        if (viewHolder == null) {
+            return;
+        }
+        viewHolder.userIP.setOnFocusChangeListener(onFocusChangeListener);
+        viewHolder.userUnit.setOnFocusChangeListener(onFocusChangeListener);
+        viewHolder.userPort.setOnFocusChangeListener(onFocusChangeListener);
+        viewHolder.ll_regist_return.setOnClickListener(new ImportIPPortReturn());
+        viewHolder.rl_regist_connect_efficacy.setOnClickListener(new EfficacyOnClickListener());
+        viewHolder.userUnit.addTextChangedListener(new UnitClickListener());
+        viewHolder.userPort.addTextChangedListener(new IpClickListener());
+        viewHolder.userIP.addTextChangedListener(new IpClickListener());
+        viewHolder.btnCustomIpOk.setOnClickListener(new BtnCustomIpOkOnClickListener());
+
+        btnAddMember.setOnClickListener(new OnSwitchingModeClickListener());
+        btn_idcard_login.setOnClickListener(new IdcardLoginClickListener());
     }
 
     @Override
@@ -213,7 +345,6 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
 
     ArrayList<String> availableIPlist = new ArrayList<>();
     Map<String, LoginModel> availableIPMap = new HashMap<>();
-    private String company = "添加单位";
 
 
     /**
@@ -247,6 +378,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
                 startVPNService();
             }else {
                 // todo authorize();//认证并获取user信息
+                authorize();//认证并获取user信息
                 requestDrawOverLays();
             }
         } else {
@@ -258,6 +390,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
 
     private void startVPNService(){
         try{
+            logger.info("开始绑定VPN");
             // 绑定安全VPN服务
             Intent intent = new Intent();
             intent.setAction(SEC_VPN_SERVICE_ACTION_NAME);
@@ -266,6 +399,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             startService(intent1);
             bindService(intent1, secVpnServiceConnection, BIND_AUTO_CREATE);
         }catch(Exception e){
+            logger.error("绑定安全VPN服务失败："+e);
             e.printStackTrace();
         }
     }
@@ -359,11 +493,17 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
     }
 
     private void start() {
+        String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+        logger.info("apkType:"+apkType+"----deviceType:"+deviceType+"----versionName:"+PadApplication.getPadApplication().getVersionName());
         //vpn没有启动时先启动VPN
         try{
+            if(secVpnService == null){
+                logger.info("vpn没有绑定成功");
+            }
             if(secVpnService != null && !secVpnService.sv_isStarted()){
-//              secVpnService.sv_setServerAddr("20.50.0.11", "10009");
+                secVpnService.sv_setServerAddr("20.50.0.11", "10009");
                 secVpnService.sv_start();
+                logger.info("vpn没有启动，开始启动vpn");
             }
         }catch(RemoteException e){
             e.printStackTrace();
@@ -698,16 +838,17 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
                     availableIPMap = availableIP;
                     availableIPlist.add(getString(R.string.text_selection_unit));
                     availableIPlist.addAll(SetToListUtil.setToArrayList(availableIP));
-                    availableIPlist.add(company);
+                    availableIPlist.add(getString(R.string.text_add_unit));
                     xcDropDownListView.setItemsData(availableIPlist);
                 } else {
                     availableIPlist.add(getString(R.string.text_selection_unit));
-                    availableIPlist.add(company);
+                    availableIPlist.add(getString(R.string.text_add_unit));
                     xcDropDownListView.setItemsData(availableIPlist);
                 }
                 if (!TextUtils.isEmpty(tempName)) {
                     xcDropDownListView.setText(tempName);
                 }
+                ll_regist.setVisibility(View.VISIBLE);
                 hideProgressDialog();
             });
         }
@@ -723,50 +864,62 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
         public void handler(final int resultCode, final String resultDesc, final boolean isRegisted) {
 
             logger.info("2.RegisterActivity---认证回调---resultCode：" + resultCode + "；   resultDesc：" + resultDesc + "；   isRegisted：" + isRegisted + ",主线程" + SystemUtils.isMainThread());
-            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                //认证成功，去连接接入服务
-                changeProgressMsg(getResources().getString(R.string.connecting_server));
-            } else if (resultCode == TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()) {
-                AlertDialog alerDialog = new AlertDialog.Builder(RegisterActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_temporarily_unavailable_permissions)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
-                alerDialog.show();
-            } else if (resultCode == TerminalErrorCode.DEPT_EXPIRED.getErrorCode()) {
-                AlertDialog alerDialog = new AlertDialog.Builder(RegisterActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_departmental_delegation_expires)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
-                alerDialog.show();
-            } else if (resultCode == TerminalErrorCode.TERMINAL_TYPE_ERROR.getErrorCode()) {
-                AlertDialog alerDialog = new AlertDialog.Builder(RegisterActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_terminal_type_error)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
-                alerDialog.show();
-            } else if (resultCode == TerminalErrorCode.TERMINAL_REPEAT.getErrorCode()) {
-                AlertDialog alerDialog = new AlertDialog.Builder(RegisterActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_terminal_repeat)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
-                alerDialog.show();
-            } else if (resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()) {
-                if (reAuthCount < 3) {
-                    reAuthCount++;
-                    //发生异常的时候重试几次，因为网络原因经常导致一个io异常
-                    TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(), TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
-                } else {
+            myHandler.post(() -> {
+                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                    //认证成功，去连接接入服务
+                    changeProgressMsg(getResources().getString(R.string.connecting_server));
+                } else if (resultCode == TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()) {
+                    AlertDialog alerDialog = new AlertDialog.Builder(RegisterActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_temporarily_unavailable_permissions)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
+                    alerDialog.show();
+                } else if (resultCode == TerminalErrorCode.DEPT_EXPIRED.getErrorCode()) {
+                    AlertDialog alerDialog = new AlertDialog.Builder(RegisterActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_departmental_delegation_expires)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
+                    alerDialog.show();
+                } else if (resultCode == TerminalErrorCode.TERMINAL_TYPE_ERROR.getErrorCode()) {
+                    AlertDialog alerDialog = new AlertDialog.Builder(RegisterActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_terminal_type_error)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
+                    alerDialog.show();
+                } else if (resultCode == TerminalErrorCode.TERMINAL_REPEAT.getErrorCode()) {
+                    AlertDialog alerDialog = new AlertDialog.Builder(RegisterActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_terminal_repeat)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
+                    alerDialog.show();
+                } else if (resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()) {
+                    if (reAuthCount < 3) {
+                        reAuthCount++;
+                        //发生异常的时候重试几次，因为网络原因经常导致一个io异常
+                        TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(), TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
+                    } else {
+                        changeProgressMsg(getResources().getString(R.string.auth_fail));
+                        myHandler.postDelayed(() -> {
+                            ll_regist.setVisibility(View.VISIBLE);
+                            hideProgressDialog();
+                        }, 3000);
+                    }
+                } else if (resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()) {
+                    //没有注册服务地址，去探测地址
+                    if (availableIPlist.isEmpty()) {
+                        TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
+                    }
                     changeProgressMsg(getResources().getString(R.string.auth_fail));
-                    //myHandler.postDelayed(() -> exit(), 3000);
-
-                }
-            } else if (resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()) {
-                changeProgressMsg(getResources().getString(R.string.auth_fail));
-                myHandler.postDelayed(() -> {
-                    hideProgressDialog();
-                }, 2000);
-//                hideProgressDialog();
-            } else {
-                //没有注册服务地址，去探测地址
-                if (availableIPlist.isEmpty()) {
-                    TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
-                }
-                if (!isRegisted) {
-                    ToastUtils.showShort(R.string.please_regist_account);
-                    hideProgressDialog();
+                    myHandler.postDelayed(() -> {
+                        ll_regist.setVisibility(View.VISIBLE);
+                        hideProgressDialog();
+                    }, 2000);
                 } else {
-                    changeProgressMsg(resultDesc);
-                    hideProgressDialog();
+                    //没有注册服务地址，去探测地址
+                    if (availableIPlist.isEmpty()) {
+                        TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
+                    }
+                    if (!isRegisted) {
+                        ToastUtils.showShort(R.string.please_regist_account);
+                        ll_regist.setVisibility(View.VISIBLE);
+                        hideProgressDialog();
+                    } else {
+                        changeProgressMsg(resultDesc);
+                        myHandler.postDelayed(() -> {
+                            ll_regist.setVisibility(View.VISIBLE);
+                            hideProgressDialog();
+                        }, 2000);
+                    }
                 }
-            }
+            });
         }
     };
 
@@ -872,4 +1025,311 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             //exit();
         }
     };
+
+
+    //模拟警员
+    private class OnSwitchingModeClickListener implements OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            if (llreAuthInfo.getVisibility() == View.GONE && et_user_name.getVisibility() == View.VISIBLE && et_invitation_code.getVisibility() == View.VISIBLE) {
+                et_invitation_code.setVisibility(View.GONE);
+                et_user_name.setVisibility(View.GONE);
+                btn_confirm.setVisibility(View.VISIBLE);
+                llreAuthInfo.setVisibility(View.VISIBLE);
+                btnAddMember.setText(R.string.text_invitation_code_regist);
+            } else {
+                et_invitation_code.setVisibility(View.VISIBLE);
+                et_user_name.setVisibility(View.VISIBLE);
+                btn_confirm.setVisibility(View.VISIBLE);
+                llreAuthInfo.setVisibility(View.GONE);
+                btnAddMember.setText(R.string.text_simulated_police_officer);
+            }
+            ll_idcard_info.setVisibility(View.GONE);
+        }
+    }
+
+    private void initPopupWindow() {
+        View popupWindowView = View.inflate(RegisterActivity.this, R.layout.regist_import_ip, null);
+        viewHolder = new ViewHolder(popupWindowView);
+        popupWindow = setPopupwindow(popupWindowView);
+    }
+
+    private PopupWindow setPopupwindow(View view) {
+        PopupWindow mPopWindow = new PopupWindow(view);
+        mPopWindow.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
+        mPopWindow.setHeight(ViewGroup.LayoutParams.MATCH_PARENT);
+
+        //是否响应touch事件
+        mPopWindow.setTouchable(true);
+        //是否具有获取焦点的能力
+        mPopWindow.setFocusable(true);
+
+        //外部是否可以点击
+        mPopWindow.setOutsideTouchable(false);
+
+        return mPopWindow;
+    }
+
+    static class ViewHolder {
+        EditText userUnit;
+        EditText userIP;
+        EditText userPort;
+        Button btnCustomIpOk;
+        LinearLayout ll_regist_return;
+        RelativeLayout rl_regist_connect_efficacy;
+        TextView tv_regist_connect_efficacy;
+        ImageView iv_regist_connect_efficacy_ok;
+
+        ViewHolder(View view) {
+            userUnit = (EditText) view.findViewById(R.id.userUnit);
+            userIP = (EditText) view.findViewById(R.id.userIP);
+            userPort = (EditText) view.findViewById(R.id.userPort);
+            btnCustomIpOk = (Button) view.findViewById(R.id.btn_custom_ip_ok);
+            ll_regist_return = (LinearLayout) view.findViewById(R.id.ll_regist_return);
+            rl_regist_connect_efficacy = (RelativeLayout) view.findViewById(R.id.rl_regist_connect_efficacy);
+            tv_regist_connect_efficacy = (TextView) view.findViewById(R.id.tv_regist_connect_efficacy);
+            iv_regist_connect_efficacy_ok = (ImageView) view.findViewById(R.id.iv_regist_connect_efficacy_ok);
+        }
+    }
+
+    /**
+     * 邀请码用户名输入框焦点
+     */
+    private View.OnFocusChangeListener onFocusChangeListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if (!hasFocus) {
+                if (v.getId() == R.id.userUnit) {
+                    ((TextView) v).setHint(getString(R.string.text_add_unit_hint_name));
+                }
+                if (v.getId() == R.id.userIP) {
+                    ((TextView) v).setHint(getString(R.string.text_add_unit_hint_ip));
+                }
+                if (v.getId() == R.id.userPort) {
+                    ((TextView) v).setHint(getString(R.string.text_add_unit_hint_port));
+                }
+            } else {
+                ((TextView) v).setHint("");
+            }
+        }
+    };
+
+    /**
+     * 输入ip和端口界面的返回按钮
+     **/
+    private final class ImportIPPortReturn implements OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            myHandler.post(() -> popupWindow.dismiss());
+        }
+    }
+
+    private final class EfficacyOnClickListener implements OnClickListener {
+        @Override
+        public void onClick(View v) {
+            if (TextUtils.isEmpty(viewHolder.userUnit.getText())) {
+                ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_add_unit_hint_name));
+            } else {
+                String text = viewHolder.userUnit.getText().toString().trim();
+                if (!DataUtil.isLegalName(text) || text.length() < 2) {
+                    ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_unit_name_is_not_correct));
+                    return;
+                }
+
+                if (TextUtils.isEmpty(viewHolder.userIP.getText())) {
+                    ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_add_unit_hint_ip));
+                } else {
+                    if (TextUtils.isEmpty(viewHolder.userPort.getText())) {
+                        ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_add_unit_hint_port));
+                    } else {
+                        MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+                            isCheckFinished = false;
+                            if (JudgeWhetherConnect.isHostConnectable(viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString())) {
+                                isCheckFinished = true;
+                                myHandler.post(() -> {
+                                    viewHolder.rl_regist_connect_efficacy.setBackgroundColor(getResources().getColor(R.color.green));
+                                    viewHolder.tv_regist_connect_efficacy.setVisibility(View.GONE);
+                                    viewHolder.iv_regist_connect_efficacy_ok.setVisibility(View.VISIBLE);
+                                    isCheckSuccess = true;
+                                });
+
+                            } else {
+                                isCheckFinished = true;
+                                myHandler.post(() -> ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_input_ip_and_port_is_not_used)));
+                            }
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    private final class UnitClickListener implements TextWatcher {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            viewHolder.iv_regist_connect_efficacy_ok.setVisibility(View.GONE);
+            viewHolder.tv_regist_connect_efficacy.setVisibility(View.VISIBLE);
+
+            if (s.length() > 0) {
+                if (DataUtil.isLegalOrg(s)) {
+                    ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_unit_name_is_not_correct_one));
+                }
+                if (!DataUtil.isLegalSearch(s)) {
+                    ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_unit_name_is_not_correct_two));
+                }
+            }
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    }
+
+    private final class IpClickListener implements TextWatcher {
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            viewHolder.iv_regist_connect_efficacy_ok.setVisibility(View.GONE);
+            viewHolder.tv_regist_connect_efficacy.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {
+
+        }
+    }
+
+    /**
+     * 输入自定义IP和端口的确定按钮的监听
+     **/
+    private final class BtnCustomIpOkOnClickListener implements OnClickListener {
+
+        @Override
+        public void onClick(View v) {
+            //原连通校验逻辑
+            if (TextUtils.isEmpty(viewHolder.userUnit.getText())) {
+                ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_add_unit_hint_name));
+            } else {
+                String text = viewHolder.userUnit.getText().toString().trim();
+                if (!DataUtil.isLegalName(text) || text.length() < 2) {
+                    ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_unit_name_is_not_correct));
+                    return;
+                }
+
+                if (TextUtils.isEmpty(viewHolder.userIP.getText())) {
+                    ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_add_unit_hint_ip));
+                } else {
+                    if (TextUtils.isEmpty(viewHolder.userPort.getText())) {
+                        ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_add_unit_hint_port));
+                    } else {
+                        if (!isCheckFinished) {
+                            MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+                                isCheckFinished = false;
+                                if (JudgeWhetherConnect.isHostConnectable(viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString())) {
+                                    isCheckFinished = true;
+                                    myHandler.post(() -> {
+                                        viewHolder.rl_regist_connect_efficacy.setBackgroundColor(getResources().getColor(R.color.green));
+                                        viewHolder.tv_regist_connect_efficacy.setVisibility(View.GONE);
+                                        viewHolder.iv_regist_connect_efficacy_ok.setVisibility(View.VISIBLE);
+                                        //                                            viewHolder.btnCustomIpOk.setBackgroundColor(getResources().getColor(R.color.ok_blue));
+                                        isCheckSuccess = true;
+                                        doAuth();
+                                    });
+
+                                } else {
+                                    isCheckFinished = true;
+                                    myHandler.post(() -> {
+                                        isCheckFinished = false;
+                                        ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_connect_fail_please_input_corrent_ip_and_port));
+                                    });
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+//            doAuth();
+        }
+    }
+
+    private void doAuth() {
+        //校验完成并且通过才去登录认证
+        if (isCheckFinished && isCheckSuccess) {
+            availableIPlist.clear();
+            LoginModel loginModel = new LoginModel(viewHolder.userUnit.getText().toString(),
+                    viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString());
+            availableIPMap.put(viewHolder.userUnit.getText().toString(), loginModel);
+            availableIPlist.addAll(SetToListUtil.setToArrayList(availableIPMap));
+            availableIPlist.remove(viewHolder.userUnit.getText().toString());
+            availableIPlist.add(0, viewHolder.userUnit.getText().toString());
+            availableIPlist.add(getString(R.string.text_add_unit));
+            xcDropDownListView.setItemsData(availableIPlist);
+            reAuthCount = 0;
+            int code = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString());
+            if (code == BaseCommonCode.SUCCESS_CODE) {
+                changeProgressMsg(getString(R.string.authing));
+            }
+            popupWindow.dismiss();
+            isCheckSuccess = false;
+            isCheckFinished = false;
+        }
+    }
+
+    private class IdcardLoginClickListener implements OnClickListener{
+        @Override
+        public void onClick(View v){
+            if(ll_idcard_info.getVisibility() == View.GONE){
+                et_invitation_code.setVisibility(View.GONE);
+                et_user_name.setVisibility(View.GONE);
+                ll_idcard_info.setVisibility(View.VISIBLE);
+                btn_idcard_login.setText(R.string.text_invitation_code_regist);
+            }else {
+                et_invitation_code.setVisibility(View.VISIBLE);
+                et_user_name.setVisibility(View.VISIBLE);
+                ll_idcard_info.setVisibility(View.GONE);
+                btn_idcard_login.setText(getString(R.string.text_input_id_card));
+            }
+            llreAuthInfo.setVisibility(View.GONE);
+        }
+    }
+    /**
+     * 检测姓名
+     * @param name
+     * @return
+     */
+    private boolean checkName(String name) {
+        boolean result = false;
+        if (!TextUtils.isEmpty(name)&&name.length()>=2&&name.length()<=7) {
+            String pas = "^[a-zA-Z\\u4e00-\\u9fa5][a-zA-Z0-9\\u4e00-\\u9fa5]*$";
+            Pattern p = Pattern.compile(pas);
+            Matcher m = p.matcher(name);
+            if (m.matches()) {
+                result = true;
+            }
+        }
+        if(!result){
+            ptt.terminalsdk.tools.ToastUtil.showToast(RegisterActivity.this,getString(R.string.text_input_name_regex));
+        }
+        return result;
+    }
+
+    private void exit() {
+        finish();
+        Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
+        stoppedCallIntent.putExtra("stoppedResult", "0");
+        PadApplication.getPadApplication().isPttPress = false;
+    }
 }

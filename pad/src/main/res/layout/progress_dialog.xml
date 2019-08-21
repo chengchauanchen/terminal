@@ -14,15 +14,15 @@
 
         <ImageView
             android:id="@+id/progress_dialog_img"
-            android:layout_width="@dimen/dp_60"
-            android:layout_height="@dimen/dp_60"
+            android:layout_width="@dimen/progress_dialog_size"
+            android:layout_height="@dimen/progress_dialog_size"
             android:layout_centerHorizontal="true"
             android:src="@mipmap/loading" />
 
         <ImageView
             android:id="@+id/iv_loading_bg"
-            android:layout_width="@dimen/dp_60"
-            android:layout_height="@dimen/dp_60"
+            android:layout_width="@dimen/progress_dialog_size"
+            android:layout_height="@dimen/progress_dialog_size"
             android:layout_centerHorizontal="true"
             android:src="@mipmap/loading_bg" />
 
@@ -33,7 +33,8 @@
             android:layout_below="@id/progress_dialog_img"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="5dp"
-            android:textColor="@color/loading_tv" />
+            android:textColor="@color/loading_tv"
+            android:textSize="@dimen/progress_dialog_text_size"/>
     </RelativeLayout>
 
 

@@ -621,4 +621,14 @@
     <color name="chat_text_color_right">#000000</color>
     <color name="chat_other_text_color">#ffffff</color>
 
+
+    <color name="regist_edit_bg_color">#cfd1d5</color>
+    <color name="regist_edit_text_color">#313131</color>
+    <color name="regist_edit_text_other_color">#4DA1E6</color>
+    <color name="regist_edit_text_hint_color">#424242</color>
+    <color name="regist_botton_text_color">#ffffff</color>
+    <color name="regist_botton_color">#0091ff</color>
+    <color name="regist_botton_press_color">#044C83</color>
+    <color name="regist_ip_bg_color">#313131</color>
+
 </resources>

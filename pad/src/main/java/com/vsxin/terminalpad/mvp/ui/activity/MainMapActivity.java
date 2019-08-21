@@ -103,6 +103,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     RelativeLayout rl_group_call;
     @BindView(R.id.iv_group_call_bg)
     ImageView bnt_group_call;
+    @BindView(R.id.iv_ptt)
+    ImageView iv_ptt;
     @BindView(R.id.tx_ptt_time)
     TextView tx_ptt_time;
     @BindView(R.id.tx_ptt_group_name)
@@ -557,7 +559,11 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     //PTT抬起以后
     private void pttUpDoThing() {
         getLogger().info("ptt.pttUpDoThing执行了 isPttPress：" + PadApplication.getPadApplication().isPttPress);
-        mHandler.post(() -> tx_ptt_time.setText(getString(R.string.text_ptt)));
+        mHandler.post(() -> {
+            iv_ptt.setVisibility(View.VISIBLE);
+            tx_ptt_time.setText(getString(R.string.text_ptt));
+            tx_ptt_time.setVisibility(View.INVISIBLE);
+        });
         MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
         if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
             return;
@@ -786,6 +792,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                         mHandler.removeMessages(HANDLER_GROUP_TIME);
                         timeProgress = 60;
                         tx_ptt_time.setText(String.valueOf(timeProgress));
+                        tx_ptt_time.setVisibility(View.VISIBLE);
+                        iv_ptt.setVisibility(View.INVISIBLE);
                         mHandler.sendEmptyMessageDelayed(HANDLER_GROUP_TIME, 1000);
                         change2Speaking();
                         MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
@@ -846,6 +854,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                         mHandler.removeMessages(HANDLER_GROUP_TIME);
                         timeProgress = 60;
                         tx_ptt_time.setText(getString(R.string.text_ptt));
+                        tx_ptt_time.setVisibility(View.INVISIBLE);
+                        iv_ptt.setVisibility(View.VISIBLE);
                         change2Silence();
                     }
                 }
