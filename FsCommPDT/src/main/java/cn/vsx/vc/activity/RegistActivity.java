@@ -488,6 +488,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 ll_idcard_info.setVisibility(View.GONE);
                 btn_idcard_login.setText("模拟身份证号登陆");
             }
+            llreAuthInfo.setVisibility(View.GONE);
         }
     }
 
@@ -501,17 +502,15 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 userName.setVisibility(View.GONE);
                 btn_confirm.setVisibility(View.VISIBLE);
                 llreAuthInfo.setVisibility(View.VISIBLE);
-
-
                 btnAddMember.setText(R.string.text_invitation_code_regist);
             } else {
                 userOrg.setVisibility(View.VISIBLE);
                 userName.setVisibility(View.VISIBLE);
                 btn_confirm.setVisibility(View.VISIBLE);
                 llreAuthInfo.setVisibility(View.GONE);
-
                 btnAddMember.setText(R.string.text_simulated_police_officer);
             }
+            ll_idcard_info.setVisibility(View.GONE);
         }
     }
 

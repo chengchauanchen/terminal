@@ -743,6 +743,7 @@ public class PullLivingService extends BaseService{
     private void pttUpDoThing(){
         if(MyApplication.instance.isPttPress){
             MyApplication.instance.isPttPress = false;
+
             //没有组呼权限
             if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())){
                 return;
@@ -754,9 +755,9 @@ public class PullLivingService extends BaseService{
             }
             MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
             //            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
         }
         setViewEnable(true);
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
     }
 
     private void setViewEnable(boolean isEnable){

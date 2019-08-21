@@ -624,8 +624,8 @@ public class CallingService extends BaseService{
                 startAutoHangUpTimer();
             }
             MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
         }
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
     }
 
     private BroadcastReceiver mBroadcastReceiv = new BroadcastReceiver(){

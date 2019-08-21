@@ -200,7 +200,7 @@ public class PullOutGB28181Service extends BaseService{
     /**
      * 收到OutGB28181的播放地址
      **/
-    private ReceiveHiKvisionUrlHandler receiveHiKvisionUrlHandler = (success,result) -> {
+    private ReceiveHiKvisionUrlHandler receiveHiKvisionUrlHandler = (success,result,deviceId) -> {
         ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.force_stop_watch));
         mHandler.post(new Runnable() {
             @Override

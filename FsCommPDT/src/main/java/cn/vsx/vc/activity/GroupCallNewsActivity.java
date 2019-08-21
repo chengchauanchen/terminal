@@ -575,8 +575,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 change2Silence();
             }
             MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
         }
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
     }
 
     private void change2Silence() {

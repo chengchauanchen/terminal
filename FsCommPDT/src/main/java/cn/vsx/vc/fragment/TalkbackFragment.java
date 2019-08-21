@@ -266,7 +266,9 @@ public class TalkbackFragment extends BaseFragment {
     private TextView tx_ptt_group_name;
 
     public void setViewEnable(boolean isEanble) {
+        to_current_group.setEnabled(isEanble);
         talkback_change_session.setEnabled(isEanble);
+        iv_volume_off_call.setEnabled(isEanble);
     }
 
     /**
@@ -1761,6 +1763,7 @@ public class TalkbackFragment extends BaseFragment {
     private void pttUpDoThing() {
         logger.info("ptt.pttUpDoThing执行了 isPttPress：" + MyApplication.instance.isPttPress);
         MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
         if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
             return;
         }
@@ -1773,8 +1776,6 @@ public class TalkbackFragment extends BaseFragment {
 
         }
         MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
-
     }
 
     //PTT按下以后

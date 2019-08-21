@@ -278,14 +278,14 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler(final boolean isCannotCheck) {
             logger.info("raidobutton被禁了 ？ isCannotCheck：" + isCannotCheck);
-//            bv_talk_back.setEnabled(!isCannotCheck);
-//            bv_talk_back.setClickable(!isCannotCheck);
-//            bv_person_contacts.setEnabled(!isCannotCheck);
-//            bv_person_contacts.setClickable(!isCannotCheck);
-//            bv_group_contacts.setEnabled(!isCannotCheck);
-//            bv_group_contacts.setClickable(!isCannotCheck);
-//            bv_setting.setEnabled(!isCannotCheck);
-//            bv_setting.setClickable(!isCannotCheck);
+            bv_talk_back.setEnabled(!isCannotCheck);
+            bv_talk_back.setClickable(!isCannotCheck);
+            bv_person_contacts.setEnabled(!isCannotCheck);
+            bv_person_contacts.setClickable(!isCannotCheck);
+            bv_group_contacts.setEnabled(!isCannotCheck);
+            bv_group_contacts.setClickable(!isCannotCheck);
+            bv_setting.setEnabled(!isCannotCheck);
+            bv_setting.setClickable(!isCannotCheck);
             if (!MyApplication.instance.isMoved) {
                 synchronized (MyApplication.instance) {
                     logger.info("-------ReceiveCallingCannotClickHandler--------" + MyApplication.instance.isChanging);
@@ -355,9 +355,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     MyApplication.instance.isPttPress = false;
 
                     logger.info("小手雷pttUp事件，停止说话");
-                    if (PhoneAdapter.isF25()) {
-                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
-                    }
+
+                }
+                if (PhoneAdapter.isF25()) {
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
                 }
             });
         }
@@ -1060,7 +1061,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         //开启服务，开启锁屏界面
         startService(new Intent(NewMainActivity.this, LockScreenService.class));
-        SpecificSDK.initVoip();
+        SpecificSDK.initVoipSpecificSDK();
 
         MyTerminalFactory.getSDK().getVideoProxy().setActivity(this);
 
