@@ -59,6 +59,6 @@ public interface IBaseMessageView extends IRefreshView<TerminalMessage>{
 
     void refreshPersonContactsAdapter(int mposition, List<TerminalMessage> terminalMessageList, boolean isPlaying, boolean isSameItem);
 
-
+    void chatListItemClick(TerminalMessage terminalMessage, boolean isReceiver);
 
 }

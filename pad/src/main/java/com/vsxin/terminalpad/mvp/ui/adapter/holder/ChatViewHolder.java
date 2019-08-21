@@ -36,6 +36,7 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
     public ImageView ivUnread;
     public ImageView ivVoice;//语音图标
     public ImageView iv_voice_image_anim;//播放组呼录音的图标动画
+    public TextView tvVoiceContent;//组呼录音的语音转文字
     //个呼
     public View vLine ;
     public RelativeLayout llCallListener ;
@@ -163,6 +164,7 @@ public class ChatViewHolder extends RecyclerView.ViewHolder{
         tvDuration = (TextView) itemView.findViewById(R.id.tv_voice_length);
         ivVoice = (ImageView) itemView.findViewById(R.id.iv_voice);
         iv_voice_image_anim = (ImageView) itemView.findViewById(R.id.iv_voice_image_anim);
+        tvVoiceContent = (TextView) itemView.findViewById(R.id.tv_voice_content);
     }
 
     //组呼---录音（接收）

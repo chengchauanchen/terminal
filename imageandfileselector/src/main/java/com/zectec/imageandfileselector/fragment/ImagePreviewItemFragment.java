@@ -86,6 +86,12 @@ public class ImagePreviewItemFragment extends BaseFragment{
     @Override
     public void initView(){
         mViewPager = rootView.findViewById(R.id.vp);
+        rootView.findViewById(R.id.news_bar_return).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
 //        iv_save_picture = rootView.findViewById(R.id.iv_save_picture);
         mImageList = getArguments().getParcelableArrayList(DATA);
         int pos = getArguments().getInt(POSITION);

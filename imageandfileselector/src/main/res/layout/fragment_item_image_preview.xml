@@ -18,6 +18,12 @@
 
     </android.support.v4.view.ViewPager>
 
+    <ImageView
+        android:id="@+id/news_bar_return"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="20dp"
+        android:src="@drawable/news_bar_return" />
 
     <!--<ImageView-->
     <!--android:id="@+id/iv_save_picture"-->

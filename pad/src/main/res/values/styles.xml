@@ -87,4 +87,33 @@
     <style name="function_wait_text">
         <item name="android:textColor">@color/function_wait_text</item>
     </style>
+
+    <style name="chat_text_name_style">
+        <item name="android:textColor">@color/chat_other_text_color</item>
+        <item name="android:textSize">@dimen/chat_other_text_size</item>
+        <item name="android:gravity">center</item>
+    </style>
+    <style name="ShadleStyle">
+        <item name="android:paddingLeft">5dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:textSize">20px</item>
+        <item name="android:shadowColor">#4d4d4d</item>
+        <item name="android:shadowDx">0</item>
+        <item name="android:shadowDy">0</item>
+        <item name="android:shadowRadius">10</item>
+    </style>
+
+    <style name="chat_warning_common_tv">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">@dimen/chat_text_size</item>
+    </style>
+
+    <style name="warning_common_tv">
+        <item name="android:textColor">@color/warning_common_tv</item>
+        <item name="android:textSize">@dimen/chat_text_size</item>
+    </style>
+    <style name="warning_name_tv">
+        <item name="android:textColor">@color/edittext_textcolor</item>
+        <item name="android:textSize">@dimen/chat_text_size</item>
+    </style>
 </resources>

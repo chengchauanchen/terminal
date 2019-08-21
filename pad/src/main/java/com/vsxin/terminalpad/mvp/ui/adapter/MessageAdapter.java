@@ -16,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
-import android.widget.FrameLayout;
 import android.widget.ListAdapter;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -31,14 +30,16 @@ import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.entity.PlayType;
 import com.vsxin.terminalpad.mvp.ui.adapter.holder.ChatViewHolder;
 import com.vsxin.terminalpad.mvp.ui.fragment.VideoPreviewItemFragment;
-import com.vsxin.terminalpad.receiveHandler.ReceiveGoWatchRTSPHandler;
+import com.vsxin.terminalpad.receiveHandler.ReceiveGetHistoryLiveUrlsHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverChatListItemClickHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverIndividualCallFromMsgItemHandler;
 import com.vsxin.terminalpad.utils.DensityUtil;
+import com.vsxin.terminalpad.utils.FragmentManage;
 import com.zectec.imageandfileselector.adapter.FaceRecognitionAdapter;
 import com.zectec.imageandfileselector.bean.FaceRecognitionBean;
 import com.zectec.imageandfileselector.bean.ImageBean;
 import com.zectec.imageandfileselector.fragment.ImagePreviewItemFragment;
+import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileCheckMessageHandler;
 import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileHandler;
 import com.zectec.imageandfileselector.utils.DateUtils;
 import com.zectec.imageandfileselector.utils.FileIcons;
@@ -67,6 +68,7 @@ import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
+import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
@@ -124,7 +126,7 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
     private static final int MIN_CLICK_DELAY_TIME = 1000;
     private long lastClickTime = 0;
 
-    FrameLayout fragment_contener;
+//    FrameLayout fragment_contener;
 
     private Logger logger = Logger.getLogger(getClass());
     private boolean isGroupChat;
@@ -171,9 +173,9 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
         this.isGroupChat = isGroup;
     }
 
-    public void setFragment_contener(FrameLayout fragment_contener) {
-        this.fragment_contener = fragment_contener;
-    }
+//    public void setFragment_contener(FrameLayout fragment_contener) {
+//        this.fragment_contener = fragment_contener;
+//    }
 
     public void setEnable(boolean enable) {
         isEnable = enable;
@@ -721,6 +723,7 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
                     individualNewsRecordItemClick(terminalMessage, position);
                     groupCallItemClick(terminalMessage, position);
                     gb28181ItemClick(terminalMessage, viewType);
+                    mergeTransmit(terminalMessage,viewType);
                 }
                 InputMethodManager imm = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(holder.reBubble.getWindowToken(), 0);
@@ -733,8 +736,7 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
                     if (terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
                         return;
                     } else {
-//                        IndividualNewsActivity activity = ActivityCollector.getActivity(IndividualNewsActivity.class);
-//                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO, true, activity.getChatTargetId());
+                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileCheckMessageHandler.class, ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO, true, 0);
                     }
                 }
             });
@@ -744,6 +746,7 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
                 if (PadApplication.getPadApplication().getGroupSpeakState() != GroupCallSpeakState.IDLE) {
                     return;
                 } else {
+                    // TODO: 2019/8/20 跳转到个人页面 
 //                    Intent intent = new Intent(activity, UserInfoActivity.class);
 //                    intent.putExtra("userId", terminalMessage.messageFromId);
 //                    intent.putExtra("userName", terminalMessage.messageFromName);
@@ -1283,7 +1286,7 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
     private void handlerAvatar(TerminalMessage terminalMessage, int position, ChatViewHolder holder) {
         if(activity!=null&&!activity.isDestroyed()){
             Glide.with(activity)
-                    .load(com.zectec.imageandfileselector.R.drawable.user_photo)
+                    .load(R.drawable.img_police)
 //                    .asBitmap()
 //                    .placeholder(com.zectec.imageandfileselector.R.drawable.user_photo)//加载中显示的图片
 //                    .error(com.zectec.imageandfileselector.R.drawable.user_photo)//加载失败时显示的图片
@@ -1734,13 +1737,45 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
     }
 
     private void gb28181ItemClick(TerminalMessage terminalMessage, int viewType){
-        if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() ||
-                terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
+        if (terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()) {
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())){
-                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGoWatchRTSPHandler.class,terminalMessage);
+                if(terminalMessage.messageBody.containsKey(JsonParam.GB28181_RTSP_URL)){
+                    //gb28181Url = terminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL);
+                    String deviceId = terminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL);
+                    String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
+                    List<String> liveUrls = new ArrayList<>();
+                    liveUrls.add(gateWayUrl);
+                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler.class, BaseCommonCode.SUCCESS_CODE,liveUrls,deviceId,0);
+                }else{
+                    ToastUtil.showToast(activity, activity.getString(R.string.text_pull_data_error));
+                }
             }else {
                 ToastUtil.showToast(activity, activity.getString(R.string.text_has_no_image_receiver_authority));
             }
+        } else if (terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()) {
+            if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ACCEPT.name())){
+                if(terminalMessage.messageBody.containsKey(JsonParam.DEVICE_ID)){
+                    final String deviceId = terminalMessage.messageBody.getString(JsonParam.DEVICE_ID);
+                    TerminalFactory.getSDK().getDataManager().getHikvisionUrl(terminalMessage);
+                }else{
+                    ToastUtil.showToast(activity, activity.getString(R.string.text_pull_data_error));
+                }
+            }else {
+                ToastUtil.showToast(activity, activity.getString(R.string.text_has_no_image_receiver_authority));
+            }
+        }
+    }
+
+
+    /**
+     * 合并转发的点击事件
+     * @param terminalMessage
+     * @param viewType
+     */
+    private void mergeTransmit(TerminalMessage terminalMessage, int viewType) {
+        if (terminalMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()) {
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverChatListItemClickHandler.class,
+                    terminalMessage, isReceiver(terminalMessage));
         }
     }
 
@@ -1878,11 +1913,12 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
                 setViewVisibility(download_tv_progressBars, View.VISIBLE);
                 MyTerminalFactory.getSDK().download(terminalMessage, true);
             }else {
-                setViewVisibility(fragment_contener, View.VISIBLE);
+//                setViewVisibility(fragment_contener, View.VISIBLE);
                 ImagePreviewItemFragment imagePreviewItemFragment = ImagePreviewItemFragment.getInstance(mImgList, currentPos);
-
-                imagePreviewItemFragment.setFragment_contener(fragment_contener);
-                activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, imagePreviewItemFragment).commit();
+//
+//                imagePreviewItemFragment.setFragment_contener(fragment_contener);
+//                activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, imagePreviewItemFragment).commit();
+                FragmentManage.startFragment(activity, imagePreviewItemFragment);
             }
         }
     }
@@ -1944,21 +1980,25 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
             //下载图片
             return;
         }
-        setViewVisibility(fragment_contener, View.VISIBLE);
+//        setViewVisibility(fragment_contener, View.VISIBLE);
         //        ImagePreviewItemFragment imagePreviewItemFragment = ImagePreviewItemFragment.getInstance(terminalMessage.messagePath, isReceiver(terminalMessage));
         ImagePreviewItemFragment imagePreviewItemFragment = ImagePreviewItemFragment.getInstance(mImgList, currentPos);
 
-        imagePreviewItemFragment.setFragment_contener(fragment_contener);
-        activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, imagePreviewItemFragment).commit();
+//        imagePreviewItemFragment.setFragment_contener(fragment_contener);
+//        activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, imagePreviewItemFragment).commit();
+
+        FragmentManage.startFragment(activity, imagePreviewItemFragment);
     }
 
     public void openVideo(TerminalMessage terminalMessage,File file){
         if(terminalMessage.messageType == MessageType.VIDEO_CLIPS.getCode()){
             if(file.exists()){
-                setViewVisibility(fragment_contener, View.VISIBLE);
+//                setViewVisibility(fragment_contener, View.VISIBLE);
                 VideoPreviewItemFragment videoPreviewItemFragment = VideoPreviewItemFragment.newInstance(file.getAbsolutePath());
-                videoPreviewItemFragment.setFragment_contener(fragment_contener);
-                activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, videoPreviewItemFragment).commit();
+//                videoPreviewItemFragment.setFragment_contener(fragment_contener);
+//                activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, videoPreviewItemFragment).commit();
+
+                FragmentManage.startFragment(activity, videoPreviewItemFragment);
             }else {
                 ToastUtil.showToast(activity,activity.getString(R.string.text_down_load_video_fail));
             }

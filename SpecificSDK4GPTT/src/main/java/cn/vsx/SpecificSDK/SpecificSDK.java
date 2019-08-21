@@ -366,7 +366,7 @@ public class SpecificSDK extends TerminalSDK4Android {
     /**
      * 登陆成功之后才能调用此方法
      */
-    public static void initVoip(){
+    public static void initVoipSpecificSDK(){
         String account = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L)+"";
         String voipServerIp = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_IP, "");
         String voipServerPort = MyTerminalFactory.getSDK().getParam(Params.VOIP_SERVER_PORT, 0)+"";

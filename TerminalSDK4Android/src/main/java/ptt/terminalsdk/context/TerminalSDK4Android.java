@@ -1312,6 +1312,16 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		getAudioProxy().start(TerminalFactory.getSDK().getParam(Params.PROTOCOL_TYPE,Params.UDP));
 	}
 
+	@Override
+	public void initVoip() {
+
+	}
+
+	@Override
+	public Object getEventManager() {
+		return null;
+	}
+
 	/**
 	 * 全局请求的统一配置（以下配置根据自身情况选择性的配置即可）
 	 */

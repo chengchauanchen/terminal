@@ -18,6 +18,7 @@
             android:layout_height="34px"
             android:src="@drawable/news_bar_return"
             android:layout_marginLeft="10px" />
+
         <View
             android:id="@+id/news_bar_line"
             android:layout_width="0.5px"
@@ -25,9 +26,7 @@
             android:layout_marginLeft="11px"
             android:layout_marginRight="11px"
             android:background="@color/group_call_news_bar_line" />
-    
-    
-    
+
         <TextView
             android:id="@+id/tv_chat_name"
             android:layout_width="0dp"
@@ -75,12 +74,18 @@
             android:layout_marginRight="@dimen/dp_10"/>
     </LinearLayout>
 
+    <View
+        android:id="@+id/v_line"
+        android:layout_width="match_parent"
+        android:layout_height="0.5px"
+        android:background="@color/diver_bg"
+        android:layout_below="@id/rl_topbar"/>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:layout_below="@+id/rl_topbar"
-        >
+        android:layout_below="@+id/v_line">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -104,7 +109,8 @@
         <com.vsxin.terminalpad.view.FunctionHidePlus
             android:id="@+id/funcation"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:visibility="gone">
         </com.vsxin.terminalpad.view.FunctionHidePlus>
 
     </LinearLayout>

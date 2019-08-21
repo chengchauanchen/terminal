@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/rl_topbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="87px">
+
+        <ImageView
+            android:id="@+id/news_bar_return"
+            android:layout_width="46px"
+            android:layout_height="34px"
+            android:layout_marginLeft="10px"
+            android:src="@drawable/news_bar_return" />
+
+        <View
+            android:id="@+id/news_bar_line"
+            android:layout_width="0.5px"
+            android:layout_height="30px"
+            android:layout_marginLeft="11px"
+            android:layout_marginRight="11px"
+            android:background="@color/group_call_news_bar_line" />
+
+        <TextView
+            android:id="@+id/bar_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:gravity="center_vertical"
+            android:textColor="@color/bar_text_white"
+            android:textSize="25px" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5px"
+        android:background="@color/diver_bg"
+        android:layout_below="@id/rl_topbar"/>
+</LinearLayout>
+

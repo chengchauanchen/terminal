@@ -75,7 +75,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        />
+        android:visibility="gone"/>
     
     <RelativeLayout
         android:id="@+id/rl_include_listview"
@@ -158,29 +158,32 @@
     <LinearLayout
         android:id="@+id/ll_living"
         android:layout_width="match_parent"
-        android:layout_height="40px"
-        android:background="@color/blue_008_60"
+        android:layout_height="50px"
+        android:layout_marginLeft="50px"
+        android:layout_marginRight="50px"
+        android:background="@drawable/black_round_bg2"
         android:layout_below="@+id/rl_topbar"
+        android:layout_marginTop="5px"
         android:gravity="center"
         android:orientation="horizontal"
         android:visibility="gone">
         
         <ImageView
-            android:layout_width="27.4dp"
-            android:layout_height="15dp"
+            android:layout_width="31px"
+            android:layout_height="23px"
             android:src="@drawable/video_icon" />
         
         <TextView
             android:id="@+id/tv_living_number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10px"
+            android:layout_marginLeft="15px"
             android:singleLine="true"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
-            android:text="3人  正在上报"
-            android:textColor="@color/white"
-            android:textSize="16px" />
+            android:text="0人  正在上报"
+            android:textColor="@color/green_00f"
+            android:textSize="20px" />
     
     </LinearLayout>
     

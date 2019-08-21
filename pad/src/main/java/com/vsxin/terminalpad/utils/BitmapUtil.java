@@ -239,6 +239,29 @@ public class BitmapUtil {
 		}
 	}
 
+
+	/**
+	 * 根据设备类型获取不在线设备对应的图标
+	 *
+	 * @param type
+	 * @return
+	 */
+	public static int getPadDeviceImageResourceByType(int type) {
+		if (type == TerminalMemberType.TERMINAL_PC.getCode()) {
+			return R.drawable.img_phone;
+		} else if (type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()) {
+			return R.drawable.img_recorder;
+		} else if (type == TerminalMemberType.TERMINAL_UAV.getCode()) {
+			return R.drawable.img_uav;
+		} else if (type == TerminalMemberType.TERMINAL_HDMI.getCode()) {
+			return R.drawable.img_phone;
+		} else if (type == TerminalMemberType.TERMINAL_LTE.getCode()) {
+			return R.drawable.img_lte;
+		} else {
+			return R.drawable.img_phone;
+		}
+	}
+
 	/**
 	 * 根据Volume 显示是否静音的图标
 	 * @return
@@ -256,7 +279,7 @@ public class BitmapUtil {
 		if(ApkUtil.isAnjian()){
 			return R.drawable.user_photo_anjian;
 		}
-		return R.drawable.user_photo;
+		return R.drawable.img_police;
 	}
 
 	/**

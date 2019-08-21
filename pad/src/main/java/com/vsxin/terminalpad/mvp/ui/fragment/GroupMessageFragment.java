@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -17,10 +18,14 @@ import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.presenter.GroupMessagePresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IGroupMessageView;
 import com.vsxin.terminalpad.receiveHandler.ReceiveUpdateMainFrgamentPTTButtonHandler;
+import com.vsxin.terminalpad.utils.Constants;
+import com.vsxin.terminalpad.utils.FragmentManage;
 import com.vsxin.terminalpad.view.RoundProgressBarWidthNumber;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.http.util.TextUtils;
+
+import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.ResponseGroupType;
@@ -29,6 +34,7 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -50,7 +56,11 @@ public class GroupMessageFragment extends MessageBaseFragment<IGroupMessageView,
     private Handler mHandler = new Handler(Looper.getMainLooper());
     private RelativeLayout progressGroupCall;
     private TextView tv_pre_speak;
+    private LinearLayout ll_living;
+    private TextView tv_living_number;
     RoundProgressBarWidthNumber groupCallTimeProgress;
+    //获取组内正在上报人数的间隔时间
+    private static final long GET_GROUP_LIVING_INTERVAL_TIME = 20*1000;
 
     @Override
     protected int getLayoutResID(){
@@ -63,6 +73,15 @@ public class GroupMessageFragment extends MessageBaseFragment<IGroupMessageView,
         progressGroupCall = view.findViewById(R.id.progress_group_call);
         tv_pre_speak = view.findViewById(R.id.tv_pre_speak);
         groupCallTimeProgress = view.findViewById(R.id.group_call_time_progress);
+        ll_living = (LinearLayout) view.findViewById(R.id.ll_living);
+        tv_living_number = (TextView) view.findViewById(R.id.tv_living_number);
+//        fl_fragment_container = (FrameLayout) view.findViewById(R.id.fl_fragment_container);
+        view.findViewById(R.id.group_live_history).setOnClickListener(v -> {
+            goToVideoLiveList(false);
+        });
+        ll_living.setOnClickListener(v -> {
+            goToVideoLiveList(true);
+        });
         ptt.setOnTouchListener(mOnTouchListener);
     }
 
@@ -71,7 +90,16 @@ public class GroupMessageFragment extends MessageBaseFragment<IGroupMessageView,
         super.initData();
         isCurrentGroup = (userId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
         TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateMainFrgamentPTTButtonHandler.class,false);
+        getGroupLivingList();
         refreshPtt();
+    }
+
+    /**
+     * 获取组内正在上报人数
+     */
+    private void getGroupLivingList(){
+        long groupUniqueNo = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupUniqueNo(userId);
+        MyTerminalFactory.getSDK().getGroupManager().getGroupLivingList(String.valueOf(groupUniqueNo),true);
     }
 
     @Override
@@ -244,7 +272,9 @@ public class GroupMessageFragment extends MessageBaseFragment<IGroupMessageView,
             TextViewCompat.setTextAppearance(ptt, R.style.ptt_gray);
         }
 
-        pttUpDoThing();
+        if (PadApplication.getPadApplication().isPttPress) {
+            pttUpDoThing();
+        }
 
         allViewDefault();
         if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {//没有组呼听的功能不显示通知
@@ -402,5 +432,47 @@ public class GroupMessageFragment extends MessageBaseFragment<IGroupMessageView,
         MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
     }
+
+
+    @Override
+    public void getGroupLivingList(List<TerminalMessage> beanList, int resultCode, String resultDesc, boolean forNumber) {
+        mHandler.post(() -> {
+            if(resultCode == BaseCommonCode.SUCCESS_CODE && !beanList.isEmpty()){
+                //正在上报的人
+                if(tv_living_number!=null){
+                    tv_living_number.setText(String.format(GroupMessageFragment.this.getString(R.string.group_living_number),beanList.size()));
+                }
+                if(ll_living!=null){
+                    ll_living.setVisibility(View.VISIBLE);
+                }
+            }else{
+                //没有正在上报的人
+                if(tv_living_number!=null){
+                    tv_living_number.setText("");
+                }
+                if(ll_living!=null){
+                    ll_living.setVisibility(View.GONE);
+                }
+            }
+        });
+        if(forNumber){
+            mHandler.postDelayed(() -> getGroupLivingList(),GET_GROUP_LIVING_INTERVAL_TIME);
+        }
+    }
+
+    /**
+     * 跳转到组内上报列表
+     * @param isGroupVideoLiving 是否是正在上报列表
+     */
+    private void goToVideoLiveList(boolean isGroupVideoLiving){
+        GroupVideoLiveListFragment fragment = new GroupVideoLiveListFragment();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(Constants.IS_GROUP_VIDEO_LIVING,isGroupVideoLiving);
+        bundle.putInt(Constants.GROUP_ID,userId);
+        fragment.setArguments(bundle);
+        FragmentManage.startFragment(getActivity(), fragment);
+    }
+
+
 
 }

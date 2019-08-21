@@ -12,12 +12,16 @@ import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.view.IBaseMessageView;
 import com.vsxin.terminalpad.mvp.entity.PlayType;
 import com.vsxin.terminalpad.mvp.ui.widget.ChooseDevicesDialog;
+import com.vsxin.terminalpad.receiveHandler.ReceiveGetHistoryLiveUrlsHandler;
+import com.vsxin.terminalpad.receiveHandler.ReceiveGoWatchLiveHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverActivePushVideoHandler;
+import com.vsxin.terminalpad.receiveHandler.ReceiverChatListItemClickHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverIndividualCallFromMsgItemHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
 import com.vsxin.terminalpad.record.MediaManager;
 import com.vsxin.terminalpad.utils.DensityUtil;
 import com.vsxin.terminalpad.utils.MyDataUtil;
+import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileCheckMessageHandler;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.http.util.TextUtils;
@@ -53,6 +57,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.GetHistoryMessageRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadFinishHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHiKvisionUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMessageNotifyDateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMultimediaFailHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMultimediaMessageCompleteHandler;
@@ -69,6 +74,9 @@ import okio.BufferedSink;
 import okio.BufferedSource;
 import okio.Okio;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
+import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 
 /**
  * 作者：xuxiaolong
@@ -102,7 +110,7 @@ public class BaseMessagePresenter<V extends IBaseMessageView> extends RefreshPre
 
 
 
-    public void getMessageFromServer(boolean isGroup,long uniqueNo,int userId,int messageCount){
+    public void getMessageFromServer(boolean isGroup,long uniqueNo,int userId,int messageCount,boolean isGetMore){
 
         long messageId = this.tempGetMessage != null ? this.tempGetMessage.messageId : 0L;
         long messageVersion = this.tempGetMessage != null ? this.tempGetMessage.messageVersion : 0L;
@@ -115,7 +123,9 @@ public class BaseMessagePresenter<V extends IBaseMessageView> extends RefreshPre
                     groupUniqueNo = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupUniqueNo(userId);
                 }
             }
-
+         if(isGetMore&&data.size()>0){
+             tempPage++;
+         }
             MyTerminalFactory.getSDK().getTerminalMessageManager().getHistoryMessageRecord(isGroup, (long)userId, messageId, groupUniqueNo, messageVersion, messageCount);
         });
     }
@@ -125,29 +135,45 @@ public class BaseMessagePresenter<V extends IBaseMessageView> extends RefreshPre
     }
 
     public void registReceiveHandler(){
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverChatListItemClickHandler);
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileCheckMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getHistoryMessageRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiverIndividualCallFromMsgItemHandler);
-        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverReplayIndividualChatVoiceHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveMultimediaMessageCompleteHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveHistoryMultimediaFailHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveDownloadProgressHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveDownloadFinishHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveGetHistoryLiveUrlsHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveHiKvisionUrlHandler);
     }
 
     public void unregistReceiveHandler(){
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverChatListItemClickHandler);
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverSendFileCheckMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(getHistoryMessageRecordHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePersonMessageNotifyDateHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveNotifyDataMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiverIndividualCallFromMsgItemHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveDownloadProgressHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveDownloadFinishHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveGetHistoryLiveUrlsHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveHiKvisionUrlHandler);
+    }
+
+    public void onResume(){
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverReplayIndividualChatVoiceHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveMultimediaMessageCompleteHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveHistoryMultimediaFailHandler);
+    }
+
+    public void onPause(){
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverReplayIndividualChatVoiceHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMultimediaMessageCompleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveHistoryMultimediaFailHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveDownloadProgressHandler);
     }
 
     private boolean refreshing;
-    private double tempPage;
+    private int tempPage = 1;
     private GetHistoryMessageRecordHandler getHistoryMessageRecordHandler = messageRecord -> {
         //加上同步，防止更新消息时又来新的消息，导致错乱
         synchronized (BaseMessagePresenter.this) {
@@ -479,11 +505,104 @@ public class BaseMessagePresenter<V extends IBaseMessageView> extends RefreshPre
     };
 
 
+
+    /**
+     * 会话界面列表条目点击事件
+     **/
+
+    private ReceiverChatListItemClickHandler mReceiverChatListItemClickHandler = new ReceiverChatListItemClickHandler() {
+        @Override
+        public void handler(final TerminalMessage terminalMessage, boolean isReceiver) {
+            getView().chatListItemClick(terminalMessage,isReceiver);
+        }
+    };
+
+    /**
+     * 选择相片、打开相机、选择文件、发送位置、上报图像、请求上报图像
+     */
+    public ReceiverSendFileCheckMessageHandler mReceiverSendFileCheckMessageHandler = new ReceiverSendFileCheckMessageHandler() {
+        @Override
+        public void handler(int msgType, final boolean showOrHidden, int userId) {
+            Observable.just(msgType)
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(msgType1 -> {
+//                        if (showOrHidden) {
+                            switch (msgType1) {
+                                case ReceiverSendFileCheckMessageHandler.PHOTO_ALBUM://从相册中选择相片
+//                                    if (ContextCompat.checkSelfPermission(ChatBaseActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+//                                        ActivityCompat.requestPermissions(ChatBaseActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
+//                                    } else {
+//                                        setViewVisibility(fl_fragment_container, View.VISIBLE);
+//                                        getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, new ImageSelectorFragment()).commit();
+//                                    }
+                                    break;
+                                case ReceiverSendFileCheckMessageHandler.CAMERA://调用相机拍照
+//                                    autoObtainCameraPermission();
+                                    break;
+                                case ReceiverSendFileCheckMessageHandler.FILE://选取文件
+//                                    if (ContextCompat.checkSelfPermission(ChatBaseActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+//                                        ActivityCompat.requestPermissions(ChatBaseActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, STORAGE_PERMISSIONS_REQUEST_CODE);
+//                                    } else {
+//                                        setViewVisibility(fl_fragment_container, View.VISIBLE);
+//                                        getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, new FileMainFragment()).commit();
+//                                    }
+                                    break;
+                                case ReceiverSendFileCheckMessageHandler.POST_BACK_VIDEO://上报图像
+//                                    postVideo();
+                                    break;
+                                case ReceiverSendFileCheckMessageHandler.REQUEST_VIDEO://请求图像
+                                    requestVideo();
+                                    break;
+                                case ReceiverSendFileCheckMessageHandler.NFC://NFC
+//                                    checkNFC(userId,true);
+                                    break;
+                                case ReceiverSendFileCheckMessageHandler.QR_CODE://二维码
+//                                    showQRDialog();
+//                                    goToScan();
+                                    break;
+                            }
+//                        } else {
+//                            setViewVisibility(fl_fragment_container, View.GONE);
+//                        }
+                    });
+        }
+    };
+
+    /**
+     * 获取历史上报图像列表
+     */
+    private ReceiveGetHistoryLiveUrlsHandler mReceiveGetHistoryLiveUrlsHandler = new ReceiveGetHistoryLiveUrlsHandler() {
+        @Override
+        public void handler(int code,List<String> liveUrl,String name,int memberId) {
+            mHandler.post(() -> {
+               if(code == 0){
+                   MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGoWatchLiveHandler.class,liveUrl,name,memberId);
+               }else{
+                   getView().showMsg(R.string.text_get_video_info_fail);
+               }
+            });
+        }
+    };
+
+    /**
+     * 收到OutGB28181的播放地址
+     **/
+    private ReceiveHiKvisionUrlHandler receiveHiKvisionUrlHandler = (success, result,deviceId) -> {
+            if(success){
+                List<String> liveUrls = new ArrayList<>();
+                liveUrls.add(result);
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler.class, BaseCommonCode.SUCCESS_CODE,liveUrls,deviceId,0);
+            }else{
+                ToastUtil.showToast(MyTerminalFactory.getSDK().application,result);
+            }
+    };
+
+
     /**
      * 选择设备进行相应的操作
      * @param type
      */
-    private void goToChooseDevices(int type){
+    public void goToChooseDevices(int type){
         mHandler.post(() -> getView().showProgressDialog());
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
             Account account = DataUtil.getAccountByMemberNo(getView().getUserId(),true);
@@ -841,6 +960,32 @@ public class BaseMessagePresenter<V extends IBaseMessageView> extends RefreshPre
             getView().setListSelection(data.size() - 1);
             lastVersion = newTerminalMessage.messageVersion;
         }
+    }
+
+    public void requestVideo() {
+//        if(type == 0){
+            goToChooseDevices(ChooseDevicesDialog.TYPE_PULL_LIVE);
+//        }else {
+//            showProgressDialog();
+//            TerminalFactory.getSDK().getThreadPool().execute(()->{
+//                Account account = DataUtil.getAccountByMemberNo(userId,true);
+//                myHandler.post(this::dismissProgressDialog);
+//                Member member = null;
+//                if(account != null){
+//                    List<Member> members = account.getMembers();
+//                    for(Member next : members){
+//                        if(next.getType() == type){
+//                            member = next;
+//                            break;
+//                        }
+//                    }
+//                    if(member !=null){
+//                        goToPullLive(member);
+//                    }
+//                }
+//            });
+//
+//        }
     }
 
 }

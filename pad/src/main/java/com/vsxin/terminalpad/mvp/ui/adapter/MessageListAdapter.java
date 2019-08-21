@@ -102,7 +102,7 @@ public class MessageListAdapter extends BaseRecycleViewAdapter<TerminalMessage, 
         if(TerminalMessageUtil.isGroupMessage(terminalMessage)){
             holder.iv_user_photo.setBackgroundResource(R.drawable.group);
         }else {
-            holder.iv_user_photo.setBackgroundResource(R.drawable.user_photo);
+            holder.iv_user_photo.setBackgroundResource(R.drawable.img_police);
         }
 
         //设置未读消息条目

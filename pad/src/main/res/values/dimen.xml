@@ -77,4 +77,38 @@
     <dimen name="sp_9">9sp</dimen>
     <dimen name="sp_8">8sp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+
+    <dimen name="size_avatar">60px</dimen>
+    <dimen name="margin_chat_activity">10px</dimen>
+    <dimen name="chat_content_padding">10px</dimen>
+    <dimen name="chat_content_right">100px</dimen>
+    <dimen name="chat_content_left">100px</dimen>
+    <dimen name="chat_text_size">27px</dimen>
+    <dimen name="chat_other_text_size">20px</dimen>
+    <dimen name="chat_nick_margin_left">30px</dimen>
+    <dimen name="chat_nick_text_size">20px</dimen>
+    <dimen name="cb_forward_size">40px</dimen>
+    <dimen name="placeholder_height">40px</dimen>
+    <dimen name="chat_padding_top">20px</dimen>
+    <dimen name="progress_bar_size">30px</dimen>
+
+    <dimen name="chat_margin_size">15px</dimen>
+    <dimen name="chat_file_size">40px</dimen>
+    <dimen name="chat_group_call_width">100px</dimen>
+    <dimen name="chat_group_call_height">60px</dimen>
+    <dimen name="chat_voice_width">30px</dimen>
+    <dimen name="chat_voice_height">50px</dimen>
+    <dimen name="chat_location_width">200px</dimen>
+    <dimen name="chat_location_size">40px</dimen>
+    <dimen name="chat_live_width">280px</dimen>
+    <dimen name="chat_live_height">180px</dimen>
+    <dimen name="chat_live_size">40px</dimen>
+    <dimen name="chat_merge_transmit_width">440px</dimen>
+    <dimen name="chat_image_max_width">300px</dimen>
+    <dimen name="chat_image_height">400px</dimen>
+    <dimen name="chat_video_image_size">50px</dimen>
+
+
+    ImageView
+
 </resources>

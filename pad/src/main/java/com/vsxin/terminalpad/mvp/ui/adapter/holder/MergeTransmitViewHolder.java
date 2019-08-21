@@ -34,6 +34,7 @@ public class MergeTransmitViewHolder extends RecyclerView.ViewHolder {
     public ImageView ivUnread;
     public ImageView ivVoice;//语音图标
     public ImageView iv_voice_image_anim;//播放组呼录音的图标动画
+    public TextView tvVoiceContent;//组呼录音的语音转文字
 
     //发送消息
     public ProgressBar progressBar;
@@ -106,6 +107,7 @@ public class MergeTransmitViewHolder extends RecyclerView.ViewHolder {
         ivVoice = (ImageView) itemView.findViewById(R.id.iv_voice);
         iv_voice_image_anim = (ImageView) itemView.findViewById(R.id.iv_voice_image_anim);
         ivUnread = (ImageView) itemView.findViewById(R.id.iv_unread_voice);
+        tvVoiceContent = (TextView) itemView.findViewById(R.id.tv_voice_content);
     }
 
 

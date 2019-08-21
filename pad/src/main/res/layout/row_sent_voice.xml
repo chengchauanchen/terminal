@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:paddingTop="@dimen/chat_padding_top">
+
+    <TextView
+        android:id="@+id/timestamp"
+        style="@style/chat_text_date_style"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <RelativeLayout
+        android:id="@+id/re_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_chat_activity">
+
+        <CheckBox
+            android:id="@+id/cb_forward"
+            android:layout_width="@dimen/cb_forward_size"
+            android:layout_height="@dimen/cb_forward_size"
+            android:layout_gravity="center_vertical"
+            android:layout_alignParentRight="true"
+            android:layout_marginTop="@dimen/dp_5"
+            android:background="@android:color/transparent"
+            android:button="@drawable/checkbox"
+            android:clickable="true"
+            android:focusable="false"
+            android:visibility="gone"/>
+
+        <ImageView
+            android:id="@+id/iv_userhead"
+            android:layout_width="@dimen/size_avatar"
+            android:layout_height="@dimen/size_avatar"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/cb_forward"
+            android:layout_alignWithParentIfMissing="true"
+            android:layout_marginRight="@dimen/margin_chat_activity"
+            android:scaleType="fitXY" />
+
+        <RelativeLayout
+            android:id="@+id/bubble"
+            android:layout_width="@dimen/chat_group_call_width"
+            android:layout_height="@dimen/chat_group_call_height"
+            android:layout_marginRight="@dimen/margin_chat_activity"
+            android:layout_toLeftOf="@id/iv_userhead"
+            android:background="@drawable/chatto_bg_normal">
+
+            <ImageView
+                android:id="@+id/iv_voice_image_anim"
+                android:layout_width="@dimen/chat_voice_width"
+                android:layout_height="@dimen/chat_voice_height"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="@dimen/dp_8"
+                android:background="@drawable/voice_history_play_anim_right"
+                android:visibility="gone" />
+
+            <ImageView
+                android:id="@+id/iv_voice"
+                android:layout_width="@dimen/chat_voice_width"
+                android:layout_height="@dimen/chat_voice_height"
+                android:layout_alignParentRight="true"
+                android:layout_centerVertical="true"
+                android:layout_marginRight="@dimen/dp_8"
+                android:contentDescription="@null"
+                android:src="@drawable/sound_item_right" />
+
+        </RelativeLayout>
+
+        <TextView
+            android:id="@+id/tv_voice_content"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/bubble"
+            android:layout_alignRight="@+id/bubble"
+            android:layout_marginLeft="@dimen/chat_content_right"
+            android:layout_marginTop="10px"
+            android:padding="@dimen/chat_content_padding"
+            android:layout_marginRight="5px"
+            android:background="@drawable/white_round_bg"
+            android:textColor="@color/chat_text_color_right"
+            android:textSize="@dimen/chat_text_size"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/tv_voice_length"
+            style="@style/chat_text_name_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="@dimen/dp_10"
+            android:layout_toLeftOf="@id/bubble"
+            android:gravity="center"
+            android:textColor="@color/chat_other_text_color" />
+
+        <!--发送失败-->
+        <ImageView
+            android:id="@+id/msg_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/dp_5"
+            android:layout_toLeftOf="@id/tv_voice_length"
+            android:clickable="true"
+            android:src="@drawable/msg_state_failed_resend"
+            android:visibility="gone" />
+        <!--发送失败-->
+        <TextView
+            android:id="@+id/tv_ack_msg"
+            style="@style/chat_text_name_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/tv_voice_length"
+            android:text="@string/text_ack_msg"
+            android:textSize="@dimen/chat_other_text_size"
+            android:visibility="invisible" />
+        <!--送达-->
+        <TextView
+            android:id="@+id/tv_delivered"
+            style="@style/chat_text_name_style"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/tv_voice_length"
+            android:text="@string/text_delivered_msg"
+            android:textSize="@dimen/chat_other_text_size"
+            android:visibility="invisible" />
+
+        <ProgressBar
+            android:id="@+id/progress_bar"
+            style="@style/mProgress_circle"
+            android:layout_width="@dimen/progress_bar_size"
+            android:layout_height="@dimen/progress_bar_size"
+            android:layout_centerVertical="true"
+            android:layout_toLeftOf="@id/tv_voice_length"
+            android:visibility="gone" />
+    </RelativeLayout>
+
+    <!--  组或个人被删除了不能发送消息的提示语 -->
+    <TextView
+        android:id="@+id/tv_error"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/margin_chat_activity"
+        android:textColor="@color/chat_msg_error_text"
+        android:visibility="gone" />
+
+    <View
+        android:id="@+id/placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_10"
+        android:visibility="gone" />
+</LinearLayout>

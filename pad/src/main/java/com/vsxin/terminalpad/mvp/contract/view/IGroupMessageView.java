@@ -1,5 +1,9 @@
 package com.vsxin.terminalpad.mvp.contract.view;
 
+import java.util.List;
+
+import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+
 /**
  * 作者：ly-xuxiaolong
  * 版本：1.0
@@ -19,4 +23,6 @@ public interface IGroupMessageView extends IBaseMessageView{
     void refreshPtt();
 
     void changeGroup(final int errorCode, final String errorDesc);
+
+    void getGroupLivingList(List<TerminalMessage> beanList, int resultCode, String resultDesc, boolean forNumber);
 }

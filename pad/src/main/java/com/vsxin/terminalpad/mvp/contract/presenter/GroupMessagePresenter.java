@@ -14,6 +14,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupLivingListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
@@ -40,6 +41,7 @@ public class GroupMessagePresenter extends BaseMessagePresenter<IGroupMessageVie
         TerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         TerminalFactory.getSDK().registReceiveHandler(mReceiveChangeGroupHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiveGetGroupLivingListHandler);
     }
 
     @Override
@@ -50,6 +52,7 @@ public class GroupMessagePresenter extends BaseMessagePresenter<IGroupMessageVie
         TerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         TerminalFactory.getSDK().unregistReceiveHandler(mReceiveChangeGroupHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveGetGroupLivingListHandler);
     }
 
     /**
@@ -151,4 +154,12 @@ public class GroupMessagePresenter extends BaseMessagePresenter<IGroupMessageVie
             });
         }
     };
+
+    /**
+     * 获取组内正在直播的成员列表
+     */
+    private ReceiveGetGroupLivingListHandler receiveGetGroupLivingListHandler = (beanList, resultCode, resultDesc, forNumber) -> {
+        getView().getGroupLivingList(beanList, resultCode, resultDesc, forNumber);
+    };
+
 }

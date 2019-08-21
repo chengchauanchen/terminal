@@ -1,33 +1,53 @@
 package com.vsxin.terminalpad.mvp.ui.fragment;
 
+import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.alibaba.fastjson.JSONObject;
+import com.blankj.utilcode.util.ToastUtils;
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.adapter.BaseRecycleViewAdapter;
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.fragment.RefreshRecycleViewFragment;
 import com.vsxin.terminalpad.R;
+import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.presenter.BaseMessagePresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IBaseMessageView;
 import com.vsxin.terminalpad.mvp.ui.adapter.MessageAdapter;
 import com.vsxin.terminalpad.mvp.ui.widget.ChooseDevicesDialog;
 import com.vsxin.terminalpad.mvp.ui.widget.ProgressDialog;
 import com.vsxin.terminalpad.utils.CallPhoneUtil;
+import com.vsxin.terminalpad.utils.Constants;
 import com.vsxin.terminalpad.utils.FragmentManage;
+import com.vsxin.terminalpad.utils.LiveUtil;
+import com.zectec.imageandfileselector.bean.FileInfo;
+import com.zectec.imageandfileselector.fragment.ImagePreviewFragment;
+
+import org.apache.http.util.TextUtils;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.util.JsonParam;
+import cn.vsx.hamster.errcode.module.TerminalErrorCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
+import cn.vsx.hamster.terminalsdk.tools.Util;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -49,10 +69,14 @@ public abstract class MessageBaseFragment<V extends IBaseMessageView,P extends B
     protected Button ptt;
     private ProgressDialog myProgressDialog;//加载数据的弹窗
     private MessageAdapter messageAdapter;
+    private boolean isFrist = true;
+//    FrameLayout fl_fragment_container;
 
     private boolean isActivity;//是否是显示
     @Override
     protected void refresh(){
+        isRefrash = false;
+        getPresenter().getMessageFromServer(isGroup,uniqueNo,userId,10,true);
     }
 
     @Override
@@ -77,10 +101,13 @@ public abstract class MessageBaseFragment<V extends IBaseMessageView,P extends B
         this.userName = getArguments().getString("userName", userName);
         this.uniqueNo = getArguments().getLong("uniqueNo", 0L);
         this.isGroup = getArguments().getBoolean("isGroup", true);
+        isFrist = true;
         refreshLayout.setEnableLoadMore(false);
         tv_title.setText(userName);
+        messageAdapter.setIsGroup(isGroup);
+//        messageAdapter.setFragment_contener(fl_fragment_container);
         getPresenter().setAdapter(recyclerView, messageAdapter);
-        getPresenter().getMessageFromServer(isGroup,uniqueNo,userId,10);
+        getPresenter().getMessageFromServer(isGroup,uniqueNo,userId,10,false);
     }
 
     @Override
@@ -92,19 +119,27 @@ public abstract class MessageBaseFragment<V extends IBaseMessageView,P extends B
 
     @Override
     public void notifyDataSetChanged(List<TerminalMessage> terminalMessages){
-        getActivity().runOnUiThread(() -> refreshOrLoadMore(terminalMessages));
+        getActivity().runOnUiThread(() -> {
+            isRefrash = true;
+            refreshOrLoadMore(terminalMessages);
+//            if(isFrist){
+//                recyclerView.scrollToPosition(messageAdapter.getItemCount() - 1);
+//            }
+        });
     }
 
     @Override
     public void onResume() {
         super.onResume();
         isActivity = true;
+        getPresenter().onResume();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         isActivity = false;
+        getPresenter().onPause();
     }
 
     @Override
@@ -364,4 +399,110 @@ public abstract class MessageBaseFragment<V extends IBaseMessageView,P extends B
 //            startActivity(intent);
         });
     }
+
+    @Override
+    public void chatListItemClick(TerminalMessage terminalMessage, boolean isReceiver) {
+        /**  进入定位界面 **/
+        if (terminalMessage.messageType == MessageType.POSITION.getCode()) {
+            if (terminalMessage.messageBody.containsKey(JsonParam.LONGITUDE) &&
+                    terminalMessage.messageBody.containsKey(JsonParam.LATITUDE)) {
+//                setViewVisibility(fl_fragment_container, View.VISIBLE);
+                double longitude = terminalMessage.messageBody.getDouble(JsonParam.LONGITUDE);
+                double altitude = terminalMessage.messageBody.getDouble(JsonParam.LATITUDE);
+                //http://192.168.1.96:7007/mapLocationl.html?lng=117.68&lat=39.456
+                String url = TerminalFactory.getSDK().getParam(Params.LOCATION_URL, "") + "?lng=" + longitude + "&lat=" + altitude;
+                if (TextUtils.isEmpty(TerminalFactory.getSDK().getParam(Params.LOCATION_URL, ""))) {
+                    showMsg(R.string.text_please_go_to_the_management_background_configuration_location_url);
+                } else {
+                    LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
+//                    locationFragment.setFragment_contener(fl_fragment_container);
+//                    getActivity().getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commit();
+
+                    FragmentManage.startFragment(getActivity(), locationFragment);
+                }
+            } else {
+//                setViewVisibility(fl_fragment_container, View.VISIBLE);
+                String url = TerminalFactory.getSDK().getParam(Params.LOCATION_URL, "");
+                if (TextUtils.isEmpty(TerminalFactory.getSDK().getParam(Params.LOCATION_URL, ""))) {
+                    showMsg(R.string.text_please_go_to_the_management_background_configuration_location_url);
+                } else {
+                    LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
+//                    locationFragment.setFragment_contener(fl_fragment_container);
+//                    getActivity().getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commit();
+
+                    FragmentManage.startFragment(getActivity(), locationFragment);
+                }
+            }
+        }
+
+        /**  进入图片预览界面  **/
+        if (terminalMessage.messageType == MessageType.PICTURE.getCode()) {
+//            setViewVisibility(fl_fragment_container, View.VISIBLE);
+            FileInfo fileInfo = new FileInfo();
+            fileInfo.setFilePath(terminalMessage.messagePath);
+            List<FileInfo> images = new ArrayList<>();
+            images.add(fileInfo);
+//            getActivity().getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, new ImagePreviewFragment(images)).commit();
+
+            FragmentManage.startFragment(getActivity(), new ImagePreviewFragment(images));
+        }
+
+        /**  上报图像  **/
+        if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
+            //如果在视频上报、观看、个呼中不允许观看
+            if (PadApplication.getPadApplication().getVideoLivePushingState() != VideoLivePushingState.IDLE) {
+                ToastUtils.showShort(R.string.text_pushing_cannot_pull);
+                return;
+            } else if (PadApplication.getPadApplication().getVideoLivePlayingState() != VideoLivePlayingState.IDLE) {
+                ToastUtils.showShort(R.string.text_pulling_cannot_pull);
+                return;
+            } else if (PadApplication.getPadApplication().getIndividualState() != IndividualCallState.IDLE) {
+                ToastUtils.showShort(R.string.text_calling_cannot_pull);
+                return;
+            }
+            //先请求看视频上报是否已经结束
+            MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+                String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
+                int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
+                String url = "http://" + serverIp + ":" + serverPort + "/file/download/isLiving";
+                Map<String, String> paramsMap = new HashMap<>();
+                paramsMap.put("callId", terminalMessage.messageBody.getString(JsonParam.CALLID));
+                paramsMap.put("sign", SignatureUtil.sign(paramsMap));
+                getLogger().info("查看视频播放是否结束url：" + url);
+                String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
+                getLogger().info("查看视频播放是否结束结果：" + result);
+                if (!Util.isEmpty(result)) {
+                    JSONObject jsonObject = JSONObject.parseObject(result);
+                    boolean living = jsonObject.getBoolean("living");
+//                    Long endChatTime = jsonObject.getLong("endChatTime");
+                    if (living) {
+                        int resultCode = LiveUtil.requestToWatchLiving(terminalMessage);
+                        if(resultCode !=0){
+                            ToastUtil.livingFailToast(MessageBaseFragment.this.getContext(), resultCode, TerminalErrorCode.LIVING_PLAYING.getErrorCode());
+                        }
+                    } else {
+                        LiveUtil.getHistoryLiveUrls(terminalMessage);
+                    }
+                }
+            });
+        }
+
+        if (terminalMessage.messageType == MessageType.AUDIO.getCode()) {
+            getLogger().debug("点击了录音消息！");
+        }
+        /**  跳转到合并转发  **/
+        if (terminalMessage.messageType == MessageType.MERGE_TRANSMIT.getCode()) {
+            MergeTransmitListFragment fragment = new MergeTransmitListFragment();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(Constants.TERMINALMESSAGE,terminalMessage);
+            bundle.putBoolean(Constants.IS_GROUP,isGroup);
+            bundle.putInt(Constants.USER_ID,userId);
+            fragment.setArguments(bundle);
+//            fragment.setFragment_contener(fl_fragment_container);
+//            getActivity().getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, fragment).commit();
+
+            FragmentManage.startFragment(getActivity(), fragment);
+        }
+    }
+
 }
