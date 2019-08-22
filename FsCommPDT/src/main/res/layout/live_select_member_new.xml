@@ -35,10 +35,13 @@
 
         <Button
             android:id="@+id/btn_live_selectmember_start"
-            android:layout_width="@dimen/dp_50"
+            android:layout_width="wrap_content"
             android:layout_height="@dimen/dp_30"
             android:layout_marginRight="@dimen/dp_10"
+            android:minWidth="@dimen/dp_50"
             android:background="@drawable/live_theme_confirm_bg"
+            android:paddingLeft="@dimen/dp_5"
+            android:paddingRight="@dimen/dp_5"
             android:gravity="center"
             android:text="@string/text_sure"
             android:textColor="@color/white"
