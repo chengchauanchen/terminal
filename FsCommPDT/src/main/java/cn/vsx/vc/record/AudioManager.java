@@ -161,7 +161,7 @@ public class AudioManager {
                 //e.printStackTrace();
                 mRecorder = null;
                 mRecorder = new MediaRecorder();
-                mRecorder.stop();
+//                mRecorder.stop();
             }finally{
                 //将录音对象保存
                 //记录录音结束时间和结束时文件长度
