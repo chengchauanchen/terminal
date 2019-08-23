@@ -61,13 +61,13 @@ public class CollectAndSendWork implements Runnable {
             else if(command.getCmdType() == Command.CmdType.PAUSE_SENDER || command.getCmdType() == Command.CmdType.STOP_DUPLEX_COMMUNICATION){
                 AudioResourceManager.INSTANCE.releaseSendClient();
                 AudioResourceManager.INSTANCE.releaseSpeex4Receiver();
-                AudioResourceManager.INSTANCE.releaseAudioTrack();
+                AudioResourceManager.INSTANCE.releaseAudioRecord();
             }
         }
         logger.info("采集与发送任务执行完毕，销毁可能未销毁的资源");
         //任务执行完毕，销毁可能未销毁的资源
         AudioResourceManager.INSTANCE.releaseSendClient();
         AudioResourceManager.INSTANCE.releaseSpeex4Receiver();
-        AudioResourceManager.INSTANCE.releaseAudioTrack();
+        AudioResourceManager.INSTANCE.releaseAudioRecord();
     }
 }

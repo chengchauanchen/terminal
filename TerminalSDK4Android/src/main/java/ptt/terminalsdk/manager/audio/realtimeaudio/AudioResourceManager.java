@@ -90,7 +90,9 @@ public class AudioResourceManager {
     }
 
     void releaseAudioRecord(){
+        logger.info("---releaseAudioRecord---销毁资源1");
         if(audioRecord != null){
+            logger.info("---releaseAudioRecord--,正在销毁资源1");
             audioRecord.release();
             audioRecord = null;
         }

@@ -22,9 +22,9 @@ public class MyAudioResourceManager extends AudioResourceManager{
 
     private int sampleRate = 8000;
 
-    private IAudioRecord audioRecord;
+    //private IAudioRecord audioRecord;
 
-    private IAudioTrack audioTrack;
+    //private IAudioTrack audioTrack;
 
     public MyAudioResourceManager(){
         super();
