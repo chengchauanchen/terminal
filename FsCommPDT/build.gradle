@@ -53,6 +53,7 @@ android {
 
     productFlavors {
         common {}
+        policeTest {}
         policeStore {}
         policeStoreOut {}
         xiangYang {}
