@@ -103,7 +103,7 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
         public void handleMessage(Message msg){
             super.handleMessage(msg);
             switch(msg.what){
-                case UPDATE_PROGRESS:
+                case UPDATE_PROGRESS://更新进度
                     mHandler.removeMessages(UPDATE_PROGRESS);
                     if(null != mediaPlayer){
                         float position = mediaPlayer.getCurrentPosition();
@@ -122,7 +122,7 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
                         }
                     }
                     break;
-                case COMPLETE_PROGRESS:
+                case COMPLETE_PROGRESS://完成\进度
                     seek_bar.setProgress(seek_bar.getMax());
                     tv_current_time.setText(DateUtils.getTime(maxTime));
                     logger.info("currentMediaBeanPosition:"+currentMediaBeanPosition);
@@ -135,13 +135,13 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
                         iv_pause_continue.setImageResource(R.drawable.on_pause);
                     }
                     break;
-                case HIDE_SEEK_BAR:
+                case HIDE_SEEK_BAR://隐藏搜索栏
                     ll_seek_bar.setVisibility(View.GONE);
                     break;
-                case RECEIVEVOICECHANGED:
+                case RECEIVEVOICECHANGED://接收语音已更改
                     ll_volume.setVisibility(View.GONE);
                     break;
-                case GETDATA:
+                case GETDATA://获取数据
                     if(!mediaBeans.isEmpty()){
                         mediaBeans.get(0).setSelected(true);
                         playLiveAdapter.notifyItemChanged(0);
@@ -502,6 +502,7 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
                         String fileServerIp = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_IP);
                         String port = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT,0)+"";
                         String liveUrl = "http://"+fileServerIp+":"+port+hls;
+                        logger.info("liveUrl："+liveUrl);
                         MediaBean mediaBean = new MediaBean();
                         mediaBean.setUrl(liveUrl);
                         mediaBean.setStartTime(startTime);
@@ -588,12 +589,18 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
         }
     }
 
+    /**
+     * 还原SeekBar
+     */
     private void revertSeekBar(){
         mHandler.removeMessages(UPDATE_PROGRESS);
         mHandler.removeMessages(COMPLETE_PROGRESS);
         seek_bar.setProgress(0);
     }
 
+    /**
+     * 还原媒体播放器
+     */
     private void revertMediaPlayer(){
         destroyMediaPlayer();
         revertSeekBar();

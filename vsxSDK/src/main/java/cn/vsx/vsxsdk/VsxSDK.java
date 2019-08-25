@@ -73,6 +73,7 @@ public class VsxSDK {
         registerBroadcastReceiver = new RegisterBroadcastReceiver();
         //发送一个ReceivedService启动的广播
         registerBroadcastReceiver.sendMessageActionBroadcast(context);
+        //registerBroadcastReceiver.sendStartAppBroadcast(context);
     }
 
     /**
@@ -150,7 +151,7 @@ public class VsxSDK {
         Intent intent = new Intent();
         intent.setAction("cn.vsx.vc.jump.service.JumpService");
         intent.setPackage("cn.vsx.vc");
-        context.bindService(intent, conn, BIND_AUTO_CREATE);
+        context.getApplicationContext().bindService(intent, conn, BIND_AUTO_CREATE);
     }
 
     /**

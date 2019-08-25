@@ -3,8 +3,11 @@ package cn.vsx.vc.jump.command;
 import android.content.Context;
 import android.text.TextUtils;
 
+import java.util.List;
+
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllGroupHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
@@ -19,8 +22,11 @@ import cn.vsx.vc.utils.ToastUtil;
  */
 public class GroupChat extends BaseCommand {
 
+    private String groupName;
+
     public GroupChat(Context context) {
         super(context);
+
     }
 
     @Override
@@ -55,9 +61,17 @@ public class GroupChat extends BaseCommand {
     }
 
     public void jumpGroupChatActivityForName(Context context, String groupName) {
+        this.groupName = groupName;
         Group group =  DataUtil.getTempGroupByGroupName(groupName);
         if(group==null){
-            ToastUtil.showToast(context,"未找到当前组");
+            //为空，主动请求一次
+            TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo();
+            Group group2 =  DataUtil.getTempGroupByGroupName(groupName);
+            if(group2==null){
+                ToastUtil.showToast(context,"未找到当前组,请重试");
+            }else{
+                GroupCallNewsActivity.startCurrentActivity(context, group2.getNo(), group2.getName(), 0, "", true);
+            }
             return;
         }
         GroupCallNewsActivity.startCurrentActivity(context, group.getNo(), group.getName(), 0, "", true);

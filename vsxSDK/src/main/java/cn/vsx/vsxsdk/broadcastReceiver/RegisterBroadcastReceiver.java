@@ -11,6 +11,7 @@ public class RegisterBroadcastReceiver {
 
     private static final String MESSAGE_ACTION = "cn.vsx.vc.conn.MESSAGE_ACTION" ;
     private static final String JUMP_ACTION = "cn.vsx.vc.conn.JUMP_ACTION" ;
+    private static final String START_APP_RECEIVER = "cn.vsx.vc.START_APP_RECEIVER" ;
     private ConnectJumpReceiver receiver;
 
     public RegisterBroadcastReceiver() {
@@ -48,6 +49,20 @@ public class RegisterBroadcastReceiver {
         context.sendBroadcast(intent);//发送标准广播
         Log.e("--vsx--广播","发送标准广播__MESSAGE_ACTION");
     }
+
+    /**
+     * 启动app
+     * @param context
+     */
+    public void sendStartAppBroadcast(Context context){
+        Log.e("--vsx--广播","发送标准广播_开启惟实性后台服务");
+        Intent intent = new Intent();
+        intent.setAction(START_APP_RECEIVER);
+        //FLAG_INCLUDE_STOPPED_PACKAGES
+        intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
+        context.sendBroadcast(intent);
+    }
+
 
     private String getPackageName(Context context){
         return context.getApplicationInfo().packageName;

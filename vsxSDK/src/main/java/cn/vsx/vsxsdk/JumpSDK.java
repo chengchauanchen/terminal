@@ -2,11 +2,13 @@ package cn.vsx.vsxsdk;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cn.vsx.vsxsdk.Interf.JumpInterface;
@@ -19,6 +21,12 @@ public class JumpSDK implements JumpInterface {
 
     public JumpSDK(Context context) {
         this.context = context;
+    }
+
+
+    @Override
+    public void sendStartAppBroadcast(Context context) {
+        VsxSDK.getInstance().getRegisterBroadcastReceiver().sendStartAppBroadcast(context);
     }
 
     /**
@@ -49,19 +57,40 @@ public class JumpSDK implements JumpInterface {
     }
 
     private void startIntent(Context context,String url){
-        PackageManager packageManager = context.getPackageManager();
+        //PackageManager packageManager = context.getPackageManager();
         String packageName = "cn.vsx.vc";//要打开应用的包名
-        Intent launchIntentForPackage = packageManager.getLaunchIntentForPackage(packageName);
-        if(launchIntentForPackage != null){
-            //scheme
 
+        //这个方法在没main 入口得时候会取到null
+//        Intent launchIntentForPackage = packageManager.getLaunchIntentForPackage(packageName);
+        if(isAvilible(context,packageName)){
+            //scheme
             Uri uri = Uri.parse(url);
             Intent intent = new Intent(Intent.ACTION_VIEW, uri);
-            intent.setFlags(Intent.FLAG_ACTIVITY_BROUGHT_TO_FRONT);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }else{
-            Toast.makeText(context, "手机未安装该应用", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "手机未安装融合通信APP,请前往警务平台应用商店下载", Toast.LENGTH_LONG).show();
         }
+    }
+
+    /**
+     * 判断包是否安装
+     * @param context
+     * @param packageName
+     * @return
+     */
+    private boolean isAvilible(Context context, String packageName){
+        final PackageManager packageManager = context.getPackageManager();//获取packagemanager
+        List<PackageInfo> pinfo = packageManager.getInstalledPackages(0);//获取所有已安装程序的包信息
+        List<String> pName = new ArrayList<String>();//用于存储所有已安装程序的包名
+        //从pinfo中将包名字逐一取出，压入pName list中
+        if(pinfo != null){
+            for(int i = 0; i < pinfo.size(); i++){
+                String pn = pinfo.get(i).packageName;
+                pName.add(pn);
+            }
+        }
+        return pName.contains(packageName);//判断pName中是否有目标程序的包名，有TRUE，没有FALSE
     }
 
 

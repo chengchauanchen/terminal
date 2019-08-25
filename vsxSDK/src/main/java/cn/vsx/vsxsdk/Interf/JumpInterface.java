@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface JumpInterface {
 
+    void sendStartAppBroadcast(Context context);
+
     /**
      * 发起上报
      */

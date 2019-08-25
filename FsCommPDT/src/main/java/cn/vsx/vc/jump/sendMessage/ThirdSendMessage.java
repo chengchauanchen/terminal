@@ -130,6 +130,6 @@ public class ThirdSendMessage {
         Intent intent = new Intent();
         intent.setAction(ParamKey.THIRD_APP_SEND_MESSAGE_SERVICE_PACKAGE_NAME);//
         intent.setPackage(packageName);//注册服务包名(第三方应用包名)
-        context.bindService(intent, conn, BIND_AUTO_CREATE);
+        context.getApplicationContext().bindService(intent, conn, BIND_AUTO_CREATE);
     }
 }
