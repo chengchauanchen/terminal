@@ -1004,7 +1004,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         if (TextUtils.isEmpty(authUrl)) {
             //平台包或者没获取到类型，直接用AuthManager中的地址,
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-            if (AuthManagerTwo.POLICESTORE.equals(apkType) ||
+            if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType) ||
                     AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType) || TextUtils.isEmpty(apkType)) {
                 String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
                 if (defaultAddress.length >= 2) {
