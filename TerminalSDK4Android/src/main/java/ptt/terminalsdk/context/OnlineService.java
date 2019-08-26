@@ -41,7 +41,7 @@ public class OnlineService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		
+		Log.e("--vsxSDK--","启动惟实信Service开始onCreate");
 		logger.info("OnlineService开始onCreate");
 		
 //		this.setTickAlarm();
@@ -98,6 +98,7 @@ public class OnlineService extends Service {
 
 	@Override
 	public int onStartCommand(Intent param, int flags, int startId) {
+		Log.e("--vsxSDK--","启动惟实信Service开始onStartCommand");
 		KeepLiveManager.getInstance().setServiceForeground(this);
 		try {
 			//如果全部更新完成，没有退出，就发送OnlineService开启的广播

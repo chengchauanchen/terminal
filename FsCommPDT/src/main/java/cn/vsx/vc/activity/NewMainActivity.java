@@ -944,13 +944,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
 //        thridAppJoin();
 
-        //初始化 向地三方应用同步消息的service 避免未登录情况
-        ThirdSendMessage.initVsxSendMessage(this);
-
         //注册 连接jumpService的广播
         ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().register(this);
-
 //        GetPublicKey.getSignInfo(this);
+        ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().sendBroadcast(this);
     }
 
     @Override

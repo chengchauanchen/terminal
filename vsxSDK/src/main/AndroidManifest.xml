@@ -18,14 +18,15 @@
             </intent-filter>
         </service>
 
-        <!--在xml中配置 广播接收者-->
-        <receiver android:name=".broadcastReceiver.ConnectJumpReceiver">
+        <!--&lt;!&ndash;在xml中配置 广播接收者&ndash;&gt;-->
+        <receiver
+            android:name="cn.vsx.vsxsdk.broadcastReceiver.ConnectJumpReceiver"
+            android:exported="true">
             <!-- android:priority属性是设置此接收者的优先级（从-1000到1000） -->
-            <intent-filter android:priority="20">
-                <action android:name="cn.vsx.vc.conn.JUMP_ACTION"/>
+            <intent-filter>
+                <action android:name="cn.vsx.vc.conn.JUMP_ACTION" />
             </intent-filter>
         </receiver>
-
     </application>
 
 </manifest>

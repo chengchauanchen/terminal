@@ -44,7 +44,9 @@ public class MainActivity extends AppCompatActivity {
         btn_log1.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getInstance().getJumpSDK().activeStartLive("021222");
+               // VsxSDK.getInstance().getJumpSDK().activeStartLive("021222");
+                VsxSDK.getInstance().getJumpSDK().sendStartAppBroadcast(MainActivity.this);
+//                VsxSDK.getInstance().getJumpSDK().startVsxService(MainActivity.this);
             }
         });
         //请求别人上报
@@ -72,8 +74,9 @@ public class MainActivity extends AppCompatActivity {
         btn_log5.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-//                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivity("0");
-                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivityForName("临时组777");
+                //组会话页
+                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivity("100040");
+//                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivityForName("T201908232qwe");
             }
         });
 

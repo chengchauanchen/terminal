@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface JumpInterface {
 
+    void startVsxService(Context context);
+
     void sendStartAppBroadcast(Context context);
 
     /**

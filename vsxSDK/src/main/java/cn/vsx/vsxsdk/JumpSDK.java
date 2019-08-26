@@ -1,5 +1,6 @@
 package cn.vsx.vsxsdk;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -28,6 +29,17 @@ public class JumpSDK implements JumpInterface {
     public void sendStartAppBroadcast(Context context) {
         VsxSDK.getInstance().getRegisterBroadcastReceiver().sendStartAppBroadcast(context);
     }
+
+    @Override
+    public void startVsxService(Context context){
+        Intent intent = new Intent();
+        //在intent里面加   component（“广播接收者的包名”，“广播接收者路径”）
+        intent.setComponent(new ComponentName("cn.vsx.vc","ptt.terminalsdk.context.OnlineService"));
+        context.startService(intent);
+        Log.e("--vsxSDK--","启动惟实信Service");
+    }
+
+
 
     /**
      * 注册连接jump的广播

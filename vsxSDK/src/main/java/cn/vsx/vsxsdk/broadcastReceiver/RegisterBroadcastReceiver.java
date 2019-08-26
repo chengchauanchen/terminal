@@ -1,5 +1,6 @@
 package cn.vsx.vsxsdk.broadcastReceiver;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -58,6 +59,7 @@ public class RegisterBroadcastReceiver {
         Log.e("--vsx--广播","发送标准广播_开启惟实性后台服务");
         Intent intent = new Intent();
         intent.setAction(START_APP_RECEIVER);
+        intent.setComponent(new ComponentName("cn.vsx.vc","ptt.terminalsdk.broadcastreceiver.AutoStartReceiver"));
         //FLAG_INCLUDE_STOPPED_PACKAGES
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         context.sendBroadcast(intent);

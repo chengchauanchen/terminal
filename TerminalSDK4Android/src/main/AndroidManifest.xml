@@ -57,6 +57,7 @@
     <application
         android:allowBackup="true">
         <service android:name=".context.OnlineService"
+            android:exported="true"
             android:enabled="true" >
         </service>
         <!--<service android:name="org.easydarwin.easypusher.BackgroundCameraService"/>-->

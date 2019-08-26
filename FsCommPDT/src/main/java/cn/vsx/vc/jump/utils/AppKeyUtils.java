@@ -11,4 +11,20 @@ public class AppKeyUtils {
     public static void setAppKey(String appKey){
         TerminalFactory.getSDK().putParam(Params.APP_KEY,appKey);
     }
+
+    /**
+     * 获取 第三方appKey
+     * @return
+     */
+    public static String getAppKey(){
+        return TerminalFactory.getSDK().getParam(Params.APP_KEY,"vsx");
+    }
+
+    /**
+     * 是否是vsx appKey
+     * @return
+     */
+    public static boolean isVsxAppKey(){
+        return "vsx".equals(getAppKey());
+    }
 }

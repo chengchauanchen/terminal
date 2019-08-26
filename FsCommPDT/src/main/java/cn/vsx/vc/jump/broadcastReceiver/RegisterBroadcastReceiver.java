@@ -1,5 +1,6 @@
 package cn.vsx.vc.jump.broadcastReceiver;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -11,6 +12,9 @@ public class RegisterBroadcastReceiver {
     protected static Logger logger = Logger.getLogger(RegisterBroadcastReceiver.class);
     private static final String MESSAGE_ACTION = "cn.vsx.vc.conn.MESSAGE_ACTION" ;
     private static final String JUMP_ACTION = "cn.vsx.vc.conn.JUMP_ACTION" ;
+    private static final String START_APP_RECEIVER = "cn.vsx.vc.START_APP_RECEIVER" ;
+    private static final String THIRD_PACKAGE_NAME = "cn.vsx.vc.daytime_qzw" ;
+    private static final String CONNECT_JUMP_RECEIVER = "cn.vsx.vsxsdk.broadcastReceiver.ConnectJumpReceiver" ;
     private ConnectMessageReceiver receiver;
 
     public RegisterBroadcastReceiver() {
@@ -44,6 +48,8 @@ public class RegisterBroadcastReceiver {
     public void sendBroadcast(Context context){
         Intent intent = new Intent();
         intent.setAction(JUMP_ACTION);
+        //在intent里面加   component（“广播接收者的包名”，“广播接收者路径”）
+        intent.setComponent(new ComponentName(THIRD_PACKAGE_NAME,CONNECT_JUMP_RECEIVER));
         context.sendBroadcast(intent);
         logger.info("--vsxSDK--"+"发送标准广播__JUMP_ACTION");
     }

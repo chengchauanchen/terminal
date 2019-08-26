@@ -73,7 +73,6 @@ public class VsxSDK {
         registerBroadcastReceiver = new RegisterBroadcastReceiver();
         //发送一个ReceivedService启动的广播
         registerBroadcastReceiver.sendMessageActionBroadcast(context);
-        //registerBroadcastReceiver.sendStartAppBroadcast(context);
     }
 
     /**

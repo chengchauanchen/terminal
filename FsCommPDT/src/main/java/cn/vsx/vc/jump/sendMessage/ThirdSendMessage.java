@@ -36,6 +36,7 @@ public class ThirdSendMessage {
     public static ThirdSendMessage getInstance() {
         if(sendMessage==null){
             throw new RuntimeException("第三方接收消息服务未初始化");
+//            sendMessage = new ThirdSendMessage(context);
         }
         return sendMessage;
     }
@@ -45,7 +46,6 @@ public class ThirdSendMessage {
         startJumpService(context);
         registReceiveHandler();
         registerBroadcastReceiver = new RegisterBroadcastReceiver();
-        registerBroadcastReceiver.sendBroadcast(context);
     }
 
     /**

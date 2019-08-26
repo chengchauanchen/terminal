@@ -1124,7 +1124,12 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     protected void onDestroy() {
         super.onDestroy();
         int flags = getIntent().getFlags();
-        if(flags==Intent.FLAG_ACTIVITY_NEW_TASK){//另一个app近来的
+        if(flags==Intent.FLAG_ACTIVITY_NEW_TASK || !AppKeyUtils.isVsxAppKey()){//另一个app近来的
+            logger.info("--vsx--另一个app近来的");
+            if(!AppKeyUtils.isVsxAppKey()){
+                logger.info("--vsx--把程序变成后台的");
+                //moveTaskToBack(true);//把程序变成后台的
+            }
             AppKeyUtils.setAppKey(null);//销毁时，将appKey置空
         }
     }

@@ -9,6 +9,11 @@ import android.content.Intent;
 import java.util.List;
 
 public class SystemUtil {
+
+    public static String getPackageName(Context context){
+        return context.getApplicationInfo().packageName;
+    }
+
     /**
      * 判断指定页面是否已经打开
      * @param context
