@@ -29,14 +29,14 @@ import java.io.File;
 
 import cn.vsx.vsxsdk.R;
 
-public class DowmLoadApkUtils {
+public class DownLoadApkUtils {
     private Activity activity;
     private DownloadTask task;
     private NotificationSampleListener listener;
     private CancelReceiver cancelReceiver;
     private final InstallUtils mInstallUtil;
 
-    public DowmLoadApkUtils(Activity activity) {
+    public DownLoadApkUtils(Activity activity) {
         this.activity = activity;
         String fileName = FileUtils.getRootPath().getPath() + File.separator + activity.getString(R.string.vsx_app_name) + ".apk";
         mInstallUtil = new InstallUtils(activity, fileName);
@@ -82,7 +82,7 @@ public class DowmLoadApkUtils {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void run() {
-                installApk();
+                //installApk();
             }
         });
 

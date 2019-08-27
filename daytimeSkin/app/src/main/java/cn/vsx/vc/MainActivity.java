@@ -1,5 +1,9 @@
 package cn.vsx.vc;
 
+import android.Manifest;
+import android.app.Activity;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,6 +18,7 @@ import cn.vsx.vsxsdk.Interf.IndividualCallListener;
 import cn.vsx.vsxsdk.Interf.LiveInComeListener;
 import cn.vsx.vsxsdk.Interf.TempGroupListener;
 import cn.vsx.vsxsdk.VsxSDK;
+import cn.vsx.vsxsdk.utils.download.DownLoadApkUtils;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -24,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btn_log4;
     private Button btn_log5;
     private Button btn_log6;
+    private DownLoadApkUtils loadApkUtils;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +37,26 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 //        VsxSDK.getInstance().getJumpSDK().registerConnectJumpReceiver(this);
         initView();
+        initDownLoadApk();
     }
+
+    private void initDownLoadApk() {
+        loadApkUtils = new DownLoadApkUtils(this);
+    }
+
+
+    public static boolean isGrantExternalRW(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && activity.checkSelfPermission(
+                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            activity.requestPermissions(new String[]{
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, 1);
+            return false;
+        }
+        return true;
+    }
+
 
     private void initView() {
         btn_log1 = findViewById(R.id.btn_log1);
@@ -44,9 +69,19 @@ public class MainActivity extends AppCompatActivity {
         btn_log1.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-               // VsxSDK.getInstance().getJumpSDK().activeStartLive("021222");
-                VsxSDK.getInstance().getJumpSDK().sendStartAppBroadcast(MainActivity.this);
+                // VsxSDK.getInstance().getJumpSDK().activeStartLive("021222");
+                //VsxSDK.getInstance().getJumpSDK().sendStartAppBroadcast(MainActivity.this);
 //                VsxSDK.getInstance().getJumpSDK().startVsxService(MainActivity.this);
+
+                if(!isGrantExternalRW(MainActivity.this)){
+                    Log.e("MainActivity","没得权限");
+                    return;
+                }else{
+                    final String url = "https://cdn.llscdn.com/yy/files/xs8qmxn8-lls-LLS-5.8-800-20171207-111607.apk";
+                    loadApkUtils.startDownLoadApk(url);
+                }
+
+
             }
         });
         //请求别人上报
@@ -92,14 +127,14 @@ public class MainActivity extends AppCompatActivity {
         VsxSDK.getInstance().getRegistMessageListener().setCommonMessageListener(new CommonMessageListener() {
             @Override
             public void onReceived(String messageJson) {
-                Log.d("MainActivity",messageJson);
+                Log.d("MainActivity", messageJson);
             }
         });
         //临时组消息
         VsxSDK.getInstance().getRegistMessageListener().setTempGroupListener(new TempGroupListener() {
             @Override
             public void onReceived(String messageJson) {
-                Log.d("MainActivity",messageJson);
+                Log.d("MainActivity", messageJson);
             }
         });
 
@@ -108,7 +143,7 @@ public class MainActivity extends AppCompatActivity {
         VsxSDK.getInstance().getRegistMessageListener().setEmergencyVideoLiveListener(new EmergencyVideoLiveListener() {
             @Override
             public void onReceived(String messageJson) {
-                Log.d("MainActivity",messageJson);
+                Log.d("MainActivity", messageJson);
             }
         });
 
@@ -116,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
         VsxSDK.getInstance().getRegistMessageListener().setGoWatchRTSPListener(new GoWatchRTSPListener() {
             @Override
             public void onReceived(String messageJson) {
-                Log.d("MainActivity",messageJson);
+                Log.d("MainActivity", messageJson);
             }
         });
 
@@ -124,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
         VsxSDK.getInstance().getRegistMessageListener().setIndividualCallListener(new IndividualCallListener() {
             @Override
             public void onReceived(String messageJson) {
-                Log.d("MainActivity",messageJson);
+                Log.d("MainActivity", messageJson);
             }
         });
 
@@ -132,22 +167,22 @@ public class MainActivity extends AppCompatActivity {
         VsxSDK.getInstance().getRegistMessageListener().setLiveInComeListener(new LiveInComeListener() {
             @Override
             public void onReceived(String messageJson) {
-                Log.d("MainActivity",messageJson);
+                Log.d("MainActivity", messageJson);
             }
         });
 
     }
 
 
-    public void startPush(View view){
+    public void startPush(View view) {
         VsxSDK.getInstance().getJumpSDK().activeStartLive();
     }
 
-    public void voipCall(View view){
+    public void voipCall(View view) {
         VsxSDK.getInstance().getJumpSDK().voipCall("13100715231");
     }
 
-    public void createTempGroup(View view){
+    public void createTempGroup(View view) {
         VsxSDK.getInstance().getJumpSDK().createTemporaryGroup();
     }
 
@@ -156,5 +191,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 //        VsxSDK.getInstance().getJumpSDK().unregisterConnectJumpReceiver(this);
+        loadApkUtils.onDestroy();
     }
 }

@@ -42,6 +42,8 @@ dependencies {
     implementation 'com.liulishuo.okdownload:okhttp:1.0.5'
     implementation 'com.liulishuo.okdownload:okdownload:1.0.5'
     implementation 'com.liulishuo.okdownload:sqlite:1.0.5'
+
+    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
 }
 
 task makeJar(type: Copy){
