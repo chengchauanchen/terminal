@@ -76,7 +76,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     private AudioManager audioManager;
     private HeadsetPlugReceiver headsetPlugReceiver;
 
-    protected Logger logger = Logger.getLogger(BaseActivity.class);
+    protected Logger logger = Logger.getLogger(getClass().getSimpleName());
     protected final String TAG = getClass().getSimpleName();
     private ProgressDialog myProgressDialog;//加载数据的弹窗
 

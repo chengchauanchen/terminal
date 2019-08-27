@@ -948,6 +948,12 @@ public class YuvPlayer {
         }
     }
 
+    public void changeSurface(Surface surface,int surfaceWidth, int surfaceHeight){
+        this.surfaceWidth = surfaceWidth;
+        this.surfaceHeight = surfaceHeight;
+        parseH264DataTask.surface = surface;
+    }
+
     /**
      * 结束播放，清楚资源
      */

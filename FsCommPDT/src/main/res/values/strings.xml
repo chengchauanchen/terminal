@@ -417,6 +417,7 @@
     <string name="text_load_gesture_lib_fail">手势库加载失败</string>
     <string name="text_camera_not_open_audio_is_not_used">相机未打开，图像上报功能将不能使用。</string>
     <string name="text_location_not_open_locat_is_not_used">位置信息权限未打开，定位功能将不能使用。</string>
+    <string name="text_phone_is_not_used">电话权限未打开，电话功能将不能使用。</string>
     <string name="text_click_again_to_exit">再点一次退出</string>
     <string name="text_loading_audio_please_wait">有正在下载的录音，请等待。。。。</string>
     <string name="text_load_audio_fail">录音下载失败</string>

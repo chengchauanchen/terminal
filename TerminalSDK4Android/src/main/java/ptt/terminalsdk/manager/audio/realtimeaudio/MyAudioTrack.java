@@ -40,7 +40,11 @@ public class MyAudioTrack implements IAudioTrack{
 
     @Override
     public boolean checkStatePlaying(){
-        return audioTrack.getState() == AudioTrack.PLAYSTATE_PLAYING;
+        if(audioTrack != null){
+            return audioTrack.getState() == AudioTrack.PLAYSTATE_PLAYING;
+        }else {
+            return false;
+        }
     }
 
     @Override

@@ -50,6 +50,7 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     private float downY = 0;
     private int oddOffsetX = 0;
     private int oddOffsetY = 0;
+    private boolean start;
 
     public PushService(){
     }
@@ -180,6 +181,7 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
         if(airCraftMediaStream != null && !airCraftMediaStream.isStreaming()){
             airCraftMediaStream.startPreView(1280, 720);
         }
+        start = true;
     }
 
     public void startRecord(){
@@ -241,7 +243,7 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     public void setVideoFeederListeners(){
         VideoFeeder instance = VideoFeeder.getInstance();
         logger.info(TAG+"VideoFeeder:" + instance);
-        ToastUtil.showToast(getApplicationContext(), "VideoFeeder:" + instance);
+//        ToastUtil.showToast(getApplicationContext(), "VideoFeeder:" + instance);
         if(VideoFeeder.getInstance() == null){
             return;
         }
@@ -270,7 +272,6 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
         }
     };
 
-    private int pushcount;
     private InitCallback pushCallback = new InitCallback(){
 
         @Override
@@ -288,21 +289,13 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECTED:
                     resultData.putString("event-msg", "EasyRTSP 连接成功");
-                    pushcount = 0;
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_FAILED:
                     resultData.putString("event-msg", "EasyRTSP 连接失败");
-                    if(pushcount <= 10){
-                        pushcount++;
-                    }else{
-                        mHandler.post(() -> finishVideoLive());
-                    }
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_ABORT:
                     resultData.putString("event-msg", "EasyRTSP 连接异常中断");
-                    if(pushcount <= 10){
-                        pushcount++;
-                    }
+
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_PUSHING:
                     resultData.putString("event-msg", "EasyRTSP 推流中");
@@ -376,4 +369,12 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
             ToastUtil.showToast(PushService.this, getString(cn.vsx.vc.R.string.toast_tempt_storage_space_is_in_urgent_need));
         }
     });
+
+    public boolean isStart(){
+        return start;
+    }
+
+    public void changeSurface(Surface surface,int width,int height){
+        yuvPlayer.changeSurface(surface,width,height);
+    }
 }

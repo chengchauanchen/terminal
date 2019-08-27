@@ -42,7 +42,10 @@ import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.GroupScanType;
 import cn.vsx.hamster.common.MemberChangeType;
+import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.ResponseGroupType;
+import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -85,8 +88,10 @@ import cn.vsx.vc.activity.GroupMemberActivity;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.UnbindDialog;
+import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CommonGroupUtil;
+import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.view.ChangeGroupView;
 import cn.vsx.vc.view.ChangeGroupView.OnGroupChangedListener;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
@@ -264,6 +269,7 @@ public class TalkbackFragment extends BaseFragment {
     private RelativeLayout rl_group_call;
     private TextView tx_ptt_time;
     private TextView tx_ptt_group_name;
+    private RelativeLayout rl_uav_push;
 
     public void setViewEnable(boolean isEanble) {
         to_current_group.setEnabled(isEanble);
@@ -1118,6 +1124,7 @@ public class TalkbackFragment extends BaseFragment {
         iv_group_call_bg = mRootView.findViewById(R.id.iv_group_call_bg);
         rl_group_call = mRootView.findViewById(R.id.rl_group_call);
         tx_ptt_time = mRootView.findViewById(R.id.tx_ptt_time);
+        rl_uav_push = mRootView.findViewById(R.id.rl_uav_push);
         tx_ptt_group_name = mRootView.findViewById(R.id.tx_ptt_group_name);
 
         getContext().registerReceiver(mBatInfoReceiver, filter);
@@ -1249,6 +1256,12 @@ public class TalkbackFragment extends BaseFragment {
                 ToastUtil.showToast(context, getString(R.string.text_unkown_error_member_not_in_this_group));
             }
         });
+
+        rl_uav_push.setOnClickListener(v -> {
+            int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0);
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,
+                    MyDataUtil.getPushInviteMemberData(currentGroupId, ReceiveObjectMode.GROUP.toString()) ,true);
+        });
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTDownHandler);
@@ -1274,6 +1287,12 @@ public class TalkbackFragment extends BaseFragment {
         startTimerToLock();
         setVideoIcon();//设置视频回传上报相关图标
         setPttText();
+        String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+        if(android.text.TextUtils.equals(type, TerminalMemberType.TERMINAL_UAV.name())){
+            rl_uav_push.setVisibility(View.VISIBLE);
+        }else {
+            rl_uav_push.setVisibility(View.GONE);
+        }
 //        setScanGroupIcon();//设置组扫描相关图标
     }
 

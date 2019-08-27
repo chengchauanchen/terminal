@@ -1,6 +1,7 @@
 package cn.vsx.vc.utils;
 
 import android.content.Context;
+import android.media.MediaMetadataRetriever;
 import android.os.storage.StorageManager;
 import android.util.Log;
 
@@ -285,6 +286,42 @@ public class FileUtil {
         } finally {
         }
         return file;
+    }
+
+    /**
+     * get Local video duration
+     *
+     * @return
+     */
+    public static int getLocalVideoDuration(String videoPath) {
+        int duration;
+        MediaMetadataRetriever mmr = new MediaMetadataRetriever();
+        try {
+            mmr.setDataSource(videoPath);
+            duration = Integer.parseInt(mmr.extractMetadata
+                    (MediaMetadataRetriever.METADATA_KEY_DURATION));
+        } catch (Exception e) {
+            e.printStackTrace();
+            mmr.release();
+            return 0;
+        }
+        return duration;
+    }
+
+    public static int getVideoDuration(File file){
+        int videoTime = 0;
+        android.media.MediaPlayer mediaPlayer = new android.media.MediaPlayer();
+        try {
+            mediaPlayer.setDataSource(file.getPath());
+            mediaPlayer.prepare();
+            //获得了视频的时长（以毫秒为单位）
+            videoTime = mediaPlayer.getDuration();
+        } catch (IOException e) {
+            e.printStackTrace();
+            mediaPlayer.reset();
+            mediaPlayer.release();
+        }
+        return videoTime;
     }
 
 }

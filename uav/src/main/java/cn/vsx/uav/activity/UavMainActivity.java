@@ -2,11 +2,15 @@ package cn.vsx.uav.activity;
 
 import android.Manifest;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Message;
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import com.qw.soul.permission.SoulPermission;
+import com.qw.soul.permission.bean.Permission;
+import com.qw.soul.permission.bean.Permissions;
+import com.qw.soul.permission.callbcak.CheckRequestPermissionsListener;
+
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHandler;
@@ -14,7 +18,6 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.uav.UavApplication;
 import cn.vsx.uav.utils.AirCraftUtil;
 import cn.vsx.vc.activity.NewMainActivity;
-import cn.vsx.vc.utils.SystemUtil;
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
 import dji.common.realname.AircraftBindingState;
@@ -28,7 +31,6 @@ import dji.sdk.realname.AppActivationManager;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.useraccount.UserAccountManager;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.DialogUtils;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -51,53 +53,21 @@ public class UavMainActivity extends NewMainActivity{
     public void initData(){
         super.initData();
         logger.info("UavMainActivity---initData");
+        //申请电话权限，上报时拦截电话
+        Permissions permissions = Permissions.build(Manifest.permission.CALL_PHONE, Manifest.permission.READ_PHONE_STATE);
+        SoulPermission.getInstance().checkAndRequestPermissions(permissions, new CheckRequestPermissionsListener(){
+            @Override
+            public void onAllPermissionOk(Permission[] allPermissions){
+                logger.info("申请成功权限:"+Arrays.toString(allPermissions));
+            }
+
+            @Override
+            public void onPermissionDenied(Permission[] refusedPermissions){
+                logger.info("申请被拒绝权限:"+Arrays.toString(refusedPermissions));
+            }
+        });
         startSDKRegistration();
         UavApplication.getApplication().startPushService();
-    }
-
-    //todo 需要申请电话权限
-    @Override
-    protected void judgePermission(){
-        //6.0以下判断相机权限
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M  ){
-            if(!SystemUtil.cameraIsCanUse()){
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, CheckMyPermission.REQUEST_CAMERA);
-            }
-        }else {
-            if (CheckMyPermission.selfPermissionGranted(this, Manifest.permission.RECORD_AUDIO)){
-                if(CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)){
-                    if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
-                        CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
-                    }
-                    //                    else {
-                    //                        CheckMyPermission.permissionPrompt(this,Manifest.permission.WRITE_EXTERNAL_STORAGE);
-                    //                    }
-                }else {
-                    CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
-                }
-            }else {
-                //如果权限被拒绝，申请下一个权限
-                if(onRecordAudioDenied){
-                    if(CheckMyPermission.selfPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)){
-                        if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
-                            CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
-                        }
-                    }else {
-                        if(onLocationDenied){
-                            if(!CheckMyPermission.selfPermissionGranted(this,Manifest.permission.CAMERA)){
-                                if(!onCameraDenied){
-                                    CheckMyPermission.permissionPrompt(this, Manifest.permission.CAMERA);
-                                }
-                            }
-                        }else {
-                            CheckMyPermission.permissionPrompt(this, Manifest.permission.ACCESS_FINE_LOCATION);
-                        }
-                    }
-                }else{
-                    CheckMyPermission.permissionPrompt(this, Manifest.permission.RECORD_AUDIO);
-                }
-            }
-        }
     }
 
     private AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);

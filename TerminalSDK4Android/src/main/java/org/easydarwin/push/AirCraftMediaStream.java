@@ -190,6 +190,9 @@ public class AirCraftMediaStream {
             mCameraHandler.post(() -> startRecord());
             return;
         }
+        if(isRecording()){
+            stopRecord();
+        }
         logger.info(TAG + "---startRecord");
         //检测内存卡的size
         if (TextUtils.isEmpty(tempFile)) {
@@ -199,7 +202,7 @@ public class AirCraftMediaStream {
             millis = PreferenceManager.getDefaultSharedPreferences(mApplicationContext).getInt("record_interval", VIDEO_RECODE_PER_TIME);
             fileIndex = FileTransgerUtil.getRecodeFileIndex(1);
             String fileName = FileTransgerUtil.getVideoRecodeFileName(dataStr, fileIndex);
-            File videoRecord = new File(MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory()), fileName);
+            File videoRecord = new File(MyTerminalFactory.getSDK().getUavVideoDirectory(), fileName);
             if (!videoRecord.exists()) {
                 videoRecord.getParentFile().mkdirs();
             }

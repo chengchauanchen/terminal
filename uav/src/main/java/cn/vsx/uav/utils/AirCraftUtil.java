@@ -263,7 +263,7 @@ public class AirCraftUtil{
         Camera camera = getAircraftCamera();
         if(camera != null){
             setStorageStateCallBack(camera);
-//            setMediaFileCallback(camera);
+            setMediaFileCallback(camera);
         }
     }
 
@@ -276,13 +276,17 @@ public class AirCraftUtil{
         });
     }
 
+    private static void setMediaFileCallback(Camera camera){
+        camera.setMediaFileCallback(AirCraftUtil::fetchFileData);
+    }
+
 
     private static void setStorageStateCallBack(Camera camera){
         camera.setStorageStateCallBack(storageState -> {
             //剩余空间
             int remainingSpaceInMB = storageState.getRemainingSpaceInMB();
             logger.info("剩余存储空间："+remainingSpaceInMB);
-            if(remainingSpaceInMB < 10){
+            if(remainingSpaceInMB < 20){
                 storageSpaceEnough = false;
             }else {
                 storageSpaceEnough = true;
@@ -312,7 +316,10 @@ public class AirCraftUtil{
     }
 
     public static void fetchFileData(MediaFile mediaFile){
-        File dir = new File(MyTerminalFactory.getSDK().getUAVFileDirectoty());
+        File dir = new File(MyTerminalFactory.getSDK().getUavPictureDirectory());
+        if(!dir.exists()){
+            dir.mkdirs();
+        }
         String fileName = mediaFile.getFileName();
         mediaFile.fetchFileData(dir, fileName, new DownloadHandler<String>());
     }

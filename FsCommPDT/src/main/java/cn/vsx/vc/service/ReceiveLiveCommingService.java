@@ -37,8 +37,8 @@ public class ReceiveLiveCommingService extends BaseService{
     private TextView mTvLiveReportId;
     private LinearLayout mLlLiveRespondRefuseTotal;
     private LinearLayout mLlLiveRespondAcceptTotal;
-    private String memberName;
-    private int memberId;
+    protected String memberName;
+    protected int memberId;
 
     public ReceiveLiveCommingService(){}
 

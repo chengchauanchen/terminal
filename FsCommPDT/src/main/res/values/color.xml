@@ -603,4 +603,7 @@
     <color name="group_call_wait_1">#ccd9a556</color>
     <color name="group_call_wait_2">#33d9a556</color>
     <color name="dark_gray">#80000000</color>
+    
+    <color name="uav_push_text_color">#00a4ff</color>
+    <color name="uav_push_color">#6600a4ff</color>
 </resources>

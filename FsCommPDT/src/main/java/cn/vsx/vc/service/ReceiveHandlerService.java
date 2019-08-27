@@ -1035,6 +1035,10 @@ public class ReceiveHandlerService extends Service{
 
     //接收到上报视频的回调
     private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = (uniqueNoAndType,isGroupPushLive) -> {
+        onActivePushVideo(uniqueNoAndType,isGroupPushLive);
+    };
+
+    protected void onActivePushVideo(String uniqueNoAndType, boolean isGroupPushLive){
         if(!checkFloatPermission()){
             startSetting();
             return;
@@ -1083,18 +1087,18 @@ public class ReceiveHandlerService extends Service{
                     intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
                     startService(intent);
                 }else{
-                        //请求成功,直接开始推送视频
-                        Intent intent = new Intent();
-                        intent.putExtra(Constants.TYPE, Constants.ACTIVE_PUSH);
-                        intent.putExtra(Constants.THEME,"");
-                        intent.setClass(ReceiveHandlerService.this, PhonePushService.class);
-                        intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
-                        intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
-                        startService(intent);
+                    //请求成功,直接开始推送视频
+                    Intent intent = new Intent();
+                    intent.putExtra(Constants.TYPE, Constants.ACTIVE_PUSH);
+                    intent.putExtra(Constants.THEME,"");
+                    intent.setClass(ReceiveHandlerService.this, PhonePushService.class);
+                    intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
+                    intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
+                    startService(intent);
                 }
             }
         }
-    };
+    }
 
     /**
      * 请求直播
@@ -1348,7 +1352,7 @@ public class ReceiveHandlerService extends Service{
         }
     }
 
-    private boolean checkFloatPermission(){
+    protected boolean checkFloatPermission(){
         return FloatWindowManager.getInstance().checkPermission(this);
     }
 

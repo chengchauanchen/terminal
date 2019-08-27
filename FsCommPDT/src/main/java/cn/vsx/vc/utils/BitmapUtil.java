@@ -8,6 +8,7 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
+import android.os.Build;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -15,6 +16,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.vc.R;
@@ -80,7 +82,7 @@ public class BitmapUtil {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();  
         image.compress(Bitmap.CompressFormat.PNG, 10, baos);//质量压缩方法，这里100表示不压缩，把压缩后的数据存放到baos中  
         int options = 100;  
-        while ( baos.toByteArray().length / 1024>30) {  //循环判断如果压缩后图片是否大于100kb,大于继续压缩         
+        while ( baos.toByteArray().length / 1024>30 && options > 0) {  //循环判断如果压缩后图片是否大于100kb,大于继续压缩
             baos.reset();//重置baos即清空baos  
             image.compress(Bitmap.CompressFormat.PNG, options, baos);//这里压缩options%，把压缩后的数据存放到baos中  
             options -= 10;//每次都减少10  
@@ -266,5 +268,29 @@ public class BitmapUtil {
 			return R.drawable.user_photo_anjian_round;
 		}
 		return R.drawable.member_icon_new;
+	}
+
+	public static Bitmap getBitmapFormUrl(String url) {
+		Bitmap bitmap = null;
+		MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+		try {
+			if (Build.VERSION.SDK_INT >= 14) {
+				retriever.setDataSource(url, new HashMap<String, String>());
+			} else {
+				retriever.setDataSource(url);
+			}
+        /*getFrameAtTime()--->在setDataSource()之后调用此方法。 如果可能，该方法在任何时间位置找到代表性的帧，
+         并将其作为位图返回。这对于生成输入数据源的缩略图很有用。**/
+			bitmap = retriever.getFrameAtTime();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				retriever.release();
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			}
+		}
+		return bitmap;
 	}
 }

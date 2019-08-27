@@ -595,4 +595,13 @@
     <string name="dji_sdk_regist_fail">大疆SDK注册失败</string>
     <string name="click_close_voice">点击关闭语音</string>
     <string name="uav_disconnect">无人机未连接</string>
+    <string name="confirm_weather_load">请确认是否着陆</string>
+    <string name="uav_all">全部</string>
+    <string name="uav_picture">图片</string>
+    <string name="uav_video">视频</string>
+    <string name="uav_choice">选择</string>
+    <string name="uav_forward">转发</string>
+    <string name="quiet_play">静音播放</string>
+    <string name="uav_please_select_file">请选择文件</string>
+    <string name="uav_push_quiet_play">正在上报图像，只能静音预览</string>
 </resources>

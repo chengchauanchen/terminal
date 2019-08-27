@@ -2,8 +2,8 @@
 <manifest package="cn.vsx.uav"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="30"
-    android:versionName="1.0.30">
+    android:versionCode="31"
+    android:versionName="1.0.31">
     
     <application
         android:name=".UavApplication"
@@ -52,7 +52,10 @@
             android:name=".activity.UavMainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleTask" />
-    
+        <activity
+            android:name=".activity.UavFileListActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
+        
         <service
             android:name=".service.PushService"
             android:enabled="true"

@@ -32,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
@@ -44,6 +45,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveStopUAVPatrolHandler;
@@ -58,6 +60,8 @@ import cn.vsx.uav.utils.AirCraftUtil;
 import cn.vsx.uav.view.CustomWebView;
 import cn.vsx.vc.activity.BaseActivity;
 import cn.vsx.vc.adapter.MemberEnterAdapter;
+import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.service.InviteMemberService;
 import cn.vsx.vc.utils.Constants;
@@ -146,7 +150,7 @@ public class UavPushActivity extends BaseActivity{
     private boolean patrol;
     private long textureAvailableTime;
     private PushService pushService;
-    private boolean uavConnected = true;
+    private boolean uavConnected = false;
     private ImageView mIvPush;
     private ImageView mIvPreview;
     private ImageView mIvTakePhoto;
@@ -154,7 +158,8 @@ public class UavPushActivity extends BaseActivity{
     private Button mBtnStopPush;
     private LinearLayout mLlCloseVoice;
     private ImageView mIvCloseVoice;
-    private View mVDrakBackgroupd;
+    private TextView mVDrakBackgroupd;
+    private List<String> pushMemberList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -164,6 +169,7 @@ public class UavPushActivity extends BaseActivity{
         getWindow().setFlags(WindowManager.LayoutParams. FLAG_FULLSCREEN , WindowManager.LayoutParams. FLAG_FULLSCREEN);
         pushService = UavApplication.getApplication().getPushService();
         if(pushService == null){
+            logger.info("pushService 为null!!!");
             ToastUtils.showShort("无人机没有连接，不能上报");
             finish();
         }
@@ -230,6 +236,17 @@ public class UavPushActivity extends BaseActivity{
         mLlCloseVoice = findViewById(R.id.ll_close_voice);
         mIvCloseVoice = findViewById(R.id.iv_close_voice);
         mVDrakBackgroupd = findViewById(R.id.v_drak_backgroupd);
+
+        uavConnected = AirCraftUtil.getProductInstance()!=null;
+        if(!uavConnected){
+            mVDrakBackgroupd.setVisibility(View.VISIBLE);
+//            mBtnStopPush.setVisibility(View.VISIBLE);
+            mIvTakePhoto.setImageResource(R.drawable.uav_take_photo_disable);
+        }else {
+            mVDrakBackgroupd.setVisibility(View.GONE);
+//            mBtnStopPush.setVisibility(View.GONE);
+            mIvTakePhoto.setImageResource(R.drawable.uav_take_photo);
+        }
     }
 
     @Override
@@ -240,7 +257,7 @@ public class UavPushActivity extends BaseActivity{
         mBtnVoice.setOnClickListener(onVoiceButtonClickListener);
         mIvPreview.setOnClickListener(onPreViewClickListener);
         mIvPush.setOnClickListener(onInviteMemberClickListener);
-        pushService.setVideoFeederListeners();
+
         mIvAircraftLiveRetract.setOnClickListener(onRetractClickListener);
         mSvAircraftLive.setSurfaceTextureListener(surfaceTextureListener);
         mapAircraftLive.setSurfaceTextureListener(surfaceTextureListener);
@@ -261,7 +278,8 @@ public class UavPushActivity extends BaseActivity{
         //地图控件
         mapTouch.setOnTouchListener(mapOnTouchListener);
         mapAircraftLive.setOnTouchListener(mapOnTouchListener);
-        initFlightControllerState();
+
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveStopUAVPatrolHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUAVPatrolHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
@@ -284,16 +302,40 @@ public class UavPushActivity extends BaseActivity{
         mLvAircraftLiveMemberInfo.setAdapter(memberEnterAdapter);
         initFocusView();
         initCameraSettingView();
-        initObstacle();
+        initAircraft();
+        TerminalFactory.getSDK().getDataManager().setUavVoiceOpen(true);
+        Map currentStateMap = MyTerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
+        logger.info("当前状态机："+currentStateMap);
+
+        String type = getIntent().getStringExtra(Constants.TYPE);
+        if(TextUtils.equals(type,Constants.RECEIVE_PUSH)){
+            MyTerminalFactory.getSDK().getLiveManager().responseLiving(true);
+            PromptManager.getInstance().stopRing();
+            MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
+        }else if(TextUtils.equals(type,Constants.ACTIVE_PUSH)){
+            PushLiveMemberList list = (PushLiveMemberList) getIntent().getSerializableExtra(Constants.PUSH_MEMBERS);
+            if(list!=null&&list.getList()!=null){
+                pushMemberList.clear();
+                pushMemberList.addAll(list.getList());
+            }
+
+            if(MyTerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap().isEmpty()){
+                requestStartLive();
+            }else{
+                logger.info("当前终端正在其他业务，不能发起视频上报");
+                ToastUtils.showShort("当前终端正在其他业务，不能发起视频上报");
+                finish();
+            }
+        }
+    }
+
+    private void initAircraft(){
         initGoHomeView();
+        initObstacle();
         initHomeLocationView();
         addListener();
-        TerminalFactory.getSDK().getDataManager().setUavVoiceOpen(true);
-        if(MyTerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap().isEmpty()){
-            requestStartLive();
-        }else{
-            finish();
-        }
+        pushService.setVideoFeederListeners();
+        initFlightControllerState();
     }
 
     @Override
@@ -301,6 +343,7 @@ public class UavPushActivity extends BaseActivity{
         pushService.finishVideoLive();
         AdaptScreenUtils.closeAdapt(getResources());
         removeListener();
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveStopUAVPatrolHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUAVPatrolHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
@@ -377,7 +420,6 @@ public class UavPushActivity extends BaseActivity{
             patrol = false;
             logger.error(TAG+"Execution finished: " + (error == null ? "Success!" : error.getDescription()));
             ToastUtil.showToast(getApplicationContext(),"Execution finished: " + (error == null ? "Success!" : error.getDescription()));
-//            setResultToToast();
         }
     };
 
@@ -645,10 +687,8 @@ public class UavPushActivity extends BaseActivity{
     };
 
     private View.OnClickListener onPreViewClickListener = v -> {
-        if(AirCraftUtil.getAircraftInstance() != null){
-            // TODO: 2019/8/16
-            AirCraftUtil.getFileList();
-        }
+        Intent intent = new Intent(UavPushActivity.this, UavFileListActivity.class);
+        startActivity(intent);
     };
 
     private View.OnClickListener onVoiceButtonClickListener = v -> {
@@ -990,6 +1030,15 @@ public class UavPushActivity extends BaseActivity{
         return true;
     };
 
+    /**
+     * 通知直播停止 通知界面关闭视频页
+     **/
+    private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> myHandler.post(() -> {
+        ToastUtils.showShort(R.string.push_stoped);
+        pushService.finishVideoLive();
+        finish();
+    });
+
     private ReceiveStopUAVPatrolHandler receiveStopUAVPatrolHandler = this::stopWaypointMission;
 
     private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = new ReceiveGroupCallCeasedIndicationHandler(){
@@ -1077,15 +1126,20 @@ public class UavPushActivity extends BaseActivity{
     private ReceiveAirCraftStatusChangedHandler receiveAirCraftStatusChangedHandler = new ReceiveAirCraftStatusChangedHandler(){
         @Override
         public void handler(boolean connected){
-            if(!connected){
-                mVDrakBackgroupd.setVisibility(View.VISIBLE);
-                mBtnStopPush.setVisibility(View.VISIBLE);
-                mIvTakePhoto.setImageResource(R.drawable.uav_take_photo_disable);
-            }else {
-                mVDrakBackgroupd.setVisibility(View.GONE);
-                mBtnStopPush.setVisibility(View.GONE);
-                mIvTakePhoto.setImageResource(R.drawable.uav_take_photo);
-            }
+            myHandler.post(()->{
+                if(!connected){
+                    uavConnected = false;
+                    mVDrakBackgroupd.setVisibility(View.VISIBLE);
+//                    mBtnStopPush.setVisibility(View.VISIBLE);
+                    mIvTakePhoto.setImageResource(R.drawable.uav_take_photo_disable);
+                }else {
+                    initAircraft();
+                    uavConnected = true;
+                    mVDrakBackgroupd.setVisibility(View.GONE);
+//                    mBtnStopPush.setVisibility(View.GONE);
+                    mIvTakePhoto.setImageResource(R.drawable.uav_take_photo);
+                }
+            });
         }
     };
 
@@ -1101,6 +1155,13 @@ public class UavPushActivity extends BaseActivity{
             ToastUtil.showToast(getApplicationContext(),resultDesc);
             pushService.finishVideoLive();
             finish();
+        }else {
+            if(pushMemberList != null && !pushMemberList.isEmpty()){
+                logger.info("自己发起直播成功,要推送的列表：" + pushMemberList);
+                MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(pushMemberList,
+                        MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0),
+                        TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l));
+            }
         }
     };
 

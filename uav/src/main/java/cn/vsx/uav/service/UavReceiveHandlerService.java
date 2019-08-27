@@ -5,23 +5,32 @@ import android.os.Message;
 
 import com.google.gson.Gson;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MountType;
+import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.uav.R;
 import cn.vsx.uav.activity.UavPushActivity;
 import cn.vsx.uav.utils.AirCraftUtil;
 import cn.vsx.util.StateMachine.IState;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.jump.utils.AppKeyUtils;
+import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.service.ReceiveHandlerService;
+import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.MyDataUtil;
 import dji.common.flightcontroller.ConnectionFailSafeBehavior;
 import dji.sdk.battery.Battery;
 import dji.sdk.products.Aircraft;
@@ -72,11 +81,7 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
                     myHandler.sendEmptyMessageDelayed(UPLOAD_UAV_LOCATION,uploadTime);
                     //无人机连上时自动上报
                     if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())){
-                        Intent intent = new Intent(getApplicationContext(),UavPushActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        startActivity(intent);
-                        //                    Intent intent = new Intent(getApplicationContext(), AircraftPushService.class);
-                        //                    startService(intent);
+                        pushAircraft("");
                     }else {
                         ToastUtil.showToast(getApplicationContext(),"没有图像上报的权限，不能自动上报");
                     }
@@ -220,6 +225,7 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
             MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
             //自动打开上报
             Intent intent = new Intent(getApplicationContext(),UavPushActivity.class);
+            intent.putExtra(Constants.TYPE,Constants.RECEIVE_PUSH);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }else{
@@ -229,6 +235,43 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
             intent.putExtra(Constants.THEME,"");
             intent.setClass(UavReceiveHandlerService.this, UavReceiveLiveCommingService.class);
             startService(intent);
+        }
+    }
+
+    @Override
+    public void onActivePushVideo(String uniqueNoAndType, boolean isGroupPushLive){
+        if(!checkFloatPermission()){
+            startSetting();
+            return;
+        }
+        if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_report));
+            AppKeyUtils.setAppKey(null);
+            return;
+        }
+        if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_pushing_can_not_report));
+            AppKeyUtils.setAppKey(null);
+            return;
+        }
+        logger.error("上报给：" + uniqueNoAndType);
+        pushAircraft(uniqueNoAndType);
+    }
+
+    private void pushAircraft(String uniqueNoAndType){
+        //没有选择成员就上报到当前组
+        if(android.text.TextUtils.isEmpty(uniqueNoAndType)){
+            int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0);
+            uniqueNoAndType = MyDataUtil.getPushInviteMemberData(currentGroupId, ReceiveObjectMode.GROUP.toString());
+        }
+        ArrayList<String> uniqueNos = new ArrayList<>();
+        uniqueNos.add(uniqueNoAndType);
+        Intent intent = new Intent(getApplicationContext(), UavPushActivity.class);
+        if(!ActivityCollector.isActivityExist(UavPushActivity.class)){
+            intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
+            intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         }
     }
 }

@@ -5,6 +5,7 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.os.Build;
+import android.util.Log;
 
 import org.apache.log4j.Logger;
 
@@ -56,6 +57,7 @@ public class EasyMuxer implements BaseEasyMuxer {
 
     @Override
     public synchronized void addTrack(MediaFormat format, boolean isVideo) {
+        logger.info("addTrack-----"+"isVideo:"+isVideo+"----format:"+format.toString());
         // now that we have the Magic Goodies, start the muxer
         if (mAudioTrackIndex != -1 && mVideoTrackIndex != -1)
             throw new RuntimeException("already add all tracks");
@@ -63,21 +65,22 @@ public class EasyMuxer implements BaseEasyMuxer {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             int track = mMuxer.addTrack(format);
 //            if (VERBOSE)
-//                Log.i(TAG, String.format("addTrack %s result %d", isVideo ? "video" : "audio", track));
+                Log.d(TAG, String.format("addTrack %s result %d", isVideo ? "video" : "audio", track));
             if (isVideo) {
                 mVideoFormat = format;
                 mVideoTrackIndex = track;
                 if (mAudioTrackIndex != -1) {
 //                    if (VERBOSE)
-//                        Log.i(TAG, "both audio and video added,and muxer is started");
+                    logger.info("both audio and video added,and muxer is started");
                     mMuxer.start();
                     mBeginMillis = System.currentTimeMillis();
                 }
             } else {
                 mAudioFormat = format;
                 mAudioTrackIndex = track;
+                logger.info("mAudioTrackIndex:"+mAudioTrackIndex);
                 if (mVideoTrackIndex != -1) {
-                    mMuxer.start();
+                        mMuxer.start();
                     mBeginMillis = System.currentTimeMillis();
                 }
             }
@@ -85,6 +88,8 @@ public class EasyMuxer implements BaseEasyMuxer {
     }
 
     public synchronized void pumpStream(ByteBuffer outputBuffer, MediaCodec.BufferInfo bufferInfo, boolean isVideo) {
+        // TODO: 2019/8/26  无人机图像没有推过来时，没有调用addTrack方法，mVideoTrackIndex = -1；
+        // 正常情况下：mAudioTrackIndex:0---mVideoTrackIndex:1
         if (mAudioTrackIndex == -1 || mVideoTrackIndex == -1) {
             logger.info(TAG + String.format("pumpStream [%s] but muxer is not start.ignore..", isVideo ? "video" : "audio"));
             return;
