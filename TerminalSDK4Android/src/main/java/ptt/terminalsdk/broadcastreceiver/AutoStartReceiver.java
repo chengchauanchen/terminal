@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.support.annotation.RequiresApi;
 
@@ -21,9 +22,9 @@ public class AutoStartReceiver extends BroadcastReceiver {
 		Intent startSrv = new Intent(context, OnlineService.class);
 		startSrv.putExtra("CMD", "TICK");
 
-		if (Build.VERSION_CODES.O <= Build.VERSION.SDK_INT) {//大于7.0使用此方法
+		if(VERSION.SDK_INT>= VERSION_CODES.O){//SDK>8.0
 			context.startForegroundService(startSrv);
-		} else {//小于7.0就简单了
+		}else{
 			context.startService(startSrv);
 		}
 	}
