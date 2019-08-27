@@ -20,9 +20,9 @@ android {
                 includeCompileClasspath = true
             }
         }
-//        ndk {
-//            abiFilters "armeabi", "armeabi-v7a"
-//        }
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a"
+        }
     }
 
     //debug和release版本的签名配置

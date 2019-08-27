@@ -7,13 +7,16 @@ import android.content.IntentFilter;
 
 import org.apache.log4j.Logger;
 
+import cn.vsx.vc.jump.sendMessage.Connect3rdParty;
+import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
+
 public class RegisterBroadcastReceiver {
 
     protected static Logger logger = Logger.getLogger(RegisterBroadcastReceiver.class);
     private static final String MESSAGE_ACTION = "cn.vsx.vc.conn.MESSAGE_ACTION" ;
     private static final String JUMP_ACTION = "cn.vsx.vc.conn.JUMP_ACTION" ;
     private static final String START_APP_RECEIVER = "cn.vsx.vc.START_APP_RECEIVER" ;
-    private static final String THIRD_PACKAGE_NAME = "cn.vsx.vc.daytime_qzw" ;
+    private static final String THIRD_PACKAGE_NAME = "com.gcstorage.superpolice" ;
     private static final String CONNECT_JUMP_RECEIVER = "cn.vsx.vsxsdk.broadcastReceiver.ConnectJumpReceiver" ;
     private ConnectMessageReceiver receiver;
 
@@ -32,12 +35,19 @@ public class RegisterBroadcastReceiver {
         context.registerReceiver(receiver, intentFilter);
     }
 
+    public void kill(Context context){
+        unregisterReceiver(context);
+        Connect3rdParty.getConns().clear();
+    }
     /**
      * 销毁
      * @param context
      */
     public void unregisterReceiver(Context context){
-        context.unregisterReceiver(receiver);
+        if(receiver!=null){
+            logger.error("--vsx--ConnectMessageReceiver 被销毁了");
+            context.unregisterReceiver(receiver);
+        }
     }
 
     /**

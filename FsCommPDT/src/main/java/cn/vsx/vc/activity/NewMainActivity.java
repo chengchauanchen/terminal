@@ -114,6 +114,7 @@ import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
 import cn.vsx.vc.permission.FloatWindowManager;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
+import cn.vsx.vc.receiveHandle.ReceiveMoveTaskToBackHandler;
 import cn.vsx.vc.receiveHandle.ReceiveNFCWriteResultHandler;
 import cn.vsx.vc.receiveHandle.ReceiveSwitchMainFrgamentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
@@ -270,6 +271,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             }
         }
     };
+
+
+
+
 
     /**
      * PTT按下时不可切换raidobutton
@@ -943,7 +948,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         ll_emergency_prompt.setVisibility(View.GONE);
 
 //        thridAppJoin();
-
+        //初始化 向地三方应用同步消息的service
+        //ThirdSendMessage.initVsxSendMessage(this);
         //注册 连接jumpService的广播
         ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().register(this);
 //        GetPublicKey.getSignInfo(this);
@@ -958,6 +964,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         //悬浮按钮
         imgbtn_ptt.setOnTouchListener(new OnTouchListenerImplementationToRemovePttFloatWindow());
         imgbtn_ptt.setOnLongClickListener(new OnLongClickListenerImplementationToGroupCall());
+
+        //退到后台
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveMoveTaskToBackHandler);
 
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCallingCannotClickHandler);
 
@@ -1530,6 +1539,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             callManager.cancelInterceptPtt();
         }
         HeadSetUtil.getInstance().close(this);// 关闭耳机线控监听
+        //退到后台
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveMoveTaskToBackHandler);
 
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveCallingCannotClickHandler);
 
@@ -1640,4 +1651,15 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         super.onDestroy();
         ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().unregisterReceiver(this);
     }
+
+    /**
+     * 将应用退到后台
+     */
+    private ReceiveMoveTaskToBackHandler receiveMoveTaskToBackHandler = new ReceiveMoveTaskToBackHandler() {
+        @Override
+        public void handler() {
+            logger.info("--vsx--收到第三方消息,将应用退到后台");
+            exit();
+        }
+    };
 }

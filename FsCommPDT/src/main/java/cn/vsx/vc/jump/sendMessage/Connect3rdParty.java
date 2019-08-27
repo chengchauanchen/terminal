@@ -26,6 +26,11 @@ public class Connect3rdParty {
 
     private Connect3rdParty(){}
 
+
+    public static Map<String, IReceivedVSXMessage> getConns(){
+        return conns;
+    }
+
     /**
      * 通过包名，添加连接对象
      *

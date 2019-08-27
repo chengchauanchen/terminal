@@ -17,6 +17,7 @@ import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
@@ -44,6 +45,7 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
+import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
@@ -69,9 +71,11 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.jump.utils.AppKeyUtils;
+import cn.vsx.vc.receiveHandle.ReceiveMoveTaskToBackHandler;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
+import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.InputMethodUtil;
@@ -1123,14 +1127,49 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_BACK:
+                toBack();
+                return super.onKeyDown(keyCode, event);
+            default:
+                return super.onKeyDown(keyCode, event);
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        toBack();
+    }
+
+    private void toBack(){
         int flags = getIntent().getFlags();
         if(flags==Intent.FLAG_ACTIVITY_NEW_TASK || !AppKeyUtils.isVsxAppKey()){//另一个app近来的
             logger.info("--vsx--另一个app近来的");
             if(!AppKeyUtils.isVsxAppKey()){
                 logger.info("--vsx--把程序变成后台的");
                 //moveTaskToBack(true);//把程序变成后台的
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveMoveTaskToBackHandler.class);
+                finish();
+                //exit();
             }
             AppKeyUtils.setAppKey(null);//销毁时，将appKey置空
+        }
+    }
+
+    public void exit(){
+        if ( !cn.vsx.vc.utils.PhoneAdapter.isF25() ) {
+            // 判断是否点了一次后退
+            if (MyApplication.instance.getIndividualState() != IndividualCallState.SPEAKING) {
+                // 在2秒之内点击第二次
+                moveTaskToBack(true);//把程序变成后台的
+                // finish完成之后当前进程依然在
+            }
         }
     }
 }

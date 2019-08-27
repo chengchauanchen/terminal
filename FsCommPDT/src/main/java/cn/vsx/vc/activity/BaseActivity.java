@@ -215,6 +215,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         Intent intent = new Intent(this, RegistActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+
         finish();
     }
 
