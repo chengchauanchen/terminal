@@ -132,7 +132,6 @@ repositories {
 
 dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-    implementation 'com.android.support:support-v4:26.1.0'
     compile fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:multidex:1.0.3'
     //noinspection GradleCompatible
@@ -154,10 +153,10 @@ dependencies {
     // skin-support 基础控件支持
     implementation 'skin.support:skin-support-design:2.2.3'
     // skin-support-design material design 控件支持[可选]
-    implementation 'android.arch.lifecycle:runtime:1.0.3'
-    implementation 'android.arch.lifecycle:extensions:1.0.0'
-    implementation 'android.arch.lifecycle:reactivestreams:1.0.0'
-    annotationProcessor "android.arch.lifecycle:compiler:1.0.0"
+    implementation "android.arch.lifecycle:runtime:$lifecycle_version"
+    implementation "android.arch.lifecycle:extensions:$lifecycle_version"
+    implementation "android.arch.lifecycle:reactivestreams:$lifecycle_version"
+    annotationProcessor "android.arch.lifecycle:compiler:$lifecycle_version"
     implementation 'io.reactivex.rxjava2:rxjava:2.1.6'
     implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
     //时间选择器
