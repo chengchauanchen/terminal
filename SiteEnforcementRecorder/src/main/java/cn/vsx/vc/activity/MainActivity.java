@@ -486,7 +486,7 @@ public class MainActivity extends BaseActivity {
             //自动上报
             myHandler.postDelayed(() -> {
                 if(isBinded){
-                    autoStartLive();
+//                    autoStartLive();
                 }
             },2000);
         } else {
@@ -721,9 +721,13 @@ public class MainActivity extends BaseActivity {
             }else{
                 //录像  （判断当前的状态，如果已经在录像，停止录像）
                 if(mMediaStream!=null) {
+
                     if(mMediaStream.isStreaming()){
                         updateNormalPushingState(false);
                         stopPush(true);
+                        if(mMediaStream.isRecording()){
+                            mMediaStream.stopRecord();
+                        }
                         ToastUtil.showToast(MainActivity.this, "停止上报");
                     }else if (mMediaStream.isRecording()) {
                         //已经在录像，停止录像

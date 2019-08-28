@@ -6,7 +6,7 @@ import android.content.Intent;
 
 import org.apache.log4j.Logger;
 
-import cn.vsx.vc.activity.RegistNFCActivity;
+import cn.vsx.vc.activity.SplashActivity;
 
 /**
  * 开机的广播接收
@@ -20,7 +20,7 @@ public class BootUpReceiver extends BroadcastReceiver {
 		if (ACTION_BOOT_COMPLETED.equals(intentAction)) {
 			//开机自启
 			logger.info("BootUpReceiver = " + intentAction);
-			Intent jumpIntent = new Intent(context, RegistNFCActivity.class);
+			Intent jumpIntent = new Intent(context, SplashActivity.class);
 			jumpIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			context.startActivity(jumpIntent);
 		}
