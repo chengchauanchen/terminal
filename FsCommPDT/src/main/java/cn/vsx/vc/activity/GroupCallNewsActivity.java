@@ -75,11 +75,11 @@ import cn.vsx.vc.receiveHandle.ReceiveMoveTaskToBackHandler;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
-import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.MyDataUtil;
+import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
 import cn.vsx.vc.view.FunctionHidePlus;
@@ -344,6 +344,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         //获取组内正在上报的人数
         getGroupLivingList();
         refreshPtt();
+        NfcUtil.writeData();
     }
 
     private void switchToGroup(){
@@ -1127,6 +1128,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        NfcUtil.writeData();
     }
 
 
@@ -1171,5 +1173,12 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                 // finish完成之后当前进程依然在
             }
         }
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent){
+        super.onNewIntent(intent);
+        setIntent(intent);
+        initData();
     }
 }
