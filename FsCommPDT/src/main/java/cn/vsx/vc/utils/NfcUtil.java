@@ -8,8 +8,14 @@ import android.nfc.NfcAdapter;
 import org.apache.log4j.Logger;
 
 import java.nio.charset.Charset;
+import java.util.HashMap;
 import java.util.Locale;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
+import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.vc.activity.GroupCallNewsActivity;
+import cn.vsx.vc.application.MyApplication;
 
 public class NfcUtil {
     private static Logger logger = Logger.getLogger(NfcUtil.class.getName());
@@ -116,6 +122,31 @@ public class NfcUtil {
         NdefRecord ndefRecord = new NdefRecord(NdefRecord.TNF_WELL_KNOWN,
             NdefRecord.RTD_TEXT, new byte[0], data);
         return ndefRecord;
+    }
+
+    public static void writeData(){
+        int groupNo;
+        //如果存在组会话界面，NFC绑定时就是绑定的这个组
+        if(ActivityCollector.isActivityExist(GroupCallNewsActivity.class)){
+            GroupCallNewsActivity activity = ActivityCollector.getActivity(GroupCallNewsActivity.class);
+            groupNo = activity.getChatTargetId();
+        }else {
+            //不存在组会话界面就绑定当前组
+            groupNo = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+        }
+        HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
+        if (hashMap.containsKey(groupNo + "") && !android.text.TextUtils.isEmpty(hashMap.get(groupNo + ""))){
+            writeData(groupNo,hashMap.get(groupNo + ""));
+        }else {
+            writeData(groupNo,"");
+        }
+    }
+
+    public static void writeData(int groupId,String warningId){
+        //设置刷NFC需要传的数据
+        int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+        long uniqueNo = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
+        MyApplication.instance.setBindTranslateBean(new RecorderBindTranslateBean(memberId,uniqueNo,groupId,warningId));
     }
 
 }
