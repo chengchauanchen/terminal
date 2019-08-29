@@ -73,8 +73,7 @@ public class MyApplication extends Application {
 	}
 
 	public void init(){
-		SpecificSDK.init(this);
-		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
+		SpecificSDK.init(this,TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
 	}
 
 	public void setIsContactsPersonal(boolean isContactsIndividual){
