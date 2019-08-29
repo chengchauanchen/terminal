@@ -8,9 +8,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.os.Build;
 import android.os.IBinder;
-import android.support.annotation.RequiresApi;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
@@ -85,8 +83,7 @@ public class MyApplication extends Application {
 		}
 		instance = this;
 		super.onCreate();
-		SpecificSDK.init(this);
-		setTerminalMemberType();
+		SpecificSDK.init(this,TerminalMemberType.TERMINAL_PHONE.toString());
 		registerActivityLifecycleCallbacks(new SimpleActivityLifecycle());
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
 
