@@ -33,9 +33,8 @@ import org.easydarwin.video.RTSPClient;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.TimerTask;
 
 import butterknife.Bind;
@@ -68,7 +67,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
@@ -79,6 +77,7 @@ import cn.vsx.vc.service.MAcessibilityService;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.EnableServiceUtils;
+import cn.vsx.vc.utils.StringUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.DialogUtil;
@@ -326,15 +325,15 @@ public class MainActivity extends BaseActivity {
                     showConnectToOtherView(noLive);
                 });
             } else {
-                handler.post(() -> {
-                    stopPull(false);
-                    showForeground(true);
-                    showToast("网络连接已断开");
-                    if (noLive != null) {
-                        noLive.setText("网络连接已断开");
-                    }
-                    showConnectToOtherView(tv_connect_to_other_failed);
-                });
+//                handler.post(() -> {
+//                    stopPull(false);
+//                    showForeground(true);
+//                    showToast("网络连接已断开");
+//                    if (noLive != null) {
+//                        noLive.setText("网络连接已断开");
+//                    }
+//                    showConnectToOtherView(tv_connect_to_other_failed);
+//                });
             }
         }
     };
@@ -428,6 +427,7 @@ public class MainActivity extends BaseActivity {
      **/
     private ReceiveNotifyLivingStoppedHandler receiveNotifyLivingStoppedHandler = (liveMemberId, callId, methodResult, resultDesc) -> handler.post(() -> {
         //需要判断停止直播的是不是当前观看的
+        removeLiveDescList(callId);
         cancelTask();
         showToast("图像上报已结束!");
         toWatchNext(false);
@@ -446,6 +446,8 @@ public class MainActivity extends BaseActivity {
      */
     private ReceiveMemberNotLivingHandler mReceiveMemberNotLivingHandler = callId -> handler.post(() -> {
         showToast("图像上报已结束!");
+        removeLiveDescList(callId);
+
         cancelTask();
         toWatchNext(false);
     });
@@ -529,7 +531,7 @@ public class MainActivity extends BaseActivity {
                     finishWatchLive();
                 }
                 if (errorcode == 500 || errorcode == 404 || errorcode == -32) {
-                    if (pullcount < 3) {
+                    if (pullcount < 10) {
                         try {
                             Thread.sleep(300);
                             logger.error("请求第" + pullcount + "次");
@@ -542,7 +544,7 @@ public class MainActivity extends BaseActivity {
                         }
                     } else {
                         ceaseWatching();
-                        sendMessage("图像上报已结束");
+                        sendMessage("图像已断开连接");
                         toWatchNext(false);
                     }
                 } else if (errorcode == 0) {
@@ -777,21 +779,21 @@ public class MainActivity extends BaseActivity {
      * @param message
      */
     private void goWatchRTSP(final PTTProtolbuf.NotifyDataMessage message) {
-        MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
-            String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
-            int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
-            String url = "http://" + serverIp + ":" + serverPort + "/file/download/isLiving";
-            Map<String, String> paramsMap = new HashMap<>();
-            paramsMap.put("callId", JSONObject.parseObject(message.getMessageBody()).getString(JsonParam.CALLID));
-            paramsMap.put("sign", SignatureUtil.sign(paramsMap));
-            logger.info("查看视频播放是否结束url：" + url);
-            String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
-            logger.info("查看视频播放是否结束结果：" + result);
-            if (!Util.isEmpty(result)) {
-                JSONObject jsonObject = JSONObject.parseObject(result);
-                boolean living = jsonObject.getBoolean("living");
-//                Long endChatTime = jsonObject.getLong("endChatTime");
-                if (living) {
+//        MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
+//            String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
+//            int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
+//            String url = "http://" + serverIp + ":" + serverPort + "/file/download/isLiving";
+//            Map<String, String> paramsMap = new HashMap<>();
+//            paramsMap.put("callId", JSONObject.parseObject(message.getMessageBody()).getString(JsonParam.CALLID));
+//            paramsMap.put("sign", SignatureUtil.sign(paramsMap));
+//            logger.info("查看视频播放是否结束url：" + url);
+//            String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
+//            logger.info("查看视频播放是否结束结果：" + result);
+//            if (!Util.isEmpty(result)) {
+//                JSONObject jsonObject = JSONObject.parseObject(result);
+//                boolean living = jsonObject.getBoolean("living");
+////                Long endChatTime = jsonObject.getLong("endChatTime");
+//                if (living) {
                     int resultCode = MyTerminalFactory.getSDK().getLiveManager().requestToWatchLiving(message);
                     if (resultCode == 0) {
                         //观看上报图像
@@ -803,15 +805,15 @@ public class MainActivity extends BaseActivity {
                             toWatchNext(false);
                         });
                     }
-                } else {
-                    handler.post(() -> {
-                        showToast("图像上报已结束");
-                        cancelTask();
-                        toWatchNext(false);
-                    });
-                }
-            }
-        });
+//                } else {
+//                    handler.post(() -> {
+//                        showToast("图像上报已结束");
+//                        cancelTask();
+//                        toWatchNext(false);
+//                    });
+//                }
+//            }
+//        });
     }
 
     /**
@@ -930,31 +932,56 @@ public class MainActivity extends BaseActivity {
     }
 
     /**
+     * 清除上报结束的图像信息
+     * @param callId
+     */
+    private void removeLiveDescList(long callId){
+        Iterator<PTTProtolbuf.NotifyDataMessage> iterator = liveDescList.iterator();
+        while(iterator.hasNext()){
+            PTTProtolbuf.NotifyDataMessage message = iterator.next();
+            if(message!=null && message.getMessageType() == MessageType.VIDEO_LIVE.getCode()&&message.getMessageBody()!=null){
+                String mCallId = JSONObject.parseObject(message.getMessageBody()).getString(JsonParam.CALLID);
+                if(StringUtil.toLong(mCallId) == callId){
+                    if(rotationIndex>0){
+                        rotationIndex--;
+                    }
+                    iterator.remove();
+                }
+            }
+        }
+    }
+
+    /**
      * 切换到下个live
      *
      * @param delay
      */
     private void toWatchNext(boolean delay) {
         if (!liveDescList.isEmpty()) {
-            myHandler.postDelayed(() -> {
-                rotationIndex++;
-                if(rotationIndex>=liveDescList.size()){
-                    rotationIndex = 0;
-                }
-                if (rotationIndex >= 0 && rotationIndex < liveDescList.size()) {
-//                    allFinishWatchLive();
-                    startRotationLive();
-                }else {
-                    allFinishWatchLive();
-                    clearRotationLive();
-                }
-            }, delay ? ROTATION_TIME : 0);
+            //保证只推送一路图像时，不会隔15秒停止观看
+            if(liveDescList.size()>1){
+                myHandler.removeCallbacksAndMessages(null);
+                myHandler.postDelayed(() -> {
+                    rotationIndex++;
+                    if(rotationIndex>=liveDescList.size()){
+                        rotationIndex = 0;
+                    }
+                    if (rotationIndex >= 0 && rotationIndex < liveDescList.size()) {
+//                        allFinishWatchLive();
+                        startRotationLive();
+                    }else {
+                        allFinishWatchLive();
+                        clearRotationLive();
+                    }
+                }, delay ? ROTATION_TIME : 0);
+            }
         }else{
             if(!delay){
                 allFinishWatchLive();
             }
         }
     }
+
 
     /**
      * 恢复到等待页面
