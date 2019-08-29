@@ -10,7 +10,6 @@ import java.util.logging.Logger;
 
 import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.TerminalMemberType;
-import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenStateMachine;
@@ -24,7 +23,6 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
-import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.context.TerminalSDK4Android;
 
 public class MyApplication extends Application {
@@ -45,9 +43,8 @@ public class MyApplication extends Application {
 	public void onCreate() {
 		super.onCreate();
 		instance = this;
-		SpecificSDK.init(this);
+		SpecificSDK.init(this,TerminalMemberType.TERMINAL_HDMI.toString());
 		registerActivityLifecycleCallbacks(new SimpleActivityLifecycle());
-		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_HDMI.toString());
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
 	}
 
