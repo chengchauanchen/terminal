@@ -318,6 +318,7 @@ public class FileUtil {
             videoTime = mediaPlayer.getDuration();
         } catch (IOException e) {
             e.printStackTrace();
+        }finally{
             mediaPlayer.reset();
             mediaPlayer.release();
         }

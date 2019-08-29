@@ -11,7 +11,6 @@ import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.uav.receiveHandler.ReceiveAircraftFilesHandler;
-import cn.vsx.uav.receiveHandler.ReceiveCalibrationStateCallbackHandler;
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
 import dji.common.flightcontroller.LocationCoordinate3D;
@@ -154,7 +153,7 @@ public class AirCraftUtil{
             if(hasError){
                 //校准回调
                 compass.setCalibrationStateCallback(compassCalibrationState -> {
-                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCalibrationStateCallbackHandler.class,compassCalibrationState);
+//                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCalibrationStateCallbackHandler.class,compassCalibrationState);
                 });
                 compass.startCalibration(djiError -> {
                     if(djiError == null){

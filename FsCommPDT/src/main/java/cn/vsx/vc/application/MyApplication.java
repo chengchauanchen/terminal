@@ -83,7 +83,7 @@ public class MyApplication extends Application {
 		}
 		instance = this;
 		super.onCreate();
-		SpecificSDK.init(this,TerminalMemberType.TERMINAL_PHONE.toString());
+		initSdk();
 		registerActivityLifecycleCallbacks(new SimpleActivityLifecycle());
 		catchGroupIdList = CommonGroupUtil.getCatchGroupIds();
 
@@ -96,6 +96,10 @@ public class MyApplication extends Application {
         MyApplication.instance.setBindTranslateBean(null);
         //初始化 向地三方应用同步消息的service
 		ThirdSendMessage.initVsxSendMessage(this);
+	}
+
+	protected void initSdk(){
+		SpecificSDK.init(this,TerminalMemberType.TERMINAL_PHONE.toString());
 	}
 
 	public void setTerminalMemberType(){

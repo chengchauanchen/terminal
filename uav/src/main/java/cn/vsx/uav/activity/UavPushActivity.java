@@ -2,6 +2,7 @@ package cn.vsx.uav.activity;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.PointF;
 import android.graphics.SurfaceTexture;
@@ -184,8 +185,8 @@ public class UavPushActivity extends BaseActivity{
     }
 
     @Override
-    protected void setOritation() {
-        this.oritationPort = false;
+    protected void setOrientation(){
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
     }
 
     @Override

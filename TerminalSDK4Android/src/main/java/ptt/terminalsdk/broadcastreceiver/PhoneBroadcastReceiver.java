@@ -64,6 +64,7 @@ public class PhoneBroadcastReceiver extends BroadcastReceiver {
 	 * 挂断电话
 	 */
 	private void endCall(){
+		logger.info("挂断电话");
 		try {
 			Method method = Class.forName("android.os.ServiceManager").getMethod("getService", String.class);
 			// 获取远程TELEPHONY_SERVICE的IBinder对象的代理
@@ -75,6 +76,7 @@ public class PhoneBroadcastReceiver extends BroadcastReceiver {
 			//telephony.cancelMissedCallsNotification();
 
 		} catch (Exception e) {
+			logger.info("挂断电话失败----"+e);
 		}
 	}
 }

@@ -33,6 +33,11 @@ public class UavApplication extends MyApplication{
     }
 
     @Override
+    protected void initSdk(){
+        SpecificSDK.init(this,TerminalMemberType.TERMINAL_UAV.toString());
+    }
+
+    @Override
     protected void attachBaseContext(Context base){
         super.attachBaseContext(base);
         com.secneo.sdk.Helper.install(this);

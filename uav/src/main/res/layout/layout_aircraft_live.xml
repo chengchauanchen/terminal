@@ -6,16 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/black">
     
-    <TextView
-        android:id="@+id/v_drak_backgroupd"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/black"
-        android:gravity="center"
-        android:text="@string/uav_disconnect"
-        android:textColor="@color/grid_line"
-        android:textSize="30sp"
-        android:visibility="gone" />
+
     
     <RelativeLayout
         android:id="@+id/aircraft_root"
@@ -29,6 +20,18 @@
             android:layout_centerInParent="true"
             android:keepScreenOn="true"
             android:visibility="visible" />
+        
+        <TextView
+            android:id="@+id/v_drak_backgroupd"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/black"
+            android:gravity="center"
+            android:text="@string/uav_disconnect"
+            android:textColor="@color/grid_line"
+            android:textSize="30sp"
+            android:visibility="gone" />
+        
         <!-- Widgets in top status bar -->
         <RelativeLayout
             android:id="@+id/signal"

@@ -1,6 +1,7 @@
 package cn.vsx.uav.activity;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
@@ -94,9 +95,8 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
         return AdaptScreenUtils.adaptHeight(super.getResources(),1200);
     }
 
-    @Override
-    protected void setOritation() {
-        this.oritationPort = false;
+    protected void setOrientation(){
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
     }
 
     @Override

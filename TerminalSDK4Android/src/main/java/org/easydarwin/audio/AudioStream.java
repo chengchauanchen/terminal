@@ -290,10 +290,10 @@ public class AudioStream{
     private boolean checkIfPush(){
 
         if(TextUtils.equals(type, TerminalMemberType.TERMINAL_UAV.name())){
-            logger.info("终端类型为无人机---"+"是否开启声音："+TerminalFactory.getSDK().getDataManager().isUavVoiceOpen());
+//            logger.info("终端类型为无人机---"+"是否开启声音："+TerminalFactory.getSDK().getDataManager().isUavVoiceOpen());
             return TerminalFactory.getSDK().getDataManager().isUavVoiceOpen();
         }else {
-            logger.info("是否开启声音:"+true);
+//            logger.info("是否开启声音:"+true);
             return true;
         }
     }
