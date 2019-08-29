@@ -21,6 +21,7 @@ import android.widget.TextView;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.blankj.utilcode.util.ToastUtils;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
@@ -456,6 +457,7 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
         mediaPlayer.setOnErrorListener(new MediaPlayer.OnErrorListener(){
             @Override
             public boolean onError(MediaPlayer mp, int what, int extra){
+                ToastUtils.showShort(R.string.text_play_live_fail);
                 logger.error("mediaPlayer  onError");
                 iv_pause_continue.setImageResource(R.drawable.on_pause);
                 iv_pause.setVisibility(View.VISIBLE);
