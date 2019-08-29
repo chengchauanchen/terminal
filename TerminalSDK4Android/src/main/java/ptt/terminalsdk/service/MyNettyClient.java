@@ -175,7 +175,11 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     public void onConnected(){
         logger.info("onConnected----"+connected);
         try{
-            handler.handler(true);
+            if(handler != null){
+                handler.handler(true);
+            }else {
+                logger.error("还没有注册Netty连接监听，不能通知");
+            }
         }catch(RemoteException e){
             e.printStackTrace();
         }
@@ -199,7 +203,11 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     public void onDisConnect(){
         logger.info("onDisConnect---");
         try{
-            handler.handler(false);
+            if(handler != null){
+                handler.handler(false);
+            }else {
+                logger.error("还没有注册Netty连接监听，不能通知");
+            }
         }catch(RemoteException e){
             e.printStackTrace();
         }
