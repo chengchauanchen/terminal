@@ -34,6 +34,7 @@ public class PadApplication extends App {
     public boolean isPttPress = false;//组呼是否按下
     public boolean isPlayVoice = false;//是否正在播放组呼
     public boolean isCallState = false; //记录主动个呼嘟嘟声
+    public boolean usbAttached;//外置摄像头是否连接
 
 
     /**标记个呼来或者请求图形来，是否做了接受或拒绝的操作，默认是false*/
@@ -64,9 +65,7 @@ public class PadApplication extends App {
      * 初始化vsxSDK 相关
      */
     private void initVsxinSDK(){
-        SpecificSDK.init(this);
-        //设置终端类型未 pad
-        SpecificSDK.setTerminalMemberType(TerminalMemberType.TERMINAL_PAD.toString());
+        SpecificSDK.init(this,TerminalMemberType.TERMINAL_PAD.toString());
     }
 
     /**
