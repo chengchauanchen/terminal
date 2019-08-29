@@ -1129,6 +1129,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         if(!FloatWindowManager.getInstance().checkPermission(this)){
             FloatWindowManager.getInstance().applyPermission(this);
         }
+        NfcUtil.writeData();
     }
 
     private void initNFC() {
