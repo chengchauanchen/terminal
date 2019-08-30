@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2016 Facishare Technology Co., Ltd. All Rights Reserved.
  */
-package cn.vsx.vc.permission.rom;
+package ptt.terminalsdk.permission.rom;
 
 import android.annotation.TargetApi;
 import android.app.AppOpsManager;
@@ -10,9 +10,10 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Build;
 import android.util.Log;
+
 import java.lang.reflect.Method;
 
-import cn.vsx.vc.permission.FloatWindowManager;
+import ptt.terminalsdk.permission.FloatWindowManager;
 
 public class MeizuUtils {
     private static final String TAG = "MeizuUtils";

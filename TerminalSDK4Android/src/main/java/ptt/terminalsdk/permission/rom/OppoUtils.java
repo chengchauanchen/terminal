@@ -1,4 +1,4 @@
-package cn.vsx.vc.permission.rom;
+package ptt.terminalsdk.permission.rom;
 
 import android.annotation.TargetApi;
 import android.app.AppOpsManager;

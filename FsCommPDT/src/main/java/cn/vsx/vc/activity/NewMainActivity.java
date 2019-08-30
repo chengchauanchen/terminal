@@ -111,7 +111,6 @@ import cn.vsx.vc.fragment.SearchFragment;
 import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
-import cn.vsx.vc.permission.FloatWindowManager;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.ReceiveMoveTaskToBackHandler;
@@ -133,6 +132,7 @@ import cn.vsx.vc.view.TimerView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
+import ptt.terminalsdk.permission.FloatWindowManager;
 import ptt.terminalsdk.tools.PhoneAdapter;
 import ptt.terminalsdk.tools.ToastUtil;
 

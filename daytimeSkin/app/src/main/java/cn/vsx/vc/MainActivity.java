@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //组会话页
 //                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivity("100040");
-                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivityForName("T201908232qwe");
+                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivityForName("T20190823010188");
             }
         });
 
@@ -186,6 +186,9 @@ public class MainActivity extends AppCompatActivity {
         VsxSDK.getInstance().getJumpSDK().createTemporaryGroup();
     }
 
+    public void startMyApp(View view){
+        VsxSDK.getInstance().getJumpSDK().sendStartAppBroadcast(this);
+    }
 
     @Override
     protected void onDestroy() {

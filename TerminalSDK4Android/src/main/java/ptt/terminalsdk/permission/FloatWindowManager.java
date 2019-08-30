@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2016 Facishare Technology Co., Ltd. All Rights Reserved.
  */
-package cn.vsx.vc.permission;
+package ptt.terminalsdk.permission;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -17,12 +17,12 @@ import android.view.WindowManager;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
-import cn.vsx.vc.permission.rom.HuaweiUtils;
-import cn.vsx.vc.permission.rom.MeizuUtils;
-import cn.vsx.vc.permission.rom.MiuiUtils;
-import cn.vsx.vc.permission.rom.OppoUtils;
-import cn.vsx.vc.permission.rom.QikuUtils;
-import cn.vsx.vc.permission.rom.RomUtils;
+import ptt.terminalsdk.permission.rom.HuaweiUtils;
+import ptt.terminalsdk.permission.rom.MeizuUtils;
+import ptt.terminalsdk.permission.rom.MiuiUtils;
+import ptt.terminalsdk.permission.rom.OppoUtils;
+import ptt.terminalsdk.permission.rom.QikuUtils;
+import ptt.terminalsdk.permission.rom.RomUtils;
 
 /**
  * Description:

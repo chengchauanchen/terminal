@@ -233,6 +233,11 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         } else {
             tv_ble_name.setText(R.string.text_close);
         }
+        if (MyTerminalFactory.getSDK().getParam(Params.DAYTIME_MODE, false)) {
+            btn_daytime_mode.initToggleState(true);
+        } else {
+            btn_daytime_mode.initToggleState(false);
+        }
     }
 
     @Override
@@ -248,11 +253,6 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
             btn_lock_screen_setting.initToggleState(true);
         } else {
             btn_lock_screen_setting.initToggleState(false);
-        }
-        if (MyTerminalFactory.getSDK().getParam(Params.DAYTIME_MODE, false)) {
-            btn_daytime_mode.initToggleState(true);
-        } else {
-            btn_daytime_mode.initToggleState(false);
         }
     }
 

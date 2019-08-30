@@ -1,7 +1,6 @@
 package cn.vsx.vc.application;
 
 import android.app.ActivityManager;
-import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -32,14 +31,14 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
-import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
 import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
+import ptt.terminalsdk.context.BaseApplication;
 import skin.support.SkinCompatManager;
 import skin.support.design.app.SkinMaterialViewInflater;
 
-public class MyApplication extends Application {
+public class MyApplication extends BaseApplication{
 
 	public int mAppStatus = Constants.FORCE_KILL;//App运行状态，是否被强杀
 	public boolean isBinded=false;
@@ -102,14 +101,17 @@ public class MyApplication extends Application {
 		SpecificSDK.init(this,TerminalMemberType.TERMINAL_PHONE.toString());
 	}
 
+	@Override
 	public void setTerminalMemberType(){
 		SpecificSDK.setTerminalMemberType(TerminalMemberType.TERMINAL_PHONE.toString());
 	}
 
+	@Override
 	public void setApkType(){
 		SpecificSDK.setApkType(this);
 	}
 
+	@Override
 	public void setAppKey(){
 		SpecificSDK.setAppKey(this);
 	}
@@ -165,6 +167,7 @@ public class MyApplication extends Application {
 	/**
 	 * 获取到悬浮窗权限之后需要调用
 	 */
+	@Override
 	public void startHandlerService() {
 		Intent intent = new Intent(this,ReceiveHandlerService.class);
 		isBinded=bindService(intent,conn,BIND_AUTO_CREATE);
@@ -173,6 +176,7 @@ public class MyApplication extends Application {
 	private ServiceConnection conn = new ServiceConnection() {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
+            Log.e("MyApplication", "ReceiveHandlerService bind成功");
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
@@ -180,6 +184,7 @@ public class MyApplication extends Application {
 		}
 	};
 
+	@Override
 	public void stopHandlerService(){
 		if (conn != null) {
 

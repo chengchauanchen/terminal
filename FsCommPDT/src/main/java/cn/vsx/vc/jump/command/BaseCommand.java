@@ -1,15 +1,10 @@
 package cn.vsx.vc.jump.command;
 
 import android.content.Context;
-import android.util.Log;
 
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.jump.bean.SendBean;
 import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.jump.utils.GsonUtils;
-import ptt.terminalsdk.context.MyTerminalFactory;
-import skin.support.SkinCompatManager;
 
 abstract class BaseCommand implements IJumpCommand {
     protected Context context;

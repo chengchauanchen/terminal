@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2016 Facishare Technology Co., Ltd. All Rights Reserved.
  */
-package cn.vsx.vc.permission.rom;
+package ptt.terminalsdk.permission.rom;
 
 import android.annotation.TargetApi;
 import android.app.AppOpsManager;

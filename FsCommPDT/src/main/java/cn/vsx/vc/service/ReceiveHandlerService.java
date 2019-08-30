@@ -90,7 +90,6 @@ import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.PushLiveMemberList;
-import cn.vsx.vc.permission.FloatWindowManager;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
@@ -106,6 +105,7 @@ import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.permission.FloatWindowManager;
 import ptt.terminalsdk.service.KeepLiveManager;
 import ptt.terminalsdk.tools.ToastUtil;
 

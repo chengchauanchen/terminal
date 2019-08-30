@@ -35,4 +35,5 @@ public class AddMemberToTempGroupActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
     }
+
 }
