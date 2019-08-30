@@ -35,6 +35,7 @@ import org.apache.http.util.TextUtils;
 
 import java.util.List;
 
+import cn.com.cybertech.pdk.LinkToCheckApps.Param;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
@@ -87,6 +88,7 @@ import cn.vsx.vc.view.RoundProgressBarWidthNumber;
 import cn.vsx.vc.view.VolumeViewLayout;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import skin.support.SkinCompatManager;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 
@@ -179,6 +181,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     }
 
     public static void startCurrentActivity(Context context, int userId, String userName, int speakingId, String speakingName,boolean newTask) {
+        Log.e("JumpService", "GroupChat--startCurrentActivity");
         Intent intent = new Intent(context, GroupCallNewsActivity.class);
         intent.putExtra("userId", userId);
         intent.putExtra("userName", userName);
@@ -267,6 +270,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     protected void onResume() {
         super.onResume();
         isForeground = true;
+        setDayTimeMode();
     }
 
     @Override
@@ -1147,6 +1151,23 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     public void onBackPressed() {
         super.onBackPressed();
         toBack();
+    }
+
+    /**
+     * 设置白天模式
+     */
+    private void setDayTimeMode(){
+        int flags = getIntent().getFlags();
+        if(flags==Intent.FLAG_ACTIVITY_NEW_TASK || !AppKeyUtils.isVsxAppKey()){//另一个app近来的
+            if(!AppKeyUtils.isVsxAppKey()){
+                boolean param = MyTerminalFactory.getSDK().getParam(Params.DAYTIME_MODE,false);
+                Log.e("JumpService", "DAYTIME_MODE param="+param);
+                if(!param){
+                    MyTerminalFactory.getSDK().putParam(Params.DAYTIME_MODE, true);
+                    SkinCompatManager.getInstance().loadSkin("daytime.skin", SkinCompatManager.SKIN_LOADER_STRATEGY_ASSETS);
+                }
+            }
+        }
     }
 
     private void toBack(){

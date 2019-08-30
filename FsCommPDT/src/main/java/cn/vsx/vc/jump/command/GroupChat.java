@@ -2,6 +2,7 @@ package cn.vsx.vc.jump.command;
 
 import android.content.Context;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.List;
 
@@ -37,6 +38,7 @@ public class GroupChat extends BaseCommand {
 
     @Override
     protected void jumpPage(SendBean sendBean) {
+        Log.e("JumpService", "GroupChat--jumpPage");
         int groupNo = MemberUtil.strToInt(sendBean.getGroupNo());
         String groupName = sendBean.getGroupName();
         if(TextUtils.isEmpty(groupName)){
@@ -61,6 +63,8 @@ public class GroupChat extends BaseCommand {
     }
 
     public void jumpGroupChatActivityForName(Context context, String groupName) {
+        Log.e("JumpService", "GroupChat--jumpGroupChatActivityForName");
+
         this.groupName = groupName;
         Group group =  DataUtil.getTempGroupByGroupName(groupName);
         if(group==null){

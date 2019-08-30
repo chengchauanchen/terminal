@@ -24,15 +24,16 @@ abstract class BaseCommand implements IJumpCommand {
 
     @Override
     public void jumpPage(String sendJson) {
-        Log.e("JumpService", "sendJson:" + sendJson);
         SendBean sendBean = GsonUtils.sendJsonToBean(sendJson);
         String appKey = sendBean.getAppKey();
-        Log.e("JumpService", "APP_KEY:" + appKey);
         AppKeyUtils.setAppKey(appKey);
         jumpPage(sendBean);
         //SDK进入，将页面设为白天模式
-        MyTerminalFactory.getSDK().putParam(Params.DAYTIME_MODE, true);
-        SkinCompatManager.getInstance().loadSkin("daytime.skin", SkinCompatManager.SKIN_LOADER_STRATEGY_ASSETS);
+        //MyTerminalFactory.getSDK().putParam(Params.DAYTIME_MODE, true);
+        //Log.e("JumpService", "MyTerminalFactory.getSDK().putParam(Params.DAYTIME_MODE, true);");
+        //SkinCompatManager.getInstance().loadSkin("daytime.skin", SkinCompatManager.SKIN_LOADER_STRATEGY_ASSETS);
+        //Log.e("JumpService", "SkinCompatManager.getInstance().loadSkin");
+
     }
 
     protected abstract void jumpPage(SendBean sendBean);

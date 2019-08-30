@@ -56,8 +56,6 @@ public class JumpSDK implements JumpInterface {
         Log.e("--vsxSDK--","启动惟实信Service");
     }
 
-
-
     /**
      * 注册连接jump的广播
      * @param context
@@ -262,7 +260,7 @@ public class JumpSDK implements JumpInterface {
         try {
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.GroupChat.getType());//;
         } catch (Exception e) {
-            Log.e("JumpSDK", "跳转到组会话失败");
+            Log.e("JumpSDK", "跳转到组会话失败", e);
             doCacheCommandAndLaunchedVSXApp(json, CommandEnum.GroupChat.getType());
         }
     }
@@ -273,7 +271,7 @@ public class JumpSDK implements JumpInterface {
         try {
             VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.GroupChat.getType());//;
         } catch (Exception e) {
-            Log.e("JumpSDK", "跳转到组会话失败");
+            Log.e("JumpSDK", "跳转到组会话失败", e);
             doCacheCommandAndLaunchedVSXApp(json, CommandEnum.GroupChat.getType());
         }
     }
