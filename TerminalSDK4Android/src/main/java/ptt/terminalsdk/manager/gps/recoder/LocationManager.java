@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cn.vsx.hamster.common.MountType;
+import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.channel.ServerMessageReceivedHandler;
@@ -360,6 +361,7 @@ public class LocationManager {
             Map<String,Object> params = new HashMap<>();
             params.put("terminalno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
             params.put("memberuniqueno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L));
+            params.put("terminalType",MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE));
             params.put("longitude",location.getLongitude());
             params.put("latitude",location.getLatitude());
             params.put("speed",location.getSpeed());
