@@ -946,7 +946,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         imgbtn_ptt.setVisibility(View.GONE);
         ll_emergency_prompt.setVisibility(View.GONE);
-
+        MyTerminalFactory.getSDK().registNetworkChangeHandler();
 //        thridAppJoin();
         //初始化 向地三方应用同步消息的service
         ThirdSendMessage.initVsxSendMessage(this);
@@ -1650,6 +1650,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        MyTerminalFactory.getSDK().unregistNetworkChangeHandler();
         ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().unregisterReceiver(this);
     }
 

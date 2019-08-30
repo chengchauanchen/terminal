@@ -172,10 +172,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		getVideoProxy().start();
 		PromptManager.getInstance().start(application);
 		getFileTransferOperation().start();
-		netWorkConnectionChangeReceiver = new NetWorkConnectionChangeReceiver();
-		IntentFilter netFilter = new IntentFilter();
-		netFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-		application.registerReceiver(netWorkConnectionChangeReceiver,netFilter);
 
 		// 广播接收器，用来监听SSL服务发出的广播
 		vpnConnectionChangeReceiver = new VPNConnectionChangeReceiver();
@@ -218,6 +214,17 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 	}
 
+	public void registNetworkChangeHandler(){
+		netWorkConnectionChangeReceiver = new NetWorkConnectionChangeReceiver();
+		IntentFilter netFilter = new IntentFilter();
+		netFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+		application.registerReceiver(netWorkConnectionChangeReceiver,netFilter);
+	}
+
+	public void unregistNetworkChangeHandler(){
+		application.unregisterReceiver(netWorkConnectionChangeReceiver);
+	}
+
 	@Override
 	protected void onStop() {
 		logger.error("TerminalSDK4Android----stop！！");
@@ -225,7 +232,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		locationStop();
 		getVideoProxy().stop();
 		PromptManager.getInstance().stop();
-		application.unregisterReceiver(netWorkConnectionChangeReceiver);
 		application.unregisterReceiver(vpnConnectionChangeReceiver);
 		stopUVCCameraService();
 		getVoipCallManager().destroy(application);//VOIP服务注销
