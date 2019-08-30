@@ -16,6 +16,7 @@
       android:name="android.permission.INTERACT_ACROSS_USERS_FULL"
       tools:ignore="ProtectedPermissions"/>
   <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+  <uses-permission android:name="android.permission.ACTION_SHUTDOWN"/>
   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
   <uses-permission android:name="android.permission.BODY_SENSORS"/>
   <!--传感器权限-->
@@ -183,6 +184,15 @@
         <action android:name="android.intent.action.BOOT_COMPLETED"/>
       </intent-filter>
     </receiver>
+    <!--<receiver-->
+        <!--android:name=".receiver.BootDownReceiver"-->
+        <!--android:enabled="true"-->
+        <!--android:exported="true"-->
+        <!--&gt;-->
+      <!--<intent-filter android:priority="1000">-->
+        <!--<action android:name="android.intent.action.ACTION_SHUTDOWN"/>-->
+      <!--</intent-filter>-->
+    <!--</receiver>-->
     <receiver android:name=".receiver.AccountValidReceiver">
       <intent-filter >
         <action android:name="vsxin.action.accountvalid" />

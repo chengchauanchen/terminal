@@ -175,6 +175,8 @@ public class PromptManager {
 		soundMap.put(R.raw.faild_binding, soundPool.load(context, R.raw.faild_binding, 1));
 		soundMap.put(R.raw.faild_changegroup, soundPool.load(context, R.raw.faild_changegroup, 1));
 		soundMap.put(R.raw.success_binding, soundPool.load(context, R.raw.success_binding, 1));
+		soundMap.put(R.raw.success_binding_police, soundPool.load(context, R.raw.success_binding_police, 1));
+		soundMap.put(R.raw.success_binding_police_alert, soundPool.load(context, R.raw.success_binding_police_alert, 1));
 		soundMap.put(R.raw.success_changegroup, soundPool.load(context, R.raw.success_changegroup, 1));
 		soundMap.put(R.raw.unbinding, soundPool.load(context, R.raw.unbinding, 1));
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
@@ -231,6 +233,24 @@ public class PromptManager {
 	public void bindSuccess(){
 		if(soundPool != null){
 			soundPool.play(soundMap.get(R.raw.success_binding), 0.5f, 0.5f, 0, 0, 1);
+		}
+	}
+
+	/**
+	 * 绑定民警成功
+	 */
+	public void bindPoliceSuccess(){
+		if(soundPool != null){
+			soundPool.play(soundMap.get(R.raw.success_binding_police), 0.5f, 0.5f, 0, 0, 1);
+		}
+	}
+
+	/**
+	 * 绑定民警，绑定警情成功
+	 */
+	public void bindPoliceAlertSuccess(){
+		if(soundPool != null){
+			soundPool.play(soundMap.get(R.raw.success_binding_police_alert), 0.5f, 0.5f, 0, 0, 1);
 		}
 	}
 

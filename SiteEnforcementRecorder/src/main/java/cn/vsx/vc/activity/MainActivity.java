@@ -50,11 +50,13 @@ import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.auth.LoginModel;
 import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerLiveTimeoutHandler;
@@ -63,6 +65,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExternStorageSizeHandler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveJoinInWarningGroupPushLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
@@ -93,6 +96,7 @@ import cn.vsx.vc.receiveHandle.ReceiverFragmentPopBackStackHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentShowHandler;
 import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
+import cn.vsx.vc.receiveHandle.ReceiverStopBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.APPStateUtil;
@@ -144,6 +148,11 @@ public class MainActivity extends BaseActivity {
     private static final int HANDLE_CODE_OPEN_CAMERA = -1;
     private static final int HANDLE_CODE_MSG_STATE = 0;
     private static final int HANDLE_CODE_HIDE_INFO_LAYOUT = 1;
+    //定时写入上报时间点
+    private static final int HANDLE_WRITE_AUTO_PUSH_INTERVAL_TIME = 2;
+    private static final int WRITE_AUTO_PUSH_INTERVAL_TIME = 10*1000;
+    //间隔时间
+    private static final int AUTO_PUSH_INTERVAL_TIME = 10*60*1000;
 
     BITMediaStream mMediaStream;
     List<String> listResolution;
@@ -262,6 +271,8 @@ public class MainActivity extends BaseActivity {
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverFragmentShowHandler);//收到fragment show
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverFragmentPopBackStackHandler);//收到fragment PopBackStack
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverFragmentClearHandler);//收到fragment clear
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverStopBusniessHandler);//停止一切业务
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveJoinInWarningGroupPushLiveHandler);//绑定同一个警务通账号，切组到警情组时，上报图像
     }
 
     @Override
@@ -324,10 +335,13 @@ public class MainActivity extends BaseActivity {
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverFragmentShowHandler);//收到fragment show
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverFragmentPopBackStackHandler);//收到fragment PopBackStack
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverFragmentClearHandler);//收到fragment clear
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverStopBusniessHandler);//停止一切业务
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveJoinInWarningGroupPushLiveHandler);//绑定同一个警务通账号，切组到警情组时，上报图像
         myHandler.removeCallbacksAndMessages(null);
         PromptManager.getInstance().stopRing();
         stopService(new Intent(MainActivity.this, LockScreenService.class));
         MyTerminalFactory.getSDK().getVideoProxy().start().unregister(this);
+        MyTerminalFactory.getSDK().unregistNetworkChangeHandler();
     }
 
     @OnClick({R.id.sv_live,R.id.tv_login_info,R.id.bt_bind_state})
@@ -370,6 +384,11 @@ public class MainActivity extends BaseActivity {
                     //隐藏头部的布局
                     myHandler.removeMessages(HANDLE_CODE_HIDE_INFO_LAYOUT);
                     rlLoginBind.setVisibility(View.GONE);
+                    break;
+                case HANDLE_WRITE_AUTO_PUSH_INTERVAL_TIME:
+                    removeMessages(HANDLE_WRITE_AUTO_PUSH_INTERVAL_TIME);
+                    TerminalFactory.getSDK().putParam(Params.RECORDER_AUTO_PUSH_INTERVAL_TIME, System.currentTimeMillis());
+                    sendEmptyMessageDelayed(HANDLE_WRITE_AUTO_PUSH_INTERVAL_TIME,WRITE_AUTO_PUSH_INTERVAL_TIME);
                     break;
             }
         }
@@ -483,10 +502,16 @@ public class MainActivity extends BaseActivity {
             //更新UI
             RecorderBindBean bean = cn.vsx.hamster.terminalsdk.tools.DataUtil.getRecorderBindBean();
             showLoginAndBindUI((bean == null)?Constants.LOGIN_BIND_STATE_LOGIN:Constants.LOGIN_BIND_STATE_BIND);
+            if(isFristLogin){
+                isFristLogin = false;
+            }
+            if(!isFristLogin){
+                MyTerminalFactory.getSDK().registNetworkChangeHandler();
+            }
             //自动上报
             myHandler.postDelayed(() -> {
-                if(isBinded){
-//                    autoStartLive();
+                if(checkCanAutoStartLive()){
+                    requestStartLive();
                 }
             },2000);
         } else {
@@ -498,11 +523,19 @@ public class MainActivity extends BaseActivity {
      * 转组消息
      */
     private ReceiveChangeGroupHandler receiveChangeGroupHandler = (errorCode, errorDesc) -> {
-        logger.info("转组成功回调消息, isChanging:" + MyApplication.instance.isChanging);
-        synchronized (MyApplication.instance) {
-            MyApplication.instance.isChanging = false;
-            logger.info("转组成功回调消息：isPttPress" + MyApplication.instance.isPttPress);
-            MyApplication.instance.notifyAll();
+        if(errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()){
+            myHandler.post(() -> {
+                List<Group> list = TerminalFactory.getSDK().getConfigManager().getAllListenerGroupExceptCurrentGroup();
+                List<Integer> cancelList = new ArrayList<>();
+                for (Group group: list) {
+                    if(group!=null){
+                        cancelList.add(group.getNo());
+                    }
+                }
+                if(!cancelList.isEmpty()){
+                    MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(cancelList,false);
+                }
+            });
         }
     };
 
@@ -533,15 +566,15 @@ public class MainActivity extends BaseActivity {
      * 真实网络
      */
     private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = connected -> {
-        if(!connected){
-        }else {
-            if(!TerminalFactory.getSDK().isServerConnected()){
-                //网络连接上了，心跳断开了，需要重新登陆，等待心跳连接成功
-                if(TerminalFactory.getSDK().getAuthManagerTwo().needLogin()){
-                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveRecorderLoginHandler.class);
-                }
-            }
-        }
+//        if(!connected){
+//        }else {
+//            if(!TerminalFactory.getSDK().isServerConnected()){
+//                //网络连接上了，心跳断开了，需要重新登陆，等待心跳连接成功
+//                if(TerminalFactory.getSDK().getAuthManagerTwo().needLogin()){
+//                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveRecorderLoginHandler.class);
+//                }
+//            }
+//        }
     };
 
     /**
@@ -552,8 +585,8 @@ public class MainActivity extends BaseActivity {
         MainActivity.this.runOnUiThread(() -> {
             if (!connected) {
                 ToastUtil.showToast(MainActivity.this,getString(R.string.text_network_is_disconnect));
-                stopPush(false);
-                showLoginAndBindUI(Constants.LOGIN_BIND_STATE_IDLE);
+//                stopPush(false);
+//                showLoginAndBindUI(Constants.LOGIN_BIND_STATE_IDLE);
             } else {
                 //上传未上传的文件信息
                 MyTerminalFactory.getSDK().getFileTransferOperation().uploadFileTreeBean(null);
@@ -929,6 +962,21 @@ public class MainActivity extends BaseActivity {
             clearFragmentBackStack();
         }
     };
+    /**
+     * 停止一切业务
+     */
+    private ReceiverStopBusniessHandler receiverStopBusniessHandler = this::stopBusniess;
+
+    /**
+     * 绑定同一个警务通账号，切组到警情组时，上报图像
+     */
+    private ReceiveJoinInWarningGroupPushLiveHandler receiveJoinInWarningGroupPushLiveHandler = () -> {
+        if(checkCanAutoStartLive()){
+            requestStartLive();
+        }
+    };
+
+
 
 
     private final class SurfaceTextureListener implements TextureView.SurfaceTextureListener {
@@ -978,6 +1026,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 请求自己开始上报
      */
+    @Override
     protected void requestStartLive() {
         int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMyselfLive("", "");
         logger.error("上报图像：requestCode=" + requestCode);
@@ -1110,6 +1159,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 停止上报
      */
+    @Override
     protected void finishVideoLive() {
         myHandler.post(() -> {
             PromptManager.getInstance().stopRing();//停止响铃
@@ -1121,6 +1171,7 @@ public class MainActivity extends BaseActivity {
             ip = null;
             port = null;
             id = null;
+            myHandler.removeMessages(HANDLE_WRITE_AUTO_PUSH_INTERVAL_TIME);
         });
 
     }
@@ -1433,4 +1484,28 @@ public class MainActivity extends BaseActivity {
         getSupportFragmentManager().popBackStack();
     }
 
+    /**
+     * 更新 是否是正常操作停止上报，（如果是再次进入应用不再自动上报，如果不是弹窗提示）
+     * @param state
+     */
+    public void updateNormalPushingState(boolean state){
+        if(state){
+            myHandler.sendEmptyMessage(HANDLE_WRITE_AUTO_PUSH_INTERVAL_TIME);
+        }else{
+            myHandler.removeMessages(HANDLE_WRITE_AUTO_PUSH_INTERVAL_TIME);
+            TerminalFactory.getSDK().putParam(Params.RECORDER_AUTO_PUSH_INTERVAL_TIME, 0L);
+        }
+    }
+
+    /**
+     * 判断是否自动上报
+     * 1.警情组，2上次上报时间到这次开启应用的时间间隔小于10分钟
+     * @return
+     */
+    private boolean checkCanAutoStartLive(){
+        RecorderBindBean bean = cn.vsx.hamster.terminalsdk.tools.DataUtil.getRecorderBindBean();
+        long time = TerminalFactory.getSDK().getParam(Params.RECORDER_AUTO_PUSH_INTERVAL_TIME, 0L);
+        long result = System.currentTimeMillis() - time;
+        return (isBinded&&(bean!=null&&!TextUtils.isEmpty(bean.getWarningId()))&&((time==0)||(time!=0)&&result<AUTO_PUSH_INTERVAL_TIME));
+    }
 }
