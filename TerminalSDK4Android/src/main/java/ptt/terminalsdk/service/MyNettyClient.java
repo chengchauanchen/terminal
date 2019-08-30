@@ -48,7 +48,6 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     private MyNettyClient(Context context){
         this.mContext = context;
         sp = context.getSharedPreferences(Params.MESSAGE_SERVICE_PRE_NAME, Context.MODE_PRIVATE);
-        init();
     }
 
     public static MyNettyClient newInstance(Context context){
