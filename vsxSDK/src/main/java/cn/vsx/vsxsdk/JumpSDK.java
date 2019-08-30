@@ -1,5 +1,6 @@
 package cn.vsx.vsxsdk;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import java.util.List;
 import cn.vsx.vsxsdk.Interf.JumpInterface;
 import cn.vsx.vsxsdk.constant.CommandEnum;
 import cn.vsx.vsxsdk.utils.GsonUtils;
+import cn.vsx.vsxsdk.utils.download.DownLoadApkUtils;
 
 public class JumpSDK implements JumpInterface {
 
@@ -24,6 +26,21 @@ public class JumpSDK implements JumpInterface {
         this.context = context;
     }
 
+    @Override
+    public void autoDownloadApk(Context activity) {
+        DownLoadApkUtils.getInstance(activity).startDownLoadApk(activity);
+    }
+
+    @Override
+    public void addMemberToTempGroup(List<String> nos,String businessId) {
+        String json = GsonUtils.getAddMembersToTempGroupGson(nos,businessId);
+        try {
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.AddMemberToGroup.getType());
+        } catch (Exception e) {
+            Log.e("JumpSDK", "添加成员失败");
+            doCacheCommandAndLaunchedVSXApp(json, CommandEnum.AddMemberToGroup.getType());
+        }
+    }
 
     @Override
     public void sendStartAppBroadcast(Context context) {
@@ -81,7 +98,9 @@ public class JumpSDK implements JumpInterface {
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         }else{
-            Toast.makeText(context, "手机未安装融合通信APP,请前往警务平台应用商店下载", Toast.LENGTH_LONG).show();
+            //Toast.makeText(context, "手机未安装融合通信APP,请前往警务平台应用商店下载", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "手机未安装融合通信APP,正在下载", Toast.LENGTH_LONG).show();
+            autoDownloadApk(context);
         }
     }
 

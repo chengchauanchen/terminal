@@ -1,6 +1,7 @@
 package cn.vsx.vsxsdk.utils.download;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
@@ -9,20 +10,21 @@ import android.provider.Settings;
 import android.support.annotation.RequiresApi;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 
 import java.io.File;
 
 public class InstallUtils {
-    private Activity mAct;
+    private Context mAct;
     private String mPath;//下载下来后文件的路径
     public static int UNKNOWN_CODE = 2018;
 
-    public InstallUtils(Activity mAct, String mPath) {
+    public InstallUtils(Context mAct) {
         this.mAct = mAct;
-        this.mPath = mPath;
     }
 
-    public void install(){
+    public void install(String absolutePath) {
+        mPath = absolutePath;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startInstallO();
         else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) startInstallN();
         else startInstall();
@@ -42,8 +44,16 @@ public class InstallUtils {
      * android7.x
      */
     private void startInstallN() {
+        Log.e("startInstallN","开始安装");
+        Log.e("path",mPath);
+        File file = new File(mPath);
+        if (!file.exists()) {
+            Log.e("InstallUtils","文件为空");
+            return;
+        }
+
         //参数1 上下文, 参数2 在AndroidManifest中的android:authorities值, 参数3  共享的文件
-        Uri apkUri = FileProvider.getUriForFile(mAct,mAct.getPackageName()+".fileProvider", new File(mPath));
+        Uri apkUri = FileProvider.getUriForFile(mAct, mAct.getPackageName() + ".fileProvider", new File(mPath));
         Intent install = new Intent(Intent.ACTION_VIEW);
         //由于没有在Activity环境下启动Activity,设置下面的标签
         install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -65,8 +75,13 @@ public class InstallUtils {
                 .setTitle("安装应用需要打开未知来源权限，请去设置中开启权限")
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface d, int w) {
-                        Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
-                        mAct.startActivityForResult(intent, UNKNOWN_CODE);
+                        //开启列表
+                        //Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+                        //mAct.startActivityForResult(intent, UNKNOWN_CODE);
+                        //开启指定应用 打开 安装未知来源权限
+                        Uri packageURI = Uri.parse("package:"+mAct.getPackageName());
+                        Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,packageURI);
+                        mAct.startActivity(intent);
                     }
                 })
                 .show();

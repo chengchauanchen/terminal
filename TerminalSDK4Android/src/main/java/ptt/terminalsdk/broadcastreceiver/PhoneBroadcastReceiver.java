@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.IBinder;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.android.internal.telephony.ITelephony;
 
@@ -29,6 +30,7 @@ public class PhoneBroadcastReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
+		logger.error("--vsx--PhoneBroadcastReceiver："+"监听电话状态广播,主动连接服务器");
 		telMgr = (TelephonyManager) context.getSystemService(Service.TELEPHONY_SERVICE);
 		if (intent.getAction().equals("android.intent.action.PHONE_STATE")){
 			TelephonyManager tManager = (TelephonyManager) context.getSystemService(Service.TELEPHONY_SERVICE);
@@ -48,6 +50,7 @@ public class PhoneBroadcastReceiver extends BroadcastReceiver {
 					TerminalFactory.getSDK().disConnectToServer();
 					break;
 				case TelephonyManager.CALL_STATE_IDLE://空闲状态0
+					Log.e("--vsx--CALL_STATE_IDLE","空闲状态");
 					MyTerminalFactory.getSDK().setCalling(false);
 					TerminalFactory.getSDK().connectToServer();
 					break;

@@ -1071,6 +1071,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	}
 	@Override
 	public void connectToServer() {
+		logger.error("--vsx--connectToServer");
 //		disConnectToServer();
 		uuidByte = StringUtil.hexStringToByteArray(getUuid());
 		accessServerIp = getParam(Params.ACCESS_SERVER_IP, "");

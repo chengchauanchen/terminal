@@ -16,6 +16,8 @@ import android.widget.Toast;
 
 import org.apache.log4j.Logger;
 
+import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import ptt.terminalsdk.R;
 import ptt.terminalsdk.broadcastreceiver.PTTDownAndUpReceiver;
 import ptt.terminalsdk.broadcastreceiver.PhoneBroadcastReceiver;
@@ -49,16 +51,20 @@ public class OnlineService extends Service {
 		wakeLock = MyTerminalFactory.getSDK().getWakeLock();
 //		MyTerminalFactory.getSDK().start();
 
+		//锁屏广播
 		IntentFilter filterLock = new IntentFilter();
 		filterLock.addAction(Intent.ACTION_SCREEN_OFF);
 //		filterLock.addAction(Intent.ACTION_SCREEN_ON);
 		registerReceiver(receiverLock, filterLock);
 
+		//手机电话状态 (响铃、接通、空闲) 空闲时主动向服务器建立连接
 		receiver = new PhoneBroadcastReceiver();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(Intent.ACTION_CALL);
+		filter.addAction("android.intent.action.PHONE_STATE");
 		registerReceiver(receiver, filter);
 
+		//组呼按钮
 		pttDownAndUpReceiver = new PTTDownAndUpReceiver();
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction("BLUE_TOOTH_DOWN");
@@ -103,14 +109,23 @@ public class OnlineService extends Service {
 		try {
 			//如果全部更新完成，没有退出，就发送OnlineService开启的广播
 			if(!MyTerminalFactory.getSDK().isExit()){
-				logger.debug("发布online_services_started_broadcast");
+				logger.debug("--vsxSDK--发布online_services_started_broadcast");
 				Intent broadcast = new Intent(getResources().getString(R.string.online_services_started_broadcast));
 				sendBroadcast(broadcast);
+
+//				logger.debug("--vsxSDK--发布 自动认证 cn.vsx.vc.AUTH_RECEIVER");
+//				//自动认证
+//				Intent intent = new Intent("cn.vsx.vc.AUTH_RECEIVER");
+//				sendBroadcast(intent);
+			}else{
+				logger.debug("--vsxSDK--发布 如果全部更新完成，没有退出");
 			}
+
 			if (param == null) {
 				return START_STICKY;
 			}
 			String cmd = param.getStringExtra("CMD");
+			Log.e("--vsxSDK--","CMD = "+cmd);
 			if (cmd == null) {
 				cmd = "";
 			}
@@ -131,6 +146,11 @@ public class OnlineService extends Service {
 				if (text != null && text.trim().length() != 0) {
 					Toast.makeText(this, text, Toast.LENGTH_LONG).show();
 				}
+			}
+
+			//关联启动 自动认证
+			if("AUTH".equals(cmd)){
+				auth();
 			}
 			return START_STICKY;
 		}
@@ -166,6 +186,24 @@ public class OnlineService extends Service {
 	public class OnlineServiceBinder extends Binder{
 		public OnlineService getService() {
 			return OnlineService.this;
+		}
+	}
+
+	private void auth(){
+		Log.e("--vsx--auth--", "认证");
+		String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
+		if (defaultAddress.length >= 2) {
+			int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);
+			if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+				Log.e("--vsx--AuthService--", "认证成功");
+			} else {
+				//状态机没有转到正在认证，说明已经在状态机中了，不用处理
+				Log.e("--vsx--AuthService--", "状态机没有转到正在认证，说明已经在状态机中了，不用处理");
+			}
+		} else {
+			Log.e("--vsx--AuthService--", "没有注册服务地址，去探测地址");
+			//没有注册服务地址，去探测地址
+			TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
 		}
 	}
 }

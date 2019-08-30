@@ -13,7 +13,8 @@ public enum  CommandEnum {
     CreateTempGroup("创建临时组",7),
     changeGroup("转组",8),
     monitorGroup("设置监听组",9),
-    pushVideoLive("推送视频",10);
+    pushVideoLive("推送视频",10),
+    AddMemberToGroup("添加成员到临时组",11);
 
     private String name;
     private int type;

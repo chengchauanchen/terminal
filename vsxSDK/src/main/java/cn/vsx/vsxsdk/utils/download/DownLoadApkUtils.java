@@ -1,48 +1,88 @@
 package cn.vsx.vsxsdk.utils.download;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.NotificationCompat;
-import android.view.Display;
-import android.view.Gravity;
-import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.TextView;
+import android.util.Log;
 
 import com.liulishuo.okdownload.DownloadListener;
 import com.liulishuo.okdownload.DownloadTask;
 import com.liulishuo.okdownload.StatusUtil;
 import com.liulishuo.okdownload.UnifiedListenerManager;
 
-import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import cn.vsx.vsxsdk.R;
 
 public class DownLoadApkUtils {
-    private Activity activity;
+    private Context activity;
     private DownloadTask task;
     private NotificationSampleListener listener;
     private CancelReceiver cancelReceiver;
     private final InstallUtils mInstallUtil;
 
-    public DownLoadApkUtils(Activity activity) {
+    private int redownloadCount = 0;
+
+    private static DownLoadApkUtils downLoadApkUtils;
+
+    private static String url_temp = "http://192.168.1.100:6063/u/phone_common_08-28_1.0.40_40.apk";
+//    private static String url_temp = "http://192.168.20.189:6063/u/phone.apk";
+
+    public static DownLoadApkUtils getInstance(Context activity) {
+        if(downLoadApkUtils==null){
+            downLoadApkUtils = new DownLoadApkUtils(activity);
+        }
+        return downLoadApkUtils;
+    }
+
+    public DownLoadApkUtils(Context activity) {
         this.activity = activity;
-        String fileName = FileUtils.getRootPath().getPath() + File.separator + activity.getString(R.string.vsx_app_name) + ".apk";
-        mInstallUtil = new InstallUtils(activity, fileName);
+        //String fileName = FileUtils.getRootPath().getPath() + File.separator + activity.getString(R.string.vsx_app_name) + ".apk";
+        mInstallUtil = new InstallUtils(activity);
+    }
+
+    /**
+     * 判断包是否安装
+     * @param context
+     * @param packageName
+     * @return
+     */
+    private boolean isAvilible(Context context, String packageName){
+        final PackageManager packageManager = context.getPackageManager();//获取packagemanager
+        List<PackageInfo> pinfo = packageManager.getInstalledPackages(0);//获取所有已安装程序的包信息
+        List<String> pName = new ArrayList<String>();//用于存储所有已安装程序的包名
+        //从pinfo中将包名字逐一取出，压入pName list中
+        if(pinfo != null){
+            for(int i = 0; i < pinfo.size(); i++){
+                String pn = pinfo.get(i).packageName;
+                pName.add(pn);
+            }
+        }
+        return pName.contains(packageName);//判断pName中是否有目标程序的包名，有TRUE，没有FALSE
+    }
+
+    /**
+     *
+     */
+    public void startDownLoadApk(Context context){
+        String packageName = "cn.vsx.vc";//要打开应用的包名
+        if(!isAvilible(context,packageName)){
+            Log.e("--vsx--","未安装融合通信app:"+packageName);
+            startDownLoadApk(url_temp);
+        }
     }
 
     public void startDownLoadApk(String url) {
+        Log.e("--vsx--","正在下载");
         initTask(url);
         initListener();
         // for cancel action on notification.
@@ -82,7 +122,20 @@ public class DownLoadApkUtils {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void run() {
-                //installApk();
+                if (listener.getLoadStatus() == 5) {//下载完成
+                    redownloadCount = 0;
+                    installApk();
+                    Log.e("DownLoadApk", "下载完成后,开始自动安装");
+                } else if (listener.getLoadStatus() == 6) {//下载失败
+                    Log.e("DownLoadApk","下载异常，重新下载"+redownloadCount+"次");
+                    //重新下载 3次
+                    if(redownloadCount<10){
+                        GlobalTaskManager.getImpl().enqueueTask(task, listener);
+                        redownloadCount++;
+                    }else{
+                        redownloadCount = 0;
+                    }
+                }
             }
         });
 
@@ -106,7 +159,7 @@ public class DownLoadApkUtils {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-//            this.task.cancel();
+            //this.task.cancel();
         }
     }
 
@@ -141,8 +194,7 @@ public class DownLoadApkUtils {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void installApk() {
-
-        mInstallUtil.install();
+        mInstallUtil.install(task.getFile().getAbsolutePath());
 
 //        //如果为8.0以上系统，则判断是否有 未知应用安装权限
 //        if (!LoaderPermissionUtils.isHasInstallPermissionWithO(activity)) {
@@ -190,11 +242,11 @@ public class DownLoadApkUtils {
 //        }
 //    }
 
-    /**
-     * 2014-10-27新增流量提示框，当网络为数据流量方式时，下载就会弹出此对话框提示
-     *
-     * @param updateInfo
-     */
+//    /**
+//     * 2014-10-27新增流量提示框，当网络为数据流量方式时，下载就会弹出此对话框提示
+//     *
+//     * @param updateInfo
+//     */
 //    private void showNetDialog(final CheckVersionBean updateInfo) {
 //        AlertDialog.Builder netBuilder = new AlertDialog.Builder(activity);
 //        netBuilder.setTitle("下载提示");
@@ -265,7 +317,7 @@ public class DownLoadApkUtils {
 //    }
 
     //授权提示
-    private void authorDialog(){
+    private void authorDialog() {
 //        final AlertDialog updateDialog = new AlertDialog.Builder(activity).create();
 //        updateDialog.show();
 //        Window window = updateDialog.getWindow();
@@ -300,8 +352,6 @@ public class DownLoadApkUtils {
 //        updateDialog.getWindow().setAttributes(layoutParams);
 //        updateDialog.setCancelable(true);
     }
-
-
 
 
     public void onDestroy() {

@@ -94,8 +94,8 @@ public class MyApplication extends Application {
 				.loadSkin();
         //清空刷NFC需要传的数据
         MyApplication.instance.setBindTranslateBean(null);
-        //初始化 向地三方应用同步消息的service
-		ThirdSendMessage.initVsxSendMessage(this);
+        // TODO 初始化 向地三方应用同步消息的service
+		//ThirdSendMessage.initVsxSendMessage(this);
 	}
 
 	protected void initSdk(){

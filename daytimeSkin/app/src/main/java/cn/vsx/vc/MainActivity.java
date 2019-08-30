@@ -2,6 +2,7 @@ package cn.vsx.vc;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
@@ -57,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
-
     private void initView() {
         btn_log1 = findViewById(R.id.btn_log1);
         btn_log2 = findViewById(R.id.btn_log2);
@@ -70,25 +70,25 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // VsxSDK.getInstance().getJumpSDK().activeStartLive("021222");
-                //VsxSDK.getInstance().getJumpSDK().sendStartAppBroadcast(MainActivity.this);
+                VsxSDK.getInstance().getJumpSDK().sendStartAppBroadcast(MainActivity.this);
 //                VsxSDK.getInstance().getJumpSDK().startVsxService(MainActivity.this);
 
-                if(!isGrantExternalRW(MainActivity.this)){
-                    Log.e("MainActivity","没得权限");
-                    return;
-                }else{
-                    final String url = "https://cdn.llscdn.com/yy/files/xs8qmxn8-lls-LLS-5.8-800-20171207-111607.apk";
-                    loadApkUtils.startDownLoadApk(url);
-                }
-
-
+//                if(!isGrantExternalRW(MainActivity.this)){
+//                    Log.e("MainActivity","没得权限");
+//                    return;
+//                }else{
+////                    final String url = "http://192.168.1.100:6063/u/phone_common_08-28_1.0.40_40.apk";
+////                    loadApkUtils.startDownLoadApk(url);
+//                    VsxSDK.getInstance().getJumpSDK().autoDownloadApk(MainActivity.this);
+//                }
             }
         });
         //请求别人上报
         btn_log2.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                VsxSDK.getInstance().getJumpSDK().requestOtherLive("021222");
+                //VsxSDK.getInstance().getJumpSDK().requestOtherLive("021222");
+                startActivity(new Intent(MainActivity.this,AddMemberToTempGroupActivity.class));
             }
         });
         //个呼
@@ -110,8 +110,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //组会话页
-                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivity("100040");
-//                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivityForName("T201908232qwe");
+//                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivity("100040");
+                VsxSDK.getInstance().getJumpSDK().jumpGroupChatActivityForName("T201908232qwe");
             }
         });
 

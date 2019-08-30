@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <paths>
+        <!--外部存储卡-->
+        <external-path
+            name="vsx_external"
+            path="" />
+        <!--内部存储-->
+        <root-path
+            name="vsx_root"
+            path="" />
+    </paths>
+</resources>

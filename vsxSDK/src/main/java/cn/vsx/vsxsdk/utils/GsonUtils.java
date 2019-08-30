@@ -8,6 +8,21 @@ import cn.vsx.vsxsdk.bean.SendBean;
 
 public class GsonUtils {
 
+    /**
+     * 将 memberNo businessId 转化为SendBean json对象
+     * @param nos
+     * @param businessId
+     * @return
+     */
+    public static String getAddMembersToTempGroupGson(List<String> nos,String businessId){
+        SendBean sendBean = new SendBean();
+        sendBean.setNumberList(MemberUtil.checkMemberList(nos));
+        sendBean.setGroupNo(businessId);
+        return new Gson().toJson(sendBean);
+    }
+
+
+
     public static String getEmptySendGson(){
         SendBean sendBean = new SendBean();
         return new Gson().toJson(sendBean);

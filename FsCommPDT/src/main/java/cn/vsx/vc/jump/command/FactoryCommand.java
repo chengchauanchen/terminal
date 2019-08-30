@@ -49,6 +49,9 @@ public class FactoryCommand {
             case 10:
                 jumpCommand = new PushVideoLive(context);
                 break;
+            case 11:
+                jumpCommand = new AddMemberToGroup(context);
+                break;
             default:
                 jumpCommand = null;
         }

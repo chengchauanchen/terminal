@@ -46,7 +46,9 @@ public class JumpService extends Service {
         @Override
         public void noticeConnectReceivedService(String packageName) throws RemoteException {
             logger.info("--vsxSDK--"+"接收到"+packageName+"发送过来的连接ReceivedService通知");
-            ThirdSendMessage.getInstance().connectReceivedService(getApplicationContext(),packageName,false);
+            if(ThirdSendMessage.getInstance()!=null){
+                ThirdSendMessage.getInstance().connectReceivedService(getApplicationContext(),packageName,false);
+            }
         }
     }
 

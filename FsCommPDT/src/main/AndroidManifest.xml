@@ -2,8 +2,8 @@
 <manifest package="cn.vsx.vc"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="40"
-    android:versionName="1.0.40">
+    android:versionCode="41"
+    android:versionName="1.0.41">
     <!-- android:sharedUserId="android.uid.system" -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -384,6 +384,17 @@
                 <action android:name="cn.vsx.vc.jump.service.JumpService" />
             </intent-filter>
         </service>
+
+
+        <receiver
+            android:exported="true"
+            android:name="cn.vsx.vc.receiver.AuthReceiver">
+            <!--vsxSDK 认证服务-->
+            <intent-filter>
+                <action android:name="cn.vsx.vc.AUTH_RECEIVER" />
+            </intent-filter>
+        </receiver>
+
 
     </application>
 </manifest>

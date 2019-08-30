@@ -26,6 +26,8 @@ public class ConnectMessageReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         String packageName = intent.getStringExtra(PACKAGE_NAME);
         logger.info("--vsxSDK--"+"收到广播--正在连接--"+packageName);
-        ThirdSendMessage.getInstance().connectReceivedService(context, packageName, true);
+        if(ThirdSendMessage.getInstance()!=null){
+            ThirdSendMessage.getInstance().connectReceivedService(context, packageName, true);
+        }
     }
 }

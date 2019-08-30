@@ -50,6 +50,12 @@ public class NotificationSampleListener extends DownloadListener4WithSpeed {
 
     private NotificationCompat.Action action;
 
+    private int loadStatus = 0;//
+
+    public int getLoadStatus() {
+        return loadStatus;
+    }
+
     public NotificationSampleListener(Context context) {
         this.context = context.getApplicationContext();
     }
@@ -103,26 +109,33 @@ public class NotificationSampleListener extends DownloadListener4WithSpeed {
         builder.setContentText("开始下载");
         builder.setProgress(0, 0, true);
         manager.notify(task.getId(), builder.build());
+
+        loadStatus = 1;//开始下载
     }
 
     @Override
     public void connectStart(@NonNull DownloadTask task, int blockIndex,
                              @NonNull Map<String, List<String>> requestHeaderFields) {
         builder.setTicker("connectStart");
-        builder.setContentText(
-                "The connect of " + blockIndex + " block for this task is connecting");
+//        builder.setContentText(
+//                "The connect of " + blockIndex + " block for this task is connecting");
+        builder.setContentText("正在连接");
         builder.setProgress(0, 0, true);
         manager.notify(task.getId(), builder.build());
+
+        loadStatus = 2;//正在连接
     }
 
     @Override
     public void connectEnd(@NonNull DownloadTask task, int blockIndex, int responseCode,
                            @NonNull Map<String, List<String>> responseHeaderFields) {
         builder.setTicker("connectStart");
-        builder.setContentText(
-                "The connect of " + blockIndex + " block for this task is connected");
+        //builder.setContentText("The connect of " + blockIndex + " block for this task is connected");
+        builder.setContentText("连接完成");
         builder.setProgress(0, 0, true);
         manager.notify(task.getId(), builder.build());
+
+        loadStatus = 3;//连接完成
     }
 
     @Override
@@ -160,9 +173,11 @@ public class NotificationSampleListener extends DownloadListener4WithSpeed {
         Log.d("NotificationActivity", "progress " + currentOffset);
 
 //        builder.setContentText("downloading with speed: " + taskSpeed.speed());
-        builder.setContentText("" + taskSpeed.speed());
+        builder.setContentText("正在下载" + taskSpeed.speed());
         builder.setProgress(totalLength, (int) currentOffset, false);
         manager.notify(task.getId(), builder.build());
+
+        loadStatus = 4;//正在下载
     }
 
     @Override
@@ -178,9 +193,17 @@ public class NotificationSampleListener extends DownloadListener4WithSpeed {
         builder.setOngoing(false);
         builder.setAutoCancel(true);
         builder.setTicker("taskEnd " + cause);
+
         if (cause == EndCause.COMPLETED) {
-            builder.setProgress(1, 1, false);
+            builder.setContentText("下载完成");
+            builder.setProgress(1, 1, true);
+            loadStatus = 5;//下载完成
+        }else {
+            builder.setContentText("下载异常");
+            manager.notify(task.getId(), builder.build());
+            loadStatus = 6;//下载异常
         }
+
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {

@@ -33,7 +33,6 @@ public class MemberUtil {
         return newMemberList;
     }
 
-
     /**
      * 如果memberNo为6位，默认加"88"
      * @param memberNo

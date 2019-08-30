@@ -1,12 +1,24 @@
 package cn.vsx.vsxsdk.Interf;
 
+import android.app.Activity;
 import android.content.Context;
 
 import java.util.List;
 
 public interface JumpInterface {
 
+    /***************自动下载 相关方法***************/
+    void autoDownloadApk(Context activity);
+
     void startVsxService(Context context);
+
+    /**
+     * 添加成员到临时组
+     * @param nos 要拉人的警号list
+     * @param businessId 警情组id
+     */
+    void addMemberToTempGroup(List<String> nos,String businessId);
+
 
     void sendStartAppBroadcast(Context context);
 

@@ -5,12 +5,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Build;
+import android.os.Build.VERSION;
+import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 import org.apache.log4j.Logger;
 
+import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.jump.broadcastReceiver.RegisterBroadcastReceiver;
 import cn.vsx.vc.jump.constant.ParamKey;
 import cn.vsx.vc.jump.service.JumpService;
@@ -37,8 +40,9 @@ public class ThirdSendMessage {
 
     public static ThirdSendMessage getInstance() {
         if(sendMessage==null){
-            throw new RuntimeException("第三方接收消息服务未初始化");
-//            sendMessage = new ThirdSendMessage(context);
+            logger.error("--vsx--第三方接收消息服务异常---未初始化 ThirdSendMessage");
+            //throw new RuntimeException("第三方接收消息服务未初始化");
+            //sendMessage = new ThirdSendMessage(MyApplication.instance);
         }
         return sendMessage;
     }
@@ -76,6 +80,11 @@ public class ThirdSendMessage {
      */
     private void startJumpService(Context context){
         logger.info("--vsxSDK--"+"startJumpService");
+//        if(VERSION.SDK_INT>= VERSION_CODES.O){//SDK>8.0
+//            context.startForegroundService(new Intent(context, JumpService.class));
+//        }else{
+//            context.startService(new Intent(context, JumpService.class));
+//        }
         context.startService(new Intent(context, JumpService.class));
     }
 
