@@ -41,13 +41,20 @@ import com.vsxin.terminalpad.mvp.contract.presenter.MainMapPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMainMapView;
 import com.vsxin.terminalpad.mvp.ui.fragment.LayerMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.LiveFragment2;
+import com.vsxin.terminalpad.mvp.ui.fragment.LiveFragment3;
 import com.vsxin.terminalpad.mvp.ui.fragment.MemberInfoFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.NoticeFragment;
+import com.vsxin.terminalpad.mvp.ui.fragment.PlayerFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.SmallMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.VsxFragment;
+import com.vsxin.terminalpad.mvp.ui.widget.PttButton;
+import com.vsxin.terminalpad.mvp.ui.widget.SendGroupCallListener;
+import com.vsxin.terminalpad.receiveHandler.HistoryReportPlayerHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiveUpdateMainFrgamentPTTButtonHandler;
+import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
 import com.vsxin.terminalpad.utils.HandleIdUtil;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
+import com.vsxin.terminalpad.utils.ResUtil;
 import com.vsxin.terminalpad.utils.SystemUtils;
 
 import org.apache.http.util.TextUtils;
@@ -112,7 +119,6 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
     @BindView(R.id.iv_load_web)
     ImageView iv_load_web;
-    private GroupCallInstruction groupCallInstruction;
 
     private int timeProgress;
     //组呼倒计时
@@ -171,6 +177,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     private void reloadWebView() {
 //        web_map.reload(); //刷新
         MemberInfoFragment.startMemberInfoFragment(this, null, MemberTypeEnum.PHONE);
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(HistoryReportPlayerHandler.class);
     }
 
     /**
@@ -252,7 +259,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     private void inflaterFragment() {
         SmallMapFragment smallMapFragment = new SmallMapFragment();
         NoticeFragment noticeFragment = new NoticeFragment();
-        LiveFragment2 liveFragment = new LiveFragment2();
+        PlayerFragment liveFragment = new PlayerFragment();
         LayerMapFragment layerMapFragment = new LayerMapFragment();
         VsxFragment vsxFragment = new VsxFragment();
 
@@ -264,6 +271,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         //表示使用SoundFragment 去替换之前的fragment
         fragmentTransaction.replace(R.id.fl_small_map, smallMapFragment);
         fragmentTransaction.replace(R.id.fl_notice, noticeFragment);
+
         fragmentTransaction.replace(R.id.fl_live, liveFragment);
 
         fragmentTransaction.replace(R.id.fl_map_layer, layerMapFragment);

@@ -33,7 +33,6 @@ dependencies {
     api rootProject.ext.dependencies["runner"]
     api rootProject.ext.dependencies["espresso-core"]
 
-
     //rxJava
     api rootProject.ext.dependencies["rxjava"]
     api(rootProject.ext.dependencies["rxandroid"]) {

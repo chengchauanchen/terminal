@@ -55,9 +55,9 @@ public class PadApplication extends App {
         initVsxinSDK();
         registerActivityLifecycle();
         initCatchGroup();
-        SkinCompatManager.withoutActivity(this)                         // 基础控件换肤初始化
-                .addInflater(new SkinMaterialViewInflater())            // material design 控件换肤初始化[可选]
-                .loadSkin();
+//        SkinCompatManager.withoutActivity(this)                         // 基础控件换肤初始化
+//                .addInflater(new SkinMaterialViewInflater())            // material design 控件换肤初始化[可选]
+//                .loadSkin();
 
     }
 

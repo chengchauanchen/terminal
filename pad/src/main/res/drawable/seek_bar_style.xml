@@ -1,26 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@android:id/background" android:height="@dimen/dp_1">
+    <item android:id="@android:id/background">
         <shape>
-            <corners android:radius="@dimen/dp_1"/>
-            <solid android:color="@color/white_c9"/>           <!--  颜色-->
+            <corners android:radius="1dp" />
+            <solid android:color="@color/white_c9" />
         </shape>
     </item>
-    
-    <item android:id="@android:id/secondaryProgress" android:height="1dp">
+
+    <item android:id="@android:id/secondaryProgress">
         <clip>
             <shape>
-                <corners android:radius="@dimen/dp_1"/>
-                <solid android:color="@color/white_c9"/>            <!-- 颜色-->
+                <corners android:radius="1dp" />
+                <solid android:color="@color/white_c9" />
             </shape>
         </clip>
     </item>
-    
-    <item android:id="@android:id/progress" android:height="@dimen/dp_1">
+
+    <item android:id="@android:id/progress">
         <clip>
             <shape>
-                <corners android:radius="@dimen/dp_1"/>
-                <solid android:color="@color/white"/>   <!--  颜色-->
+                <corners android:radius="1dp" />
+                <solid android:color="@color/white" />
             </shape>
         </clip>
     </item>

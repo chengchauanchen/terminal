@@ -8,4 +8,9 @@
         android:id="@+id/lp_live_player"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+
+    <com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayer
+        android:id="@+id/hrp_video_player"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 </RelativeLayout>

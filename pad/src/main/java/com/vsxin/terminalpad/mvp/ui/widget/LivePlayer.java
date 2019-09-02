@@ -42,7 +42,6 @@ public class LivePlayer extends MvpFrameLayout<ILivePlayerView, LivePlayerPresen
      */
     private int mCurrentMode = MODE_NORMAL;
 
-
     public static final int MODE_PULL_LIVE = 100;//拉流
     public static final int MODE_PUSH_LIVE = 101;//推流
     public static final int MODE_DEFAULT_LIVE = 102;//默认模式
@@ -56,8 +55,12 @@ public class LivePlayer extends MvpFrameLayout<ILivePlayerView, LivePlayerPresen
     private View smallCoverView;//小屏浮层
     private View fullScreenCoverView;//全屏浮层
 
-    public void setmLiveMode(int mLiveMode) {
+    public void setLiveMode(int mLiveMode) {
         this.mLiveMode = mLiveMode;
+    }
+
+    public int getLiveMode() {
+        return mLiveMode;
     }
 
     public LivePlayer(Context context) {
@@ -79,7 +82,7 @@ public class LivePlayer extends MvpFrameLayout<ILivePlayerView, LivePlayerPresen
     /**
      * 添加下屏浮层
      */
-    private void addSmallCoverView() {
+    public void addSmallCoverView() {
         this.removeView(smallCoverView);
         LayoutParams params = new LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
@@ -107,7 +110,7 @@ public class LivePlayer extends MvpFrameLayout<ILivePlayerView, LivePlayerPresen
      */
     public void startPullLive(String rtspURL) {
         getLogger().info("-----start-----");
-        setmLiveMode(MODE_PULL_LIVE);
+        setLiveMode(MODE_PULL_LIVE);
         initTextureView();
         addTextureView();
         getPresenter().startPullLive(mSurfaceTexture, rtspURL);
@@ -119,7 +122,7 @@ public class LivePlayer extends MvpFrameLayout<ILivePlayerView, LivePlayerPresen
     public void stopPullLive() {
         exitFullScreen();
         mCurrentMode = MODE_NORMAL;
-        setmLiveMode(MODE_DEFAULT_LIVE);
+        setLiveMode(MODE_DEFAULT_LIVE);
         getPresenter().stopPullLive();
         destroySurface();
         show(false);
@@ -157,7 +160,7 @@ public class LivePlayer extends MvpFrameLayout<ILivePlayerView, LivePlayerPresen
      */
     public void setSmallCoverView(View view) {
         smallCoverView = view;
-        addSmallCoverView();//默认添加小屏浮层
+        //addSmallCoverView();//默认添加小屏浮层
     }
 
     /**

@@ -2,6 +2,7 @@ package com.ixiaoma.xiaomabus.architecture.mvp.view.widget;
 
 import android.content.Context;
 import android.os.Parcelable;
+import android.support.v7.widget.AppCompatButton;
 import android.util.AttributeSet;
 import android.widget.Button;
 
@@ -10,8 +11,10 @@ import com.ixiaoma.xiaomabus.architecture.mvp.IBaseView;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.viewgroup.ViewGroupMvpDelegateCallback;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.viewgroup.ViewGroupMvpDelegateImpl;
 
+import org.apache.log4j.Logger;
+
 public abstract class MvpButton<V extends IBaseView, P extends IBasePresenter<V>>
-		extends android.support.v7.widget.AppCompatButton implements ViewGroupMvpDelegateCallback<V, P>,
+		extends AppCompatButton implements ViewGroupMvpDelegateCallback<V, P>,
 		IBaseView {
 
 	private ViewGroupMvpDelegateImpl<V, P> mvpDelegateImpl;
@@ -104,4 +107,8 @@ public abstract class MvpButton<V extends IBaseView, P extends IBasePresenter<V>
 		return getContext();
 	}
 
+	@Override
+	public Logger getLogger() {
+		return Logger.getLogger(getClass());
+	}
 }

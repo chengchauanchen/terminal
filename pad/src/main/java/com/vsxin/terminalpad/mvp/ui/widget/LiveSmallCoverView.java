@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -11,6 +12,7 @@ import com.ixiaoma.xiaomabus.architecture.mvp.view.layout.MvpLinearLayout;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.presenter.LiveSmallCoverPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveSmallCoverView;
+import com.vsxin.terminalpad.utils.ResUtil;
 
 /**
  * @author qzw
@@ -23,7 +25,7 @@ public class LiveSmallCoverView extends MvpLinearLayout<ILiveSmallCoverView, Liv
     private TextView tv_member_no;
     private TextView tv_time;
     private TextView tv_group_call_member;
-    private ImageView iv_group_call;
+    private PttButton ptt_group_call;
     private ImageView iv_share_live;
     private ImageView iv_full_screen;
     private ImageView iv_break_live;
@@ -43,6 +45,7 @@ public class LiveSmallCoverView extends MvpLinearLayout<ILiveSmallCoverView, Liv
     }
 
     private void initView() {
+        getLogger().info("initView");
         LayoutInflater.from(getSuperContext()).inflate(R.layout.view_live_small_cover, this, true);
 
         //上报人名称
@@ -56,7 +59,7 @@ public class LiveSmallCoverView extends MvpLinearLayout<ILiveSmallCoverView, Liv
         tv_group_call_member = findViewById(R.id.tv_group_call_member);
 
         //组呼按钮
-        iv_group_call = findViewById(R.id.iv_group_call);
+        ptt_group_call = findViewById(R.id.ptt_group_call);
 
         //分享
         iv_share_live = findViewById(R.id.iv_share_live);
@@ -81,6 +84,46 @@ public class LiveSmallCoverView extends MvpLinearLayout<ILiveSmallCoverView, Liv
         iv_share_live.setOnClickListener(v -> {
             if (shareLiveClickListener != null) {
                 shareLiveClickListener.onClick(v);
+            }
+        });
+        initPTT();
+    }
+
+    private void initPTT() {
+        ptt_group_call.setPttListener(new SendGroupCallListener() {
+            @Override
+            public void speaking() {
+                ptt_group_call.setBackground(ResUtil.getDrawable(getContext(),R.mipmap.ic_ptt_speaking));
+            }
+
+            @Override
+            public void readySpeak() {
+                ptt_group_call.setBackground(ResUtil.getDrawable(getContext(),R.mipmap.ic_ptt_pre_speak));
+            }
+
+            @Override
+            public void forbid() {
+                ptt_group_call.setBackground(ResUtil.getDrawable(getContext(),R.mipmap.ic_ptt_other));
+            }
+
+            @Override
+            public void waite() {
+                ptt_group_call.setBackground(ResUtil.getDrawable(getContext(),R.mipmap.ic_ptt_pre_speak));
+            }
+
+            @Override
+            public void silence() {
+                ptt_group_call.setBackground(ResUtil.getDrawable(getContext(),R.mipmap.ic_ptt_normal));
+            }
+
+            @Override
+            public void listening() {
+                ptt_group_call.setBackground(ResUtil.getDrawable(getContext(),R.mipmap.ic_ptt_other));
+            }
+
+            @Override
+            public void fail() {
+                ptt_group_call.setBackground(ResUtil.getDrawable(getContext(),R.mipmap.ic_ptt_normal));
             }
         });
     }

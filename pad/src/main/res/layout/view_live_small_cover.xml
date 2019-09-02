@@ -86,11 +86,11 @@
         android:layout_alignParentBottom="true"
         android:layout_marginLeft="30px">
 
-        <ImageView
-            android:id="@+id/iv_group_call"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:src="@mipmap/ic_max_screen" />
+        <com.vsxin.terminalpad.mvp.ui.widget.PttButton
+            android:id="@+id/ptt_group_call"
+            android:layout_width="76px"
+            android:layout_height="76px"
+            android:background="@mipmap/ic_ptt_normal" />
 
         <ImageView
             android:id="@+id/iv_share_live"

@@ -1,19 +1,21 @@
 package com.vsxin.terminalpad.mvp.ui.fragment;
 
 import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpFragment;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.presenter.LivePresenter2;
+import com.vsxin.terminalpad.mvp.contract.presenter.LivePresenter3;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveView2;
+import com.vsxin.terminalpad.mvp.contract.view.ILiveView3;
+import com.vsxin.terminalpad.mvp.entity.MediaBean;
+import com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayer;
 import com.vsxin.terminalpad.mvp.ui.widget.LiveFullScreenCoverView;
 import com.vsxin.terminalpad.mvp.ui.widget.LivePlayer;
 import com.vsxin.terminalpad.mvp.ui.widget.LiveSmallCoverView;
-import com.vsxin.terminalpad.receiveHandler.ReceiveStopPullLiveHandler;
-import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
+
+import java.util.List;
 
 import butterknife.BindView;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -24,19 +26,23 @@ import cn.vsx.hamster.terminalsdk.model.Member;
  * <p>
  * 直播模块
  */
-public class LiveFragment2 extends MvpFragment<ILiveView2, LivePresenter2> implements ILiveView2 {
+public class LiveFragment3 extends MvpFragment<ILiveView3, LivePresenter3> implements ILiveView3 {
 
     @BindView(R.id.rl_live_view)
     RelativeLayout rl_live_view;
 
     @BindView(R.id.lp_live_player)
     LivePlayer livePlayer;
+
+    @BindView(R.id.hrp_video_player)
+    HistoryReportPlayer hrp_video_player;
+
     private LiveSmallCoverView liveSmallCoverView;
     private LiveFullScreenCoverView liveFullScreenCoverView;
 
     @Override
     protected int getLayoutResID() {
-        return R.layout.fragment_live2;
+        return R.layout.fragment_live3;
     }
 
     @Override
@@ -46,6 +52,24 @@ public class LiveFragment2 extends MvpFragment<ILiveView2, LivePresenter2> imple
 
     @Override
     protected void initData() {
+        initLivePlayer();
+        initHistoryReportPlayer();
+    }
+
+    @Override
+    public void playerHistory(){
+        hrp_video_player.setVisibility(View.VISIBLE);
+        livePlayer.setVisibility(View.GONE);
+        List<MediaBean> testData = hrp_video_player.getPresenter().getTestData();
+        hrp_video_player.setTestData(testData);
+        hrp_video_player.play(0);
+    }
+
+    private void initHistoryReportPlayer(){
+
+    }
+
+    private void initLivePlayer(){
         liveSmallCoverView = new LiveSmallCoverView(getContext());
         liveFullScreenCoverView = new LiveFullScreenCoverView(getContext());
 
@@ -63,35 +87,24 @@ public class LiveFragment2 extends MvpFragment<ILiveView2, LivePresenter2> imple
 
     @Override
     public void startPullLive(String rtspURL) {
-        if(livePlayer!=null){
-            livePlayer.startPullLive(rtspURL);
-        }
+        hrp_video_player.setVisibility(View.GONE);
+        livePlayer.setVisibility(View.VISIBLE);
+        livePlayer.startPullLive(rtspURL);
     }
 
     @Override
     public void stopPullLive() {
-        if(livePlayer!=null && livePlayer.getLiveMode()!=LivePlayer.MODE_DEFAULT_LIVE){
-            livePlayer.stopPullLive();
-        }
-    }
-
-    @Override
-    public void onHiddenChanged(boolean hidden) {
-        super.onHiddenChanged(hidden);
-        getLogger().info("hidden:"+hidden);
-        if(hidden){
-            stopPullLive();
-        }
+        livePlayer.stopPullLive();
     }
 
     @Override
     public void setMemberInfo(Member member) {
-        liveSmallCoverView.setMemberInfo(member.getName(),member.getNo()+"");
+        liveSmallCoverView.setMemberInfo(member.getName(), member.getNo() + "");
     }
 
     @Override
-    public LivePresenter2 createPresenter() {
-        return new LivePresenter2(getContext());
+    public LivePresenter3 createPresenter() {
+        return new LivePresenter3(getContext());
     }
 
     @Override
