@@ -186,10 +186,11 @@ public class MyApplication extends BaseApplication{
 
 	@Override
 	public void stopHandlerService(){
+		Log.e("MyApplication", "stopHandlerService");
 		if (conn != null) {
 
-			Log.i("服务状态1：",""+conn);
-			Log.i("服务状态2：",""+isBinded);
+			Log.i("conn：",""+conn);
+			Log.i("isBinded：",""+isBinded);
 			if (isBinded) {
 				unbindService(conn);
 				isBinded=false;

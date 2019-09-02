@@ -1536,6 +1536,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
     @Override
     public void doOtherDestroy() {
+        logger.info("NewMainActivity----doOtherDestroy");
         if(null != callManager){
             callManager.cancelInterceptPtt();
         }

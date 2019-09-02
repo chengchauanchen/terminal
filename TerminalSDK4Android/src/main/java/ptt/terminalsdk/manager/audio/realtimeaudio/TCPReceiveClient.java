@@ -104,7 +104,7 @@ public class TCPReceiveClient implements IReceiveClient{
                 playAudio();
             }
         } catch (SocketTimeoutException e){
-            logger.info("接收数据超时");
+            logger.info("接收数据超时----",e);
         } catch (IOException e) {
             logger.warn("音频数据接收异常", e);
         } catch (IllegalStateException e){

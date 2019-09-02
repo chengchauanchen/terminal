@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Environment;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
@@ -30,7 +29,6 @@ import ptt.terminalsdk.ServerMessageReceivedHandlerAidl;
 public class MessageService extends Service {
 
     private Logger logger = LoggerFactory.getLogger(MessageService.class);
-    private Handler mHandler = new Handler();
     private static final String TAG = "MessageService--";
     private IConnectionClient connectionClient;
 
@@ -48,7 +46,7 @@ public class MessageService extends Service {
 
     @Override
     public int onStartCommand(Intent intent,  int flags, int startId) {
-        logger.info("MessageService执行了onStartCommand()");
+        logger.info("MessageService执行了onStartCommand()---flags:"+flags+"------startId:"+startId);
         KeepLiveManager.getInstance().setServiceForeground(this);
         byte[] uuid = new byte[0];
         String accessServerIp = "";
@@ -69,7 +67,7 @@ public class MessageService extends Service {
                 protocolType = intent.getStringExtra("protocolType");
             }
         }
-        logger.info("MessageService ----> onStartCommand： protocolType:"+protocolType+"--uuid = "+uuid+"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
+        logger.info("MessageService ----> onStartCommand---- protocolType:"+protocolType+"--uuid = "+ uuid.length+"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
         initClient(protocolType);
         startClient(uuid,accessServerIp,accessServerPort);
 
@@ -123,7 +121,7 @@ public class MessageService extends Service {
         try {
             connectionClient.stop();
             connectionClient = null;
-            logger.info("MessageService调用了UDPClientBase的stop()");
+            logger.info("MessageService调用了connectionClient的stop()");
         } catch (Exception e) {
             e.printStackTrace();
         }

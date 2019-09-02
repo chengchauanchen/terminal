@@ -216,11 +216,12 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
     protected void protectApp() {
         // 重新走应用的流程是一个正确的做法，因为应用被强杀了还保存 Activity 的栈信息是不合理的
+
         Intent intent = new Intent(this, RegistActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
 
-        finish();
+        ActivityCollector.removeAllActivity();
     }
 
     /**

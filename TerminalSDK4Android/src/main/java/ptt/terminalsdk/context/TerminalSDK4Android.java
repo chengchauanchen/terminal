@@ -1069,6 +1069,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	}
 
 	public void setLoginFlag(){
+		logger.info("setLoginFlag");
 		messageService = null;
 		if (bindService && messageServiceConn != null) {
 			application.unbindService(messageServiceConn);
@@ -1087,7 +1088,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}else if(Params.UDP.equals(protocolType)){
 			accessServerPort = getParam(Params.ACCESS_SERVER_PORT, 0);
 		}
-		logger.info("uuidByte = "+ uuidByte +"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
+		logger.info("uuidByte.length"+ uuidByte.length +"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
 
 
 		Intent messageService = new Intent(application, MessageService.class);
@@ -1114,6 +1115,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 	@Override
 	public void disConnectToServer() {
+		logger.info("调用了disConnectToServer");
 		//停止与服务器的连接
 		try {
 			if (bindService && messageServiceConn != null) {
