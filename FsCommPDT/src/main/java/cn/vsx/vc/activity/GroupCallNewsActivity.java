@@ -35,7 +35,6 @@ import org.apache.http.util.TextUtils;
 
 import java.util.List;
 
-import cn.com.cybertech.pdk.LinkToCheckApps.Param;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
@@ -452,6 +451,9 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
             return true;
         }
         if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
+            return true;
+        }
+        if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
             return true;
         }
         return false;
