@@ -629,5 +629,5 @@
     <string name="text_person">人员</string>
     <string name="text_change_group_data_wrong">切组数据错误</string>
     
-    <string name="text_play_live_fail">播放视频回放失败</string>
+    <string name="text_play_live_fail">历史图像未生成</string>
 </resources>

@@ -973,6 +973,7 @@ public class ReceiveHandlerService extends Service{
                     .setAutoCancel(true)//点击后取消
                     .setWhen(System.currentTimeMillis())//设置通知时间
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
+                    .setOngoing(false)
                     .setContentIntent(pIntent).setDefaults(Notification.DEFAULT_SOUND); //设置通知点击事件
             Notification notification = myBuilder.build();
             if(null != notificationManager){
@@ -985,6 +986,7 @@ public class ReceiveHandlerService extends Service{
                     .setTicker(getString(R.string.text_you_has_a_new_message))//设置状态栏提示消息
                     .setSmallIcon(R.drawable.pttpdt)//设置通知图标
                     .setAutoCancel(true)//点击后取消
+                    .setOngoing(false)
                     .setWhen(System.currentTimeMillis())//设置通知时间
                     .setPriority(Notification.PRIORITY_HIGH)//高优先级
                     .setContentIntent(pIntent).setDefaults(Notification.DEFAULT_SOUND); //设置通知点击事件
