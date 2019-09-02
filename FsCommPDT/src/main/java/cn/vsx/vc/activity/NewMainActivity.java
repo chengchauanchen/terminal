@@ -220,6 +220,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 //					MyTerminalFactory.getSDK().getGroupCallManager().requestCall();
                 }
                 MyApplication.instance.notifyAll();
+                NfcUtil.writeData();
             }
 //            if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
 //                myHandler.post(() -> setTabSelection(R.id.bv_talk_back));

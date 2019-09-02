@@ -143,6 +143,7 @@ public class NfcUtil {
     }
 
     public static void writeData(int groupId,String warningId){
+        logger.info(TAG+"writeData--groupId:"+groupId+"--:"+warningId);
         //设置刷NFC需要传的数据
         int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
         long uniqueNo = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
