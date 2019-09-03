@@ -5,9 +5,9 @@ import android.graphics.Color;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.Surface;
 import android.view.TextureView;
@@ -21,6 +21,8 @@ import com.vsxin.terminalpad.mvp.contract.presenter.HistoryReportPlayerPresenter
 import com.vsxin.terminalpad.mvp.contract.view.IHistoryReportPlayerView;
 import com.vsxin.terminalpad.mvp.entity.HistoryMediaBean;
 import com.vsxin.terminalpad.mvp.entity.MediaBean;
+import com.vsxin.terminalpad.mvp.ui.widget.CustomMediaPlayer.PlayerListener;
+import com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayer.HistoryReportPlayerListener;
 import com.vsxin.terminalpad.utils.NiceUtil;
 
 import java.io.IOException;
@@ -33,7 +35,7 @@ import ptt.terminalsdk.tools.ToastUtil;
  * <p>
  * 视频播放器控件--用于播放历史上报视频
  */
-public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView, HistoryReportPlayerPresenter> implements IHistoryReportPlayerView, SurfaceTextureListener {
+public class HistoryReportPlayer2 extends MvpFrameLayout<IHistoryReportPlayerView, HistoryReportPlayerPresenter> implements IHistoryReportPlayerView, SurfaceTextureListener {
 
     /**
      * 普通(小屏)模式
@@ -56,21 +58,21 @@ public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView
     private FrameLayout rootLayout;
     private TextureView mTextureView;
 
-    private MediaPlayer mediaPlayer;
-    private List<HistoryMediaBean> testData;
     private SurfaceTexture mSurfaceTexture;
 
     private View historyReportPlayerCoverView;
 
-    private HistoryReportPlayerListener listener;
+    private CustomMediaPlayer customMediaPlayer;
 
-    public HistoryReportPlayer(Context context) {
+    public HistoryReportPlayer2(Context context) {
         super(context);
     }
 
-    public HistoryReportPlayer(Context context, AttributeSet attrs) {
+    public HistoryReportPlayer2(Context context, AttributeSet attrs) {
         super(context, attrs);
         initView();
+        customMediaPlayer = new CustomMediaPlayer();
+
     }
 
     private void initView() {
@@ -80,8 +82,8 @@ public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView
         addTextureView();
     }
 
-    public void setListener(HistoryReportPlayerListener listener) {
-        this.listener = listener;
+    public void setListener(PlayerListener listener) {
+        customMediaPlayer.setListener(listener);
     }
 
     /**
@@ -90,7 +92,7 @@ public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView
      * @return
      */
     public int getCurrentPosition() {
-        return mediaPlayer != null ? mediaPlayer.getCurrentPosition() : 0;
+        return customMediaPlayer.getCurrentPosition();
     }
 
     /**
@@ -99,7 +101,7 @@ public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView
      * @return
      */
     public int getDuration() {
-        return mediaPlayer != null ? mediaPlayer.getDuration() : 0;
+        return customMediaPlayer.getDuration();
     }
 
     /**
@@ -111,12 +113,7 @@ public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView
         return mCurrentMode;
     }
 
-    public void setTestData(List<HistoryMediaBean> testData) {
-        this.testData = testData;
-    }
-
-    public void play(int positoon) {
-        String url = testData.get(positoon).getUrl();
+    public void play(String url) {
         getLogger().error("play---url:" + url);
         if (TextUtils.isEmpty(url)) {
             ToastUtil.showToast(getContext(), "url为空，不能播放");
@@ -125,7 +122,7 @@ public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView
                 show(true);
                 initTextureView();
                 addTextureView();
-                initMediaPlayer(url);
+                player(url);
             } catch (Exception e) {
                 getLogger().error(e);
             }
@@ -136,18 +133,14 @@ public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView
      * 暂停播放
      */
     public void pause() {
-        if (mediaPlayer != null) {
-            mediaPlayer.pause();
-        }
+        customMediaPlayer.pause();
     }
 
     /**
      * 继续播放
      */
     public void continuePlay() {
-        if (mediaPlayer != null) {
-            mediaPlayer.start();
-        }
+        customMediaPlayer.start();
     }
 
     /**
@@ -155,15 +148,7 @@ public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView
      */
     public void stopPlay() {
         try {
-            if (mediaPlayer != null) {
-//                if (mediaPlayer.isPlaying()) {
-//                    mediaPlayer.stop();
-//                }
-                mediaPlayer.reset();
-                mediaPlayer.release();
-                mediaPlayer = null;
-            }
-
+            customMediaPlayer.release();
             exitFullScreen();
             mCurrentMode = MODE_NORMAL;
             destroySurface();
@@ -174,7 +159,7 @@ public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView
     }
 
     public boolean isPlaying() {
-        return mediaPlayer != null && mediaPlayer.isPlaying();
+        return customMediaPlayer.isPlaying();
     }
 
     /**
@@ -296,9 +281,7 @@ public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         mSurfaceTexture = surface;
         Surface face = new Surface(mSurfaceTexture);
-        if (mediaPlayer != null) {
-            mediaPlayer.setSurface(face);
-        }
+        customMediaPlayer.setSurface(face);
     }
 
     @Override
@@ -316,87 +299,17 @@ public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView
 
     }
 
-    private void initMediaPlayer(String url) throws IOException {
-        getLogger().info("url:" + url);
+    private void player(String audioPath) throws IOException {
+        getLogger().info("url:" + audioPath);
+        customMediaPlayer.play(audioPath);
 
-        if (mediaPlayer == null) {
-            getLogger().info("mediaPlayer为空");
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.setDataSource(url);
-            mediaPlayer.prepareAsync();
-        }
-        /**
-         * 准备完成 加载视频
-         * 可以知道时长
-         */
-        mediaPlayer.setOnPreparedListener(mp -> {
-            getLogger().info("mediaPlayer:setOnPreparedListener");
-
-            if (null != mTextureView.getSurfaceTexture()) {
-                Surface face = new Surface(mTextureView.getSurfaceTexture());
-                mp.setSurface(face);
-            }
-//                playFinish = false;
-            //设置视频时长
-//                getView().setMaxTime(mp.getDuration());
-            getLogger().info("视频时长:" + mp.getDuration());
-            mp.start();
-
-            if (listener != null) {
-                listener.onPrepared(mp);
-            }
-        });
-
-        /**
-         * 让播放器从 指定的位置开始播放
-         *
-         * 快进/回退
-         */
-        mediaPlayer.setOnSeekCompleteListener(mp -> {
-            getLogger().info("mediaPlayer:setOnSeekCompleteListener");
-            mp.start();
-            if (listener != null) {
-                listener.onSeekComplete(mp);
-            }
-        });
-
-        /**
-         * 处理播放 结束后
-         */
-        mediaPlayer.setOnCompletionListener(mp -> {
-            getLogger().info("onCompletion");
-            destroyMediaPlayer(mp);
-            mediaPlayer = null;
-            if (listener != null) {
-                listener.onCompletion(mp);
-            }
-        });
-
-        /**
-         * 处理播放过程中遇到 错误的监听
-         */
-        mediaPlayer.setOnErrorListener((mp, what, extra) -> {
-            getLogger().error("mediaPlayer  onError");
-            if (mp.isPlaying()) {
-                mp.stop();
-            }
-            destroyMediaPlayer(mp);
-            mediaPlayer = null;
-            if (listener != null) {
-                listener.onError(mp);
-            }
-            return false;
-
-        });
     }
 
     /**
      * 释放MediaPlayer资源
      */
-    private void destroyMediaPlayer(MediaPlayer mp) {
-        mp.reset();//重置状态，使其恢复到idle空闲状态。
-        mp.release();//释放资源
+    private void release() {
+        customMediaPlayer.release();
     }
 
     private void destroySurface() {
@@ -409,15 +322,5 @@ public class HistoryReportPlayer extends MvpFrameLayout<IHistoryReportPlayerView
     @Override
     public HistoryReportPlayerPresenter createPresenter() {
         return new HistoryReportPlayerPresenter(getContext());
-    }
-
-    public interface HistoryReportPlayerListener {
-        void onPrepared(MediaPlayer mp);
-
-        void onSeekComplete(MediaPlayer mp);
-
-        void onCompletion(MediaPlayer mp);
-
-        void onError(MediaPlayer mp);
     }
 }

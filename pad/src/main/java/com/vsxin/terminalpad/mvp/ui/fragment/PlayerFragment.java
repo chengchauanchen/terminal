@@ -75,8 +75,6 @@ public class PlayerFragment extends MvpFragment<IPlayerView, PlayerPresenter> im
         }
     }
 
-
-
     @Override
     public PlayerPresenter createPresenter() {
         return new PlayerPresenter(getContext());

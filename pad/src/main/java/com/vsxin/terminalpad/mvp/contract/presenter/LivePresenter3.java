@@ -66,8 +66,9 @@ public class LivePresenter3 extends BasePresenter<ILiveView3> {
      * 注册监听
      */
     public void registReceiveHandler() {
-        //自己主动请求他人上报
+        //播放历史上报视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(historyReportPlayerHandler);
+        //自己主动请求他人上报
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseStartLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerLiveTimeoutHandler);
@@ -87,8 +88,9 @@ public class LivePresenter3 extends BasePresenter<ILiveView3> {
      * 取消监听
      */
     public void unregistReceiveHandler() {
-        //自己主动请求他人上报
+        //播放历史上报视频
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(historyReportPlayerHandler);
+        //自己主动请求他人上报
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoHandler);
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseStartLiveHandler);

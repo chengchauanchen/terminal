@@ -4,14 +4,19 @@ import android.media.MediaPlayer;
 import android.util.Log;
 import android.view.View;
 
+import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.chad.library.adapter.base.BaseQuickAdapter.OnItemClickListener;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpFragment;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.presenter.HistoryReportPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IHistoryReportView;
+import com.vsxin.terminalpad.mvp.entity.HistoryMediaBean;
 import com.vsxin.terminalpad.mvp.entity.MediaBean;
+import com.vsxin.terminalpad.mvp.ui.widget.CustomMediaPlayer.PlayerListener;
 import com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayer;
-import com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayer.HistoryReportPlayerListener;
+import com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayer2;
 import com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayerCoverView;
+import com.vsxin.terminalpad.utils.TimeUtil;
 import com.vsxin.terminalpad.utils.Timer;
 
 import java.util.List;
@@ -26,10 +31,11 @@ import ptt.terminalsdk.tools.ToastUtil;
 public class HistoryReportFragment extends MvpFragment<IHistoryReportView, HistoryReportPresenter> implements IHistoryReportView {
 
     @BindView(R.id.hrp_video_player)
-    HistoryReportPlayer hrp_video_player;
+    HistoryReportPlayer2 hrp_video_player;
 
     private HistoryReportPlayerCoverView historyReportPlayerCoverView;
     private Timer timer;
+    private List<HistoryMediaBean> testData;
 
     @Override
     protected int getLayoutResID() {
@@ -39,10 +45,10 @@ public class HistoryReportFragment extends MvpFragment<IHistoryReportView, Histo
     @Override
     protected void initViews(View view) {
         timer = new Timer(() -> {
-            updataView();
+            updateView();
         });
 
-        hrp_video_player.setListener(new HistoryReportPlayerListener() {
+        hrp_video_player.setListener(new PlayerListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
                 timer.start();
@@ -62,6 +68,12 @@ public class HistoryReportFragment extends MvpFragment<IHistoryReportView, Histo
             public void onError(MediaPlayer mp) {
                 timer.stop();
             }
+
+            //主动关闭后，不走监听回调了，只能单独搞个回调方法
+            @Override
+            public void onStop() {
+                timer.stop();
+            }
         });
     }
 
@@ -71,10 +83,12 @@ public class HistoryReportFragment extends MvpFragment<IHistoryReportView, Histo
         hrp_video_player.setHistoryReportPlayerCoverView(historyReportPlayerCoverView);
         hrp_video_player.addCoverView();
 
+        //关闭
         historyReportPlayerCoverView.setQuitClickListener(v -> {
             hrp_video_player.stopPlay();
         });
 
+        //选择
         historyReportPlayerCoverView.setChoiceClickListener(v -> {
             ToastUtil.showToast(getContext(), "选择");
 
@@ -86,6 +100,7 @@ public class HistoryReportFragment extends MvpFragment<IHistoryReportView, Histo
 
         });
 
+        //暂停/播放
         historyReportPlayerCoverView.setPauseContinueClickListener(v -> {
             if (hrp_video_player.isPlaying()) {
                 hrp_video_player.pause();
@@ -96,23 +111,38 @@ public class HistoryReportFragment extends MvpFragment<IHistoryReportView, Histo
             }
         });
 
+        //播放
         historyReportPlayerCoverView.setPlayerClickListener(v -> {
             if (!hrp_video_player.isPlaying()) {
                 hrp_video_player.continuePlay();
                 historyReportPlayerCoverView.playView();
             }
         });
+
+        testData = getPresenter().getTestData();
+        historyReportPlayerCoverView.setHistoryMedia(testData);
+        historyReportPlayerCoverView.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                if (hrp_video_player != null) {
+                    hrp_video_player.play(testData.get(position).getUrl());
+                }
+            }
+        });
     }
 
-    private void updataView(){
+    private void updateView(){
         int position = hrp_video_player.getCurrentPosition();
-        Log.e("PlayLiveHistoryActivity", "position:" + position);
+        getLogger().info("position:" + position);
         if(position < 0){
             return;
         }
         int sMax = hrp_video_player.getDuration();
         historyReportPlayerCoverView.setSeekBarMaxProgress(sMax);
         historyReportPlayerCoverView.setSeekBarProgress(position);
+
+        historyReportPlayerCoverView.setMaxTime(TimeUtil.getTime(sMax));
+        historyReportPlayerCoverView.setCurrentTime(TimeUtil.getTime(position));
     }
 
 
@@ -137,9 +167,7 @@ public class HistoryReportFragment extends MvpFragment<IHistoryReportView, Histo
 
     public void playerHistory() {
         if (hrp_video_player != null) {
-            List<MediaBean> testData = hrp_video_player.getPresenter().getTestData();
-            hrp_video_player.setTestData(testData);
-            hrp_video_player.play(0);
+            hrp_video_player.play(testData.get(0).getUrl());
         }
     }
 

@@ -9,6 +9,7 @@ import com.vsxin.terminalpad.mvp.contract.presenter.LivePresenter2;
 import com.vsxin.terminalpad.mvp.contract.presenter.LivePresenter3;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveView2;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveView3;
+import com.vsxin.terminalpad.mvp.entity.HistoryMediaBean;
 import com.vsxin.terminalpad.mvp.entity.MediaBean;
 import com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayer;
 import com.vsxin.terminalpad.mvp.ui.widget.LiveFullScreenCoverView;
@@ -60,9 +61,9 @@ public class LiveFragment3 extends MvpFragment<ILiveView3, LivePresenter3> imple
     public void playerHistory(){
         hrp_video_player.setVisibility(View.VISIBLE);
         livePlayer.setVisibility(View.GONE);
-        List<MediaBean> testData = hrp_video_player.getPresenter().getTestData();
-        hrp_video_player.setTestData(testData);
-        hrp_video_player.play(0);
+        //List<HistoryMediaBean> testData = hrp_video_player.getPresenter().getTestData();
+        //hrp_video_player.setTestData(testData);
+        //hrp_video_player.play(0);
     }
 
     private void initHistoryReportPlayer(){

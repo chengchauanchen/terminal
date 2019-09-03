@@ -1,6 +1,8 @@
 package com.vsxin.terminalpad.mvp.ui.widget;
 
 import android.content.Context;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,13 +11,20 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.chad.library.adapter.base.BaseQuickAdapter.OnItemClickListener;
 import com.ixiaoma.xiaomabus.architecture.mvp.view.layout.MvpLinearLayout;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.presenter.HistoryReportPlayerCoverPresenter;
 import com.vsxin.terminalpad.mvp.contract.presenter.LiveSmallCoverPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IHistoryReportPlayerCoverView;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveSmallCoverView;
+import com.vsxin.terminalpad.mvp.entity.HistoryMediaBean;
+import com.vsxin.terminalpad.mvp.ui.adapter.PlayHistoryVideoAdapter;
 import com.vsxin.terminalpad.utils.ResUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author qzw
@@ -38,6 +47,14 @@ public class HistoryReportPlayerCoverView extends MvpLinearLayout<IHistoryReport
     private OnClickListener pauseContinueClickListener;//暂停/继续
     private OnClickListener playerClickListener;//播放
     private OnClickListener choiceClickListener;//选择视频list
+    private LinearLayout ll_list;
+    private RecyclerView recyclerview;
+    private PlayHistoryVideoAdapter playLiveAdapter;
+
+    private List<HistoryMediaBean> historyMediaBeanList = new ArrayList<>();
+
+
+    private OnItemClickListener onItemClickListener;
 
     public HistoryReportPlayerCoverView(Context context) {
         super(context);
@@ -72,6 +89,10 @@ public class HistoryReportPlayerCoverView extends MvpLinearLayout<IHistoryReport
         //选择
         tv_choice = findViewById(R.id.tv_choice);
 
+        //历史播放记录列表
+        ll_list = findViewById(R.id.ll_list);
+        recyclerview = findViewById(R.id.recyclerview);
+
         //关闭
         iv_close.setOnClickListener(v -> {
             if (quitClickListener != null) {
@@ -99,7 +120,37 @@ public class HistoryReportPlayerCoverView extends MvpLinearLayout<IHistoryReport
                 choiceClickListener.onClick(v);
             }
         });
+
+        initRecyclerView();
     }
+
+    /**
+     * 初始化 RecyclerView
+     */
+    private void initRecyclerView() {
+        recyclerview.setLayoutManager(new LinearLayoutManager(getContext()));
+        playLiveAdapter = new PlayHistoryVideoAdapter(R.layout.item_play_history_video, historyMediaBeanList);
+        recyclerview.setAdapter(playLiveAdapter);
+    }
+
+    /**
+     * 设置item点击事件
+     * @param onItemClickListener
+     */
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener){
+        playLiveAdapter.setOnItemClickListener(onItemClickListener);
+    }
+
+    /**
+     * 设置数据源
+     * @param historyMediaBeanList
+     */
+    public void setHistoryMedia(List<HistoryMediaBean> historyMediaBeanList){
+        this.historyMediaBeanList.clear();
+        this.historyMediaBeanList.addAll(historyMediaBeanList);
+        playLiveAdapter.notifyDataSetChanged();
+    }
+
 
     /**
      * 暂停
@@ -131,6 +182,22 @@ public class HistoryReportPlayerCoverView extends MvpLinearLayout<IHistoryReport
      */
     public void setSeekBarProgress(int progress){
         seek_bar.setProgress(progress);
+    }
+
+    /**
+     * 设置当前播放时长
+     * @param currentTime
+     */
+    public void setCurrentTime(String currentTime){
+        tv_current_time.setText(currentTime);
+    }
+
+    /**
+     * 设置最大时长
+     * @param maxTime
+     */
+    public void setMaxTime(String maxTime){
+        tv_max_time.setText(maxTime);
     }
 
     /**************************设置监听*****************************/
