@@ -148,29 +148,39 @@ public class MessageService extends Service {
         @Override
         public void registMessageReceivedHandler(final ServerMessageReceivedHandlerAidl handler) throws RemoteException {
             logger.info(TAG+"registMessageReceivedHandler");
-            connectionClient.registMessageReceivedHandler(handler);
+            if(connectionClient!=null){
+                connectionClient.registMessageReceivedHandler(handler);
+            }
         }
 
         @Override
         public void unregistMessageReceivedHandler(final ServerMessageReceivedHandlerAidl handler) throws RemoteException {
-            connectionClient.unregistMessageReceivedHandler(handler);
+            if(connectionClient!=null){
+                connectionClient.unregistMessageReceivedHandler(handler);
+            }
         }
 
         @Override
         public void sendMessage(byte[] data, final PushMessageSendResultHandlerAidl handler) {
-            connectionClient.sendMessage(data, handler);
+            if(connectionClient!=null){
+                connectionClient.sendMessage(data, handler);
+            }
         }
 
         @Override
         public void registServerConnectionEstablishedHandler(final ServerConnectionEstablishedHandlerAidl handler) throws RemoteException {
             logger.info(TAG+"registServerConnectionEstablishedHandler");
-            connectionClient.registServerConnectionEstablishedHandler(handler);
+            if(connectionClient!=null){
+                connectionClient.registServerConnectionEstablishedHandler(handler);
+            }
         }
 
         @Override
         public void unregistServerConnectionEstablishedHandler(ServerConnectionEstablishedHandlerAidl handler) throws RemoteException {
             logger.info(TAG+"unregistServerConnectionEstablishedHandler");
-            connectionClient.unregistServerConnectionEstablishedHandler(handler);
+            if(connectionClient!=null){
+                connectionClient.unregistServerConnectionEstablishedHandler(handler);
+            }
         }
 
         @Override

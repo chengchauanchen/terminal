@@ -1,7 +1,6 @@
 package cn.vsx.vc.application;
 
 import android.app.ActivityManager;
-import android.app.Application;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -32,9 +31,10 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.vc.service.PTTButtonEventService;
 import cn.vsx.vc.utils.Constants;
+import ptt.terminalsdk.context.BaseApplication;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
-public class MyApplication extends Application {
+public class MyApplication extends BaseApplication {
 
 	private Logger logger = Logger.getLogger(getClass());
 	public static final String TAG = "MyApplication---";
@@ -168,7 +168,25 @@ public class MyApplication extends Application {
 		}
 	}
 
-//	/**
+	@Override
+	public void setApkType() {
+		super.setApkType();
+		SpecificSDK.setApkType(this);
+	}
+
+	@Override
+	public void setAppKey() {
+		super.setAppKey();
+		SpecificSDK.setAppKey(this);
+	}
+
+	@Override
+	public void setTerminalMemberType() {
+		super.setTerminalMemberType();
+		MyTerminalFactory.getSDK().putParam(UrlParams.TERMINALMEMBERTYPE, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString());
+	}
+
+	//	/**
 //	 * 获取AlarmManager
 //	 *
 //	 * @return

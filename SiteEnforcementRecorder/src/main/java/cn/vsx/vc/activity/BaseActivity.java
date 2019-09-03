@@ -1103,12 +1103,12 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         }
         //切换账号的时候，清除账号相关的信息
         TerminalFactory.getSDK().getDataManager().clearDataByAccountChanged();
-//        MyTerminalFactory.getSDK().stop();
-        TerminalFactory.getSDK().getClientChannel().stop();
+        MyTerminalFactory.getSDK().stop();
         //停止上报或者观看的页面
-        if (isChangeAccount && TerminalFactory.getSDK().isServerConnected()) {
-            TerminalFactory.getSDK().disConnectToServer();
-        }
+//        if (isChangeAccount && TerminalFactory.getSDK().isServerConnected()) {
+//            TerminalFactory.getSDK().disConnectToServer();
+//        }
+//        TerminalFactory.getSDK().getClientChannel().stop();
     }
 
     /**
@@ -1117,8 +1117,21 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     public void changeAccount() {
         //退出账号
         loginOut(true);
+        //初始化SDK
+        initSDK();
         //登录绑定账号
         checkLogin(true, LOGIN_DELAY_TIME);
+    }
+
+    /**
+     * 初始化SDK
+     */
+    private void initSDK() {
+        TerminalFactory.getSDK().start();
+        TerminalFactory.getSDK().getDataManager().clearMemberNo();
+        PromptManager.getInstance().start();
+        initBaseListener();
+        initListener();
     }
 
     /**

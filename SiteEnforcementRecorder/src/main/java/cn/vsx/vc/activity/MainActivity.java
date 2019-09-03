@@ -415,10 +415,10 @@ public class MainActivity extends BaseActivity {
                     //发生异常的时候重试几次，因为网络原因经常导致一个io异常
                     TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(),TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
                 }else{
-                    ToastUtil.showToast(MainActivity.this,getString(R.string.text_auth_error));
+                    ToastUtil.showToast(MainActivity.this,TextUtils.isEmpty(resultDesc)?getString(R.string.text_auth_error):resultDesc);
                 }
             }else if(resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()){
-                ToastUtil.showToast(MainActivity.this,getString(R.string.text_auth_error));
+                ToastUtil.showToast(MainActivity.this,TextUtils.isEmpty(resultDesc)?getString(R.string.text_auth_error):resultDesc);
             } else {
                 //没有注册服务地址，去探测地址
                 if(availableIPlist.isEmpty()){
@@ -773,6 +773,8 @@ public class MainActivity extends BaseActivity {
                             ToastUtil.showToast(MainActivity.this, "开始录像");
                             PromptManager.getInstance().startVideoTap();
                             mMediaStream.startRecord();
+                        }else{
+                            ToastUtil.showToast(MainActivity.this, "存储空间不可用");
                         }
                     }
                 }

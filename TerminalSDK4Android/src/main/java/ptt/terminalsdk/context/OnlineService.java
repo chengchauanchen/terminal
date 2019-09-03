@@ -19,6 +19,8 @@ import com.blankj.utilcode.util.PermissionUtils;
 
 import org.apache.log4j.Logger;
 
+import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.auth.LoginState;
@@ -170,7 +172,9 @@ public class OnlineService extends Service {
 				Log.e("--vsxSDK--","loginState:"+loginState);
 				if(TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState() == null ||
 						TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState() == LoginState.IDLE){
-					startAuth();
+					if(checkCanStartAuth()){
+						startAuth();
+					}
 				}
 			}
 			return START_STICKY;
@@ -179,6 +183,15 @@ public class OnlineService extends Service {
 			Log.e("--vsxSDK-","-在线服务启动过程中出现异常", e);
 			return START_STICKY;
 		}
+	}
+
+	/**
+	 * 判断是否可以在这里开始认证
+	 * @return
+	 */
+	private boolean checkCanStartAuth(){
+		String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+		return (TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_PHONE.getCode());
 	}
 
 	/**设置滴答警报声*/

@@ -150,10 +150,11 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     @Override
     public void stop(){
         super.stop();
-//        for (ServerConnectionEstablishedHandler handler : connectionEstablishedHandlers) {
-//            handler.handler(false);
+//        for (ServerMessageReceivedHandlerAidl handler0  : serverMessageReceivedHandlerAidls) {
+////            handler0.handler(false);
 //            logger.info("MyNettyClient---stop()--->"+false);
 //        }
+        serverMessageReceivedHandlerAidls.clear();
     }
 
     @Override

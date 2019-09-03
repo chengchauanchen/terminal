@@ -172,6 +172,7 @@ public class MyUDPClient extends UDPClientBase implements IConnectionClient{
     public void stop(){
         try{
             super.stop();
+            serverMessageReceivedHandlerAidls.clear();
         }catch(Exception e){
             e.printStackTrace();
         }
