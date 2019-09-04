@@ -320,7 +320,7 @@ public class PullLivingService extends BaseService{
     private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = new ReceiveCeaseGroupCallConformationHander() {
         @Override
         public void handler(int resultCode, String resultDesc) {
-            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+//            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
             mHandler.post(() -> {
                 mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_dodgerblue2);
                 mLlLiveGroupCall.setVisibility(View.GONE);

@@ -269,6 +269,7 @@ public class CallingService extends BaseService{
             case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
+                logger.info("PTT松开了，结束说话");
                 halfPttUpDothing();
                 break;
             default:
@@ -399,22 +400,19 @@ public class CallingService extends BaseService{
 //            if(MyApplication.instance.isPttPress){
                 mHandler.post(() -> {
                     if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){
+                        cancelAutoHangUpTimer();
                         if(methodResult == 0){
                             mTvHalfDuplexPrompt.setText(getResources().getString(R.string.i_speaking));
                             mBtnIndividualCallHalfDuplexPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_speaking);
                         }else if(methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()){
-                            startAutoHangUpTimer();
                             ToastUtil.showToast(CallingService.this, getResources().getString(R.string.cannot_talk));
                             mTvHalfDuplexPrompt.setText(getResources().getString(R.string.press_talk));
-                            startAutoHangUpTimer();
                             mBtnIndividualCallHalfDuplexPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_dodgerblue2);
                         }else if(methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()){
                             mTvHalfDuplexPrompt.setText(getResources().getString(R.string.press_talk));
-                            startAutoHangUpTimer();
                             mBtnIndividualCallHalfDuplexPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_yellow);
                         }else{
                             mBtnIndividualCallHalfDuplexPtt.setText(getResources().getString(R.string.press_talk));
-                            startAutoHangUpTimer();
                             if(MyApplication.instance.getGroupListenenState() != LISTENING){
                                 mBtnIndividualCallHalfDuplexPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_dodgerblue2);
                             }else{
@@ -506,7 +504,7 @@ public class CallingService extends BaseService{
         stopBusiness();
     }
 
-    private void startAutoHangUpTimer(){
+    private synchronized void startAutoHangUpTimer(){
         if(MyApplication.instance.getIndividualState() == IndividualCallState.SPEAKING || MyApplication.instance.getIndividualState() == IndividualCallState.RINGING){
             logger.info("启动了半双工超时检测机制；10秒后将自动挂断！！！");
             mHandler.removeMessages(AUTOHANGUP);
@@ -514,9 +512,11 @@ public class CallingService extends BaseService{
         }
     }
 
-    private void cancelAutoHangUpTimer(){
+    private synchronized void cancelAutoHangUpTimer(){
         logger.info("取消半双工超时检测");
-        mHandler.removeMessages(AUTOHANGUP);
+        if(mHandler.hasMessages(AUTOHANGUP)){
+            mHandler.removeMessages(AUTOHANGUP);
+        }
     }
 
     @Override
@@ -588,7 +588,7 @@ public class CallingService extends BaseService{
     private void halfPttDownDothing(){
         logger.info("pttDownDoThing执行了 isPttPress：" + MyApplication.instance.isPttPress);
         if(!CheckMyPermission.selfPermissionGranted(CallingService.this, Manifest.permission.RECORD_AUDIO)){//没有录音权限
-            ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.no_recorde_permisson));
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.no_record_perssion_for_call));
             return;
         }
         cancelAutoHangUpTimer();
@@ -597,7 +597,7 @@ public class CallingService extends BaseService{
             int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",tempGroupId);
             if(resultCode == BaseCommonCode.SUCCESS_CODE){//允许组呼了
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);
-                MyApplication.instance.isPttPress = true;
+//                MyApplication.instance.isPttPress = true;
                 mTvHalfDuplexPrompt.setText(getResources().getString(R.string.i_pre_speaking));
                 mTvHalfDuplexPrompt.setTextColor(Color.YELLOW);
                 mBtnIndividualCallHalfDuplexPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_yellow);
@@ -613,19 +613,17 @@ public class CallingService extends BaseService{
     }
 
     private void halfPttUpDothing(){
-        MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
-        if(MyApplication.instance.isPttPress){
-            logger.info("PTT松开了，结束说话");
-            MyApplication.instance.isPttPress = false;
+//        MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+//        if(MyApplication.instance.isPttPress){
+//            MyApplication.instance.isPttPress = false;
             if(MyApplication.instance.getGroupListenenState() == LISTENING){
                 mBtnIndividualCallHalfDuplexPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_gray);
-            }
-            if(MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED){
+            }else if(MyApplication.instance.getGroupSpeakState() == GroupCallSpeakState.GRANTED){
                 startAutoHangUpTimer();
             }
             MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
-        }
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
+//        }
+//        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
     }
 
     private BroadcastReceiver mBroadcastReceiv = new BroadcastReceiver(){

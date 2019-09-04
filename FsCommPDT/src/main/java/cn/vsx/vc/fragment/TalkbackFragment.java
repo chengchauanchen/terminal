@@ -1454,12 +1454,8 @@ public class TalkbackFragment extends BaseFragment {
      * 开始说话
      */
     private void change2Speaking() {
-//        layoutDefault();
-//        talkback_time_progress.setVisibility(View.VISIBLE);
         talkback_add_icon.setEnabled(false);
-//        mHandler.removeMessages(1);
-//        mHandler.sendEmptyMessage(1);
-        logger.info("ptt.change2Speaking()松开结束");
+        logger.info("change2Speaking");
         allViewDefault();
         ll_speaking.setVisibility(View.VISIBLE);
         tv_current_online.setText(String.format(getResources().getString(R.string.current_group_members), online_number));
@@ -1781,7 +1777,7 @@ public class TalkbackFragment extends BaseFragment {
     //PTT抬起以后
     private void pttUpDoThing() {
         logger.info("ptt.pttUpDoThing执行了 isPttPress：" + MyApplication.instance.isPttPress);
-        MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+//        MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, false);
         if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
             return;
