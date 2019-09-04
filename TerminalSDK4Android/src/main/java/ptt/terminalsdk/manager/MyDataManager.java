@@ -1,5 +1,7 @@
 package ptt.terminalsdk.manager;
 
+import android.text.TextUtils;
+
 import com.alibaba.fastjson.JSONObject;
 import com.allen.library.manage.RxUrlManager;
 import com.allen.library.observer.CommonObserver;
@@ -12,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 import cn.vsx.hamster.common.RequestDataType;
+import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.data.DataManager;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -20,6 +24,7 @@ import io.reactivex.schedulers.Schedulers;
 import ptt.terminalsdk.BuildConfig;
 import ptt.terminalsdk.bean.DepData;
 import ptt.terminalsdk.bean.GroupBean;
+import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.http.AppUrlConfig;
 import ptt.terminalsdk.manager.http.api.ApiManager;
 import ptt.terminalsdk.receiveHandler.ReceiveUpdateDepGroupHandler;
@@ -52,6 +57,9 @@ public class MyDataManager extends DataManager{
      */
     @Override
     public void updateDepAllGroup(){
+        if(notNeedUpdateDepAllGroup()){
+            return;
+        }
         //查询所在部门的组
         Map<String, String> paramsMap = new HashMap<>();
         paramsMap.put("type", RequestDataType.DEPARTMENTS_GROUPS_DATA.toString());
@@ -70,14 +78,14 @@ public class MyDataManager extends DataManager{
 
                     @Override
                     protected void onSuccess(DepData depData){
-                        logger.info("请求当前组部门下的所有组:"+depData);
+//                        logger.info("请求当前组部门下的所有组:"+depData);
                         if(depData != null && depData.getMemberGroups() !=null){
                             List<GroupBean> groupList = depData.getMemberGroups().getGroupList();
                             depAllGroup.clear();
                             depAllGroup.addAll(groupList);
                             TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateDepGroupHandler.class,groupList);
                         }else {
-                            logger.info("请求当前组部门下的所有组数据为null");
+//                            logger.info("请求当前组部门下的所有组数据为null");
                         }
                     }
                 });
@@ -106,5 +114,14 @@ public class MyDataManager extends DataManager{
     @Override
     public void setUavVoiceOpen(boolean uavVoiceOpen){
         this.uavVoiceOpen = uavVoiceOpen;
+    }
+
+    /**
+     * 是否更新部门下所有组信息
+     * @return
+     */
+    private boolean notNeedUpdateDepAllGroup(){
+        String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+        return (!TextUtils.isEmpty(deviceType)&&TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString()));
     }
 }

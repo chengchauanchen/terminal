@@ -103,6 +103,7 @@ import cn.vsx.vc.utils.APPStateUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.FragmentUtil;
+import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.PhotoUtils;
 import cn.vsx.vc.utils.SetToListUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -234,6 +235,7 @@ public class MainActivity extends BaseActivity {
 //            width = 480;
 //            height = 640;
 //        }
+        MyTerminalFactory.getSDK().registNetworkChangeHandler();
     }
 
     @Override
@@ -445,12 +447,15 @@ public class MainActivity extends BaseActivity {
                 authModel = entry.getValue();
             }
             if (authModel != null) {
-
-                int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(authModel.getIp(),authModel.getPort());
-                if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                    ToastUtil.showToast(MainActivity.this,getString(R.string.text_authing));
-                }else {
-                    //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                if(NetworkUtil.isConnected(this)){
+                    int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(authModel.getIp(),authModel.getPort());
+                    if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                        ToastUtil.showToast(MainActivity.this,getString(R.string.text_authing));
+                    }else {
+                        //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                    }
+                }else{
+                    ToastUtil.showToast(MainActivity.this,getString(R.string.text_network_disconnect));
                 }
             }
         } else {
@@ -502,12 +507,12 @@ public class MainActivity extends BaseActivity {
             //更新UI
             RecorderBindBean bean = cn.vsx.hamster.terminalsdk.tools.DataUtil.getRecorderBindBean();
             showLoginAndBindUI((bean == null)?Constants.LOGIN_BIND_STATE_LOGIN:Constants.LOGIN_BIND_STATE_BIND);
-            if(isFristLogin){
-                isFristLogin = false;
-            }
-            if(!isFristLogin){
-                MyTerminalFactory.getSDK().registNetworkChangeHandler();
-            }
+//            if(isFristLogin){
+//                isFristLogin = false;
+//            }
+//            if(!isFristLogin){
+//                MyTerminalFactory.getSDK().registNetworkChangeHandler();
+//            }
             //自动上报
             myHandler.postDelayed(() -> {
                 if(checkCanAutoStartLive()){
@@ -1104,6 +1109,7 @@ public class MainActivity extends BaseActivity {
     /**
      * 创建直播服务
      */
+    @Override
     protected void startLiveService() {
         MyTerminalFactory.getSDK().getVideoProxy().start().register(this);
         startService(new Intent(this, BITBackgroundCameraService.class));

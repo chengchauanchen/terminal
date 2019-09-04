@@ -381,6 +381,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
     /**
      * 必须要有SD卡和读取电话状态的权限，APP才能使用
      */
+    @Override
     public void judgePermission() {
         if (CheckMyPermission.selfPermissionGranted(this, permission.WRITE_EXTERNAL_STORAGE)) {//SD卡读写权限
             if (CheckMyPermission.selfPermissionGranted(this, permission.READ_PHONE_STATE)) {//手机权限，获取uuid

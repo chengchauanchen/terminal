@@ -88,6 +88,7 @@ import cn.vsx.vc.receiver.HeadsetPlugReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.BITDialogUtil;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -136,7 +137,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     private AlertDialog pushDialog;
     private AlertDialog logDialog;
     private ExitAccountDialog exitAccountDialog;
-    protected boolean isFristLogin = true;
+//    protected boolean isFristLogin = true;
 
     @Override
     protected void onStart() {
@@ -999,11 +1000,15 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             setChangeServer();
             String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
             if (defaultAddress.length >= 2) {
-                int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);
-                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                    ToastUtil.showToast(BaseActivity.this, getString(R.string.text_authing));
-                } else {
-                    //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                if(NetworkUtil.isConnected(this)){
+                    int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);
+                    if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                        ToastUtil.showToast(BaseActivity.this, getString(R.string.text_authing));
+                    } else {
+                        //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                    }
+                }else{
+                    ToastUtil.showToast(BaseActivity.this, getString(R.string.text_network_disconnect));
                 }
             } else {
                 //没有注册服务地址，去探测地址
@@ -1011,11 +1016,15 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             }
         } else {
             //有注册服务地址，去认证
-            int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
-            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                ToastUtil.showToast(BaseActivity.this, getString(R.string.text_authing));
-            } else {
-                //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+            if(NetworkUtil.isConnected(this)){
+                int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
+                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                    ToastUtil.showToast(BaseActivity.this, getString(R.string.text_authing));
+                } else {
+                    //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                }
+            }else{
+                ToastUtil.showToast(BaseActivity.this, getString(R.string.text_network_disconnect));
             }
         }
     }
@@ -1089,7 +1098,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         TerminalFactory.getSDK().putParam(Params.IS_UPDATE_DATA, true);
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
-        isFristLogin = true;
+//        isFristLogin = true;
         TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().stop();
 //        MyApplication.instance.stopPTTButtonEventService();
         if (this instanceof MainActivity) {
