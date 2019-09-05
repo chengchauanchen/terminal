@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import org.apache.log4j.Logger;
-import org.easydarwin.muxer.EasyMuxer;
+import org.easydarwin.muxer.UAVEasyMuxer;
 import org.easydarwin.sw.X264Encoder;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -128,7 +128,7 @@ public class AirSWConsumer extends Thread implements UAVVideoConSumer{
     }
 
     @Override
-    public void setMuxer(EasyMuxer muxer) {
+    public void setMuxer(UAVEasyMuxer muxer) {
 
     }
 }

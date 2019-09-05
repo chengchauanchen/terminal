@@ -159,6 +159,6 @@ public class PrePhotoFragment extends BaseFragment implements View.OnClickListen
     private void transponPhotoMessage(TerminalMessage terminalMessage, List<Integer> list , List<Long> toUniqueNos) {
         terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
         File file = new File(terminalMessage.messagePath);
-        MyTerminalFactory.getSDK().upload(list,toUniqueNos, file, terminalMessage, false);
+        MyTerminalFactory.getSDK().upload(list,toUniqueNos, file, terminalMessage, true);
     }
 }

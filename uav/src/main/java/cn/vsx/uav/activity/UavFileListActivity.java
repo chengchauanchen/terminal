@@ -3,6 +3,7 @@ package cn.vsx.uav.activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -46,11 +47,13 @@ import cn.vsx.vc.fragment.BaseFragment;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.TransponSelectedBean;
 import cn.vsx.vc.model.TransponToBean;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.ScreenState;
 import cn.vsx.vc.utils.ScreenSwitchUtils;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.HttpUtil;
 
 /**
  * 作者：ly-xuxiaolong
@@ -92,9 +95,10 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     public Resources getResources(){
-        return AdaptScreenUtils.adaptHeight(super.getResources(),1200);
+        return AdaptScreenUtils.adaptWidth(super.getResources(),1200);
     }
 
+    @Override
     protected void setOrientation(){
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
     }
@@ -280,7 +284,7 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
                                 jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
 //                                jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
                                 TerminalMessage mTerminalMessage = new TerminalMessage();
-                                mTerminalMessage.messageType = MessageType.FILE.getCode();
+                                mTerminalMessage.messageType = MessageType.VIDEO_CLIPS.getCode();
                                 mTerminalMessage.sendTime = System.currentTimeMillis();
                                 mTerminalMessage.messagePath = selectFile.getPath();
                                 mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
@@ -299,6 +303,7 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
                         showCheckbox = false;
                         selectFiles.clear();
                         mTvUavChoice.setText(R.string.uav_choice);
+                        mTvUavForward.setVisibility(View.GONE);
                     }
                 }
             }
@@ -335,7 +340,7 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
 
     public void transponMessage(TerminalMessage transponMessage,ArrayList<ContactItemBean> list, PushMessageSendResultHandler pushMessageSendResultHandler) {
         
-        logger.info("转发消息，type:" + transponMessage);
+
         //单个转发
         List<Integer> toIds = MyDataUtil.getToIdsTranspon(list);
         TransponToBean bean = MyDataUtil.getToNamesTranspon(list);
@@ -348,13 +353,16 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
         transponMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
         transponMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
 
-        
-        
+
+        logger.info("转发消息，type:" + transponMessage);
         if (transponMessage.messageType == MessageType.PICTURE.getCode()) {
             transponMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
         }
         
         if (transponMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
+            Bitmap bitmap = BitmapUtil.createVideoThumbnail(transponMessage.messagePath);
+            String picture = HttpUtil.saveFileByBitmap(MyTerminalFactory.getSDK().getPhotoRecordDirectory(), System.currentTimeMillis() + ".jpg", bitmap);
+            transponMessage.messageBody.put(JsonParam.PICTURE_THUMB_URL, picture);
             transponMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
         }
         
@@ -370,7 +378,7 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
     private void transponMessage(TerminalMessage terminalMessage, List<Integer> list , List<Long> toUniqueNos, PushMessageSendResultHandler pushMessageSendResultHandler) {
         terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
         File file = new File(terminalMessage.messagePath);
-        MyTerminalFactory.getSDK().upload(list,toUniqueNos, file, terminalMessage, false);
+        MyTerminalFactory.getSDK().upload(list,toUniqueNos, file, terminalMessage, true);
     }
 
     /**

@@ -7,7 +7,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 import org.apache.log4j.Logger;
-import org.easydarwin.muxer.EasyMuxer;
+import org.easydarwin.muxer.UAVEasyMuxer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -19,7 +19,7 @@ import static org.easydarwin.push.AirCraftMediaStream.info;
  */
 public class AirHWConsumer extends Thread implements UAVVideoConSumer{
     private static final String TAG = "Pusher";
-    public EasyMuxer mMuxer;
+    public UAVEasyMuxer mMuxer;
     private final Context mContext;
     private final Pusher mPusher;
     private int mHeight;
@@ -123,12 +123,13 @@ public class AirHWConsumer extends Thread implements UAVVideoConSumer{
                 // not expected for an encoder
                 outputBuffers = mMediaCodec.getOutputBuffers();
             } else if (outputBufferIndex == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
+                logger.info("INFO_OUTPUT_FORMAT_CHANGED");
                 synchronized (AirHWConsumer.this) {
                     newFormat = mMediaCodec.getOutputFormat();
-                    EasyMuxer muxer = mMuxer;
+                    UAVEasyMuxer muxer = mMuxer;
                     if (muxer != null) {
                         // should happen before receiving buffers, and should only happen once
-
+                        logger.info("INFO_OUTPUT_FORMAT_CHANGED---addTrack");
                         muxer.addTrack(newFormat, true);
                     }
                 }
@@ -144,7 +145,7 @@ public class AirHWConsumer extends Thread implements UAVVideoConSumer{
                 }
                 outputBuffer.position(bufferInfo.offset);
                 outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
-                EasyMuxer muxer = mMuxer;
+                UAVEasyMuxer muxer = mMuxer;
                 if (muxer != null) {
                     muxer.pumpStream(outputBuffer, bufferInfo, true);
                 }
@@ -207,12 +208,14 @@ public class AirHWConsumer extends Thread implements UAVVideoConSumer{
     }
 
     @Override
-    public synchronized void setMuxer(EasyMuxer muxer) {
+    public synchronized void setMuxer(UAVEasyMuxer muxer) {
         if (muxer != null) {
-            if (newFormat != null)
+            if (newFormat != null){
+                logger.info("setMuxer---addTrack");
                 muxer.addTrack(newFormat, true);
+            }
         }
-        mMuxer = (EasyMuxer) muxer;
+        mMuxer = muxer;
     }
 
 

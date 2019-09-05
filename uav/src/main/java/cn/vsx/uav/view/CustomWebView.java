@@ -98,6 +98,9 @@ public class CustomWebView extends WebView{
 
     public void initWeb(){
         WebSettings settings = getSettings();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            settings.setSafeBrowsingEnabled(false);
+        }
         // 设置是否可以交互Javascript
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);

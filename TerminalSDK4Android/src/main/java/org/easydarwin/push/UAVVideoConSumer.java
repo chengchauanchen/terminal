@@ -1,6 +1,6 @@
 package org.easydarwin.push;
 
-import org.easydarwin.muxer.EasyMuxer;
+import org.easydarwin.muxer.UAVEasyMuxer;
 
 import java.io.IOException;
 
@@ -18,5 +18,5 @@ public interface UAVVideoConSumer{
 
     public void onVideoStop();
 
-    public void setMuxer(EasyMuxer muxer);
+    public void setMuxer(UAVEasyMuxer muxer);
 }

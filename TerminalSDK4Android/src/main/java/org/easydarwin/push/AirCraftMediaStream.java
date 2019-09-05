@@ -13,9 +13,9 @@ import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import org.apache.log4j.Logger;
-import org.easydarwin.audio.AudioStream;
+import org.easydarwin.audio.UAVAudioStream;
 import org.easydarwin.easypusher.BackgroundCameraService;
-import org.easydarwin.muxer.EasyMuxer;
+import org.easydarwin.muxer.UAVEasyMuxer;
 import org.easydarwin.sw.JNIUtil;
 import org.easydarwin.sw.TxtOverlay;
 
@@ -51,8 +51,8 @@ public class AirCraftMediaStream {
     private boolean mSWCodec;
     private UAVVideoConSumer mVC;
     private TxtOverlay overlay;
-    private EasyMuxer mMuxer;
-    private AudioStream audioStream ;
+    private UAVEasyMuxer mMuxer;
+    private UAVAudioStream audioStream ;
     public static AirCraftMediaStream.CodecInfo info = new AirCraftMediaStream.CodecInfo();
     public Logger logger = Logger.getLogger(AirCraftMediaStream.class);
     private final HandlerThread mCameraThread;
@@ -207,7 +207,7 @@ public class AirCraftMediaStream {
                 videoRecord.getParentFile().mkdirs();
             }
             tempFile = videoRecord.toString();
-            mMuxer = new EasyMuxer(tempFile, millis);
+            mMuxer = new UAVEasyMuxer(tempFile, millis);
             mMuxer.setmContext(mApplicationContext);
             mMuxer.setDateStr(dataStr, fileIndex);
 
@@ -243,7 +243,7 @@ public class AirCraftMediaStream {
 
     @Provides
     @Nullable
-    public EasyMuxer getMuxer() {
+    public UAVEasyMuxer getMuxer() {
         return mMuxer;
     }
 
@@ -329,7 +329,7 @@ public class AirCraftMediaStream {
     }
 
     public void startPreView(int width,int height){
-        audioStream = new AudioStream();
+        audioStream = new UAVAudioStream();
         ArrayList<CodecInfo> infos = listEncoders("video/avc");
         for(CodecInfo info : infos){
             logger.info("硬编码库："+"info.mName:"+info.mName+"---info.mColorFormat:"+info.mColorFormat);

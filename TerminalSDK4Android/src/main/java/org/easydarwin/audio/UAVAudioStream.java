@@ -10,7 +10,7 @@ import android.os.Process;
 import android.util.Log;
 
 import org.apache.log4j.Logger;
-import org.easydarwin.muxer.EasyMuxer;
+import org.easydarwin.muxer.UAVEasyMuxer;
 import org.easydarwin.push.Pusher;
 
 import java.nio.ByteBuffer;
@@ -26,8 +26,8 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicatio
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
-public class AudioStream{
-    private EasyMuxer muxer;
+public class UAVAudioStream{
+    private UAVEasyMuxer muxer;
     private int samplingRate = 8000;
     private int bitRate = 16000;
     private int BUFFER_SIZE = 1920;
@@ -66,7 +66,7 @@ public class AudioStream{
     private MediaFormat newFormat;
     private final String type;
 
-    public AudioStream() {
+    public UAVAudioStream() {
         type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
@@ -210,7 +210,7 @@ public class AudioStream{
     }
 
 
-    public synchronized void setMuxer(EasyMuxer muxer) {
+    public synchronized void setMuxer(UAVEasyMuxer muxer) {
         if (muxer != null) {
             if (newFormat != null)
                 muxer.addTrack(newFormat, false);
@@ -255,20 +255,23 @@ public class AudioStream{
                     addADTStoPacket(mBuffer.array(), mBufferInfo.size + 7);
                     mBuffer.flip();
                     Collection<Pusher> p;
-                    synchronized (AudioStream.this){
+                    synchronized (UAVAudioStream.this){
                         p = sets;
                     }
                     Iterator<Pusher> it = p.iterator();
                     while (it.hasNext()){
                         Pusher ps = it.next();
-                        ps.push(mBuffer.array(), 0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000, 0);
+                        if(TerminalFactory.getSDK().getDataManager().isUavVoiceOpen()){
+                            ps.push(mBuffer.array(), 0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000, 0);
+                            logger.debug("推送音频"+mBufferInfo.size);
+                        }
                     }
 
                     mMediaCodec.releaseOutputBuffer(index, false);
                 } else if (index == MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED) {
                     mBuffers = mMediaCodec.getOutputBuffers();
                 } else if (index == MediaCodec.INFO_OUTPUT_FORMAT_CHANGED) {
-                    synchronized (AudioStream.this) {
+                    synchronized (UAVAudioStream.this) {
                         Log.v(TAG, "output format changed...");
                         newFormat = mMediaCodec.getOutputFormat();
                         if (muxer != null)

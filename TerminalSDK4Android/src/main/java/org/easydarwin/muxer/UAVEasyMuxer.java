@@ -22,15 +22,19 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.tools.FileTransgerUtil;
+import ptt.terminalsdk.tools.VideoFileUtil;
 
 /**
- * Created by John on 2017/1/10.
+ * 作者：ly-xuxiaolong
+ * 版本：1.0
+ * 创建日期：2019/9/4
+ * 描述：
+ * 修订历史：
  */
-
-public class EasyMuxer implements BaseEasyMuxer {
+public class UAVEasyMuxer implements BaseEasyMuxer{
     public Logger logger = Logger.getLogger(getClass());
-//    private static final boolean VERBOSE = BuildConfig.DEBUG;
-    private static final String TAG = EasyMuxer.class.getSimpleName();
+    //    private static final boolean VERBOSE = BuildConfig.DEBUG;
+    private static final String TAG = UAVEasyMuxer.class.getSimpleName();
     private String mFilePath;
     private MediaMuxer mMuxer;
     private final long durationMillis;
@@ -44,7 +48,7 @@ public class EasyMuxer implements BaseEasyMuxer {
     private MediaFormat mAudioFormat;
     private Context mContext;
 
-    public EasyMuxer(String path, long durationMillis) {
+    public UAVEasyMuxer(String path, long durationMillis) {
         mFilePath = path;
         this.durationMillis = durationMillis;
         Object mux = null;
@@ -68,13 +72,13 @@ public class EasyMuxer implements BaseEasyMuxer {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             int track = mMuxer.addTrack(format);
-//            if (VERBOSE)
-                Log.d(TAG, String.format("addTrack %s result %d", isVideo ? "video" : "audio", track));
+            //            if (VERBOSE)
+            Log.d(TAG, String.format("addTrack %s result %d", isVideo ? "video" : "audio", track));
             if (isVideo) {
                 mVideoFormat = format;
                 mVideoTrackIndex = track;
                 if (mAudioTrackIndex != -1) {
-//                    if (VERBOSE)
+                    //                    if (VERBOSE)
                     logger.info("both audio and video added,and muxer is started");
                     mMuxer.start();
                     mBeginMillis = System.currentTimeMillis();
@@ -95,6 +99,7 @@ public class EasyMuxer implements BaseEasyMuxer {
     public synchronized void pumpStream(ByteBuffer outputBuffer, MediaCodec.BufferInfo bufferInfo, boolean isVideo) {
         // TODO: 2019/8/26  无人机图像没有推过来时，没有调用addTrack方法，mVideoTrackIndex = -1；
         // 正常情况下：mAudioTrackIndex:0---mVideoTrackIndex:1
+        logger.info("pumpStream"+"----isVideo:"+isVideo+"---mAudioTrackIndex:"+mAudioTrackIndex+"----mVideoTrackIndex:"+mVideoTrackIndex);
         if (mAudioTrackIndex == -1 || mVideoTrackIndex == -1) {
             logger.info(TAG + String.format("pumpStream [%s] but muxer is not start.ignore..", isVideo ? "video" : "audio"));
             return;
@@ -114,12 +119,12 @@ public class EasyMuxer implements BaseEasyMuxer {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
                 mMuxer.writeSampleData(isVideo ? mVideoTrackIndex : mAudioTrackIndex, outputBuffer, bufferInfo);
             }
-//            if (VERBOSE)
-//            logger.info(TAG+String.format("sent %s [" + bufferInfo.size + "] with timestamp:[%d] to muxer", isVideo ? "video" : "audio", bufferInfo.presentationTimeUs / 1000));
+            //            if (VERBOSE)
+            //            logger.info(TAG+String.format("sent %s [" + bufferInfo.size + "] with timestamp:[%d] to muxer", isVideo ? "video" : "audio", bufferInfo.presentationTimeUs / 1000));
         }
 
         if ((bufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
-//            if (VERBOSE)
+            //            if (VERBOSE)
             logger.info(TAG + "BUFFER_FLAG_END_OF_STREAM received");
         }
 
@@ -129,7 +134,7 @@ public class EasyMuxer implements BaseEasyMuxer {
             FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
             operation.checkExternalUsableSize();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-//                if (VERBOSE)
+                //                if (VERBOSE)
                 try {
                     logger.info(TAG + String.format("record file reach expiration.create new file:" + fileIndex));
                     try{
@@ -162,7 +167,7 @@ public class EasyMuxer implements BaseEasyMuxer {
                     addTrack(mAudioFormat, false);
                 }
                 catch (Exception e) {
-                    logger.info(e.fillInStackTrace());
+                    logger.info(e.toString());
                 }
             }
         }
@@ -182,7 +187,7 @@ public class EasyMuxer implements BaseEasyMuxer {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             if (mMuxer != null) {
                 if (mAudioTrackIndex != -1 && mVideoTrackIndex != -1) {
-//                    if (VERBOSE)
+                    //                    if (VERBOSE)
                     logger.info(TAG + String.format("muxer is started. now it will be stoped."));
                     try {
                         mMuxer.stop();
@@ -191,7 +196,7 @@ public class EasyMuxer implements BaseEasyMuxer {
                         ex.printStackTrace();
                     }
                     File file = new File(mFilePath + ".mp4");
-                    if (System.currentTimeMillis() - mBeginMillis <= 1000 || file.length() < 10) {
+                    if (System.currentTimeMillis() - mBeginMillis <= 1000 || file.length() < 10 ||  VideoFileUtil.getVideoDuration(file) <= 0) {
                         file.delete();
                     } else {
                         //生成文件
@@ -210,7 +215,7 @@ public class EasyMuxer implements BaseEasyMuxer {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             if (mMuxer != null) {
                 if (mAudioTrackIndex != -1 && mVideoTrackIndex != -1) {
-//                    if (VERBOSE)
+                    //                    if (VERBOSE)
                     logger.info(TAG + String.format("muxer is started. now it will be stoped."));
                     try {
                         mMuxer.stop();

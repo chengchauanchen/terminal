@@ -181,7 +181,7 @@ public class UavPushActivity extends BaseActivity{
 
     @Override
     public Resources getResources(){
-        return AdaptScreenUtils.adaptHeight(super.getResources(),1200);
+        return AdaptScreenUtils.adaptWidth(super.getResources(),1200);
     }
 
     @Override
@@ -327,6 +327,9 @@ public class UavPushActivity extends BaseActivity{
                 ToastUtils.showShort("当前终端正在其他业务，不能发起视频上报");
                 finish();
             }
+        }
+        if(AirCraftUtil.checkIsAircraftConnected()){
+            AirCraftUtil.loginToActivationIfNeeded();
         }
     }
 
@@ -805,7 +808,7 @@ public class UavPushActivity extends BaseActivity{
                             showFocusView(event);
                             myHandler.postDelayed(hideFocusView, 2000);
                             //因为是横屏，所以用RawY()/screenWidth
-                            setFocus(camera, event.getRawY() / ScreenUtils.getScreenWidth(), event.getRawX() / ScreenUtils.getScreenHeight());
+                            setFocus(camera, event.getRawY() / ScreenUtils.getScreenHeight(), event.getRawX() / ScreenUtils.getScreenWidth());
                         });
                     }
                 }
@@ -830,13 +833,15 @@ public class UavPushActivity extends BaseActivity{
             camera.getFocusMode(new CommonCallbacks.CompletionCallbackWith<SettingsDefinitions.FocusMode>(){
                 @Override
                 public void onSuccess(SettingsDefinitions.FocusMode focusMode){
-                    if(focusMode == SettingsDefinitions.FocusMode.AUTO){
+                    if(focusMode == SettingsDefinitions.FocusMode.AUTO || focusMode == SettingsDefinitions.FocusMode.AFC){
                         setAutoFocusTarget(x, y, camera);
                     }
                 }
 
                 @Override
                 public void onFailure(DJIError djiError){
+                    setAutoFocusTarget(x, y, camera);
+                    logger.info("获取对焦模式失败"+djiError.getDescription());
                 }
             });
         }
@@ -846,9 +851,9 @@ public class UavPushActivity extends BaseActivity{
         PointF pointF = new PointF(x, y);
         camera.setFocusTarget(pointF, djiError -> {
             if(djiError == null){
-                logger.info(TAG+"设置焦点成功" + "--x:" + x + "--y" + y);
+                logger.info(TAG+"设置焦点成功：" + "--x:" + x + "--y" + y);
             }else{
-                logger.error(TAG+djiError.getDescription());
+                logger.error(TAG+"设置焦点失败："+djiError.getDescription());
             }
         });
     }
@@ -1134,6 +1139,7 @@ public class UavPushActivity extends BaseActivity{
 //                    mBtnStopPush.setVisibility(View.VISIBLE);
                     mIvTakePhoto.setImageResource(R.drawable.uav_take_photo_disable);
                 }else {
+                    AirCraftUtil.loginToActivationIfNeeded();
                     initAircraft();
                     uavConnected = true;
                     mVDrakBackgroupd.setVisibility(View.GONE);

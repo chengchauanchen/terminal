@@ -7,6 +7,8 @@ import android.text.TextUtils;
 
 import com.chad.library.adapter.base.entity.MultiItemEntity;
 
+import java.util.Objects;
+
 /**
  * 作者：ly-xuxiaolong
  * 版本：1.0
@@ -116,6 +118,11 @@ public class FileBean implements Parcelable,Comparable<FileBean>, MultiItemEntit
         }
         FileBean fileBean = (FileBean) o;
         return TextUtils.equals(path,fileBean.path) ;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path);
     }
 
     @Override

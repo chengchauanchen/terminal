@@ -1,6 +1,7 @@
 package cn.vsx.uav.fragment;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.SurfaceTexture;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -42,9 +43,11 @@ import cn.vsx.vc.fragment.BaseFragment;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.TransponSelectedBean;
 import cn.vsx.vc.model.TransponToBean;
+import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.MyDataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.HttpUtil;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -319,7 +322,7 @@ public class PlayVideoFragment extends BaseFragment implements View.OnClickListe
                         jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
                         //                                jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
                         TerminalMessage mTerminalMessage = new TerminalMessage();
-                        mTerminalMessage.messageType = MessageType.FILE.getCode();
+                        mTerminalMessage.messageType = MessageType.VIDEO_CLIPS.getCode();
                         mTerminalMessage.sendTime = System.currentTimeMillis();
                         mTerminalMessage.messagePath = fileBean.getPath();
                         mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
@@ -462,7 +465,10 @@ public class PlayVideoFragment extends BaseFragment implements View.OnClickListe
         transponMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
         transponMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
 
-        if (transponMessage.messageType == MessageType.FILE.getCode()) {
+        if (transponMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
+            Bitmap bitmap = BitmapUtil.createVideoThumbnail(transponMessage.messagePath);
+            String picture = HttpUtil.saveFileByBitmap(MyTerminalFactory.getSDK().getPhotoRecordDirectory(), System.currentTimeMillis() + ".jpg", bitmap);
+            transponMessage.messageBody.put(JsonParam.PICTURE_THUMB_URL, picture);
             transponFileMessage(transponMessage, toIds,toUniqueNos);
         }
     }
@@ -471,6 +477,6 @@ public class PlayVideoFragment extends BaseFragment implements View.OnClickListe
     private void transponFileMessage(TerminalMessage terminalMessage, List<Integer> list,List<Long> toUniqueNos) {
         terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
         File file = new File(terminalMessage.messagePath);
-        MyTerminalFactory.getSDK().upload(list,toUniqueNos, file, terminalMessage, false);
+        MyTerminalFactory.getSDK().upload(list,toUniqueNos, file, terminalMessage, true);
     }
 }

@@ -1352,8 +1352,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
 
         if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.GRANTED) {
-            ll_groupCall_prompt.setVisibility(View.GONE);
-            ICTV_groupCall_time.stop();
+//            ll_groupCall_prompt.setVisibility(View.GONE);
+//            ICTV_groupCall_time.stop();
         }
 
         //清楚所有通知

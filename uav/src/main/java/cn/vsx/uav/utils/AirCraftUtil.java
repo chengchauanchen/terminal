@@ -1,20 +1,35 @@
 package cn.vsx.uav.utils;
 
+import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.text.TextUtils;
 
+import com.blankj.utilcode.util.ActivityUtils;
 import com.blankj.utilcode.util.ToastUtils;
 
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHandler;
+import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.uav.UavApplication;
 import cn.vsx.uav.receiveHandler.ReceiveAircraftFilesHandler;
+import cn.vsx.uav.receiveHandler.ReceiveProductRegistHandler;
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
+import dji.common.error.DJISDKError;
 import dji.common.flightcontroller.LocationCoordinate3D;
+import dji.common.realname.AircraftBindingState;
+import dji.common.realname.AppActivationState;
+import dji.common.useraccount.UserAccountState;
 import dji.common.util.CommonCallbacks;
+import dji.sdk.base.BaseComponent;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.Camera;
 import dji.sdk.flightcontroller.Compass;
@@ -22,7 +37,9 @@ import dji.sdk.gimbal.Gimbal;
 import dji.sdk.media.MediaFile;
 import dji.sdk.media.MediaManager;
 import dji.sdk.products.Aircraft;
+import dji.sdk.realname.AppActivationManager;
 import dji.sdk.sdkmanager.DJISDKManager;
+import dji.sdk.useraccount.UserAccountManager;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
@@ -36,6 +53,20 @@ public class AirCraftUtil{
 
     private static Logger logger = Logger.getLogger(AirCraftUtil.class);
     private static boolean storageSpaceEnough = true;
+    private static final int MSG_INFORM_ACTIVATION = 1;
+    private static final int ACTIVATION_DALAY_TIME = 1500;
+    private static AppActivationState appActivationState;
+    private static AircraftBindingState bindingState;
+    private static AtomicBoolean hasAppActivationListenerStarted = new AtomicBoolean(false);
+    private static Handler mHandler = new Handler(Looper.getMainLooper()){
+        @Override
+        public void handleMessage(Message msg){
+            super.handleMessage(msg);
+            if(msg.what == MSG_INFORM_ACTIVATION){
+                loginToActivationIfNeeded();
+            }
+        }
+    };
 
     private static boolean isAircraftConnected() {
         return getProductInstance() != null && getProductInstance() instanceof Aircraft;
@@ -271,6 +302,8 @@ public class AirCraftUtil{
             if(djiError != null){
                 ToastUtils.showShort(djiError.getDescription());
                 logger.error("拍摄照片失败:"+djiError.getDescription());
+            }else {
+                logger.error("拍摄照片成功");
             }
         });
     }
@@ -321,5 +354,136 @@ public class AirCraftUtil{
         }
         String fileName = mediaFile.getFileName();
         mediaFile.fetchFileData(dir, fileName, new DownloadHandler<String>());
+    }
+
+    private static AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);
+    public static void startSDKRegistration() {
+        if (isRegistrationInProgress.compareAndSet(false, true)) {
+            AsyncTask.execute(() -> {
+                //                    ToastUtil.showToast(getApplicationContext(),"registering, pls wait...");
+                DJISDKManager.getInstance().registerApp(UavApplication.getApplication(), new DJISDKManager.SDKManagerCallback() {
+                    @Override
+                    public void onRegister(DJIError djiError) {
+                        if (djiError == DJISDKError.REGISTRATION_SUCCESS) {
+                            logger.info("注册大疆sdk成功");
+                            DJISDKManager.getInstance().startConnectionToProduct();
+                            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveProductRegistHandler.class,true,"注册大疆sdk成功");
+                        } else {
+                            logger.error("注册大疆sdk："+djiError.getDescription());
+                            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveProductRegistHandler.class,false,djiError.getDescription());
+                        }
+                    }
+
+                    @Override
+                    public void onProductDisconnect() {
+                        logger.info("onProductDisconnect");
+                        notifyStatusChange(false);
+
+                    }
+                    @Override
+                    public void onProductConnect(BaseProduct baseProduct) {
+                        logger.info(String.format("onProductConnect newProduct:%s", baseProduct));
+                        notifyStatusChange(true);
+
+                    }
+                    @Override
+                    public void onComponentChange(BaseProduct.ComponentKey componentKey, BaseComponent oldComponent,
+                                                  BaseComponent newComponent) {
+
+                        if (newComponent != null) {
+                            newComponent.setComponentListener(isConnected -> {
+                                logger.info("onComponentConnectivityChanged: " + isConnected);
+                                notifyStatusChange(isConnected);
+                            });
+                        }
+                        logger.info(String.format("onComponentChange key:%s, oldComponent:%s, newComponent:%s",
+                                componentKey,
+                                oldComponent,
+                                newComponent));
+
+                    }
+                });
+            });
+        }
+    }
+
+    private static void notifyStatusChange(boolean connect){
+        if(connect){
+            Aircraft aircraft= AirCraftUtil.getAircraftInstance();
+            if (null != aircraft ) {
+                addAppActivationListenerIfNeeded();
+            } else {
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,false);
+            }
+        }else {
+            AirCraftUtil.bindingState = null;
+            AirCraftUtil.appActivationState = null;
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,false);
+        }
+    }
+
+    private static void addAppActivationListenerIfNeeded() {
+        AppActivationState appActivationState = AppActivationManager.getInstance().getAppActivationState();
+        logger.info("addAppActivationListenerIfNeeded状态："+appActivationState);
+        if (appActivationState != AppActivationState.ACTIVATED) {
+            mHandler.sendEmptyMessageDelayed(MSG_INFORM_ACTIVATION, ACTIVATION_DALAY_TIME);
+            if (hasAppActivationListenerStarted.compareAndSet(false, true)) {
+                AppActivationState.AppActivationStateListener appActivationStateListener = appActivationState1 -> {
+                    logger.info("AppActivationStateListener--onUpdate:" + appActivationState1.name());
+                    AirCraftUtil.appActivationState = appActivationState1;
+                    if(mHandler.hasMessages(MSG_INFORM_ACTIVATION)){
+                        mHandler.removeMessages(MSG_INFORM_ACTIVATION);
+                    }
+                    if(appActivationState1 != AppActivationState.ACTIVATED){
+                        mHandler.sendEmptyMessageDelayed(MSG_INFORM_ACTIVATION, ACTIVATION_DALAY_TIME);
+                    }else{
+                        if(checkIsAircraftConnected()){
+                            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class, true);
+                        }
+                    }
+                };
+                AircraftBindingState.AircraftBindingStateListener bindingStateListener = bindingState -> {
+                    logger.info("Binding State: " + bindingState);
+                    AirCraftUtil.bindingState = bindingState;
+                    if(checkIsAircraftConnected()){
+                        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class, true);
+                    }
+                };
+                AppActivationManager.getInstance().addAppActivationStateListener(appActivationStateListener);
+                AppActivationManager.getInstance().addAircraftBindingStateListener(bindingStateListener);
+            }
+        }else {
+            MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
+        }
+    }
+
+    public static boolean checkIsAircraftConnected(){
+        return appActivationState == AppActivationState.ACTIVATED && bindingState == AircraftBindingState.BOUND;
+    }
+
+    public static void loginToActivationIfNeeded() {
+        AppActivationState appActivationState = AppActivationManager.getInstance().getAppActivationState();
+        logger.info("AppActivationManager.getInstance().getAppActivationState():" + appActivationState);
+        if (appActivationState == AppActivationState.LOGIN_REQUIRED) {
+            UserAccountManager.getInstance()
+                    .logIntoDJIUserAccount(ActivityUtils.getTopActivity(),
+                            new CommonCallbacks.CompletionCallbackWith<UserAccountState>() {
+                                @Override
+                                public void onSuccess(UserAccountState userAccountState) {
+//                                    ToastUtil.showToast(getApplicationContext(),"Login Successed!");
+                                    logger.info("大疆账号登陆成功");
+                                    MyTerminalFactory.getSDK().putParam(Params.DJ_LOGINED,true);
+                                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,true);
+                                }
+
+                                @Override
+                                public void onFailure(DJIError djiError) {
+                                    ToastUtils.showShort("大疆账号登陆失败"+djiError.getDescription());
+                                    logger.info("大疆账号登陆失败"+djiError.getDescription());
+                                    MyTerminalFactory.getSDK().putParam(Params.DJ_LOGINED,false);
+                                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveAirCraftStatusChangedHandler.class,false);
+                                }
+                            });
+        }
     }
 }
