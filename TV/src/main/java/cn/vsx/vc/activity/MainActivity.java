@@ -197,6 +197,7 @@ public class MainActivity extends BaseActivity {
         } catch (PackageManager.NameNotFoundException e) {
             e.printStackTrace();
         }
+        MyTerminalFactory.getSDK().registNetworkChangeHandler();
         tv_user_id.setText(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "");
         tv_user_name.setText(MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""));
 
@@ -262,6 +263,7 @@ public class MainActivity extends BaseActivity {
         handler.removeCallbacksAndMessages(null);
         PromptManager.getInstance().stopRing();
         stopPull(true);
+        MyTerminalFactory.getSDK().unregistNetworkChangeHandler();
     }
 
     /*******************************************************************   Activity生命周期   ***************************************************************************/
