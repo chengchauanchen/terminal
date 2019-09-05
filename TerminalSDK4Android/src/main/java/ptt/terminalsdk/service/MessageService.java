@@ -89,7 +89,7 @@ public class MessageService extends Service {
         try {
             if(uuid.length != 0 && accessServerIp.length() != 0 && accessServerPort != 0){
                 if(connectionClient.isConnected()){
-                    connectionClient.stop();
+                    connectionClient.stop(false);
                 }
                 logger.info("MessageService连接到信令服务器，调用了connectionClient的start()");
                 connectionClient.setUuid(uuid);
@@ -119,7 +119,7 @@ public class MessageService extends Service {
     public boolean onUnbind(Intent intent) {
         logger.info("MessageService执行了onUnbind()");
         try {
-            connectionClient.stop();
+            connectionClient.stop(true);
             connectionClient = null;
             logger.info("MessageService调用了connectionClient的stop()");
         } catch (Exception e) {
@@ -133,7 +133,7 @@ public class MessageService extends Service {
         logger.info("MessageService执行了onDestroy()--connectionClient:"+(connectionClient!=null));
         try {
             if(connectionClient!=null){
-                connectionClient.stop();
+                connectionClient.stop(true);
             }
             connectionClient = null;
             logger.info("MessageService调用了connectionClient的stop()");

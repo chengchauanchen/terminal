@@ -169,10 +169,12 @@ public class MyUDPClient extends UDPClientBase implements IConnectionClient{
     }
 
     @Override
-    public void stop(){
+    public void stop(boolean isClearHandler){
         try{
             super.stop();
-            serverMessageReceivedHandlerAidls.clear();
+            if(isClearHandler){
+                serverMessageReceivedHandlerAidls.clear();
+            }
         }catch(Exception e){
             e.printStackTrace();
         }

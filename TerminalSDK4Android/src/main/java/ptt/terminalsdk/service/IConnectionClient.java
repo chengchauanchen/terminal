@@ -33,7 +33,7 @@ public interface IConnectionClient{
 
     void start();
 
-    void stop();
+    void stop(boolean isClearHandler);
 
     boolean isConnected();
 }

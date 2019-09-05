@@ -148,14 +148,17 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     }
 
     @Override
-    public void stop(){
+    public void stop(boolean isClearHandler) {
         super.stop();
 //        for (ServerMessageReceivedHandlerAidl handler0  : serverMessageReceivedHandlerAidls) {
 ////            handler0.handler(false);
 //            logger.info("MyNettyClient---stop()--->"+false);
 //        }
-        serverMessageReceivedHandlerAidls.clear();
+        if(isClearHandler){
+            serverMessageReceivedHandlerAidls.clear();
+        }
     }
+
 
     @Override
     public boolean isConnected(){
