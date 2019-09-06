@@ -222,7 +222,9 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	}
 
 	public void unregistNetworkChangeHandler(){
-		application.unregisterReceiver(netWorkConnectionChangeReceiver);
+		if(netWorkConnectionChangeReceiver!=null){
+			application.unregisterReceiver(netWorkConnectionChangeReceiver);
+		}
 	}
 
 	@Override

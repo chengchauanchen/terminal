@@ -1,7 +1,6 @@
 package cn.vsx.vc.service;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.Service;
 import android.content.Intent;
 import android.os.Binder;
@@ -9,9 +8,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.support.v4.widget.TextViewCompat;
 import android.text.TextUtils;
-import android.view.View;
+
+import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
+
+import org.apache.log4j.Logger;
+
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.MemberChangeType;
@@ -27,21 +29,13 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandle
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.vc.R;
-import cn.vsx.vc.activity.MainActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverPTTButtonEventHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.ToastUtil;
-import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import org.apache.log4j.Logger;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
-import ptt.terminalsdk.tools.PhoneAdapter;
 
-import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.IDLE;
 
 /**
@@ -58,6 +52,10 @@ public class PTTButtonEventService extends Service {
   @Override public void onCreate() {
     super.onCreate();
     logger.info("PTTButtonEventService = onCreate");
+    initListener();
+  }
+
+  private void initListener(){
     MyTerminalFactory.getSDK().registReceiveHandler(receiverPTTButtonEventHandler);
     MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberChangeHandler);
     MyTerminalFactory.getSDK().registReceiveHandler(receiveCallingCannotClickHandler);
@@ -72,6 +70,7 @@ public class PTTButtonEventService extends Service {
     if (!TextUtils.isEmpty(pttAction)){
       //做相应的处理
     }
+    initListener();
     return super.onStartCommand(intent, flags, startId);
   }
 

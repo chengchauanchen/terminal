@@ -102,7 +102,7 @@ import ptt.terminalsdk.tools.DialogUtil;
 public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack, Actions, NfcUtil.OnReadListener {
 
     private AudioManager audioManager;
-    private HeadsetPlugReceiver headsetPlugReceiver;
+    protected HeadsetPlugReceiver headsetPlugReceiver;
     private PowerManager.WakeLock wakeLock;
     private PowerManager.WakeLock wakeLockScreen;
     protected PowerManager.WakeLock wakeLockComing;
@@ -426,7 +426,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     /**
      * 注册耳机插入拔出的监听
      */
-    private void registerHeadsetPlugReceiver() {
+    protected void registerHeadsetPlugReceiver() {
         headsetPlugReceiver = new HeadsetPlugReceiver(sensorManager,
                 sensorEventListener, wakeLockScreen);
         IntentFilter filter = new IntentFilter();
@@ -437,7 +437,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     /**
      * 注销耳机插入拔出的监听
      */
-    private void unregisterHeadsetPlugReceiver() {
+    protected void unregisterHeadsetPlugReceiver() {
         if (headsetPlugReceiver != null) {
             unregisterReceiver(headsetPlugReceiver);
         }
@@ -486,7 +486,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     @Override
     protected void onResume() {
         super.onResume();
-        registerHeadsetPlugReceiver();
         //nfc
         if (mNFCUtil != null && mNFCUtil.getmNfcAdapter() != null) {
             mNFCUtil.getmNfcAdapter().enableForegroundDispatch(this, mNFCUtil.getmPendingIntent(), mNFCUtil.getmIntentFilter(), mNFCUtil.getmTechList());
@@ -504,7 +503,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterHeadsetPlugReceiver();
         if (mNFCUtil != null && mNFCUtil.getmNfcAdapter() != null) {
             mNFCUtil.getmNfcAdapter().disableForegroundDispatch(this);
         }
@@ -613,7 +611,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        logger.info(TAG + "onKeyDown:event.getKeyCode():" + keyCode + "--event:" + event);
+//        logger.info(TAG + "onKeyDown:event.getKeyCode():" + keyCode + "--event:" + event);
         switch (keyCode) {
             case KeyEvent.KEYCODE_DPAD_LEFT:
             case 286:
@@ -1027,6 +1025,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 ToastUtil.showToast(BaseActivity.this, getString(R.string.text_network_disconnect));
             }
         }
+        MyTerminalFactory.getSDK().unregistNetworkChangeHandler();
+        MyTerminalFactory.getSDK().registNetworkChangeHandler();
     }
 
     /**
@@ -1112,11 +1112,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         }
         //切换账号的时候，清除账号相关的信息
         TerminalFactory.getSDK().getDataManager().clearDataByAccountChanged();
-        MyTerminalFactory.getSDK().stop();
-        //停止上报或者观看的页面
-//        if (isChangeAccount && TerminalFactory.getSDK().isServerConnected()) {
-//            TerminalFactory.getSDK().disConnectToServer();
-//        }
+//        MyTerminalFactory.getSDK().stop();
 //        TerminalFactory.getSDK().getClientChannel().stop();
     }
 
@@ -1127,9 +1123,18 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         //退出账号
         loginOut(true);
         //初始化SDK
-        initSDK();
-        //登录绑定账号
-        checkLogin(true, LOGIN_DELAY_TIME);
+//        initSDK();
+        //停止上报或者观看的页面
+        TerminalFactory.getSDK().getTimer().schedule(new TimerTask() {
+            @Override
+            public void run() {
+                if (TerminalFactory.getSDK().isServerConnected()) {
+                    TerminalFactory.getSDK().disConnectToServer();
+                }
+                //登录绑定账号
+                checkLogin(true, LOGIN_DELAY_TIME);
+            }
+        },500);
     }
 
     /**
@@ -1141,6 +1146,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         PromptManager.getInstance().start();
         initBaseListener();
         initListener();
+        MyApplication.instance.startPTTButtonEventService("");
     }
 
     /**

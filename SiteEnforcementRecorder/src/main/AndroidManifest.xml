@@ -108,6 +108,8 @@
         <!-- 普通 -->
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>
+        <category android:name="android.intent.category.HOME" />
+        <category android:name="android.intent.category.DEFAULT" />
         <!-- 发布到平台应用商店 -->
         <!--<action android:name="pstore.intent.action.MAIN"/>-->
         <!--<category android:name="pstore.intent.category.APP"/>-->
