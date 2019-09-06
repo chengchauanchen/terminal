@@ -9,6 +9,7 @@ import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,7 +25,6 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -127,8 +127,8 @@ public class MainActivity extends BaseActivity {
     TextView btBindState;
 
     //操作的framelayout
-    @Bind(R.id.fl_content)
-    FrameLayout flContent;
+//    @Bind(R.id.fl_content)
+//    FrameLayout flContent;
 
     //视频
     @Bind(R.id.sv_live)
@@ -235,7 +235,6 @@ public class MainActivity extends BaseActivity {
 //            width = 480;
 //            height = 640;
 //        }
-        MyTerminalFactory.getSDK().registNetworkChangeHandler();
     }
 
     @Override
@@ -275,6 +274,12 @@ public class MainActivity extends BaseActivity {
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverFragmentClearHandler);//收到fragment clear
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverStopBusniessHandler);//停止一切业务
         MyTerminalFactory.getSDK().registReceiveHandler(receiveJoinInWarningGroupPushLiveHandler);//绑定同一个警务通账号，切组到警情组时，上报图像
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        registerHeadsetPlugReceiver();
     }
 
     @Override
@@ -344,6 +349,7 @@ public class MainActivity extends BaseActivity {
         stopService(new Intent(MainActivity.this, LockScreenService.class));
         MyTerminalFactory.getSDK().getVideoProxy().start().unregister(this);
         MyTerminalFactory.getSDK().unregistNetworkChangeHandler();
+        unregisterHeadsetPlugReceiver();
     }
 
     @OnClick({R.id.sv_live,R.id.tv_login_info,R.id.bt_bind_state})
@@ -412,13 +418,13 @@ public class MainActivity extends BaseActivity {
             }else if(resultCode == TerminalErrorCode.TERMINAL_REPEAT.getErrorCode()){
                 ToastUtil.showToast(MainActivity.this,getString(R.string.text_terminal_repeat));
             } else if(resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()){
-                if(reAuthCount < 3){
-                    reAuthCount++;
-                    //发生异常的时候重试几次，因为网络原因经常导致一个io异常
+//                if(reAuthCount < 10){
+//                    reAuthCount++;
+//                    //发生异常的时候重试几次，因为网络原因经常导致一个io异常
                     TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(),TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
-                }else{
-                    ToastUtil.showToast(MainActivity.this,TextUtils.isEmpty(resultDesc)?getString(R.string.text_auth_error):resultDesc);
-                }
+//                }else{
+//                    ToastUtil.showToast(MainActivity.this,TextUtils.isEmpty(resultDesc)?getString(R.string.text_auth_error):resultDesc);
+//                }
             }else if(resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()){
                 ToastUtil.showToast(MainActivity.this,TextUtils.isEmpty(resultDesc)?getString(R.string.text_auth_error):resultDesc);
             } else {
@@ -589,6 +595,7 @@ public class MainActivity extends BaseActivity {
         logger.info("主界面收到服务是否连接的通知ReceiveOnLineStatusChangedHandler--" + connected);
         MainActivity.this.runOnUiThread(() -> {
             if (!connected) {
+                TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().stop();
                 ToastUtil.showToast(MainActivity.this,getString(R.string.text_network_is_disconnect));
 //                stopPush(false);
 //                showLoginAndBindUI(Constants.LOGIN_BIND_STATE_IDLE);
@@ -1258,11 +1265,13 @@ public class MainActivity extends BaseActivity {
      * 拍照
      */
     private void takePicture () {
-        if (mService == null || mService.getMediaStream() == null)
+        if (mService == null || mService.getMediaStream() == null) {
             return;
+        }
         Camera camera = mService.getMediaStream().getCamera();
-        if (camera == null)
+        if (camera == null) {
             return;
+        }
         camera.takePicture(null, null, (data, camera1) -> {
             if (takePictureTimer != null) {
                 takePictureTimer.cancel();
