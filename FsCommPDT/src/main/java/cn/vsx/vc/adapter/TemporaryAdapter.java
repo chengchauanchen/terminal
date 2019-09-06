@@ -1271,7 +1271,10 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             } else {
                 setText(holder.tvContent, activity.getString(R.string.canceled));
             }
-        } else {//被呼叫方不在线
+        } else if(terminalMessage.resultCode == SignalServerErrorCode.TETRA_INVALID_RETURN.getErrorCode()){
+            setText(holder.tvContent, SignalServerErrorCode.TETRA_INVALID_RETURN.getErrorDiscribe());
+        }
+        else {//被呼叫方不在线
             if (isReceiver(terminalMessage)) {
                 setText(holder.tvContent, activity.getString(R.string.no_answer));
             } else {

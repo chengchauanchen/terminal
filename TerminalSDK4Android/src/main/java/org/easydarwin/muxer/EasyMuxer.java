@@ -189,6 +189,8 @@ public class EasyMuxer implements BaseEasyMuxer {
                         mMuxer.release();
                     } catch (IllegalStateException ex) {
                         ex.printStackTrace();
+                    }finally{
+                        mMuxer = null;
                     }
                     File file = new File(mFilePath + ".mp4");
                     if (System.currentTimeMillis() - mBeginMillis <= 1000 || file.length() < 10) {

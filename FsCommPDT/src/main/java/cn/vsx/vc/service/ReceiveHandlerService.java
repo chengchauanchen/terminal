@@ -103,6 +103,7 @@ import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.SensorUtil;
+import cn.vsx.vc.utils.StringUtil;
 import cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.permission.FloatWindowManager;
@@ -771,7 +772,7 @@ public class ReceiveHandlerService extends Service{
                 TerminalFactory.getSDK().getThreadPool().execute(() -> {
                     cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(terminalMessage.messageFromId,true);
                     if(terminalMessage.messageBody.containsKey(JsonParam.ACCOUNT_ID) && !TextUtils.isEmpty(terminalMessage.messageBody.getString(JsonParam.ACCOUNT_ID))){
-                        cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(Integer.valueOf(terminalMessage.messageBody.getString(JsonParam.ACCOUNT_ID)),true);
+                        cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(StringUtil.stringToInt(terminalMessage.messageBody.getString(JsonParam.ACCOUNT_ID)),true);
                     }
                 });
                 if(!TerminalMessageUtil.isGroupMessage(terminalMessage)){

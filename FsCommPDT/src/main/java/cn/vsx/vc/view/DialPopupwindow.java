@@ -35,6 +35,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.dialog.ProgressDialog;
+import cn.vsx.vc.utils.StringUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -135,7 +136,7 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                 }
                 //五位数代表手台，直接播，信令会处理逻辑
                 if(inputString.length() == 5){
-                    int callId = Integer.parseInt(inputString);
+                    int callId = StringUtil.stringToInt(inputString);
                     Member member = new Member(callId,inputString,callId);
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
                     return;
@@ -143,7 +144,7 @@ public class DialPopupwindow extends PopupWindow implements View.OnClickListener
                 if(inputString.length() == 6){
                     inputString = "88" + inputString;
                 }
-                int callId = Integer.parseInt(inputString);
+                int callId = StringUtil.stringToInt(inputString);
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
                     ToastUtil.showToast(context,context.getString(R.string.text_has_no_personal_call_authority));
                     dismiss();

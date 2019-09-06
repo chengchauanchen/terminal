@@ -299,6 +299,7 @@ public abstract class ChatBaseActivity extends BaseActivity
         setToIds();
         //消息从文件服务获取
 //        if(isGroup){
+        refreshing = true;
         getHistoryMessageRecord(PAGE_COUNT);
 //        }else {
 //            List<TerminalMessage> groupMessageRecord = MyTerminalFactory.getSDK().getTerminalMessageManager().getGroupMessageRecord(
@@ -1997,7 +1998,6 @@ public abstract class ChatBaseActivity extends BaseActivity
                     if (chatMessageList.size() != 0) {
                         stopRefreshAndToast("没有更多消息了");
                     }
-                    refreshing = false;
                 });
             } else {
 //                messageRecord.remove(0);
@@ -2013,6 +2013,7 @@ public abstract class ChatBaseActivity extends BaseActivity
                         }
                     }
                 }
+                refreshing = false;
                 temporaryAdapter.notifyDataSetChanged();
             });
         }
@@ -2227,7 +2228,9 @@ public abstract class ChatBaseActivity extends BaseActivity
     private final class OnRefreshListenerImplementationImpl implements SwipeRefreshLayout.OnRefreshListener {
         @Override
         public void onRefresh() {
-            MyTerminalFactory.getSDK().getThreadPool().execute(() -> refreshData());
+            if(!refreshing){
+                MyTerminalFactory.getSDK().getThreadPool().execute(() -> refreshData());
+            }
         }
 
     }
