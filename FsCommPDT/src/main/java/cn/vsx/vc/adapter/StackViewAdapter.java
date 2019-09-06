@@ -30,6 +30,7 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.HandleIdUtil;
+import cn.vsx.vc.utils.StringUtil;
 
 /**
  * 作者：ly-xuxiaolong
@@ -228,7 +229,7 @@ public class StackViewAdapter extends BaseAdapter{
             Account account;
             boolean pushMessage;
             if(data.get(position).messageBody.containsKey(JsonParam.ACCOUNT_ID) && !TextUtils.isEmpty(data.get(position).messageBody.getString(JsonParam.ACCOUNT_ID))){
-                 account = DataUtil.getAccountByMemberNo(Integer.valueOf(data.get(position).messageBody.getString(JsonParam.ACCOUNT_ID)),false);
+                 account = DataUtil.getAccountByMemberNo(StringUtil.stringToInt(data.get(position).messageBody.getString(JsonParam.ACCOUNT_ID)),false);
                  pushMessage = false;
             }else {
                 //推送
