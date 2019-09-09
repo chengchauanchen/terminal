@@ -5,11 +5,15 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ThumbnailUtils;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.provider.MediaStore;
 import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSONObject;
@@ -21,7 +25,9 @@ import org.easydarwin.push.InitCallback;
 import org.easydarwin.push.LocalVideoPushStream;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +60,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.FileTransgerUtil;
 import ptt.terminalsdk.tools.SDCardUtil;
 import ptt.terminalsdk.tools.ToastUtil;
+import ptt.terminalsdk.tools.VideoFileUtil;
 
 import static android.content.Context.ALARM_SERVICE;
 import static cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory.USB;
@@ -454,11 +461,47 @@ public class FileTransferOperation {
                     record.setFileType(FileTransgerUtil.getBITFileType(path));
                     record.setFileTime(System.currentTimeMillis());
                     record.setFileState(UPLOAD_STATE_NO);
-                    logger.info(TAG + "saveFileToSQlite:record：" + record);
-                    TerminalFactory.getSDK().getSQLiteDBManager().addBitStarFileRecord(record);
-                    //发送保存超过48小时对比文件信息
-                    saveExpireFileInfoForFirstTimes(record);
-//                    sendMessgeToSaveExpireInfoForFirstTimes(record);
+                    if(isUavDevice()){
+                        record.setDate(new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
+                        if(TextUtils.equals(FileTransgerUtil.TYPE_VIDEO,FileTransgerUtil.getBITFileType(record.getFileName()))){
+                            Bitmap bitmap = ThumbnailUtils.createVideoThumbnail(path, MediaStore.Images.Thumbnails.MICRO_KIND);
+                            //视频文件
+                            if(bitmap != null){
+                                record.setWidth(bitmap.getWidth());
+                                record.setHeight(bitmap.getHeight());
+                                bitmap.recycle();
+                            }
+                            int videoDuration = VideoFileUtil.getVideoDuration(path);
+                            if(videoDuration>0){
+                                record.setDuration(videoDuration);
+                                TerminalFactory.getSDK().getSQLiteDBManager().addBitStarFileRecord(record);
+                                //发送保存超过48小时对比文件信息
+                                saveExpireFileInfoForFirstTimes(record);
+                                //                    sendMessgeToSaveExpireInfoForFirstTimes(record);
+                            }else {
+                                //该视频文件有问题，视频文件删除
+                                File file = new File(path);
+                                if(file.exists()){
+                                    file.delete();
+                                }
+                            }
+                        }else {
+                            Bitmap bitmap = BitmapFactory.decodeFile(path);
+                            record.setWidth(bitmap.getWidth());
+                            record.setHeight(bitmap.getHeight());
+                            bitmap.recycle();
+                            TerminalFactory.getSDK().getSQLiteDBManager().addBitStarFileRecord(record);
+                            //发送保存超过48小时对比文件信息
+                            saveExpireFileInfoForFirstTimes(record);
+                            //                    sendMessgeToSaveExpireInfoForFirstTimes(record);
+                        }
+
+                    }else {
+                        TerminalFactory.getSDK().getSQLiteDBManager().addBitStarFileRecord(record);
+                        //发送保存超过48小时对比文件信息
+                        saveExpireFileInfoForFirstTimes(record);
+                        //                    sendMessgeToSaveExpireInfoForFirstTimes(record);
+                    }
                 }
             }
         });
@@ -1045,5 +1088,10 @@ public class FileTransferOperation {
     private boolean isRecorderDevice(){
         String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
         return TerminalMemberType.valueOf(type).getCode() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode();
+    }
+
+    private boolean isUavDevice(){
+        String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+        return TerminalMemberType.valueOf(type).getCode() == TerminalMemberType.TERMINAL_UAV.getCode();
     }
 }

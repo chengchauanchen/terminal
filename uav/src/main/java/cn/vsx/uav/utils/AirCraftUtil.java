@@ -1,5 +1,6 @@
 package cn.vsx.uav.utils;
 
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
@@ -21,6 +22,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.uav.UavApplication;
 import cn.vsx.uav.receiveHandler.ReceiveAircraftFilesHandler;
 import cn.vsx.uav.receiveHandler.ReceiveProductRegistHandler;
+import cn.vsx.vc.utils.BitmapUtil;
 import dji.common.camera.SettingsDefinitions;
 import dji.common.error.DJIError;
 import dji.common.error.DJISDKError;
@@ -41,6 +43,8 @@ import dji.sdk.realname.AppActivationManager;
 import dji.sdk.sdkmanager.DJISDKManager;
 import dji.sdk.useraccount.UserAccountManager;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
+import ptt.terminalsdk.tools.FileTransgerUtil;
 
 /**
  * 作者：ly-xuxiaolong
@@ -300,9 +304,10 @@ public class AirCraftUtil{
     private static void startShootPhoto(Camera camera){
         camera.startShootPhoto(djiError -> {
             if(djiError != null){
-                ToastUtils.showShort(djiError.getDescription());
+                ToastUtils.showShort("拍摄照片失败:"+djiError.getDescription());
                 logger.error("拍摄照片失败:"+djiError.getDescription());
             }else {
+//                ToastUtils.showShort(R.string.uav_take_photo_success);
                 logger.error("拍摄照片成功");
             }
         });
@@ -348,12 +353,24 @@ public class AirCraftUtil{
     }
 
     public static void fetchFileData(MediaFile mediaFile){
-        File dir = new File(MyTerminalFactory.getSDK().getUavPictureDirectory());
+        File dir = new File(MyTerminalFactory.getSDK().getPhotoRecordDirectory());
         if(!dir.exists()){
             dir.mkdirs();
         }
-        String fileName = mediaFile.getFileName();
-        mediaFile.fetchFileData(dir, fileName, new DownloadHandler<String>());
+        String fileName = FileTransgerUtil.getPhotoFileName()+".jpg";
+        String filePath = MyTerminalFactory.getSDK().getPhotoRecordDirectory()+File.separator+fileName;
+        mediaFile.fetchPreview(djiError -> {
+            if(djiError == null){
+                Bitmap preview = mediaFile.getPreview();
+                BitmapUtil.saveBitmapFile(preview,MyTerminalFactory.getSDK().getPhotoRecordDirectory(),fileName);
+                FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
+                operation.generateFileComplete(MyTerminalFactory.getSDK().getPhotoRecordDirectory(),filePath);
+            }else {
+                logger.info("获取预览图片失败："+djiError.getDescription());
+            }
+        });
+        //下载原图时间太长了，要90秒
+//        mediaFile.fetchFileData(dir, fileName, new DownloadHandler<String>(fileName));
     }
 
     private static AtomicBoolean isRegistrationInProgress = new AtomicBoolean(false);

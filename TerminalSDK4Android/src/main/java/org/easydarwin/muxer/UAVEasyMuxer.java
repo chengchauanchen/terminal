@@ -5,7 +5,6 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.os.Build;
-import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.log4j.Logger;
@@ -16,9 +15,6 @@ import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import cn.vsx.hamster.common.TerminalMemberType;
-import cn.vsx.hamster.common.UrlParams;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.tools.FileTransgerUtil;
@@ -99,7 +95,7 @@ public class UAVEasyMuxer implements BaseEasyMuxer{
     public synchronized void pumpStream(ByteBuffer outputBuffer, MediaCodec.BufferInfo bufferInfo, boolean isVideo) {
         // TODO: 2019/8/26  无人机图像没有推过来时，没有调用addTrack方法，mVideoTrackIndex = -1；
         // 正常情况下：mAudioTrackIndex:0---mVideoTrackIndex:1
-        logger.info("pumpStream"+"----isVideo:"+isVideo+"---mAudioTrackIndex:"+mAudioTrackIndex+"----mVideoTrackIndex:"+mVideoTrackIndex);
+        //logger.info("pumpStream"+"----isVideo:"+isVideo+"---mAudioTrackIndex:"+mAudioTrackIndex+"----mVideoTrackIndex:"+mVideoTrackIndex);
         if (mAudioTrackIndex == -1 || mVideoTrackIndex == -1) {
             logger.info(TAG + String.format("pumpStream [%s] but muxer is not start.ignore..", isVideo ? "video" : "audio"));
             return;
@@ -147,13 +143,7 @@ public class UAVEasyMuxer implements BaseEasyMuxer{
                     }
 
                     mVideoTrackIndex = mAudioTrackIndex = -1;
-                    String directoty;
-                    String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
-                    if(TextUtils.equals(type, TerminalMemberType.TERMINAL_UAV.name())){
-                        directoty = MyTerminalFactory.getSDK().getUavVideoDirectory();
-                    }else {
-                        directoty = MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory());
-                    }
+                    String directoty = MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory());
                     //生成文件
                     operation.generateFileComplete(directoty, mFilePath + FileTransgerUtil._TYPE_VIDEO_SUFFIX);
                     checkIndexOutOfBounds();

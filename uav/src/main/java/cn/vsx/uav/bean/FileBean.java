@@ -3,7 +3,6 @@ package cn.vsx.uav.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 
 import com.chad.library.adapter.base.entity.MultiItemEntity;
 
@@ -116,13 +115,15 @@ public class FileBean implements Parcelable,Comparable<FileBean>, MultiItemEntit
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        FileBean fileBean = (FileBean) o;
-        return TextUtils.equals(path,fileBean.path) ;
+        FileBean bean = (FileBean) o;
+        return Objects.equals(name, bean.name) &&
+                Objects.equals(type, bean.type) &&
+                Objects.equals(path, bean.path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(path);
+        return Objects.hash(name, type, path);
     }
 
     @Override

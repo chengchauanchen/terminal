@@ -7,7 +7,7 @@
     
     <ImageView
         android:id="@+id/iv_back"
-        android:layout_width="@dimen/dp_15"
+        android:layout_width="@dimen/dp_30"
         android:layout_height="@dimen/dp_18"
         android:layout_marginLeft="30dp"
         android:src="@drawable/back" />

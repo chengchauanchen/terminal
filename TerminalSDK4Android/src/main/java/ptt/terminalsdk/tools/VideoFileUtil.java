@@ -28,4 +28,21 @@ public class VideoFileUtil{
         }
         return videoTime;
     }
+
+    public static int getVideoDuration(String path){
+        int videoTime = 0;
+        android.media.MediaPlayer mediaPlayer = new android.media.MediaPlayer();
+        try {
+            mediaPlayer.setDataSource(path);
+            mediaPlayer.prepare();
+            //获得了视频的时长（以毫秒为单位）
+            videoTime = mediaPlayer.getDuration();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }finally{
+            mediaPlayer.reset();
+            mediaPlayer.release();
+        }
+        return videoTime;
+    }
 }

@@ -707,6 +707,9 @@ public class ReceiveHandlerService extends Service{
             }
         }
 
+        if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
+            return;
+        }
         //视频消息
         if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()){
             //紧急观看
@@ -1196,6 +1199,7 @@ public class ReceiveHandlerService extends Service{
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(ReceiveHandlerService.this)) {
                 cn.vsx.vc.utils.ToastUtil.showToast(ReceiveHandlerService.this, "请打开悬浮窗权限，否则私密呼叫和图像功能无法使用！");
+                return;
             }
         }
         // 如果已经添加了就只更新view

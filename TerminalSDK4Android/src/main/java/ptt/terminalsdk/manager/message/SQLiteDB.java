@@ -12,7 +12,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
 
     public SQLiteDB(Context context) {
-        super(context, "4gptt.db", null, 20);
+        super(context, "4gptt.db", null, 21);
     }
 
     @Override
@@ -61,7 +61,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE IF NOT EXISTS warningRecord (_id INTEGER primary key autoincrement,alarm_no varchar,status INTEGER,levels INTEGER,alarm_time varchar, address varchar, summary varchar,apersonphone varchar,aperson varchar,recvperson varchar,recvphone varchar,date varchar,unread INTEGER,unique(alarm_no))");
 
         //比特星本地文件
-        db.execSQL("CREATE TABLE IF NOT EXISTS bitStarFileRecord (_id INTEGER primary key autoincrement, file_name varchar,file_path varchar ,file_type varchar,file_time INTEGER,file_state INTEGER, unique(file_name))");
+        db.execSQL("CREATE TABLE IF NOT EXISTS bitStarFileRecord (_id INTEGER primary key autoincrement,file_height INTEGER,file_width INTEGER,file_duration INTEGER,file_date varchar,file_name varchar,file_path varchar ,file_type varchar,file_time INTEGER,file_state INTEGER, unique(file_name))");
     }
 
     @Override

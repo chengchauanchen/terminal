@@ -292,7 +292,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
     @Override
     protected void initData() {
-
+        MyTerminalFactory.getSDK().registNetworkChangeHandler();
     }
 
     @Override
@@ -429,6 +429,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        MyTerminalFactory.getSDK().unregistNetworkChangeHandler();
         unregistReceiveHandler();
 //        groupCallInstruction.unBindReceiveHandler();
     }

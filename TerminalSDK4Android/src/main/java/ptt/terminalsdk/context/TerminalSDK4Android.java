@@ -62,9 +62,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -283,7 +281,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		logConfigurator.setRootLevel(Level.ALL);
 		logConfigurator.setFilePattern("%d %-5p [%t][%c{2}]-[%l] %m%n");
 		logConfigurator.setUseLogCatAppender(true);
-		logConfigurator.setMaxFileSize(1024 * 1024 * 50);
+		logConfigurator.setMaxFileSize(1024 * 1024 * 20);
 		logConfigurator.setMaxBackupSize(0);
 		logConfigurator.setImmediateFlush(true);
 		logConfigurator.configure();
@@ -664,23 +662,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		return Environment.getExternalStorageDirectory()
 				+ File.separator + application.getApplicationInfo().loadLabel(application.getPackageManager())+ File.separator + "uavFile"+File.separator;
 	}
-
-	/**
-	 * 无人机拍照文件存放的路径
-	 * @return
-	 */
-	public String getUAVFileDirectoty(){
-		return getUavDirectory()+ new SimpleDateFormat("yyyy-MM-dd").format(new Date())+File.separator;
-	}
-
-	public String getUavPictureDirectory(){
-		return getUAVFileDirectoty()+"picture"+File.separator;
-	}
-
-	public String getUavVideoDirectory(){
-		return getUAVFileDirectoty()+"videoRecord"+File.separator;
-	}
-
 
 	/**得到存放录制视频和照片的文件目录*/
 	@Override

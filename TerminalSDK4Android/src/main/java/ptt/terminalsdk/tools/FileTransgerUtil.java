@@ -34,7 +34,7 @@ public class FileTransgerUtil {
     //上传到服务器时的类型
     public static final String TYPE_AUDIO = "audio";
     public static final String TYPE_VIDEO = "video";
-    private static final String TYPE_IMAGE = "img";
+    public static final String TYPE_IMAGE = "img";
 
     //文件的后缀名
     public static final String _TYPE_AUDIO_SUFFIX = ".mp3";

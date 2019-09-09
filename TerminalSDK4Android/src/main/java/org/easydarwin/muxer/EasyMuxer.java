@@ -5,7 +5,6 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.media.MediaMuxer;
 import android.os.Build;
-import android.text.TextUtils;
 import android.util.Log;
 
 import org.apache.log4j.Logger;
@@ -16,9 +15,6 @@ import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import cn.vsx.hamster.common.TerminalMemberType;
-import cn.vsx.hamster.common.UrlParams;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.tools.FileTransgerUtil;
@@ -142,13 +138,7 @@ public class EasyMuxer implements BaseEasyMuxer {
                     }
 
                     mVideoTrackIndex = mAudioTrackIndex = -1;
-                    String directoty;
-                    String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
-                    if(TextUtils.equals(type, TerminalMemberType.TERMINAL_UAV.name())){
-                        directoty = MyTerminalFactory.getSDK().getUavVideoDirectory();
-                    }else {
-                        directoty = MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory());
-                    }
+                    String directoty = MyTerminalFactory.getSDK().getBITVideoRecordesDirectoty(operation.getExternalUsableStorageDirectory());
                     //生成文件
                     operation.generateFileComplete(directoty, mFilePath + FileTransgerUtil._TYPE_VIDEO_SUFFIX);
                     checkIndexOutOfBounds();

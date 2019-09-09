@@ -930,8 +930,13 @@ public class SQLiteDBManager implements ISQLiteDBManager {
      */
     @Override
     public void addBitStarFileRecord(BitStarFileRecord record) {
+        logger.info("addBitStarFileRecord"+record);
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
+        values.put("file_duration", record.getDuration());
+        values.put("file_width", record.getWidth());
+        values.put("file_height", record.getHeight());
+        values.put("file_date", record.getDate());
         values.put("file_name", record.getFileName());
         values.put("file_path",record.getFilePath());
         values.put("file_type", record.getFileType());
@@ -1067,6 +1072,68 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         return list;
     }
 
+    @Override
+    public CopyOnWriteArrayList<String> getFileDates(int page,int pageSize){
+        CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>();
+        SQLiteDatabase db = helper.getReadableDatabase();
+        StringBuffer sql=new StringBuffer("select file_date from bitStarFileRecord GROUP BY file_date ORDER BY file_date desc limit "+pageSize+" offset "+(page-1)*pageSize);
+        Cursor cursor=db.rawQuery(sql.toString(), null);
+        if (cursor != null && cursor.getCount() > 0){
+            while (cursor.moveToNext()){
+                list.add(cursor.getString(cursor.getColumnIndex("file_date")));
+            }
+            cursor.close();
+        }
+        return list;
+    }
+
+    @Override
+    public CopyOnWriteArrayList<BitStarFileRecord> getBitStarFileRecords(String date,String fileType){
+        CopyOnWriteArrayList<BitStarFileRecord> list = new CopyOnWriteArrayList<>();
+        SQLiteDatabase db = helper.getReadableDatabase();
+        StringBuffer sql=new StringBuffer("select * from bitStarFileRecord where file_date = ");
+        sql.append("\'").append(date).append("\'");
+        if(!TextUtils.isEmpty(fileType)){
+            sql.append(" AND file_type = ");
+            sql.append("\'").append(fileType).append("\'");
+        }
+        sql.append(" ORDER BY file_date desc");
+        Cursor cursor=db.rawQuery(sql.toString(), null);
+        if (cursor != null && cursor.getCount() > 0){
+            while (cursor.moveToNext()){
+                list.add(getBitStarFileRecord(cursor));
+            }
+            cursor.close();
+        }
+        logger.info("查询本地数据库getBitStarFileRecord结果：" + list);
+        return list;
+    }
+    /**
+     * 分组分页查询存放的文件
+     * @param page 页数，从1开始
+     * @param pageSize 每页数据数量
+     * @return
+     */
+    @Override
+    public CopyOnWriteArrayList<BitStarFileRecord> getBitStarFileRecords(int page,int pageSize,String fileType){
+        CopyOnWriteArrayList<BitStarFileRecord> list = new CopyOnWriteArrayList<>();
+        SQLiteDatabase db = helper.getReadableDatabase();
+        StringBuffer sql=new StringBuffer("select * from bitStarFileRecord ");
+        if(!TextUtils.isEmpty(fileType)){
+            sql.append("where file_type = "+fileType);
+        }
+        sql.append(" GROUP BY file_date "+"ORDER BY file_date desc limit "+pageSize+" offset "+(page-1)*pageSize);
+        Cursor cursor=db.rawQuery(sql.toString(), null);
+        if (cursor != null && cursor.getCount() > 0){
+            while (cursor.moveToNext()){
+                list.add(getBitStarFileRecord(cursor));
+            }
+            cursor.close();
+        }
+        logger.info("查询本地数据库getBitStarFileRecord结果：" + list);
+        return list;
+    }
+
     /**
      *获取单个BitStarFileRecord
      * @param cursor
@@ -1074,6 +1141,10 @@ public class SQLiteDBManager implements ISQLiteDBManager {
      */
     public  BitStarFileRecord getBitStarFileRecord(Cursor cursor){
         BitStarFileRecord record = new BitStarFileRecord();
+        record.setDuration(cursor.getInt(cursor.getColumnIndex("file_duration")));
+        record.setWidth(cursor.getInt(cursor.getColumnIndex("file_width")));
+        record.setHeight(cursor.getInt(cursor.getColumnIndex("file_height")));
+        record.setDate(cursor.getString(cursor.getColumnIndex("file_date")));
         record.setFileName(cursor.getString(cursor.getColumnIndex("file_name")));
         record.setFilePath(cursor.getString(cursor.getColumnIndex("file_path")));
         record.setFileType(cursor.getString(cursor.getColumnIndex("file_type")));

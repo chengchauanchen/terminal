@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 
@@ -17,8 +18,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.BitStarFileRecord;
 import cn.vsx.uav.R;
 import cn.vsx.uav.activity.UavFileListActivity;
 import cn.vsx.uav.adapter.CommonItemDecoration;
@@ -31,6 +34,7 @@ import cn.vsx.uav.receiveHandler.ReceiveShowPreViewHandler;
 import cn.vsx.vc.fragment.BaseFragment;
 import cn.vsx.vc.utils.FileUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.FileTransgerUtil;
 
 import static cn.vsx.uav.constant.Constants.TYPE_COMMON;
 import static cn.vsx.uav.constant.Constants.TYPE_DATE;
@@ -52,9 +56,9 @@ public class UavPictureFileFragment extends BaseFragment implements BaseQuickAda
     private static final int ADD_DATA = 0;
     private static final int CLEAR_DATA = 1;
     //一次加载3天的数据
-    private static final int PAGE = 6;
+    private static final int PAGE = 10;
     //当前加载的次数
-    private int currentIndex = 0;
+    private int currentIndex = 1;
     //总次数
     private int totalPage;
     @SuppressWarnings("handlerLeak")
@@ -111,9 +115,64 @@ public class UavPictureFileFragment extends BaseFragment implements BaseQuickAda
         mUavDateRecyclerView.setAdapter(adapter);
 
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
-            getData(currentIndex);
+//            getData(currentIndex);
+            getNewData(currentIndex);
             currentIndex++;
         });
+    }
+
+    private synchronized void getNewData(int pageIndex){
+        CopyOnWriteArrayList<String> fileDates = TerminalFactory.getSDK().getSQLiteDBManager().getFileDates(pageIndex, PAGE);
+        for(String fileDate : fileDates){
+            boolean first = true;
+            int realFileSize = 0;
+            CopyOnWriteArrayList<BitStarFileRecord> bitStarFileRecords = TerminalFactory.getSDK().getSQLiteDBManager().getBitStarFileRecords(fileDate, FileTransgerUtil.TYPE_IMAGE);
+            for(BitStarFileRecord bitStarFileRecord : bitStarFileRecords){
+                String filePath = bitStarFileRecord.getFilePath();
+                File file = new File(filePath);
+                if(file.exists() && file.isFile()){
+                    FileBean fileBean = new FileBean();
+                    if(first){
+                        fileBean.setType(TYPE_DATE);
+                        first = false;
+                    }else {
+                        fileBean.setType(TYPE_COMMON);
+                    }
+                    fileBean.setDate(fileDate);
+                    fileBean.setPath(bitStarFileRecord.getFilePath());
+                    fileBean.setHeight(bitStarFileRecord.getHeight());
+                    fileBean.setWidth(bitStarFileRecord.getWidth());
+                    fileBean.setDuration(bitStarFileRecord.getDuration());
+                    fileBean.setName(bitStarFileRecord.getFileName());
+                    fileBean.setFileSize(bitStarFileRecord.getFileSize());
+                    fileBean.setIsVideo(TextUtils.equals(bitStarFileRecord.getFileType(), FileTransgerUtil.TYPE_VIDEO));
+                    if(getActivity() != null){
+                        if(((UavFileListActivity) getActivity()).getSelectFileBean().contains(fileBean)){
+                            fileBean.setSelected(true);
+                        }
+                    }
+
+                    Message message = Message.obtain();
+                    message.what = ADD_DATA;
+                    message.obj = fileBean;
+                    mHandler.sendMessage(message);
+                    realFileSize++;
+                }
+            }
+            //次数应为当天的有效数据
+            int size = 5 - realFileSize % 5;
+            if(size != 0 &&  size !=5){
+                for(int k = 0; k < size; k++){
+                    FileBean emptyBean = new FileBean();
+                    emptyBean.setType(TYPE_NULL);
+                    Message message = Message.obtain();
+                    message.what = ADD_DATA;
+                    message.obj = emptyBean;
+                    mHandler.sendMessage(message);
+                }
+            }
+        }
+
     }
 
     private synchronized void getData(int pageIndex){
@@ -167,8 +226,10 @@ public class UavPictureFileFragment extends BaseFragment implements BaseQuickAda
                                         fileBean.setWidth(bitmap.getWidth());
                                         fileBean.setHeight(bitmap.getHeight());
                                         bitmap.recycle();
-                                        if(((UavFileListActivity) getActivity()).getSelectFileBean().contains(fileBean)){
-                                            fileBean.setSelected(true);
+                                        if(getActivity() != null){
+                                            if(((UavFileListActivity) getActivity()).getSelectFileBean().contains(fileBean)){
+                                                fileBean.setSelected(true);
+                                            }
                                         }
                                         Message message = Message.obtain();
                                         message.what = ADD_DATA;
@@ -220,8 +281,8 @@ public class UavPictureFileFragment extends BaseFragment implements BaseQuickAda
     }
 
     @Override
-    public void onDestroyView(){
-        super.onDestroyView();
+    public void onDestroy(){
+        super.onDestroy();
         mHandler.removeCallbacksAndMessages(null);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveSendFileFinishHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveShowCheckboxHandler);
@@ -229,12 +290,18 @@ public class UavPictureFileFragment extends BaseFragment implements BaseQuickAda
     }
 
     private ReceiveSendFileFinishHandler receiveSendFileFinishHandler = () -> mHandler.post(()->{
+        showCheckbox = false;
         adapter.setShowCheckbox(false);
         adapter.notifyDataSetChanged();
     });
 
     private ReceiveShowCheckboxHandler receiveShowCheckboxHandler = show -> {
         if(adapter != null){
+            if(!show){
+                for(FileBean bean : data){
+                    bean.setSelected(false);
+                }
+            }
             showCheckbox = show;
             mHandler.post(()->{
                 adapter.setShowCheckbox(show);
@@ -244,8 +311,13 @@ public class UavPictureFileFragment extends BaseFragment implements BaseQuickAda
     };
 
     private ReceiveFileSelectChangeHandler receiveFileSelectChangeHandler = (selected, fileBean) -> {
-        if(data.contains(fileBean)){
-            fileBean.setSelected(selected);
+        for(FileBean bean : data){
+            if(TextUtils.equals(bean.getPath(),fileBean.getPath())){
+                bean.setSelected(selected);
+                break;
+            }
+        }
+        if(isHidden()){
             adapter.notifyDataSetChanged();
         }
     };
@@ -264,7 +336,8 @@ public class UavPictureFileFragment extends BaseFragment implements BaseQuickAda
                 adapter.loadMoreEnd();
             } else {
                 TerminalFactory.getSDK().getThreadPool().execute(()->{
-                    getData(currentIndex);
+//                    getData(currentIndex);
+                    getNewData(currentIndex);
                     currentIndex++;
                     mHandler.post(()-> adapter.loadMoreComplete());
                 });

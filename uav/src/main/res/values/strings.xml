@@ -604,4 +604,6 @@
     <string name="quiet_play">静音播放</string>
     <string name="uav_please_select_file">请选择文件</string>
     <string name="uav_push_quiet_play">正在上报图像，只能静音预览</string>
+    <string name="uav_picture_download_finish">照片下载成功</string>
+    <string name="uav_take_photo_success">照片拍摄成功，请等待下载完成</string>
 </resources>
