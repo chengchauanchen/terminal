@@ -320,14 +320,12 @@ public class UavAllFileFragment extends BaseFragment implements BaseQuickAdapter
     });
 
     private ReceiveFileSelectChangeHandler receiveFileSelectChangeHandler = (selected, fileBean) -> {
-        for(FileBean bean : data){
-            if(TextUtils.equals(bean.getPath(),fileBean.getPath())){
-                bean.setSelected(selected);
-                break;
+        if(data.contains(fileBean)){
+            int index = data.indexOf(fileBean);
+            data.get(index).setSelected(selected);
+            if(isHidden()){
+                adapter.notifyItemChanged(index);
             }
-        }
-        if(isHidden()){
-            adapter.notifyDataSetChanged();
         }
     };
 

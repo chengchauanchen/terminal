@@ -69,7 +69,9 @@ public class FileAdapter extends BaseMultiItemQuickAdapter<FileBean, BaseViewHol
                 mTvDate.setVisibility(View.INVISIBLE);
             }
             mIvPicture.setVisibility(View.VISIBLE);
-            setLayoutParams(mIvPicture,item);
+            if(item.getWidth() != 0 && item.getHeight() != 0){
+                setLayoutParams(mIvPicture,item);
+            }
             Glide.with(mContext).load(item.getPath())
                     .override(item.getWidth(),item.getHeight())
                     .into(mIvPicture);

@@ -487,9 +487,11 @@ public class FileTransferOperation {
                             }
                         }else {
                             Bitmap bitmap = BitmapFactory.decodeFile(path);
-                            record.setWidth(bitmap.getWidth());
-                            record.setHeight(bitmap.getHeight());
-                            bitmap.recycle();
+                            if(bitmap != null){
+                                record.setWidth(bitmap.getWidth());
+                                record.setHeight(bitmap.getHeight());
+                                bitmap.recycle();
+                            }
                             TerminalFactory.getSDK().getSQLiteDBManager().addBitStarFileRecord(record);
                             //发送保存超过48小时对比文件信息
                             saveExpireFileInfoForFirstTimes(record);

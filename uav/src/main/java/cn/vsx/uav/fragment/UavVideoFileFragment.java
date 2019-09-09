@@ -297,7 +297,7 @@ public class UavVideoFileFragment extends BaseFragment implements BaseQuickAdapt
         TerminalFactory.getSDK().unregistReceiveHandler(receiveSendFileFinishHandler);
     }
 
-    private ReceiveSendFileFinishHandler receiveSendFileFinishHandler = () -> mHandler.post(()->{
+    private ReceiveSendFileFinishHandler receiveSendFileFinishHandler = () -> mHandler.post(() -> {
         showCheckbox = false;
         adapter.setShowCheckbox(false);
         adapter.notifyDataSetChanged();
@@ -319,14 +319,12 @@ public class UavVideoFileFragment extends BaseFragment implements BaseQuickAdapt
     };
 
     private ReceiveFileSelectChangeHandler receiveFileSelectChangeHandler = (selected, fileBean) -> {
-        for(FileBean bean : data){
-            if(TextUtils.equals(bean.getPath(),fileBean.getPath())){
-                bean.setSelected(selected);
-                break;
+        if(data.contains(fileBean)){
+            int index = data.indexOf(fileBean);
+            data.get(index).setSelected(selected);
+            if(isHidden()){
+                adapter.notifyItemChanged(index);
             }
-        }
-        if(isHidden()){
-            adapter.notifyDataSetChanged();
         }
     };
 
