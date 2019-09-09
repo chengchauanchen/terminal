@@ -308,3 +308,7 @@
 }
 -dontwarn io.netty.**
 -dontwarn sun.**
+
+#无人机
+-keep class cn.vsx.uav.bean.** { *; }
+-keep class cn.vsx.uav.receiveHandler.** { *; }
