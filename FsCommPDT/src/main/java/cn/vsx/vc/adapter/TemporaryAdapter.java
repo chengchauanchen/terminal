@@ -1895,10 +1895,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         //加载原图
         File file = new File(terminalMessage.messagePath);
         mImgList = findImages();
-        logger.error("adapter ---getCount():" + getItemCount());
-        logger.error("mImgList.size():" + mImgList.size());
         int currentPos = mImgUrlList.indexOf(terminalMessage.messagePath);
-        logger.info("图片列表位置：" + currentPos+"路径："+terminalMessage.messagePath);
+        logger.info("图片列表位置：" + currentPos+"terminalMessage："+terminalMessage);
         if (!isDownloadingPicture){
             if(terminalMessage.messageBody.containsKey(JsonParam.ISMICROPICTURE) && terminalMessage.messageBody.getBooleanValue(JsonParam.ISMICROPICTURE)||
                     !file.exists()){

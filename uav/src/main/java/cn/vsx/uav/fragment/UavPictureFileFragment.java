@@ -144,7 +144,7 @@ public class UavPictureFileFragment extends BaseFragment implements BaseQuickAda
                     fileBean.setWidth(bitStarFileRecord.getWidth());
                     fileBean.setDuration(bitStarFileRecord.getDuration());
                     fileBean.setName(bitStarFileRecord.getFileName());
-                    fileBean.setFileSize(bitStarFileRecord.getFileSize());
+                    fileBean.setFileSize(FileUtil.getFileSize(file));
                     fileBean.setIsVideo(TextUtils.equals(bitStarFileRecord.getFileType(), FileTransgerUtil.TYPE_VIDEO));
                     if(getActivity() != null){
                         if(((UavFileListActivity) getActivity()).getSelectFileBean().contains(fileBean)){

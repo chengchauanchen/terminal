@@ -306,6 +306,7 @@ public class AirCraftUtil{
             if(djiError != null){
                 ToastUtils.showShort("拍摄照片失败:"+djiError.getDescription());
                 logger.error("拍摄照片失败:"+djiError.getDescription());
+
             }else {
 //                ToastUtils.showShort(R.string.uav_take_photo_success);
                 logger.error("拍摄照片成功");

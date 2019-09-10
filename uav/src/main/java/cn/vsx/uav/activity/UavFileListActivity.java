@@ -18,8 +18,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.blankj.utilcode.util.AdaptScreenUtils;
 import com.blankj.utilcode.util.ToastUtils;
 
-import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +52,7 @@ import cn.vsx.vc.utils.ScreenState;
 import cn.vsx.vc.utils.ScreenSwitchUtils;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.HttpUtil;
+import ptt.terminalsdk.tools.VideoFileUtil;
 
 /**
  * 作者：ly-xuxiaolong
@@ -263,36 +262,34 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
                                 jsonObject.put(JsonParam.PICTURE_NAME, selectFile.getName());
                                 jsonObject.put(JsonParam.PICTURE_SIZE, selectFile.getFileSize());
                                 jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
-                                //                            jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
                                 TerminalMessage mTerminalMessage = new TerminalMessage();
                                 mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
                                 mTerminalMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
-
                                 mTerminalMessage.messagePath = selectFile.getPath();
                                 mTerminalMessage.sendTime = System.currentTimeMillis();
                                 mTerminalMessage.messageType = MessageType.PICTURE.getCode();
-
                                 mTerminalMessage.messageBody = jsonObject;
                                 //单个转发
-                                transponMessage(mTerminalMessage,bean.getList(), pushMessageSendResultHandler);
+                                transponMessage(mTerminalMessage,bean.getList());
                             }else {
                                 //发送文件
                                 JSONObject jsonObject = new JSONObject();
                                 jsonObject.put(JsonParam.FILE_NAME, selectFile.getName());
                                 jsonObject.put(JsonParam.FILE_SIZE, selectFile.getFileSize());
                                 jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
+                                jsonObject.put(JsonParam.VIDEO_TIME, VideoFileUtil.getVideoDuration(selectFile.getPath()));
                                 jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
-//                                jsonObject.put(JsonParam.DOWN_VERSION_FOR_FAIL, lastVersion);
+                                Bitmap bitmap = BitmapUtil.createVideoThumbnail(selectFile.getPath());
+                                String picture = HttpUtil.saveFileByBitmap(MyTerminalFactory.getSDK().getPhotoRecordDirectory(), System.currentTimeMillis() + ".jpg", bitmap);
+                                jsonObject.put(JsonParam.PICTURE_THUMB_URL, picture);
                                 TerminalMessage mTerminalMessage = new TerminalMessage();
                                 mTerminalMessage.messageType = MessageType.VIDEO_CLIPS.getCode();
                                 mTerminalMessage.sendTime = System.currentTimeMillis();
                                 mTerminalMessage.messagePath = selectFile.getPath();
                                 mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
                                 mTerminalMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
-                                mTerminalMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-                                mTerminalMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
                                 mTerminalMessage.messageBody = jsonObject;
-                                transponMessage(mTerminalMessage,bean.getList(), pushMessageSendResultHandler);
+                                transponMessage(mTerminalMessage,bean.getList());
                             }
                         }
                         //刷新adapter
@@ -338,9 +335,7 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
         mTvUavChoice.setText(getString(R.string.text_cancel)+"("+selectFiles.size()+")");
     };
 
-    public void transponMessage(TerminalMessage transponMessage,ArrayList<ContactItemBean> list, PushMessageSendResultHandler pushMessageSendResultHandler) {
-        
-
+    public void transponMessage(TerminalMessage transponMessage,ArrayList<ContactItemBean> list) {
         //单个转发
         List<Integer> toIds = MyDataUtil.getToIdsTranspon(list);
         TransponToBean bean = MyDataUtil.getToNamesTranspon(list);
@@ -349,23 +344,9 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
             transponMessage.messageToId = bean.getNo();
             transponMessage.messageToName = bean.getName();
         }
-        transponMessage.messageFromId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-        transponMessage.messageFromName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
-        transponMessage.messageBody.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
 
-
-        logger.info("转发消息，type:" + transponMessage);
-        if (transponMessage.messageType == MessageType.PICTURE.getCode()) {
-            transponMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
-        }
-        
-        if (transponMessage.messageType == MessageType.VIDEO_CLIPS.getCode()) {
-            Bitmap bitmap = BitmapUtil.createVideoThumbnail(transponMessage.messagePath);
-            String picture = HttpUtil.saveFileByBitmap(MyTerminalFactory.getSDK().getPhotoRecordDirectory(), System.currentTimeMillis() + ".jpg", bitmap);
-            transponMessage.messageBody.put(JsonParam.PICTURE_THUMB_URL, picture);
-            transponMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
-        }
-        
+        logger.info("发送消息，transponMessage:" + transponMessage);
+        transponMessage(transponMessage, toIds,toUniqueNos);
     }
 
     public List<FileBean> getSelectFileBean(){
@@ -375,26 +356,11 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
     /**
      * 转发图片消息
      **/
-    private void transponMessage(TerminalMessage terminalMessage, List<Integer> list , List<Long> toUniqueNos, PushMessageSendResultHandler pushMessageSendResultHandler) {
+    private void transponMessage(TerminalMessage terminalMessage, List<Integer> list , List<Long> toUniqueNos) {
         terminalMessage.messageBody.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
         File file = new File(terminalMessage.messagePath);
         MyTerminalFactory.getSDK().upload(list,toUniqueNos, file, terminalMessage, true);
     }
-
-    /**
-     * 转发结果回调
-     */
-    private PushMessageSendResultHandler pushMessageSendResultHandler = new PushMessageSendResultHandler() {
-        @Override
-        public void handler(boolean sendOK, String uuid) {
-            myHandler.post(() -> {
-                logger.info(getString(sendOK ? cn.vsx.vc.R.string.transpond_success : cn.vsx.vc.R.string.transpond_fail));
-                mTvUavChoice.setText(R.string.uav_choice);
-                mTvUavForward.setVisibility(View.GONE);
-//                ToastUtil.showToast(ChatBaseActivity.this, ChatBaseActivity.this.getString(sendOK ? cn.vsx.vc.R.string.transpond_success : cn.vsx.vc.R.string.transpond_fail));
-            });
-        }
-    };
 
     @Override
     public void onBackPressed(){

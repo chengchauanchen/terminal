@@ -145,7 +145,7 @@ public class UavAllFileFragment extends BaseFragment implements BaseQuickAdapter
                     fileBean.setWidth(bitStarFileRecord.getWidth());
                     fileBean.setDuration(bitStarFileRecord.getDuration());
                     fileBean.setName(bitStarFileRecord.getFileName());
-                    fileBean.setFileSize(bitStarFileRecord.getFileSize());
+                    fileBean.setFileSize(FileUtil.getFileSize(file));
                     fileBean.setIsVideo(TextUtils.equals(bitStarFileRecord.getFileType(),FileTransgerUtil.TYPE_VIDEO));
                     Message message = Message.obtain();
                     message.what = ADD_DATA;

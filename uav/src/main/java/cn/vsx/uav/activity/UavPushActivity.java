@@ -344,6 +344,8 @@ public class UavPushActivity extends BaseActivity{
 
     @Override
     public void doOtherDestroy(){
+        mapMinWebview.destroy();
+        mapMinWebview.destroy();
         pushService.finishVideoLive();
         AdaptScreenUtils.closeAdapt(getResources());
         removeListener();
