@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/select_member_item_height"
+    android:orientation="horizontal">
+
+    <RelativeLayout
+        android:id="@+id/is_pc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true">
+
+            <TextView
+                android:id="@+id/pc_tv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:textStyle="bold"
+                android:text="@string/text_pc"
+                android:textSize="@dimen/chat_text_size"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/select_member_tab_line_height"
+            android:layout_alignParentBottom="true"
+            android:background="@color/line_color" />
+
+        <View
+            android:id="@+id/pc_line"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/select_member_tab_line_height"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="@dimen/dp_18"
+            android:layout_marginRight="@dimen/dp_18"
+            android:background="@color/white"
+            android:visibility="visible" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/is_jingwutong"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true">
+
+            <TextView
+                android:id="@+id/jingwutong_tv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/text_police_service"
+                android:textSize="@dimen/chat_text_size"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/select_member_tab_line_height"
+            android:layout_alignParentBottom="true"
+            android:background="@color/line_color" />
+
+        <View
+            android:id="@+id/jingwutong_line"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/select_member_tab_line_height"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="@dimen/dp_18"
+            android:layout_marginRight="@dimen/dp_18"
+            android:background="@color/white"
+            android:visibility="invisible" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/is_uav"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true">
+
+            <TextView
+                android:id="@+id/uav_tv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/text_uav"
+                android:textSize="@dimen/chat_text_size"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/select_member_tab_line_height"
+            android:layout_alignParentBottom="true"
+            android:background="@color/line_color" />
+
+        <View
+            android:id="@+id/uav_line"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/select_member_tab_line_height"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="@dimen/dp_18"
+            android:layout_marginRight="@dimen/dp_18"
+            android:background="@color/white"
+            android:visibility="invisible" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/is_recoder"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true">
+
+            <TextView
+                android:id="@+id/recoder_tv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/text_recoder"
+                android:textSize="@dimen/chat_text_size"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/select_member_tab_line_height"
+            android:layout_alignParentBottom="true"
+            android:background="@color/line_color" />
+
+        <View
+            android:id="@+id/recoder_line"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/select_member_tab_line_height"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="@dimen/dp_18"
+            android:layout_marginRight="@dimen/dp_18"
+            android:background="@color/white"
+            android:visibility="invisible" />
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/is_lte"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerInParent="true">
+
+            <TextView
+                android:id="@+id/lte_tv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/text_lte"
+                android:textSize="@dimen/chat_text_size"
+                android:textColor="@color/white"/>
+        </LinearLayout>
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/select_member_tab_line_height"
+            android:layout_alignParentBottom="true"
+            android:background="@color/line_color" />
+
+        <View
+            android:id="@+id/lte_line"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/select_member_tab_line_height"
+            android:layout_alignParentBottom="true"
+            android:layout_marginLeft="@dimen/dp_18"
+            android:layout_marginRight="@dimen/dp_18"
+            android:background="@color/white"
+            android:visibility="invisible" />
+
+    </RelativeLayout>
+
+</LinearLayout>

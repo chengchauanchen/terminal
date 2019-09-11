@@ -41,6 +41,7 @@ import com.vsxin.terminalpad.mvp.contract.view.IRegisterView;
 import com.vsxin.terminalpad.mvp.ui.widget.ProgressDialog;
 import com.vsxin.terminalpad.mvp.ui.widget.XCDropDownListView;
 import com.vsxin.terminalpad.prompt.PromptManager;
+import com.vsxin.terminalpad.utils.InputMethodUtil;
 import com.vsxin.terminalpad.utils.NetworkUtil;
 import com.vsxin.terminalpad.utils.SetToListUtil;
 import com.vsxin.terminalpad.utils.SystemUtils;
@@ -103,10 +104,10 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
     private Handler myHandler = new Handler(Looper.getMainLooper());
 
     @BindView(R.id.ll_regist)//全布局
-     LinearLayout ll_regist;
+            LinearLayout ll_regist;
 
     @BindView(R.id.xcd_available_ip)//选择环境
-    XCDropDownListView xcDropDownListView;
+            XCDropDownListView xcDropDownListView;
 
     @BindView(R.id.btn_confirm)
     Button btn_confirm;//注册
@@ -155,6 +156,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
 
     public String selectIp;
     public String selectPort;
+
     @Override
     protected int getLayoutResID() {
         return R.layout.activity_register;
@@ -204,7 +206,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
                 }
             }
         });
-
+        xcDropDownListView.setOnShowPopWindowListener(() -> InputMethodUtil.hideInputMethod(RegisterActivity.this,et_invitation_code));
         if (myProgressDialog == null) {
             myProgressDialog = new ProgressDialog(RegisterActivity.this);
             myProgressDialog.setCancelable(false);
@@ -213,7 +215,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
         btn_confirm.setOnClickListener(v -> registerUser());
         apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
         //襄阳包就启动安全VPN服务
-        if(apkType.equals(AuthManagerTwo.XIANGYANGPOLICESTORE) || apkType.equals(AuthManagerTwo.XIANGYANG)){
+        if (apkType.equals(AuthManagerTwo.XIANGYANGPOLICESTORE) || apkType.equals(AuthManagerTwo.XIANGYANG)) {
             startVPNService();
         }
         ll_regist.setVisibility(View.GONE);
@@ -224,9 +226,10 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
      * 注册用户
      */
     private void registerUser() {
+        InputMethodUtil.hideInputMethod(RegisterActivity.this,et_invitation_code);
         String itemsData = xcDropDownListView.getItemsData();
 
-        if (TextUtils.equals(getString(R.string.text_add_unit),itemsData)) {
+        if (TextUtils.equals(getString(R.string.text_add_unit), itemsData)) {
             ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_please_select_unit));
             return;
         }
@@ -236,7 +239,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             String useDepartmentId = departmentId.getText().toString().trim();
             String useDepartmentName = departmentName.getText().toString().trim();
             String name = edtName.getText().toString().trim();
-            if(!checkName(name)){
+            if (!checkName(name)) {
                 return;
             }
             MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, useAccount);
@@ -247,19 +250,18 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 changeProgressMsg(getString(R.string.authing));
             }
-        } else if(ll_idcard_info.getVisibility() == View.VISIBLE){
+        } else if (ll_idcard_info.getVisibility() == View.VISIBLE) {
             //身份证号登陆
             String userID = et_idcard.getText().toString().trim();
             String userName = et_name.getText().toString().trim();
             MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, userID);
             MyTerminalFactory.getSDK().putParam(UrlParams.NAME, userName);
-            MyTerminalFactory.getSDK().putParam(UrlParams.XIANGYANG_STORE,true);
+            MyTerminalFactory.getSDK().putParam(UrlParams.XIANGYANG_STORE, true);
             int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 changeProgressMsg(getString(R.string.authing));
             }
-        }
-        else {
+        } else {
             //注册
             String useOrg = et_invitation_code.getText().toString().trim();
             String useName = et_user_name.getText().toString().trim();
@@ -374,9 +376,9 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             }
             changeProgressMsg(getString(R.string.text_get_info_now));
             //襄阳包就启动安全VPN服务
-            if(apkType.equals(AuthManagerTwo.XIANGYANGPOLICESTORE) || apkType.equals(AuthManagerTwo.XIANGYANG)){
+            if (apkType.equals(AuthManagerTwo.XIANGYANGPOLICESTORE) || apkType.equals(AuthManagerTwo.XIANGYANG)) {
                 startVPNService();
-            }else {
+            } else {
                 // todo authorize();//认证并获取user信息
                 authorize();//认证并获取user信息
                 requestDrawOverLays();
@@ -388,18 +390,18 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
         }
     }
 
-    private void startVPNService(){
-        try{
+    private void startVPNService() {
+        try {
             logger.info("开始绑定VPN");
             // 绑定安全VPN服务
             Intent intent = new Intent();
             intent.setAction(SEC_VPN_SERVICE_ACTION_NAME);
             //试一下sec.vpn这个包名
-            Intent intent1 = new Intent(createExplicitFromImplicitIntent(this,intent));
+            Intent intent1 = new Intent(createExplicitFromImplicitIntent(this, intent));
             startService(intent1);
             bindService(intent1, secVpnServiceConnection, BIND_AUTO_CREATE);
-        }catch(Exception e){
-            logger.error("绑定安全VPN服务失败："+e);
+        } catch (Exception e) {
+            logger.error("绑定安全VPN服务失败：" + e);
             e.printStackTrace();
         }
     }
@@ -407,19 +409,18 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
     private ISecVpnService secVpnService;
     private ServiceConnection secVpnServiceConnection = new ServiceConnection() {
         @Override
-        public void onServiceConnected(ComponentName name, IBinder service)
-        {
+        public void onServiceConnected(ComponentName name, IBinder service) {
             secVpnService = ISecVpnService.Stub.asInterface(service);
-            try{
+            try {
                 //获取身份证号
                 String userID = secVpnService.getTfInfo().getUserID();
                 String userName = secVpnService.getTfInfo().getUserName();
-                logger.info("获取到身份证号为："+userID+"------姓名："+userName);
+                logger.info("获取到身份证号为：" + userID + "------姓名：" + userName);
                 MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, userID);
                 MyTerminalFactory.getSDK().putParam(UrlParams.NAME, userName);
-                MyTerminalFactory.getSDK().putParam(UrlParams.XIANGYANG_STORE,true);
+                MyTerminalFactory.getSDK().putParam(UrlParams.XIANGYANG_STORE, true);
                 requestDrawOverLays();
-            }catch(RemoteException e){
+            } catch (RemoteException e) {
                 e.printStackTrace();
             }
         }
@@ -494,18 +495,18 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
 
     private void start() {
         String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
-        logger.info("apkType:"+apkType+"----deviceType:"+deviceType+"----versionName:"+PadApplication.getPadApplication().getVersionName());
+        logger.info("apkType:" + apkType + "----deviceType:" + deviceType + "----versionName:" + PadApplication.getPadApplication().getVersionName());
         //vpn没有启动时先启动VPN
-        try{
-            if(secVpnService == null){
+        try {
+            if (secVpnService == null) {
                 logger.info("vpn没有绑定成功");
             }
-            if(secVpnService != null && !secVpnService.sv_isStarted()){
+            if (secVpnService != null && !secVpnService.sv_isStarted()) {
                 secVpnService.sv_setServerAddr("20.50.0.11", "10009");
                 secVpnService.sv_start();
                 logger.info("vpn没有启动，开始启动vpn");
             }
-        }catch(RemoteException e){
+        } catch (RemoteException e) {
             e.printStackTrace();
         }
 
@@ -655,8 +656,8 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
         } else {
             TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, false);
             PadApplication.getPadApplication().setTerminalMemberType();
-            String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,AuthManagerTwo.POLICESTORE);
-            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)|| AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)){
+            String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
+            if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)) {
                 ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_please_open_wuhan_police_work_first));
             }
 
@@ -833,7 +834,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             logger.info("1.RegisterActivity---收到可用IP列表" + ",主线程" + SystemUtils.isMainThread());
             availableIPlist.clear();
             String tempName = xcDropDownListView.getText();
-            myHandler.post(()->{
+            myHandler.post(() -> {
                 if (availableIP.size() > 0) {
                     availableIPMap = availableIP;
                     availableIPlist.add(getString(R.string.text_selection_unit));
@@ -1288,15 +1289,15 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
         }
     }
 
-    private class IdcardLoginClickListener implements OnClickListener{
+    private class IdcardLoginClickListener implements OnClickListener {
         @Override
-        public void onClick(View v){
-            if(ll_idcard_info.getVisibility() == View.GONE){
+        public void onClick(View v) {
+            if (ll_idcard_info.getVisibility() == View.GONE) {
                 et_invitation_code.setVisibility(View.GONE);
                 et_user_name.setVisibility(View.GONE);
                 ll_idcard_info.setVisibility(View.VISIBLE);
                 btn_idcard_login.setText(R.string.text_invitation_code_regist);
-            }else {
+            } else {
                 et_invitation_code.setVisibility(View.VISIBLE);
                 et_user_name.setVisibility(View.VISIBLE);
                 ll_idcard_info.setVisibility(View.GONE);
@@ -1305,14 +1306,16 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             llreAuthInfo.setVisibility(View.GONE);
         }
     }
+
     /**
      * 检测姓名
+     *
      * @param name
      * @return
      */
     private boolean checkName(String name) {
         boolean result = false;
-        if (!TextUtils.isEmpty(name)&&name.length()>=2&&name.length()<=7) {
+        if (!TextUtils.isEmpty(name) && name.length() >= 2 && name.length() <= 7) {
             String pas = "^[a-zA-Z\\u4e00-\\u9fa5][a-zA-Z0-9\\u4e00-\\u9fa5]*$";
             Pattern p = Pattern.compile(pas);
             Matcher m = p.matcher(name);
@@ -1320,8 +1323,8 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
                 result = true;
             }
         }
-        if(!result){
-            ptt.terminalsdk.tools.ToastUtil.showToast(RegisterActivity.this,getString(R.string.text_input_name_regex));
+        if (!result) {
+            ptt.terminalsdk.tools.ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_input_name_regex));
         }
         return result;
     }

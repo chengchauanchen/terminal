@@ -77,6 +77,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandl
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseChangeTempGroupProcessingStateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -1005,6 +1006,10 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         }
     };
 
+    private ReceiveUVCCameraConnectChangeHandler receiveUVCCameraConnectChangeHandler = connected -> {
+        PadApplication.getPadApplication().usbAttached = connected;
+    };
+
     public void registReceiveHandler() {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
@@ -1021,6 +1026,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateMainFrgamentPTTButtonHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUVCCameraConnectChangeHandler);
     }
 
     public void unregistReceiveHandler() {
@@ -1039,6 +1045,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseChangeTempGroupProcessingStateHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateMainFrgamentPTTButtonHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUVCCameraConnectChangeHandler);
     }
 
     @Override

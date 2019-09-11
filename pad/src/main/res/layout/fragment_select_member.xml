@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/common_bg"
+    android:orientation="vertical">
+
+    <!--标题 -->
+    <include layout="@layout/layout_title_select_member" />
+    <!--分割线 -->
+    <include layout="@layout/layout_line" />
+    <!--已选择成员 -->
+    <include
+        layout="@layout/layout_select_member_selected"
+        android:visibility="gone"/>
+    <!--分割线 -->
+    <include
+        android:id="@+id/ll_select_line"
+        layout="@layout/layout_line"
+        android:visibility="gone"/>
+    <!--tab -->
+    <include layout="@layout/layout_select_member_tab" />
+    <!--&lt;!&ndash;分割线 &ndash;&gt;-->
+    <!--<include layout="@layout/layout_line" />-->
+    <!--&lt;!&ndash;tab &ndash;&gt;-->
+    <!--<include layout="@layout/layout_select_member_department" />-->
+    <!--分割线 -->
+    <include layout="@layout/layout_line" />
+
+    <FrameLayout
+        android:id="@+id/contacts_viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!--<FrameLayout-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent">-->
+
+        <!--<include-->
+            <!--android:id="@+id/ll_all_select"-->
+            <!--layout="@layout/layout_invite_member_content" />-->
+
+        <!--<include-->
+            <!--android:id="@+id/ll_all_selected"-->
+            <!--layout="@layout/layout_invite_member_selected"-->
+            <!--android:visibility="gone"/>-->
+
+    <!--</FrameLayout>-->
+
+</LinearLayout>

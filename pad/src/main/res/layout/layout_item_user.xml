@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_content"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/select_member_item_margin_horizontal"
+        android:paddingTop="@dimen/select_member_item_margin_vertical"
+        android:paddingRight="@dimen/select_member_item_margin_horizontal"
+        android:paddingBottom="@dimen/select_member_item_margin_vertical">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/shoutai_user_logo"
+                android:layout_width="@dimen/select_member_item_head_size"
+                android:layout_height="@dimen/select_member_item_head_size" />
+
+            <ImageView
+                android:id="@+id/recorder_binded_logo"
+                android:layout_width="31px"
+                android:layout_height="12px"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/ico_phone_recorder_binded"
+                android:visibility="gone" />
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/select_member_item_horizontal_other_interval"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/shoutai_tv_member_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="middle"
+                android:maxLength="8"
+                android:singleLine="true"
+                android:textColor="@color/white"
+                android:textSize="@dimen/chat_text_size"
+                android:textStyle="normal" />
+
+            <TextView
+                android:id="@+id/shoutai_tv_member_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="@dimen/chat_other_text_size"
+                android:textStyle="normal" />
+        </LinearLayout>
+
+        <CheckBox
+            android:id="@+id/checkbox"
+            android:layout_width="30px"
+            android:layout_height="30px"
+            android:background="@drawable/checkbox"
+            android:button="@null"
+            android:clickable="false"
+            android:focusable="false" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_half_one"
+        android:layout_marginLeft="@dimen/select_member_item_horizontal_interval"
+        android:layout_marginRight="@dimen/select_member_item_margin_horizontal"
+        android:background="@color/diver_bg" />
+</LinearLayout>

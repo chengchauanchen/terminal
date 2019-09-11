@@ -248,7 +248,7 @@ public class BitmapUtil {
 	 */
 	public static int getPadDeviceImageResourceByType(int type) {
 		if (type == TerminalMemberType.TERMINAL_PC.getCode()) {
-			return R.drawable.img_phone;
+			return R.drawable.img_pc;
 		} else if (type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()) {
 			return R.drawable.img_recorder;
 		} else if (type == TerminalMemberType.TERMINAL_UAV.getCode()) {

@@ -84,6 +84,7 @@
     <dimen name="chat_content_right">100px</dimen>
     <dimen name="chat_content_left">100px</dimen>
     <dimen name="chat_text_size">27px</dimen>
+    <dimen name="title_text_size">35px</dimen>
     <dimen name="chat_other_text_size">20px</dimen>
     <dimen name="chat_nick_margin_left">30px</dimen>
     <dimen name="chat_nick_text_size">20px</dimen>
@@ -121,5 +122,24 @@
     <dimen name="progress_dialog_size">200px</dimen>
     <dimen name="progress_dialog_text_size">40px</dimen>
     <dimen name="icon_ptt_size">50px</dimen>
+
+
+    <dimen name="select_member_content_margin">20px</dimen>
+    <dimen name="button_shape_stoke_width">2px</dimen>
+    <dimen name="line_height">1px</dimen>
+    <dimen name="arrow_size">50px</dimen>
+    <dimen name="select_member_item_height">80px</dimen>
+    <dimen name="select_member_tab_line_height">4px</dimen>
+    <dimen name="select_member_button_width">110px</dimen>
+    <dimen name="select_member_bg_round_size">5px</dimen>
+
+    <dimen name="select_member_item_margin_horizontal">25px</dimen>
+    <dimen name="select_member_item_margin_vertical">10px</dimen>
+    <dimen name="select_member_item_horizontal_interval">100px</dimen>
+    <dimen name="select_member_item_horizontal_other_interval">15px</dimen>
+    <dimen name="select_member_item_head_size">60px</dimen>
+
+
+
 
 </resources>

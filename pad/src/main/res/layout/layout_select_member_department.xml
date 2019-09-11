@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/select_member_item_height"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingLeft="@dimen/select_member_content_margin"
+    android:paddingRight="@dimen/select_member_content_margin">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/parent_recyclerview"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1" />
+
+    <ImageView
+        android:id="@+id/iv_search"
+        android:layout_width="@dimen/arrow_size"
+        android:layout_height="@dimen/arrow_size"
+        android:layout_marginLeft="@dimen/dp_10"
+        android:padding="10px"
+        android:src="@drawable/search" />
+
+</LinearLayout>

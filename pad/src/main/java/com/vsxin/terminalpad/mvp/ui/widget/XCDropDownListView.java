@@ -56,6 +56,9 @@ public class XCDropDownListView extends LinearLayout {
             @Override
             public void onClick(View v) {
                 if(popupWindow == null ){
+                    if(showPopWindowListener!=null){
+                        showPopWindowListener.onShowPopWindowListener();
+                    }
                     showPopWindow();
                 }else{
                     closePopWindow();
@@ -197,5 +200,13 @@ public class XCDropDownListView extends LinearLayout {
     private XCDropDownListViewClickListeren xcDropDownListViewClickListeren;
     public void setOnXCDropDownListViewClickListeren(XCDropDownListViewClickListeren xcDropDownListViewClickListeren){
         this.xcDropDownListViewClickListeren = xcDropDownListViewClickListeren;
+    }
+
+    public interface ShowPopWindowListener{
+        void onShowPopWindowListener();
+    }
+    private ShowPopWindowListener showPopWindowListener;
+    public void setOnShowPopWindowListener(ShowPopWindowListener showPopWindowListener){
+        this.showPopWindowListener = showPopWindowListener;
     }
 }

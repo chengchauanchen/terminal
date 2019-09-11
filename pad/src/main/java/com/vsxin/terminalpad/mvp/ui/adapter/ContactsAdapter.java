@@ -2,6 +2,7 @@ package com.vsxin.terminalpad.mvp.ui.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.OrientationHelper;
@@ -16,10 +17,9 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.adapter.BaseRecycleViewAdapter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.entity.CatalogBean;
+import com.vsxin.terminalpad.mvp.ui.fragment.SearchFragment;
 import com.vsxin.terminalpad.receiveHandler.ReceiverMonitorViewClickHandler;
-import com.vsxin.terminalpad.receiveHandler.ReceiverShowGroupFragmentHandler;
 import com.vsxin.terminalpad.utils.Constants;
-import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,9 +49,11 @@ public class ContactsAdapter extends BaseRecycleViewAdapter<GroupAndDepartment, 
     private ItemOnClickListener itemOnClickListener;
     private MonitorOnClickListener monitorOnClickListener;
     private long lastSearchTime;
+    private FragmentActivity activity;
 
-    public ContactsAdapter(Context mContext) {
+    public ContactsAdapter(Context mContext,FragmentActivity activity) {
         super(mContext);
+        this.activity = activity;
     }
 
 
@@ -122,7 +124,9 @@ public class ContactsAdapter extends BaseRecycleViewAdapter<GroupAndDepartment, 
                 if(System.currentTimeMillis() - lastSearchTime<1000){
                     return;
                 }
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowGroupFragmentHandler.class, null,false);
+                ArrayList<Integer>selectedMemberNos = new ArrayList<>();
+                SearchFragment.startSearchFragment(activity, Constants.TYPE_CONTRACT_GROUP, selectedMemberNos,R.id.fl_vsx);
+//                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowGroupFragmentHandler.class, null,false);
                 lastSearchTime = System.currentTimeMillis();
             });
 

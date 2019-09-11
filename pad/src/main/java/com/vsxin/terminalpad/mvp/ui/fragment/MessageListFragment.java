@@ -43,6 +43,15 @@ public class MessageListFragment extends RefreshRecycleViewFragment<TerminalMess
         refreshLayout.setEnableRefresh(false);
         refreshLayout.setEnableLoadMore(false);
         getPresenter().setAdapter(recyclerView, mSuperAdapter);
+        view.findViewById(R.id.iv_plus).setOnClickListener(v -> {
+//            Bundle bundle = new Bundle();
+//            bundle.putString(Constants.TYPE, Constants.PULL);
+//            bundle.putBoolean(Constants.PULLING, true);
+//            bundle.putSerializable(Constants.LIVE_MEMBER,new InviteMemberLiverMember(0,0));
+//            List<Integer> list = new ArrayList<>();
+//            bundle.putSerializable(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,new InviteMemberExceptList(list));
+//            SelectMemberFragment.startSelectMemberFragment(getActivity(),bundle);
+        });
     }
 
     @Override

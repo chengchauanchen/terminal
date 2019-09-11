@@ -79,7 +79,7 @@ public class ContactsFragment extends RefreshRecycleViewFragment<GroupAndDepartm
 
     @Override
     protected BaseRecycleViewAdapter createAdapter() {
-        contactsAdapter = new ContactsAdapter(getContext());
+        contactsAdapter = new ContactsAdapter(getContext(),getActivity());
         return contactsAdapter;
     }
 

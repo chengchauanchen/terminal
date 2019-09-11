@@ -627,4 +627,5 @@
     <string name="text_pull_data_error">播放数据错误</string>
     <string name="text_id_card_data_login">模拟身份证号登陆</string>
     <string name="text_input_id_card">请输入身份证号</string>
+    <string name="text_live_data_error">直播数据错误</string>
 </resources>

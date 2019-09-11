@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_item_search_contacts"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="@dimen/select_member_item_margin_horizontal"
+        android:paddingTop="@dimen/select_member_item_margin_vertical"
+        android:paddingRight="@dimen/select_member_item_margin_horizontal"
+        android:paddingBottom="@dimen/select_member_item_margin_vertical">
+
+        <ImageView
+            android:id="@+id/iv_member_portrait"
+            android:layout_width="@dimen/select_member_item_head_size"
+            android:layout_height="@dimen/select_member_item_head_size" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="@dimen/select_member_item_horizontal_other_interval"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_member_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLength="12"
+                android:textColor="@color/white"
+                android:textSize="@dimen/chat_text_size"
+                android:textStyle="normal" />
+
+            <TextView
+                android:id="@+id/tv_member_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="@dimen/chat_text_size"
+                android:textStyle="normal" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:id="@+id/shoutai_dial_to"
+            android:layout_width="@dimen/select_member_item_head_size"
+            android:layout_height="@dimen/select_member_item_head_size"
+            android:layout_marginRight="@dimen/select_member_item_horizontal_other_interval"
+            android:gravity="center"
+            android:padding="5px">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/tel" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/iv_search_msg"
+            android:layout_width="@dimen/select_member_item_head_size"
+            android:layout_height="@dimen/select_member_item_head_size"
+            android:layout_marginRight="@dimen/select_member_item_horizontal_other_interval"
+            android:gravity="center"
+            android:padding="5px">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/new_message_icon" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/shoutai_live_to"
+            android:layout_width="@dimen/select_member_item_head_size"
+            android:layout_height="@dimen/select_member_item_head_size"
+            android:layout_marginRight="@dimen/select_member_item_horizontal_other_interval"
+            android:gravity="center"
+            android:padding="5px">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/new_live_icon" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/iv_search_call"
+            android:layout_width="@dimen/select_member_item_head_size"
+            android:layout_height="@dimen/select_member_item_head_size"
+            android:layout_marginRight="@dimen/select_member_item_horizontal_other_interval"
+            android:gravity="center"
+            android:padding="5px">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/new_call_icon" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_search_add_remove"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/iv_search_add_remove"
+                android:layout_width="@dimen/select_member_item_head_size"
+                android:layout_height="@dimen/select_member_item_head_size"
+                android:padding="5px"
+                android:src="@drawable/popupwindow_add_contacts_gray" />
+
+            <TextView
+                android:id="@+id/me"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="@string/text_me"
+                android:textColor="@color/white"
+                android:textSize="@dimen/chat_text_size"
+                android:visibility="gone" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/lay_line"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_half_one"
+        android:layout_marginLeft="@dimen/select_member_item_margin_horizontal"
+        android:layout_marginRight="@dimen/select_member_item_margin_horizontal"
+        android:background="@color/diver_bg" />
+</LinearLayout>

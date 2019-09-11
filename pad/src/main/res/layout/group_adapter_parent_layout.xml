@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_title"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="60px"
+        android:layout_height="@dimen/select_member_item_height"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:paddingLeft="@dimen/dp_18"
-        android:paddingRight="@dimen/dp_10">
+        android:paddingLeft="@dimen/select_member_content_margin"
+        android:paddingRight="@dimen/select_member_content_margin">
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/parent_recyclerview"
@@ -20,15 +21,15 @@
 
         <ImageView
             android:id="@+id/iv_search"
-            android:layout_width="50px"
-            android:layout_height="50px"
-            android:layout_marginLeft="10px"
+            android:layout_width="@dimen/arrow_size"
+            android:layout_height="@dimen/arrow_size"
+            android:layout_marginLeft="@dimen/dp_10"
             android:padding="10px"
             android:src="@drawable/search" />
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_half_one"
-        android:background="@color/diver_bg" />
+        android:layout_height="@dimen/line_height"
+        android:background="@color/line_color" />
 </LinearLayout>

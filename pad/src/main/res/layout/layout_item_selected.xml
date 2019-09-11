@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
     android:orientation="vertical">
 
     <LinearLayout
@@ -17,26 +17,44 @@
 
 
         <ImageView
+            android:id="@+id/shoutai_user_logo"
             android:layout_width="@dimen/select_member_item_head_size"
-            android:layout_height="@dimen/select_member_item_head_size"
-            android:src="@drawable/ic_folder" />
+            android:layout_height="@dimen/select_member_item_head_size" />
 
-
-        <TextView
-            android:id="@+id/tv_department"
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginLeft="@dimen/select_member_item_horizontal_other_interval"
             android:layout_weight="1"
             android:gravity="center_vertical"
-            android:singleLine="true"
-            android:textColor="@color/white"
-            android:textSize="@dimen/chat_text_size" />
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/shoutai_tv_member_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:ellipsize="middle"
+                android:maxLength="8"
+                android:singleLine="true"
+                android:textColor="@color/white"
+                android:textSize="@dimen/chat_text_size"
+                android:textStyle="normal" />
+
+            <TextView
+                android:id="@+id/shoutai_tv_member_id"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="@dimen/chat_other_text_size"
+                android:textStyle="normal" />
+        </LinearLayout>
 
         <ImageView
-            android:layout_width="@dimen/dp_8"
-            android:layout_height="@dimen/dp_15"
-            android:src="@drawable/arrow_right" />
+            android:id="@+id/iv_delete"
+            android:layout_width="@dimen/select_member_item_head_size"
+            android:layout_height="@dimen/select_member_item_head_size"
+            android:padding="15px"
+            android:src="@drawable/icon_close_red" />
     </LinearLayout>
 
     <View
@@ -45,5 +63,4 @@
         android:layout_marginLeft="@dimen/select_member_item_horizontal_interval"
         android:layout_marginRight="@dimen/select_member_item_margin_horizontal"
         android:background="@color/diver_bg" />
-
 </LinearLayout>

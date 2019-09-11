@@ -445,7 +445,7 @@
     <color name="edittext_cursor">#0091ff</color>
     <color name="bottom_bg">#0f1c31</color>
     <color name="bottom_line">#040110</color>
-    <color name="common_bg">#0d182b</color>
+    <color name="common_bg">#374350</color>
     <color name="diver_bg">#4D000000</color>
     <color name="contacts_title_checked_text">#34B4FF</color>
     <color name="contacts_title_unchecked_text">#637e9e</color>
@@ -630,5 +630,14 @@
     <color name="regist_botton_color">#0091ff</color>
     <color name="regist_botton_press_color">#044C83</color>
     <color name="regist_ip_bg_color">#313131</color>
+
+
+    <color name="line_color">#262f38</color>
+    <color name="button_shape_stoke_blue_color">#0091ff</color>
+    <color name="button_shape_stoke_blue_press_color">#044C83</color>
+    <color name="button_shape_stoke_grey_color">#555f6a</color>
+    <color name="button_shape_stoke_grey_press_color">#3A3D41</color>
+
+
 
 </resources>

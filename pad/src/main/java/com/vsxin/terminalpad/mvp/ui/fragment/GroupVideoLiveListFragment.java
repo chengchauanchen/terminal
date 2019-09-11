@@ -13,10 +13,13 @@ import com.ixiaoma.xiaomabus.architecture.mvp.refresh.fragment.RefreshRecycleVie
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.presenter.GroupVideoLiveListPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IGroupVideoLiveList;
+import com.vsxin.terminalpad.mvp.entity.InviteMemberExceptList;
+import com.vsxin.terminalpad.mvp.entity.InviteMemberLiverMember;
 import com.vsxin.terminalpad.mvp.ui.adapter.GroupVideoLiveListAdapter;
 import com.vsxin.terminalpad.utils.Constants;
 import com.vsxin.terminalpad.utils.LiveUtil;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -194,7 +197,34 @@ public class GroupVideoLiveListFragment extends RefreshRecycleViewFragment<Termi
 
     @Override
     public void goToForward(TerminalMessage item) {
-
+        transponMessage = item;
+        if(isGroupVideoLiving){
+            if(item!=null&&item.messageBody!=null){
+                JSONObject messageBody = item.messageBody;
+                String liver = messageBody.getString(JsonParam.LIVER);
+                int liverNo = Util.stringToInt(messageBody.getString(JsonParam.LIVERNO));
+                long uniqueNo = 0L;
+                if (!TextUtils.isEmpty(liver)) {
+                    String[] split = liver.split("_");
+                    if(split.length>0){
+                        uniqueNo = Util.stringToLong(split[0]);
+                    }
+                }
+                Bundle bundle = new Bundle();
+                bundle.putString(Constants.TYPE, Constants.PULL);
+                bundle.putBoolean(Constants.PULLING, true);
+                bundle.putSerializable(Constants.LIVE_MEMBER,new InviteMemberLiverMember(liverNo,uniqueNo));
+                List<Integer> list = new ArrayList<>();
+                list.add((Integer)liverNo);
+                bundle.putSerializable(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,new InviteMemberExceptList(list));
+                SelectMemberFragment.startSelectMemberFragment(getActivity(),bundle);
+            }
+        }else{
+            showMsg("转发页面待设计!");
+//            Intent intent = new Intent(GroupVideoLiveListActivity.this, TransponActivity.class);
+//            intent.putExtra(Constants.TRANSPON_TYPE, Constants.TRANSPON_TYPE_ONE);
+//            startActivityForResult(intent, CODE_TRANSPON_REQUEST);
+        }
     }
 
     @Override
