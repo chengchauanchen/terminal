@@ -1127,7 +1127,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		public void onServiceDisconnected(ComponentName name) {
 			logger.error("MessageServiceon----onServiceDisconnected");
 			bindService = false;
-//			connectToServer();
+			connectToServer();
 		}
 	};
 	public ServiceConnection getMessageServiceConn(){
