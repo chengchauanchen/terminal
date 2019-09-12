@@ -87,6 +87,7 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
         });
     }
 
+    @Override
     public void registServerConnectionEstablishedHandler(final ServerConnectionEstablishedHandlerAidl handler){
         logger.info("MyNettyClient----registServerConnectionEstablishedHandler----"+handler);
         this.handler = handler;
@@ -148,10 +149,17 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     }
 
     @Override
-    public void stop(boolean isClearHandler) {
+    public void stop(boolean isClearHandler)  {
         super.stop();
+        try {
+            if(handler!=null){
+                handler.handler(false);
+            }
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
 //        for (ServerMessageReceivedHandlerAidl handler0  : serverMessageReceivedHandlerAidls) {
-////            handler0.handler(false);
+//            handler0.handler(false);
 //            logger.info("MyNettyClient---stop()--->"+false);
 //        }
         if(isClearHandler){

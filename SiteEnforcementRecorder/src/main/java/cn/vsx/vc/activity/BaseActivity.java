@@ -85,11 +85,11 @@ import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
+import cn.vsx.vc.receiver.NFCCardReader;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.BITDialogUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.NetworkUtil;
-import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.utils.VolumeToastUitl;
@@ -99,7 +99,7 @@ import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
 import ptt.terminalsdk.tools.DeleteData;
 import ptt.terminalsdk.tools.DialogUtil;
 
-public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack, Actions, NfcUtil.OnReadListener {
+public abstract class BaseActivity extends AppCompatActivity implements RecvCallBack, Actions {
 
     private AudioManager audioManager;
     protected HeadsetPlugReceiver headsetPlugReceiver;
@@ -125,8 +125,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
     private Timer timer = new Timer();
     private long currentTime;
-
-    private NfcUtil mNFCUtil;
 
     protected boolean onRecordAudioDenied;
     protected boolean onLocationDenied;
@@ -394,10 +392,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             regBroadcastRecv(ACT_SHOW_FULL_SCREEN, ACT_DISMISS_FULL_SCREEN, STOP_INDIVDUALCALL_SERVEIC);
             ActivityCollector.addActivity(this, getClass());
 
-            //nfc初始化
-            mNFCUtil = new NfcUtil(this);
-            mNFCUtil.setOnReadListener(this);
-
             initData();
             initView();
             initListener();
@@ -416,10 +410,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             if (wakeLockComing != null) {
                 wakeLockComing.acquire();
             }
-            //注册页面提示nfc是否打开
-//            if(BaseActivity.this instanceof RegistNFCActivity && mNFCUtil!=null){
-//                mNFCUtil.nfcCheck(this);
-//            }
         }
     }
 
@@ -481,33 +471,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     protected abstract void requestStartLive();
 
     protected abstract void finishVideoLive();
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        //nfc
-        if (mNFCUtil != null && mNFCUtil.getmNfcAdapter() != null) {
-            mNFCUtil.getmNfcAdapter().enableForegroundDispatch(this, mNFCUtil.getmPendingIntent(), mNFCUtil.getmIntentFilter(), mNFCUtil.getmTechList());
-            mNFCUtil.proccessIntent(getIntent());
-        }
-
-    }
-
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        if (mNFCUtil != null && mNFCUtil.getmNfcAdapter() != null) {
-            mNFCUtil.getmNfcAdapter().disableForegroundDispatch(this);
-        }
-    }
-
 
     @Override
     protected void onDestroy() {
@@ -1065,11 +1028,10 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
      * @param resultDescribe
      * @param bean
      */
-    @Override
     public void onReadResult(int resultCode, String readType, String resultDescribe, final RecorderBindTranslateBean bean) {
         ToastUtil.showToast(this, resultDescribe);
         switch (resultCode) {
-            case NfcUtil.RESULT_CODE_SUCCESS:
+            case NFCCardReader.RESULT_CODE_SUCCESS:
                 //切组，上报，录像
                 if (bean != null) {
                     logger.debug("onReadResult---bean:" + bean);

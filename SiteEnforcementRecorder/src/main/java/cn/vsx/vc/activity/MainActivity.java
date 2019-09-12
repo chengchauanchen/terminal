@@ -8,6 +8,7 @@ import android.content.ServiceConnection;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
+import android.nfc.NfcAdapter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
@@ -98,6 +99,7 @@ import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
+import cn.vsx.vc.receiver.NFCCardReader;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.APPStateUtil;
 import cn.vsx.vc.utils.Constants;
@@ -116,7 +118,7 @@ import ptt.terminalsdk.tools.SDCardUtil;
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 import static cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory.USB;
 
-public class MainActivity extends BaseActivity {
+public class MainActivity extends BaseActivity implements NFCCardReader.OnReadListener {
     @Bind(R.id.rl_login_bind)
     RelativeLayout rlLoginBind;
     @Bind(R.id.tv_login_info)
@@ -180,6 +182,10 @@ public class MainActivity extends BaseActivity {
     private int reAuthCount;
     ArrayList<String> availableIPlist = new ArrayList<>();
 
+    private NFCCardReader nfcCardReader = new NFCCardReader(this);
+    public static int READER_FLAGS =
+            NfcAdapter.FLAG_READER_NFC_A | NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK;
+
     @Override
     public int getLayoutResId() {
         return R.layout.activity_main;
@@ -235,6 +241,7 @@ public class MainActivity extends BaseActivity {
 //            width = 480;
 //            height = 640;
 //        }
+        enableReaderMode();
     }
 
     @Override
@@ -310,6 +317,14 @@ public class MainActivity extends BaseActivity {
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.cancelAll();
 
+        enableReaderMode();
+
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        disableReaderMode();
     }
 
     @Override
@@ -1524,5 +1539,21 @@ public class MainActivity extends BaseActivity {
         long time = TerminalFactory.getSDK().getParam(Params.RECORDER_AUTO_PUSH_INTERVAL_TIME, 0L);
         long result = System.currentTimeMillis() - time;
         return (isBinded&&(bean!=null&&!TextUtils.isEmpty(bean.getWarningId()))&&((time==0)||(time!=0)&&result<AUTO_PUSH_INTERVAL_TIME));
+    }
+
+    private void enableReaderMode() {
+        Log.i(TAG, "Enabling reader mode");
+        NfcAdapter nfc = NfcAdapter.getDefaultAdapter(this);
+        if (nfc != null) {
+            nfc.enableReaderMode(this, nfcCardReader, READER_FLAGS, null);
+        }
+    }
+
+    private void disableReaderMode() {
+        Log.i(TAG, "Disabling reader mode");
+        NfcAdapter nfc = NfcAdapter.getDefaultAdapter(this);
+        if (nfc != null) {
+            nfc.disableReaderMode(this);
+        }
     }
 }
