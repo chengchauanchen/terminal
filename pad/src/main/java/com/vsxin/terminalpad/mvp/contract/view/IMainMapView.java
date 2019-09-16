@@ -10,5 +10,5 @@ import com.ixiaoma.xiaomabus.architecture.mvp.IBaseView;
  */
 public interface IMainMapView extends IBaseView {
 
-    void drawMapLayer(String type,boolean isShow);
+    void drawMapLayer(int type, boolean isShow);
 }

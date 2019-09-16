@@ -28,8 +28,9 @@ public interface SendGroupCallListener {
 
     /**
      * 听
+     * @param memberName
      */
-    void listening();
+    void listening(String memberName);
 
     /**
      * 失败

@@ -12,7 +12,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -21,11 +20,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.webkit.WebChromeClient;
-import android.webkit.WebResourceRequest;
-import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.webkit.WebViewClient;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -35,16 +31,14 @@ import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpActivity;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.js.TerminalPadJs;
-import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.presenter.MainMapPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMainMapView;
 import com.vsxin.terminalpad.mvp.ui.fragment.LayerMapFragment;
-import com.vsxin.terminalpad.mvp.ui.fragment.MemberInfoFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.NoticeFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.PlayerFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.SmallMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.VsxFragment;
-import com.vsxin.terminalpad.receiveHandler.HistoryReportPlayerHandler;
+import com.vsxin.terminalpad.mvp.ui.widget.ArcgisWebView;
 import com.vsxin.terminalpad.receiveHandler.ReceiveUpdateMainFrgamentPTTButtonHandler;
 import com.vsxin.terminalpad.utils.HandleIdUtil;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
@@ -97,7 +91,7 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
 public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter> implements IMainMapView {
 
     @BindView(R.id.web_map)
-    WebView web_map;
+    ArcgisWebView web_map;
     @BindView(R.id.fl_layer_member_info)
     FrameLayout fl_layer_member_info;
     @BindView(R.id.rl_group_call)
@@ -170,8 +164,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
     private void reloadWebView() {
 //        web_map.reload(); //刷新
-        MemberInfoFragment.startMemberInfoFragment(this, null, MemberTypeEnum.PHONE);
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(HistoryReportPlayerHandler.class);
+        //TerminalInfoFragment.startMemberInfoFragment(this, null, MemberTypeEnum.PHONE);
+        //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(HistoryReportPlayerHandler.class);
     }
 
     /**
@@ -202,50 +196,19 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                     ToastUtil.showToast(MainMapActivity.this, "地图加载完成");
                 }
             }
-
-
         });
-
-        web_map.setWebViewClient(new WebViewClient() {
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return super.shouldOverrideUrlLoading(view, request);
-            }
-
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                getLogger().info("shouldOverrideUrlLoading=====request.getUrl()=" + url.toString());
-                return super.shouldOverrideUrlLoading(view, url);
-            }
-
-            @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
-                getLogger().info("shouldInterceptRequest=====request.getUrl()=" + url.toString());
-                return super.shouldInterceptRequest(view, url);
-            }
-
-            @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-            @Override
-            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
-                getLogger().info("shouldInterceptRequest=====request.getUrl()=" + request.getUrl().toString());
-                return super.shouldInterceptRequest(view, request);
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                //web_map.loadUrl(url);
-            }
-        });
-        // 将Android里面定义的类对象AndroidJs暴露给javascript
+        //将Android里面定义的类对象AndroidJs暴露给javascript
         web_map.addJavascriptInterface(new TerminalPadJs(this), "TerminalPadJs");
 
         String memberId = HandleIdUtil.handleId(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
         Long memberUniqueno = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
         int depId = MyTerminalFactory.getSDK().getParam(Params.DEP_ID, 0);
         String format = String.format("no=%s&code=%s&dept_id=%s", "88" + memberId, memberUniqueno, depId);
-        getLogger().info("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
-        web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
+//        getLogger().info("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
+//        web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
+        //李翔本机
+        getLogger().info("http://192.168.1.152:8080/#/");
+        web_map.loadUrl("http://192.168.1.152:8081/#/");
 //        web_map.loadUrl("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
     }
 
@@ -264,7 +227,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
         //表示使用SoundFragment 去替换之前的fragment
         fragmentTransaction.replace(R.id.fl_small_map, smallMapFragment);
-        fragmentTransaction.replace(R.id.fl_notice, noticeFragment);
+        //fragmentTransaction.replace(R.id.fl_notice, noticeFragment);
 
         fragmentTransaction.replace(R.id.fl_live, liveFragment);
 
@@ -276,12 +239,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     }
 
     @Override
-    public void drawMapLayer(String type, boolean isShow) {
-        web_map.loadUrl("javascript:abstractIndexObj.showResourceToMap('" + type + "'," + isShow + ")");
-    }
-
-    public void closeInfoBoxToMap(String no, String type) {
-        web_map.loadUrl("javascript:abstractIndexObj.closeInfoBoxToMap('" + no + "'," + "'" + type + "')");
+    public void drawMapLayer(int type, boolean isShow) {
+        web_map.loadUrl("javascript:chooseEquipment(" + type + "," + isShow + ")");
     }
 
     @Override

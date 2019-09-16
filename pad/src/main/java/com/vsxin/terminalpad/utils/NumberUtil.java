@@ -18,6 +18,21 @@ public class NumberUtil {
     }
 
     /**
+     * 将字符串转化为 Long
+     * @param numStr
+     * @return
+     */
+    public static Long strToLong(String numStr){
+        Long num = 0L;
+        try {
+            num = Long.parseLong(numStr);
+        }catch (Exception e){
+            num = 0L;
+        }
+        return num;
+    }
+
+    /**
      * 如果memberNo为6位，默认加"88"
      * @param memberNo
      * @return

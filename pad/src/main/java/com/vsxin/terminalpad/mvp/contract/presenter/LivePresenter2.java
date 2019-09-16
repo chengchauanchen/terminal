@@ -1,9 +1,10 @@
 package com.vsxin.terminalpad.mvp.contract.presenter;
 
 import android.content.Context;
-import android.graphics.SurfaceTexture;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSONObject;
@@ -11,17 +12,19 @@ import com.ixiaoma.xiaomabus.architecture.mvp.BasePresenter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveView2;
+import com.vsxin.terminalpad.mvp.entity.InviteMemberExceptList;
+import com.vsxin.terminalpad.mvp.entity.InviteMemberLiverMember;
+import com.vsxin.terminalpad.mvp.ui.fragment.SelectMemberFragment;
 import com.vsxin.terminalpad.prompt.PromptManager;
 import com.vsxin.terminalpad.receiveHandler.ReceiveGoWatchRTSPHandler;
-import com.vsxin.terminalpad.receiveHandler.ReceivePullLivingHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiveStartPullLiveHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverRequestLteBullHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
+import com.vsxin.terminalpad.utils.Constants;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
-import com.vsxin.terminalpad.utils.SensorUtil;
-import com.vsxin.terminalpad.utils.StateMachineUtils;
 
-import org.easydarwin.video.EasyRTSPClient;
+import java.util.ArrayList;
+import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageType;
@@ -35,12 +38,10 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerLiveTimeoutHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetRtspStreamUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberNotLivingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberStopWatchMessageHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -71,8 +72,8 @@ public class LivePresenter2 extends BasePresenter<ILiveView2> {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberNotLivingHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
+        //MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
+        //MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
 
         //拉取不控球视频
@@ -92,8 +93,8 @@ public class LivePresenter2 extends BasePresenter<ILiveView2> {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberNotLivingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
 
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
+        //MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
+        //MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
 
         //拉取不控球视频
@@ -231,14 +232,6 @@ public class LivePresenter2 extends BasePresenter<ILiveView2> {
         }
     }
 
-    /**
-     * 主动方请求组呼的消息
-     */
-    private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = (methodResult, resultDesc, groupId) -> {
-
-    };
-
-
 
     /**
      * 对方拒绝直播，通知界面关闭响铃页
@@ -272,16 +265,7 @@ public class LivePresenter2 extends BasePresenter<ILiveView2> {
         getView().stopPullLive();
     });
 
-    /**
-     * 主动方停止组呼
-     */
 
-    private ReceiveCeaseGroupCallConformationHander receiveCeaseGroupCallConformationHander = new ReceiveCeaseGroupCallConformationHander() {
-        @Override
-        public void handler(int resultCode, String resultDesc) {
-            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
-        }
-    };
 
     /**
      * 通知终端停止观看直播
@@ -305,6 +289,24 @@ public class LivePresenter2 extends BasePresenter<ILiveView2> {
                 getView().setMemberInfo(liveMember);//设置成员信息
                 getView().startPullLive(rtspUrl);//播放
             }, 1200);
+
+            //获取到流地址后，设置分享点击事件
+            getView().setShareLiveClickListener(v -> shareLive(liveMember));
         }
     };
+
+    /**
+     * 分享上报视频
+     * @param member
+     */
+    private void shareLive(Member member){
+        Bundle bundle = new Bundle();
+        bundle.putString(Constants.TYPE, Constants.PULL);
+        bundle.putBoolean(Constants.PULLING, true);
+        bundle.putSerializable(Constants.LIVE_MEMBER,new InviteMemberLiverMember(member.getNo(),member.getUniqueNo()));
+        List<Integer> list = new ArrayList<>();
+        list.add(member.getNo());
+        bundle.putSerializable(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,new InviteMemberExceptList(list));
+        SelectMemberFragment.startSelectMemberFragment((FragmentActivity)getContext(),bundle);
+    }
 }

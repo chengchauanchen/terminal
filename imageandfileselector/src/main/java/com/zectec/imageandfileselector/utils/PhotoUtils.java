@@ -58,7 +58,7 @@ public class PhotoUtils {
                 if (!Util.isEmpty(path) && path.endsWith("f")) {
                     Glide.with(context)
                             .load(new File(path))
-    //                        .asGif()
+                            //                        .asGif()
                             .fitCenter()
                             .override(480, 800)
                             .dontAnimate()
@@ -77,26 +77,32 @@ public class PhotoUtils {
 
     }
 
-    public void loadLocalResource(Context context,ImageView imageView){
+    public void loadLocalResource(Context context, ImageView imageView) {
         Glide.with(context)
                 .load(R.drawable.placeholder)
                 .asBitmap()
                 .into(imageView);
     }
 
-    public void loadNetBitmap (Context context, String path, ImageView imageView, TextView progress, ProgressBar progressBar) {
-        Glide.with(context)
-                .load(path)
-                .asBitmap()
-                .placeholder(R.drawable.default_image)//加载中显示的图片
-                .error(R.drawable.error_image)//加载失败时显示的图片
+    public void loadNetBitmap(Context context, String path, ImageView imageView, TextView progress, ProgressBar progressBar) {
+        try {
+            //遇到一种情况 path = http://192.168.1.100:4866/null
+            Glide.with(context)
+                    .load(path)
+                    .asBitmap()
+                    .placeholder(R.drawable.default_image)//加载中显示的图片
+                    .error(R.drawable.error_image)//加载失败时显示的图片
 //                .override(200,200)//设置最终显示的图片像素为80*80,注意:这个是像素,而不是控件的宽高
-                .into(imageView);
-        progress.setVisibility(View.GONE);
-        progressBar.setVisibility(View.GONE);
+                    .into(imageView);
+            progress.setVisibility(View.GONE);
+            progressBar.setVisibility(View.GONE);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public void loadNetBitmap2 (Context context, String path, ImageView imageView) {
+    public void loadNetBitmap2(Context context, String path, ImageView imageView) {
         Glide.with(context)
                 .load(path)
                 .asBitmap()
@@ -105,7 +111,7 @@ public class PhotoUtils {
                 .into(imageView);
     }
 
-    public static void loadNetBitmap(Context context, String path, ImageView imageView,int placeHolder) {
+    public static void loadNetBitmap(Context context, String path, ImageView imageView, int placeHolder) {
         Glide.with(context)
                 .load(path)
                 .asBitmap()
@@ -120,15 +126,14 @@ public class PhotoUtils {
         int photoNum = TerminalFactory.getSDK().getParam(Params.PHOTO_NUM, 0);
         photoNum++;
         TerminalFactory.getSDK().putParam(Params.PHOTO_NUM, photoNum);
-        File file = new File(TerminalFactory.getSDK().getPhotoRecordDirectory(), "image"+photoNum+".jpg");
+        File file = new File(TerminalFactory.getSDK().getPhotoRecordDirectory(), "image" + photoNum + ".jpg");
         file.getParentFile().mkdirs();
         Uri imageUri = null;
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             //兼容Android7.0
             intentCamera.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-            imageUri= FileProvider.getUriForFile(activity, getFileProviderName(activity), file);
-        }
-        else {
+            imageUri = FileProvider.getUriForFile(activity, getFileProviderName(activity), file);
+        } else {
             imageUri = Uri.fromFile(file);
         }
         intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
@@ -138,12 +143,14 @@ public class PhotoUtils {
         //getSDK().getPhotoRecordDirectory()
     }
 
-    public static String getFileProviderName(Context context){
-        return context.getPackageName()+".fileprovider";
+    public static String getFileProviderName(Context context) {
+        return context.getPackageName() + ".fileprovider";
     }
 
-    /**  将图片保存到本地，并在相册中显示 ***/
-    public static void savePhotoTo (final Context context, final File file) {
+    /**
+     * 将图片保存到本地，并在相册中显示
+     ***/
+    public static void savePhotoTo(final Context context, final File file) {
 
         TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
             @Override
@@ -160,8 +167,7 @@ public class PhotoUtils {
                     FileOutputStream fos = new FileOutputStream(file1);
                     if (photoName.endsWith("png")) {
                         boolean isSuccess = bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    }
-                    else {
+                    } else {
                         boolean isSuccess = bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
                     }
                     fos.flush();
@@ -171,9 +177,9 @@ public class PhotoUtils {
                     MediaStore.Images.Media.insertImage(context.getContentResolver(), file1.getAbsolutePath(), file1.getName(), "4GPTT");
                     Uri uri = Uri.fromFile(file1);
                     context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSaveImgHandler.class,true,"4GPTT");
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSaveImgHandler.class, true, "4GPTT");
                 } catch (Exception e) {
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSaveImgHandler.class,false,"4GPTT");
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSaveImgHandler.class, false, "4GPTT");
                     e.printStackTrace();
                 }
             }

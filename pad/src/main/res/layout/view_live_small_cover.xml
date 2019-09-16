@@ -9,7 +9,8 @@
         android:id="@+id/ll_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="30px"
+        android:layout_marginLeft="36px"
+        android:layout_marginTop="27px"
         android:gravity="center_vertical">
 
         <ImageView
@@ -21,7 +22,7 @@
             android:id="@+id/tv_member_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5px"
+            android:layout_marginLeft="11px"
             android:text="赵强"
             android:textColor="@color/white"
             android:textSize="27px" />
@@ -48,13 +49,15 @@
 
 
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/ll_group_call_member"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/ll_title"
+        android:layout_marginTop="27px"
         android:background="@drawable/live_member_goup_call_shape"
         android:gravity="center_vertical"
-        android:paddingLeft="30px"
+        android:paddingLeft="36px"
         android:paddingTop="10px"
         android:paddingRight="30px"
         android:paddingBottom="10px">
@@ -68,7 +71,7 @@
             android:id="@+id/tv_group_call_member"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5px"
+            android:layout_marginLeft="11px"
             android:text="赵强"
             android:textColor="@color/white"
             android:textSize="27px" />
@@ -76,7 +79,8 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@mipmap/ic_phone_layer" />
+            android:layout_marginLeft="11px"
+            android:src="@mipmap/self_speaking" />
     </LinearLayout>
 
 
@@ -84,27 +88,76 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_marginLeft="30px">
+        android:layout_marginLeft="30px"
+        android:layout_marginBottom="15px">
 
-        <com.vsxin.terminalpad.mvp.ui.widget.PttButton
-            android:id="@+id/ptt_group_call"
-            android:layout_width="76px"
-            android:layout_height="76px"
-            android:background="@mipmap/ic_ptt_normal" />
 
-        <ImageView
-            android:id="@+id/iv_share_live"
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="55px"
-            android:src="@mipmap/ic_share_live" />
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-        <ImageView
-            android:id="@+id/iv_full_screen"
+            <com.vsxin.terminalpad.mvp.ui.widget.PttButton
+                android:id="@+id/ptt_group_call"
+                android:layout_width="76px"
+                android:layout_height="76px"
+                android:background="@mipmap/ic_ptt_normal" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="11px"
+                android:gravity="center"
+                android:text="PTT"
+                android:textColor="@color/white"
+                android:textSize="18px" />
+        </LinearLayout>
+
+
+        <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="55px"
-            android:src="@mipmap/ic_max_screen" />
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/iv_share_live"
+                android:layout_width="76px"
+                android:layout_height="76px"
+                android:src="@mipmap/ic_share_live" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="11px"
+                android:gravity="center"
+                android:text="推送"
+                android:textColor="@color/white"
+                android:textSize="18px" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_gravity="center_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="55px"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/iv_full_screen"
+                android:layout_width="76px"
+                android:layout_height="76px"
+                android:src="@mipmap/ic_max_screen" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="11px"
+                android:gravity="center"
+                android:text="全屏"
+                android:textColor="@color/white"
+                android:textSize="18px" />
+        </LinearLayout>
 
     </LinearLayout>
 

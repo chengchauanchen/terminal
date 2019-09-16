@@ -10,5 +10,6 @@
     <color name="net_color">#bfbfbf</color>
 
     <color name="white">#ffffff</color>
+    <color name="white_60">#60ffffff</color>
     <color name="color_9B9FA4">#9B9FA4</color>
 </resources>

@@ -1,5 +1,6 @@
 package com.vsxin.terminalpad.mvp.ui.fragment;
 
+import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
@@ -9,11 +10,18 @@ import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpFragment;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.presenter.LivePresenter2;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveView2;
+import com.vsxin.terminalpad.mvp.entity.InviteMemberExceptList;
+import com.vsxin.terminalpad.mvp.entity.InviteMemberLiverMember;
 import com.vsxin.terminalpad.mvp.ui.widget.LiveFullScreenCoverView;
 import com.vsxin.terminalpad.mvp.ui.widget.LivePlayer;
 import com.vsxin.terminalpad.mvp.ui.widget.LiveSmallCoverView;
+import com.vsxin.terminalpad.prompt.PromptManager;
 import com.vsxin.terminalpad.receiveHandler.ReceiveStopPullLiveHandler;
+import com.vsxin.terminalpad.utils.Constants;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -57,9 +65,23 @@ public class LiveFragment2 extends MvpFragment<ILiveView2, LivePresenter2> imple
         liveSmallCoverView.setQuitLiveClickListener(v -> livePlayer.stopPullLive());
         //全屏
         liveSmallCoverView.setFullScreenClickListener(v -> livePlayer.enterFullScreen());
+
+        //退出全屏
+        liveFullScreenCoverView.setSmallScreenClickListener(v -> livePlayer.exitFullScreen());
         //关闭全屏
-        liveFullScreenCoverView.setQuitLiveClickListener(v -> livePlayer.exitFullScreen());
+        liveFullScreenCoverView.setQuitLiveClickListener(v -> livePlayer.stopPullLive());
     }
+
+    /**
+     * 设置分享监听
+     * @param shareLiveClickListener
+     */
+    @Override
+    public void setShareLiveClickListener(OnClickListener shareLiveClickListener){
+        liveSmallCoverView.setShareLiveClickListener(shareLiveClickListener);
+        liveFullScreenCoverView.setShareLiveClickListener(shareLiveClickListener);
+    }
+
 
     @Override
     public void startPullLive(String rtspURL) {
@@ -71,7 +93,10 @@ public class LiveFragment2 extends MvpFragment<ILiveView2, LivePresenter2> imple
     @Override
     public void stopPullLive() {
         if(livePlayer!=null && livePlayer.getLiveMode()!=LivePlayer.MODE_DEFAULT_LIVE){
+            getLogger().info("stopPullLive");
             livePlayer.stopPullLive();
+        }else{
+            PromptManager.getInstance().stopRing();
         }
     }
 

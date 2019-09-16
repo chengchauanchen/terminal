@@ -5,16 +5,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.View;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.BasePresenter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.App;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.view.IPttButton;
-import com.vsxin.terminalpad.mvp.ui.activity.MainMapActivity;
 import com.vsxin.terminalpad.mvp.ui.widget.SendGroupCallListener;
-import com.vsxin.terminalpad.utils.HandleIdUtil;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
 
 import java.lang.ref.WeakReference;
@@ -25,8 +22,6 @@ import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
-import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
-import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
@@ -37,13 +32,10 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConforma
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveStartCeaseGroupCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTalkWillTimeoutHandler;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.ToastUtil;
-
-import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 
 /**
  * @author qzw
@@ -112,7 +104,7 @@ public class PttButtonPresenter extends BasePresenter<IPttButton> {
             //Todo 1显示 当前组呼人
             //change2Listening();//听
             if (getSendGroupCallListener() != null) {
-                getSendGroupCallListener().listening();
+                getSendGroupCallListener().listening(memberName);
             }
         }
     });
@@ -176,7 +168,7 @@ public class PttButtonPresenter extends BasePresenter<IPttButton> {
                 } else {
                     //change2Listening();//听
                     if (getSendGroupCallListener() != null) {
-                        getSendGroupCallListener().listening();
+                        getSendGroupCallListener().listening(null);
                     }
                 }
             }
@@ -189,7 +181,7 @@ public class PttButtonPresenter extends BasePresenter<IPttButton> {
             } else {
                 //change2Listening();//听
                 if (getSendGroupCallListener() != null) {
-                    getSendGroupCallListener().listening();
+                    getSendGroupCallListener().listening(null);
                 }
             }
         }
@@ -264,7 +256,7 @@ public class PttButtonPresenter extends BasePresenter<IPttButton> {
         if (PadApplication.getPadApplication().getGroupListenenState() == GroupCallListenState.LISTENING) {
             //change2Listening();//听
             if (getSendGroupCallListener() != null) {
-                getSendGroupCallListener().listening();
+                getSendGroupCallListener().listening(null);
             }
         } else {
             //change2Silence();//沉默、无声状态

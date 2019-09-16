@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,9 +14,11 @@ import com.google.gson.Gson;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpFragment;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
-import com.vsxin.terminalpad.mvp.contract.presenter.MemberInfoPresenter;
-import com.vsxin.terminalpad.mvp.contract.view.IMemberInfoView;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
+import com.vsxin.terminalpad.mvp.contract.presenter.TerminalInfoPresenter;
+import com.vsxin.terminalpad.mvp.contract.view.ITerminalInfoView;
 import com.vsxin.terminalpad.mvp.entity.MemberInfoBean;
+import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 import com.vsxin.terminalpad.mvp.ui.activity.MainMapActivity;
 import com.vsxin.terminalpad.utils.TimeUtil;
 
@@ -29,13 +30,14 @@ import ptt.terminalsdk.tools.ToastUtil;
 /**
  * @author qzw
  * <p>
- * 地图气泡点击-成员详情页
+ * 地图气泡点击-单个终端详情页
  */
-public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoPresenter> implements IMemberInfoView {
+public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, TerminalInfoPresenter> implements ITerminalInfoView {
 
-    private static final String PARAM_JSON = "paramJson";
-    private static final String PARAM_ENUM = "paramEnum";
-    private static final String FRAGMENT_TAG = "memberInfo";
+    private static final String FRAGMENT_TAG = "TerminalInfoFragment";
+    public static final String TERMINAL = "TerminalBean";
+    public static final String TERMINAL_ENUM = "terminalEnum";
+
 
     @BindView(R.id.iv_close)
     ImageView iv_close;
@@ -66,51 +68,53 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
 
     @BindView(R.id.iv_message)
     ImageView iv_message;//个人聊天界面
-    private MemberInfoBean memberInfo;
-    private MemberTypeEnum memberTypeEnum;
+    //private MemberInfoBean memberInfo;
+    //private MemberTypeEnum memberTypeEnum;
 
     @Override
     protected int getLayoutResID() {
-        return R.layout.fragment_member_info;
+        return R.layout.fragment_terminal_info;
     }
 
     @Override
     protected void initViews(View view) {
         getPresenter().registReceiveHandler();
 
-        memberInfo = (MemberInfoBean) getArguments().getSerializable(PARAM_JSON);
-        memberTypeEnum = (MemberTypeEnum) getArguments().getSerializable(PARAM_ENUM);
-        if (memberTypeEnum != null) {
-            getLogger().info("memberInfo:" + new Gson().toJson(memberInfo));
-            getLogger().info(memberTypeEnum.toString());
-            iv_type_icon.setImageResource(memberTypeEnum.getResId());
-        }
-        if(memberInfo!=null){
-            bindMemberInfo(memberInfo);
-        }
+        TerminalBean terminalBean = (TerminalBean) getArguments().getSerializable(TERMINAL);
+        TerminalEnum terminalEnum = (TerminalEnum) getArguments().getSerializable(TERMINAL_ENUM);
 
-        iv_close.setOnClickListener(v -> closeMemberInfoFragment(getActivity()));
 
-        //发起个呼
-        iv_individual_call.setOnClickListener(v -> {
-            //手台个呼
-            if(memberTypeEnum!=null && memberTypeEnum==MemberTypeEnum.HAND){
-                getPresenter().startIndividualCall("72020850", TerminalMemberType.TERMINAL_PDT);
-            }else{
-                ToastUtil.showToast(getContext(),"暂不支持该设备个呼");
-            }
-        });
-
-        //上报视频
-        iv_push_video.setOnClickListener(v -> {
-            //pushVideo();
-            pullVideo();
-        });
-
-        //会话界面
-        iv_message.setOnClickListener(v -> {
-            //pullVideo();
-        });
+//        if (memberTypeEnum != null) {
+//            getLogger().info("memberInfo:" + new Gson().toJson(memberInfo));
+//            getLogger().info(memberTypeEnum.toString());
+//            iv_type_icon.setImageResource(memberTypeEnum.getResId());
+//        }
+//        if(memberInfo!=null){
+//            bindMemberInfo(memberInfo);
+//        }
+//
+//        iv_close.setOnClickListener(v -> closeMemberInfoFragment(getActivity()));
+//
+//        //发起个呼
+//        iv_individual_call.setOnClickListener(v -> {
+//            //手台个呼
+//            if(memberTypeEnum!=null && memberTypeEnum==MemberTypeEnum.HAND){
+//                getPresenter().startIndividualCall("72020850", TerminalMemberType.TERMINAL_PDT);
+//            }else{
+//                ToastUtil.showToast(getContext(),"暂不支持该设备个呼");
+//            }
+//        });
+//
+//        //上报视频
+//        iv_push_video.setOnClickListener(v -> {
+//            //pushVideo();
+//            pullVideo();
+//        });
+//
+//        //会话界面
+//        iv_message.setOnClickListener(v -> {
+//            //pullVideo();
+//        });
     }
 
     private void bindMemberInfo(MemberInfoBean memberInfo) {
@@ -126,7 +130,7 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
      * 自己主动请求别人上报
      */
     private void pullVideo() {
-        getPresenter().pullVideo(memberTypeEnum);
+        //getPresenter().pullVideo(memberTypeEnum);
     }
 
     /**
@@ -152,43 +156,59 @@ public class MemberInfoFragment extends MvpFragment<IMemberInfoView, MemberInfoP
     }
 
     @Override
-    public MemberInfoPresenter createPresenter() {
-        return new MemberInfoPresenter(getContext());
+    public TerminalInfoPresenter createPresenter() {
+        return new TerminalInfoPresenter(getContext());
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        getLogger().info("MemberInfoFragment 销毁了");
+        getLogger().info("TerminalInfoFragment 销毁了");
         getPresenter().unregistReceiveHandler();
-        if (memberInfo != null && memberTypeEnum != null) {
-            String no = memberInfo.getNo();
-            String type = memberTypeEnum.getType();
-            ((MainMapActivity) getContext()).closeInfoBoxToMap(no, type);
-        }
     }
 
     /**
-     * 开启 MemberInfoFragment
+     * 开启 TerminalInfoFragment
      *
      * @param fragmentActivity
      * @param json
      */
-    public static void startMemberInfoFragment(FragmentActivity fragmentActivity, MemberInfoBean json, MemberTypeEnum typeEnum) {
-        MemberInfoFragment memberInfoFragment = new MemberInfoFragment();
+//    public static void startTerminalInfoFragment(FragmentActivity fragmentActivity, MemberInfoBean json, MemberTypeEnum typeEnum) {
+//        TerminalInfoFragment terminalInfoFragment = new TerminalInfoFragment();
+//        Bundle args = new Bundle();
+//        args.putSerializable(PARAM_JSON, json);
+//        args.putSerializable(PARAM_ENUM,typeEnum);
+//        terminalInfoFragment.setArguments(args);
+//        FragmentManager supportFragmentManager = fragmentActivity.getSupportFragmentManager();
+//        //replace 会将上一个Fragment干掉
+//        FragmentTransaction fragmentTransaction = supportFragmentManager.beginTransaction();
+//        fragmentTransaction.replace(R.id.fl_layer_member_info, terminalInfoFragment,FRAGMENT_TAG);
+//        fragmentTransaction.commit();
+//    }
+
+
+    /**
+     * 开启 TerminalInfoFragment
+     *
+     * @param fragmentActivity
+     * @param terminalBean
+     * @param terminalEnum
+     */
+    public static void startTerminalInfoFragment(FragmentActivity fragmentActivity, TerminalBean terminalBean, TerminalEnum terminalEnum) {
+        TerminalInfoFragment terminalInfoFragment = new TerminalInfoFragment();
         Bundle args = new Bundle();
-        args.putSerializable(PARAM_JSON, json);
-        args.putSerializable(PARAM_ENUM,typeEnum);
-        memberInfoFragment.setArguments(args);
+        args.putSerializable(TERMINAL, terminalBean);
+        args.putSerializable(TERMINAL_ENUM,terminalEnum);
+        terminalInfoFragment.setArguments(args);
         FragmentManager supportFragmentManager = fragmentActivity.getSupportFragmentManager();
         //replace 会将上一个Fragment干掉
         FragmentTransaction fragmentTransaction = supportFragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fl_layer_member_info, memberInfoFragment,FRAGMENT_TAG);
+        fragmentTransaction.replace(R.id.fl_layer_member_info, terminalInfoFragment,FRAGMENT_TAG);
         fragmentTransaction.commit();
     }
 
     /**
-     * 关闭 MemberInfoFragment
+     * 关闭 TerminalInfoFragment
      * @param fragmentActivity
      */
     public static void closeMemberInfoFragment(FragmentActivity fragmentActivity){

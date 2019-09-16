@@ -71,7 +71,7 @@ public class HalfDuplexIndividualCallFragment extends MvpFragment<IHalfDuplexInd
     Unbinder unbinder;
 
     private static final int AUTOHANGUP = 0;
-    private static final String HDICFragment_TAG = "halfDuplexIndividualCallFragment";
+    public static final String HDICFragment_TAG = "halfDuplexIndividualCallFragment";
     private boolean isPress = false;
 
 
@@ -381,7 +381,7 @@ public class HalfDuplexIndividualCallFragment extends MvpFragment<IHalfDuplexInd
     @Override
     public void onDestroy() {
         super.onDestroy();
-        getLogger().info("MemberInfoFragment 销毁了");
+        getLogger().info("TerminalInfoFragment 销毁了");
         mHandler.removeCallbacksAndMessages(null);
         getPresenter().unregistReceiveHandler();
     }

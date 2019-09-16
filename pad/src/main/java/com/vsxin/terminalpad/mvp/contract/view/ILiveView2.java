@@ -1,6 +1,8 @@
 package com.vsxin.terminalpad.mvp.contract.view;
 
 
+import android.view.View.OnClickListener;
+
 import com.ixiaoma.xiaomabus.architecture.mvp.IBaseView;
 
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -15,4 +17,6 @@ public interface ILiveView2 extends IBaseView {
     void startPullLive(String rtspURL);
 
     void setMemberInfo(Member member);
+
+    void setShareLiveClickListener(OnClickListener shareLiveClickListener);
 }

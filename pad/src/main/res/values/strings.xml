@@ -212,6 +212,7 @@
     <string name="text_call_answer">接听</string>
     <string name="text_press_ptt_and_speaking">按住PTT说话</string>
     <string name="text_calling">正在拨号...</string>
+    <string name="text_calling_2">正在拨号</string>
     <string name="text_on_the_phone">正在通话...</string>
     <string name="text_the_other_party_has_refused">对方已拒绝</string>
     <string name="text_the_other_party_has_refus">对方拒绝</string>

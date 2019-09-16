@@ -248,17 +248,17 @@ public class BitmapUtil {
 	 */
 	public static int getPadDeviceImageResourceByType(int type) {
 		if (type == TerminalMemberType.TERMINAL_PC.getCode()) {
-			return R.drawable.img_pc;
+			return R.mipmap.img_phone;
 		} else if (type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()) {
-			return R.drawable.img_recorder;
+			return R.mipmap.img_recorder;
 		} else if (type == TerminalMemberType.TERMINAL_UAV.getCode()) {
-			return R.drawable.img_uav;
+			return R.mipmap.img_uav;
 		} else if (type == TerminalMemberType.TERMINAL_HDMI.getCode()) {
-			return R.drawable.img_phone;
+			return R.mipmap.img_phone;
 		} else if (type == TerminalMemberType.TERMINAL_LTE.getCode()) {
-			return R.drawable.img_lte;
+			return R.mipmap.img_lte;
 		} else {
-			return R.drawable.img_phone;
+			return R.mipmap.img_phone;
 		}
 	}
 
@@ -279,7 +279,7 @@ public class BitmapUtil {
 		if(ApkUtil.isAnjian()){
 			return R.drawable.user_photo_anjian;
 		}
-		return R.drawable.img_police;
+		return R.mipmap.img_police;
 	}
 
 	/**

@@ -7,8 +7,9 @@ import android.content.Context;
 import com.ixiaoma.xiaomabus.architecture.mvp.BasePresenter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
+import com.vsxin.terminalpad.manager.PullLiveManager;
 import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
-import com.vsxin.terminalpad.mvp.contract.view.IMemberInfoView;
+import com.vsxin.terminalpad.mvp.contract.view.ITerminalInfoView;
 import com.vsxin.terminalpad.mvp.ui.widget.ChooseDevicesDialog;
 import com.vsxin.terminalpad.prompt.PromptManager;
 import com.vsxin.terminalpad.receiveHandler.ReceiverActivePushVideoHandler;
@@ -41,12 +42,12 @@ import ptt.terminalsdk.tools.ToastUtil;
 /**
  * Created by PC on 2018/11/1.
  * <p>
- * 地图气泡点击-成员详情页
+ * 地图气泡点击-单个终端详情页
  */
 
-public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
+public class TerminalInfoPresenter extends BasePresenter<ITerminalInfoView> {
 
-    public MemberInfoPresenter(Context mContext) {
+    public TerminalInfoPresenter(Context mContext) {
         super(mContext);
     }
 
@@ -215,88 +216,4 @@ public class MemberInfoPresenter extends BasePresenter<IMemberInfoView> {
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, pushInviteMember, false);
         }
     }
-
-    /****************************************自己主动请求他人上报视频，自己观看**************************************************/
-
-    /**
-     * 自己主动请求他人上报视频，给我看
-     */
-    public void pullVideo(MemberTypeEnum type) {
-        if (!PadApplication.getPadApplication().isPttPress) {
-            if (!CheckMyPermission.selfPermissionGranted(getContext(), Manifest.permission.RECORD_AUDIO)) {//没有录音权限
-                CheckMyPermission.permissionPrompt((Activity) getContext(), Manifest.permission.RECORD_AUDIO);
-                return;
-            }
-
-            if (!CheckMyPermission.selfPermissionGranted(getContext(), Manifest.permission.CAMERA)) {//没有录音权限
-                CheckMyPermission.permissionPrompt((Activity) getContext(), Manifest.permission.CAMERA);
-                return;
-            }
-            //判断终端权限
-            if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())) {
-                ToastUtil.showToast(getContext(), getContext().getString(R.string.text_has_no_image_request_authority));
-                return;
-            }
-
-            if (MemberTypeEnum.PHONE == type) {//ok  警务通拉视频掩饰20秒左右,才有视频过来
-                //警务通
-//                String number = NumberUtil.checkMemberNo("011075");
-//                int no = NumberUtil.strToInt(number);
-//                if(no==0){
-//                    ToastUtil.showToast(getContext(), "警员编号异常");
-//                    return;
-//                }
-//                pullVideoForMemberNo(88011075, TerminalMemberType.TERMINAL_PHONE);
-                pullVideoForMemberNo(88020446, TerminalMemberType.TERMINAL_PHONE);
-            } else if (MemberTypeEnum.VIDEO == type) {//ok
-                //执法记录仪
-                pullVideoForMemberNo(77000000, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA);
-            }else if (MemberTypeEnum.UAV == type) {//ok
-                //无人机
-                pullVideoForMemberNo(88000369, TerminalMemberType.TERMINAL_UAV);
-            }  else if (MemberTypeEnum.LTE == type) {
-                //LTE rtsp://59.32.1.174:554/DevAor=34020100001320000021
-                String rtsp = "rtsp://192.168.20.188:554/DevAor=34020100001320000021";
-                pullVideoForRtspUrl(rtsp);
-//                pullVideoForMemberNo(10000369, TerminalMemberType.TERMINAL_LTE);
-            } else if (MemberTypeEnum.BALL == type) {
-                //不控球  rtsp://59.32.1.174:554/DevAor=32010000001320000114
-                String rtsp = "rtsp://192.168.20.188:554/DevAor=32010000001320000114";
-                pullVideoForRtspUrl(rtsp);
-//                pullVideoForMemberNo(10000368, TerminalMemberType.TERMINAL_LTE);
-            } else {
-                ToastUtil.showToast(getContext(), "暂不支持拉取该设备视频");
-            }
-        }
-    }
-
-    /**
-     * 通过memberNo 拉取视频 主要用于 警务通，执法记录仪
-     *
-     * @param memberNo
-     * @param type
-     */
-    private void pullVideoForMemberNo(int memberNo, TerminalMemberType type) {
-        TerminalFactory.getSDK().getThreadPool().execute(() -> {
-            Account account = DataUtil.getAccountByMemberNo(memberNo, true);
-            Member member = MemberUtil.getMemberForTerminalMemberType(account, type);
-            //拉取账号的警务通终端
-            if (member == null) {
-                ToastUtil.showToast(getContext(), getContext().getString(R.string.text_has_no_image_request_authority));
-                return;
-            }
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
-        });
-    }
-
-    /**
-     * 通过memberNo 拉取视频 主要用于 不控球
-     * @param rtspUrl
-     */
-    private void pullVideoForRtspUrl(String rtspUrl) {
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestLteBullHandler.class, rtspUrl);
-    }
-
-    /*******************************************别人请求我上报视频************************************************/
-
 }

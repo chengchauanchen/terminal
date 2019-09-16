@@ -31,6 +31,16 @@ public class MemberInfoBean extends BaseBean{
     private String imisNo;
     private String gUniqueNo;
 
+    private int type2;
+
+    public int getType2() {
+        return type2;
+    }
+
+    public void setType2(int type2) {
+        this.type2 = type2;
+    }
+
     public String getNo() {
         return no;
     }

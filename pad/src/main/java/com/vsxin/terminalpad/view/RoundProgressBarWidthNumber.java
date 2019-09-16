@@ -123,7 +123,7 @@ public class RoundProgressBarWidthNumber extends SkinCompatProgressBar  implemen
         } finally {
             a.recycle();
         }
-        applySkin();
+        //applySkin();
 
         mTextSize = sp2px(30);
 

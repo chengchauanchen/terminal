@@ -35,7 +35,7 @@ public class LayerMapPresenter extends RefreshPresenter<MemberTypeEnum, ILayerMa
         super(mContext);
     }
 
-    public void drawMapLayer(String layerType,boolean isShow){
+    public void drawMapLayer(int layerType,boolean isShow){
         ((MainMapActivity)getContext()).drawMapLayer(layerType,isShow);
     }
 

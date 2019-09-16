@@ -3,7 +3,6 @@ package com.vsxin.terminalpad.mvp.contract.presenter;
 import android.content.Context;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.BasePresenter;
-import com.vsxin.terminalpad.mvp.contract.view.IMemberInfoView;
 import com.vsxin.terminalpad.mvp.contract.view.IMemberListView;
 
 /**

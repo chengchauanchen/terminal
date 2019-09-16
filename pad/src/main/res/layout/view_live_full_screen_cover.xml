@@ -5,11 +5,171 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <RelativeLayout
+        android:id="@+id/ll_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="36px"
+        android:layout_marginTop="27px">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@mipmap/ic_phone_layer" />
+
+            <TextView
+                android:id="@+id/tv_member_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="11px"
+                android:text="赵强"
+                android:textColor="@color/white"
+                android:textSize="36px" />
+
+            <TextView
+                android:id="@+id/tv_member_no"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5px"
+                android:text="771245"
+                android:textColor="@color/white"
+                android:textSize="36px" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tv_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="20px"
+            android:text="00:12:25"
+            android:textColor="@color/white"
+            android:textSize="36px" />
+
+    </RelativeLayout>
+
+
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/ll_group_call_member"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/ll_title"
+        android:layout_marginTop="235px"
+        android:background="@drawable/live_member_goup_call_shape"
+        android:gravity="center_vertical"
+        android:paddingLeft="65px"
+        android:paddingTop="18px"
+        android:paddingRight="30px"
+        android:paddingBottom="18px">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@mipmap/ic_phone_layer" />
+
+        <TextView
+            android:id="@+id/tv_group_call_member"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="11px"
+            android:text="赵强"
+            android:textColor="@color/white"
+            android:textSize="36px" />
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="11px"
+            android:src="@mipmap/self_speaking" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="60px"
+        android:layout_marginBottom="63px">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <com.vsxin.terminalpad.mvp.ui.widget.PttButton
+                android:id="@+id/ptt_group_call"
+                android:layout_width="91px"
+                android:layout_height="91px"
+                android:background="@mipmap/ic_ptt_normal" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="11px"
+                android:gravity="center"
+                android:text="PTT"
+                android:textColor="@color/white"
+                android:textSize="18px" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="55px"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/iv_share_live"
+                android:layout_width="91px"
+                android:layout_height="91px"
+                android:src="@mipmap/ic_share_live" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="11px"
+                android:gravity="center"
+                android:text="推送"
+                android:textColor="@color/white"
+                android:textSize="18px" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="55px"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/iv_full_screen"
+                android:layout_width="91px"
+                android:layout_height="91px"
+                android:src="@mipmap/ic_small_screen" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="11px"
+                android:gravity="center"
+                android:text="缩小窗口"
+                android:textColor="@color/white"
+                android:textSize="18px" />
+        </LinearLayout>
+
+
+    </LinearLayout>
+
     <ImageView
         android:id="@+id/iv_break_live"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:src="@mipmap/ic_break_live" />
-
 </RelativeLayout>

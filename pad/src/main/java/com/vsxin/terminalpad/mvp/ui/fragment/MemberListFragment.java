@@ -61,7 +61,7 @@ public class MemberListFragment extends MvpFragment<IMemberListView, MemberListP
     }
 
     /**
-     * 开启 MemberInfoFragment
+     * 开启 TerminalInfoFragment
      * @param fragmentActivity
      * @param json
      */
@@ -78,7 +78,7 @@ public class MemberListFragment extends MvpFragment<IMemberListView, MemberListP
     }
 
     /**
-     * 关闭 MemberInfoFragment
+     * 关闭 TerminalInfoFragment
      * @param fragmentActivity
      */
     public static void closeMemberInfoFragment(FragmentActivity fragmentActivity){

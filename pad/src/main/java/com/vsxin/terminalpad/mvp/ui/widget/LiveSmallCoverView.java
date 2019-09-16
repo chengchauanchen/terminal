@@ -1,11 +1,11 @@
 package com.vsxin.terminalpad.mvp.ui.widget;
 
 import android.content.Context;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
-import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.view.layout.MvpLinearLayout;
@@ -25,6 +25,7 @@ public class LiveSmallCoverView extends MvpLinearLayout<ILiveSmallCoverView, Liv
     private TextView tv_member_no;
     private TextView tv_time;
     private TextView tv_group_call_member;
+    private LinearLayout ll_group_call_member;
     private PttButton ptt_group_call;
     private ImageView iv_share_live;
     private ImageView iv_full_screen;
@@ -56,6 +57,7 @@ public class LiveSmallCoverView extends MvpLinearLayout<ILiveSmallCoverView, Liv
         tv_time = findViewById(R.id.tv_time);
 
         //当前组呼人名称
+        ll_group_call_member = findViewById(R.id.ll_group_call_member);
         tv_group_call_member = findViewById(R.id.tv_group_call_member);
 
         //组呼按钮
@@ -112,13 +114,18 @@ public class LiveSmallCoverView extends MvpLinearLayout<ILiveSmallCoverView, Liv
             }
 
             @Override
-            public void silence() {
+            public void silence() {//结束
                 ptt_group_call.setBackground(ResUtil.getDrawable(getContext(),R.mipmap.ic_ptt_normal));
+                showCurrentGroupCall(false);
             }
 
             @Override
-            public void listening() {
+            public void listening(String memberName) {//听
                 ptt_group_call.setBackground(ResUtil.getDrawable(getContext(),R.mipmap.ic_ptt_other));
+                if(!TextUtils.isEmpty(memberName)){
+                    showCurrentGroupCall(true);
+                    setCurrentGroupCallMember(memberName);
+                }
             }
 
             @Override
@@ -144,6 +151,14 @@ public class LiveSmallCoverView extends MvpLinearLayout<ILiveSmallCoverView, Liv
      */
     public void setCurrentGroupCallMember(String name){
         tv_group_call_member.setText(name);
+    }
+
+    /**
+     * 是否显示当前组呼人
+     * @param isShow
+     */
+    private void showCurrentGroupCall(Boolean isShow){
+        ll_group_call_member.setVisibility(isShow?VISIBLE:GONE);
     }
 
     /**

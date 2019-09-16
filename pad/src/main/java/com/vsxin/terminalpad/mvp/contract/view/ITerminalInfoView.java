@@ -8,10 +8,10 @@ import cn.vsx.hamster.terminalsdk.model.Account;
 /**
  * @author qzw
  *
- * 地图聚合气泡点击-成员列表页
+ * 地图聚合气泡点击-单个终端详情页
  */
 
-public interface IMemberInfoView extends IBaseView {
+public interface ITerminalInfoView extends IBaseView {
 
     void showChooseDevicesDialog(Account account, int type);
 

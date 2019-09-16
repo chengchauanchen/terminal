@@ -1286,7 +1286,7 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
     private void handlerAvatar(TerminalMessage terminalMessage, int position, ChatViewHolder holder) {
         if(activity!=null&&!activity.isDestroyed()){
             Glide.with(activity)
-                    .load(R.drawable.img_police)
+                    .load(R.mipmap.img_police)
 //                    .asBitmap()
 //                    .placeholder(com.zectec.imageandfileselector.R.drawable.user_photo)//加载中显示的图片
 //                    .error(com.zectec.imageandfileselector.R.drawable.user_photo)//加载失败时显示的图片
