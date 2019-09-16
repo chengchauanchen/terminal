@@ -1152,6 +1152,16 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		return account;
 	}
 
+	@Override
+	public String getUuid(){
+		String uuid = Util.md5(newUuid());
+		if(Util.isEmpty(uuid)){
+			throw new IllegalArgumentException("newUuid()的返回值不能为null或空字符串");
+		}
+		logger.info("uuid是："+uuid);
+		return uuid;
+	}
+
 	@SuppressLint("MissingPermission")
 	@Override
 	protected String newUuid() {
