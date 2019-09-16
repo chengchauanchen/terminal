@@ -203,7 +203,7 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
         FragmentManager supportFragmentManager = fragmentActivity.getSupportFragmentManager();
         //replace 会将上一个Fragment干掉
         FragmentTransaction fragmentTransaction = supportFragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fl_layer_member_info, memberInfoFragment,FRAGMENT_TAG);
+        fragmentTransaction.replace(R.id.fl_layer_member_info, terminalInfoFragment,FRAGMENT_TAG);
         fragmentTransaction.commit();
     }
 
