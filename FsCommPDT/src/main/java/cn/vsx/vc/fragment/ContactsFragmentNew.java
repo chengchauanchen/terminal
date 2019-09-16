@@ -291,7 +291,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     };
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
         @Override
-        public void handler(int memberId, String memberName, int groupId, final String groupName, CallMode currentCallMode) {
+        public void handler(int memberId, String memberName, int groupId, String groupName,CallMode currentCallMode, long uniqueNo) {
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 mHandler.post(() -> {
                     setting_group_name.setText(memberName);

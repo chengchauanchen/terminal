@@ -862,7 +862,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     /**
      * 被动方组呼来了
      */
-    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, version, currentCallMode) -> {
+    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, version, currentCallMode,uniqueNo) -> {
         logger.info("触发了被动方组呼来了receiveGroupCallIncommingHandler:" + currentCallMode);
         speakingId = groupId;
         speakingName = memberName;

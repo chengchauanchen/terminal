@@ -161,8 +161,7 @@ public class LockScreenActivity extends BaseActivity {
      */
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
         @Override
-        public void handler(int memberId, final String memberName, final int groupId,
-                            String version, CallMode currentCallMode) {
+        public void handler(int memberId, String memberName, int groupId, String groupName,CallMode currentCallMode, long uniqueNo) {
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 mHandler.post(() -> {
                     change2Listening();

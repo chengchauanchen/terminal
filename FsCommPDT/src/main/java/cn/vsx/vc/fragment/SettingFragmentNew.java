@@ -362,7 +362,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
     };
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
         @Override
-        public void handler(int memberId, String memberName, final int groupId, String groupName, CallMode currentCallMode) {
+        public void handler(int memberId, String memberName, int groupId, String groupName,CallMode currentCallMode, long uniqueNo) {
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 mHandler.post(() -> {
                     icon_laba.setVisibility(View.VISIBLE);

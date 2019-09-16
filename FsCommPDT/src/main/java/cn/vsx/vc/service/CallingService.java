@@ -324,7 +324,7 @@ public class CallingService extends BaseService{
         return true;
     };
 
-    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
+    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode,uniqueNo) -> {
         //如果在半双工个呼中来组呼，就是对方在说话
         Log.e("IndividualCallService", "收到组呼：callType:" + individualCallType);
         if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){

@@ -331,7 +331,7 @@ public class PhoneAssistantManageActivity extends BaseActivity implements View.O
     };
 
     //被动方组呼来了
-    private ReceiveGroupCallIncommingHandler mReceiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
+    private ReceiveGroupCallIncommingHandler mReceiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode,uniqueNo) -> {
         logger.info("被动方组呼来了ReceiveGroupCallIncommingHandler");
 
                 if (MediaManager.getMediaPlayer() != null) {

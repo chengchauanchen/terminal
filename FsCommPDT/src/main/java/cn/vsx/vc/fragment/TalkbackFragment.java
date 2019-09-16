@@ -388,7 +388,7 @@ public class TalkbackFragment extends BaseFragment {
      */
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
         @Override
-        public void handler(int memberId, final String memberName, final int groupId, String groupName, CallMode currentCallMode) {
+        public void handler(int memberId, String memberName, int groupId, String groupName,CallMode currentCallMode, long uniqueNo) {
             logger.info("触发了被动方组呼来了receiveGroupCallIncommingHandler:" + "curreneCallMode " + currentCallMode + "-----" + MyApplication.instance.getGroupSpeakState());
             if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 ToastUtil.showToast(activity, getString(R.string.text_has_no_group_call_listener_authority));

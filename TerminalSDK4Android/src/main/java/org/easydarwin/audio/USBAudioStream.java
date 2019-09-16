@@ -86,8 +86,7 @@ public class USBAudioStream{
      */
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
         @Override
-        public void handler(final int memberId, final String memberName, final int groupId,
-                            String version, CallMode currentCallMode) {
+        public void handler(int memberId, String memberName, int groupId, String groupName,CallMode currentCallMode, long uniqueNo) {
             groupCalling = true;
         }
     };
