@@ -164,15 +164,18 @@ public class OnlineService extends Service {
 				}
 				//如果有悬浮窗权限，把事件service启动起来
 				if(!FloatWindowManager.getInstance().checkPermission(this)){
-					logger.info("没有获取到悬浮窗权限");
+					logger.info("--vsxSDK--没有获取到悬浮窗权限");
 				}else {
+					logger.info("--vsxSDK--startHandlerService");
 					BaseApplication.getApplication().startHandlerService();
 				}
 				LoginState loginState = TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState();
 				Log.e("--vsxSDK--","loginState:"+loginState);
+				logger.info("--vsxSDK-loginState:"+loginState);
 				if(TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState() == null ||
 						TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState() == LoginState.IDLE){
 					if(checkCanStartAuth()){
+						logger.info("--vsxSDK-startAuth");
 						startAuth();
 					}
 				}
@@ -225,6 +228,7 @@ public class OnlineService extends Service {
 
 	private void startAuth(){
 		Log.e("-vsxSDK--", "startAuth");
+		logger.info("-vsxSDK--startAuth");
 		AuthUtil.setOauthInfo(getApplicationContext());
 		String authUrl = TerminalFactory.getSDK().getParam(Params.AUTH_URL, "");
 		if(android.text.TextUtils.isEmpty(authUrl)){
@@ -235,15 +239,18 @@ public class OnlineService extends Service {
 				} else {
 					//状态机没有转到正在认证，说明已经在状态机中了，不用处理
 					Log.e("--vsx--AuthService--", "状态机没有转到正在认证，说明已经在状态机中了，不用处理");
+					logger.info("--vsx--AuthService--状态机没有转到正在认证，说明已经在状态机中了，不用处理");
 				}
 			} else {
 				Log.e("--vsx--AuthService--", "没有注册服务地址，去探测地址");
+				logger.info("--vsx--AuthService--没有注册服务地址，去探测地址");
 				//没有注册服务地址，去探测地址
 				TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
 			}
 		}else {
 			//有注册服务地址，去认证
 			Log.e("OnlineService", "startAuth");
+			logger.info("--vsx--OnlineService--startAuth");
 			TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
 		}
 	}

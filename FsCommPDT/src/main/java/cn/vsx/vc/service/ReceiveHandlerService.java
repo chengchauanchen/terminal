@@ -209,6 +209,7 @@ public class ReceiveHandlerService extends Service{
     @SuppressLint({"WrongConstant", "InvalidWakeLockTag"})
     @Override
     public void onCreate(){
+        logger.info("--vsx--ReceiveHandlerService--onCreate");
         super.onCreate();
         createFloatView();
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true, 1);
