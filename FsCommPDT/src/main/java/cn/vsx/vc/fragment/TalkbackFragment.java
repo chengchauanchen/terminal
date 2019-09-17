@@ -536,13 +536,17 @@ public class TalkbackFragment extends BaseFragment {
      */
    private ReceiveNotifyZfyBoundPhoneMessageHandler receiveNotifyZfyBoundPhoneMessageHandler = new ReceiveNotifyZfyBoundPhoneMessageHandler(){
         @Override
-        public void handler(boolean isBound) {
-        if(!isBound){
-            ToastUtil.showToast(getContext(),getString(R.string.text_unbind_success));
-             myHandler.post(() -> rlBind.setVisibility(View.GONE));
+        public void handler(boolean isBound,boolean isShow) {
+            if(!isBound){
+                if (isShow) {
+                   ToastUtil.showToast(getContext(),getString(R.string.text_unbind_success));
+                 }
+                myHandler.post(() -> rlBind.setVisibility(View.GONE));
             }else{
-            ToastUtil.showToast(getContext(),getString(R.string.text_bind_success));
-            myHandler.post(() -> rlBind.setVisibility(View.VISIBLE));
+                if(isShow){
+                   ToastUtil.showToast(getContext(),getString(R.string.text_bind_success));
+                }
+                myHandler.post(() -> rlBind.setVisibility(View.VISIBLE));
            }
         }
    };
