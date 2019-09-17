@@ -223,7 +223,7 @@ public class PTTButtonEventService extends Service {
    */
   private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
     @Override
-    public void handler(int memberId, final String memberName, final int groupId, String version, CallMode currentCallMode) {
+    public void handler(int memberId, final String memberName, final int groupId, String version, CallMode currentCallMode, long uniqueNo) {
       logger.info("触发了被动方组呼来了receiveGroupCallIncommingHandler:" + "curreneCallMode " + currentCallMode + "-----" + MyApplication.instance.getGroupSpeakState());
       if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
         //ToastUtil.showToast(activity, "没有组呼听的权限");
