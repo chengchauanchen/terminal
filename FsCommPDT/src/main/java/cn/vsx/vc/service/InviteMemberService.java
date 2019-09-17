@@ -1239,10 +1239,10 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         for (ContactItemBean bean:selectedMembers) {
             if(bean.getType() == Constants.TYPE_USER){
                 Member member = (Member) bean.getBean();
-                result.add(member.getNo());
+                result.add(NoCodec.encodeMemberNo(member.getNo()));
             }else if(bean.getType() == Constants.TYPE_GROUP){
                 Group group = (Group) bean.getBean();
-                result.add(group.getNo());
+                result.add(NoCodec.encodeGroupNo(group.getNo()));
             }
         }
         return result;
