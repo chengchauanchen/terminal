@@ -203,7 +203,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
      */
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler(){
         @Override
-        public void handler(final int memberId, final String memberName, final int groupId, String version, CallMode currentCallMode){
+        public void handler(final int memberId, final String memberName, final int groupId, String version, CallMode currentCallMode,long uniqueNo){
             if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
                 ToastUtil.showToast(getApplicationContext(), "没有组呼听的权限");
             }

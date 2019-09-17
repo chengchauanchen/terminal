@@ -117,13 +117,12 @@ public class FileBean implements Parcelable,Comparable<FileBean>, MultiItemEntit
         }
         FileBean bean = (FileBean) o;
         return Objects.equals(name, bean.name) &&
-                Objects.equals(type, bean.type) &&
                 Objects.equals(path, bean.path);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, type, path);
+        return Objects.hash(name, path);
     }
 
     @Override
