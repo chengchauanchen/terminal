@@ -40,7 +40,7 @@ import java.util.List;
 
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.MyBleDevice;
-import cn.vsx.vc.utils.StringUtil;
+import ptt.terminalsdk.tools.StringUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.MToggleButton;
 import ptt.terminalsdk.service.BluetoothLeService;

@@ -94,6 +94,9 @@ public class CustomWebView extends WebView{
         super.onDetachedFromWindow();
         TerminalFactory.getSDK().unregistReceiveHandler(receiveChangePersonLocationHandler);
         mhandler.removeCallbacksAndMessages(null);
+        setWebChromeClient(null);
+        setWebViewClient(null);
+        getSettings().setJavaScriptEnabled(false);
     }
 
     public void initWeb(){

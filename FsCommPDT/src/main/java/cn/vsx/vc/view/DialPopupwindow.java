@@ -35,7 +35,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.dialog.ProgressDialog;
-import cn.vsx.vc.utils.StringUtil;
+import ptt.terminalsdk.tools.StringUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 

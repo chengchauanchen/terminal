@@ -1,4 +1,4 @@
-package cn.vsx.vc.utils;
+package ptt.terminalsdk.tools;
 
 import android.text.TextUtils;
 
@@ -171,4 +171,7 @@ public class StringUtil{
         }
         return data;
     }
+
+
+
 }

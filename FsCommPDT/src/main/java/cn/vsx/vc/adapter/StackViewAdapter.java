@@ -30,7 +30,7 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.HandleIdUtil;
-import cn.vsx.vc.utils.StringUtil;
+import ptt.terminalsdk.tools.StringUtil;
 
 /**
  * 作者：ly-xuxiaolong

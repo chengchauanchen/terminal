@@ -103,7 +103,7 @@ import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.SensorUtil;
-import cn.vsx.vc.utils.StringUtil;
+import ptt.terminalsdk.tools.StringUtil;
 import cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.permission.FloatWindowManager;

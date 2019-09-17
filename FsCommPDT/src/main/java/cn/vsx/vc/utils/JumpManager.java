@@ -31,6 +31,7 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.StringUtil;
 
 import static cn.vsx.hamster.common.UrlParams.*;
 

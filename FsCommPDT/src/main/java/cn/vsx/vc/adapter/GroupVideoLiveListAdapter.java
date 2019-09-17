@@ -13,7 +13,7 @@ import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.BitmapUtil;
-import cn.vsx.vc.utils.StringUtil;
+import ptt.terminalsdk.tools.StringUtil;
 
 public class GroupVideoLiveListAdapter extends BaseQuickAdapter<TerminalMessage, BaseViewHolder> {
 

@@ -512,6 +512,7 @@ public class CallingService extends BaseService{
         }
     }
 
+
     private synchronized void cancelAutoHangUpTimer(){
         logger.info("取消半双工超时检测");
         if(mHandler.hasMessages(AUTOHANGUP)){

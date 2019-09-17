@@ -1062,7 +1062,7 @@ public class UavPushActivity extends BaseActivity{
      */
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler(){
         @Override
-        public void handler(final int memberId, final String memberName, final int groupId, String version, CallMode currentCallMode){
+        public void handler(final int memberId, final String memberName, final int groupId, String version, CallMode currentCallMode,long uniqueNo){
             if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
                 ToastUtil.showToast(getApplicationContext(), "没有组呼听的权限");
             }
@@ -1153,10 +1153,10 @@ public class UavPushActivity extends BaseActivity{
     };
 
     private void onNetworkChanged(boolean connected){
-        if(!connected){
-            pushService.finishVideoLive();
-            finish();
-        }
+//        if(!connected){
+//            pushService.finishVideoLive();
+//            finish();
+//        }
     }
 
     private ReceiveResponseMyselfLiveHandler receiveResponseMyselfLiveHandler = (resultCode, resultDesc) -> {

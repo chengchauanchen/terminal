@@ -35,7 +35,7 @@ public class UAVAudioStream{
     private AudioRecord mAudioRecord;
     private MediaCodec mMediaCodec;
     private Thread mThread = null;
-    private String TAG = "AudioStream";
+    private String TAG = "UAVAudioStream";
     private Logger logger = Logger.getLogger(getClass());
 
     protected MediaCodec.BufferInfo mBufferInfo = new MediaCodec.BufferInfo();

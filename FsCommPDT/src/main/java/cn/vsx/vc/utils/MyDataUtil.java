@@ -15,6 +15,7 @@ import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.TransponToBean;
+import ptt.terminalsdk.tools.StringUtil;
 
 /**
  *

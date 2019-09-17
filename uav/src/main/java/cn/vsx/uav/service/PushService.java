@@ -43,6 +43,7 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     private long lastupdate;
     private static String TAG = "PushService---";
     private Logger logger = Logger.getLogger(getClass());
+    @SuppressWarnings("HandlerLeak")
     private Handler mHandler = new Handler();
     private TextureView mSvLivePop;
 
@@ -233,8 +234,13 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
         }
     }
 
+    private long lastRecvDataTime;
     @Override
     public void onDataRecv(byte[] data, int width, int height){
+        if(System.currentTimeMillis() - lastRecvDataTime > 3*1000){
+            logger.info("收到YUV数据"+data.length);
+        }
+        lastRecvDataTime = System.currentTimeMillis();
         if(airCraftMediaStream != null){
             airCraftMediaStream.push(data, width, height);
         }
@@ -262,10 +268,10 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     private VideoFeeder.VideoDataListener mReceivedVideoDataListener = new VideoFeeder.VideoDataListener(){
         @Override
         public void onReceive(byte[] videoBuffer, int size){
-            if(System.currentTimeMillis() - lastupdate > 1000){
-                //                logger.info(TAG+"camera recv video data size:" + size);
-                lastupdate = System.currentTimeMillis();
+            if(System.currentTimeMillis() - lastupdate > 3000){
+                logger.info("收到无人机视频数据:"+size);
             }
+            lastupdate = System.currentTimeMillis();
             if(null != yuvPlayer){
                 yuvPlayer.parseH264(videoBuffer, size);
             }
@@ -331,6 +337,9 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
             airCraftMediaStream.stopRecord();
             airCraftMediaStream = null;
         }
+        mHandler.removeCallbacksAndMessages(null);
+        lastupdate = 0;
+        lastRecvDataTime = 0;
         TerminalFactory.getSDK().getLiveManager().ceaseLiving();
     }
 

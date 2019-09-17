@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import java.util.HashMap;
 import java.util.Map;
 
+import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
@@ -27,6 +28,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTalkWillTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.R;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.StringUtil;
 
 /**
  * 提示管理器
@@ -139,10 +141,12 @@ public class PromptManager {
 	private ReceiveNotifyInviteToWatchHandler receiveNotifyInviteToWatchHandler = new ReceiveNotifyInviteToWatchHandler() {
 		@Override
 		public void handler(final PTTProtolbuf.NotifyDataMessage message) {
-
-			if (soundPool != null && JSONObject.parseObject(message.getMessageBody()).getIntValue("remark") == 2) {//Remark为通知观看时，才响铃
-				soundPool.play(soundMap.get(R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
-				logger.info("被叫收到邀请自己去观看直播的通知，开始响铃----------");
+			String liverNo = JSONObject.parseObject(message.getMessageBody()).getString("liverNo");
+			if(StringUtil.stringToInt(liverNo) != TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
+				if (soundPool != null && JSONObject.parseObject(message.getMessageBody()).getIntValue("remark") == Remark.INFORM_TO_WATCH_LIVE) {//Remark为通知观看时，才响铃
+					soundPool.play(soundMap.get(R.raw.request_call_ok), 0.5f, 0.5f, 0, 0, 1);
+					logger.info("被叫收到邀请自己去观看直播的通知，开始响铃----------");
+				}
 			}
 
 		}
