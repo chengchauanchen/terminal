@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.vsx.vsxsdk.R;
+import cn.vsx.vsxsdk.utils.SystemUtil;
 
 public class DownLoadApkUtils {
     private Context activity;
@@ -50,32 +51,14 @@ public class DownLoadApkUtils {
         mInstallUtil = new InstallUtils(activity);
     }
 
-    /**
-     * 判断包是否安装
-     * @param context
-     * @param packageName
-     * @return
-     */
-    private boolean isAvilible(Context context, String packageName){
-        final PackageManager packageManager = context.getPackageManager();//获取packagemanager
-        List<PackageInfo> pinfo = packageManager.getInstalledPackages(0);//获取所有已安装程序的包信息
-        List<String> pName = new ArrayList<String>();//用于存储所有已安装程序的包名
-        //从pinfo中将包名字逐一取出，压入pName list中
-        if(pinfo != null){
-            for(int i = 0; i < pinfo.size(); i++){
-                String pn = pinfo.get(i).packageName;
-                pName.add(pn);
-            }
-        }
-        return pName.contains(packageName);//判断pName中是否有目标程序的包名，有TRUE，没有FALSE
-    }
+
 
     /**
      *
      */
     public void startDownLoadApk(Context context){
         String packageName = "cn.vsx.vc";//要打开应用的包名
-        if(!isAvilible(context,packageName)){
+        if(!SystemUtil.isAvilible(context,packageName)){
             Log.e("--vsx--","未安装融合通信app:"+packageName);
             startDownLoadApk(url_temp);
         }
