@@ -230,6 +230,7 @@ public class OnlineService extends Service {
 		Log.e("-vsxSDK--", "startAuth");
 		logger.info("-vsxSDK--startAuth");
 		AuthUtil.setOauthInfo(getApplicationContext());
+
 		String authUrl = TerminalFactory.getSDK().getParam(Params.AUTH_URL, "");
 		if(android.text.TextUtils.isEmpty(authUrl)){
 			String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();

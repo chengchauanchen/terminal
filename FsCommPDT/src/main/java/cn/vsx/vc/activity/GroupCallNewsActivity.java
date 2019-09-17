@@ -371,6 +371,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                     stateView();
                 }
             }else {
+                stateView();
                 switchToGroup();
             }
         }else {

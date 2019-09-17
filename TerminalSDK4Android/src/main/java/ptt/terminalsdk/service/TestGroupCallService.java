@@ -65,6 +65,7 @@ public class TestGroupCallService extends Service {
     private RelativeLayout rlContent;
     private TextView tvClose;
     private EditText etAllCount;
+    private EditText etGroupCallTime;
     private EditText etTimeInterval;
     private TextView txResultTitle;
     private TextView txResult;
@@ -76,8 +77,8 @@ public class TestGroupCallService extends Service {
     private int allCount = 1000;
     private int currentCount = 1;
     private int errorCount = 0;
-    private long timeInterval = 5*1000;
-    private long startInterval = 1*1000;
+    private long groupCallTime = 5*1000;//每次组呼的时长
+    private long groupCallTimeInterval = 1*1000;//上次组呼和下次组呼的间隔时间
 
     private static final int START_GROUP_CALL = 1;
     private static final int CANCEL_GROUP_CALL = 2;
@@ -97,7 +98,7 @@ public class TestGroupCallService extends Service {
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveTestGroupCallHandler.class,false);
                     if(currentCount<allCount){
                         removeMessages(START_GROUP_CALL);
-                        sendEmptyMessageDelayed(START_GROUP_CALL,startInterval);
+                        sendEmptyMessageDelayed(START_GROUP_CALL,groupCallTimeInterval);
                     }
                     break;
             }
@@ -140,6 +141,7 @@ public class TestGroupCallService extends Service {
         rlContent = rootView.findViewById(R.id.rl_content);
         tvClose = rootView.findViewById(R.id.tv_close);
         etAllCount = rootView.findViewById(R.id.et_all_count);
+        etGroupCallTime = rootView.findViewById(R.id.et_group_call_time);
         etTimeInterval = rootView.findViewById(R.id.et_time_interval);
         txResultTitle = rootView.findViewById(R.id.tx_result_title);
         txResult = rootView.findViewById(R.id.tx_result);
@@ -198,6 +200,7 @@ public class TestGroupCallService extends Service {
 //        MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
 //        MyTerminalFactory.getSDK().registReceiveHandler(receiveStopStartReceiveCallServiceHandler);
         etAllCount.setEnabled(true);
+        etGroupCallTime.setEnabled(true);
         etTimeInterval.setEnabled(true);
         btStart.setEnabled(true);
         rlContent.setOnTouchListener(removeOnTouchListener);
@@ -223,6 +226,7 @@ public class TestGroupCallService extends Service {
     protected void initView(Intent intent){
         wakeLock.acquire(10 * 1000);
         etAllCount.setSelection(etAllCount.getText().length());
+        etGroupCallTime.setSelection(etGroupCallTime.getText().length());
         etTimeInterval.setSelection(etTimeInterval.getText().length());
     }
 
@@ -309,7 +313,7 @@ public class TestGroupCallService extends Service {
         }
     };
     /**
-     * 停止测试
+     * 开始测试
      */
     private void mStartListener() {
         //初始化数据
@@ -317,13 +321,19 @@ public class TestGroupCallService extends Service {
         allCount = stringToInt(etAllCount.getText().toString());
         currentCount = 0;
         errorCount = 0;
-        timeInterval = stringToLong(etTimeInterval.getText().toString())*1000;
-        if(timeInterval<=0){
-            ToastUtil.showToast(this,"请输入大于0的间隔时间");
+        groupCallTime = stringToLong(etGroupCallTime.getText().toString())*1000;
+        groupCallTimeInterval = stringToLong(etTimeInterval.getText().toString())*1000;
+        if(groupCallTime<=0||groupCallTime>60*1000){
+            ToastUtil.showToast(this,"请输入大于0秒小于60秒的组呼时长");
+            return;
+        }
+        if(groupCallTimeInterval<=0){
+            ToastUtil.showToast(this,"请输入大于0秒组呼间隔时间");
             return;
         }
         //设置UI
         etAllCount.setEnabled(false);
+        etGroupCallTime.setEnabled(false);
         etTimeInterval.setEnabled(false);
         btStart.setEnabled(false);
         txEnd.setText("");
@@ -353,14 +363,14 @@ public class TestGroupCallService extends Service {
     private void checkCount(boolean isStart){
         mHandler.post(() -> updateUI());
         if(currentCount >= allCount){
-            mHandler.sendEmptyMessageDelayed(CANCEL_GROUP_CALL,timeInterval);
+            mHandler.sendEmptyMessageDelayed(CANCEL_GROUP_CALL,groupCallTime);
             stopTest("测试结束");
             return;
         }
         if(isStart){
             mHandler.sendEmptyMessage(START_GROUP_CALL);
         }else {
-            mHandler.sendEmptyMessageDelayed(CANCEL_GROUP_CALL,timeInterval);
+            mHandler.sendEmptyMessageDelayed(CANCEL_GROUP_CALL,groupCallTime);
         }
     }
 
@@ -376,6 +386,7 @@ public class TestGroupCallService extends Service {
         txEnd.setVisibility(View.VISIBLE);
         mHandler.removeMessages(START_GROUP_CALL);
         etAllCount.setEnabled(true);
+        etGroupCallTime.setEnabled(true);
         etTimeInterval.setEnabled(true);
         btStart.setEnabled(true);
     }

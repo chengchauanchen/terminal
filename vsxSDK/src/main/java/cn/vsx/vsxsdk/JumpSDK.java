@@ -15,7 +15,10 @@ import java.util.List;
 
 import cn.vsx.vsxsdk.Interf.JumpInterface;
 import cn.vsx.vsxsdk.constant.CommandEnum;
+import cn.vsx.vsxsdk.utils.BackgroundServicesTimer;
+import cn.vsx.vsxsdk.utils.BackgroundServicesTimer.TimerListener;
 import cn.vsx.vsxsdk.utils.GsonUtils;
+import cn.vsx.vsxsdk.utils.SystemUtil;
 import cn.vsx.vsxsdk.utils.download.DownLoadApkUtils;
 
 public class JumpSDK implements JumpInterface {
@@ -43,8 +46,22 @@ public class JumpSDK implements JumpInterface {
     }
 
     @Override
-    public void sendStartAppBroadcast(Context context) {
-        VsxSDK.getInstance().getRegisterBroadcastReceiver().sendStartAppBroadcast(context);
+    public void sendStartAppBroadcast(final Context context) {
+        final String packageName = "cn.vsx.vc";//要打开应用的包名
+        final String serviceName = "ptt.terminalsdk.context.OnlineService";
+        BackgroundServicesTimer timer = new BackgroundServicesTimer(new TimerListener() {
+            @Override
+            public void time() {
+                Log.e("JumpSDK","定时启动--sendStartAppBroadcast");
+                if (SystemUtil.isAvilible(context, packageName) && !SystemUtil.isServiceStarted(context,packageName)) {//安装了
+                    Log.e("--vsx--","安装融合通信app:"+packageName+"发送启动融合通信后台服务");
+                    VsxSDK.getInstance().getRegisterBroadcastReceiver().sendStartAppBroadcast(context);
+                } else {//没安装
+                    Log.e("--vsx--","未安装融合通信app:"+packageName);
+                }
+            }
+        });
+        timer.start();
     }
 
     @Override
