@@ -34,8 +34,8 @@ public class DownLoadApkUtils {
 
     private static DownLoadApkUtils downLoadApkUtils;
 
-//    private static String url_temp = "http://192.168.1.100:6063/u/phone_common_08-28_1.0.40_40.apk";
-    private static String url_temp = "http://192.168.20.189:6063/u/phone.apk";
+    private static String url_temp = "http://192.168.1.100:6063/u/phone_common_08-28_1.0.40_40.apk";
+//    private static String url_temp = "http://192.168.20.189:6063/u/phone.apk";
 
     public static DownLoadApkUtils getInstance(Context activity) {
         if(downLoadApkUtils==null){

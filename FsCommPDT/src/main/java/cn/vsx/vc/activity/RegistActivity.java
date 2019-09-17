@@ -21,6 +21,7 @@ import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -87,6 +88,7 @@ import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.KeyboarUtils;
 import cn.vsx.vc.utils.NetworkUtil;
+import cn.vsx.vc.utils.SelfStartupPermissionUtils;
 import cn.vsx.vc.utils.SetToListUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.XCDropDownListView;
@@ -1216,6 +1218,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     public static final int REQUEST_PERMISSION_SETTING = 1235;
     public static final int OPEN_NET_CODE = 1236;
 
+    public static final int SELF_STARTUP_PERMISSION_CODE = 1237;
+
     public void requestDrawOverLays() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(RegistActivity.this)) {
@@ -1233,17 +1237,39 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         }
     }
 
+
+    /**
+     * 开启自启动权限 设置页面
+     */
+    private void startSelfStartupPermission(){
+        logger.info("开启自启动权限返回--startSelfStartupPermission");
+        SelfStartupPermissionUtils.startToAutoStartSetting(this,SELF_STARTUP_PERMISSION_CODE);
+        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.open_self_permisson));
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
-            // 创建个呼直播服务
-            MyApplication.instance.startHandlerService();
-            start();
+            apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
+            //根据打包类型，市局才走这个
+            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)
+                    || AuthManagerTwo.POLICESTOREOUT.equals(apkType)){
+                startSelfStartupPermission();
+            }else{
+                // 创建个呼直播服务
+                MyApplication.instance.startHandlerService();
+                start();
+            }
         } else if (requestCode == REQUEST_PERMISSION_SETTING) {
             // 从设置界面返回时再判断权限是否开启
             judgePermission();
         } else if (requestCode == OPEN_NET_CODE) {
             checkIfAuthorize();
+        }else if(requestCode == SELF_STARTUP_PERMISSION_CODE){
+            logger.info("开启自启动权限返回");
+            // 创建个呼直播服务
+            MyApplication.instance.startHandlerService();
+            start();
         }
     }
 
