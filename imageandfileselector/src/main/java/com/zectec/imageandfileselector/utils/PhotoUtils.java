@@ -59,15 +59,16 @@ public class PhotoUtils {
                     Glide.with(context)
                             .load(new File(path))
                             //                        .asGif()
-                            .fitCenter()
-                            .override(480, 800)
+//                            .fitCenter()
+//                            .override(480, 800)
                             .dontAnimate()
                             .diskCacheStrategy(DiskCacheStrategy.SOURCE)
                             .into(new GlideDrawableImageViewTarget(imageView, 0));
                 } else {
                     Glide.with(context)
                             .load(new File(path))
-                            .override(480, 800)
+//                            .override(480, 800)
+//                            .fitCenter()
                             .into(imageView);
                 }
             }

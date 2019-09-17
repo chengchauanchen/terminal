@@ -1598,6 +1598,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             MyTerminalFactory.getSDK().upload(MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, ""), file, terminalMessage, false);
         } else {
             TerminalMessage terminalMessage1 = (TerminalMessage) terminalMessage.clone();
+            terminalMessage1.messageBody.remove(JsonParam.ISMICROPICTURE);
+            logger.error("terminalMessage--"+terminalMessage1);
             MyTerminalFactory.getSDK().getTerminalMessageManager().uploadDataByDDPUSH("", terminalMessage1.messageType,terminalMessage1.messageBody.toJSONString(),list,toUniqueNos,pushMessageSendResultHandler);
         }
     }

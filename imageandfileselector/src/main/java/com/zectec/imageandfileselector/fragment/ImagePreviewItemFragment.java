@@ -90,6 +90,9 @@ public class ImagePreviewItemFragment extends BaseFragment{
             @Override
             public void onClick(View v) {
                 getFragmentManager().popBackStack();
+                if(fragment_contener != null){
+                    fragment_contener.setVisibility(View.GONE);
+                }
             }
         });
 //        iv_save_picture = rootView.findViewById(R.id.iv_save_picture);
