@@ -287,7 +287,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     /**
      * 接收到绑定/解绑的结果
      */
-    private ReceiveNotifyZfyBoundPhoneMessageHandler receiveNotifyZfyBoundPhoneMessageHandler = (isBound) -> {
+    private ReceiveNotifyZfyBoundPhoneMessageHandler receiveNotifyZfyBoundPhoneMessageHandler = (isBound,isShow) -> {
         if (!isBound) {
             if (DataUtil.getRecorderBindBean() != null) {
                 ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().unbinding();
