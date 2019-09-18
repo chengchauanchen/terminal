@@ -117,6 +117,7 @@ public class PullGB28181Service extends BaseService{
     @Override
     protected void initView(Intent intent){
         terminalMessage = (TerminalMessage) intent.getSerializableExtra(Constants.TERMINALMESSAGE);
+        logger.info("terminalMessage:"+terminalMessage);
         if(terminalMessage.messageBody.containsKey(JsonParam.GB28181_RTSP_URL)){
             setPushAuthority();
             //gb28181Url = terminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL);

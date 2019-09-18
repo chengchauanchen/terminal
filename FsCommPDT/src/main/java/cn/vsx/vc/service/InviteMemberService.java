@@ -1515,12 +1515,20 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
     private void inviteOtherMemberToWatch(List<Integer> memberNos,List<Long> uniqueNos) {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SENDING);
-        jsonObject.put(JsonParam.DEVICE_ID, oldTerminalMessage.messageBody.getString(JsonParam.DEVICE_ID));
-        if(oldTerminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+        if(oldTerminalMessage.messageBody.containsKey(JsonParam.GB28181_RTSP_URL)){
+            jsonObject.put(JsonParam.DEVICE_ID, oldTerminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL));
             jsonObject.put(JsonParam.GB28181_RTSP_URL, oldTerminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL));
+        }
+        if(oldTerminalMessage.messageBody.containsKey(JsonParam.DEVICE_NAME)){
             jsonObject.put(JsonParam.DEVICE_NAME, oldTerminalMessage.messageBody.getString(JsonParam.DEVICE_NAME));
+        }
+        if(oldTerminalMessage.messageBody.containsKey(JsonParam.DEVICE_DEPT_ID)){
             jsonObject.put(JsonParam.DEVICE_DEPT_ID, oldTerminalMessage.messageBody.getString(JsonParam.DEVICE_DEPT_ID));
+        }
+        if(oldTerminalMessage.messageBody.containsKey(JsonParam.DEVICE_DEPT_NAME)){
             jsonObject.put(JsonParam.DEVICE_DEPT_NAME, oldTerminalMessage.messageBody.getString(JsonParam.DEVICE_DEPT_NAME));
+        }
+        if(oldTerminalMessage.messageBody.containsKey(JsonParam.ACCOUNT_ID)){
             jsonObject.put(JsonParam.ACCOUNT_ID, oldTerminalMessage.messageBody.getString(JsonParam.ACCOUNT_ID));
         }
         jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());
