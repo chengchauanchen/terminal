@@ -2,10 +2,14 @@ package com.vsxin.terminalpad.js;
 
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
+import android.text.TextUtils;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.vsxin.terminalpad.manager.PullLiveManager;
 import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.mvp.entity.CarBean;
@@ -17,6 +21,8 @@ import com.vsxin.terminalpad.mvp.ui.fragment.PoliceInfoFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.TerminalInfoFragment;
 
 import java.util.logging.Logger;
+
+import static com.alibaba.fastjson.JSON.parseObject;
 
 /**
  * @author 地图web与原生交互
@@ -30,26 +36,23 @@ public class TerminalPadJs {
         this.context = context;
     }
 
-
-    public static final int PHONE = 1;//警务通
-    public static final int LTE = 2;//LTE
-    public static final int CAMERA = 3;//摄像头
-    public static final int HAND = 4;//电台
-    public static final int CAR = 5;//警车
-    public static final int VIDEO = 6;//执法仪
-    public static final int UAV = 7;//无人机
-    public static final int POLICE = 8;//警员
-    public static final int PATROL = 9;//巡逻船
-    public static final int BALL = 10;//布控球
-
-
     /**
      * 点击单个气泡，打开成员详情
      *
      * @param memberInfo
      */
     @JavascriptInterface
-    public void memberInfo(String memberInfo, String terminalType) {
+    public void memberInfo(String memberInfo) {
+        JSONObject jsonObject = parseObject(memberInfo);
+        if(jsonObject==null){
+            Log.i("气泡-memberInfo:", "jsonObject==null");
+            return;
+        }
+        String terminalType = jsonObject.getString("type");
+        if(TextUtils.isEmpty(terminalType)){
+            Log.i("气泡-memberInfo:", "terminalType==null");
+            return;
+        }
         Log.i("气泡-memberInfo:", memberInfo);
         TerminalEnum terminalEnum = null;
 
@@ -106,21 +109,19 @@ public class TerminalPadJs {
                 break;
         }
 
-        Gson gson = new Gson();
-
         try {
             if(terminalEnum==null){
                 return;
             }
             //List<BindBean> bindBeans = gson.fromJson(deviceJson, new TypeToken<List<BindBean>>() {}.getType());
 
-            if(terminalType ==TerminalType.TERMINAL_PATROL){//船
+            if(TextUtils.equals(terminalType,TerminalType.TERMINAL_PATROL)){//船
                 PatrolBean patrolBean = new Gson().fromJson(memberInfo, PatrolBean.class);
                 CarOrPatrolInfoFragment.startCarBoatInfoFragment((FragmentActivity) context,patrolBean,terminalEnum);
-            }else if(terminalType ==TerminalType.TERMINAL_CAR){//警车
+            }else if(TextUtils.equals(terminalType,TerminalType.TERMINAL_CAR)){//警车
                 CarBean carBean = new Gson().fromJson(memberInfo, CarBean.class);
                 CarOrPatrolInfoFragment.startCarBoatInfoFragment((FragmentActivity) context,carBean,terminalEnum);
-            }else if(terminalType ==TerminalType.TERMINAL_PERSONNEL){//民警
+            }else if(TextUtils.equals(terminalType,TerminalType.TERMINAL_PERSONNEL)){//民警
                 PersonnelBean personnelBean = new Gson().fromJson(memberInfo, PersonnelBean.class);
                 PoliceInfoFragment.startPoliceInfoFragment((FragmentActivity) context,personnelBean,terminalEnum);
             }else{//终端设备
@@ -131,6 +132,12 @@ public class TerminalPadJs {
             e.printStackTrace();
             logger.info("数据解析异常");
         }
+    }
 
+    @JavascriptInterface
+    public void playCityCamera(String json){
+        //Todo 点击地图 城市摄像头观看视频监控
+        PullLiveManager liveManager = new PullLiveManager(context);
+        liveManager.playRTSPUrl("rtspUrl","TERMINAL_CAMERA","城市摄像头");
     }
 }

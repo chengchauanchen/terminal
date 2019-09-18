@@ -172,20 +172,6 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
      * 初始化地图
      */
     private void initWebMap() {
-        web_map.requestFocus();
-        web_map.getSettings().setJavaScriptEnabled(true);
-        web_map.getSettings().setSaveFormData(false);
-        web_map.getSettings().setSavePassword(false);
-        web_map.getSettings().setSupportZoom(false);
-        web_map.getSettings().setUseWideViewPort(true);
-        web_map.getSettings().setLoadWithOverviewMode(true);
-        web_map.getSettings().setDomStorageEnabled(true); // 开启 DOM storage API 功能
-        web_map.getSettings().setDatabaseEnabled(true);   //开启 database storage API 功能
-        web_map.setVerticalScrollBarEnabled(false); //垂直不显示滚动条
-
-        web_map.getSettings().setRenderPriority(WebSettings.RenderPriority.HIGH);
-        web_map.getSettings().setCacheMode(WebSettings.LOAD_DEFAULT);  //设置 缓存模式
-
         web_map.setWebChromeClient(new WebChromeClient() {
             @Override
             public void onProgressChanged(WebView view, int progress) {
@@ -208,7 +194,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 //        web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
         //李翔本机
         getLogger().info("http://192.168.1.152:8080/#/");
-        web_map.loadUrl("http://192.168.1.152:8081/#/");
+        web_map.loadUrl("http://192.168.1.152:8080/#/");
 //        web_map.loadUrl("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
     }
 

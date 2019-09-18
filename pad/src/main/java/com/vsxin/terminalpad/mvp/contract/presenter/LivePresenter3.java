@@ -111,7 +111,7 @@ public class LivePresenter3 extends BasePresenter<ILiveView3> {
     /**
      * 拉取布控球视频
      */
-    private ReceiverRequestLteBullHandler receiverRequestLteBullHandler = (rtsp) -> {
+    private ReceiverRequestLteBullHandler receiverRequestLteBullHandler = (rtsp,type,title) -> {
         if (PadApplication.getPadApplication().getVideoLivePlayingState() != VideoLivePlayingState.IDLE) {
             ToastUtil.showToast(getContext(), getContext().getString(R.string.text_watching_can_not_request_report));
             return;

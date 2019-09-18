@@ -90,7 +90,6 @@ public class PoliceInfoFragment extends RefreshRecycleViewFragment<TerminalBean,
     @Override
     protected BaseRecycleViewAdapter createAdapter() {
         personnelBean = (PersonnelBean) getArguments().getSerializable(PERSONNEL);
-
         return new PoliceBandDeviceAdapter(getContext(),personnelBean);
     }
 

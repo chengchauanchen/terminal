@@ -5,10 +5,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.text.TextUtils;
 
-import com.alibaba.fastjson.JSONObject;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
-import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.receiveHandler.ReceiverRequestLteBullHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
@@ -18,12 +16,15 @@ import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.TerminalMemberType;
-import cn.vsx.hamster.common.util.JsonParam;
+import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingParameter;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
-import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -40,10 +41,12 @@ public class PullLiveManager {
 
     /**
      * 拉视频
-     * @param memberNo 警号
-     * @param type 终端类型
+     *
+     * @param memberNo         警号
+     * @param type             终端类型
+     * @param terminalUniqueNo
      */
-    public void pullVideo(String memberNo, String type) {
+    public void pullVideo(String memberNo, String type, String terminalUniqueNo) {
         if (!PadApplication.getPadApplication().isPttPress) {
             if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
                 CheckMyPermission.permissionPrompt((Activity) context, Manifest.permission.RECORD_AUDIO);
@@ -51,7 +54,7 @@ public class PullLiveManager {
             }
 
             if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.CAMERA)) {//没有录音权限
-                CheckMyPermission.permissionPrompt((Activity)context, Manifest.permission.CAMERA);
+                CheckMyPermission.permissionPrompt((Activity) context, Manifest.permission.CAMERA);
                 return;
             }
             //判断终端权限
@@ -61,48 +64,56 @@ public class PullLiveManager {
             }
 
             //加88
-            String number = NumberUtil.checkMemberNo(memberNo+"");
+            String number = NumberUtil.checkMemberNo(memberNo + "");
             int no = NumberUtil.strToInt(number);
-            if(no==0){
+            if (no == 0) {
                 ToastUtil.showToast(context, "警员编号异常");
                 return;
             }
 
-            if (TextUtils.equals(type,TerminalType.TERMINAL_PHONE)) {//ok  警务通拉视频掩饰20秒左右,才有视频过来
+            if (TextUtils.equals(type, TerminalType.TERMINAL_PHONE)) {//ok  警务通拉视频掩饰20秒左右,才有视频过来 播放时做延时1~2秒
+                //警务通
                 pullVideoForMemberNo(no, TerminalMemberType.TERMINAL_PHONE);
-            } else if (TextUtils.equals(type,TerminalType.TERMINAL_BODY_WORN_CAMERA)) {//ok
+            } else if (TextUtils.equals(type, TerminalType.TERMINAL_BODY_WORN_CAMERA)) {
                 //执法记录仪
                 pullVideoForMemberNo(no, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA);
-            }else if (TextUtils.equals(type,TerminalType.TERMINAL_UAV)) {//ok
+            } else if (TextUtils.equals(type, TerminalType.TERMINAL_UAV)) {
                 //无人机
                 pullVideoForMemberNo(no, TerminalMemberType.TERMINAL_UAV);
-            }  else if (TextUtils.equals(type,TerminalType.TERMINAL_LTE)) {
+            } else if (TextUtils.equals(type, TerminalType.TERMINAL_LTE)) {
                 //LTE
-//                String gb28181No = member.getGb28181No();
-//                //String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
-//                //String gb28181RtspUrl = gateWayUrl+"DevAor="+gb28181No;
-//                TerminalMessage terminalMessage = new TerminalMessage();
-//                terminalMessage.messageBody = new JSONObject();
-//                terminalMessage.messageBody.put(JsonParam.GB28181_RTSP_URL,gb28181No);
-//                terminalMessage.messageBody.put(JsonParam.DEVICE_NAME,member.getName());
-//                terminalMessage.messageBody.put(JsonParam.ACCOUNT_ID,member.getNo());
-//                terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_NAME,member.getDepartmentName());
-//                terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_ID,member.getDeptId());
-//                goWatchGB28121(terminalMessage);
-                //LTE rtsp://59.32.1.174:554/DevAor=34020100001320000021
-                String rtsp = "rtsp://192.168.20.188:554/DevAor=34020100001320000021";
-                pullVideoForRtspUrl(rtsp);
-//                pullVideoForMemberNo(10000369, TerminalMemberType.TERMINAL_LTE);
-            } else if (TextUtils.equals(type,TerminalType.TERMINAL_BULL)) {
-                //不控球  rtsp://59.32.1.174:554/DevAor=32010000001320000114
-                String rtsp = "rtsp://192.168.20.188:554/DevAor=32010000001320000114";
-                pullVideoForRtspUrl(rtsp);
-//                pullVideoForMemberNo(10000368, TerminalMemberType.TERMINAL_LTE);
+                playRTSPUrl(terminalUniqueNo, type, "LTE");
+            } else if (TextUtils.equals(type, TerminalType.TERMINAL_BULL)) {
+                //布控球
+                playRTSPUrl(terminalUniqueNo, type, "布控球");
+            } else if (TextUtils.equals(type, TerminalType.TERMINAL_CAMERA)) {
+                //城市摄像头
+                playRTSPUrl(terminalUniqueNo, type, "城市摄像头");
             } else {
                 ToastUtil.showToast(context, "暂不支持拉取该设备视频");
             }
         }
     }
+
+    /**
+     * 播放RTSP url 直播流 包含：LTE、布控球、城市摄像头
+     *
+     * @param terminalNo 设备编号
+     * @param type       类型
+     * @param title      显示title
+     */
+    public void playRTSPUrl(String terminalNo, String type, String title) {
+        String rtspUrl = getRtspUrl(terminalNo);
+        pullVideoForRtspUrl(rtspUrl, type, title);
+    }
+
+
+    private String getRtspUrl(String terminalUniqueNo) {
+        String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
+        String rtspUrl = gateWayUrl + "DevAor=" + terminalUniqueNo;
+        return rtspUrl;
+    }
+
 
     /**
      * 拉视频
@@ -204,9 +215,35 @@ public class PullLiveManager {
 
     /**
      * 通过memberNo 拉取视频 主要用于 不控球
+     *
      * @param rtspUrl
+     * @param type
+     * @param title
      */
-    private void pullVideoForRtspUrl(String rtspUrl) {
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestLteBullHandler.class, rtspUrl);
+    private void pullVideoForRtspUrl(String rtspUrl, String type, String title) {
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestLteBullHandler.class, rtspUrl, type, title);
     }
+
+    /**
+     * 开启播放 手动将视频状态机 改为 播放中
+     * <p>
+     * 观看lte,布控球,城市摄像头 手动控制状态机
+     */
+    public static void moveToStateIdleToPlaying() {
+        //手动
+        VideoLivePlayingState currentState = TerminalFactory.getSDK().getLiveManager().getVideoLivePlayingStateMachine().getCurrentState();
+        if(currentState ==VideoLivePlayingState.IDLE){
+            TerminalFactory.getSDK().getLiveManager().handMoveIdleToPlaying();
+        }
+    }
+
+    /**
+     * 关闭播放 手动视频状态机 改为 空闲
+     * <p>
+     * 观看lte,布控球,城市摄像头 手动控制状态机
+     */
+    private static void handMovePlayingToIdle() {
+        TerminalFactory.getSDK().getLiveManager().handMovePlayingToIdle();
+    }
+
 }

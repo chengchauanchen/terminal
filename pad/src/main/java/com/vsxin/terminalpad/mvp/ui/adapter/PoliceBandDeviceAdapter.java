@@ -17,12 +17,16 @@ import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.manager.PullLiveManager;
 import com.vsxin.terminalpad.manager.StartCallManager;
 import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.mvp.entity.DeviceBean;
 import com.vsxin.terminalpad.mvp.entity.PersonnelBean;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 import com.vsxin.terminalpad.mvp.ui.fragment.IndividualCallFragment;
 import com.vsxin.terminalpad.utils.NumberUtil;
 import com.vsxin.terminalpad.utils.TerminalUtils;
+
+import java.util.List;
+import java.util.Map;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -35,6 +39,7 @@ import ptt.terminalsdk.tools.ToastUtil;
 public class PoliceBandDeviceAdapter extends BaseRecycleViewAdapter<TerminalBean, PoliceBandDeviceAdapter.ViewHolder> {
 
     private PersonnelBean personnelBean;
+
     public PoliceBandDeviceAdapter(Context mContext, PersonnelBean personnelBean) {
         super(mContext);
         this.personnelBean = personnelBean;
@@ -53,6 +58,39 @@ public class PoliceBandDeviceAdapter extends BaseRecycleViewAdapter<TerminalBean
         int resId = TerminalUtils.getImageForTerminalType(terminalBean.getTerminalType());
         holder.iv_device.setImageResource(resId);
 
+        holder.iv_call_phone.setVisibility(View.GONE);
+        holder.iv_message.setVisibility(View.GONE);
+        holder.iv_push_video.setVisibility(View.GONE);
+        holder.iv_individual_call.setVisibility(View.GONE);
+
+        String terminalType = terminalBean.getTerminalType();
+
+        //int[] imageRid = [holder.iv_call_phone,holder.iv_message,holder.iv_push_video,holder.iv_individual_call];
+
+        //TerminalUtils.showOperate(,terminalType);
+
+
+        Map<String, Boolean> operates = TerminalUtils.getOperationForTerminalType(terminalType);
+        for (String key : operates.keySet()) {//keySet获取map集合key的集合  然后在遍历key即可
+            Boolean value = operates.get(key);
+            switch (key) {
+                case TerminalUtils.CALL_PHONE:
+                    holder.iv_individual_call.setVisibility(value?View.VISIBLE:View.GONE);
+                    break;
+                case TerminalUtils.MESSAGE:
+                    holder.iv_message.setVisibility(value?View.VISIBLE:View.GONE);
+                    break;
+                case TerminalUtils.LIVE:
+                    holder.iv_push_video.setVisibility(value?View.VISIBLE:View.GONE);
+                    break;
+                case TerminalUtils.INDIVIDUAL_CALL:
+                    holder.iv_individual_call.setVisibility(value?View.VISIBLE:View.GONE);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         holder.iv_individual_call.setOnClickListener(v -> {
             //IndividualCallFragment.startIndividualCallFragment((FragmentActivity)getContext(),"警察好","10000201");
 
@@ -61,25 +99,26 @@ public class PoliceBandDeviceAdapter extends BaseRecycleViewAdapter<TerminalBean
             //startCallManager.startIndividualCall("10000201", TerminalMemberType.TERMINAL_PHONE);
 
 
-            if(personnelBean!=null){
+            if (personnelBean != null) {
                 String personnelName = personnelBean.getPersonnelName();
                 String personnelNo = personnelBean.getPersonnelNo();
                 Long uniqueNo = NumberUtil.strToLong(terminalBean.getTerminalUniqueNo());
-                startCallManager.startIndividualCall(personnelName,personnelNo,uniqueNo);
-            }else{
-                ToastUtil.showToast(getContext(),"personnelBean 为空");
+                startCallManager.startIndividualCall(personnelName, personnelNo, uniqueNo);
+            } else {
+                ToastUtil.showToast(getContext(), "personnelBean 为空");
             }
         });
 
         holder.iv_push_video.setOnClickListener(v -> {
             //拉视频
-            if(personnelBean!=null){
+            if (personnelBean != null) {
                 String personnelName = personnelBean.getPersonnelName();
                 String personnelNo = personnelBean.getPersonnelNo();
+                String terminalUniqueNo = terminalBean.getTerminalUniqueNo();
                 PullLiveManager liveManager = new PullLiveManager(getContext());
-                liveManager.pullVideo(personnelNo,terminalBean.getTerminalType());
-            }else{
-                ToastUtil.showToast(getContext(),"personnelBean 为空");
+                liveManager.pullVideo(personnelNo, terminalBean.getTerminalType(), terminalUniqueNo);
+            } else {
+                ToastUtil.showToast(getContext(), "personnelBean 为空");
             }
         });
     }
@@ -89,7 +128,7 @@ public class PoliceBandDeviceAdapter extends BaseRecycleViewAdapter<TerminalBean
         return getDatas().size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder{
+    static class ViewHolder extends RecyclerView.ViewHolder {
 
         private final LinearLayout ll_row;
         private final ImageView iv_device;

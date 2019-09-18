@@ -105,7 +105,7 @@ public class LivePresenter2 extends BasePresenter<ILiveView2> {
     /**
      * 拉取布控球视频
      */
-    private ReceiverRequestLteBullHandler receiverRequestLteBullHandler = (rtsp) -> {
+    private ReceiverRequestLteBullHandler receiverRequestLteBullHandler = (rtsp,type,title) -> {
         if (PadApplication.getPadApplication().getVideoLivePlayingState() != VideoLivePlayingState.IDLE) {
             ToastUtil.showToast(getContext(), getContext().getString(R.string.text_watching_can_not_request_report));
             return;
@@ -131,7 +131,11 @@ public class LivePresenter2 extends BasePresenter<ILiveView2> {
             setPushAuthority();
             getView().getLogger().info("播放地址：" + rtspUrl);
             //拉取LTE 上报视频
-            //getView().startGB28121Pull();
+            PromptManager.getInstance().stopRing();
+            mHandler.postDelayed(() -> {
+                //getView().setMemberInfo(liveMember);//设置成员信息
+                getView().startPullLive(rtspUrl);//播放
+            }, 1200);
         }
     }
 

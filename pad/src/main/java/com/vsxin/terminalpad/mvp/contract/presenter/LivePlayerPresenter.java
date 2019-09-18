@@ -10,6 +10,7 @@ import android.text.TextUtils;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.BasePresenter;
 import com.vsxin.terminalpad.R;
+import com.vsxin.terminalpad.manager.PullLiveManager;
 import com.vsxin.terminalpad.mvp.contract.view.ILivePlayerView;
 import com.vsxin.terminalpad.prompt.PromptManager;
 import com.vsxin.terminalpad.utils.SensorUtil;
@@ -18,6 +19,9 @@ import com.vsxin.terminalpad.utils.StateMachineUtils;
 import org.easydarwin.video.EasyRTSPClient;
 import org.easydarwin.video.RTSPClient;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
+import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -73,6 +77,12 @@ public class LivePlayerPresenter extends BasePresenter<ILivePlayerView> {
 
     public void initEasyPlay(SurfaceTexture surface) {
         getView().getLogger().info("-----initEasyPlay-----");
+
+        //兼容两种播放视频的情况 1.走正常的服务信令 2.直接播流地址 lte、布控球、摄像头 手动控制状态机
+        //这样就防止,在播lte等视频时，若又播其它视频导致状态机异常错误的情况
+        //不用关结束，关闭是会将状态机回执
+        PullLiveManager.moveToStateIdleToPlaying();
+
         if (null == mPullRtspReceiver) {
             mPullRtspReceiver = new LivePlayerPresenter.PullRtspReceiver(new Handler());
         }
