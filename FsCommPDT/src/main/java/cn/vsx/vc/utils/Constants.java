@@ -104,6 +104,7 @@ public class Constants{
 
 
     public static final String USER_NAME = "userName";
+    public static final String SECOND_GROUP_ID = "secondGroupId";
 
     public static String OLD_CURRENT_GROUP = "oldCurrentGroup";
 

@@ -1,7 +1,6 @@
 package cn.vsx.vc.view;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,7 +16,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConforma
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetCurrentGroupHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import cn.vsx.vc.activity.SetSecondGroupActivity;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import skin.support.widget.SkinCompatLinearLayout;
 
@@ -48,6 +46,7 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
     private Context context;
     private android.os.Handler myHandler = new android.os.Handler();
     private boolean[] selected;
+    private ChooseSecondGroupListener chooseSecondGroupListener;
 
     public PhysicalButtonSet4PTT(Context context) {
         this(context, null);
@@ -118,8 +117,8 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
         setCurrentGroupName();
     }
 
-    private void setLastGroupName(){
-        int lastGroupId = TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0);
+    public void setLastGroupName(){
+        int lastGroupId = TerminalFactory.getSDK().getParam(Params.SECOND_GROUP_ID, 0);
         Log.e("PhysicalButtonSet4PTT", "lastGroupId:" + lastGroupId);
         if(lastGroupId == 0){
             //没有设置上一个当前组,下音量键关闭
@@ -163,11 +162,14 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
             selected[2] = currState;
             if (currState) {
                 //如果打开时没有上一个组，弹窗选择
-                int lastGroupId = TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0);
+                int lastGroupId = TerminalFactory.getSDK().getParam(Params.SECOND_GROUP_ID, 0);
                 if(lastGroupId == 0){
-                    Intent intent = new Intent(context, SetSecondGroupActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
+                    if(chooseSecondGroupListener != null){
+                        chooseSecondGroupListener.OnChooseSecondGroup();
+                    }
+//                    Intent intent = new Intent(context, SetSecondGroupActivity.class);
+//                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                    context.startActivity(intent);
                 }else {
                     tv_last_group_name.setText(TerminalFactory.getSDK().getGroupByGroupNo(lastGroupId).getName());
                     //                    down_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_black));
@@ -211,9 +213,9 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
         tv_last_group_name.setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View view){
-                Intent intent = new Intent(context, SetSecondGroupActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                context.startActivity(intent);
+                if(chooseSecondGroupListener != null){
+                    chooseSecondGroupListener.OnChooseSecondGroup();
+                }
             }
         });
     }
@@ -282,5 +284,13 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetCurrentGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
+    }
+
+    public void setChooseSecondGroupListener(ChooseSecondGroupListener chooseSecondGroupListener){
+        this.chooseSecondGroupListener = chooseSecondGroupListener;
+    }
+
+    public interface ChooseSecondGroupListener{
+        void OnChooseSecondGroup();
     }
 }

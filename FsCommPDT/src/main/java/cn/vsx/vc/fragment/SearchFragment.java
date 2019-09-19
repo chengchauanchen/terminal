@@ -295,6 +295,14 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
                 List<Group> groups = TerminalFactory.getSDK().getConfigManager().searchGroup(keywords);
                 mLayoutSrl.setRefreshing(false);
                 for(Group group : groups){
+                    boolean isCheck = false;
+                    for(Integer selectedNo : selectedNos){
+                        if(group.getNo() == selectedNo){
+                            isCheck = true;
+                            break;
+                        }
+                    }
+                    group.setChecked(isCheck);
                     ContactItemBean<Group> contactItemBean = new ContactItemBean<>();
                     contactItemBean.setType(type);
                     contactItemBean.setBean(group);

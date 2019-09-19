@@ -51,6 +51,7 @@ import cn.vsx.vc.activity.BaseActivity;
 import cn.vsx.vc.activity.BleActivity;
 import cn.vsx.vc.activity.HelpWordActivity;
 import cn.vsx.vc.activity.MonitorGroupListActivity;
+import cn.vsx.vc.activity.SetSecondGroupActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.utils.ActivityCollector;
@@ -238,6 +239,7 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         } else {
             btn_daytime_mode.initToggleState(false);
         }
+        physicalButtonSet4PTT.setLastGroupName();
     }
 
     @Override
@@ -254,6 +256,14 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         } else {
             btn_lock_screen_setting.initToggleState(false);
         }
+        physicalButtonSet4PTT.setChooseSecondGroupListener(new PhysicalButtonSet4PTT.ChooseSecondGroupListener(){
+            @Override
+            public void OnChooseSecondGroup(){
+                Intent intent = new Intent(context, SetSecondGroupActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            }
+        });
     }
 
     private static IntentFilter makeGattUpdateIntentFilter() {

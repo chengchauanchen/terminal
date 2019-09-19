@@ -55,13 +55,11 @@
             android:layout_marginRight="@dimen/dp_12"
             android:gravity="center">
 
-            <CheckBox
-                android:id="@+id/checkbox"
+            <ImageView
+                android:id="@+id/iv_select"
                 android:layout_width="@dimen/dp_30"
                 android:layout_height="@dimen/dp_30"
-                android:button="@drawable/checkbox"
-                android:clickable="false"
-                android:focusable="false" />
+                android:src="@drawable/second_group_uncheck"/>
 
         </LinearLayout>
     </LinearLayout>

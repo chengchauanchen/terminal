@@ -14,7 +14,6 @@ import java.util.List;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
-import cn.vsx.hamster.terminalsdk.model.GroupAndDepartment;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.ContactItemBean;
@@ -34,11 +33,16 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
     private Context mContext;
     private LayoutInflater mInflater;
     private ItemClickListener itemClickListener;
+    private int checkGroupNo;
 
     public GroupListAdapter(Context mContext, List<ContactItemBean> mData ){
         this.mContext = mContext;
         this.mData = mData;
         mInflater = LayoutInflater.from(mContext);
+    }
+
+    public void checkGroupNo(int checkGroupNo){
+        this.checkGroupNo = checkGroupNo;
     }
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
@@ -98,13 +102,20 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             GroupViewHolder groupViewHolder = (GroupViewHolder) holder;
             Group group = (Group) mData.get(position).getBean();
             groupViewHolder.tvName.setText(group.getName());
-            groupViewHolder.checkbox.setChecked(group.isChecked());
-            groupViewHolder.checkbox.setOnClickListener(new View.OnClickListener(){
+            if(checkGroupNo == group.getNo()){
+                groupViewHolder.iv_select.setImageResource(R.drawable.second_group_check);
+            }else {
+                groupViewHolder.iv_select.setImageResource(R.drawable.second_group_uncheck);
+            }
+            groupViewHolder.itemView.setOnClickListener(new View.OnClickListener(){
                 @Override
-                public void onClick(View v){
+                public void onClick(View view){
+                    checkGroupNo = group.getNo();
+                    notifyDataSetChanged();
                     if(null != itemClickListener){
                         itemClickListener.itemClick(Constants.TYPE_GROUP,position);
                     }
+
                 }
             });
         }
@@ -134,12 +145,12 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         TextView tvName;
 
-        CheckBox checkbox;
+        ImageView iv_select;
         public GroupViewHolder(View itemView){
             super(itemView);
             ivLogo = itemView.findViewById(R.id.shoutai_user_logo);
             tvName = itemView.findViewById(R.id.shoutai_tv_member_name);
-            checkbox = itemView.findViewById(R.id.checkbox);
+            iv_select = itemView.findViewById(R.id.iv_select);
         }
     }
 
