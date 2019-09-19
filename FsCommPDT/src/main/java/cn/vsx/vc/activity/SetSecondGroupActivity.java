@@ -12,11 +12,18 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Department;
+import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.model.GroupAndDepartment;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdateGroupHandler;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupCatalogAdapter;
 import cn.vsx.vc.adapter.GroupListAdapter;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
+import cn.vsx.vc.utils.Constants;
 
 /**
  * 作者：ly-xuxiaolong
@@ -37,8 +44,17 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
     private GroupListAdapter groupListAdapter;
     private GroupCatalogAdapter parentRecyclerAdapter;
 
-    private List<CatalogBean> catalogNames=new ArrayList<>();
-    private List<ContactItemBean> mData = new ArrayList<>();
+    //显示在recyclerview上的所有数据
+    private List<ContactItemBean> datas = new ArrayList<>();
+    //临时组的数据
+    private List<ContactItemBean> tempGroupDatas = new ArrayList<>();
+    //普通部门组的数据
+    private List<ContactItemBean> commonGroupDatas = new ArrayList<>();
+    //点进子部门之前的数据
+    private List<ContactItemBean> lastGroupDatas = new ArrayList<>();
+
+    private List<CatalogBean> catalogNames = new ArrayList<>();
+    private List<CatalogBean> tempCatalogNames = new ArrayList<>();
 
     @Override
     public int getLayoutResId(){
@@ -58,6 +74,23 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
 
     @Override
     public void initListener(){
+        TerminalFactory.getSDK().registReceiveHandler(receivegUpdateGroupHandler);
+        swipeRefreshLayout.setProgressBackgroundColorSchemeResource(R.color.white);
+        swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark);
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            catalogNames.clear();
+            tempCatalogNames.clear();
+
+            CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+            catalogNames.add(groupCatalogBean);
+            TerminalFactory.getSDK().getConfigManager().updateAllGroups();
+            TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(false);
+            myHandler.postDelayed(() -> {
+                // 加载完数据设置为不刷新状态，将下拉进度收起来
+                swipeRefreshLayout.setRefreshing(false);
+                // 加载完数据设置为不刷新状态，将下拉进度收起来
+            }, 1200);
+        });
     }
 
     @Override
@@ -65,21 +98,59 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
         mBarTitle.setText(R.string.text_choose);
 
         mRecyclerview.setLayoutManager(new LinearLayoutManager(this));
-        groupListAdapter = new GroupListAdapter(this, mData);
+        groupListAdapter = new GroupListAdapter(this, datas);
         mRecyclerview.setAdapter(groupListAdapter);
 
         mParentRecyclerview.setLayoutManager(new LinearLayoutManager(this, OrientationHelper.HORIZONTAL, false));
         parentRecyclerAdapter = new GroupCatalogAdapter(this,catalogNames);
         parentRecyclerAdapter.setOnItemClick(this);
         mParentRecyclerview.setAdapter(parentRecyclerAdapter);
+
+        CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
+        catalogNames.add(groupCatalogBean);
+        TerminalFactory.getSDK().getConfigManager().updateGroup(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), TerminalFactory.getSDK().getParam(Params.DEP_NAME, ""));
     }
 
     @Override
     public void doOtherDestroy(){
+        TerminalFactory.getSDK().unregistReceiveHandler(receivegUpdateGroupHandler);
     }
 
     @Override
     public void onItemClick(View view, int position){
 
+    }
+
+    private ReceivegUpdateGroupHandler receivegUpdateGroupHandler = (depId, depName, departments, groups) -> myHandler.post(() -> updateData( depId, departments, groups));
+
+    /**
+     * 更新数据（组）
+     * @param depId
+     * @param departments
+     * @param groups
+     */
+    private void updateData(int depId, List<Department> departments, List<Group> groups){
+        //请求一个添加一个部门标题
+        commonGroupDatas.clear();
+        //部门标题
+        ContactItemBean<Object> Title = new ContactItemBean<>();
+        Title.setType(Constants.TYPE_TITLE);
+        Title.setBean(new Object());
+        commonGroupDatas.add(Title);
+        //添加组
+        for(Group group : groups){
+            ContactItemBean<Group> groupAndDepartment = new ContactItemBean<>();
+            groupAndDepartment.setType(Constants.TYPE_GROUP);
+            groupAndDepartment.setBean(group);
+            commonGroupDatas.add(groupAndDepartment);
+        }
+        //添加部门
+        for(Department department : departments){
+            ContactItemBean<Department> groupAndDepartment = new ContactItemBean<>();
+            groupAndDepartment.setType(Constants.TYPE_FOLDER);
+            groupAndDepartment.setBean(department);
+            commonGroupDatas.add(groupAndDepartment);
+        }
+        groupListAdapter.notifyDataSetChanged();
     }
 }

@@ -17,6 +17,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConforma
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetCurrentGroupHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.SetSecondGroupActivity;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import skin.support.widget.SkinCompatLinearLayout;
 
@@ -163,14 +164,14 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
                 //如果打开时没有上一个组，弹窗选择
                 int lastGroupId = TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0);
                 if(lastGroupId == 0){
-                    // TODO: 2019/9/19 弹窗
-                    Intent intent = new Intent(context,)
-                    context.startActivity();
+                    Intent intent = new Intent(context, SetSecondGroupActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    context.startActivity(intent);
                 }else {
                     tv_last_group_name.setText(TerminalFactory.getSDK().getGroupByGroupNo(lastGroupId).getName());
+                    //                    down_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_black));
+                    MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, true);
                 }
-//                    down_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_black));
-                MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, true);
             } else {
 //                    down_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_gray));
                 tv_last_group_name.setText("");
@@ -209,7 +210,9 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
         tv_last_group_name.setOnClickListener(new OnClickListener(){
             @Override
             public void onClick(View view){
-                //弹窗选择
+                Intent intent = new Intent(context, SetSecondGroupActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
             }
         });
     }
