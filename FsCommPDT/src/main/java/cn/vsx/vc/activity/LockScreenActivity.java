@@ -234,7 +234,7 @@ public class LockScreenActivity extends BaseActivity {
         public boolean onTouch(View v, MotionEvent event) {
             switch (event.getAction()) {
                 case MotionEvent.ACTION_DOWN:
-                    lockPttDownDoThing();
+                    lockPttDownDoThing(true);
                     break;
 
                 case MotionEvent.ACTION_UP:
@@ -250,7 +250,7 @@ public class LockScreenActivity extends BaseActivity {
 
     }
 
-    private void lockPttDownDoThing() {
+    private void lockPttDownDoThing(boolean isCurrentGroup) {
         if (!CheckMyPermission.selfPermissionGranted(this, permission.RECORD_AUDIO)) {
             ToastUtil.showToast(this, getString(R.string.text_audio_frequency_is_not_open_audio_is_not_used));
             logger.error("录制音频权限未打开，语音功能将不能使用。");
@@ -261,7 +261,17 @@ public class LockScreenActivity extends BaseActivity {
             return;
         }
         logger.info("锁屏界面PTT按下");
-        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
+        int resultCode;
+        if(isCurrentGroup){
+            resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
+        }else {
+            int lastGroupId = TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0);
+            if(lastGroupId != 0){
+                resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",lastGroupId);
+            }else {
+                resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
+            }
+        }
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {
             MyApplication.instance.isPttPress = true;
             change2PreSpeaking();
@@ -602,9 +612,9 @@ public class LockScreenActivity extends BaseActivity {
     private final class OnPTTVolumeBtnStatusChangedListenerImp
             implements OnPTTVolumeBtnStatusChangedListener {
         @Override
-        public void onPTTVolumeBtnStatusChange(GroupCallSpeakState groupCallSpeakState) {
+        public void onPTTVolumeBtnStatusChange(GroupCallSpeakState groupCallSpeakState,boolean isVolumeUp) {
             if (groupCallSpeakState == IDLE) {
-                lockPttDownDoThing();
+                lockPttDownDoThing(isVolumeUp);
             } else {
                 lockPttUpDoThing();
             }

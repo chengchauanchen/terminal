@@ -17,6 +17,8 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:text="@string/text_ptt_shortcut_keys" />
+        
+        
 
         <cn.vsx.vc.view.MToggleButton
             android:id="@+id/btn_pttphysicalset"
@@ -42,6 +44,17 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:text="@string/text_up_volume_key" />
+    
+            <TextView
+                android:id="@+id/tv_current_group_name"
+                android:layout_toLeftOf="@+id/ppt_button_add"
+                android:layout_marginRight="@dimen/dp_20"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:textColor="@color/setting_text_temp"
+                android:textSize="16sp"
+                android:textStyle="normal" />
 
             <cn.vsx.vc.view.MToggleButton
                 android:id="@+id/ppt_button_add"
@@ -62,7 +75,17 @@
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
                 android:text="@string/text_lower_volume_key" />
-
+    
+            <TextView
+                android:id="@+id/tv_last_group_name"
+                android:layout_toLeftOf="@+id/ppt_button_cut"
+                android:layout_marginRight="@dimen/dp_20"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:textColor="@color/setting_text_temp"
+                android:textSize="16sp"
+                android:textStyle="normal" />
             <cn.vsx.vc.view.MToggleButton
                 android:id="@+id/ppt_button_cut"
                 style="@style/setting_MToggleButton" />

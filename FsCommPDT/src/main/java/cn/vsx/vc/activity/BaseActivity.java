@@ -386,13 +386,13 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                     logger.info("onKeyUp执行第一次，开始说话");
                     if (onPTTVolumeBtnStatusChangedListener != null) {
                         logger.warn("用耳机中键做ptt按钮，按下时：ptt的当前状态是：" + MyApplication.instance.getGroupSpeakState());
-                        onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(MyApplication.instance.getGroupSpeakState());
+                        onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(MyApplication.instance.getGroupSpeakState(),true);
                     }
                     MyApplication.instance.isPttPress = true;
                 } else if (MyApplication.instance.isPttPress) {
                     logger.info("onClickUp执行第二次，暂停说话");
                     if (onPTTVolumeBtnStatusChangedListener != null) {
-                        onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(GroupCallSpeakState.END);
+                        onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(GroupCallSpeakState.END,false);
                     }
                     MyApplication.instance.isPttPress = false;
                 }
@@ -406,7 +406,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     private OnPTTVolumeBtnStatusChangedListener onPTTVolumeBtnStatusChangedListener;
 
     public interface OnPTTVolumeBtnStatusChangedListener {
-        void onPTTVolumeBtnStatusChange(GroupCallSpeakState groupCallSpeakState);
+        void onPTTVolumeBtnStatusChange(GroupCallSpeakState groupCallSpeakState,boolean isVolumeUp);
     }
 
     public void setOnPTTVolumeBtnStatusChangedListener(OnPTTVolumeBtnStatusChangedListener onPTTVolumeBtnStatusChangedListener) {
@@ -510,7 +510,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                     MyApplication.instance.isClickVolumeToCall = true;
                     if (onPTTVolumeBtnStatusChangedListener != null) {
                         logger.warn("用音量键做ptt按钮，音量键按下时：ptt的当前状态是：" + MyApplication.instance.getGroupSpeakState());
-                        onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(MyApplication.instance.getGroupSpeakState());
+                        onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(MyApplication.instance.getGroupSpeakState(),isVolumeUp);
                     }
                     MyApplication.instance.volumePress = true;
 
@@ -528,7 +528,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 if (MyApplication.instance.volumePress) {
                     MyApplication.instance.isClickVolumeToCall = false;
                     if (onPTTVolumeBtnStatusChangedListener != null) {
-                        onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(GroupCallSpeakState.END);
+                        onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(GroupCallSpeakState.END,isVolumeUp);
                     }
                     MyApplication.instance.volumePress = false;
                 }
@@ -554,7 +554,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             if ((key.equals(Params.VOLUME_UP) && !MyTerminalFactory.getSDK().getParam(Params.VOLUME_UP, false) && volumeUpCalling)
                     || (key.equals(Params.VOLUME_DOWN) && !MyTerminalFactory.getSDK().getParam(Params.VOLUME_DOWN, false) && volumeDownCalling)) {
                 if (onPTTVolumeBtnStatusChangedListener != null) {
-                    onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(GroupCallSpeakState.END);
+                    onPTTVolumeBtnStatusChangedListener.onPTTVolumeBtnStatusChange(GroupCallSpeakState.END,false);
                 }
                 MyApplication.instance.isClickVolumeToCall = false;
                 MyApplication.instance.volumePress = false;

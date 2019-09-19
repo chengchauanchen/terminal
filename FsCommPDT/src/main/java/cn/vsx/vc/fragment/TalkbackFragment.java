@@ -767,7 +767,7 @@ public class TalkbackFragment extends BaseFragment {
                     logger.error("ACTION_DOWN，ptt按钮按下，开始组呼：" + MyApplication.instance.folatWindowPress + MyApplication.instance.volumePress);
                     if (!MyApplication.instance.folatWindowPress && !MyApplication.instance.volumePress) {
 
-                        pttDownDoThing();
+                        pttDownDoThing(true);
                     }
                     break;
                 case MotionEvent.ACTION_MOVE:
@@ -911,10 +911,10 @@ public class TalkbackFragment extends BaseFragment {
      */
     private final class OnPTTVolumeBtnStatusChangedListenerImp implements BaseActivity.OnPTTVolumeBtnStatusChangedListener {
         @Override
-        public void onPTTVolumeBtnStatusChange(GroupCallSpeakState groupCallSpeakState) {
+        public void onPTTVolumeBtnStatusChange(GroupCallSpeakState groupCallSpeakState,boolean isVolumeUp) {
             if (groupCallSpeakState == IDLE) {
                 //半双工个呼、视频观看中不能组呼
-                pttDownDoThing();
+                pttDownDoThing(isVolumeUp);
             } else {
                 myHandler.removeMessages(1);
                 pttUpDoThing();
@@ -943,7 +943,7 @@ public class TalkbackFragment extends BaseFragment {
             myHandler.post(() -> {
                 if(isStart){
                     //开始组呼
-                    pttDownDoThing();
+                    pttDownDoThing(true);
                 }else{
                     //结束组呼
                     pttUpDoThing();
@@ -961,7 +961,7 @@ public class TalkbackFragment extends BaseFragment {
         public void onPTTKeyDown() throws RemoteException {
             myHandler.post(() -> {
                 try {
-                    pttDownDoThing();
+                    pttDownDoThing(true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -1150,7 +1150,7 @@ public class TalkbackFragment extends BaseFragment {
                     TerminalFactory.getSDK().putParam(Params.OLD_CURRENT_GROUP_ID,currentGroup);
                     //市局宽带组111
                     TerminalFactory.getSDK().putParam(Params.CURRENT_GROUP_ID,72088905);
-                    pttDownDoThing();
+                    pttDownDoThing(true);
                 }
             }
         });
@@ -1798,7 +1798,7 @@ public class TalkbackFragment extends BaseFragment {
     }
 
     //PTT按下以后
-    private void pttDownDoThing() {
+    private void pttDownDoThing(boolean currentGroup) {
         logger.info("ptt.pttDownDoThing执行了 isPttPress：" + MyApplication.instance.isPttPress);
 
         if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
@@ -1814,7 +1814,17 @@ public class TalkbackFragment extends BaseFragment {
         if (MyApplication.instance.getIndividualState() != IndividualCallState.IDLE) {
 
         }
-        int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
+        int resultCode;
+        if(currentGroup){
+            resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
+        }else {
+            int lastGroupId = TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0);
+            if(lastGroupId != 0){
+                resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",lastGroupId);
+            }else {
+                resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
+            }
+        }
         logger.info("PTT按下以后resultCode:" + resultCode);
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {//允许组呼了
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCallingCannotClickHandler.class, true);

@@ -2264,14 +2264,24 @@ public abstract class ChatBaseActivity extends BaseActivity
     private final class OnPTTVolumeBtnStatusChangedListenerImp
             implements OnPTTVolumeBtnStatusChangedListener {
         @Override
-        public void onPTTVolumeBtnStatusChange(GroupCallSpeakState groupCallSpeakState) {
+        public void onPTTVolumeBtnStatusChange(GroupCallSpeakState groupCallSpeakState,boolean isVolumeUp) {
             if (groupCallSpeakState == IDLE) {
                 if (!CheckMyPermission.selfPermissionGranted(ChatBaseActivity.this, Manifest.permission.RECORD_AUDIO)) {
                     ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_audio_frequency_is_not_open_audio_is_not_used));
                     logger.error("录制音频权限未打开，语音功能将不能使用。");
                     return;
                 }
-                int resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
+                int resultCode;
+                if(isVolumeUp){
+                    resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
+                }else {
+                    int lastGroupId = TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0);
+                    if(lastGroupId != 0){
+                        resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",lastGroupId);
+                    }else {
+                        resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
+                    }
+                }
                 if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                     MyApplication.instance.isPttPress = true;
                 } else {

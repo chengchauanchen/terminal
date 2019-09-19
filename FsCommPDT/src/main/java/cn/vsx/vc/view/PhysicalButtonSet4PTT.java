@@ -1,16 +1,20 @@
 package cn.vsx.vc.view;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-
-
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetCurrentGroupHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -37,11 +41,12 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
     TextView up_ptt;
 
     TextView down_ptt;
+    TextView tv_current_group_name;
+    TextView tv_last_group_name;
 
     private Context context;
     private android.os.Handler myHandler = new android.os.Handler();
     private boolean[] selected;
-
 
     public PhysicalButtonSet4PTT(Context context) {
         this(context, null);
@@ -72,6 +77,8 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
         tv_pttphysicalset = view.findViewById(R.id.tv_pttphysicalset);
         up_ptt = view.findViewById(R.id.up_ptt);
         down_ptt = view.findViewById(R.id.down_ptt);
+        tv_current_group_name = view.findViewById(R.id.tv_current_group_name);
+        tv_last_group_name = view.findViewById(R.id.tv_last_group_name);
 
     }
 
@@ -82,8 +89,8 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
             MyTerminalFactory.getSDK().putParam(Params.VOLUME_UP, false);
             MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, false);
         }
-        selected = new boolean[]{MyTerminalFactory.getSDK().getParam(Params.SHOW_PTT_PHYSICAL_SET, false),MyTerminalFactory.getSDK().getParam(Params.VOLUME_UP, false),
-                MyTerminalFactory.getSDK().getParam(Params.VOLUME_DOWN, false)};
+
+        selected = new boolean[]{MyTerminalFactory.getSDK().getParam(Params.SHOW_PTT_PHYSICAL_SET, false),MyTerminalFactory.getSDK().getParam(Params.VOLUME_UP, false), MyTerminalFactory.getSDK().getParam(Params.VOLUME_DOWN, false)};
         int item = MyTerminalFactory.getSDK().getParam(Params.PTTFLOAT_HIDE_OR_SHOW, 0);//0隐藏/1显示
         btn_pttphysicalset.initToggleState(selected[0]);
         pptButtonAdd.initToggleState(selected[1]);
@@ -105,9 +112,30 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
 //            tv_pttphysicalset.setTextColor(context.getResources().getColor(R.color.setting_text_gray));
             ll_voice.setVisibility(View.GONE);
         }
+        setLastGroupName();
+        setCurrentGroupName();
+    }
+
+    private void setLastGroupName(){
+        int lastGroupId = TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0);
+        Log.e("PhysicalButtonSet4PTT", "lastGroupId:" + lastGroupId);
+        if(lastGroupId == 0){
+            //没有设置上一个当前组,下音量键关闭
+            pptButtonCut.initToggleState(false);
+        }else {
+            tv_last_group_name.setText(TerminalFactory.getSDK().getGroupByGroupNo(lastGroupId).getName());
+        }
+    }
+
+    private void setCurrentGroupName(){
+        int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
+        tv_current_group_name.setText(TerminalFactory.getSDK().getGroupByGroupNo(currentGroupId).getName());
     }
 
     private void initLinstener () {
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveForceChangeGroupHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSetCurrentGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
 
@@ -132,10 +160,20 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
         pptButtonCut.setOnBtnClick(currState -> {
             selected[2] = currState;
             if (currState) {
+                //如果打开时没有上一个组，弹窗选择
+                int lastGroupId = TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0);
+                if(lastGroupId == 0){
+                    // TODO: 2019/9/19 弹窗
+                    Intent intent = new Intent(context,)
+                    context.startActivity();
+                }else {
+                    tv_last_group_name.setText(TerminalFactory.getSDK().getGroupByGroupNo(lastGroupId).getName());
+                }
 //                    down_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_black));
                 MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, true);
             } else {
 //                    down_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_gray));
+                tv_last_group_name.setText("");
                 MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, false);
                 if(!selected[1]) {
 //                        tv_pttphysicalset.setTextColor(context.getResources().getColor(R.color.setting_text_gray));
@@ -168,7 +206,47 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
                 MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, false);
             }
         });
+        tv_last_group_name.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View view){
+                //弹窗选择
+            }
+        });
     }
+
+    /**
+     * 转组
+     */
+    private ReceiveChangeGroupHandler receiveChangeGroupHandler = new ReceiveChangeGroupHandler(){
+        @Override
+        public void handler(int errorCode, String errorDesc){
+            myHandler.post(()->{
+                setLastGroupName();
+                setCurrentGroupName();
+            });
+        }
+    };
+
+    private ReceiveForceChangeGroupHandler receiveForceChangeGroupHandler = new ReceiveForceChangeGroupHandler(){
+        @Override
+        public void handler(int memberId, int toGroupId, boolean forceSwitchGroup, String tempGroupType){
+            myHandler.post(()->{
+                setLastGroupName();
+                setCurrentGroupName();
+            });
+        }
+    };
+
+    private ReceiveSetCurrentGroupHandler receiveSetCurrentGroupHandler = new ReceiveSetCurrentGroupHandler(){
+        @Override
+        public void handler(int currentGroupId, int errorCode, String errorDesc){
+            myHandler.post(()->{
+                setLastGroupName();
+                setCurrentGroupName();
+            });
+        }
+    };
+
     /**主动方请求组呼的消息*/
     private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = new ReceiveRequestGroupCallConformationHandler() {
         @Override
@@ -195,6 +273,9 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
         }
     };
     public void unregist(){
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceChangeGroupHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetCurrentGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
     }

@@ -182,6 +182,9 @@
             android:name=".activity.HistoryCombatGroupActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"/>
         <activity
+            android:name=".activity.SetSecondGroupActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
+        <activity
             android:name=".activity.PixelActivity"
             android:excludeFromRecents="true"
             android:exported="false"
