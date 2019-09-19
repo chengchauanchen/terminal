@@ -474,8 +474,24 @@ public class ReceiveHandlerService extends Service{
                 }
             });
         }else if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
+            if(position >= 0){
+                data.remove(videoStackViewAdapter.getItem(position));
+                videoStackViewAdapter.remove(position);
+                video_dialog.setVisibility(View.GONE);
+                if(data.size() == 0){
+                    removeView();
+                }
+            }
             goWatchGB28121(terminalMessage);
         }else if(terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()){
+            if(position >= 0){
+                data.remove(videoStackViewAdapter.getItem(position));
+                videoStackViewAdapter.remove(position);
+                video_dialog.setVisibility(View.GONE);
+                if(data.size() == 0){
+                    removeView();
+                }
+            }
             goWatchOutGB28121(terminalMessage);
         }
     }
