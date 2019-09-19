@@ -2,8 +2,8 @@
 <manifest package="cn.vsx.uav"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="32"
-    android:versionName="1.0.32">
+    android:versionCode="33"
+    android:versionName="1.0.33">
     <!--<uses-permission android:name="android.permission.MODIFY_PHONE_STATE" />-->
     <application
         android:name=".UavApplication"
