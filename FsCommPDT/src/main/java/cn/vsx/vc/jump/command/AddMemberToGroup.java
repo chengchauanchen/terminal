@@ -1,7 +1,6 @@
 package cn.vsx.vc.jump.command;
 
 import android.content.Context;
-import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,12 +8,10 @@ import java.util.List;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
-import cn.vsx.hamster.terminalsdk.model.GetMemberByNoResponse;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.jump.bean.SendBean;
 import cn.vsx.vc.jump.constant.CommandEnum;
 import cn.vsx.vc.jump.utils.AppKeyUtils;
@@ -103,7 +100,7 @@ public class AddMemberToGroup extends BaseCommand implements IJumpCommand {
         Group group = DataUtil.getTempGroupByGroupName(BusinessId);
         if (group == null) {
             //为空，主动请求一次
-            TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo();
+            TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(false);
             Group group2 = DataUtil.getTempGroupByGroupName(BusinessId);
             if (group2 == null) {
                 ToastUtil.showToast(context, "未找到当前组,请重试");

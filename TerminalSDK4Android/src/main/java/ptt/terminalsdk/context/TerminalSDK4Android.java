@@ -75,6 +75,7 @@ import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
 import cn.vsx.hamster.terminalsdk.manager.channel.AbsClientChannel;
 import cn.vsx.hamster.terminalsdk.manager.data.DataManager;
 import cn.vsx.hamster.terminalsdk.manager.http.IHttpClient;
+import cn.vsx.hamster.terminalsdk.manager.okhttp.LoggingInterceptor;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -104,7 +105,6 @@ import ptt.terminalsdk.manager.gps.GPSManager;
 import ptt.terminalsdk.manager.gps.recoder.LocationManager;
 import ptt.terminalsdk.manager.gps.recoder.RecorderBDGPSManager;
 import ptt.terminalsdk.manager.gps.recoder.RecorderGPSManager;
-import ptt.terminalsdk.manager.http.LoggingInterceptor;
 import ptt.terminalsdk.manager.http.MyHttpClient;
 import ptt.terminalsdk.manager.http.ProgressHelper;
 import ptt.terminalsdk.manager.http.ProgressUIListener;
@@ -637,6 +637,13 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
     public String getFileRecordDirectory() {
 		return Environment.getExternalStorageDirectory()
 				+ File.separator + application.getApplicationInfo().loadLabel(application.getPackageManager())+ File.separator + "file"
+				+ File.separator;
+	}
+	/**得到缓存的存储位置*/
+	@Override
+	public String getCacheDirectory(){
+		return application.getCacheDir()
+				+ File.separator + "okhttpCache"
 				+ File.separator;
 	}
 	/**得到日志的存储位置*/

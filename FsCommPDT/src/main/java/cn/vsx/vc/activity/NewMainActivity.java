@@ -260,7 +260,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     }
                 },1000);
                 //网络连接上，需要更新组数据（防止在断网的时候有些组不存在）
-                TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo();
+                TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(false);
             }
         }
     };
@@ -1040,7 +1040,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
         }
         MyApplication.instance.isPttPress = false;
-        talkbackFragment.setPttCurrentState(GroupCallSpeakState.IDLE);
+        if(talkbackFragment!=null){
+            talkbackFragment.setPttCurrentState(GroupCallSpeakState.IDLE);
+        }
 
 //        if (mNfcAdapter != null) {
 //            mNfcAdapter.disableForegroundDispatch(this);
@@ -1177,6 +1179,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
      * 设置Fragment状态
      */
     private void setTabSelection(int checkedId) {
+        if(ll_sliding_chenge_volume == null||bv_talk_back == null||bv_person_contacts == null
+        ||bv_group_contacts == null||bv_setting == null){
+            return;
+        }
         if(checkedId == R.id.bv_talk_back){
             if(talkbackFragment == null){
                 talkbackFragment = new TalkbackFragment(this);

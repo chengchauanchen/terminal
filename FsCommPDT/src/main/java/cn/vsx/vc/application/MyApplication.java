@@ -98,6 +98,7 @@ public class MyApplication extends BaseApplication{
 	}
 
 	protected void initSdk(){
+		Log.e("MyApplication", "initSdk");
 		SpecificSDK.init(this,TerminalMemberType.TERMINAL_PHONE.toString());
 	}
 
@@ -237,7 +238,7 @@ public class MyApplication extends BaseApplication{
 		return localVersion;
 	}
 
-	protected void killAllProcess() {
+	public void killAllProcess() {
 		ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
 		if (null != mActivityManager) {
 			List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
