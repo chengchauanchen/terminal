@@ -125,7 +125,8 @@
             android:text="@string/text_contacts"
             android:textColor="@color/gray"
             android:textSize="@dimen/sp_14"
-            android:textStyle="normal" />
+            android:textStyle="normal"
+            android:visibility="gone"/>
         <android.support.v4.widget.SwipeRefreshLayout
             android:id="@+id/layout_srl"
             android:layout_width="match_parent"

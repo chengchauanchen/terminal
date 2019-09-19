@@ -81,6 +81,7 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
         tv_current_group_name = view.findViewById(R.id.tv_current_group_name);
         tv_last_group_name = view.findViewById(R.id.tv_last_group_name);
 
+
     }
 
     private void initData () {

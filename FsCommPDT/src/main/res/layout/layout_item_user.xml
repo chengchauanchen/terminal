@@ -62,6 +62,7 @@
         
         
         <LinearLayout
+            android:id="@+id/ll_checkbox"
             android:layout_width="@dimen/dp_45"
             android:layout_height="@dimen/dp_45"
             android:layout_marginRight="@dimen/dp_12"
@@ -69,9 +70,10 @@
             
             <CheckBox
                 android:id="@+id/checkbox"
-                android:layout_width="@dimen/dp_30"
-                android:layout_height="@dimen/dp_30"
-                android:button="@drawable/checkbox"
+                android:layout_width="@dimen/dp_20"
+                android:layout_height="@dimen/dp_20"
+                android:background="@drawable/checkbox"
+                android:button="@null"
                 android:clickable="false"
                 android:focusable="false" />
         

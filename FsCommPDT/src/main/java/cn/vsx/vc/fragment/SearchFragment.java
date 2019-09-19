@@ -289,6 +289,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
     private void doSearch(String keywords){
         switch(type){
             case Constants.TYPE_CHECK_SEARCH_GROUP:
+            case Constants.TYPE_CHECK_SEARCH_BUTTON_GROUP:
             case Constants.TYPE_CONTRACT_GROUP:
                 mData.clear();
                 List<Group> groups = TerminalFactory.getSDK().getConfigManager().searchGroup(keywords);

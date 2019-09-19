@@ -6,6 +6,7 @@ import android.support.v7.widget.OrientationHelper;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,12 +16,12 @@ import java.util.List;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
-import cn.vsx.hamster.terminalsdk.model.GroupAndDepartment;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivegUpdateGroupHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupCatalogAdapter;
 import cn.vsx.vc.adapter.GroupListAdapter;
+import cn.vsx.vc.fragment.SearchFragment;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.utils.Constants;
@@ -41,6 +42,7 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView mParentRecyclerview;
     private ImageView mIvSearch;
+    private FrameLayout flFragmentContainer;
     private GroupListAdapter groupListAdapter;
     private GroupCatalogAdapter parentRecyclerAdapter;
 
@@ -70,6 +72,7 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
         mRecyclerview = (RecyclerView) findViewById(R.id.recyclerview);
         mParentRecyclerview = (RecyclerView) findViewById(R.id.parent_recyclerview);
         mIvSearch = (ImageView) findViewById(R.id.iv_search);
+        flFragmentContainer = (FrameLayout) findViewById(R.id.fl_fragment_container);
     }
 
     @Override
@@ -90,6 +93,14 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
                 swipeRefreshLayout.setRefreshing(false);
                 // 加载完数据设置为不刷新状态，将下拉进度收起来
             }, 1200);
+        });
+        //搜索按钮的点击事件
+        mIvSearch.setOnClickListener(v -> {
+            ArrayList<Integer> selectedNos  = new ArrayList<>();
+            SearchFragment searchFragment = SearchFragment.newInstance(Constants.TYPE_CHECK_SEARCH_BUTTON_GROUP,selectedNos);
+            flFragmentContainer.setVisibility(View.VISIBLE);
+            getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, searchFragment).commit();
+//            myHandler.postDelayed(() -> ll_content.setVisibility(View.GONE),500);
         });
     }
 
@@ -132,11 +143,12 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
     private void updateData(int depId, List<Department> departments, List<Group> groups){
         //请求一个添加一个部门标题
         commonGroupDatas.clear();
+        datas.clear();
         //部门标题
-        ContactItemBean<Object> Title = new ContactItemBean<>();
-        Title.setType(Constants.TYPE_TITLE);
-        Title.setBean(new Object());
-        commonGroupDatas.add(Title);
+//        ContactItemBean<Object> Title = new ContactItemBean<>();
+//        Title.setType(Constants.TYPE_TITLE);
+//        Title.setBean(new Object());
+//        catalogNames.add(Title);
         //添加组
         for(Group group : groups){
             ContactItemBean<Group> groupAndDepartment = new ContactItemBean<>();
@@ -151,6 +163,8 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
             groupAndDepartment.setBean(department);
             commonGroupDatas.add(groupAndDepartment);
         }
+        datas.addAll(commonGroupDatas);
         groupListAdapter.notifyDataSetChanged();
+        mRecyclerview.scrollToPosition(0);
     }
 }

@@ -1,25 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/common_bg">
-    
-    <include
-        android:id="@+id/title"
-        layout="@layout/in_title_bar" />
-    
-    <include layout="@layout/group_adapter_parent_layout"
-        android:id="@+id/ll_title"/>
-    
-    <android.support.v4.widget.SwipeRefreshLayout
-        android:id="@+id/swipeRefreshLayout"
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recyclerview"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <include
+            android:id="@+id/title"
+            layout="@layout/in_title_bar" />
+
+        <include layout="@layout/group_adapter_parent_layout"
+            android:id="@+id/ll_title"/>
+
+        <android.support.v4.widget.SwipeRefreshLayout
+            android:id="@+id/swipeRefreshLayout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-    </android.support.v4.widget.SwipeRefreshLayout>
-</LinearLayout>
+            android:layout_height="match_parent">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </android.support.v4.widget.SwipeRefreshLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/fl_fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clickable="false"
+        android:focusable="false"
+        android:background="@color/transparent"
+        android:visibility="gone"/>
+</RelativeLayout>

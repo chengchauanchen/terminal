@@ -40,6 +40,7 @@ import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
+import skin.support.widget.SkinCompatCheckBox;
 
 /**
  * 通讯录组搜索adapter
@@ -59,6 +60,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
         addItemType(Constants.TYPE_CONTRACT_LTE, R.layout.item_search_lte);
         addItemType(Constants.TYPE_CONTRACT_RECORDER, R.layout.item_search_recorder);
         addItemType(Constants.TYPE_CHECK_SEARCH_GROUP, R.layout.layout_item_user);
+        addItemType(Constants.TYPE_CHECK_SEARCH_BUTTON_GROUP, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_PC, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_POLICE, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_HDMI, R.layout.layout_item_user);
@@ -164,12 +166,20 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 holder.setOnClickListener(R.id.shoutai_live_to, v ->  OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, contractRecorder));
                 break;
             case Constants.TYPE_CHECK_SEARCH_GROUP:
+            case Constants.TYPE_CHECK_SEARCH_BUTTON_GROUP:
+                SkinCompatCheckBox checkBox = holder.getView(R.id.checkbox);
+                if (item.getType() == Constants.TYPE_CHECK_SEARCH_BUTTON_GROUP) {
+                    //ptt按钮设置组呼的UI
+                    checkBox.setBackgroundResource(R.drawable.checkbox2);
+                }else{
+                    checkBox.setBackgroundResource(R.drawable.checkbox);
+                }
                 Group group1 = (Group) item.getBean();
                 holder.setImageResource(R.id.shoutai_user_logo,R.drawable.group_photo);
                 holder.setGone(R.id.shoutai_tv_member_id,false);
                 holder.setChecked(R.id.checkbox,group1.isChecked());
                 setKeyWordsView(holder.getView(R.id.shoutai_tv_member_name),group1.getName());
-                holder.setOnClickListener(R.id.checkbox, v -> {
+                holder.setOnClickListener(R.id.ll_checkbox, v -> {
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveGroupSelectedHandler.class,group1,!group1.isChecked());
                     group1.setChecked(!group1.isChecked());
                     if(onItemClickListener !=null){
@@ -200,7 +210,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 }
                 holder.setChecked(R.id.checkbox,member.isChecked());
 
-                holder.setOnClickListener(R.id.checkbox, v -> {
+                holder.setOnClickListener(R.id.ll_checkbox, v -> {
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveMemberSelectedHandler.class,member,!member.isChecked(), TerminalMemberType.getInstanceByCode(member.getType()).toString());
                     member.setChecked(!member.isChecked());
                     if(onItemClickListener !=null){
@@ -216,7 +226,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 holder.setChecked(R.id.checkbox,account1.isChecked());
                 setKeyWordsView(holder.getView(R.id.shoutai_tv_member_name),HandleIdUtil.handleName(account1.getName()));
                 setKeyWordsView(holder.getView(R.id.shoutai_tv_member_id),HandleIdUtil.handleId(account1.getNo()));
-                holder.setOnClickListener(R.id.checkbox, v -> {
+                holder.setOnClickListener(R.id.ll_checkbox, v -> {
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiveAccountSelectedHandler.class,account1,!account1.isChecked());
                     account1.setChecked(!account1.isChecked());
                     if(onItemClickListener !=null){
