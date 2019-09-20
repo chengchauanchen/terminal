@@ -37,7 +37,7 @@
         -->
         <meta-data
             android:name="com.dji.sdk.API_KEY"
-            android:value="13aa7d5b4c7e98145e8f4fce" />
+            android:value="1f4a8fc5a05133cfbb0a0437" />
         
         <service
             android:name=".service.AircraftPushService"
