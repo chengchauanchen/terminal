@@ -210,6 +210,7 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
         }else if(id == R.id.ok_btn){
             if(selectGroupNo !=0){
                 TerminalFactory.getSDK().putParam(Params.SECOND_GROUP_ID,selectGroupNo);
+                TerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, true);
                 finish();
             }else {
                 ToastUtils.showShort(R.string.text_please_select_group);

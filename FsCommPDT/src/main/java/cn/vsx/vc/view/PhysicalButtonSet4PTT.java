@@ -191,16 +191,26 @@ public class PhysicalButtonSet4PTT extends SkinCompatLinearLayout{
         btn_pttphysicalset.setOnBtnClick(currState -> {
             selected[1] = currState;
             selected[2] = currState;
+            int lastGroupId = TerminalFactory.getSDK().getParam(Params.SECOND_GROUP_ID, 0);
             if(currState) {
 //                    tv_pttphysicalset.setTextColor(context.getResources().getColor(R.color.setting_text_black));
 //                    down_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_black));
 //                    up_ptt.setTextColor(context.getResources().getColor(R.color.setting_text_black));
                 ll_voice.setVisibility(View.VISIBLE);
                 pptButtonAdd.initToggleState(true);
-                pptButtonCut.initToggleState(true);
+                if(lastGroupId == 0){
+                    pptButtonCut.initToggleState(false);
+                    selected[2] = false;
+                    MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, false);
+                    tv_last_group_name.setText("");
+                }else {
+                    pptButtonCut.initToggleState(true);
+                    MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, true);
+                    tv_last_group_name.setText(TerminalFactory.getSDK().getGroupByGroupNo(lastGroupId).getName());
+                }
                 MyTerminalFactory.getSDK().putParam(Params.SHOW_PTT_PHYSICAL_SET, true);
                 MyTerminalFactory.getSDK().putParam(Params.VOLUME_UP, true);
-                MyTerminalFactory.getSDK().putParam(Params.VOLUME_DOWN, true);
+
             }
             else {
 //                    tv_pttphysicalset.setTextColor(context.getResources().getColor(R.color.setting_text_gray));
