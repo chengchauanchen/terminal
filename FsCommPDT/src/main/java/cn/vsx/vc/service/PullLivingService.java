@@ -297,6 +297,7 @@ public class PullLivingService extends BaseService{
      */
     private ReceiveRequestGroupCallConformationHandler receiveRequestGroupCallConformationHandler = (methodResult, resultDesc,groupId) -> mHandler.post(() -> {
         if(methodResult == BaseCommonCode.SUCCESS_CODE){
+            mLlLiveGroupCall.setVisibility(View.GONE);
             mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_speaking);
             if (!MyTerminalFactory.getSDK().getAudioProxy().isSpeakerphoneOn()) {
                 MyTerminalFactory.getSDK().getAudioProxy().setSpeakerphoneOn(true);
@@ -323,7 +324,6 @@ public class PullLivingService extends BaseService{
 //            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
             mHandler.post(() -> {
                 mBtnLiveLookPtt.setBackgroundResource(R.drawable.rectangle_with_corners_shape_dodgerblue2);
-                mLlLiveGroupCall.setVisibility(View.GONE);
             });
         }
     };
