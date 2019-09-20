@@ -124,7 +124,8 @@
 -keep class cn.vsx.hamster.errcode.** { *; }
 -keep class cn.vsx.hamster.common.** { *; }
 -keep class cn.vsx.hamster.terminalsdk.model.** { *; }
-
+-keep class ptt.terminalsdk.bean.** { *; }
+-keep class ptt.terminalsdk.receiveHandler.** { *; }
 -keep class cn.vsx.hamster.terminalsdk.manager.channel** { *; }
 -keep class cn.vsx.hamster.protolbuf.** { *; }
 -keep class org.ddpush.im.** { *; }
