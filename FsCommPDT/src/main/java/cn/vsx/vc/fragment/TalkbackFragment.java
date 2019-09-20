@@ -1818,7 +1818,7 @@ public class TalkbackFragment extends BaseFragment {
         if(currentGroup){
             resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestCurrentGroupCall("");
         }else {
-            int lastGroupId = TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0);
+            int lastGroupId = TerminalFactory.getSDK().getParam(Params.SECOND_GROUP_ID, 0);
             if(lastGroupId != 0){
                 resultCode = MyTerminalFactory.getSDK().getGroupCallManager().requestGroupCall("",lastGroupId);
             }else {
