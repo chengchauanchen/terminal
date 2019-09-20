@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,7 +22,6 @@ import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -916,7 +916,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     /**
      * 必须要有SD卡和读取电话状态的权限，APP才能使用
      */
-    private void judgePermission() {
+    public void judgePermission() {
         if (CheckMyPermission.selfPermissionGranted(this, permission.WRITE_EXTERNAL_STORAGE)) {//SD卡读写权限
             if (CheckMyPermission.selfPermissionGranted(this, permission.READ_PHONE_STATE)) {//手机权限，获取uuid
                 SpecificSDK.getInstance().configLogger();
@@ -940,8 +940,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             }
             changeProgressMsg(getString(R.string.text_get_info_now));
             //襄阳包就启动安全VPN服务
-            if(apkType.equals(AuthManagerTwo.XIANGYANGPOLICESTORE) || apkType.equals(AuthManagerTwo.XIANGYANG)){
+            if(TextUtils.equals(AuthManagerTwo.XIANGYANGPOLICESTORE,apkType) || TextUtils.equals(AuthManagerTwo.XIANGYANG,apkType)){
                 startVPNService();
+            }else if(TextUtils.equals(AuthManagerTwo.TIANJIN,apkType)){
+                getStringToken();
             }else {
                 authorize();//认证并获取user信息
                 requestDrawOverLays();
@@ -950,6 +952,27 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             if (netWorkDialog != null && !netWorkDialog.isShowing()) {
                 netWorkDialog.show();
             }
+        }
+    }
+
+    /**
+     * 获取票据
+     */
+    private void getStringToken() {
+        Cursor cursor = getContentResolver().query(Uri.parse(Constants.AUTH_TIAN_JIN_TOKEN_URI),null,null,null,null);
+        if (cursor != null && cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                int resultCode = cursor.getInt(cursor.getColumnIndex("resultCode"));
+                String message = cursor.getString(cursor.getColumnIndex("message"));
+                String billStr = cursor.getString(cursor.getColumnIndex("billStr"));
+                if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                    //传给服务端获取警员信息
+
+                } else {
+                   ToastUtil.showToast(this,TextUtils.isEmpty(message)?getString(R.string.text_get_token_fail):message);
+                }
+            }
+            cursor.close();
         }
     }
 

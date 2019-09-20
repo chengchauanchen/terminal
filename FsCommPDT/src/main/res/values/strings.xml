@@ -633,4 +633,5 @@
     
     <string name="text_play_live_fail">历史图像未生成</string>
     <string name="text_please_select_group">请选择组</string>
+    <string name="text_get_token_fail">获取票据失败</string>
 </resources>

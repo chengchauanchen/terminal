@@ -133,4 +133,7 @@ public class Constants{
     public static int INCREASE_MEMBER = 1;
    //是否是强制类型
     public static final String EMERGENCY_TYPE = "emergencyType";
+
+    //天津从统一认证客户端获取票据的URI
+    public static final String AUTH_TIAN_JIN_TOKEN_URI = "content://com.xdja.app.pj/cn.vsx.vc";
 }

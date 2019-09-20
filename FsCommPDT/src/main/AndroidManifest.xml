@@ -397,7 +397,14 @@
                 <action android:name="cn.vsx.vc.AUTH_RECEIVER" />
             </intent-filter>
         </receiver>
-
-
+        <!--天津统一认证客户端的登录和退出的广播-->
+        <receiver
+            android:name="cn.vsx.vc.receiver.TianjinAuthLoginAndLogoutReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="cn.vsx.vc" />
+                <action android:name="com.xdja.unifyauthorize.ACTION_LOGOUT" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

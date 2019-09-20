@@ -61,6 +61,7 @@ android {
         teJing {}
         chuTianYun {}
         jiaXing {}
+        tianJin {}
     }
     productFlavors.all {
         flavor -> flavor.manifestPlaceholders = [apk_type: name]

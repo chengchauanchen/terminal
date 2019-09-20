@@ -49,6 +49,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseZfyBoundPhoneByR
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
+import cn.vsx.hamster.terminalsdk.tools.OperateReceiveHandlerUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
@@ -59,6 +60,7 @@ import cn.vsx.vc.receive.IBroadcastRecvHandler;
 import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.OnBackListener;
+import cn.vsx.vc.receiveHandle.ReceiveTianjinAuthLoginAndLogoutHandler;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
@@ -216,12 +218,18 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
     protected void protectApp() {
         // 重新走应用的流程是一个正确的做法，因为应用被强杀了还保存 Activity 的栈信息是不合理的
-
+        if(TerminalFactory.getSDK().isServerConnected()){
+            TerminalFactory.getSDK().getAuthManagerTwo().logout();
+        }
+        MyApplication.instance.isClickVolumeToCall = false;
+        MyApplication.instance.isPttPress = false;
+        OperateReceiveHandlerUtil.getInstance().clear();
         Intent intent = new Intent(this, RegistActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+        ActivityCollector.removeAllActivityExcept(RegistActivity.class);
+        android.os.Process.killProcess(android.os.Process.myPid());
 
-        ActivityCollector.removeAllActivity();
     }
 
     /**
@@ -258,6 +266,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseZfyBoundPhoneByRequestMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveTianjinAuthLoginAndLogoutHandler);
         registerHeadsetPlugReceiver();
         setPttVolumeChangedListener();
     }
@@ -271,6 +280,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseZfyBoundPhoneByRequestMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTianjinAuthLoginAndLogoutHandler);
     }
 
     @Override
@@ -617,6 +627,33 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     };
 
     /**
+     *天津统一认证客户端登录、退出的通知
+     */
+    private ReceiveTianjinAuthLoginAndLogoutHandler receiveTianjinAuthLoginAndLogoutHandler = new ReceiveTianjinAuthLoginAndLogoutHandler(){
+        @Override
+        public void handler(boolean isLogin) {
+            if(isLogin){
+                //登录成功-去认证登录
+                //判断是否是
+                if(ActivityCollector.isActivityExist(RegistActivity.class)){
+                    RegistActivity activity = ActivityCollector.getActivity(RegistActivity.class);
+                    //分两种情况，1.什么都没有操作，2.正在登录
+                    if(!TerminalFactory.getSDK().getAuthManagerTwo().needLogin()){
+                        TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().stop();
+                    }
+                    activity.judgePermission();
+                }else {
+                    //不存在组会话界面就绑定当前组
+                    logoutAccount();
+                }
+            }else{
+                //退出登录-退出登录
+                logoutAccount();
+            }
+        }
+    };
+
+    /**
      * 创建加载数据的ProgressDialog
      */
     private void createProgressDialog() {
@@ -796,8 +833,22 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         }
     }
 
+    /**
+     * 退出账号并退出应用
+     */
+    private void logoutAccount(){
+        //清除数据
+        TerminalFactory.getSDK().clearData();
+        //退出应用
+        exitApp();
+    }
 
-    private void exitApp() {
+    public void exitApp() {
+
+        if(TerminalFactory.getSDK().isServerConnected()){
+            TerminalFactory.getSDK().getAuthManagerTwo().logout();
+        }
+
         Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
         stoppedCallIntent.putExtra("stoppedResult", "0");
         SendRecvHelper.send(BaseActivity.this, stoppedCallIntent);

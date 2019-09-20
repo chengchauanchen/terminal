@@ -7,6 +7,7 @@ import android.os.Build;
 import org.apache.log4j.Logger;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -97,5 +98,20 @@ public class ActivityCollector {
             }
         }
         activities.clear();
+    }
+    /**
+     * 移除所有的Activity除了某个指定的activity
+     */
+    public static void removeAllActivityExcept(Class<?> clz) {
+        if (activities != null && activities.size() > 0) {
+            Iterator<Map.Entry<Class<?>, Activity>> iterator = activities.entrySet().iterator();
+            while(iterator.hasNext()){
+                Map.Entry<Class<?>, Activity> entry = iterator.next();
+                if (!entry.getValue().isFinishing() && entry.getKey() != clz) {
+                    entry.getValue().finish();
+                    iterator.remove();
+                }
+            }
+        }
     }
 }
