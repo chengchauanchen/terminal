@@ -14,7 +14,8 @@ import java.util.Map;
 public enum ScreenState{
     SCREEN_ORIENTATION_LANDSCAPE("横屏",0),
     SCREEN_ORIENTATION_REVERSE_LANDSCAPE("反向横屏",8),
-    SCREEN_ORIENTATION_PORTRAIT("竖屏",1);
+    SCREEN_ORIENTATION_PORTRAIT("竖屏",1),
+    SCREEN_ORIENTATION_UNKNOWN("位置",-1);
 
     private String value;
     private int code;

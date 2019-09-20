@@ -88,7 +88,7 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
         //去掉Activity上面的状态栏
         getWindow().setFlags(WindowManager.LayoutParams. FLAG_FULLSCREEN , WindowManager.LayoutParams. FLAG_FULLSCREEN);
         ScreenSwitchUtils.init(this).setPortraitEnable(false);
-        ScreenSwitchUtils.init(this).setCurrentState(ScreenState.SCREEN_ORIENTATION_LANDSCAPE);
+
         super.onCreate(savedInstanceState);
     }
 
@@ -110,6 +110,7 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
     @Override
     protected void onResume(){
         super.onResume();
+        ScreenSwitchUtils.init(this).setCurrentState(ScreenState.getInstanceByCode(getRequestedOrientation()));
         ScreenSwitchUtils.init(this).start(this);
     }
 

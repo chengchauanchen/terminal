@@ -175,7 +175,6 @@ public class UavPushActivity extends BaseActivity{
             finish();
         }
         ScreenSwitchUtils.init(this).setPortraitEnable(false);
-        ScreenSwitchUtils.init(this).setCurrentState(ScreenState.SCREEN_ORIENTATION_LANDSCAPE);
         super.onCreate(savedInstanceState);
     }
 
@@ -364,7 +363,9 @@ public class UavPushActivity extends BaseActivity{
     @Override
     protected void onResume(){
         super.onResume();
+        ScreenSwitchUtils.init(this).setCurrentState(ScreenState.getInstanceByCode(getRequestedOrientation()));
         ScreenSwitchUtils.init(this).start(this);
+
     }
 
     @Override
