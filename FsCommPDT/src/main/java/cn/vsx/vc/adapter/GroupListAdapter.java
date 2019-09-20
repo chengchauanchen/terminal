@@ -102,11 +102,9 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
             GroupViewHolder groupViewHolder = (GroupViewHolder) holder;
             Group group = (Group) mData.get(position).getBean();
             groupViewHolder.tvName.setText(group.getName());
-            if(checkGroupNo == group.getNo()){
-                groupViewHolder.iv_select.setImageResource(R.drawable.second_group_check);
-            }else {
-                groupViewHolder.iv_select.setImageResource(R.drawable.second_group_uncheck);
-            }
+            groupViewHolder.checkbox.setBackgroundResource(R.drawable.checkbox2);
+            groupViewHolder.checkbox.setChecked(checkGroupNo == group.getNo());
+
             groupViewHolder.itemView.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View view){
@@ -145,12 +143,12 @@ public class GroupListAdapter extends RecyclerView.Adapter<RecyclerView.ViewHold
 
         TextView tvName;
 
-        ImageView iv_select;
+        CheckBox checkbox;
         public GroupViewHolder(View itemView){
             super(itemView);
             ivLogo = itemView.findViewById(R.id.shoutai_user_logo);
             tvName = itemView.findViewById(R.id.shoutai_tv_member_name);
-            iv_select = itemView.findViewById(R.id.iv_select);
+            checkbox = itemView.findViewById(R.id.checkbox);
         }
     }
 

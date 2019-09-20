@@ -52,6 +52,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerVertical="true"
+                android:ellipsize="middle"
+                android:maxEms="10"
+                android:singleLine="true"
                 android:textColor="@color/setting_text_temp"
                 android:textSize="16sp"
                 android:textStyle="normal" />
@@ -85,6 +88,9 @@
                 android:layout_centerVertical="true"
                 android:textColor="#39dea2"
                 android:textSize="16sp"
+                android:ellipsize="middle"
+                android:maxEms="10"
+                android:singleLine="true"
                 android:textStyle="normal" />
             <cn.vsx.vc.view.MToggleButton
                 android:id="@+id/ppt_button_cut"

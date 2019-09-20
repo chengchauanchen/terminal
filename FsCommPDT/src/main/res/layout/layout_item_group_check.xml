@@ -50,17 +50,20 @@
 
 
         <LinearLayout
+            
             android:layout_width="@dimen/dp_45"
             android:layout_height="@dimen/dp_45"
             android:layout_marginRight="@dimen/dp_12"
             android:gravity="center">
-
-            <ImageView
-                android:id="@+id/iv_select"
-                android:layout_width="@dimen/dp_30"
-                android:layout_height="@dimen/dp_30"
-                android:src="@drawable/second_group_uncheck"/>
-
+    
+            <CheckBox
+                android:id="@+id/checkbox"
+                android:layout_width="@dimen/dp_20"
+                android:layout_height="@dimen/dp_20"
+                android:button="@null"
+                android:background="@drawable/checkbox"
+                android:clickable="false"
+                android:focusable="false" />
         </LinearLayout>
     </LinearLayout>
 
