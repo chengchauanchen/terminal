@@ -67,6 +67,7 @@ import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
 import cn.vsx.hamster.terminalsdk.manager.auth.LoginModel;
+import cn.vsx.hamster.terminalsdk.model.IdentifyType;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetNameByOrgHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
@@ -85,6 +86,7 @@ import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receive.SendRecvHelper;
+import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.KeyboarUtils;
 import cn.vsx.vc.utils.NetworkUtil;
@@ -835,9 +837,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             }
         }
         apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-        //市局包隐藏模拟警员
-        if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)
-            || AuthManagerTwo.XIANGYANG.equals(apkType)) {
+        //市局包隐藏模拟警员（武汉市公安局、襄阳、天津）
+        if (ApkUtil.isAppStore() || AuthManagerTwo.XIANGYANG.equals(apkType)) {
             btnAddMember.setVisibility(View.GONE);
             btn_idcard_login.setVisibility(View.GONE);
         }
@@ -943,7 +944,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             if(TextUtils.equals(AuthManagerTwo.XIANGYANGPOLICESTORE,apkType) || TextUtils.equals(AuthManagerTwo.XIANGYANG,apkType)){
                 startVPNService();
             }else if(TextUtils.equals(AuthManagerTwo.TIANJIN,apkType)){
-                getStringToken();
+                getTianJinStringToken();
+                requestDrawOverLays();
             }else {
                 authorize();//认证并获取user信息
                 requestDrawOverLays();
@@ -958,20 +960,33 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     /**
      * 获取票据
      */
-    private void getStringToken() {
+    private void getTianJinStringToken() {
+        MyTerminalFactory.getSDK().putParam(Params.IDENTIFY_TYPE, "");
         Cursor cursor = getContentResolver().query(Uri.parse(Constants.AUTH_TIAN_JIN_TOKEN_URI),null,null,null,null);
-        if (cursor != null && cursor.getCount() > 0) {
-            while (cursor.moveToNext()) {
+        logger.info("getTianJinStringToken--cursor:"+cursor+"--count:"+((cursor!=null)?cursor.getCount():0));
+        if (cursor != null && cursor.moveToFirst()) {
+            do{
                 int resultCode = cursor.getInt(cursor.getColumnIndex("resultCode"));
                 String message = cursor.getString(cursor.getColumnIndex("message"));
                 String billStr = cursor.getString(cursor.getColumnIndex("billStr"));
+                logger.info("getTianJinStringToken--resultCode"+resultCode+"--message:"+message+"--billStr:"+billStr);
                 if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                    //传给服务端获取警员信息
-
+                    if(!TextUtils.isEmpty(billStr)){
+                        //传给服务端获取警员信息
+                        MyTerminalFactory.getSDK().putParam(UrlParams.TIANJIN_STORE,true);
+                        MyTerminalFactory.getSDK().putParam(UrlParams.TIANJIN_STRTOKEN,billStr);
+                        MyTerminalFactory.getSDK().putParam(Params.IDENTIFY_TYPE, IdentifyType.IDENTIFY_TYPE_TOKEN_OUTER.toString());
+                    }else{
+                        ToastUtil.showToast(this,getString(R.string.text_get_token_fail));
+                    }
                 } else {
-                   ToastUtil.showToast(this,TextUtils.isEmpty(message)?getString(R.string.text_get_token_fail):message);
+                    ToastUtil.showToast(this,TextUtils.isEmpty(message)?getString(R.string.text_get_token_fail):message);
                 }
-            }
+            }while(cursor.moveToNext());
+        }else{
+            ToastUtil.showToast(this,getString(R.string.text_get_token_fail));
+        }
+        if(cursor!=null){
             cursor.close();
         }
     }
@@ -1029,8 +1044,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         if (TextUtils.isEmpty(authUrl)) {
             //平台包或者没获取到类型，直接用AuthManager中的地址,
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-            if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType) ||
-                    AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType) || TextUtils.isEmpty(apkType)) {
+            if (ApkUtil.isAppStore()|| AuthManagerTwo.POLICETEST.equals(apkType) || TextUtils.isEmpty(apkType)) {
                 String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
                 if (defaultAddress.length >= 2) {
                     int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);
@@ -1276,7 +1290,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
             //根据打包类型，市局才走这个
             if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)
-                    || AuthManagerTwo.POLICESTOREOUT.equals(apkType)){
+                    || AuthManagerTwo.POLICESTOREOUT.equals(apkType)|| AuthManagerTwo.TIANJIN.equals(apkType)){
                 startSelfStartupPermission();
             }else{
                 // 创建个呼直播服务

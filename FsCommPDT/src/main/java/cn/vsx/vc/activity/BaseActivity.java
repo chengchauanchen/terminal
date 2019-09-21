@@ -643,7 +643,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                     }
                     activity.judgePermission();
                 }else {
-                    //不存在组会话界面就绑定当前组
+                    //退出登录
                     logoutAccount();
                 }
             }else{

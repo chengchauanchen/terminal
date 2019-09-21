@@ -3,6 +3,7 @@ package cn.vsx.vc.utils;
 import android.text.TextUtils;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -27,6 +28,13 @@ public class ApkUtil{
     public static boolean isAnjian(){
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
         return TextUtils.equals(apkType,CHUTIANYUN);
+//        return MyTerminalFactory.getSDK().getParam(Params.IS_ANJIAN, false);
+    }
+
+    //是否为移动警务平台的包
+    public static boolean isAppStore(){
+        String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
+        return TextUtils.equals(AuthManagerTwo.POLICESTORE,apkType) || TextUtils.equals(AuthManagerTwo.XIANGYANGPOLICESTORE,apkType)||TextUtils.equals(AuthManagerTwo.TIANJIN,apkType);
 //        return MyTerminalFactory.getSDK().getParam(Params.IS_ANJIAN, false);
     }
 
