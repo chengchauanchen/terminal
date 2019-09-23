@@ -25,6 +25,7 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.zectec.imageandfileselector.adapter.FaceRecognitionAdapter;
 import com.zectec.imageandfileselector.bean.FaceRecognitionBean;
 import com.zectec.imageandfileselector.bean.FileInfo;
@@ -851,12 +852,19 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
      */
     private void handlerAvatar(TerminalMessage terminalMessage, MergeTransmitViewHolder holder, int position) {
         int drawable = BitmapUtil.getUserPhoto();
+//        Glide.with(activity)
+//                .load(drawable)
+//                .asBitmap()
+//                .placeholder(drawable)//加载中显示的图片
+//                .error(drawable)//加载失败时显示的图片
+//                .into(holder.ivAvatar);
         Glide.with(activity)
                 .load(drawable)
-                .asBitmap()
-                .placeholder(drawable)//加载中显示的图片
-                .error(drawable)//加载失败时显示的图片
+                .apply(new RequestOptions().placeholder(drawable).error(drawable))
                 .into(holder.ivAvatar);
+
+
+
         holder.ivAvatar.setVisibility(View.VISIBLE);
         if(position > 0 && position < chatMessageList.size()){
             TerminalMessage message = chatMessageList.get(position-1);

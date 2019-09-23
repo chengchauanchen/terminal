@@ -98,6 +98,55 @@ public class PhotoUtils {
 
     }
 
+    /**
+     * Glide 加载 gif
+     * @param context
+     * @param resId
+     * @param imageView
+     */
+    public static void loadGif(Context context,int resId,ImageView imageView){
+        Glide.with(context).load(resId).listener(new RequestListener() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target,boolean isFirstResource) {
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Object resource, Object model, Target target, DataSource dataSource, boolean isFirstResource) {
+                if (resource instanceof GifDrawable) {
+                    //加载一次
+                    ((GifDrawable)resource).setLoopCount(1);
+                }
+                return false;
+            }
+        }).into(imageView);
+    }
+
+    /**
+     * Glide 加载 gif
+     * @param context
+     * @param path
+     * @param imageView
+     */
+    public static void loadGif(Context context,String path,ImageView imageView){
+        Glide.with(context).load(path).listener(new RequestListener() {
+            @Override
+            public boolean onLoadFailed(@Nullable GlideException e, Object model, Target target,boolean isFirstResource) {
+                return false;
+            }
+
+            @Override
+            public boolean onResourceReady(Object resource, Object model, Target target, DataSource dataSource, boolean isFirstResource) {
+                if (resource instanceof GifDrawable) {
+                    //加载一次
+                    ((GifDrawable)resource).setLoopCount(1);
+                }
+                return false;
+            }
+        }).into(imageView);
+    }
+
+
     public void loadLocalResource(Context context, ImageView imageView) {
         Glide.with(context)
                 .load(R.drawable.placeholder)

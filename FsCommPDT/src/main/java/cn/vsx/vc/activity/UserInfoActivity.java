@@ -15,6 +15,7 @@ import android.widget.TextView;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
@@ -160,12 +161,18 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
             userPhone.setText(account.getPhone());
         }
         int drawable = BitmapUtil.getUserPhoto();
+//        Glide.with(UserInfoActivity.this)
+//                .load(drawable)
+//                .asBitmap()
+//                .placeholder(drawable)//加载中显示的图片
+//                .error(drawable)//加载失败时显示的图片
+//                .into(userLogo);
+
         Glide.with(UserInfoActivity.this)
                 .load(drawable)
-                .asBitmap()
-                .placeholder(drawable)//加载中显示的图片
-                .error(drawable)//加载失败时显示的图片
+                .apply(new RequestOptions().placeholder(drawable).error(drawable))
                 .into(userLogo);
+
         initBottomMenu();
     }
 
