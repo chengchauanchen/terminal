@@ -294,6 +294,7 @@
     <string name="text_create_temporary_groups">创建临时组</string>
     <string name="scan_to_login_pc_device">扫码登录PC</string>
     <string name="scan">扫码</string>
+    <string name="band_device">绑定装备</string>
     <string name="text_hour">时</string>
     <string name="text_minute">分</string>
     <string name="text_second">秒</string>

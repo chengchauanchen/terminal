@@ -53,6 +53,8 @@ import cn.vsx.hamster.terminalsdk.tools.OperateReceiveHandlerUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.BandDeviceDialog;
+import cn.vsx.vc.dialog.BandDeviceDialog.SureBindListener;
 import cn.vsx.vc.dialog.NFCBindingDialog;
 import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.receive.Actions;
@@ -735,6 +737,14 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     }
 
     /**
+     * 绑定设备
+     */
+    public void bandDeviceDialog(){
+        startActivity(new Intent(this,AddEquipmentActivity.class));
+
+    }
+
+    /**
      * 显示刷NFC的弹窗
      */
     private void showNFCDialog(int userId) {
@@ -861,4 +871,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyApplication.instance.isPttPress = false;
         MyApplication.instance.stopHandlerService();
     }
+
+
+
 }

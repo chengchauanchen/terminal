@@ -51,7 +51,7 @@ public class OnlineService extends Service {
 	@Override
 	public void onCreate() {
 		super.onCreate();
-		Log.e("--vsxSDK--","启动惟实信Service开始onCreate");
+		logger.info("--vsxSDK--启动惟实信Service开始onCreate");
 		logger.info("OnlineService开始onCreate");
 
 //		this.setTickAlarm();
@@ -103,7 +103,7 @@ public class OnlineService extends Service {
 		unregisterReceiver(receiver);
 		unregisterReceiver(pttDownAndUpReceiver);
 		unregisterReceiver(receiverLock);
-		Log.e("OnlineService", "OnlineService被杀了，要重新启动");
+		logger.info("OnlineService被杀了，要重新启动");
 		Intent intent = new Intent();
 		intent.setAction("RESTART_ONLINESERVICE");
 		sendBroadcast(intent);
@@ -112,7 +112,7 @@ public class OnlineService extends Service {
 
 	@Override
 	public int onStartCommand(Intent param, int flags, int startId) {
-		Log.e("--vsxSDK--","启动惟实信Service开始onStartCommand"+param);
+		logger.info("--vsxSDK--启动惟实信Service开始onStartCommand"+param);
 		KeepLiveManager.getInstance().setServiceForeground(this);
 		try {
 			//如果全部更新完成，没有退出，就发送OnlineService开启的广播
@@ -130,14 +130,14 @@ public class OnlineService extends Service {
 //			}
 
 			if (param == null) {
-				Log.e("--vsxSDK--","Intent 为null");
+				logger.info("--vsxSDK--Intent 为null");
 				return START_STICKY;
 			}
 			String cmd = param.getStringExtra("CMD");
 			if (cmd == null) {
 				cmd = "";
 			}
-			Log.e("--vsxSDK-","-OnlineService开始onStartCommand，CMD = " + cmd);
+			logger.info("--vsxSDK-"+"-OnlineService开始onStartCommand，CMD = " + cmd);
 			if (cmd.equals("TICK")) {
 				if (wakeLock != null && wakeLock.isHeld() == false) {
 					wakeLock.acquire();
@@ -158,6 +158,7 @@ public class OnlineService extends Service {
 
 			//关联启动 自动认证
 			if("AUTH".equals(cmd)){
+				logger.info("--vsxSDK--关联启动 自动认证");
 				//如果有读写权限就配置log
 				if(PermissionUtils.isGranted(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)){
 					MyTerminalFactory.getSDK().configLogger();
@@ -183,7 +184,7 @@ public class OnlineService extends Service {
 			return START_STICKY;
 		}
 		catch(Exception e){
-			Log.e("--vsxSDK-","-在线服务启动过程中出现异常", e);
+			logger.info("--vsxSDK--在线服务启动过程中出现异常", e);
 			return START_STICKY;
 		}
 	}
@@ -193,6 +194,7 @@ public class OnlineService extends Service {
 	 * @return
 	 */
 	private boolean checkCanStartAuth(){
+		logger.info("-vsxSDK--判断是否可以在这里开始认证");
 		String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
 		return (TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_PHONE.getCode());
 	}
@@ -243,7 +245,6 @@ public class OnlineService extends Service {
 					logger.info("--vsx--AuthService--状态机没有转到正在认证，说明已经在状态机中了，不用处理");
 				}
 			} else {
-				Log.e("--vsx--AuthService--", "没有注册服务地址，去探测地址");
 				logger.info("--vsx--AuthService--没有注册服务地址，去探测地址");
 				//没有注册服务地址，去探测地址
 				TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();

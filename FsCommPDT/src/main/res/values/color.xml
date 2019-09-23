@@ -153,6 +153,7 @@
     <color name="darkblue">#00008B</color><!--暗蓝色 -->
     <color name="navy">#000080</color><!--海军色 -->
     <color name="black">#000000</color><!--黑色 -->
+    <color name="black_50">#50000000</color><!--黑色 -->
     <color name="liantong">#13223f</color>
     <color name="folder_name">#535353</color>
     <color name="folder_name_60">#99535353</color>
@@ -606,4 +607,7 @@
     
     <color name="uav_push_text_color">#00a4ff</color>
     <color name="uav_push_color">#6600a4ff</color>
+    <color name="white_04">#04000000</color>
+    <color name="white_40">#40ffffff</color>
+    <color name="color_FAFAFA">#FAFAFA</color>
 </resources>

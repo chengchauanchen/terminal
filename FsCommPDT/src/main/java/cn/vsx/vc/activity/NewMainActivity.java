@@ -28,6 +28,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,7 +41,8 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.hytera.api.SDKException;
 import com.hytera.api.SDKManager;
 import com.hytera.api.base.common.CallManager;
@@ -52,8 +54,11 @@ import org.apache.log4j.Logger;
 import org.easydarwin.easypusher.BackgroundCameraService;
 
 import java.io.File;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -102,11 +107,13 @@ import cn.vsx.vc.fragment.SearchFragment;
 import cn.vsx.vc.fragment.SettingFragmentNew;
 import cn.vsx.vc.fragment.TalkbackFragment;
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
+import cn.vsx.vc.model.BindBean;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.ReceiveMoveTaskToBackHandler;
 import cn.vsx.vc.receiveHandle.ReceiveSwitchMainFrgamentHandler;
 import cn.vsx.vc.receiveHandle.ReceiveUnReadCountChangedHandler;
+import cn.vsx.vc.receiveHandle.ReceiverBindDeviceHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentDestoryHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowGroupFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
@@ -115,6 +122,7 @@ import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
+import cn.vsx.vc.utils.HongHuUtils;
 import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.view.BottomView;
@@ -945,6 +953,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().register(this);
 //        GetPublicKey.getSignInfo(this);
         ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().sendBroadcast(this);
+
     }
 
     @Override
@@ -1122,6 +1131,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             FloatWindowManager.getInstance().applyPermission(this);
         }
         NfcUtil.writeData();
+
     }
 
 //    private void initNFC() {
@@ -1661,4 +1671,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             exit();
         }
     };
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        //每次页面都刷新一次
+        HongHuUtils.getBindDevices();
+    }
 }

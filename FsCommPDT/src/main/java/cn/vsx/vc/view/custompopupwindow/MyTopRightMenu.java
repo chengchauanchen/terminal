@@ -64,18 +64,21 @@ public class MyTopRightMenu {
             final MenuItem createItem = new MenuItem(R.drawable.create_temporary_group,activity.getString(R.string.text_create_temporary_groups));
             final MenuItem nfcItem = new MenuItem(R.drawable.nfc_white,activity.getString(R.string.text_nfc));
             final MenuItem scanItem = new MenuItem(R.drawable.scan,activity.getString(R.string.scan));
+            final MenuItem bandItem = new MenuItem(R.drawable.ic_bind_devce,activity.getString(R.string.band_device));
             final List<MenuItem> items = new ArrayList<>();
             mTopRightMenu.addMenuItem(pullItem);
             mTopRightMenu.addMenuItem(pushItem);
             mTopRightMenu.addMenuItem(createItem);
             mTopRightMenu.addMenuItem(nfcItem);
             mTopRightMenu.addMenuItem(scanItem);
+            mTopRightMenu.addMenuItem(bandItem);
 
             items.add(pullItem);
             items.add(pushItem);
             items.add(createItem);
             items.add(nfcItem);
             items.add(scanItem);
+            items.add(bandItem);
 
 //            if(items.size() == 1) {
 //                mTopRightMenu.setHeight(240);
@@ -155,6 +158,8 @@ public class MyTopRightMenu {
                                     }else if(items.get(position) ==nfcItem){
                                         int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
                                         context.checkNFC(userId,true);
+                                    }else if(items.get(position) ==bandItem){//绑定设备
+                                        context.bandDeviceDialog();
                                     }
                                     break;
                                 case SPEAKING:

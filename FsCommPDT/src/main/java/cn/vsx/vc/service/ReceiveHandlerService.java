@@ -211,6 +211,8 @@ public class ReceiveHandlerService extends Service{
     public void onCreate(){
         logger.info("--vsx--ReceiveHandlerService--onCreate");
         super.onCreate();
+        logger.info("--vsxSDK--ReceiveHandlerService---onCreate");
+
         createFloatView();
         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveVolumeOffCallHandler.class, true, 1);
         //个呼监听

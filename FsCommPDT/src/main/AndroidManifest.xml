@@ -193,7 +193,13 @@
             android:process=":remote"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:theme="@style/TranslucentTheme" />
-        
+
+        <activity android:name=".activity.AddEquipmentActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
+
+        <activity android:name=".activity.BindEquipmentListActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"/>
+
         <receiver
             android:name=".receiver.MediaButtonReceiver"
             android:permission="2147483647" />

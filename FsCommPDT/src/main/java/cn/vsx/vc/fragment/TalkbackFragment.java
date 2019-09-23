@@ -10,15 +10,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.AudioManager;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
 import android.support.v4.widget.TextViewCompat;
+import android.util.Log;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -30,12 +33,17 @@ import android.widget.TextView;
 import com.baidu.speechsynthesizer.SpeechSynthesizer;
 import com.baidu.speechsynthesizer.SpeechSynthesizerListener;
 import com.baidu.speechsynthesizer.publicutility.SpeechError;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.http.util.TextUtils;
 import org.apache.log4j.Logger;
 
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TimerTask;
 
 import cn.vsx.hamster.common.Authority;
@@ -83,14 +91,20 @@ import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.BaseActivity;
+import cn.vsx.vc.activity.BindEquipmentListActivity;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.GroupMemberActivity;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.BandDeviceListDialog;
 import cn.vsx.vc.dialog.UnbindDialog;
+import cn.vsx.vc.model.BindBean;
+import cn.vsx.vc.model.HongHuBean;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
+import cn.vsx.vc.receiveHandle.ReceiverBindDeviceHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CommonGroupUtil;
+import cn.vsx.vc.utils.HongHuUtils;
 import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.view.ChangeGroupView;
 import cn.vsx.vc.view.ChangeGroupView.OnGroupChangedListener;
@@ -270,6 +284,7 @@ public class TalkbackFragment extends BaseFragment {
     private TextView tx_ptt_time;
     private TextView tx_ptt_group_name;
     private RelativeLayout rl_uav_push;
+    private TextView tv_uav_push;
 
     public void setViewEnable(boolean isEanble) {
         to_current_group.setEnabled(isEanble);
@@ -494,10 +509,10 @@ public class TalkbackFragment extends BaseFragment {
         }
     };
 
-    private ReceiveUpdateDepGroupHandler receiveUpdateDepGroupHandler = new ReceiveUpdateDepGroupHandler(){
+    private ReceiveUpdateDepGroupHandler receiveUpdateDepGroupHandler = new ReceiveUpdateDepGroupHandler() {
         @Override
-        public void handler(List<GroupBean> groupList){
-            myHandler.post(()-> setChangeGroupView(groupList));
+        public void handler(List<GroupBean> groupList) {
+            myHandler.post(() -> setChangeGroupView(groupList));
         }
     };
 
@@ -534,7 +549,7 @@ public class TalkbackFragment extends BaseFragment {
     /**
      * 接收到绑定/解绑的结果
      */
-   private ReceiveNotifyZfyBoundPhoneMessageHandler receiveNotifyZfyBoundPhoneMessageHandler = new ReceiveNotifyZfyBoundPhoneMessageHandler(){
+    private ReceiveNotifyZfyBoundPhoneMessageHandler receiveNotifyZfyBoundPhoneMessageHandler = new ReceiveNotifyZfyBoundPhoneMessageHandler() {
         @Override
         public void handler(boolean isBound,boolean isShow) {
             if(!isBound){
@@ -549,7 +564,7 @@ public class TalkbackFragment extends BaseFragment {
                 myHandler.post(() -> rlBind.setVisibility(View.VISIBLE));
            }
         }
-   };
+    };
 
     /**
      * 手势滑动监听器
@@ -653,10 +668,10 @@ public class TalkbackFragment extends BaseFragment {
         @Override
         public void onGroupChanged(final int groupId, String groupName) {
             myHandler.post(() -> {
-                if(groupId>0){
+                if (groupId > 0) {
                     MyTerminalFactory.getSDK().getGroupManager().changeGroup(groupId);
-                }else{
-                    ToastUtil.showToast(context,getString(R.string.text_change_group_data_wrong));
+                } else {
+                    ToastUtil.showToast(context, getString(R.string.text_change_group_data_wrong));
                 }
             });
         }
@@ -1129,6 +1144,7 @@ public class TalkbackFragment extends BaseFragment {
         rl_group_call = mRootView.findViewById(R.id.rl_group_call);
         tx_ptt_time = mRootView.findViewById(R.id.tx_ptt_time);
         rl_uav_push = mRootView.findViewById(R.id.rl_uav_push);
+        tv_uav_push = mRootView.findViewById(R.id.tv_uav_push);
         tx_ptt_group_name = mRootView.findViewById(R.id.tx_ptt_group_name);
 
         getContext().registerReceiver(mBatInfoReceiver, filter);
@@ -1137,17 +1153,17 @@ public class TalkbackFragment extends BaseFragment {
 
         getActivity().registerReceiver(mbtBroadcastReceiver, makeGattUpdateIntentFilter());
 //        mGestureDetector = new GestureDetector(context, gestureListener);
-        iv_group_call_bg.setOnClickListener(new View.OnClickListener(){
+        iv_group_call_bg.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v){
+            public void onClick(View v) {
 
-                if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE){
+                if (MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE) {
                     pttUpDoThing();
                     int oldGroupId = TerminalFactory.getSDK().getParam(Params.OLD_CURRENT_GROUP_ID, 0);
-                    TerminalFactory.getSDK().putParam(Params.CURRENT_GROUP_ID,oldGroupId);
-                }else{
+                    TerminalFactory.getSDK().putParam(Params.CURRENT_GROUP_ID, oldGroupId);
+                } else {
                     int currentGroup = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
-                    TerminalFactory.getSDK().putParam(Params.OLD_CURRENT_GROUP_ID,currentGroup);
+                    TerminalFactory.getSDK().putParam(Params.OLD_CURRENT_GROUP_ID, currentGroup);
                     //市局宽带组111
                     TerminalFactory.getSDK().putParam(Params.CURRENT_GROUP_ID,72088905);
                     pttDownDoThing(true);
@@ -1195,7 +1211,7 @@ public class TalkbackFragment extends BaseFragment {
         }
         //警务通和执法记录仪的绑定关系
         boolean isBind = MyTerminalFactory.getSDK().getParam(Params.RECORDER_BIND_STATE, false);
-        rlBind.setVisibility(isBind?View.VISIBLE:View.GONE);
+        rlBind.setVisibility(isBind ? View.VISIBLE : View.GONE);
 
         //测试组呼
         mRootView.findViewById(R.id.tv_test_group_call).setOnClickListener(v -> {
@@ -1273,6 +1289,9 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupViewHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveTestGroupCallHandler);
 
+        //东湖 绑定设备
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverBindDeviceHandler);
+
         ((BaseActivity) context).setOnPTTVolumeBtnStatusChangedListener(new OnPTTVolumeBtnStatusChangedListenerImp());
 
     }
@@ -1292,12 +1311,14 @@ public class TalkbackFragment extends BaseFragment {
         setVideoIcon();//设置视频回传上报相关图标
         setPttText();
         String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
-        if(android.text.TextUtils.equals(type, TerminalMemberType.TERMINAL_UAV.name())){
+        if (android.text.TextUtils.equals(type, TerminalMemberType.TERMINAL_UAV.name())) {
             rl_uav_push.setVisibility(View.VISIBLE);
-        }else {
+        } else {
             rl_uav_push.setVisibility(View.GONE);
+            //Todo 获取绑定的装备 来判断是否显示
         }
 //        setScanGroupIcon();//设置组扫描相关图标
+
     }
 
     private void setPttText() {
@@ -1660,6 +1681,9 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupViewHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyZfyBoundPhoneMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTestGroupCallHandler);
+
+        //东湖 绑定设备
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverBindDeviceHandler);
         try {
             getContext().unregisterReceiver(mBatInfoReceiver);
             getActivity().unregisterReceiver(mbtBroadcastReceiver);
@@ -1877,6 +1901,24 @@ public class TalkbackFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
         setPttText();
+        //获取已绑定的装备列表
+        HongHuUtils.getBindDevices();
     }
 
+    private ReceiverBindDeviceHandler receiverBindDeviceHandler = deviceJson -> myHandler.post(() -> {
+        logger.info(deviceJson);
+        Gson gson = new Gson();
+        List<BindBean> bindBeans = gson.fromJson(deviceJson, new TypeToken<List<BindBean>>() {
+        }.getType());
+        rl_uav_push.setVisibility(View.VISIBLE);
+        tv_uav_push.setText("绑定的装备(" + bindBeans.size() + ")");
+        rl_uav_push.setOnClickListener(v -> {
+            //已绑定设备列表
+            Intent intent = new Intent(getContext(), BindEquipmentListActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putSerializable(BindEquipmentListActivity.BIND_DATA, (Serializable) bindBeans);
+            intent.putExtras(bundle);
+            getContext().startActivity(intent);
+        });
+    });
 }

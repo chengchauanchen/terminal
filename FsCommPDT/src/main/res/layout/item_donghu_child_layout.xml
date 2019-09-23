@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/ll_content"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="13dp"
+        android:layout_marginRight="13dp"
+        android:background="@color/color_FAFAFA"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingLeft="7dp"
+        android:paddingTop="15dp"
+        android:paddingRight="7dp"
+        android:paddingBottom="15dp">
+
+        <ImageView
+            android:id="@+id/iv_device"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ico_bindingcar_car" />
+
+        <TextView
+            android:id="@+id/tv_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="17dp"
+            android:layout_weight="1"
+            android:text="千禧街派出所"
+            android:textColor="@color/black"
+            android:textSize="16sp" />
+
+        <ImageView
+            android:id="@+id/iv_checkbox"
+            android:src="@drawable/ico_bindingcar_selected"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <!--<CheckBox-->
+            <!--android:id="@+id/checkbox"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:button="@drawable/checkbox_device_shape"-->
+            <!--android:clickable="false"-->
+            <!--android:focusable="false"-->
+            <!--android:focusableInTouchMode="false" />-->
+    </LinearLayout>
+
+</LinearLayout>
