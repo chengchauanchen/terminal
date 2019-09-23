@@ -6,6 +6,8 @@
     <string name="authing">正在认证...</string>
     <string name="auth_fail">认证失败...</string>
     <string name="logining">正在登录...</string>
+    <string name="login_fail">登录失败</string>
+    <string name="login_success">登录成功</string>
     <string name="connecting_server">正在连接服务器</string>
     <string name="updating_data">正在更新数据</string>
     <string name="please_regist_account">请注册账号</string>

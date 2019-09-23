@@ -139,13 +139,13 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
 
     @Override
     public void onItemClick(View view, int position){
-        if(position>=0 && position < catalogNames.size()){
+        if(position>=0 && position < catalogNames.size()-1){
             synchronized(SetSecondGroupActivity.this){
-                List<CatalogBean> groupCatalogBeans = new ArrayList<>(catalogNames.subList(0, position + 1));
+                TerminalFactory.getSDK().getConfigManager().updateGroup(catalogNames.get(position).getId(),catalogNames.get(position).getName());
+                List<CatalogBean> groupCatalogBeans = new ArrayList<>(catalogNames.subList(0, position));
                 catalogNames.clear();
                 catalogNames.addAll(groupCatalogBeans);
             }
-            TerminalFactory.getSDK().getConfigManager().updateGroup(catalogNames.get(position).getId(),catalogNames.get(position).getName());
         }
     }
 
@@ -174,10 +174,10 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
      * @param groups
      */
     private void updateData(int depId, String depName,List<Department> departments, List<Group> groups){
+        datas.clear();
         //根部门的数据，清空之前的数据
         if(depId == TerminalFactory.getSDK().getParam(Params.DEP_ID, 0)){
             catalogNames.clear();
-            datas.clear();
         }
         //请求一个添加一个部门标题
         CatalogBean memberCatalogBean = new CatalogBean(depName,depId);
@@ -206,7 +206,7 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
     public void onClick(View view){
         int id = view.getId();
         if(id == R.id.news_bar_back){
-            finish();
+            onBackPressed();
         }else if(id == R.id.ok_btn){
             if(selectGroupNo !=0){
                 TerminalFactory.getSDK().putParam(Params.SECOND_GROUP_ID,selectGroupNo);
@@ -225,6 +225,19 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
             selectGroupNo = group.getNo();
         }else if(type == Constants.TYPE_FOLDER){
             TerminalFactory.getSDK().getConfigManager().updateGroup(((Department) datas.get(position).getBean()).getId(),((Department) datas.get(position).getBean()).getName());
+        }
+    }
+
+    @Override
+    public void onBackPressed(){
+        if(catalogNames.size() > 1){
+            //返回上一层
+            TerminalFactory.getSDK().getConfigManager().updateGroup(catalogNames.get(catalogNames.size()-2).getId(),catalogNames.get(catalogNames.size()-2).getName());
+            List<CatalogBean> groupCatalogBeans = new ArrayList<>(catalogNames.subList(0, catalogNames.size()-2));
+            catalogNames.clear();
+            catalogNames.addAll(groupCatalogBeans);
+        }else {
+            super.onBackPressed();
         }
     }
 }

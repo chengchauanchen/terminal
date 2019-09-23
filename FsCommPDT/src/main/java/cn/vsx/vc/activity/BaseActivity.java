@@ -53,8 +53,6 @@ import cn.vsx.hamster.terminalsdk.tools.OperateReceiveHandlerUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.dialog.BandDeviceDialog;
-import cn.vsx.vc.dialog.BandDeviceDialog.SureBindListener;
 import cn.vsx.vc.dialog.NFCBindingDialog;
 import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.receive.Actions;
@@ -208,6 +206,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         //适配Android9.0调用hide时，关闭警告弹窗
         closeAndroidPDialog();
         createProgressDialog();
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveForceOfflineHandler);
     }
 
     protected void setOrientation(){
@@ -263,7 +262,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     @Override
     protected void onResume() {
         super.onResume();
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveForceOfflineHandler);
+
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
@@ -277,7 +276,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     protected void onPause() {
         super.onPause();
         unregisterHeadsetPlugReceiver();
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceOfflineHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
@@ -287,6 +285,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
 
     @Override
     protected void onDestroy() {
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceOfflineHandler);
         try {
             doOtherDestroy();
 
