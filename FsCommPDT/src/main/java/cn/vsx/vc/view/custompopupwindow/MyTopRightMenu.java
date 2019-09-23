@@ -26,6 +26,7 @@ import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DensityUtil;
+import cn.vsx.vc.utils.HongHuUtils;
 import cn.vsx.vc.utils.SystemUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
@@ -41,10 +42,12 @@ public class MyTopRightMenu {
     private BaseActivity activity;
     private static final int REQUEST_PERMISSION_SETTING = 0;
 
-    private MyTopRightMenu(){}
-    public static MyTopRightMenu offerObject(){
+    private MyTopRightMenu() {
+    }
+
+    public static MyTopRightMenu offerObject() {
         synchronized (MyTopRightMenu.class) {
-            if(myTopRightMenu == null){
+            if (myTopRightMenu == null) {
                 synchronized (MyTopRightMenu.class) {
                     myTopRightMenu = new MyTopRightMenu();
                 }
@@ -53,32 +56,36 @@ public class MyTopRightMenu {
 
         return myTopRightMenu;
     }
+
     private TopRightMenu mTopRightMenu;
 
-    public void initview(final ImageView view, final BaseActivity context){
+    public void initview(final ImageView view, final BaseActivity context) {
         this.activity = context;
         view.setOnClickListener(v -> {
             mTopRightMenu = new TopRightMenu(context);
             final MenuItem pushItem = new MenuItem(R.drawable.shipin_up, activity.getString(R.string.text_push));
             final MenuItem pullItem = new MenuItem(R.drawable.shipin_hc, activity.getString(R.string.text_pull));
-            final MenuItem createItem = new MenuItem(R.drawable.create_temporary_group,activity.getString(R.string.text_create_temporary_groups));
-            final MenuItem nfcItem = new MenuItem(R.drawable.nfc_white,activity.getString(R.string.text_nfc));
-            final MenuItem scanItem = new MenuItem(R.drawable.scan,activity.getString(R.string.scan));
-            final MenuItem bandItem = new MenuItem(R.drawable.ic_bind_devce,activity.getString(R.string.band_device));
+            final MenuItem createItem = new MenuItem(R.drawable.create_temporary_group, activity.getString(R.string.text_create_temporary_groups));
+            final MenuItem nfcItem = new MenuItem(R.drawable.nfc_white, activity.getString(R.string.text_nfc));
+            final MenuItem scanItem = new MenuItem(R.drawable.scan, activity.getString(R.string.scan));
+            final MenuItem bandItem = new MenuItem(R.drawable.ic_bind_devce, activity.getString(R.string.band_device));
             final List<MenuItem> items = new ArrayList<>();
             mTopRightMenu.addMenuItem(pullItem);
             mTopRightMenu.addMenuItem(pushItem);
             mTopRightMenu.addMenuItem(createItem);
             mTopRightMenu.addMenuItem(nfcItem);
             mTopRightMenu.addMenuItem(scanItem);
-            mTopRightMenu.addMenuItem(bandItem);
 
             items.add(pullItem);
             items.add(pushItem);
             items.add(createItem);
             items.add(nfcItem);
             items.add(scanItem);
-            items.add(bandItem);
+
+            if (HongHuUtils.isHonghuDep()) {
+                items.add(bandItem);
+                mTopRightMenu.addMenuItem(bandItem);
+            }
 
 //            if(items.size() == 1) {
 //                mTopRightMenu.setHeight(240);
@@ -94,7 +101,7 @@ public class MyTopRightMenu {
 //                mTopRightMenu.setHeight(1200);
 //            }
             mTopRightMenu.setHeight(120)
-                    .setWidth(DensityUtil.dip2px(context,200))      //默认宽度wrap_content
+                    .setWidth(DensityUtil.dip2px(context, 200))      //默认宽度wrap_content
                     .showIcon(true)     //显示菜单图标，默认为true
                     .dimBackground(true)           //背景变暗，默认为true
                     .needAnimationStyle(true)   //显示动画，默认为true
@@ -104,15 +111,15 @@ public class MyTopRightMenu {
 //                        .addMenuItem(new MenuItem(R.drawable.popupwindow_add_contacts, "添加联系人"))
                     .setOnMenuItemClickListener(position -> {
                         //判断权限
-                        if(!checkCameraPermission()){
+                        if (!checkCameraPermission()) {
                             gotoSetting();
                             return;
                         }
-                        if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.IDLE && MyApplication.instance.getVideoLivePushingState() == VideoLivePushingState.IDLE){
-                            switch (MyApplication.instance.getIndividualState()){
+                        if (MyApplication.instance.getVideoLivePlayingState() == VideoLivePlayingState.IDLE && MyApplication.instance.getVideoLivePushingState() == VideoLivePushingState.IDLE) {
+                            switch (MyApplication.instance.getIndividualState()) {
                                 case IDLE:
-                                    if (items.get(position) == pushItem){
-                                        if (!MyApplication.instance.isPttPress){
+                                    if (items.get(position) == pushItem) {
+                                        if (!MyApplication.instance.isPttPress) {
                                             if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
                                                 CheckMyPermission.permissionPrompt(context, Manifest.permission.RECORD_AUDIO);
                                                 return;
@@ -123,14 +130,14 @@ public class MyTopRightMenu {
                                             }
 
                                             if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP.name())) {
-                                                ToastUtil.showToast(context,activity.getString(R.string.text_has_no_image_report_authority));
+                                                ToastUtil.showToast(context, activity.getString(R.string.text_has_no_image_report_authority));
                                                 return;
                                             }
-                                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class,"",false);
+                                            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoHandler.class, "", false);
                                         }
 
 
-                                    }else if (items.get(position) == pullItem){
+                                    } else if (items.get(position) == pullItem) {
                                         if (!MyApplication.instance.isPttPress) {
                                             if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
                                                 CheckMyPermission.permissionPrompt(context, Manifest.permission.RECORD_AUDIO);
@@ -138,27 +145,26 @@ public class MyTopRightMenu {
                                             }
                                             //判断终端权限
                                             if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())) {
-                                                ToastUtil.showToast(context,activity.getString(R.string.text_has_no_image_request_authority));
+                                                ToastUtil.showToast(context, activity.getString(R.string.text_has_no_image_request_authority));
                                                 return;
                                             }
                                             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, new Member());
                                         }
 
-                                    }
-                                    else if(items.get(position) ==createItem){
-                                        if (!MyApplication.instance.isPttPress){
+                                    } else if (items.get(position) == createItem) {
+                                        if (!MyApplication.instance.isPttPress) {
                                             if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TEMP_CREATE.name())) {
-                                                ToastUtil.showToast(context,activity.getString(R.string.text_has_no_create_temp_group_authority));
+                                                ToastUtil.showToast(context, activity.getString(R.string.text_has_no_create_temp_group_authority));
                                                 return;
                                             }
-                                            IncreaseTemporaryGroupMemberActivity.startActivity(context, Constants.CREATE_TEMP_GROUP,0);
+                                            IncreaseTemporaryGroupMemberActivity.startActivity(context, Constants.CREATE_TEMP_GROUP, 0);
                                         }
-                                    }else if(items.get(position) ==scanItem){
+                                    } else if (items.get(position) == scanItem) {
                                         context.goToScanActivity();
-                                    }else if(items.get(position) ==nfcItem){
+                                    } else if (items.get(position) == nfcItem) {
                                         int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
-                                        context.checkNFC(userId,true);
-                                    }else if(items.get(position) ==bandItem){//绑定设备
+                                        context.checkNFC(userId, true);
+                                    } else if (items.get(position) == bandItem) {//绑定设备
                                         context.bandDeviceDialog();
                                     }
                                     break;
@@ -173,8 +179,8 @@ public class MyTopRightMenu {
                                     break;
                             }
 
-                        }else {
-                            ToastUtil.showToast(context,activity.getString(R.string.text_in_video_function));
+                        } else {
+                            ToastUtil.showToast(context, activity.getString(R.string.text_in_video_function));
                         }
 
                     })
@@ -183,7 +189,7 @@ public class MyTopRightMenu {
         });
     }
 
-    private void gotoSetting(){
+    private void gotoSetting() {
         new DialogUtil() {
             @Override
             public CharSequence getMessage() {
@@ -207,20 +213,20 @@ public class MyTopRightMenu {
 
             @Override
             public void doCancelThings() {
-                ToastUtil.showToast(activity,activity.getString(R.string.text_go_to_setting_open_camera_authority));
+                ToastUtil.showToast(activity, activity.getString(R.string.text_go_to_setting_open_camera_authority));
             }
         }.showDialog();
     }
 
-    private boolean checkCameraPermission(){
+    private boolean checkCameraPermission() {
         //6.0以下检测相机权限
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.M ){
-            if(SystemUtil.cameraIsCanUse()){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            if (SystemUtil.cameraIsCanUse()) {
                 return true;
             }
-        }else {
+        } else {
             //6.0以上检测相机权限
-            if(CheckMyPermission.selfPermissionGranted(activity, Manifest.permission.CAMERA)){
+            if (CheckMyPermission.selfPermissionGranted(activity, Manifest.permission.CAMERA)) {
                 return true;
             }
         }

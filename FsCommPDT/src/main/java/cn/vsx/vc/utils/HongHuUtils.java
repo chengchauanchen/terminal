@@ -6,10 +6,13 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
+import org.apache.log4j.Logger;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.model.BindBean;
 import cn.vsx.vc.model.Relationship;
@@ -19,15 +22,25 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class HongHuUtils {
 
-   //public static String IP = "http://192.168.1.33:7036";
-   public static String IP = "http://192.168.20.189:6062/donghu";
+    public static String IP = "http://192.168.20.189:6062/donghu";
+
+    /**
+     * 是否为东湖部门
+     *
+     * @return
+     */
+    public static boolean isHonghuDep() {
+        String param = MyTerminalFactory.getSDK().getParam(Params.DEP_NAME, "");
+        Log.e("当前账号部门:",param);
+        return param.contains("东湖");
+    }
 
     /**
      * 解绑设备
      *
      * @param id
      */
-    public static void unBindDevice(int id,int position) {
+    public static void unBindDevice(int id, int position) {
         Relationship relationship = new Relationship();
         //Map<String, String> paramsMap = new HashMap<>();
         relationship.setId(id);
@@ -36,14 +49,14 @@ public class HongHuUtils {
         int port = MyTerminalFactory.getSDK().getParam(Params.GPS_PORT, 0);
 //			final String url = "http://192.168.1.174:6666/save";
 //        final String url = "http://"+ip+":"+port+"/save";
-        final String url =HongHuUtils.IP + "/management/unBundlingPhoneEquipment";
+        final String url = HongHuUtils.IP + "/management/unBundlingPhoneEquipment";
         Gson gson = new Gson();
         final String json = gson.toJson(relationship);
 
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
             String result = MyTerminalFactory.getSDK().getHttpClient().postJson(url, "unBind=" + json);
             Log.i("BandDeviceDialog", result);
-            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverUnBindDeviceHandler.class, id,position);
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverUnBindDeviceHandler.class, id, position);
         });
     }
 
@@ -53,12 +66,11 @@ public class HongHuUtils {
     public static void getBindDevices() {
         Map<String, String> paramsMap = new HashMap<>();
         paramsMap.put("terminalNo", MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "");
-//        String ip = MyTerminalFactory.getSDK().getParam(Params.GPS_IP);
-//        int port = MyTerminalFactory.getSDK().getParam(Params.GPS_PORT, 0);
-        String ip = "192.168.1.20";
-        int port = 9011;
-//        final String url = "http://" + ip + ":" + port + "/management/getRelationshipList";
-        final String url = HongHuUtils.IP +"/management/getRelationshipList";
+
+        //取默认地址
+        String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
+
+        final String url = HongHuUtils.IP + "/management/getRelationshipList";
         Gson gson = new Gson();
         final String json = gson.toJson(paramsMap);
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> {

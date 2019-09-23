@@ -1676,6 +1676,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     protected void onRestart() {
         super.onRestart();
         //每次页面都刷新一次
-        HongHuUtils.getBindDevices();
+        if (HongHuUtils.isHonghuDep()) {
+            //获取已绑定的装备列表
+            HongHuUtils.getBindDevices();
+        }
     }
 }

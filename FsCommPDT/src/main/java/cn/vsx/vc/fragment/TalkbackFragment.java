@@ -1315,7 +1315,6 @@ public class TalkbackFragment extends BaseFragment {
             rl_uav_push.setVisibility(View.VISIBLE);
         } else {
             rl_uav_push.setVisibility(View.GONE);
-            //Todo 获取绑定的装备 来判断是否显示
         }
 //        setScanGroupIcon();//设置组扫描相关图标
 
@@ -1901,8 +1900,10 @@ public class TalkbackFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
         setPttText();
-        //获取已绑定的装备列表
-        HongHuUtils.getBindDevices();
+        if (HongHuUtils.isHonghuDep()) {
+            //获取已绑定的装备列表
+            HongHuUtils.getBindDevices();
+        }
     }
 
     private ReceiverBindDeviceHandler receiverBindDeviceHandler = deviceJson -> myHandler.post(() -> {
