@@ -62,34 +62,10 @@ public class PoliceBandDeviceAdapter extends BaseRecycleViewAdapter<TerminalBean
         holder.iv_message.setVisibility(View.GONE);
         holder.iv_push_video.setVisibility(View.GONE);
         holder.iv_individual_call.setVisibility(View.GONE);
-
+        //根据装备类型,显示操作按钮
         String terminalType = terminalBean.getTerminalType();
-
-        //int[] imageRid = [holder.iv_call_phone,holder.iv_message,holder.iv_push_video,holder.iv_individual_call];
-
-        //TerminalUtils.showOperate(,terminalType);
-
-
-        Map<String, Boolean> operates = TerminalUtils.getOperationForTerminalType(terminalType);
-        for (String key : operates.keySet()) {//keySet获取map集合key的集合  然后在遍历key即可
-            Boolean value = operates.get(key);
-            switch (key) {
-                case TerminalUtils.CALL_PHONE:
-                    holder.iv_individual_call.setVisibility(value?View.VISIBLE:View.GONE);
-                    break;
-                case TerminalUtils.MESSAGE:
-                    holder.iv_message.setVisibility(value?View.VISIBLE:View.GONE);
-                    break;
-                case TerminalUtils.LIVE:
-                    holder.iv_push_video.setVisibility(value?View.VISIBLE:View.GONE);
-                    break;
-                case TerminalUtils.INDIVIDUAL_CALL:
-                    holder.iv_individual_call.setVisibility(value?View.VISIBLE:View.GONE);
-                    break;
-                default:
-                    break;
-            }
-        }
+        ImageView[] imageRid = {holder.iv_call_phone,holder.iv_message,holder.iv_push_video,holder.iv_individual_call};
+        TerminalUtils.showOperate(imageRid,terminalType);
 
         holder.iv_individual_call.setOnClickListener(v -> {
             //IndividualCallFragment.startIndividualCallFragment((FragmentActivity)getContext(),"警察好","10000201");
@@ -114,8 +90,8 @@ public class PoliceBandDeviceAdapter extends BaseRecycleViewAdapter<TerminalBean
             if (personnelBean != null) {
                 String personnelName = personnelBean.getPersonnelName();
                 String personnelNo = personnelBean.getPersonnelNo();
-                String terminalUniqueNo = terminalBean.getTerminalUniqueNo();
                 PullLiveManager liveManager = new PullLiveManager(getContext());
+                String terminalUniqueNo = TerminalUtils.getPullLiveUniqueNo(terminalBean);
                 liveManager.pullVideo(personnelNo, terminalBean.getTerminalType(), terminalUniqueNo);
             } else {
                 ToastUtil.showToast(getContext(), "personnelBean 为空");

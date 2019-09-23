@@ -27,24 +27,37 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpActivity;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.js.TerminalPadJs;
+import com.vsxin.terminalpad.mvp.contract.constant.OperationEnum;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
 import com.vsxin.terminalpad.mvp.contract.presenter.MainMapPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMainMapView;
+import com.vsxin.terminalpad.mvp.entity.CarBean;
+import com.vsxin.terminalpad.mvp.entity.PatrolBean;
+import com.vsxin.terminalpad.mvp.entity.TerminalBean;
+import com.vsxin.terminalpad.mvp.ui.fragment.CarOrPatrolInfoFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.LayerMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.NoticeFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.PlayerFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.SmallMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.VsxFragment;
 import com.vsxin.terminalpad.mvp.ui.widget.ArcgisWebView;
+import com.vsxin.terminalpad.mvp.ui.widget.PoliceDevicesDialog;
 import com.vsxin.terminalpad.receiveHandler.ReceiveUpdateMainFrgamentPTTButtonHandler;
 import com.vsxin.terminalpad.utils.HandleIdUtil;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
 import com.vsxin.terminalpad.utils.SystemUtils;
 
 import org.apache.http.util.TextUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import cn.vsx.hamster.common.Authority;
@@ -107,6 +120,11 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
     @BindView(R.id.iv_load_web)
     ImageView iv_load_web;
+    @BindView(R.id.iv_fold)
+    ImageView iv_fold;
+
+    @BindView(R.id.fl_vsx)
+    FrameLayout fl_vsx;
 
     private int timeProgress;
     //组呼倒计时
@@ -137,6 +155,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         }
     };
 
+    private boolean isShow = true;
+
     public static void startActivity(Context context) {
         context.startActivity(new Intent(context, MainMapActivity.class));
     }
@@ -160,12 +180,24 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 //        groupCallInstruction.bindReceiveHandler();
 
         iv_load_web.setOnClickListener(view -> reloadWebView());
+
+        iv_fold.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                fl_vsx.setVisibility(!isShow ? View.VISIBLE :View.GONE );
+                isShow = !isShow;
+            }
+        });
     }
 
     private void reloadWebView() {
 //        web_map.reload(); //刷新
         //TerminalInfoFragment.startMemberInfoFragment(this, null, MemberTypeEnum.PHONE);
         //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(HistoryReportPlayerHandler.class);
+//        CarOrPatrolInfoFragment.startCarBoatInfoFragment(this,new PatrolBean(), TerminalEnum.TERMINAL_PATROL);
+//        List<TerminalBean> terminalBeans = new ArrayList<>();
+//        PoliceDevicesDialog policeDevicesDialog = new PoliceDevicesDialog(this,terminalBeans, OperationEnum.INDIVIDUAL_CALL);
+//        policeDevicesDialog.show();
     }
 
     /**
@@ -193,8 +225,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 //        getLogger().info("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
 //        web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
         //李翔本机
-        getLogger().info("http://192.168.1.152:8080/#/");
-        web_map.loadUrl("http://192.168.1.152:8080/#/");
+        getLogger().info("http://192.168.20.189:6062/donghuMap/index.html");
+        web_map.loadUrl("http://192.168.20.189:6062/donghuMap/index.html");
 //        web_map.loadUrl("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
     }
 
@@ -226,6 +258,26 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 
     @Override
     public void drawMapLayer(int type, boolean isShow) {
+        web_map.loadUrl("javascript:chooseEquipment(" + type + "," + isShow + ")");
+    }
+
+    //组呼来了
+    private void jsGroupCallComing(int memberId, final String memberName, final int groupId, String groupName, CallMode currentCallMode, long uniqueNo){
+
+        Map<Object,Object> json = new HashMap<>();
+        json.put("memberId",memberId);
+        json.put("memberName",memberName);
+        json.put("groupId",groupId);
+        json.put("currentCallMode",currentCallMode.getCode());
+        json.put("uniqueNo",uniqueNo);
+
+        Gson gson = new Gson();
+        String s = gson.toJson(json);
+        web_map.loadUrl("javascript:getyuyin(" + s + ")");
+    }
+
+    //组呼来了
+    private void jsGroupCallEnd(int type, boolean isShow){
         web_map.loadUrl("javascript:chooseEquipment(" + type + "," + isShow + ")");
     }
 
@@ -816,7 +868,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
      */
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
         @Override
-        public void handler(int memberId, final String memberName, final int groupId, String groupName, CallMode currentCallMode) {
+        public void handler(int memberId, final String memberName, final int groupId, String groupName, CallMode currentCallMode, long uniqueNo) {
             getLogger().info("触发了被动方组呼来了receiveGroupCallIncommingHandler:" + "curreneCallMode " + currentCallMode + "-----" + PadApplication.getPadApplication().getGroupSpeakState());
             if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 ToastUtil.showToast(MainMapActivity.this, getString(R.string.text_has_no_group_call_listener_authority));
@@ -834,6 +886,9 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 //                    setCurrentGroupScanView(groupId, groupName);
                 }
                 MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, memberName);
+
+                //TODO 调地图的js
+                jsGroupCallComing(memberId,memberName,groupId,groupName,currentCallMode,uniqueNo);
             });
 
 //            speakingId = groupId;
@@ -874,6 +929,8 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                         change2Silence();
                     }
                 }
+                //TODO 调地图的js
+
             });
         }
     };

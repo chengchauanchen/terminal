@@ -233,8 +233,8 @@ public class ImagePreviewItemFragment extends BaseFragment{
             Glide.with(getActivity())
                     .load(mImageList.get(position).getPath())
 //                    .placeholder(R.drawable.default_image)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true)
+                    //.diskCacheStrategy(DiskCacheStrategy.NONE)
+                    //.skipMemoryCache(true)
                     .into(view);
             container.addView(view);
             view.setOnClickListener(new View.OnClickListener(){

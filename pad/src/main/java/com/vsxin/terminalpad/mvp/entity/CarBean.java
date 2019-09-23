@@ -1,5 +1,6 @@
 package com.vsxin.terminalpad.mvp.entity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -14,6 +15,15 @@ public class CarBean extends BaseBean {
     private String carLng;
     private String carNo;//车牌
     private Map<String,PersonnelBean> personnelDtoMap;//警员
+    private List<TerminalBean> terminals;//终端设备
+
+    public List<TerminalBean> getTerminals() {
+        return terminals;
+    }
+
+    public void setTerminals(List<TerminalBean> terminals) {
+        this.terminals = terminals;
+    }
 
     public String getCarName() {
         return carName;

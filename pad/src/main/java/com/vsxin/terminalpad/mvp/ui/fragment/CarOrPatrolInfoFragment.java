@@ -13,14 +13,17 @@ import com.ixiaoma.xiaomabus.architecture.mvp.refresh.adapter.BaseRecycleViewAda
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.fragment.RefreshRecycleViewFragment;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.mvp.contract.presenter.CarBoatInfoPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.ICarBoatInfoView;
 import com.vsxin.terminalpad.mvp.entity.CarBean;
 import com.vsxin.terminalpad.mvp.entity.DeviceBean;
 import com.vsxin.terminalpad.mvp.entity.PatrolBean;
 import com.vsxin.terminalpad.mvp.entity.PersonnelBean;
+import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 import com.vsxin.terminalpad.mvp.ui.adapter.CarBandDeviceAdapter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -103,21 +106,38 @@ public class CarOrPatrolInfoFragment extends RefreshRecycleViewFragment<DeviceBe
 
         List<PersonnelBean> personnels = getPresenter().getPersonnels(personnelDtoMap);
         List<DeviceBean> devices = getPresenter().getDevices(personnels);
-        refreshOrLoadMore(devices);
+        //refreshOrLoadMore(devices);
     }
 
     /**
      * 初始化 car
      */
     private void initCar(CarBean car) {
+        List<DeviceBean> deviceBeanList = new ArrayList<>();
         tv_name.setText(car.getCarName() + "    " + car.getCarNo());
         tv_department.setText(car.getCarOccupant());
         Map<String, PersonnelBean> personnelDtoMap = car.getPersonnelDtoMap();
         //Todo 其他单独终端设备列表
+        List<TerminalBean> terminals = car.getTerminals();
 
+        TerminalBean terminalBean = new TerminalBean();
+        terminalBean.setTerminalType(TerminalType.TERMINAL_BULL);
+        terminalBean.setGb28181No("32010000001320000114");
+
+        if(terminals==null){
+            terminals = new ArrayList<>();
+            terminals.add(terminalBean);
+        }else{
+            terminals.add(terminalBean);
+        }
+        List<DeviceBean> terminals1 = getPresenter().getTerminals(terminals);
         List<PersonnelBean> personnels = getPresenter().getPersonnels(personnelDtoMap);
         List<DeviceBean> devices = getPresenter().getDevices(personnels);
-        refreshOrLoadMore(devices);
+
+        deviceBeanList.addAll(terminals1);
+        deviceBeanList.addAll(devices);
+
+        refreshOrLoadMore(deviceBeanList);
     }
 
 

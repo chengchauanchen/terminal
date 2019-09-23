@@ -254,7 +254,7 @@ public class LivePresenter extends BasePresenter<ILiveView> {
     /**
      * 组呼进来了
      */
-    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
+    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode, uniqueNo) -> {
         if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
             ToastUtil.showToast(getContext(), getContext().getString(R.string.text_has_no_group_call_listener_authority));
         } else {

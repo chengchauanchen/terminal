@@ -49,8 +49,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
         final Image image = mImages.get(position);
-        Glide.with(mContext).load(new File(image.getPath()))
-                .diskCacheStrategy(DiskCacheStrategy.NONE).into(holder.ivImage);
+        Glide.with(mContext).load(new File(image.getPath())).into(holder.ivImage);
 
         setItemSelect(holder, mSelectImages.contains(image));
         //点击选中/取消选中图片

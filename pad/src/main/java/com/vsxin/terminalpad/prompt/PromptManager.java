@@ -123,7 +123,7 @@ public class PromptManager {
 	private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
 		@Override
 		public void handler(final int memberId, final String memberName, final int groupId,
-                            String version, final CallMode currentCallMode) {
+                            String version, final CallMode currentCallMode, long uniqueNo) {
 			TerminalFactory.getSDK().getThreadPool().execute(new Runnable(){
 				@Override
 				public void run(){

@@ -29,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="11px"
-                android:text="赵强"
+                android:text=""
                 android:textColor="@color/white"
                 android:textSize="36px" />
 
@@ -38,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5px"
-                android:text="771245"
+                android:text=""
                 android:textColor="@color/white"
                 android:textSize="36px" />
         </LinearLayout>
@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
             android:layout_marginLeft="20px"
-            android:text="00:12:25"
+            android:text=""
             android:textColor="@color/white"
             android:textSize="36px" />
 

@@ -3,9 +3,11 @@ package com.vsxin.terminalpad.mvp.contract.presenter;
 import android.content.Context;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.RefreshPresenter;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.mvp.contract.view.ICarBoatInfoView;
 import com.vsxin.terminalpad.mvp.entity.DeviceBean;
 import com.vsxin.terminalpad.mvp.entity.PersonnelBean;
+import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 
 import java.util.AbstractList;
 import java.util.ArrayList;
@@ -39,7 +41,22 @@ public class CarBoatInfoPresenter extends RefreshPresenter<DeviceBean, ICarBoatI
     }
 
     /**
-     * 拼接数据
+     * 拼接民警数据
+     * @return
+     */
+    public List<DeviceBean> getTerminals(List<TerminalBean> terminalBeans){
+        List<DeviceBean> deviceBeans = new ArrayList<>();
+        for (TerminalBean terminalBean : terminalBeans){
+            DeviceBean deviceBean = new DeviceBean();
+            deviceBean.setTerminal(terminalBean);
+            deviceBean.setPolice(false);
+            deviceBeans.add(deviceBean);
+        }
+        return deviceBeans;
+    }
+
+    /**
+     * 拼接民警数据
      * @return
      */
     public List<DeviceBean> getDevices(List<PersonnelBean> personnels){

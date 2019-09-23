@@ -60,9 +60,9 @@ public class ArcgisWebView extends WebView {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, String url) {
                 Log.i(TAG, "shouldInterceptRequest=====request.getUrl()=" + url);
-                if (url.contains("init.js")) {
-                    return editResponse();
-                }
+//                if (url.contains("init.js")) {
+//                    return editResponse();
+//                }
                 return super.shouldInterceptRequest(view, url);
 
             }
@@ -71,10 +71,10 @@ public class ArcgisWebView extends WebView {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 Log.i(TAG, "shouldInterceptRequest=====request.getUrl()=" + request.getUrl().toString());
-                String url = request.getUrl().toString();
-                if (!TextUtils.isEmpty(url) && url.contains("init.js")) {
-                    return editResponse();
-                }
+//                String url = request.getUrl().toString();
+//                if (!TextUtils.isEmpty(url) && url.contains("init.js")) {
+//                    return editResponse();
+//                }
                 return super.shouldInterceptRequest(view, request);
             }
 

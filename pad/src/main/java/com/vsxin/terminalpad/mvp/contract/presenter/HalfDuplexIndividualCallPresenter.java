@@ -33,7 +33,7 @@ public class HalfDuplexIndividualCallPresenter extends BasePresenter<IHalfDuplex
     //全双工还是半双工
     private int individualCallType = IndividualCallType.HALF_DUPLEX.getCode();
 
-    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> {
+    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode, uniqueNo) -> {
         //如果在半双工个呼中来组呼，就是对方在说话
         getView().getLogger().info("IndividualCallService: 收到组呼：callType:" + individualCallType);
         if(individualCallType == IndividualCallType.HALF_DUPLEX.getCode()){

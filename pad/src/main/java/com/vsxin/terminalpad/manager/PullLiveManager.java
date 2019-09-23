@@ -74,6 +74,7 @@ public class PullLiveManager {
             if (TextUtils.equals(type, TerminalType.TERMINAL_PHONE)) {//ok  警务通拉视频掩饰20秒左右,才有视频过来 播放时做延时1~2秒
                 //警务通
                 pullVideoForMemberNo(no, TerminalMemberType.TERMINAL_PHONE);
+//                pullVideoForMemberNo(88021990, TerminalMemberType.TERMINAL_PHONE);
             } else if (TextUtils.equals(type, TerminalType.TERMINAL_BODY_WORN_CAMERA)) {
                 //执法记录仪
                 pullVideoForMemberNo(no, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA);
@@ -206,7 +207,7 @@ public class PullLiveManager {
             Member member = MemberUtil.getMemberForTerminalMemberType(account, type);
             //拉取账号的警务通终端
             if (member == null) {
-                ToastUtil.showToast(context, context.getString(R.string.text_has_no_image_request_authority));
+                ToastUtil.showToast(context, context.getString(R.string.text_get_personal_info_fail));
                 return;
             }
             OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);

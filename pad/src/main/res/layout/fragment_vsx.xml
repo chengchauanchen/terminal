@@ -1,78 +1,93 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:background="@drawable/shape_black70transparent"
-    android:orientation="vertical">
+    android:layout_gravity="right"
+    android:orientation="horizontal">
 
-    <FrameLayout
-        android:id="@+id/tab_content"
-        android:layout_weight="1"
-        android:layout_width="match_parent"
-        android:layout_height="0dip">
-    </FrameLayout>
+    <ImageView
+        android:visibility="gone"
+        android:id="@+id/iv_fold"
+        android:layout_gravity="center_vertical"
+        android:src="@mipmap/ic_fold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
-    <View
-        android:id="@+id/v_line"
-        android:layout_width="fill_parent"
-        android:layout_height="1px"
-        android:layout_above="@+id/rg"
-        android:background="@color/black" />
-
-    <!--tab选项-->
     <LinearLayout
-        android:id="@+id/rg"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:minHeight="118dp"
-        android:paddingRight="50px"
-        android:paddingLeft="50px"
-        android:orientation="horizontal">
+        android:id="@+id/ll_vsx_fragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/shape_black70transparent"
+        android:orientation="vertical">
 
-        <RadioButton
-            android:id="@+id/btn_message_page"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:button="@null"
-            android:drawablePadding="2dp"
-            android:drawableTop="@drawable/select_bottom_tab_message_icon"
-            android:gravity="center"
-            android:paddingTop="5dp"
-            android:text="消息"
-            android:textColor="@drawable/select_bottom_tab_message_text_color"
-            android:textSize="20sp" />
+        <FrameLayout
+            android:id="@+id/tab_content"
+            android:layout_width="match_parent"
+            android:layout_height="0dip"
+            android:layout_weight="1"/>
 
-        <RadioButton
-            android:id="@+id/btn_contects_page"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:button="@null"
-            android:drawablePadding="2dp"
-            android:drawableTop="@drawable/select_bottom_tab_contects_icon"
-            android:gravity="center"
-            android:paddingTop="5dp"
-            android:text="通讯录"
-            android:textColor="@drawable/select_bottom_tab_message_text_color"
-            android:textSize="20sp" />
+        <View
+            android:id="@+id/v_line"
+            android:layout_width="fill_parent"
+            android:layout_height="1px"
+            android:layout_above="@+id/rg"
+            android:background="@color/black" />
 
-        <RadioButton
-            android:id="@+id/btn_mine_page"
-            android:layout_width="0dp"
+        <!--tab选项-->
+        <LinearLayout
+            android:id="@+id/rg"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:button="@null"
-            android:drawablePadding="2dp"
-            android:drawableTop="@drawable/select_bottom_tab_me_icon"
-            android:gravity="center"
-            android:paddingTop="5dp"
-            android:text="我"
-            android:textColor="@drawable/select_bottom_tab_message_text_color"
-            android:textSize="20sp"
-            android:visibility="gone"/>
+            android:gravity="center_vertical"
+            android:minHeight="118dp"
+            android:orientation="horizontal"
+            android:paddingLeft="50px"
+            android:paddingRight="50px">
+
+            <RadioButton
+                android:id="@+id/btn_message_page"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:button="@null"
+                android:drawableTop="@drawable/select_bottom_tab_message_icon"
+                android:drawablePadding="2dp"
+                android:gravity="center"
+                android:paddingTop="5dp"
+                android:text="消息"
+                android:textColor="@drawable/select_bottom_tab_message_text_color"
+                android:textSize="20sp" />
+
+            <RadioButton
+                android:id="@+id/btn_contects_page"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:button="@null"
+                android:drawableTop="@drawable/select_bottom_tab_contects_icon"
+                android:drawablePadding="2dp"
+                android:gravity="center"
+                android:paddingTop="5dp"
+                android:text="通讯录"
+                android:textColor="@drawable/select_bottom_tab_message_text_color"
+                android:textSize="20sp" />
+
+            <RadioButton
+                android:id="@+id/btn_mine_page"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:button="@null"
+                android:drawableTop="@drawable/select_bottom_tab_me_icon"
+                android:drawablePadding="2dp"
+                android:gravity="center"
+                android:paddingTop="5dp"
+                android:text="我"
+                android:textColor="@drawable/select_bottom_tab_message_text_color"
+                android:textSize="20sp"
+                android:visibility="gone" />
+
+        </LinearLayout>
 
     </LinearLayout>
-
 </LinearLayout>

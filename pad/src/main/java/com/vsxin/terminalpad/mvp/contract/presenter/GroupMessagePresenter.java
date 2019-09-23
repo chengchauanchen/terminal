@@ -36,22 +36,22 @@ public class GroupMessagePresenter extends BaseMessagePresenter<IGroupMessageVie
     @Override
     public void registReceiveHandler(){
         super.registReceiveHandler();
-        TerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
-        TerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
-        TerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
-        TerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
-        TerminalFactory.getSDK().registReceiveHandler(mReceiveChangeGroupHandler);
+        //TerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
+        //TerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
+        //TerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
+        //TerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
+        //TerminalFactory.getSDK().registReceiveHandler(mReceiveChangeGroupHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveGetGroupLivingListHandler);
     }
 
     @Override
     public void unregistReceiveHandler(){
         super.unregistReceiveHandler();
-        TerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
-        TerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
-        TerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
-        TerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
-        TerminalFactory.getSDK().unregistReceiveHandler(mReceiveChangeGroupHandler);
+        //TerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
+        //TerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
+        //TerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
+        //TerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
+        //TerminalFactory.getSDK().unregistReceiveHandler(mReceiveChangeGroupHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveGetGroupLivingListHandler);
     }
 
@@ -87,7 +87,7 @@ public class GroupMessagePresenter extends BaseMessagePresenter<IGroupMessageVie
     /**
      * 被动方组呼来了
      */
-    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, version, currentCallMode) -> {
+    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, version, currentCallMode, uniqueNo) -> {
 //        speakingId = groupId;
 //        speakingName = memberName;
         if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {

@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:textSize="32px"
-            android:text="赵全 106525"/>
+            android:text=""/>
 
         <TextView
             android:id="@+id/tv_department"
@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:textSize="27px"
-            android:text="洪山分局关南派出所"/>
+            android:text=""/>
 
         <LinearLayout
             android:layout_marginTop="20px"
@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/color_42A5F6"
                 android:textSize="27px"
-                android:text="13545213172"/>
+                android:text=""/>
         </LinearLayout>
 
         <LinearLayout
@@ -100,7 +100,7 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:textSize="27px"
-            android:text="定位时间：2018-11-24 20:37:02"/>
+            android:text="定位时间："/>
 
     </LinearLayout>
 
@@ -114,6 +114,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <ImageView
+                android:id="@+id/iv_phone"
                 android:src="@mipmap/ic_phone"
                 android:layout_width="0dp"
                 android:layout_weight="1"
@@ -142,6 +143,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:visibility="gone"
             android:layout_marginTop="66px"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">

@@ -3,6 +3,8 @@ package com.vsxin.terminalpad.mvp.ui.fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpFragment;
@@ -26,6 +28,10 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
 
     @BindView(R.id.btn_contects_page)
     RadioButton btn_contects_page;
+    @BindView(R.id.iv_fold)
+    ImageView iv_fold;//折叠
+    @BindView(R.id.ll_vsx_fragment)
+    LinearLayout ll_vsx_fragment;//折叠
 
 //    @BindView(R.id.btn_mine_page)
 //    RadioButton btn_mine_page;
@@ -34,6 +40,7 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
     private ContactsFragment contactsFragment;
 //    private MeFragment meFragment;
 
+    private boolean isShow = true;
 
     @Override
     protected int getLayoutResID() {
@@ -43,6 +50,15 @@ public class VsxFragment extends MvpFragment<IMainView, MainPresenter> implement
     @Override
     protected void initViews(View view) {
         initFragment();
+
+        //折叠右侧
+        iv_fold.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ll_vsx_fragment.setVisibility(!isShow ? View.VISIBLE :View.GONE );
+                isShow = !isShow;
+            }
+        });
     }
 
     @Override

@@ -12,10 +12,18 @@ import android.widget.TextView;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.adapter.BaseRecycleViewAdapter;
 import com.vsxin.terminalpad.R;
+import com.vsxin.terminalpad.mvp.contract.constant.OperationEnum;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.mvp.entity.DeviceBean;
 import com.vsxin.terminalpad.mvp.entity.PersonnelBean;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
+import com.vsxin.terminalpad.mvp.ui.widget.PoliceDevicesDialog;
 import com.vsxin.terminalpad.utils.TerminalUtils;
+
+import java.util.List;
+import java.util.Map;
+
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * @author qzw
@@ -50,20 +58,77 @@ public class CarBandDeviceAdapter extends BaseRecycleViewAdapter<DeviceBean, Car
                 holder.tv_type.setVisibility(View.GONE);
             }
         }
-
         if (deviceBean.isPolice()) {
             PersonnelBean personnel = deviceBean.getPersonnel();
-            holder.tv_type.setText("民警：");
-            holder.iv_device.setImageResource(R.mipmap.img_police);
-            holder.tv_device_name.setText(personnel.getPersonnelName());
+            bindPersonnel(personnel,holder);
         } else {
-            holder.tv_type.setText("装备：");
             TerminalBean terminal = deviceBean.getTerminal();
-            int resId = TerminalUtils.getImageForTerminalType(terminal.getTerminalType());
-            holder.iv_device.setImageResource(resId);
-            String terminalName = TerminalUtils.getNameForTerminalType(terminal.getTerminalType());
-            holder.tv_device_name.setText(terminalName);
+            bindTerminal(terminal,holder);
         }
+    }
+
+    //民警
+    private void bindPersonnel(PersonnelBean personnel,ViewHolder holder){
+        holder.tv_type.setText("民警：");
+        holder.iv_device.setImageResource(R.mipmap.img_police);
+        holder.tv_device_name.setText(personnel.getPersonnelName());
+        //根据装备类型,显示操作按钮
+        ImageView[] imageRid = {holder.iv_call_phone, holder.iv_message, holder.iv_push_video, holder.iv_individual_call};
+        TerminalUtils.showOperate(imageRid, TerminalType.TERMINAL_PERSONNEL);
+        holder.iv_call_phone.setOnClickListener(view -> {//打电话
+            //ToastUtil.showToast(getContext(),"民警-打电话");
+            callPhone(personnel,personnel.getTerminalDtoList(), OperationEnum.CALL_PHONE);
+        });
+        holder.iv_message.setOnClickListener(view -> {//消息
+            //ToastUtil.showToast(getContext(),"民警-消息");
+            callPhone(personnel,personnel.getTerminalDtoList(),OperationEnum.MESSAGE);
+        });
+        holder.iv_push_video.setOnClickListener(view -> {//拉视频
+            //ToastUtil.showToast(getContext(),"民警-拉视频");
+            callPhone(personnel,personnel.getTerminalDtoList(),OperationEnum.LIVE);
+        });
+        holder.iv_individual_call.setOnClickListener(view -> {//个呼
+            //ToastUtil.showToast(getContext(),"民警-个呼");
+            callPhone(personnel,personnel.getTerminalDtoList(),OperationEnum.INDIVIDUAL_CALL);
+        });
+    }
+
+    private void callPhone(PersonnelBean personnel,List<TerminalBean> terminalBeans,OperationEnum operationEnum){
+        if(operationEnum == OperationEnum.CALL_PHONE){//打电话
+
+        }else if(operationEnum == OperationEnum.MESSAGE){//消息
+
+        }else if(operationEnum == OperationEnum.LIVE){//拉视频
+            PoliceDevicesDialog policeDevicesDialog = new PoliceDevicesDialog(getContext(),personnel,terminalBeans,operationEnum);
+            policeDevicesDialog.show();
+        }else if(operationEnum == OperationEnum.INDIVIDUAL_CALL){//个呼
+            PoliceDevicesDialog policeDevicesDialog = new PoliceDevicesDialog(getContext(),personnel,terminalBeans,operationEnum);
+            policeDevicesDialog.show();
+        }
+    }
+
+    //装备
+    private void bindTerminal(TerminalBean terminal,ViewHolder holder){
+        holder.tv_type.setText("装备：");
+        int resId = TerminalUtils.getImageForTerminalType(terminal.getTerminalType());
+        holder.iv_device.setImageResource(resId);
+        String terminalName = TerminalUtils.getNameForTerminalType(terminal.getTerminalType());
+        holder.tv_device_name.setText(terminalName);
+        //根据装备类型,显示操作按钮
+        ImageView[] imageRid = {holder.iv_call_phone, holder.iv_message, holder.iv_push_video, holder.iv_individual_call};
+        TerminalUtils.showOperate(imageRid, terminal.getTerminalType());
+        holder.iv_call_phone.setOnClickListener(view -> {//打电话
+            ToastUtil.showToast(getContext(),"装备-打电话");
+        });
+        holder.iv_message.setOnClickListener(view -> {//消息
+            ToastUtil.showToast(getContext(),"装备-消息");
+        });
+        holder.iv_push_video.setOnClickListener(view -> {//拉视频
+            ToastUtil.showToast(getContext(),"装备-拉视频");
+        });
+        holder.iv_individual_call.setOnClickListener(view -> {//个呼
+            ToastUtil.showToast(getContext(),"装备-个呼");
+        });
     }
 
     @Override

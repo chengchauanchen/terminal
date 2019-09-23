@@ -112,7 +112,7 @@ public class GroupCallInstruction extends BaseInstruction{
      */
     ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
         @Override
-        public void handler(int memberId, String memberName, int groupId, String groupName, CallMode currentCallMode) {
+        public void handler(int memberId, String memberName, int groupId, String groupName, CallMode currentCallMode, long uniqueNo) {
             getLogger().info("组呼来了---ReceiveGroupCallIncommingHandler---");
         }
     };

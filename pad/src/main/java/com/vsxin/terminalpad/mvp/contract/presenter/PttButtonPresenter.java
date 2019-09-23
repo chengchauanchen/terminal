@@ -95,7 +95,7 @@ public class PttButtonPresenter extends BasePresenter<IPttButton> {
     /**
      * 组呼来了
      */
-    ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode) -> mHandler.post(() -> {
+    ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode, uniqueNo) -> mHandler.post(() -> {
         getView().getLogger().info("组呼来了---ReceiveGroupCallIncommingHandler---");
 
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){

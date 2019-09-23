@@ -152,7 +152,8 @@ public abstract class MessageBaseFragment<V extends IBaseMessageView,P extends B
     public void onClick(View view){
         switch(view.getId()){
             case R.id.news_bar_return:
-                FragmentManage.finishFragment(Objects.requireNonNull(getActivity()));
+                //FragmentManage.finishFragment(Objects.requireNonNull(getActivity()));
+                FragmentManage.startVsxFragment(getActivity());
             break;
         }
     }

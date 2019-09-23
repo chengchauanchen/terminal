@@ -13,13 +13,18 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpFragment;
 import com.vsxin.terminalpad.R;
+import com.vsxin.terminalpad.manager.PullLiveManager;
+import com.vsxin.terminalpad.manager.StartCallManager;
 import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.mvp.contract.presenter.TerminalInfoPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.ITerminalInfoView;
 import com.vsxin.terminalpad.mvp.entity.MemberInfoBean;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 import com.vsxin.terminalpad.mvp.ui.activity.MainMapActivity;
+import com.vsxin.terminalpad.utils.NumberUtil;
+import com.vsxin.terminalpad.utils.TerminalUtils;
 import com.vsxin.terminalpad.utils.TimeUtil;
 
 import butterknife.BindView;
@@ -60,14 +65,21 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
     @BindView(R.id.tv_time)
     TextView tv_time;//时间
 
+    @BindView(R.id.iv_phone)
+    ImageView iv_phone;//打电话
+
+    @BindView(R.id.iv_message)
+    ImageView iv_message;//消息
+
     @BindView(R.id.iv_individual_call)
     ImageView iv_individual_call;//发起个呼
 
     @BindView(R.id.iv_push_video)
     ImageView iv_push_video;//视频上报
 
-    @BindView(R.id.iv_message)
-    ImageView iv_message;//个人聊天界面
+    private TerminalBean terminalBean;
+    private TerminalEnum terminalEnum;
+    private StartCallManager startCallManager;
     //private MemberInfoBean memberInfo;
     //private MemberTypeEnum memberTypeEnum;
 
@@ -80,36 +92,47 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
     protected void initViews(View view) {
         getPresenter().registReceiveHandler();
 
-        TerminalBean terminalBean = (TerminalBean) getArguments().getSerializable(TERMINAL);
-        TerminalEnum terminalEnum = (TerminalEnum) getArguments().getSerializable(TERMINAL_ENUM);
+        terminalBean = (TerminalBean) getArguments().getSerializable(TERMINAL);
+        terminalEnum = (TerminalEnum) getArguments().getSerializable(TERMINAL_ENUM);
+        startCallManager = new StartCallManager(getContext());
 
-
-//        if (memberTypeEnum != null) {
-//            getLogger().info("memberInfo:" + new Gson().toJson(memberInfo));
-//            getLogger().info(memberTypeEnum.toString());
-//            iv_type_icon.setImageResource(memberTypeEnum.getResId());
-//        }
-//        if(memberInfo!=null){
-//            bindMemberInfo(memberInfo);
-//        }
+        if (terminalEnum != null) {
+            iv_type_icon.setImageResource(terminalEnum.getRid());
+        }
+        if(terminalBean !=null){
+            bindMemberInfo(terminalBean);
+        }
 //
-//        iv_close.setOnClickListener(v -> closeMemberInfoFragment(getActivity()));
+        iv_close.setOnClickListener(v -> closeMemberInfoFragment(getActivity()));
 //
 //        //发起个呼
-//        iv_individual_call.setOnClickListener(v -> {
-//            //手台个呼
-//            if(memberTypeEnum!=null && memberTypeEnum==MemberTypeEnum.HAND){
-//                getPresenter().startIndividualCall("72020850", TerminalMemberType.TERMINAL_PDT);
-//            }else{
-//                ToastUtil.showToast(getContext(),"暂不支持该设备个呼");
-//            }
-//        });
+        iv_individual_call.setOnClickListener(v -> {
+            //手台个呼
+            if(terminalBean!=null){
+                if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_PDT)){
+                    Long uniqueNo = NumberUtil.strToLong(terminalBean.getPdtNo());
+                    //startCallManager.startIndividualCall("手台", terminalBean.getPdtNo(), uniqueNo);
+                    startCallManager.startIndividualCall("手台", "72020855", uniqueNo);
+                }else if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_LTE)){//lte暂不能个呼.因为取不到uniqueNo
+//                    Long uniqueNo = NumberUtil.strToLong(terminalBean.getPdtNo());
+//                    startCallManager.startIndividualCall("手台", terminalBean.getPdtNo(), uniqueNo);
+                }else if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_PHONE)){//正常情况,警务通就是民警,不会走这
+//                    Long uniqueNo = NumberUtil.strToLong(terminalBean.getPdtNo());
+//                    startCallManager.startIndividualCall("手台", terminalBean.getPdtNo(), uniqueNo);
+                }else{
+                    ToastUtil.showToast(getContext(),"暂不支持该设备个呼");
+                }
+                //getPresenter().startIndividualCall("72020850", TerminalMemberType.TERMINAL_PDT);
+            }else{
+                ToastUtil.showToast(getContext(),"暂不支持该设备个呼");
+            }
+        });
 //
 //        //上报视频
-//        iv_push_video.setOnClickListener(v -> {
-//            //pushVideo();
-//            pullVideo();
-//        });
+        iv_push_video.setOnClickListener(v -> {
+            //pushVideo();
+            pullVideo();
+        });
 //
 //        //会话界面
 //        iv_message.setOnClickListener(v -> {
@@ -117,9 +140,18 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
 //        });
     }
 
-    private void bindMemberInfo(MemberInfoBean memberInfo) {
-        tv_member_name.setText(memberInfo.getName());
-        tv_department.setText(TextUtils.isEmpty(memberInfo.getDeptName())?"武汉市公安局":memberInfo.getDeptName());
+    private void bindMemberInfo(TerminalBean terminalBean) {
+        if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_PDT)){
+            tv_member_name.setText(terminalBean.getPdtNo());
+        }else if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_LTE)){
+            tv_member_name.setText(terminalBean.getLteNo());
+        }
+
+        //只显示该设备能用的功能
+        ImageView[] imageRid = {iv_phone, iv_message, iv_push_video, iv_individual_call};
+        TerminalUtils.showOperate(imageRid, terminalBean.getTerminalType());
+
+       // tv_department.setText(TextUtils.isEmpty(memberInfo.getDeptName())?"武汉市公安局":memberInfo.getDeptName());
         //tv_phone.setText(memberInfo);
 //        tv_speed.setText(memberInfo.getSpeed());
         tv_time.setText("定位时间："+ TimeUtil.getCurrentTimeYMD());
@@ -131,6 +163,16 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
      */
     private void pullVideo() {
         //getPresenter().pullVideo(memberTypeEnum);
+        //单设备,警务通==民警,
+        // 执法仪??
+        // 无人机??
+//        String personnelName = personnelBean.getPersonnelName();
+//        String personnelNo = personnelBean.getPersonnelNo();
+        PullLiveManager liveManager = new PullLiveManager(getContext());
+        String terminalUniqueNo = TerminalUtils.getPullLiveUniqueNo(terminalBean);
+        liveManager.pullVideo(terminalBean.getAccount(), terminalBean.getTerminalType(), terminalUniqueNo);
+
+
     }
 
     /**

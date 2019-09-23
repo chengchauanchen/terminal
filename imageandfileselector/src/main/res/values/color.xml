@@ -67,5 +67,6 @@
 
     <color name="merge_transmit_text_color">#ffffff</color>
     <color name="merge_transmit_line">#4C818181</color>
+    <color name="color_313131">#313131</color>
 
 </resources>
