@@ -103,6 +103,7 @@ import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.SensorUtil;
+import ptt.terminalsdk.tools.ApkUtil;
 import ptt.terminalsdk.tools.StringUtil;
 import cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -1158,19 +1159,27 @@ public class ReceiveHandlerService extends Service{
 
         }else{//直接请求
             if(member.getType() == TerminalMemberType.TERMINAL_LTE.getCode()){
-                //LTE
-                String gb28181No = member.getGb28181No();
-                //String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
-                //String gb28181RtspUrl = gateWayUrl+"DevAor="+gb28181No;
-                TerminalMessage terminalMessage = new TerminalMessage();
-                terminalMessage.messageType = MessageType.GB28181_RECORD.getCode();
-                terminalMessage.messageBody = new JSONObject();
-                terminalMessage.messageBody.put(JsonParam.GB28181_RTSP_URL,gb28181No);
-                terminalMessage.messageBody.put(JsonParam.DEVICE_NAME,member.getName());
-                terminalMessage.messageBody.put(JsonParam.ACCOUNT_ID,member.getNo());
-                terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_NAME,member.getDepartmentName());
-                terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_ID,member.getDeptId());
-                goWatchGB28121(terminalMessage);
+                //市局和安监的LTE不同，市局的直接拼接流地址就行，安监的去请求信令
+                if(ApkUtil.isAnjian()){
+                    Intent intent = new Intent(ReceiveHandlerService.this, LiveRequestService.class);
+                    intent.putExtra(Constants.MEMBER_NAME, member.getName());
+                    intent.putExtra(Constants.MEMBER_ID, member.getNo());
+                    intent.putExtra(Constants.UNIQUE_NO, member.getUniqueNo());
+                    startService(intent);
+                }else {
+                    String gb28181No = member.getGb28181No();
+                    //String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
+                    //String gb28181RtspUrl = gateWayUrl+"DevAor="+gb28181No;
+                    TerminalMessage terminalMessage = new TerminalMessage();
+                    terminalMessage.messageType = MessageType.GB28181_RECORD.getCode();
+                    terminalMessage.messageBody = new JSONObject();
+                    terminalMessage.messageBody.put(JsonParam.GB28181_RTSP_URL,gb28181No);
+                    terminalMessage.messageBody.put(JsonParam.DEVICE_NAME,member.getName());
+                    terminalMessage.messageBody.put(JsonParam.ACCOUNT_ID,member.getNo());
+                    terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_NAME,member.getDepartmentName());
+                    terminalMessage.messageBody.put(JsonParam.DEVICE_DEPT_ID,member.getDeptId());
+                    goWatchGB28121(terminalMessage);
+                }
             }else{
                 Intent intent = new Intent(ReceiveHandlerService.this, LiveRequestService.class);
                 intent.putExtra(Constants.MEMBER_NAME, member.getName());
