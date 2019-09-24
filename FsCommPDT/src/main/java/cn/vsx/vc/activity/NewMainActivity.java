@@ -125,6 +125,7 @@ import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.HongHuUtils;
+import cn.vsx.vc.utils.HongHuUtils.DonghuAccount;
 import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.view.BottomView;
@@ -1701,21 +1702,20 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     /**
      * 将应用退到后台
      */
-    private ReceiveMoveTaskToBackHandler receiveMoveTaskToBackHandler = new ReceiveMoveTaskToBackHandler() {
-        @Override
-        public void handler() {
-            logger.info("--vsx--收到第三方消息,将应用退到后台");
-            exit();
-        }
+    private ReceiveMoveTaskToBackHandler receiveMoveTaskToBackHandler = () -> {
+        logger.info("--vsx--收到第三方消息,将应用退到后台");
+        exit();
     };
 
     @Override
     protected void onRestart() {
         super.onRestart();
         //每次页面都刷新一次
-        if (HongHuUtils.isHonghuDep()) {
-            //获取已绑定的装备列表
-            HongHuUtils.getBindDevices();
-        }
+        HongHuUtils.isHonghuDep(isDonghu -> {
+            if(isDonghu){
+                //获取已绑定的装备列表
+                HongHuUtils.getBindDevices();
+            }
+        });
     }
 }

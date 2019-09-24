@@ -105,6 +105,7 @@ import cn.vsx.vc.receiveHandle.ReceiverBindDeviceHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.HongHuUtils;
+import cn.vsx.vc.utils.HongHuUtils.DonghuAccount;
 import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.view.ChangeGroupView;
 import cn.vsx.vc.view.ChangeGroupView.OnGroupChangedListener;
@@ -1900,10 +1901,12 @@ public class TalkbackFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
         setPttText();
-        if (HongHuUtils.isHonghuDep()) {
-            //获取已绑定的装备列表
-            HongHuUtils.getBindDevices();
-        }
+        HongHuUtils.isHonghuDep(isDonghu -> {
+            if(isDonghu){
+                //获取已绑定的装备列表
+                HongHuUtils.getBindDevices();
+            }
+        });
     }
 
     private ReceiverBindDeviceHandler receiverBindDeviceHandler = deviceJson -> myHandler.post(() -> {

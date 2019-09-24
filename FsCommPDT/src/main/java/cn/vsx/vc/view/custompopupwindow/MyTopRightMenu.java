@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.widget.ImageView;
 
@@ -27,6 +29,7 @@ import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.HongHuUtils;
+import cn.vsx.vc.utils.HongHuUtils.DonghuAccount;
 import cn.vsx.vc.utils.SystemUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
@@ -41,6 +44,8 @@ public class MyTopRightMenu {
     private static MyTopRightMenu myTopRightMenu;
     private BaseActivity activity;
     private static final int REQUEST_PERMISSION_SETTING = 0;
+
+    private Handler myHandler = new Handler(Looper.getMainLooper());
 
     private MyTopRightMenu() {
     }
@@ -82,10 +87,6 @@ public class MyTopRightMenu {
             items.add(nfcItem);
             items.add(scanItem);
 
-            if (HongHuUtils.isHonghuDep()) {
-                items.add(bandItem);
-                mTopRightMenu.addMenuItem(bandItem);
-            }
 
 //            if(items.size() == 1) {
 //                mTopRightMenu.setHeight(240);
@@ -186,6 +187,17 @@ public class MyTopRightMenu {
                     })
                     .showAsDropDown(view, -DensityUtil.px2dip(MyApplication.instance, MyApplication.instance.getResources().getDimension(R.dimen.x150))
                             , DensityUtil.px2dip(MyApplication.instance, MyApplication.instance.getResources().getDimension(R.dimen.y20)));
+
+
+            HongHuUtils.isHonghuDep(isDonghu -> {
+                if(isDonghu){
+                    myHandler.post(() -> {
+                        items.add(bandItem);
+                        mTopRightMenu.addMenuItem(bandItem);
+                        mTopRightMenu.notifyDataSetChanged();
+                    });
+                }
+            });
         });
     }
 

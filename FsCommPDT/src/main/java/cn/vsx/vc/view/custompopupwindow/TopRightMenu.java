@@ -81,6 +81,10 @@ public class TopRightMenu {
         return mPopupWindow;
     }
 
+    public void notifyDataSetChanged(){
+        mAdapter.notifyDataSetChanged();
+    }
+
     public TopRightMenu setHeight(int height){
 //        if (height <= 0 && height != RecyclerView.LayoutParams.MATCH_PARENT
 //                && height != RecyclerView.LayoutParams.WRAP_CONTENT){
