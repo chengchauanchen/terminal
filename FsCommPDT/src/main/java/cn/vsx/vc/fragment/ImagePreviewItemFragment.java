@@ -18,7 +18,6 @@ import android.widget.ImageView;
 import com.bm.library.PhotoView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.request.RequestOptions;
 import com.zectec.imageandfileselector.base.BaseFragment;
 import com.zectec.imageandfileselector.bean.ImageBean;
 import com.zectec.imageandfileselector.receivehandler.ReceiverSaveImgHandler;
@@ -202,18 +201,12 @@ public class ImagePreviewItemFragment extends BaseFragment{
             PhotoView view = new PhotoView(mContext);
             view.enable();
             view.setScaleType(ImageView.ScaleType.FIT_CENTER);
-//            Glide.with(getActivity())
-//                    .load(mImageList.get(position).getPath())
-////                    .placeholder(R.drawable.default_image)
-//                    //.diskCacheStrategy(DiskCacheStrategy.NONE)
-//                    .skipMemoryCache(true)
-//                    .into(view);
             Glide.with(getActivity())
                     .load(mImageList.get(position).getPath())
-                    .apply(new RequestOptions().diskCacheStrategy(DiskCacheStrategy.NONE)
-                    .skipMemoryCache(true))
+//                    .placeholder(R.drawable.default_image)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .skipMemoryCache(true)
                     .into(view);
-
             container.addView(view);
             view.setOnClickListener(view1 -> desBitmap(true));
             return view;

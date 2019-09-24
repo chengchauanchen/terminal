@@ -12,7 +12,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 
 import org.apache.log4j.Logger;
 
@@ -43,7 +42,6 @@ public class PersonInfoLayout extends LinearLayout {
     TextView userId;
     private Logger logger = Logger.getLogger(getClass());
     private Handler myHandler = new Handler();
-
     public PersonInfoLayout(Context context) {
         this(context, null);
     }
@@ -58,59 +56,50 @@ public class PersonInfoLayout extends LinearLayout {
         initListener();
     }
 
-    private void initView(Context context) {
+    private void initView (Context context) {
         String infServie = Context.LAYOUT_INFLATER_SERVICE;
         LayoutInflater layoutInflater;
-        layoutInflater = (LayoutInflater) getContext().getSystemService(infServie);
+        layoutInflater =  (LayoutInflater) getContext().getSystemService(infServie);
         View view = layoutInflater.inflate(R.layout.layout_personinfo, this, true);
         userLogo = view.findViewById(R.id.user_logo);
         userName = view.findViewById(R.id.user_name);
         userId = view.findViewById(R.id.user_id);
-        userId.setText("警号:" + HandleIdUtil.handleId(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)));
+        userId.setText("警号:"+ HandleIdUtil.handleId(MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)));
         userName.setText(MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, ""));
-        logger.info("用户头像：" + TerminalFactory.getSDK().getParam(UrlParams.AVATAR_URL));
+        logger.info("用户头像："+TerminalFactory.getSDK().getParam(UrlParams.AVATAR_URL));
         int drawable = BitmapUtil.getUserPhoto();
-//        Glide.with(context)
-//                .load(TerminalFactory.getSDK().getParam(UrlParams.AVATAR_URL))
-//                .asBitmap()
-//                .placeholder(drawable)//加载中显示的图片
-//                .error(drawable)//加载失败时显示的图片
-//                .into(userLogo);
-
         Glide.with(context)
                 .load(TerminalFactory.getSDK().getParam(UrlParams.AVATAR_URL))
-                .apply(new RequestOptions().placeholder(drawable).error(drawable))
+                .asBitmap()
+                .placeholder(drawable)//加载中显示的图片
+                .error(drawable)//加载失败时显示的图片
                 .into(userLogo);
     }
 
-    private void initListener() {
+    private void initListener () {
 //        MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeNameHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberChangeHandler);
     }
 
-    public void unInitListener() {
+    public void unInitListener () {
 //        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeNameHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
     }
 
 
-    /**
-     * 收到修改名字成功的消息
-     */
-    private ReceiveChangeNameHandler receiveChangeNameHandler = new ReceiveChangeNameHandler() {
+    /**收到修改名字成功的消息*/
+    private ReceiveChangeNameHandler receiveChangeNameHandler = new ReceiveChangeNameHandler(){
         @Override
         public void handler(final int resultCode, final int memberId, final String newMemberName) {
             myHandler.post(() -> {
-                if (resultCode == BaseCommonCode.SUCCESS_CODE && memberId == TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)) {
+                if (resultCode == BaseCommonCode.SUCCESS_CODE && memberId == TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){
                     userName.setText(newMemberName);
                 }
             });
         }
     };
 
-    /**
-     * 更新所有成员列表
-     */
+    /**更新所有成员列表*/
     private ReceiveNotifyMemberChangeHandler receiveNotifyMemberChangeHandler = new ReceiveNotifyMemberChangeHandler() {
         @Override
         public void handler(final MemberChangeType memberChangeType) {
@@ -119,9 +108,9 @@ public class PersonInfoLayout extends LinearLayout {
     };
 
 
-    public void toUserInfoActivity(View view) {
+    public void toUserInfoActivity (View view) {
         int i = view.getId();
-        if (i == R.id.ll_user_info) {
+        if(i == R.id.ll_user_info){
             Intent intent = new Intent(getContext(), UserInfoActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             intent.putExtra("userId", MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));

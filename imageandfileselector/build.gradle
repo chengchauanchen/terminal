@@ -35,7 +35,7 @@ dependencies {
     implementation "com.android.support:appcompat-v7:$support_version"
     testCompile 'junit:junit:4.12'
     compile "com.android.support:design:$support_version"
-    compile 'com.github.bumptech.glide:glide:4.8.0'
+    compile 'com.github.bumptech.glide:glide:3.8.0'
     //    annotationProcessor 'com.github.bumptech.glide:compiler:4.3.1'
     compile 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.44'
     compile 'com.tapadoo.android:alerter:1.0.6'

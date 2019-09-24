@@ -16,10 +16,7 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.zectec.imageandfileselector.utils.PhotoUtils;
 
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
 import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
@@ -71,10 +68,9 @@ public class NFCBindingDialog extends Dialog implements DialogInterface.OnDismis
             case TYPE_WAIT:
                 rlContent.setVisibility(View.INVISIBLE);
                 ivBinding.setVisibility(View.VISIBLE);
-//                Glide.with(getContext()).load(R.drawable.icon_nfc_binding_gif)
-//                        .asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE)
-//                        .into(ivBinding);
-                PhotoUtils.loadGif(getContext(),R.drawable.icon_nfc_binding_gif,ivBinding);
+                Glide.with(getContext()).load(R.drawable.icon_nfc_binding_gif)
+                        .asGif().diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                        .into(ivBinding);
                 ivClose.setVisibility(View.VISIBLE);
                 tvTempt.setVisibility(View.VISIBLE);
                 tvTempt.setText(getContext().getString(R.string.binding_nfc_tempt));

@@ -27,7 +27,6 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.zectec.imageandfileselector.adapter.FaceRecognitionAdapter;
 import com.zectec.imageandfileselector.bean.FaceRecognitionBean;
 import com.zectec.imageandfileselector.bean.ImageBean;
@@ -1291,18 +1290,12 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
     private void handlerAvatar(TerminalMessage terminalMessage, int position, ChatViewHolder holder) {
         if(activity!=null&&!activity.isDestroyed()){
             int drawable = BitmapUtil.getUserPhoto();
-//            Glide.with(activity)
-//                    .load(drawable)
-//                    .asBitmap()
-//                    .placeholder(drawable)//加载中显示的图片
-//                    .error(drawable)//加载失败时显示的图片
-//                    .into(holder.ivAvatar);
-
             Glide.with(activity)
                     .load(drawable)
-                    .apply(new RequestOptions().placeholder(drawable).error(drawable))
+                    .asBitmap()
+                    .placeholder(drawable)//加载中显示的图片
+                    .error(drawable)//加载失败时显示的图片
                     .into(holder.ivAvatar);
-
         }
     }
 
@@ -1424,8 +1417,8 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 lp.width = DensityUtil.dip2px(activity,25);
                 lp.height = DensityUtil.dip2px(activity,25);
                 holder.ivVoice.setLayoutParams(lp);
-                //Glide.with(MyApplication.instance.getApplicationContext()).load(R.drawable.gif_download).asGif().dontAnimate().into(holder.ivVoice);
-                PhotoUtils.loadGif(MyApplication.instance.getApplicationContext(),R.drawable.gif_download,holder.ivVoice);
+                Glide.with(MyApplication.instance.getApplicationContext()).load(R.drawable.gif_download).asGif().dontAnimate().into(holder.ivVoice);
+
             }else{
                 //显示播放的UI
                 if(holder.tvStatus!=null){
