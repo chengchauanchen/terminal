@@ -381,7 +381,7 @@ public class UavPushActivity extends BaseActivity{
         if(requestCode == REQUEST_FILE_CODE && resultCode == RESULT_OK){
             int oritation = data.getIntExtra(Constants.ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
             logger.info("onActivityResult:"+oritation);
-
+            ScreenSwitchUtils.init(this).setCurrentState(ScreenState.getInstanceByCode(oritation));
             setRequestedOrientation(oritation);
         }
     }
@@ -707,7 +707,7 @@ public class UavPushActivity extends BaseActivity{
 
     private View.OnClickListener onPreViewClickListener = v -> {
         Intent intent = new Intent(UavPushActivity.this, UavFileListActivity.class);
-        intent.putExtra(Constants.ORIENTATION,getResources().getConfiguration().orientation);
+        intent.putExtra(Constants.ORIENTATION,getRequestedOrientation());
         startActivityForResult(intent,REQUEST_FILE_CODE);
     };
 
