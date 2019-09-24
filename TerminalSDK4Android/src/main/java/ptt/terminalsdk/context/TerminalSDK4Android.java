@@ -1172,21 +1172,18 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	@SuppressLint("MissingPermission")
 	@Override
 	protected String newUuid() {
-		String account = TerminalFactory.getSDK().getParam(UrlParams.ACCOUNT);
-		if (Util.isEmpty(account)){
-			String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
-			if(!TextUtils.isEmpty(deviceType)&&(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString()))){
-				account = newIMEI();
-			}else{
-				TelephonyManager telephonyManager = (TelephonyManager)application.getSystemService(Context.TELEPHONY_SERVICE);
-				WifiManager wm = (WifiManager)application.getSystemService(Context.WIFI_SERVICE);
-				account = telephonyManager.getDeviceId() == null ?
-						wm.getConnectionInfo().getMacAddress().hashCode()+"" : telephonyManager.getDeviceId().hashCode()+"";
-			}
+		String account;
+		String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+		if(!TextUtils.isEmpty(deviceType)&&(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString()))){
+			account = newIMEI();
+		}else{
+			TelephonyManager telephonyManager = (TelephonyManager)application.getSystemService(Context.TELEPHONY_SERVICE);
+			WifiManager wm = (WifiManager)application.getSystemService(Context.WIFI_SERVICE);
+			account = telephonyManager.getDeviceId() == null ?
+					wm.getConnectionInfo().getMacAddress().hashCode()+"" : telephonyManager.getDeviceId().hashCode()+"";
 		}
-		String terminalType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE, "");
-		logger.info(" TerminalSDK4Android--------> account = "+account+"---terminalType = "+terminalType);
-		return account+terminalType;
+		logger.info(" TerminalSDK4Android--------> account = "+account+"---terminalType = "+deviceType);
+		return account+deviceType;
 	}
 	@SuppressLint("MissingPermission")
 	@Override
