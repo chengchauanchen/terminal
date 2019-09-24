@@ -99,6 +99,7 @@ public class Constants{
     public static final String CAMERA_TYPE = "cameraType";
     public static final String UVC_CAMERA = "uvcCamera";
     public static final String RECODER_CAMERA = "recoderCamera";
+    public static final String ORIENTATION = "orientation";
 
     public static final String FINISH_TRANSPARENT = "FINISH_TRANSPARENT";
 

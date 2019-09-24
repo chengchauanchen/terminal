@@ -99,7 +99,8 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
 
     @Override
     protected void setOrientation(){
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+        int oritation = getIntent().getIntExtra(Constants.ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+        setRequestedOrientation(oritation);
     }
 
     @Override
@@ -163,6 +164,9 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void onClick(View v){
         if(v.getId() == R.id.iv_back){
+            Intent intent = new Intent();
+            intent.putExtra(Constants.ORIENTATION,getResources().getConfiguration().orientation);
+            setResult(RESULT_OK,intent);
             finish();
         }else if(v.getId() == R.id.tv_uav_choice){
             if(showCheckbox){
@@ -370,6 +374,9 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
             mUavTitle.setVisibility(View.VISIBLE);
             getSupportFragmentManager().popBackStack();
         }else {
+            Intent intent = new Intent();
+            intent.putExtra(Constants.ORIENTATION,getRequestedOrientation());
+            setResult(RESULT_OK,intent);
             super.onBackPressed();
         }
     }

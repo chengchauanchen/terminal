@@ -160,6 +160,7 @@ public class UavPushActivity extends BaseActivity{
     private LinearLayout mLlCloseVoice;
     private ImageView mIvCloseVoice;
     private TextView mVDrakBackgroupd;
+    private static final int REQUEST_FILE_CODE = 99;
     private List<String> pushMemberList = new ArrayList<>();
 
     @Override
@@ -372,6 +373,17 @@ public class UavPushActivity extends BaseActivity{
     protected void onPause(){
         super.onPause();
         ScreenSwitchUtils.init(this).stop();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == REQUEST_FILE_CODE && resultCode == RESULT_OK){
+            int oritation = data.getIntExtra(Constants.ORIENTATION, ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+            logger.info("onActivityResult:"+oritation);
+
+            setRequestedOrientation(oritation);
+        }
     }
 
     /**
@@ -695,7 +707,8 @@ public class UavPushActivity extends BaseActivity{
 
     private View.OnClickListener onPreViewClickListener = v -> {
         Intent intent = new Intent(UavPushActivity.this, UavFileListActivity.class);
-        startActivity(intent);
+        intent.putExtra(Constants.ORIENTATION,getResources().getConfiguration().orientation);
+        startActivityForResult(intent,REQUEST_FILE_CODE);
     };
 
     private View.OnClickListener onVoiceButtonClickListener = v -> {
