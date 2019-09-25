@@ -345,42 +345,42 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     private synchronized List<TerminalMessage> getTerminalMessageList(SQLiteDatabase db, Cursor cursor) {
         List<TerminalMessage> terminalMessageList = new LinkedList<>();
+        try{
+            if (cursor != null && cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    TerminalMessage terminalMessage = new TerminalMessage();
 
-        if (cursor != null && cursor.getCount() > 0) {
-            while (cursor.moveToNext()) {
-                TerminalMessage terminalMessage = new TerminalMessage();
-
-                terminalMessage.messageId = cursor.getLong(cursor.getColumnIndex("message_id"));
-                terminalMessage.messageBodyId = cursor.getString(cursor.getColumnIndex("message_body_id"));
-                terminalMessage.messageFromId = cursor.getInt(cursor.getColumnIndex("message_from_id"));
-                terminalMessage.messageFromName = cursor.getString(cursor.getColumnIndex("message_from_name"));
-                terminalMessage.messageToId = cursor.getInt(cursor.getColumnIndex("message_to_id"));
-                terminalMessage.messageCategory = cursor.getInt(cursor.getColumnIndex("message_category"));
-                terminalMessage.messageToName = cursor.getString(cursor.getColumnIndex("message_to_name"));
-                terminalMessage.messageBody = JSONObject.parseObject(cursor.getString(cursor.getColumnIndex("message_body")));
-                terminalMessage.messageUrl = cursor.getString(cursor.getColumnIndex("message_url"));
-                terminalMessage.messagePath = cursor.getString(cursor.getColumnIndex("message_path"));
-                terminalMessage.messageType = cursor.getInt(cursor.getColumnIndex("message_type"));
-                terminalMessage.messageVersion = cursor.getLong(cursor.getColumnIndex("message_version"));
-                terminalMessage.resultCode = cursor.getInt(cursor.getColumnIndex("result_code"));
-                terminalMessage.sendTime = cursor.getLong(cursor.getColumnIndex("send_time"));
-                terminalMessage.messageFromUniqueNo = cursor.getLong(cursor.getColumnIndex("message_from_unique_no"));
-                terminalMessage.messageToUniqueNo = cursor.getLong(cursor.getColumnIndex("message_to_unique_no"));
-                int messageStatus = cursor.getInt(cursor.getColumnIndex("message_status"));
-                terminalMessage.messageStatus = (messageStatus == 1)?MessageStatus.MESSAGE_RECALL.toString():MessageStatus.MESSAGE_NORMAL.toString();
-                //消息列表数据库才有unread_count这个字段
-                try {
+                    terminalMessage.messageId = cursor.getLong(cursor.getColumnIndex("message_id"));
+                    terminalMessage.messageBodyId = cursor.getString(cursor.getColumnIndex("message_body_id"));
+                    terminalMessage.messageFromId = cursor.getInt(cursor.getColumnIndex("message_from_id"));
+                    terminalMessage.messageFromName = cursor.getString(cursor.getColumnIndex("message_from_name"));
+                    terminalMessage.messageToId = cursor.getInt(cursor.getColumnIndex("message_to_id"));
+                    terminalMessage.messageCategory = cursor.getInt(cursor.getColumnIndex("message_category"));
+                    terminalMessage.messageToName = cursor.getString(cursor.getColumnIndex("message_to_name"));
+                    terminalMessage.messageBody = JSONObject.parseObject(cursor.getString(cursor.getColumnIndex("message_body")));
+                    terminalMessage.messageUrl = cursor.getString(cursor.getColumnIndex("message_url"));
+                    terminalMessage.messagePath = cursor.getString(cursor.getColumnIndex("message_path"));
+                    terminalMessage.messageType = cursor.getInt(cursor.getColumnIndex("message_type"));
+                    terminalMessage.messageVersion = cursor.getLong(cursor.getColumnIndex("message_version"));
+                    terminalMessage.resultCode = cursor.getInt(cursor.getColumnIndex("result_code"));
+                    terminalMessage.sendTime = cursor.getLong(cursor.getColumnIndex("send_time"));
+                    terminalMessage.messageFromUniqueNo = cursor.getLong(cursor.getColumnIndex("message_from_unique_no"));
+                    terminalMessage.messageToUniqueNo = cursor.getLong(cursor.getColumnIndex("message_to_unique_no"));
+                    int messageStatus = cursor.getInt(cursor.getColumnIndex("message_status"));
+                    terminalMessage.messageStatus = (messageStatus == 1)?MessageStatus.MESSAGE_RECALL.toString():MessageStatus.MESSAGE_NORMAL.toString();
+                    //消息列表数据库才有unread_count这个字段
                     if (cursor.getColumnIndex("unread_count") != -1) {
                         terminalMessage.unReadCount = cursor.getInt(cursor.getColumnIndex("unread_count"));
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.info("从数据库取出数据："+terminalMessage);
+                    terminalMessageList.add(terminalMessage);
                 }
-                logger.info("从数据库取出数据："+terminalMessage);
-                terminalMessageList.add(terminalMessage);
+                cursor.close();
             }
-            cursor.close();
+        }catch(Exception e){
+            logger.error(e.toString());
         }
+
 //        db.close();
         return terminalMessageList;
     }

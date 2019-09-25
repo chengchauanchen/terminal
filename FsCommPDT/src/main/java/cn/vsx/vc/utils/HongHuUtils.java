@@ -9,8 +9,6 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
-import org.apache.log4j.Logger;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,14 +17,11 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.vc.R;
-import cn.vsx.vc.activity.UserInfoActivity;
 import cn.vsx.vc.model.BindBean;
 import cn.vsx.vc.model.Relationship;
 import cn.vsx.vc.receiveHandle.ReceiverBindDeviceHandler;
 import cn.vsx.vc.receiveHandle.ReceiverUnBindDeviceHandler;
 import ptt.terminalsdk.context.MyTerminalFactory;
-import ptt.terminalsdk.tools.ToastUtil;
 
 public class HongHuUtils {
 
@@ -108,11 +103,13 @@ public class HongHuUtils {
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
             try {
                 String result = MyTerminalFactory.getSDK().getHttpClient().get(url, paramsMap);
-                Log.i("BandDeviceDialog", result);
-                List<BindBean> bindBeans = gson.fromJson(result, new TypeToken<List<BindBean>>() {
-                }.getType());
-                if (bindBeans != null) {
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverBindDeviceHandler.class, result);
+                if(!TextUtils.isEmpty(result)){
+                    Log.i("BandDeviceDialog", result);
+                    List<BindBean> bindBeans = gson.fromJson(result, new TypeToken<List<BindBean>>() {
+                    }.getType());
+                    if (bindBeans != null) {
+                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverBindDeviceHandler.class, result);
+                    }
                 }
             } catch (Exception e) {
                 e.printStackTrace();

@@ -54,7 +54,11 @@ public class MyAudioTrack implements IAudioTrack{
 
     @Override
     public void play(){
-        audioTrack.play();
+        try{
+            audioTrack.play();
+        }catch(Exception e){
+            logger.error("播放音频出错：",e);
+        }
     }
 
     public AudioTrack getAudioTrack(Command.CmdType cmdType,int sampleRate,int audioTrackBufferSize){
