@@ -327,8 +327,8 @@ public class PromptManager {
 
 
 	public void start(){
-		logger.info("----------提示音管理类 start()------------");
 		if(!started){
+			logger.info("----------提示音管理类 start()------------");
 			soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
 			soundMap.clear();
 			soundMap.put(ptt.terminalsdk.R.raw.ppt_up, soundPool.load(MyApplication.instance,ptt.terminalsdk.R.raw.ppt_up, 1));

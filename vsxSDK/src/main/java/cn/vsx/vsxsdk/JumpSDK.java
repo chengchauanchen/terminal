@@ -1,6 +1,5 @@
 package cn.vsx.vsxsdk;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -49,7 +48,7 @@ public class JumpSDK implements JumpInterface {
     public void sendStartAppBroadcast(final Context context) {
         final String packageName = "cn.vsx.vc";//要打开应用的包名
         final String serviceName = "ptt.terminalsdk.context.OnlineService";
-        BackgroundServicesTimer timer = new BackgroundServicesTimer(new TimerListener() {
+        BackgroundServicesTimer.newInstance(new TimerListener() {
             @Override
             public void time() {
                 Log.e("JumpSDK","定时启动--sendStartAppBroadcast");
@@ -60,8 +59,7 @@ public class JumpSDK implements JumpInterface {
                     Log.e("--vsx--","未安装融合通信app:"+packageName);
                 }
             }
-        });
-        timer.start();
+        }).start();
     }
 
     @Override
