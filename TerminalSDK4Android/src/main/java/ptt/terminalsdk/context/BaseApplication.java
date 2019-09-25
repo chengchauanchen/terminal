@@ -36,4 +36,10 @@ public class BaseApplication extends Application{
 
     public void stopHandlerService(){
     }
+
+    public void setAppLogined(){
+    }
+
+    public void startPromptManager(){
+    }
 }

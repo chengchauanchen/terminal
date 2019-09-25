@@ -1,6 +1,7 @@
 package cn.vsx.vc.service;
 
 import android.annotation.SuppressLint;
+import android.app.KeyguardManager;
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -49,6 +50,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandle
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.TransparentActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.jump.utils.AppKeyUtils;
 import cn.vsx.vc.prompt.PromptManager;
@@ -469,6 +471,22 @@ public abstract class BaseService extends Service{
         MyTerminalFactory.getSDK().getAudioProxy().setMicrophoneMute(result);
         if(imageView!=null){
             imageView.setImageResource(result?R.drawable.ic_micro_mute_2:R.drawable.ic_micro_mute_1);
+        }
+    }
+
+    protected void startTranspantActivity(){
+        //判断是否锁屏
+        KeyguardManager mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
+        if(null != mKeyguardManager){
+            boolean flag = mKeyguardManager.inKeyguardRestrictedInputMode();
+            if(flag){
+                //                //无屏保界面
+                if(MyTerminalFactory.getSDK().getParam(Params.LOCK_SCREEN_HIDE_OR_SHOW, 0) != 1){
+                    Intent intent = new Intent(BaseService.this, TransparentActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+                    startActivity(intent);
+                }
+            }
         }
     }
 }

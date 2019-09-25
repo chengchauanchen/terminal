@@ -31,6 +31,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
+import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
@@ -207,6 +208,16 @@ public class MyApplication extends BaseApplication{
 
 	public void setBindTranslateBean(RecorderBindTranslateBean bindTranslateBean) {
 		this.bindTranslateBean = bindTranslateBean;
+	}
+
+	@Override
+	public void setAppLogined(){
+		MyApplication.instance.mAppStatus = Constants.LOGINED;
+	}
+
+	@Override
+	public void startPromptManager(){
+		PromptManager.getInstance().start();
 	}
 
 	public String getProcessName(Context cxt, int pid) {

@@ -170,6 +170,8 @@ public class OnlineService extends Service {
 					logger.info("--vsxSDK--startHandlerService");
 					BaseApplication.getApplication().startHandlerService();
 				}
+				BaseApplication.getApplication().setAppLogined();
+				BaseApplication.getApplication().startPromptManager();
 				LoginState loginState = TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState();
 				Log.e("--vsxSDK--","loginState:"+loginState);
 				logger.info("--vsxSDK-loginState:"+loginState);

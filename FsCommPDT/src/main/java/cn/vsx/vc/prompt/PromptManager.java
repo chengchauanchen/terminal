@@ -53,6 +53,7 @@ public class PromptManager {
 	private Map<Integer, Integer> soundMap = new HashMap<>();
 	private static PromptManager instance;
 	private int streamId;
+	private boolean started;
 
 	/**组成员遥毙消息*/
 	private ReceiveNotifyMemberKilledHandler receiveNotifyMemberKilledHandler = forbid -> {
@@ -327,47 +328,53 @@ public class PromptManager {
 
 	public void start(){
 		logger.info("----------提示音管理类 start()------------");
-		soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
-		soundMap.clear();
-		soundMap.put(ptt.terminalsdk.R.raw.ppt_up, soundPool.load(MyApplication.instance,ptt.terminalsdk.R.raw.ppt_up, 1));
+		if(!started){
+			soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
+			soundMap.clear();
+			soundMap.put(ptt.terminalsdk.R.raw.ppt_up, soundPool.load(MyApplication.instance,ptt.terminalsdk.R.raw.ppt_up, 1));
 
-		soundMap.put(R.raw.notific_call_coming, soundPool.load(MyApplication.instance, R.raw.notific_call_coming, 1));
-		soundMap.put(R.raw.notific_videolive_coming,soundPool.load(MyApplication.instance,R.raw.notific_videolive_coming,1));
-		soundMap.put(R.raw.request_call_ok, soundPool.load(MyApplication.instance, R.raw.request_call_ok, 1));
-		soundMap.put(R.raw.request_call_fail, soundPool.load(MyApplication.instance, R.raw.request_call_fail, 1));
-		soundMap.put(R.raw.cease_call, soundPool.load(MyApplication.instance, R.raw.cease_call, 1));
-		soundMap.put(R.raw.receive_group_comming,soundPool.load(MyApplication.instance,R.raw.receive_group_comming,1));
-		soundMap.put(R.raw.change_group_ok, soundPool.load(MyApplication.instance, R.raw.change_group_ok, 1));
-		soundMap.put(R.raw.request_call_wait, soundPool.load(MyApplication.instance, R.raw.request_call_wait, 1));
-		soundMap.put(R.raw.passive_dropped_warning,soundPool.load(MyApplication.instance,R.raw.passive_dropped_warning,1));
-		soundMap.put(R.raw.exten_no_storage, soundPool.load(MyApplication.instance, R.raw.exten_no_storage,1));
-		soundMap.put(R.raw.exten_storage_not_engou, soundPool.load(MyApplication.instance, R.raw.exten_storage_not_engou,1));
-		soundMap.put(R.raw.start_report_by_notify, soundPool.load(MyApplication.instance, R.raw.start_report_by_notify,1));
-		soundMap.put(R.raw.start_play_by_notify, soundPool.load(MyApplication.instance, R.raw.start_play_by_notify,1));
-		soundMap.put(R.raw.temp_group_expire, soundPool.load(MyApplication.instance, R.raw.temp_group_expire,10));
-		MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
-		MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
-		MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);
-		MyTerminalFactory.getSDK().registReceiveHandler(receiveGetRtspStreamUrlHandler);
-		MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
-		MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
-		MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
+			soundMap.put(R.raw.notific_call_coming, soundPool.load(MyApplication.instance, R.raw.notific_call_coming, 1));
+			soundMap.put(R.raw.notific_videolive_coming,soundPool.load(MyApplication.instance,R.raw.notific_videolive_coming,1));
+			soundMap.put(R.raw.request_call_ok, soundPool.load(MyApplication.instance, R.raw.request_call_ok, 1));
+			soundMap.put(R.raw.request_call_fail, soundPool.load(MyApplication.instance, R.raw.request_call_fail, 1));
+			soundMap.put(R.raw.cease_call, soundPool.load(MyApplication.instance, R.raw.cease_call, 1));
+			soundMap.put(R.raw.receive_group_comming,soundPool.load(MyApplication.instance,R.raw.receive_group_comming,1));
+			soundMap.put(R.raw.change_group_ok, soundPool.load(MyApplication.instance, R.raw.change_group_ok, 1));
+			soundMap.put(R.raw.request_call_wait, soundPool.load(MyApplication.instance, R.raw.request_call_wait, 1));
+			soundMap.put(R.raw.passive_dropped_warning,soundPool.load(MyApplication.instance,R.raw.passive_dropped_warning,1));
+			soundMap.put(R.raw.exten_no_storage, soundPool.load(MyApplication.instance, R.raw.exten_no_storage,1));
+			soundMap.put(R.raw.exten_storage_not_engou, soundPool.load(MyApplication.instance, R.raw.exten_storage_not_engou,1));
+			soundMap.put(R.raw.start_report_by_notify, soundPool.load(MyApplication.instance, R.raw.start_report_by_notify,1));
+			soundMap.put(R.raw.start_play_by_notify, soundPool.load(MyApplication.instance, R.raw.start_play_by_notify,1));
+			soundMap.put(R.raw.temp_group_expire, soundPool.load(MyApplication.instance, R.raw.temp_group_expire,10));
+			MyTerminalFactory.getSDK().registReceiveHandler(receiveChangeGroupHandler);
+			MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
+			MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);
+			MyTerminalFactory.getSDK().registReceiveHandler(receiveGetRtspStreamUrlHandler);
+			MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
+			MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
+			MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
+			started = true;
+		}
 	}
 
 	public void stop(){
 		logger.info("----------提示音管理类 stop()------------");
-		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
-		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
-		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartIndividualCallHandler);
-		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetRtspStreamUrlHandler);
-		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
-		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
-		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
+		if(started){
+			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveChangeGroupHandler);
+			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
+			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartIndividualCallHandler);
+			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetRtspStreamUrlHandler);
+			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
+			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
+			MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
 
-		soundMap.clear();
-		if(soundPool != null){
-			soundPool.release();
-			soundPool = null;
+			soundMap.clear();
+			if(soundPool != null){
+				soundPool.release();
+				soundPool = null;
+			}
 		}
+		started = false;
 	}
 }

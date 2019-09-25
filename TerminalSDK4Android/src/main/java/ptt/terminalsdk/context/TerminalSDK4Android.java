@@ -1086,10 +1086,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		logger.error("确定另一个进程messageService的哈希值------------->messageService.hashCode = "+this.messageService);
 
 		//首先要绑定服务，获取service实例，才能注册handler。
-		if (this.messageService == null) {
-			application.bindService(messageService, messageServiceConn, BIND_AUTO_CREATE);
-			logger.info("开始绑定服务MessageService"+bindService);
-		}
+
 		if (uuidByte.length != 0 && accessServerIp.length() != 0 && accessServerPort != 0) {
 			messageService.putExtra("uuid", uuidByte);
 			messageService.putExtra("accessServerIp", accessServerIp);
@@ -1097,10 +1094,15 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			messageService.putExtra("protocolType",protocolType);
 			application.startService(messageService);
 			logger.info("开始启动服务MessageService, 连接到信令服务");
+
+			if (this.messageService == null) {
+				application.bindService(messageService, messageServiceConn, BIND_AUTO_CREATE);
+				bindService = true;
+				logger.info("开始绑定服务MessageService"+bindService);
+			}
 		}else {
 			logger.error("接入服务地址不对！！不能出现这种情况");
 		}
-
 	}
 
 	@Override
@@ -1113,6 +1115,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				application.stopService(new Intent(application, MessageService.class));
 				logger.error("停止与服务器的连接");
 			}
+			bindService = false;
 			messageService = null;
 		} catch (Exception e) {
 			logger.error("连接停止时出现异常", e);
@@ -1123,7 +1126,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			logger.error("MessageService --- onServiceConnected");
-			bindService = true;
 			messageService = Stub.asInterface(service);
 			clientChannel = null;
 			getClientChannel().registServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
@@ -1133,7 +1135,6 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			logger.error("MessageServiceon----onServiceDisconnected");
-			bindService = false;
 			connectToServer();
 		}
 	};
