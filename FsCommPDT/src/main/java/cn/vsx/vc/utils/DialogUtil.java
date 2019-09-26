@@ -16,7 +16,7 @@ public abstract class DialogUtil {
 			dialog.dismiss();
 			doCancelThings();
 		});
-		builder.show();
+		builder.setCancelable(false).show();
 	}
 
 	public abstract CharSequence getMessage();

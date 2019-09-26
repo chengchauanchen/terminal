@@ -73,7 +73,7 @@ public class MyDataManager extends DataManager{
                 .subscribe(new CommonObserver<DepData>(){
                     @Override
                     protected void onError(String errorMsg){
-                        logger.info("请求当前组部门下的所有组失败"+errorMsg);
+                        logger.info("请求当前组部门下的所有组失败---"+errorMsg);
                     }
 
                     @Override

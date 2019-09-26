@@ -51,8 +51,10 @@ import java.util.Map;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.Remark;
 import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -102,13 +104,14 @@ import cn.vsx.vc.receiver.NotificationClickReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DensityUtil;
+import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.SensorUtil;
-import ptt.terminalsdk.tools.ApkUtil;
-import ptt.terminalsdk.tools.StringUtil;
 import cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.permission.FloatWindowManager;
 import ptt.terminalsdk.service.KeepLiveManager;
+import ptt.terminalsdk.tools.ApkUtil;
+import ptt.terminalsdk.tools.StringUtil;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -1085,42 +1088,56 @@ public class ReceiveHandlerService extends Service{
             AppKeyUtils.setAppKey(null);
             return;
         }
-        if(android.text.TextUtils.isEmpty(uniqueNoAndType)){//要弹出选择成员页
-            Intent intent = new Intent(ReceiveHandlerService.this, InviteMemberService.class);
-            intent.putExtra(Constants.TYPE, Constants.PUSH);
-            intent.putExtra(Constants.PUSHING, false);
-            intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
-            intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,new InviteMemberExceptList());
-            startService(intent);
-        }else{//直接上报了
+        String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE, "");
+        // 判断有没有直接上报到组的权限，如果有直接上报到组，不弹出选择界面
+        if(android.text.TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_PHONE.toString()) && TerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_UP_CURRENT_GROUP.name())){
+            int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0);
+            uniqueNoAndType = MyDataUtil.getPushInviteMemberData(currentGroupId, ReceiveObjectMode.GROUP.toString());
             ArrayList<String> uniqueNos = new ArrayList<>();
             uniqueNos.add(uniqueNoAndType);
-            if(MyApplication.instance.usbAttached){
-                Intent intent = new Intent(ReceiveHandlerService.this,SwitchCameraService.class);
-                intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
-                intent.putExtra(Constants.THEME,"");
-                intent.putExtra(Constants.CAMERA_TYPE,Constants.UVC_CAMERA);
-                intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
+            Intent intent = new Intent(getApplicationContext(), PhonePushService.class);
+            intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
+            intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }else {
+            if(android.text.TextUtils.isEmpty(uniqueNoAndType)){//要弹出选择成员页
+                Intent intent = new Intent(ReceiveHandlerService.this, InviteMemberService.class);
+                intent.putExtra(Constants.TYPE, Constants.PUSH);
+                intent.putExtra(Constants.PUSHING, false);
                 intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
+                intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO,new InviteMemberExceptList());
                 startService(intent);
-            }else{
-                if(Constants.HYTERA.equals(Build.MODEL)){
+            }else{//直接上报了
+                ArrayList<String> uniqueNos = new ArrayList<>();
+                uniqueNos.add(uniqueNoAndType);
+                if(MyApplication.instance.usbAttached){
                     Intent intent = new Intent(ReceiveHandlerService.this,SwitchCameraService.class);
                     intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
                     intent.putExtra(Constants.THEME,"");
-                    intent.putExtra(Constants.CAMERA_TYPE,Constants.RECODER_CAMERA);
+                    intent.putExtra(Constants.CAMERA_TYPE,Constants.UVC_CAMERA);
                     intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
                     intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
                     startService(intent);
                 }else{
-                    //请求成功,直接开始推送视频
-                    Intent intent = new Intent();
-                    intent.putExtra(Constants.TYPE, Constants.ACTIVE_PUSH);
-                    intent.putExtra(Constants.THEME,"");
-                    intent.setClass(ReceiveHandlerService.this, PhonePushService.class);
-                    intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
-                    intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
-                    startService(intent);
+                    if(Constants.HYTERA.equals(Build.MODEL)){
+                        Intent intent = new Intent(ReceiveHandlerService.this,SwitchCameraService.class);
+                        intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
+                        intent.putExtra(Constants.THEME,"");
+                        intent.putExtra(Constants.CAMERA_TYPE,Constants.RECODER_CAMERA);
+                        intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
+                        intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
+                        startService(intent);
+                    }else{
+                        //请求成功,直接开始推送视频
+                        Intent intent = new Intent();
+                        intent.putExtra(Constants.TYPE, Constants.ACTIVE_PUSH);
+                        intent.putExtra(Constants.THEME,"");
+                        intent.setClass(ReceiveHandlerService.this, PhonePushService.class);
+                        intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
+                        intent.putExtra(Constants.IS_GROUP_PUSH_LIVING, isGroupPushLive);
+                        startService(intent);
+                    }
                 }
             }
         }
