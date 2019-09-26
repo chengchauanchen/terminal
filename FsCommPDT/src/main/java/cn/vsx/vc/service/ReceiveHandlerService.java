@@ -57,6 +57,7 @@ import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
@@ -72,6 +73,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHa
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponNotifyWatchHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -231,6 +233,7 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getWarningMessageDetailHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveResponNotifyWatchHandler);
 
         //监听voip来电
         MyTerminalFactory.getSDK().getVoipCallManager().addCallback(voipRegistrationCallback,voipPhoneCallback);
@@ -569,6 +572,7 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveNotifyDataMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(getWarningMessageDetailHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponNotifyWatchHandler);
 
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoHandler);
@@ -1061,11 +1065,23 @@ public class ReceiveHandlerService extends Service{
         myHandler.postDelayed(() -> TerminalFactory.getSDK().getLiveManager().openFunctionToLivingIncomming(message),1000);
     });
 
+    private ReceiveResponNotifyWatchHandler receiveResponNotifyWatchHandler = message -> {
+        //推送失败
+        if(message.getResultCode() == SignalServerErrorCode.WITHOUT_LIVING.getErrorCode()){
+            //如果是自己上报的话需要向信令发起上报
+            if(message.getLiveUniqueNo() == TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L)){
+                TerminalFactory.getSDK().getLiveManager().requestMyselfLive("","");
+            }else {
+                ToastUtils.showShort(message.getResultDesc());
+            }
+        }else {
+            ToastUtils.showShort(message.getResultDesc());
+        }
+    };
+
 
     //接收到上报视频的回调
-    private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = (uniqueNoAndType,isGroupPushLive) -> {
-        onActivePushVideo(uniqueNoAndType,isGroupPushLive);
-    };
+    private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = this::onActivePushVideo;
 
     protected void onActivePushVideo(String uniqueNoAndType, boolean isGroupPushLive){
         if(!checkFloatPermission()){

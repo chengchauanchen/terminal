@@ -1,11 +1,9 @@
 package cn.vsx.uav.fragment;
 
-import android.annotation.SuppressLint;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -13,10 +11,7 @@ import android.text.TextUtils;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 
 import java.io.File;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -33,7 +28,6 @@ import cn.vsx.uav.receiveHandler.ReceiveShowCheckboxHandler;
 import cn.vsx.uav.receiveHandler.ReceiveShowPreViewHandler;
 import cn.vsx.vc.fragment.BaseFragment;
 import cn.vsx.vc.utils.FileUtil;
-import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.FileTransgerUtil;
 
 import static cn.vsx.uav.constant.Constants.TYPE_COMMON;
@@ -47,8 +41,9 @@ import static cn.vsx.uav.constant.Constants.TYPE_NULL;
  * 描述：所有文件
  * 修订历史：
  */
-public class UavPictureFileFragment extends BaseFragment implements BaseQuickAdapter.RequestLoadMoreListener{
+public class UavPictureFileFragment extends BaseFragment implements BaseQuickAdapter.RequestLoadMoreListener, SwipeRefreshLayout.OnRefreshListener{
 
+    private SwipeRefreshLayout mUavDateSwipeRefreshLayout;
     private RecyclerView mUavDateRecyclerView;
     private FileAdapter adapter;
     private boolean showCheckbox;
@@ -91,11 +86,13 @@ public class UavPictureFileFragment extends BaseFragment implements BaseQuickAda
 
     @Override
     public void initView(){
+        mUavDateSwipeRefreshLayout = mRootView.findViewById(R.id.uav_swipeRefreshLayout);
         mUavDateRecyclerView = mRootView.findViewById(R.id.uav_date_recycler_view);
     }
 
     @Override
     public void initListener(){
+        mUavDateSwipeRefreshLayout.setOnRefreshListener(this);
         TerminalFactory.getSDK().registReceiveHandler(receiveSendFileFinishHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveShowCheckboxHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveFileSelectChangeHandler);
@@ -172,112 +169,6 @@ public class UavPictureFileFragment extends BaseFragment implements BaseQuickAda
                 }
             }
         }
-
-    }
-
-    private synchronized void getData(int pageIndex){
-        logger.info("pageIndex:"+pageIndex);
-        if(pageIndex == 0){
-            mHandler.sendEmptyMessage(CLEAR_DATA);
-        }
-        //"uavFile"文件夹
-        String uavDirectory = MyTerminalFactory.getSDK().getUavDirectory();
-        File dir = new File(uavDirectory);
-        if(dir.exists() && dir.isDirectory() && dir.listFiles().length>0){
-            File[] datefiles = dir.listFiles();
-            sortDirs(datefiles);
-            totalPage = (int) Math.ceil((double) datefiles.length/PAGE);
-            logger.info("totalPage:"+totalPage);
-            int currentData;
-            if(totalPage > PAGE*(pageIndex+1)){
-                currentData = PAGE*(pageIndex+1);
-            }else {
-                currentData = datefiles.length;
-            }
-            logger.info("currentData:"+currentData);
-
-            for(int i = PAGE*pageIndex; i < currentData; i++){
-                //日期文件夹
-                if(datefiles[i].exists() && datefiles[i].isDirectory() && datefiles[i].listFiles().length > 0){
-                    //照片文件夹
-                    File[] dirs = datefiles[i].listFiles();
-                    boolean first = true;
-                    int realFileSize = 0;
-                    for(File dir1 : dirs){
-                        if(dir1.exists() && dir1.isDirectory() && dir1.listFiles().length > 0){
-                            //照片或者视频文件
-                            if(dir1.getPath().contains("picture")){
-                                File[] files = dir1.listFiles();
-                                for(File file : files){
-                                    if(file.exists() && file.isFile() && file.length() > 0){
-                                        FileBean fileBean = new FileBean();
-                                        if(first){
-                                            fileBean.setType(TYPE_DATE);
-                                            first = false;
-                                        }else{
-                                            fileBean.setType(TYPE_COMMON);
-                                        }
-                                        fileBean.setDate(datefiles[i].getName());
-                                        fileBean.setPath(file.getPath());
-                                        fileBean.setName(file.getName());
-                                        fileBean.setFileSize(FileUtil.getFileSize(file));
-                                        fileBean.setIsVideo(false);
-                                        Bitmap bitmap = BitmapFactory.decodeFile(file.getPath());
-                                        fileBean.setWidth(bitmap.getWidth());
-                                        fileBean.setHeight(bitmap.getHeight());
-                                        bitmap.recycle();
-                                        if(getActivity() != null){
-                                            if(((UavFileListActivity) getActivity()).getSelectFileBean().contains(fileBean)){
-                                                fileBean.setSelected(true);
-                                            }
-                                        }
-                                        Message message = Message.obtain();
-                                        message.what = ADD_DATA;
-                                        message.obj = fileBean;
-                                        mHandler.sendMessage(message);
-                                        realFileSize++;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    //次数应为当天的有效数据
-                    int size = 5 - realFileSize % 5;
-                    if(size != 0 &&  size !=5){
-                        for(int k = 0; k < size; k++){
-                            FileBean emptyBean = new FileBean();
-                            emptyBean.setType(TYPE_NULL);
-                            Message message = Message.obtain();
-                            message.what = ADD_DATA;
-                            message.obj = emptyBean;
-                            mHandler.sendMessage(message);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    @SuppressLint("SimpleDateFormat")
-    private void sortDirs(File[] files){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Arrays.sort(files, (o1, o2) -> {
-            String path = o1.getPath();
-            int index = path.lastIndexOf("/");
-            String date1 = path.substring(index+1);
-
-            String path2 = o2.getPath();
-            int index2 = path2.lastIndexOf("/");
-            String date2 = path2.substring(index2+1);
-            long result = 0;
-            try{
-                result = dateFormat.parse(date2).getTime() - dateFormat.parse(date1).getTime();
-            }catch(ParseException e){
-                e.printStackTrace();
-            }
-//            logger.info("result:"+result);
-            return (int) result;
-        });
     }
 
     @Override
@@ -348,5 +239,18 @@ public class UavPictureFileFragment extends BaseFragment implements BaseQuickAda
             adapter.setShowCheckbox(showCheckbox);
             adapter.notifyDataSetChanged();
         }
+    }
+
+    @Override
+    public void onRefresh(){
+        currentIndex = 1;
+        data.clear();
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            getNewData(currentIndex);
+            currentIndex++;
+        });
+        mHandler.postDelayed(()->{
+            mUavDateSwipeRefreshLayout.setRefreshing(false);
+        },500);
     }
 }

@@ -26,7 +26,6 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.auth.LoginState;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.broadcastreceiver.PTTDownAndUpReceiver;
-import ptt.terminalsdk.broadcastreceiver.PhoneBroadcastReceiver;
 import ptt.terminalsdk.broadcastreceiver.TickAlarmReceiver;
 import ptt.terminalsdk.permission.FloatWindowManager;
 import ptt.terminalsdk.service.BluetoothLeService;
@@ -41,7 +40,7 @@ public class OnlineService extends Service {
 
 	protected PendingIntent tickPendIntent;
 
-	private PhoneBroadcastReceiver receiver;
+//	private PhoneBroadcastReceiver receiver;
 	private PTTDownAndUpReceiver pttDownAndUpReceiver;
 
 	@Override
@@ -65,12 +64,12 @@ public class OnlineService extends Service {
 //		filterLock.addAction(Intent.ACTION_SCREEN_ON);
 		registerReceiver(receiverLock, filterLock);
 
-		//手机电话状态 (响铃、接通、空闲) 空闲时主动向服务器建立连接
-		receiver = new PhoneBroadcastReceiver();
-		IntentFilter filter = new IntentFilter();
-		filter.addAction(Intent.ACTION_CALL);
-		filter.addAction("android.intent.action.PHONE_STATE");
-		registerReceiver(receiver, filter);
+//		//手机电话状态 (响铃、接通、空闲) 空闲时主动向服务器建立连接
+//		receiver = new PhoneBroadcastReceiver();
+//		IntentFilter filter = new IntentFilter();
+//		filter.addAction(Intent.ACTION_CALL);
+//		filter.addAction("android.intent.action.PHONE_STATE");
+//		registerReceiver(receiver, filter);
 
 		//组呼按钮
 		pttDownAndUpReceiver = new PTTDownAndUpReceiver();
@@ -100,7 +99,7 @@ public class OnlineService extends Service {
 	@Override
 	public void onDestroy() {
 		logger.info("OnlineService执行onDestroy");
-		unregisterReceiver(receiver);
+//		unregisterReceiver(receiver);
 		unregisterReceiver(pttDownAndUpReceiver);
 		unregisterReceiver(receiverLock);
 		logger.info("OnlineService被杀了，要重新启动");

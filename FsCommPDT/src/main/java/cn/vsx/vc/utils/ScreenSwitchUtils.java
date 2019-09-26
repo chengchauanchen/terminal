@@ -38,7 +38,7 @@ public class ScreenSwitchUtils{
             switch (msg.what) {
                 case 888:
                     int orientation = msg.arg1;
-                    Log.d(TAG, "orientation:" + orientation);
+//                    Log.d(TAG, "orientation:" + orientation);
                     if (orientation > 45 && orientation < 135) {
                         if(currentState != ScreenState.SCREEN_ORIENTATION_REVERSE_LANDSCAPE){
                             Log.d(TAG, "切换成反向横屏");

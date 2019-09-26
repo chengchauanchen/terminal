@@ -35,6 +35,7 @@ import dji.sdk.base.BaseComponent;
 import dji.sdk.base.BaseProduct;
 import dji.sdk.camera.Camera;
 import dji.sdk.flightcontroller.Compass;
+import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.gimbal.Gimbal;
 import dji.sdk.media.MediaFile;
 import dji.sdk.media.MediaManager;
@@ -81,6 +82,14 @@ public class AirCraftUtil{
             return null;
         }
         return (Aircraft) getProductInstance();
+    }
+
+    public static synchronized FlightController getFlightController(){
+        if(getAircraftInstance() != null){
+            return getAircraftInstance().getFlightController();
+        }else {
+            return null;
+        }
     }
 
     public static synchronized Camera getAircraftCamera(){
