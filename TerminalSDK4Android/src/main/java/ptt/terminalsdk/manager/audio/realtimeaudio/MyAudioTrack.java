@@ -55,7 +55,9 @@ public class MyAudioTrack implements IAudioTrack{
     @Override
     public void play(){
         try{
-            audioTrack.play();
+            if(audioTrack != null){
+                audioTrack.play();
+            }
         }catch(Exception e){
             logger.error("播放音频出错：",e);
         }
