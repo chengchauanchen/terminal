@@ -33,6 +33,7 @@ import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.MyDataUtil;
 import dji.common.flightcontroller.ConnectionFailSafeBehavior;
 import dji.sdk.battery.Battery;
+import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.products.Aircraft;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -72,6 +73,7 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
                 if(!uavConnected){
                     MyTerminalFactory.getSDK().getLiveManager().sendAircraftConnectStatus(true);
                     setConnectionFailBehavior();
+                    setCollisionAvoidance();
                     myHandler.postDelayed(() -> checkBattery(aircraft),2000);
                     setUploadTime();
                     //校准
@@ -96,6 +98,39 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
         }
         uavConnected = connected;
     };
+
+    //开启防碰撞功能
+    private void setCollisionAvoidance(){
+        FlightController flightController = AirCraftUtil.getFlightController();
+        if(flightController != null && flightController.getFlightAssistant() != null){
+            //启用向上防碰撞
+            flightController.getFlightAssistant().setUpwardsAvoidanceEnabled(true, djiError -> {
+                if(djiError == null){
+                    logger.info("启动向上防碰撞成功");
+                }else {
+                    logger.error("启动向上防碰撞失败---"+djiError.getDescription());
+                }
+            });
+            //启动主动避障，启用后，当障碍物向飞机移动时，飞机将主动飞离它。
+            // 如果在主动避开移动障碍物的同时，飞机在避让路径中检测到其他障碍物，它将停止
+            flightController.getFlightAssistant().setActiveObstacleAvoidanceEnabled(true, djiError -> {
+                if(djiError == null){
+                    logger.info("启动主动避障成功");
+                }else {
+                    logger.error("启动主动避障失败---"+djiError.getDescription());
+                }
+            });
+            //启用避免碰撞。启用后，飞机将停止并尝试绕过检测到的障碍物。
+            flightController.getFlightAssistant().setCollisionAvoidanceEnabled(true, djiError -> {
+                if(djiError == null){
+                    logger.info("启动防碰撞成功");
+                }else {
+                    logger.error("启动防碰撞失败---"+djiError.getDescription());
+                }
+            });
+
+        }
+    }
 
     @Override
     protected void handleMyMessage(Message msg){
@@ -161,7 +196,7 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
             battery.setStateCallback(batteryState -> {
                 //电池电量小于等于10%时自动返航
                 //                logger.info("无人机电池电量:"+batteryState.getChargeRemainingInPercent());
-                if(batteryState.getChargeRemainingInPercent() == 10){
+                if(batteryState.getChargeRemainingInPercent() == 15){
                     if(!aircraft.getFlightController().getState().isGoingHome()){
                         //自动返航代码
                         autoGoHome();
