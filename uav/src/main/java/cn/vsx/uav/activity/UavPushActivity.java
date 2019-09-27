@@ -11,6 +11,7 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
@@ -45,9 +46,12 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHan
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveStopUAVPatrolHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUAVPatrolHandler;
@@ -124,7 +128,7 @@ public class UavPushActivity extends BaseActivity{
     private TextureView mapAircraftLive;
     private Button btnHomeLocation;
     private Button btn_auto_flight;
-    protected LinearLayout mLlNoNetwork;
+//    protected LinearLayout mLlNoNetwork;
     private ImageView iv_menu;
     private ImageView iv_setting;
 
@@ -224,7 +228,6 @@ public class UavPushActivity extends BaseActivity{
         mapAircraftLive = findViewById(R.id.map_aircraft_live);
         btnHomeLocation = findViewById(R.id.btn_home_location);
         btn_auto_flight = findViewById(R.id.btn_auto_flight);
-        mLlNoNetwork = findViewById(R.id.ll_no_network);
         mIvPush = findViewById(R.id.iv_push);
         mIvPreview = findViewById(R.id.iv_preview);
         mIvTakePhoto = findViewById(R.id.iv_take_photo);
@@ -280,9 +283,12 @@ public class UavPushActivity extends BaseActivity{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);//通知有人加入或离开
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);//自己发起直播的响应
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCalibrationStateCallbackHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAirCraftStatusChangedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
     }
 
     @Override
@@ -347,8 +353,11 @@ public class UavPushActivity extends BaseActivity{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);//通知有人加入或离开
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);//自己发起直播的响应
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAirCraftStatusChangedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
     }
 
     @Override
@@ -1064,7 +1073,7 @@ public class UavPushActivity extends BaseActivity{
             if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
                 ToastUtil.showToast(getApplicationContext(), "没有组呼听的权限");
             }
-            PromptManager.getInstance().groupCallCommingRing();
+//            PromptManager.getInstance().groupCallCommingRing();
             logger.info(TAG + "组呼来了");
             myHandler.post(() -> {
                 //是组扫描的组呼,且当前组没人说话，变文件夹和组名字
@@ -1118,22 +1127,14 @@ public class UavPushActivity extends BaseActivity{
         pushService.startAircraftPush(streamMediaServerIp, String.valueOf(streamMediaServerPort), TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "_" + callId);
     }, 1000);
 
-    /**
-     * 在线状态
-     */
-    private ReceiveServerConnectionEstablishedHandler receiveOnLineStatusChangedHandler = connected -> {
-        if(!connected){
-            ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.net_work_disconnect));
-        }
-        myHandler.post(() -> onNetworkChanged(connected));
-    };
-
     private ReceiveAirCraftStatusChangedHandler receiveAirCraftStatusChangedHandler = new ReceiveAirCraftStatusChangedHandler(){
         @Override
         public void handler(boolean connected){
             myHandler.post(() -> {
                 if(!connected){
                     uavConnected = false;
+                    setUavDisconnectParams();
+                    mVDrakBackgroupd.setText(R.string.uav_disconnect);
                     mVDrakBackgroupd.setVisibility(View.VISIBLE);
                     //                    mBtnStopPush.setVisibility(View.VISIBLE);
                     mIvTakePhoto.setImageResource(R.drawable.uav_take_photo_disable);
@@ -1141,7 +1142,12 @@ public class UavPushActivity extends BaseActivity{
                     AirCraftUtil.loginToActivationIfNeeded();
                     initAircraft();
                     uavConnected = true;
-                    mVDrakBackgroupd.setVisibility(View.GONE);
+                    if(TerminalFactory.getSDK().getAuthManagerTwo().isOnLine()){
+                        logger.info("GONE---ReceiveAirCraftStatusChangedHandler");
+                        mVDrakBackgroupd.setVisibility(View.GONE);
+                    }else {
+                        mVDrakBackgroupd.setVisibility(View.VISIBLE);
+                    }
                     //                    mBtnStopPush.setVisibility(View.GONE);
                     mIvTakePhoto.setImageResource(R.drawable.uav_take_photo);
                 }
@@ -1211,5 +1217,128 @@ public class UavPushActivity extends BaseActivity{
         lastState = compassCalibrationState;
     }
 
-//    private
+    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler(){
+        @Override
+        public void handler(boolean connected){
+            myHandler.post(()->{
+                mVDrakBackgroupd.setVisibility(View.VISIBLE);
+                if(uavConnected){
+                    setUavConnectedParams();
+                    if(!connected){
+                        //无人机连上，网络断开
+                        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.net_work_disconnect));
+                        mVDrakBackgroupd.setText(R.string.net_work_disconnect);
+                    }else {
+                        if(TerminalFactory.getSDK().isServerConnected()){
+                            logger.info("GONE---ReceiveOnLineStatusChangedHandler");
+                            mVDrakBackgroupd.setVisibility(View.GONE);
+                        }
+                    }
+                }else {
+                    setUavDisconnectParams();
+                    if(!connected){
+                        //无人机没连上，接入也没连上
+                        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.net_work_disconnect));
+                        mVDrakBackgroupd.setText(R.string.net_work_disconnect);
+                    }else {
+                        mVDrakBackgroupd.setText(R.string.uav_disconnect);
+                    }
+                }
+                onNetworkChanged(connected);
+            });
+        }
+    };
+
+    private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = new ReceiveSendUuidResponseHandler(){
+        @Override
+        public void handler(int resultCode, String resultDesc, boolean isRegisted){
+            myHandler.post(()->{
+                mVDrakBackgroupd.setVisibility(View.VISIBLE);
+                if(uavConnected){
+                    setUavConnectedParams();
+                }else {
+                    setUavDisconnectParams();
+                }
+                if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                    mVDrakBackgroupd.setText(R.string.connecting_server);
+                }else {
+                    mVDrakBackgroupd.setText(resultDesc);
+                }
+            });
+        }
+    };
+
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler(){
+        @Override
+        public void handler(boolean connected){
+            myHandler.post(()->{
+                mVDrakBackgroupd.setVisibility(View.VISIBLE);
+                if(uavConnected){
+                    //无人机连上，接入也连上，设为登陆
+                    setUavConnectedParams();
+                    if(connected){
+                        mVDrakBackgroupd.setText(R.string.logining);
+                    }else {
+                        //无人机连上，接入断开
+                        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.net_work_disconnect));
+                        mVDrakBackgroupd.setText(R.string.net_work_disconnect);
+                    }
+                }else {
+                    //无人机没连上，接入连上，设为登陆
+                    setUavDisconnectParams();
+                    if(connected){
+                        mVDrakBackgroupd.setText(R.string.logining);
+                    }else {
+                        //无人机没连上，接入也没连上
+                        ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.net_work_disconnect));
+                        mVDrakBackgroupd.setText(R.string.net_work_disconnect);
+                    }
+                }
+                onNetworkChanged(connected);
+            });
+        }
+    };
+
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = (resultCode, resultDesc) -> myHandler.post(()->{
+
+        if(uavConnected){
+            setUavConnectedParams();
+            if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                //登陆成功
+                mVDrakBackgroupd.setText(R.string.login_success);
+                logger.info("GONE---ReceiveLoginResponseHandler");
+                mVDrakBackgroupd.setVisibility(View.GONE);
+            }else {
+                mVDrakBackgroupd.setText(resultDesc);
+                mVDrakBackgroupd.setVisibility(View.VISIBLE);
+            }
+        }else {
+            setUavDisconnectParams();
+            if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                mVDrakBackgroupd.setText(R.string.uav_disconnect);
+                mVDrakBackgroupd.setVisibility(View.VISIBLE);
+            }else {
+                mVDrakBackgroupd.setText(resultDesc);
+                mVDrakBackgroupd.setVisibility(View.VISIBLE);
+            }
+        }
+    });
+
+    private void setUavDisconnectParams(){
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mVDrakBackgroupd.getLayoutParams();
+        layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+        layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+        mVDrakBackgroupd.setLayoutParams(layoutParams);
+        mVDrakBackgroupd.setGravity(Gravity.CENTER);
+        mVDrakBackgroupd.setBackgroundResource(R.color.black);
+    }
+
+    private void setUavConnectedParams(){
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) mVDrakBackgroupd.getLayoutParams();
+        layoutParams.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+        layoutParams.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+        mVDrakBackgroupd.setLayoutParams(layoutParams);
+        mVDrakBackgroupd.setGravity(Gravity.CENTER);
+        mVDrakBackgroupd.setBackgroundResource(R.color.red_40);
+    }
 }

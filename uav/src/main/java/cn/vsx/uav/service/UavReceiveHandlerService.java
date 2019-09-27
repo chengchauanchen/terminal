@@ -229,12 +229,26 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
         }else{
-            Intent intent = new Intent();
-            intent.putExtra(Constants.MEMBER_NAME, mainMemberName);
-            intent.putExtra(Constants.MEMBER_ID, mainMemberId);
-            intent.putExtra(Constants.THEME,"");
-            intent.setClass(UavReceiveHandlerService.this, UavReceiveLiveCommingService.class);
-            startService(intent);
+            //判断无人机有没有连接上，没有连接上要响铃让用户选择,已经连上直接上报
+            if(AirCraftUtil.getAircraftInstance() == null){
+                if(!checkFloatPermission()){
+                    startSetting();
+                    return;
+                }
+                startTranspantActivity();
+                Intent intent = new Intent();
+                intent.putExtra(Constants.MEMBER_NAME, mainMemberName);
+                intent.putExtra(Constants.MEMBER_ID, mainMemberId);
+                intent.putExtra(Constants.THEME,"");
+                intent.setClass(UavReceiveHandlerService.this, UavReceiveLiveCommingService.class);
+                startService(intent);
+            }else {
+                //直接上报
+                Intent intent = new Intent(getApplicationContext(), UavPushActivity.class);
+                intent.putExtra(Constants.TYPE,Constants.RECEIVE_PUSH);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+            }
         }
     }
 

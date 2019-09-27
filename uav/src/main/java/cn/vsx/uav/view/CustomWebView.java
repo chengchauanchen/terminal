@@ -8,7 +8,7 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.webkit.ValueCallback;
-import android.webkit.WebResourceRequest;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -33,8 +33,8 @@ public class CustomWebView extends WebView{
     private static final int UPDATE_AIRCRAFT_LOCATION = 0;
     private static final long UPDATE_DALAY = 15*1000L;
     private Logger logger = Logger.getLogger(CustomWebView.class);
-    private double uvLng = 114.41588661389632;
-    private double uvLat = 30.55199833333333;
+    private double uvLng;
+    private double uvLat;
     private double personLng = 114.41584253964803;
     private double personLat = 30.55562209282912;
 
@@ -94,9 +94,6 @@ public class CustomWebView extends WebView{
         super.onDetachedFromWindow();
         TerminalFactory.getSDK().unregistReceiveHandler(receiveChangePersonLocationHandler);
         mhandler.removeCallbacksAndMessages(null);
-        setWebChromeClient(null);
-        setWebViewClient(null);
-        getSettings().setJavaScriptEnabled(false);
     }
 
     public void initWeb(){
@@ -107,10 +104,13 @@ public class CustomWebView extends WebView{
         // 设置是否可以交互Javascript
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
+        settings.setBlockNetworkImage(false);//解决图片不显示
         //        // 设置允许JS弹窗
         //        settings.setJavaScriptCanOpenWindowsAutomatically(true);
         //设置WebView加载页面文本内容的编码，默认“UTF-8”。
         settings.setDefaultTextEncodingName("utf-8");
+        settings.setLoadsImagesAutomatically(true);
+
         //支持屏幕缩放
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(true);
@@ -132,14 +132,11 @@ public class CustomWebView extends WebView{
         //开启 DOM storage API 功能
         //        settings.setDomStorageEnabled(false);
         //        settings.setAllowContentAccess(true);
+        setWebChromeClient(new WebChromeClient());//这行最好不要丢掉
         setWebViewClient(new WebViewClient(){
             @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    view.loadUrl(request.getUrl().toString());
-                } else {
-                    view.loadUrl(request.toString());
-                }
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                view.loadUrl(url);
                 return true;
             }
         });
@@ -148,7 +145,7 @@ public class CustomWebView extends WebView{
 
     private void loadMap(String type,double uv_lng,double uv_lat,double person_lng,double person_lat){
         String url = TerminalFactory.getSDK().getParam(Params.LOCATION_URL, "")+"?type="+type+"&u_lng="+uv_lng+"&u_lat="+uv_lat+"&lng="+person_lng+"&lat="+person_lat;
-        logger.info("加载无人机地址" + url);
+        logger.info("加载无人机地址:" + url);
         if(!TextUtils.isEmpty(url)){
             clearCache(true);
             loadUrl(url);

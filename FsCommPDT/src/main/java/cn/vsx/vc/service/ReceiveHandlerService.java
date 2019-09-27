@@ -1405,7 +1405,7 @@ public class ReceiveHandlerService extends Service{
         }
     }
 
-    private void startTranspantActivity(){
+    protected void startTranspantActivity(){
         //判断是否锁屏
         KeyguardManager mKeyguardManager = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
         if(null != mKeyguardManager){

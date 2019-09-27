@@ -59,7 +59,6 @@ import cn.vsx.uav.view.CustomWebView;
 import cn.vsx.uav.view.MyCameraSettingAdvancedPanel;
 import cn.vsx.vc.adapter.MemberEnterAdapter;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.service.BaseService;
 import cn.vsx.vc.service.InviteMemberService;
@@ -207,7 +206,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
             if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
                 ToastUtil.showToast(getApplicationContext(), "没有组呼听的权限");
             }
-            PromptManager.getInstance().groupCallCommingRing();
+//            PromptManager.getInstance().groupCallCommingRing();
             logger.info(TAG+"组呼来了");
             mHandler.post(() -> {
                 //是组扫描的组呼,且当前组没人说话，变文件夹和组名字

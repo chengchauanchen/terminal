@@ -26,6 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@color/black"
+            android:layout_centerInParent="true"
             android:gravity="center"
             android:text="@string/uav_disconnect"
             android:textColor="@color/grid_line"
@@ -609,7 +610,7 @@
         </RelativeLayout>
     </RelativeLayout>
     
-    <include
-        layout="@layout/layout_no_network"
-        android:visibility="gone" />
+<!--    <include-->
+<!--        layout="@layout/layout_no_network"-->
+<!--        android:visibility="gone" />-->
 </RelativeLayout>
