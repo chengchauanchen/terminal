@@ -1111,11 +1111,12 @@ public class ReceiveHandlerService extends Service{
             uniqueNoAndType = MyDataUtil.getPushInviteMemberData(currentGroupId, ReceiveObjectMode.GROUP.toString());
             ArrayList<String> uniqueNos = new ArrayList<>();
             uniqueNos.add(uniqueNoAndType);
-            Intent intent = new Intent(getApplicationContext(), PhonePushService.class);
+            Intent intent = new Intent(ReceiveHandlerService.this, PhonePushService.class);
             intent.putExtra(Constants.PUSH_MEMBERS,new PushLiveMemberList(uniqueNos));
+            intent.putExtra(Constants.THEME,"");
             intent.putExtra(Constants.TYPE,Constants.ACTIVE_PUSH);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
+            startService(intent);
         }else {
             if(android.text.TextUtils.isEmpty(uniqueNoAndType)){//要弹出选择成员页
                 Intent intent = new Intent(ReceiveHandlerService.this, InviteMemberService.class);
