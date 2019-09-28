@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
@@ -127,6 +128,14 @@ public class HistoryReportPlayer2 extends MvpFrameLayout<IHistoryReportPlayerVie
                 getLogger().error(e);
             }
         }
+    }
+
+    /**
+     * 跟新进度
+     * @param position
+     */
+    public void seekTo(int position) {
+        customMediaPlayer.seekTo(position);
     }
 
     /**
@@ -308,7 +317,7 @@ public class HistoryReportPlayer2 extends MvpFrameLayout<IHistoryReportPlayerVie
     /**
      * 释放MediaPlayer资源
      */
-    private void release() {
+    public void release() {
         customMediaPlayer.release();
     }
 

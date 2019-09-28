@@ -70,10 +70,10 @@ dependencies {
     api rootProject.ext.dependencies["design"]
 
     //图片加载 glide
-    api(rootProject.ext.dependencies["glide"]) {
-        exclude module: 'support-v4'
-    }
-    annotationProcessor rootProject.ext.dependencies["glideCompiler"]
+//    api(rootProject.ext.dependencies["glide"]) {
+//        exclude module: 'support-v4'
+//    }
+//    annotationProcessor rootProject.ext.dependencies["glideCompiler"]
     //androideventbus
     api rootProject.ext.dependencies["androideventbus"]
 

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="87px"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/rl_topbar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center_vertical">
+        <ImageView
+            android:id="@+id/news_bar_return"
+            android:layout_width="46px"
+            android:layout_height="34px"
+            android:src="@drawable/news_bar_return"
+            android:layout_marginLeft="10px" />
+
+        <View
+            android:id="@+id/news_bar_line"
+            android:layout_width="0.5px"
+            android:layout_height="30px"
+            android:layout_marginLeft="11px"
+            android:layout_marginRight="11px"
+            android:background="@color/group_call_news_bar_line" />
+
+        <TextView
+            android:id="@+id/tv_chat_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/group_call_news_group_name"
+            android:textSize="25px" />
+
+        <LinearLayout
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:id="@+id/group_live_history"
+                android:layout_width="46px"
+                android:layout_height="46px"
+                android:layout_marginRight="12px"
+                android:padding="5px"
+                android:src="@drawable/group_live_history" />
+
+            <ImageView
+                android:id="@+id/group_call_activity_member_info"
+                android:layout_width="46px"
+                android:layout_height="46px"
+                android:layout_marginRight="12px"
+                android:padding="5px"
+                android:src="@drawable/group_member" />
+        </LinearLayout>
+
+    </LinearLayout>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5px"
+        android:background="@color/diver_bg"
+        android:layout_below="@id/rl_topbar"/>
+</LinearLayout>

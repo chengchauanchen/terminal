@@ -63,7 +63,7 @@ public class StartCallManager {
         });
     }
 
-    private void activeIndividualCall(Member member) {
+    public void activeIndividualCall(Member member) {
         //MyApplication.instance.isCallState = true;
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {

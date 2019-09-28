@@ -1,19 +1,20 @@
 package com.vsxin.terminalpad.mvp.contract.presenter;
 
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.BasePresenter;
 import com.vsxin.terminalpad.mvp.contract.constant.FragmentTagConstants;
-import com.vsxin.terminalpad.mvp.contract.constant.NoticeInOrOutEnum;
-import com.vsxin.terminalpad.mvp.contract.constant.NoticeOutLiveEnum;
-import com.vsxin.terminalpad.mvp.contract.constant.NoticeTypeEnum;
-import com.vsxin.terminalpad.mvp.contract.view.IMainView;
 import com.vsxin.terminalpad.mvp.contract.view.IPlayerView;
-import com.vsxin.terminalpad.mvp.entity.NoticeBean;
+import com.vsxin.terminalpad.mvp.entity.HistoryMediaBean;
 import com.vsxin.terminalpad.receiveHandler.HistoryReportPlayerHandler;
+import com.vsxin.terminalpad.receiveHandler.ReceiveGoWatchLiveHandler2;
 import com.vsxin.terminalpad.receiveHandler.ReceiveStartPullLiveHandler;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
-import com.vsxin.terminalpad.utils.TimeUtil;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -28,11 +29,21 @@ public class PlayerPresenter extends BasePresenter<IPlayerView> {
         super(mContext);
     }
 
+    protected Handler mHandler = new Handler(Looper.getMainLooper());
+    /**
+     * 播放历史视频
+     */
+    private ReceiveGoWatchLiveHandler2 receiveGoWatchLiveHandler = (liveUrl, name, memberId) -> mHandler.post(() -> {
+        getView().getLogger().info("ReceiveGoWatchLiveHandler--播放历史视频");
+        getView().setHistoryMediaDataSource(liveUrl,name, memberId);
+        getView().showFragmentForTag(FragmentTagConstants.MP4);
+    });
+
     /**
      * 播放历史视频
      */
     private HistoryReportPlayerHandler historyReportPlayerHandler = () -> {
-        //getView().playerHistory();
+        getView().getLogger().info("HistoryReportPlayerHandler--播放历史视频");
         getView().showFragmentForTag(FragmentTagConstants.MP4);
     };
 
@@ -47,6 +58,7 @@ public class PlayerPresenter extends BasePresenter<IPlayerView> {
      * 注册监听
      */
     public void registReceiveHandler() {
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveGoWatchLiveHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(historyReportPlayerHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveStartPullLiveHandler);
     }
@@ -57,6 +69,7 @@ public class PlayerPresenter extends BasePresenter<IPlayerView> {
     public void unregistReceiveHandler() {
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(historyReportPlayerHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveStartPullLiveHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGoWatchLiveHandler);
     }
 
     @Override
@@ -69,5 +82,23 @@ public class PlayerPresenter extends BasePresenter<IPlayerView> {
     public void detachView() {
         super.detachView();
         unregistReceiveHandler();
+    }
+
+
+
+    public List<HistoryMediaBean> getTestData(List<String> liveUrls) {
+        List<HistoryMediaBean> mediaBeans = new ArrayList<>();
+        for (String urlStr : liveUrls) {
+            HistoryMediaBean mediaBean = new HistoryMediaBean();
+//            String fileServerIp = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_IP);
+//            String port = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT, 0) + "";
+//            String liveUrl = "http://" + fileServerIp + ":" + port + urlStr;
+            getView().getLogger().info("liveUrl：" + urlStr);
+            mediaBean.setUrl(urlStr);
+            mediaBean.setSelected(true);
+            mediaBean.setStartTime("");
+            mediaBeans.add(mediaBean);
+        }
+        return mediaBeans;
     }
 }

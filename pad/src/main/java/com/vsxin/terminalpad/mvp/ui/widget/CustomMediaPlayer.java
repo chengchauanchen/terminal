@@ -83,10 +83,12 @@ public class CustomMediaPlayer implements OnPreparedListener, OnErrorListener, O
 
     public void release() {
         hasPrepared = false;
-        mPlayer.stop();
-        mPlayer.reset();
-        mPlayer.release();
-        mPlayer = null;
+        if(mPlayer!=null){
+            mPlayer.stop();
+            mPlayer.reset();
+            mPlayer.release();
+            mPlayer = null;
+        }
         if (playerListener != null) {
             playerListener.onStop();
         }
@@ -140,6 +142,8 @@ public class CustomMediaPlayer implements OnPreparedListener, OnErrorListener, O
         if (playerListener != null) {
             playerListener.onCompletion(mp);
         }
+        //重新播放
+        //release();
     }
 
     @Override

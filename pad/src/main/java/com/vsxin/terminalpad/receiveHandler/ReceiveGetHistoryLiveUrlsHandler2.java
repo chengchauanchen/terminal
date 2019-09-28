@@ -1,5 +1,7 @@
 package com.vsxin.terminalpad.receiveHandler;
 
+import com.vsxin.terminalpad.mvp.entity.MediaBean;
+
 import java.util.List;
 
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
@@ -11,6 +13,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  * 描述：
  * 修订历史：
  */
-public interface ReceiveGetHistoryLiveUrlsHandler extends ReceiveHandler{
-    void handler(int code,List<String> liveUrl,String name,int memberId);
+public interface ReceiveGetHistoryLiveUrlsHandler2 extends ReceiveHandler{
+    void handler(int code, List<MediaBean> liveUrl, String name, int memberId);
 }

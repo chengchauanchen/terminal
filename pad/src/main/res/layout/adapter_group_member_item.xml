@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_row"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="120px"
+    android:gravity="center_vertical"
+    android:orientation="horizontal">
+    <LinearLayout
+        android:id="@+id/ll_person_search_item"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_60"
+        android:gravity="center_vertical">
+
+        <RelativeLayout
+            android:layout_width="@dimen/dp_50"
+            android:layout_height="@dimen/dp_50"
+            android:layout_marginLeft="10px">
+
+            <ImageView
+                android:id="@+id/user_logo"
+                android:layout_width="@dimen/dp_50"
+                android:layout_height="@dimen/dp_50"/>
+
+            <ImageView
+                android:id="@+id/recorder_binded_logo"
+                android:layout_width="15.5dp"
+                android:layout_height="6dp"
+                android:layout_alignParentRight="true"
+                android:src="@drawable/ico_phone_recorder_binded"
+                android:visibility="gone"/>
+
+        </RelativeLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="12px"
+            android:gravity="center_vertical"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_member_name"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:ellipsize="end"
+                android:gravity="center_vertical"
+                android:maxLength="12"
+                android:text="张星星"
+                android:textColor="@color/white"
+                android:textSize="27px"
+                android:textStyle="normal" />
+
+            <TextView
+                android:id="@+id/tv_member_id"
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:text="ID:123456"
+                android:textColor="@color/white"
+                android:textSize="21px"
+                android:textStyle="normal" />
+        </LinearLayout>
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
+
+        <LinearLayout
+            android:id="@+id/shoutai_dial_to"
+            android:layout_width="@dimen/dp_45"
+            android:layout_height="@dimen/dp_45"
+            android:layout_marginRight="40px"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/tel" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/message_to"
+            android:layout_width="@dimen/dp_45"
+            android:layout_height="@dimen/dp_45"
+            android:layout_marginRight="40px"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/new_message_icon" />
+
+        </LinearLayout>
+
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="40px">
+
+            <LinearLayout
+                android:id="@+id/call_to"
+                android:layout_width="@dimen/dp_45"
+                android:layout_height="@dimen/dp_45"
+                android:gravity="center">
+
+                <ImageView
+                    android:id="@+id/iv_call"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/new_call_icon" />
+            </LinearLayout>
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/lay_line"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_half_one"
+        android:background="@color/diver_bg"
+        android:orientation="vertical" />
+</LinearLayout>
+

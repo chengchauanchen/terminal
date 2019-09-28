@@ -4,10 +4,13 @@ import android.content.Context;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -20,6 +23,7 @@ import com.vsxin.terminalpad.mvp.contract.presenter.LiveSmallCoverPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IHistoryReportPlayerCoverView;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveSmallCoverView;
 import com.vsxin.terminalpad.mvp.entity.HistoryMediaBean;
+import com.vsxin.terminalpad.mvp.entity.MediaBean;
 import com.vsxin.terminalpad.mvp.ui.adapter.PlayHistoryVideoAdapter;
 import com.vsxin.terminalpad.utils.ResUtil;
 
@@ -42,16 +46,19 @@ public class HistoryReportPlayerCoverView extends MvpLinearLayout<IHistoryReport
     private SeekBar seek_bar;
     private TextView tv_max_time;
     private TextView tv_choice;
+    private RelativeLayout rl_video_view;
 
     private OnClickListener quitClickListener;//退出
     private OnClickListener pauseContinueClickListener;//暂停/继续
     private OnClickListener playerClickListener;//播放
     private OnClickListener choiceClickListener;//选择视频list
+    private OnSeekBarChangedListener onSeekBarChangedListener;//拖动进度条监听
+    private OnDoubleClickListener onDoubleClickListener;//拖动进度条监听
     private LinearLayout ll_list;
     private RecyclerView recyclerview;
     private PlayHistoryVideoAdapter playLiveAdapter;
 
-    private List<HistoryMediaBean> historyMediaBeanList = new ArrayList<>();
+    private List<MediaBean> historyMediaBeanList = new ArrayList<>();
 
 
     private OnItemClickListener onItemClickListener;
@@ -89,6 +96,9 @@ public class HistoryReportPlayerCoverView extends MvpLinearLayout<IHistoryReport
         //选择
         tv_choice = findViewById(R.id.tv_choice);
 
+        //跟布局
+        rl_video_view = findViewById(R.id.rl_video_view);
+
         //历史播放记录列表
         ll_list = findViewById(R.id.ll_list);
         recyclerview = findViewById(R.id.recyclerview);
@@ -122,6 +132,34 @@ public class HistoryReportPlayerCoverView extends MvpLinearLayout<IHistoryReport
         });
 
         initRecyclerView();
+
+        seek_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener(){
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+            }
+
+            //拖动条开始拖动的时候调用
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar){
+            }
+
+            //拖动条停止拖动的时候调用
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar){
+                try{
+                    int progress = seekBar.getProgress();
+                    if(onSeekBarChangedListener!=null){
+                        onSeekBarChangedListener.stopTrackingTouch(progress);
+                    }
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        //双击事件
+        rl_video_view.setOnTouchListener(new onDoubleClick());
+
     }
 
     /**
@@ -132,6 +170,21 @@ public class HistoryReportPlayerCoverView extends MvpLinearLayout<IHistoryReport
         playLiveAdapter = new PlayHistoryVideoAdapter(R.layout.item_play_history_video, historyMediaBeanList);
         recyclerview.setAdapter(playLiveAdapter);
     }
+
+    public void currentPlayPosition(int position){
+        getPresenter().setAllUnSelect(historyMediaBeanList);
+        historyMediaBeanList.get(position).setSelected(true);
+        playLiveAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 显示选择播放类别
+     * @param isShow
+     */
+    public void isShowSelectListView(Boolean isShow){
+        ll_list.setVisibility(isShow?VISIBLE:GONE);
+    }
+
 
     /**
      * 设置item点击事件
@@ -145,10 +198,21 @@ public class HistoryReportPlayerCoverView extends MvpLinearLayout<IHistoryReport
      * 设置数据源
      * @param historyMediaBeanList
      */
-    public void setHistoryMedia(List<HistoryMediaBean> historyMediaBeanList){
+    public void setHistoryMedia(List<MediaBean> historyMediaBeanList){
         this.historyMediaBeanList.clear();
         this.historyMediaBeanList.addAll(historyMediaBeanList);
         playLiveAdapter.notifyDataSetChanged();
+    }
+
+
+
+
+    /**
+     * 设置标题
+     * @param title
+     */
+    public void setTitle(String title){
+        tv_theme.setText(title);
     }
 
 
@@ -202,6 +266,10 @@ public class HistoryReportPlayerCoverView extends MvpLinearLayout<IHistoryReport
 
     /**************************设置监听*****************************/
 
+    public void setSeekBarChangeListener(OnSeekBarChangedListener onSeekBarChangedListener){
+        this.onSeekBarChangedListener = onSeekBarChangedListener;
+    }
+
     /**
      * 退出
      * @param quitClickListener
@@ -234,8 +302,60 @@ public class HistoryReportPlayerCoverView extends MvpLinearLayout<IHistoryReport
         this.choiceClickListener = choiceClickListener;
     }
 
+    /**
+     * 选择视频list
+     * @param onDoubleClickListener
+     */
+    public void setOnDoubleClickListener(OnDoubleClickListener onDoubleClickListener) {
+        this.onDoubleClickListener = onDoubleClickListener;
+    }
+
     @Override
     public HistoryReportPlayerCoverPresenter createPresenter() {
         return new HistoryReportPlayerCoverPresenter(getSuperContext());
+    }
+
+    /**
+     * 拖动进度条监听
+     */
+    public interface OnSeekBarChangedListener{
+        void stopTrackingTouch(int progress);
+    }
+
+
+
+    class onDoubleClick implements View.OnTouchListener{
+        int count = 0;
+        long firClick;
+        long secClick;
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            if(MotionEvent.ACTION_DOWN == event.getAction()){
+                count++;
+                if(count == 1){
+                    firClick = System.currentTimeMillis();
+                } else if (count == 2){
+                    secClick = System.currentTimeMillis();
+                    if(secClick - firClick < 1000){
+                        //双击事件
+                        if(onDoubleClickListener!=null){
+                            onDoubleClickListener.onDoubleClick();
+                        }
+                    }
+                    count = 0;
+                    firClick = 0;
+                    secClick = 0;
+
+                }
+            }
+            return true;
+        }
+    }
+
+    /**
+     * 双击事件
+     */
+    public interface OnDoubleClickListener{
+       void onDoubleClick();
     }
 }

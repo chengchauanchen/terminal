@@ -16,9 +16,12 @@ import com.vsxin.terminalpad.mvp.ui.widget.CustomMediaPlayer.PlayerListener;
 import com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayer;
 import com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayer2;
 import com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayerCoverView;
+import com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayerCoverView.OnDoubleClickListener;
+import com.vsxin.terminalpad.mvp.ui.widget.HistoryReportPlayerCoverView.OnSeekBarChangedListener;
 import com.vsxin.terminalpad.utils.TimeUtil;
 import com.vsxin.terminalpad.utils.Timer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -35,7 +38,10 @@ public class HistoryReportFragment extends MvpFragment<IHistoryReportView, Histo
 
     private HistoryReportPlayerCoverView historyReportPlayerCoverView;
     private Timer timer;
-    private List<HistoryMediaBean> testData;
+    private List<MediaBean> testData = new ArrayList<>();
+    private int currentMediaBeanPosition = 0;
+
+    private Boolean isShow = false;
 
     @Override
     protected int getLayoutResID() {
@@ -62,6 +68,13 @@ public class HistoryReportFragment extends MvpFragment<IHistoryReportView, Histo
             @Override
             public void onCompletion(MediaPlayer mp) {
                 timer.stop();
+                if (currentMediaBeanPosition < testData.size() - 1) {
+                    playNext(currentMediaBeanPosition + 1);
+                    historyReportPlayerCoverView.playView();
+                } else {
+                    hrp_video_player.pause();
+                    historyReportPlayerCoverView.pauseView();
+                }
             }
 
             @Override
@@ -90,14 +103,8 @@ public class HistoryReportFragment extends MvpFragment<IHistoryReportView, Histo
 
         //选择
         historyReportPlayerCoverView.setChoiceClickListener(v -> {
-            ToastUtil.showToast(getContext(), "选择");
-
-            if (hrp_video_player.getCurrentMode() != HistoryReportPlayer.MODE_FULL_SCREEN) {
-                hrp_video_player.enterFullScreen();
-            } else {
-                hrp_video_player.exitFullScreen();
-            }
-
+            isShow = !isShow;
+            historyReportPlayerCoverView.isShowSelectListView(isShow);
         });
 
         //暂停/播放
@@ -119,22 +126,63 @@ public class HistoryReportFragment extends MvpFragment<IHistoryReportView, Histo
             }
         });
 
-        testData = getPresenter().getTestData();
+        //testData = getPresenter().getTestData();
         historyReportPlayerCoverView.setHistoryMedia(testData);
         historyReportPlayerCoverView.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+
                 if (hrp_video_player != null) {
+                    //每次主动点击播放，需要将播放器重置，不然自动播放会有问题，会走onCompletion
+                    //导致直接播下一个
+                    hrp_video_player.release();
+                    currentMediaBeanPosition = position;
+                    historyReportPlayerCoverView.currentPlayPosition(position);
                     hrp_video_player.play(testData.get(position).getUrl());
+                    historyReportPlayerCoverView.playView();
+                }
+            }
+        });
+
+        historyReportPlayerCoverView.setSeekBarChangeListener(new OnSeekBarChangedListener() {
+            @Override
+            public void stopTrackingTouch(int progress) {
+                hrp_video_player.seekTo(progress);
+            }
+        });
+
+        historyReportPlayerCoverView.setOnDoubleClickListener(new OnDoubleClickListener() {
+            @Override
+            public void onDoubleClick() {
+                if (hrp_video_player.getCurrentMode() != HistoryReportPlayer.MODE_FULL_SCREEN) {
+                    hrp_video_player.enterFullScreen();
+                } else {
+                    hrp_video_player.exitFullScreen();
                 }
             }
         });
     }
 
-    private void updateView(){
+    private void playNext(int position) {
+        historyReportPlayerCoverView.currentPlayPosition(position);
+        hrp_video_player.release();
+        hrp_video_player.play(testData.get(position).getUrl());
+        currentMediaBeanPosition=position;
+    }
+
+
+    @Override
+    public void setHistoryMediaDataSource(List<MediaBean> dataSource, String name, int memberId) {
+        testData.clear();
+        testData.addAll(dataSource);
+        historyReportPlayerCoverView.setHistoryMedia(testData);
+        historyReportPlayerCoverView.setTitle(name + "上报图像");
+    }
+
+    private void updateView() {
         int position = hrp_video_player.getCurrentPosition();
         getLogger().info("position:" + position);
-        if(position < 0){
+        if (position < 0) {
             return;
         }
         int sMax = hrp_video_player.getDuration();
@@ -167,7 +215,9 @@ public class HistoryReportFragment extends MvpFragment<IHistoryReportView, Histo
 
     public void playerHistory() {
         if (hrp_video_player != null) {
-            hrp_video_player.play(testData.get(0).getUrl());
+            currentMediaBeanPosition = 0;
+            historyReportPlayerCoverView.currentPlayPosition(currentMediaBeanPosition);
+            hrp_video_player.play(testData.get(currentMediaBeanPosition).getUrl());
         }
     }
 

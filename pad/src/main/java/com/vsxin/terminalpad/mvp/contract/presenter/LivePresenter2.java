@@ -287,6 +287,9 @@ public class LivePresenter2 extends BasePresenter<ILiveView2> {
             ToastUtil.showToast(getContext(), getContext().getString(R.string.no_rtsp_data));
             getView().stopPullLive();
         } else {
+            //通知拉取成功，正在观看 notice
+            //消息列表中，观看上报消息，点击直播消息
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveStartPullLiveHandler.class, liveMember);
             getView().getLogger().info("rtspUrl ----> " + rtspUrl);
             PromptManager.getInstance().stopRing();
             mHandler.postDelayed(() -> {

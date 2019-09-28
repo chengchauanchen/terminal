@@ -4,24 +4,18 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.vsxin.terminalpad.R;
+import com.vsxin.terminalpad.manager.operation.OperationConstants;
 import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
  * 上图设备 工具类
  */
 public class TerminalUtils {
-
-    public static final String CALL_PHONE = "CALL_PHONE";
-    public static final String MESSAGE = "MESSAGE";
-    public static final String LIVE = "LIVE";
-    public static final String INDIVIDUAL_CALL = "INDIVIDUAL_CALL";
 
     //个呼:警务通终端,PDT终端(350M)
     //视频:警务通终端,执法记录仪,无人机,LTE终端,布控球,摄像头
@@ -139,16 +133,16 @@ public class TerminalUtils {
         for (String key : operates.keySet()) {//keySet获取map集合key的集合  然后在遍历key即可
             Boolean value = operates.get(key);
             switch (key) {
-                case TerminalUtils.CALL_PHONE:
+                case OperationConstants.CALL_PHONE:
                     imageRid[0].setVisibility(value ? View.VISIBLE : View.GONE);
                     break;
-                case TerminalUtils.MESSAGE:
+                case OperationConstants.MESSAGE:
                     imageRid[1].setVisibility(value ? View.VISIBLE : View.GONE);
                     break;
-                case TerminalUtils.LIVE:
+                case OperationConstants.LIVE:
                     imageRid[2].setVisibility(value ? View.VISIBLE : View.GONE);
                     break;
-                case TerminalUtils.INDIVIDUAL_CALL:
+                case OperationConstants.INDIVIDUAL_CALL:
                     imageRid[3].setVisibility(value ? View.VISIBLE : View.GONE);
                     break;
                 default:
@@ -161,52 +155,52 @@ public class TerminalUtils {
         Map<String, Boolean> operatShow = new HashMap<>();
         switch (terminalType) {
             case TerminalType.TERMINAL_PHONE://警务通终端
-                operatShow.put(CALL_PHONE, false);
-                operatShow.put(MESSAGE, false);
-                operatShow.put(LIVE, true);
-                operatShow.put(INDIVIDUAL_CALL, true);
+                operatShow.put(OperationConstants.CALL_PHONE, false);
+                operatShow.put(OperationConstants.MESSAGE, false);
+                operatShow.put(OperationConstants.LIVE, true);
+                operatShow.put(OperationConstants.INDIVIDUAL_CALL, true);
                 break;
             case TerminalType.TERMINAL_BODY_WORN_CAMERA://执法记录仪
-                operatShow.put(CALL_PHONE, false);
-                operatShow.put(MESSAGE, false);
-                operatShow.put(LIVE, true);
-                operatShow.put(INDIVIDUAL_CALL, false);
+                operatShow.put(OperationConstants.CALL_PHONE, false);
+                operatShow.put(OperationConstants.MESSAGE, false);
+                operatShow.put(OperationConstants.LIVE, true);
+                operatShow.put(OperationConstants.INDIVIDUAL_CALL, false);
                 break;
             case TerminalType.TERMINAL_UAV://无人机
-                operatShow.put(CALL_PHONE, false);
-                operatShow.put(MESSAGE, false);
-                operatShow.put(LIVE, true);
-                operatShow.put(INDIVIDUAL_CALL, false);
+                operatShow.put(OperationConstants.CALL_PHONE, false);
+                operatShow.put(OperationConstants.MESSAGE, false);
+                operatShow.put(OperationConstants.LIVE, true);
+                operatShow.put(OperationConstants.INDIVIDUAL_CALL, false);
                 break;
             case TerminalType.TERMINAL_PDT://PDT终端(350M)
-                operatShow.put(CALL_PHONE, false);
-                operatShow.put(MESSAGE, false);
-                operatShow.put(LIVE, false);
-                operatShow.put(INDIVIDUAL_CALL, true);
+                operatShow.put(OperationConstants.CALL_PHONE, false);
+                operatShow.put(OperationConstants.MESSAGE, false);
+                operatShow.put(OperationConstants.LIVE, false);
+                operatShow.put(OperationConstants.INDIVIDUAL_CALL, true);
                 break;
             case TerminalType.TERMINAL_LTE://LTE终端
-                operatShow.put(CALL_PHONE, false);
-                operatShow.put(MESSAGE, false);
-                operatShow.put(LIVE, true);
-                operatShow.put(INDIVIDUAL_CALL, false);
+                operatShow.put(OperationConstants.CALL_PHONE, false);
+                operatShow.put(OperationConstants.MESSAGE, false);
+                operatShow.put(OperationConstants.LIVE, true);
+                operatShow.put(OperationConstants.INDIVIDUAL_CALL, false);
                 break;
             case TerminalType.TERMINAL_BULL://布控球
-                operatShow.put(CALL_PHONE, false);
-                operatShow.put(MESSAGE, false);
-                operatShow.put(LIVE, true);
-                operatShow.put(INDIVIDUAL_CALL, false);
+                operatShow.put(OperationConstants.CALL_PHONE, false);
+                operatShow.put(OperationConstants.MESSAGE, false);
+                operatShow.put(OperationConstants.LIVE, true);
+                operatShow.put(OperationConstants.INDIVIDUAL_CALL, false);
                 break;
             case TerminalType.TERMINAL_CAMERA://摄像头
-                operatShow.put(CALL_PHONE, false);
-                operatShow.put(MESSAGE, false);
-                operatShow.put(LIVE, true);
-                operatShow.put(INDIVIDUAL_CALL, false);
+                operatShow.put(OperationConstants.CALL_PHONE, false);
+                operatShow.put(OperationConstants.MESSAGE, false);
+                operatShow.put(OperationConstants.LIVE, true);
+                operatShow.put(OperationConstants.INDIVIDUAL_CALL, false);
                 break;
             case TerminalType.TERMINAL_PERSONNEL://民警
-                operatShow.put(CALL_PHONE, false);
-                operatShow.put(MESSAGE, false);
-                operatShow.put(LIVE, true);
-                operatShow.put(INDIVIDUAL_CALL, true);
+                operatShow.put(OperationConstants.CALL_PHONE, false);
+                operatShow.put(OperationConstants.MESSAGE, false);
+                operatShow.put(OperationConstants.LIVE, true);
+                operatShow.put(OperationConstants.INDIVIDUAL_CALL, true);
                 break;
             default:
                 break;

@@ -5,6 +5,9 @@ import android.content.Context;
 import com.ixiaoma.xiaomabus.architecture.mvp.BasePresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IHistoryReportPlayerCoverView;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveSmallCoverView;
+import com.vsxin.terminalpad.mvp.entity.MediaBean;
+
+import java.util.List;
 
 /**
  * @author qzw
@@ -15,5 +18,12 @@ public class HistoryReportPlayerCoverPresenter extends BasePresenter<IHistoryRep
 
     public HistoryReportPlayerCoverPresenter(Context mContext) {
         super(mContext);
+    }
+
+    public List<MediaBean> setAllUnSelect(List<MediaBean> historyMediaBeanList){
+        for (MediaBean mediaBean : historyMediaBeanList){
+            mediaBean.setSelected(false);
+        }
+        return historyMediaBeanList;
     }
 }

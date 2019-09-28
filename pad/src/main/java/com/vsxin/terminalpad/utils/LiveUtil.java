@@ -2,7 +2,8 @@ package com.vsxin.terminalpad.utils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.vsxin.terminalpad.receiveHandler.ReceiveGetHistoryLiveUrlsHandler;
+import com.vsxin.terminalpad.mvp.entity.MediaBean;
+import com.vsxin.terminalpad.receiveHandler.ReceiveGetHistoryLiveUrlsHandler2;
 
 import org.apache.http.util.TextUtils;
 
@@ -46,7 +47,7 @@ public class LiveUtil {
     public static void getHistoryLiveUrls(TerminalMessage terminalMessage){
         //获取播放url
         MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
-            List<String> liveUrls  = new ArrayList<>();
+            List<MediaBean> liveUrls  = new ArrayList<>();
             String serverIp = TerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_IP, "");
             String serverPort = TerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT, 0)+"";
             String url = "http://"+serverIp+":"+serverPort+"/api/v1/query_records";
@@ -69,17 +70,21 @@ public class LiveUtil {
                             String fileServerIp = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_IP);
                             String port = MyTerminalFactory.getSDK().getParam(Params.MEDIA_HISTORY_SERVER_PORT,0)+"";
                             String liveUrl = "http://"+fileServerIp+":"+port+hls;
-                            liveUrls.add(liveUrl);
+
+                            MediaBean mediaBean = new MediaBean();
+                            mediaBean.setUrl(liveUrl);
+                            mediaBean.setStartTime(startTime);
+                            liveUrls.add(mediaBean);
                         }
-                        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler.class,0,liveUrls,terminalMessage.messageFromName,terminalMessage.messageFromId);
+                        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler2.class,0,liveUrls,terminalMessage.messageFromName,terminalMessage.messageFromId);
                     }else{
-                        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler.class,-1,liveUrls,"",0);
+                        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler2.class,-1,liveUrls,"",0);
                     }
                 }else{
-                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler.class,-1,liveUrls,"",0);
+                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler2.class,-1,liveUrls,"",0);
                 }
             }else{
-                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler.class,-1,liveUrls,"",0);
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler2.class,-1,liveUrls,"",0);
             }
         });
     }

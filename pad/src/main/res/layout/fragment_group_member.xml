@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/shape_black70transparent"
+    android:orientation="vertical">
+
+    <include layout="@layout/titler_bar2"/>
+
+    <LinearLayout
+        android:id="@+id/ll_member_num"
+        android:layout_width="match_parent"
+        android:layout_height="15dp"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/member_num"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="14dp"
+            android:gravity="center_vertical"
+            android:textColor="@color/member_num_text"
+            android:textSize="@dimen/sp_12" />
+
+    </LinearLayout>
+
+    <com.scwang.smartrefresh.layout.SmartRefreshLayout
+        android:id="@+id/refreshLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none" />
+    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+</LinearLayout>

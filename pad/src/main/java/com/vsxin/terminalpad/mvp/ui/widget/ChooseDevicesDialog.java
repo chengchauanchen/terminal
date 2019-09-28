@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -40,7 +41,7 @@ public class ChooseDevicesDialog extends Dialog {
     public static final int TYPE_PUSH_LIVE = 4;//上报图像
 
     public ChooseDevicesDialog(Context context, int type, Account account, ChooseDevicesAdapter.ItemClickListener mItemClickListener) {
-        super(context, R.style.progress_dialog);
+        super(context, R.style.dialog);
         this.type = type;
         this.account = account;
         this.list = getList(account, type);
@@ -72,10 +73,12 @@ public class ChooseDevicesDialog extends Dialog {
         int width = display.getWidth();
         Window window = getWindow();
         WindowManager.LayoutParams layoutParams = window.getAttributes();
-        layoutParams.width = (int) (width * 0.9);
+//        layoutParams.width = (int) (width * 0.9);
 //        layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
+        layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
         layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
         window.setAttributes(layoutParams);
+        window.setGravity(Gravity.RIGHT|Gravity.CENTER);
         setCanceledOnTouchOutside(true);
         setCancelable(true);
     }

@@ -23,7 +23,6 @@ import android.widget.TextView;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.entity.PlayType;
@@ -857,13 +856,13 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
     private void handlerAvatar(TerminalMessage terminalMessage, MergeTransmitViewHolder holder, int position) {
         int drawable = BitmapUtil.getUserPhoto();
         Glide.with(activity)
-                .asBitmap()
+//                .asBitmap()
+//                .load(drawable)
+//                .apply(new RequestOptions().placeholder(drawable).error(drawable))
                 .load(drawable)
-                .apply(new RequestOptions().placeholder(drawable).error(drawable))
-                //.load(drawable)
-                //.asBitmap()
-                //.placeholder(drawable)//加载中显示的图片
-               // .error(drawable)//加载失败时显示的图片
+                .asBitmap()
+                .placeholder(drawable)//加载中显示的图片
+                .error(drawable)//加载失败时显示的图片
                 .into(holder.ivAvatar);
         holder.ivAvatar.setVisibility(View.VISIBLE);
         if(position > 0 && position < chatMessageList.size()){

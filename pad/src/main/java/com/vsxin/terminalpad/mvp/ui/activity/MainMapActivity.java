@@ -20,7 +20,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.webkit.WebChromeClient;
-import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -32,21 +31,15 @@ import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpActivity;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.js.TerminalPadJs;
-import com.vsxin.terminalpad.mvp.contract.constant.OperationEnum;
-import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
 import com.vsxin.terminalpad.mvp.contract.presenter.MainMapPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMainMapView;
-import com.vsxin.terminalpad.mvp.entity.CarBean;
-import com.vsxin.terminalpad.mvp.entity.PatrolBean;
-import com.vsxin.terminalpad.mvp.entity.TerminalBean;
-import com.vsxin.terminalpad.mvp.ui.fragment.CarOrPatrolInfoFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.LayerMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.NoticeFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.PlayerFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.SmallMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.VsxFragment;
 import com.vsxin.terminalpad.mvp.ui.widget.ArcgisWebView;
-import com.vsxin.terminalpad.mvp.ui.widget.PoliceDevicesDialog;
+import com.vsxin.terminalpad.receiveHandler.HistoryReportPlayerHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiveUpdateMainFrgamentPTTButtonHandler;
 import com.vsxin.terminalpad.utils.HandleIdUtil;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
@@ -54,9 +47,7 @@ import com.vsxin.terminalpad.utils.SystemUtils;
 
 import org.apache.http.util.TextUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -193,7 +184,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     private void reloadWebView() {
 //        web_map.reload(); //刷新
         //TerminalInfoFragment.startMemberInfoFragment(this, null, MemberTypeEnum.PHONE);
-        //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(HistoryReportPlayerHandler.class);
+        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(HistoryReportPlayerHandler.class);
 //        CarOrPatrolInfoFragment.startCarBoatInfoFragment(this,new PatrolBean(), TerminalEnum.TERMINAL_PATROL);
 //        List<TerminalBean> terminalBeans = new ArrayList<>();
 //        PoliceDevicesDialog policeDevicesDialog = new PoliceDevicesDialog(this,terminalBeans, OperationEnum.INDIVIDUAL_CALL);

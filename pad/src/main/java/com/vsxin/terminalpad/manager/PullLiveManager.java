@@ -197,7 +197,6 @@ public class PullLiveManager {
 
     /**
      * 通过memberNo 拉取视频 主要用于 警务通，执法记录仪
-     *
      * @param memberNo
      * @param type
      */

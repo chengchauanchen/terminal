@@ -10,6 +10,9 @@ import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.constant.FragmentTagConstants;
 import com.vsxin.terminalpad.mvp.contract.presenter.PlayerPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IPlayerView;
+import com.vsxin.terminalpad.mvp.entity.MediaBean;
+
+import java.util.List;
 
 import butterknife.BindView;
 
@@ -38,6 +41,11 @@ public class PlayerFragment extends MvpFragment<IPlayerView, PlayerPresenter> im
     @Override
     protected void initData() {
 
+    }
+
+    @Override
+    public void setHistoryMediaDataSource(List<MediaBean> dataSource, String name, int memberId) {
+        historyReportFragment.setHistoryMediaDataSource(dataSource,name,memberId);
     }
 
     @Override

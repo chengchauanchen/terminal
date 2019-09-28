@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:padding="20px"
     android:gravity="center_vertical"
-    android:background="@color/color_374350"
+    android:background="@color/white"
     android:orientation="horizontal">
 
     <ImageView
@@ -20,7 +20,7 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="20px"
         android:text="pc"
-        android:textColor="@color/white"
+        android:textColor="@color/color_313131"
         android:textSize="@dimen/chat_text_size" />
 
 </LinearLayout>

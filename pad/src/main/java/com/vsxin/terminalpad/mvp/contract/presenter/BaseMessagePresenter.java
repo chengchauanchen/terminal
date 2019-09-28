@@ -10,10 +10,11 @@ import com.ixiaoma.xiaomabus.architecture.mvp.refresh.RefreshPresenter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.view.IBaseMessageView;
+import com.vsxin.terminalpad.mvp.entity.MediaBean;
 import com.vsxin.terminalpad.mvp.entity.PlayType;
 import com.vsxin.terminalpad.mvp.ui.widget.ChooseDevicesDialog;
-import com.vsxin.terminalpad.receiveHandler.ReceiveGetHistoryLiveUrlsHandler;
-import com.vsxin.terminalpad.receiveHandler.ReceiveGoWatchLiveHandler;
+import com.vsxin.terminalpad.receiveHandler.ReceiveGetHistoryLiveUrlsHandler2;
+import com.vsxin.terminalpad.receiveHandler.ReceiveGoWatchLiveHandler2;
 import com.vsxin.terminalpad.receiveHandler.ReceiverActivePushVideoHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverChatListItemClickHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverIndividualCallFromMsgItemHandler;
@@ -571,16 +572,19 @@ public class BaseMessagePresenter<V extends IBaseMessageView> extends RefreshPre
     /**
      * 获取历史上报图像列表
      */
-    private ReceiveGetHistoryLiveUrlsHandler mReceiveGetHistoryLiveUrlsHandler = new ReceiveGetHistoryLiveUrlsHandler() {
+    private ReceiveGetHistoryLiveUrlsHandler2 mReceiveGetHistoryLiveUrlsHandler = new ReceiveGetHistoryLiveUrlsHandler2() {
         @Override
-        public void handler(int code,List<String> liveUrl,String name,int memberId) {
-            mHandler.post(() -> {
-               if(code == 0){
-                   MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGoWatchLiveHandler.class,liveUrl,name,memberId);
-               }else{
-                   getView().showMsg(R.string.text_get_video_info_fail);
-               }
-            });
+        public void handler(int code,List<MediaBean> liveUrl,String name,int memberId) {
+            logger.info("ReceiveGetHistoryLiveUrlsHandler--name:"+name+",member:"+memberId+",code:"+code);
+            if(code == 0){
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGoWatchLiveHandler2.class,liveUrl,name,memberId);
+                //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveGoWatchLiveHandler.class,liveUrl,name,memberId);
+                //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(HistoryReportPlayerHandler.class);
+            }else{
+                mHandler.post(() -> {
+                    getView().showMsg(R.string.text_get_video_info_fail);
+                });
+            }
         }
     };
 
@@ -589,9 +593,12 @@ public class BaseMessagePresenter<V extends IBaseMessageView> extends RefreshPre
      **/
     private ReceiveHiKvisionUrlHandler receiveHiKvisionUrlHandler = (success, result,deviceId) -> {
             if(success){
-                List<String> liveUrls = new ArrayList<>();
-                liveUrls.add(result);
-                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler.class, BaseCommonCode.SUCCESS_CODE,liveUrls,deviceId,0);
+                List<MediaBean> liveUrls = new ArrayList<>();
+                MediaBean mediaBean = new MediaBean();
+                mediaBean.setUrl(result);
+                mediaBean.setStartTime("视频1");
+                liveUrls.add(mediaBean);
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler2.class, BaseCommonCode.SUCCESS_CODE,liveUrls,deviceId,0);
             }else{
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,result);
             }

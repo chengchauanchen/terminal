@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--android:layout_width="match_parent"-->
+<!--android:layout_height="wrap_content"-->
+<!--android:paddingBottom="15px"-->
+<!--android:paddingTop="15px"-->
+<!--android:paddingRight="15px"-->
+<!--android:paddingLeft="15px"-->
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="264px"
     android:layout_height="wrap_content"
-    android:paddingBottom="15px"
-    android:paddingTop="15px"
-    android:paddingRight="15px"
-    android:paddingLeft="15px"
-    android:background="@color/color_374350">
+    android:layout_marginRight="50dp"
+    android:background="@color/white">
 
     <TextView
         android:id="@+id/text_title"

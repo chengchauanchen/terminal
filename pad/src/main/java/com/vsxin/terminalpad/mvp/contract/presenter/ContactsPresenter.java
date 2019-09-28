@@ -263,7 +263,7 @@ public class ContactsPresenter extends RefreshPresenter<GroupAndDepartment, ICon
         CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
         catalogNames.add(groupCatalogBean);
         TerminalFactory.getSDK().getConfigManager().updateAllGroups();
-        TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo();
+        TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(false);
     }
 
 

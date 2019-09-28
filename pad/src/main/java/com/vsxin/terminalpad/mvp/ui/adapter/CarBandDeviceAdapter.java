@@ -12,7 +12,7 @@ import android.widget.TextView;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.adapter.BaseRecycleViewAdapter;
 import com.vsxin.terminalpad.R;
-import com.vsxin.terminalpad.mvp.contract.constant.OperationEnum;
+import com.vsxin.terminalpad.manager.operation.OperationEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.mvp.entity.DeviceBean;
 import com.vsxin.terminalpad.mvp.entity.PersonnelBean;
@@ -21,7 +21,6 @@ import com.vsxin.terminalpad.mvp.ui.widget.PoliceDevicesDialog;
 import com.vsxin.terminalpad.utils.TerminalUtils;
 
 import java.util.List;
-import java.util.Map;
 
 import ptt.terminalsdk.tools.ToastUtil;
 

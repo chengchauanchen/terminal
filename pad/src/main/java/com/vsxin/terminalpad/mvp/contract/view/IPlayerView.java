@@ -2,6 +2,9 @@ package com.vsxin.terminalpad.mvp.contract.view;
 
 
 import com.ixiaoma.xiaomabus.architecture.mvp.IBaseView;
+import com.vsxin.terminalpad.mvp.entity.MediaBean;
+
+import java.util.List;
 
 /**
  * @author qzw
@@ -12,4 +15,5 @@ public interface IPlayerView extends IBaseView {
 
     void showFragmentForTag(String tag);
 
+    void setHistoryMediaDataSource(List<MediaBean> dataSource, String name, int memberId);
 }

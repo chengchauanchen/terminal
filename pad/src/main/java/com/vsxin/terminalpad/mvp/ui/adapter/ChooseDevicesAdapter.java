@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.ui.widget.ChooseDevicesDialog;
+import com.vsxin.terminalpad.utils.TerminalUtils;
 
 import java.util.List;
 
@@ -93,13 +94,13 @@ public class ChooseDevicesAdapter extends RecyclerView.Adapter<ChooseDevicesAdap
      */
     private int getImageResource(int type) {
         if (type == TerminalMemberType.TERMINAL_PC.getCode()) {
-            return R.mipmap.ic_phone_layer;
+            return R.mipmap.ic_phone_dialog;
         } else if (type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()) {
-            return R.mipmap.ic_hand_layer;
+            return R.mipmap.ic_zfy_dialog;
         } else if (type == TerminalMemberType.TERMINAL_UAV.getCode()) {
-            return R.mipmap.ic_uav_layer;
+            return R.mipmap.ic_uav_dialog;
         } else {
-            return R.mipmap.ic_phone_layer;
+            return R.mipmap.ic_phone_dialog;
         }
     }
 

@@ -27,10 +27,11 @@ import com.bumptech.glide.Glide;
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.adapter.BaseRecycleViewAdapter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
+import com.vsxin.terminalpad.mvp.entity.MediaBean;
 import com.vsxin.terminalpad.mvp.entity.PlayType;
 import com.vsxin.terminalpad.mvp.ui.adapter.holder.ChatViewHolder;
 import com.vsxin.terminalpad.mvp.ui.fragment.VideoPreviewItemFragment;
-import com.vsxin.terminalpad.receiveHandler.ReceiveGetHistoryLiveUrlsHandler;
+import com.vsxin.terminalpad.receiveHandler.ReceiveGetHistoryLiveUrlsHandler2;
 import com.vsxin.terminalpad.receiveHandler.ReceiverChatListItemClickHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverIndividualCallFromMsgItemHandler;
 import com.vsxin.terminalpad.utils.DensityUtil;
@@ -1743,9 +1744,12 @@ public class MessageAdapter  extends BaseRecycleViewAdapter<TerminalMessage,Chat
                     //gb28181Url = terminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL);
                     String deviceId = terminalMessage.messageBody.getString(JsonParam.GB28181_RTSP_URL);
                     String gateWayUrl = TerminalFactory.getSDK().getParam(Params.GATE_WAY_URL);
-                    List<String> liveUrls = new ArrayList<>();
-                    liveUrls.add(gateWayUrl);
-                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler.class, BaseCommonCode.SUCCESS_CODE,liveUrls,deviceId,0);
+                    List<MediaBean> liveUrls = new ArrayList<>();
+                    MediaBean mediaBean = new MediaBean();
+                    mediaBean.setUrl(gateWayUrl);
+                    mediaBean.setStartTime("视频1");
+                    liveUrls.add(mediaBean);
+                    MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetHistoryLiveUrlsHandler2.class, BaseCommonCode.SUCCESS_CODE,liveUrls,deviceId,0);
                 }else{
                     ToastUtil.showToast(activity, activity.getString(R.string.text_pull_data_error));
                 }

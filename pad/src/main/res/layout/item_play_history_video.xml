@@ -8,6 +8,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="11111111"
-        android:textSize="@dimen/sp_18" />
+        android:text=""
+        android:singleLine="true"
+        android:ellipsize="end"
+        android:textSize="23px" />
 </RelativeLayout>

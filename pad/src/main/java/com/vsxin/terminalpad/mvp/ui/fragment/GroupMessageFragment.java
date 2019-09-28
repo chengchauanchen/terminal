@@ -1,6 +1,7 @@
 package com.vsxin.terminalpad.mvp.ui.fragment;
 
 import android.Manifest;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -9,6 +10,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.TextViewCompat;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -26,6 +29,7 @@ import org.apache.http.util.TextUtils;
 
 import java.util.List;
 
+import butterknife.BindView;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -35,6 +39,7 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandler;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
@@ -49,15 +54,30 @@ import ptt.terminalsdk.tools.ToastUtil;
  */
 public class GroupMessageFragment extends MessageBaseFragment<IGroupMessageView, GroupMessagePresenter> implements IGroupMessageView{
 
+    @BindView(R.id.group_call_activity_member_info)
+    ImageView onlineMembers;
+
+    @BindView(R.id.progress_group_call)
+    RelativeLayout progressGroupCall;
+
+    @BindView(R.id.tv_pre_speak)
+    TextView tv_pre_speak;
+
+    @BindView(R.id.ll_living)
+    LinearLayout ll_living;
+
+    @BindView(R.id.tv_living_number)
+    TextView tv_living_number;
+
+    @BindView(R.id.group_live_history)
+    ImageView group_live_history;
+
+    @BindView(R.id.group_call_time_progress)
+    RoundProgressBarWidthNumber groupCallTimeProgress;
 
     private boolean isCurrentGroup;
     protected static final int REQUEST_RECORD_CODE = 999;
     private Handler mHandler = new Handler(Looper.getMainLooper());
-    private RelativeLayout progressGroupCall;
-    private TextView tv_pre_speak;
-    private LinearLayout ll_living;
-    private TextView tv_living_number;
-    RoundProgressBarWidthNumber groupCallTimeProgress;
     //获取组内正在上报人数的间隔时间
     private static final long GET_GROUP_LIVING_INTERVAL_TIME = 20*1000;
 
@@ -69,19 +89,18 @@ public class GroupMessageFragment extends MessageBaseFragment<IGroupMessageView,
     @Override
     protected void initViews(View view){
         super.initViews(view);
-        progressGroupCall = view.findViewById(R.id.progress_group_call);
-        tv_pre_speak = view.findViewById(R.id.tv_pre_speak);
-        groupCallTimeProgress = view.findViewById(R.id.group_call_time_progress);
-        ll_living = (LinearLayout) view.findViewById(R.id.ll_living);
-        tv_living_number = (TextView) view.findViewById(R.id.tv_living_number);
-//        fl_fragment_container = (FrameLayout) view.findViewById(R.id.fl_fragment_container);
-        view.findViewById(R.id.group_live_history).setOnClickListener(v -> {
+        group_live_history.setOnClickListener(v -> {
             goToVideoLiveList(false);
         });
         ll_living.setOnClickListener(v -> {
             goToVideoLiveList(true);
         });
         ptt.setOnTouchListener(mOnTouchListener);
+
+        //组内在线成员列表
+        onlineMembers.setOnClickListener(v -> {
+            GroupMemberFragment.startGroupMemberFragment(getActivity(),userId,userName);
+        });
     }
 
     @Override

@@ -5,17 +5,14 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
 import android.view.Display;
 import android.view.Gravity;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.vsxin.terminalpad.R;
-import com.vsxin.terminalpad.mvp.contract.constant.OperationEnum;
-import com.vsxin.terminalpad.mvp.entity.DeviceBean;
+import com.vsxin.terminalpad.manager.operation.OperationEnum;
 import com.vsxin.terminalpad.mvp.entity.PersonnelBean;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 import com.vsxin.terminalpad.mvp.ui.adapter.PoliceDeviceAdapter;

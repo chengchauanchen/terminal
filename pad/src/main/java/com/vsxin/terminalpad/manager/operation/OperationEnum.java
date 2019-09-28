@@ -1,6 +1,4 @@
-package com.vsxin.terminalpad.mvp.contract.constant;
-
-import com.vsxin.terminalpad.utils.TerminalUtils;
+package com.vsxin.terminalpad.manager.operation;
 
 /**
  * @author qzw
@@ -10,10 +8,10 @@ public enum OperationEnum {
     /**
      * 通知类型 个呼、直播
      */
-    CALL_PHONE("打电话", TerminalUtils.CALL_PHONE),
-    MESSAGE("消息", TerminalUtils.MESSAGE),
-    LIVE("请求图像", TerminalUtils.LIVE),
-    INDIVIDUAL_CALL("个呼", TerminalUtils.INDIVIDUAL_CALL);
+    CALL_PHONE("打电话", OperationConstants.CALL_PHONE),
+    MESSAGE("消息", OperationConstants.MESSAGE),
+    LIVE("请求图像", OperationConstants.LIVE),
+    INDIVIDUAL_CALL("个呼", OperationConstants.INDIVIDUAL_CALL);
 
     private String remarks;
     private String type;

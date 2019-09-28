@@ -5,6 +5,8 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.entity.HistoryMediaBean;
+import com.vsxin.terminalpad.mvp.entity.MediaBean;
+
 import java.util.List;
 
 /**
@@ -14,14 +16,14 @@ import java.util.List;
  * 描述：
  * 修订历史：
  */
-public class PlayHistoryVideoAdapter extends BaseQuickAdapter<HistoryMediaBean, BaseViewHolder> {
+public class PlayHistoryVideoAdapter extends BaseQuickAdapter<MediaBean, BaseViewHolder> {
 
-    public PlayHistoryVideoAdapter(int layoutResId, @Nullable List<HistoryMediaBean> data){
+    public PlayHistoryVideoAdapter(int layoutResId, @Nullable List<MediaBean> data){
         super(layoutResId, data);
     }
 
     @Override
-    protected void convert(BaseViewHolder helper, HistoryMediaBean item){
+    protected void convert(BaseViewHolder helper, MediaBean item){
         String startTime = item.getStartTime();
         if(startTime.length()>12){
             String date = startTime.substring(0, 8);
@@ -31,6 +33,8 @@ public class PlayHistoryVideoAdapter extends BaseQuickAdapter<HistoryMediaBean, 
             StringBuffer stringBuffer = new StringBuffer();
             stringBuffer.append(date).append(" ").append(hour).append(":").append(min).append(":").append(second);
             helper.setText(R.id.tv_start_time, stringBuffer.toString());
+        }else{
+            helper.setText(R.id.tv_start_time, item.getStartTime());
         }
         if(item.isSelected()){
             helper.setTextColor(R.id.tv_start_time, mContext.getResources().getColor(R.color.blue_21bfe2));
