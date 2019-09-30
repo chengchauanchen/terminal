@@ -63,7 +63,8 @@ public class AuthUtil{
             TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, false);
             BaseApplication.getApplication().setTerminalMemberType();
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)){
+            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)
+                || AuthManagerTwo.WUTIE.equals(apkType)){
                 ToastUtil.showToast(BaseApplication.getApplication().getApplicationContext(), context.getString(R.string.text_please_open_wuhan_police_work_first));
             }
         }

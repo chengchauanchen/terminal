@@ -3,6 +3,7 @@
     <string name="app_name">融合通信</string>
     <!--<string name="app_name">襄阳融合通信测试</string>-->
     <!-- <string name="app_name">宽带对讲</string> -->
+<!--     <string name="app_name">平安站车</string>-->
     <string name="authing">正在认证...</string>
     <string name="auth_fail">认证失败...</string>
     <string name="logining">正在登录...</string>
@@ -190,6 +191,7 @@
     <string name="text_pc">PC</string>
     <string name="text_recoder">执法记录仪</string>
     <string name="text_recoder_abridge">执法仪</string>
+    <string name="text_recoder_abridge_4">4G执法仪</string>
     <string name="text_hdmi">HDMI</string>
     <string name="text_uav">无人机</string>
     <string name="text_search_by_group_name">输入组名称 搜索</string>
@@ -637,4 +639,7 @@
     <string name="text_play_live_fail">历史图像未生成</string>
     <string name="text_please_select_group">请选择组</string>
     <string name="text_get_token_fail">获取票据失败</string>
+
+    <string name="text_tianjin_group">融合组</string>
+    <string name="text_tianjin_car_4">4G图传车</string>
 </resources>
