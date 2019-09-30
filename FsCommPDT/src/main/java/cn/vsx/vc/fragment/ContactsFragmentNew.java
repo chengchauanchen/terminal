@@ -171,11 +171,19 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         RelativeLayout is_shoutai = mRootView.findViewById(R.id.is_shoutai);
         RelativeLayout isLte = mRootView.findViewById(R.id.is_lte);
         RelativeLayout is_recoder = mRootView.findViewById(R.id.is_recoder);
+        group_tv.setText(getString(R.string.text_group));
+        lte_tv.setText(getString(R.string.text_lte));
+        recoder_tv.setText(getString(R.string.text_recoder_abridge));
         if(ApkUtil.isAnjian()){
             is_shoutai.setVisibility(View.GONE);
             isLte.setVisibility(View.GONE);
             is_recoder.setVisibility(View.GONE);
             jingwutong_tv.setText(getString(R.string.text_person));
+        }else if(ApkUtil.isTianjin()){
+            group_tv.setText(getString(R.string.text_tianjin_group));
+            is_shoutai.setVisibility(View.GONE);
+            lte_tv.setText(getString(R.string.text_tianjin_car_4));
+            recoder_tv.setText(getString(R.string.text_recoder_abridge_4));
         }else{
             jingwutong_tv.setText(getString(R.string.text_police_service));
             is_shoutai.setVisibility(View.VISIBLE);
@@ -412,6 +420,16 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
             transaction.add(R.id.contacts_viewPager, groupFragmentNew)
                     .add(R.id.contacts_viewPager, policeAffairsFragment)
                     .hide(policeAffairsFragment)
+                    .show(groupFragmentNew);
+            transaction.commit();
+        }else if(ApkUtil.isTianjin()){
+            transaction.add(R.id.contacts_viewPager, groupFragmentNew)
+                    .add(R.id.contacts_viewPager, policeAffairsFragment)
+                    .add(R.id.contacts_viewPager, lteFragment)
+                    .add(R.id.contacts_viewPager, recorderFragment)
+                    .hide(policeAffairsFragment)
+                    .hide(lteFragment)
+                    .hide(recorderFragment)
                     .show(groupFragmentNew);
             transaction.commit();
         }else{
