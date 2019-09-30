@@ -10,25 +10,18 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
 import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpFragment;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.manager.PullLiveManager;
 import com.vsxin.terminalpad.manager.StartCallManager;
-import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
-import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.mvp.contract.presenter.TerminalInfoPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.ITerminalInfoView;
-import com.vsxin.terminalpad.mvp.entity.MemberInfoBean;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
-import com.vsxin.terminalpad.mvp.ui.activity.MainMapActivity;
 import com.vsxin.terminalpad.utils.NumberUtil;
 import com.vsxin.terminalpad.utils.TerminalUtils;
-import com.vsxin.terminalpad.utils.TimeUtil;
 
 import butterknife.BindView;
-import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -98,8 +91,10 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
 
         if (terminalEnum != null) {
             iv_type_icon.setImageResource(terminalEnum.getRid());
+        } else {
+            terminalEnum = TerminalEnum.valueOf(terminalBean.getTerminalType());
         }
-        if(terminalBean !=null){
+        if (terminalBean != null) {
             bindMemberInfo(terminalBean);
         }
 //
@@ -108,23 +103,25 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
 //        //发起个呼
         iv_individual_call.setOnClickListener(v -> {
             //手台个呼
-            if(terminalBean!=null){
-                if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_PDT)){
-                    Long uniqueNo = NumberUtil.strToLong(terminalBean.getPdtNo());
-                    //startCallManager.startIndividualCall("手台", terminalBean.getPdtNo(), uniqueNo);
-                    startCallManager.startIndividualCall("手台", "72020855", uniqueNo);
-                }else if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_LTE)){//lte暂不能个呼.因为取不到uniqueNo
-//                    Long uniqueNo = NumberUtil.strToLong(terminalBean.getPdtNo());
-//                    startCallManager.startIndividualCall("手台", terminalBean.getPdtNo(), uniqueNo);
-                }else if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_PHONE)){//正常情况,警务通就是民警,不会走这
-//                    Long uniqueNo = NumberUtil.strToLong(terminalBean.getPdtNo());
-//                    startCallManager.startIndividualCall("手台", terminalBean.getPdtNo(), uniqueNo);
-                }else{
-                    ToastUtil.showToast(getContext(),"暂不支持该设备个呼");
+            if (terminalBean != null) {
+                Long uniqueNo = null;
+                switch (terminalEnum) {
+                    case TERMINAL_PDT:
+                        uniqueNo = NumberUtil.strToLong(terminalBean.getTerminalUniqueNo());
+                        startCallManager.startIndividualCall(terminalEnum.getDes(), terminalBean.getPdtNo(), uniqueNo);
+                        break;
+                    case TERMINAL_LTE:
+                        break;
+                    case TERMINAL_PHONE:
+                        uniqueNo = NumberUtil.strToLong(terminalBean.getTerminalUniqueNo());
+                        startCallManager.startIndividualCall(terminalEnum.getDes(), terminalBean.getAccount(), uniqueNo);
+                        break;
+                    default:
+                        ToastUtil.showToast(getContext(), "暂不支持该设备个呼");
+                        break;
                 }
-                //getPresenter().startIndividualCall("72020850", TerminalMemberType.TERMINAL_PDT);
-            }else{
-                ToastUtil.showToast(getContext(),"暂不支持该设备个呼");
+            } else {
+                ToastUtil.showToast(getContext(), "暂不支持该设备个呼");
             }
         });
 //
@@ -141,20 +138,30 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
     }
 
     private void bindMemberInfo(TerminalBean terminalBean) {
-        if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_PDT)){
-            tv_member_name.setText(terminalBean.getPdtNo());
-        }else if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_LTE)){
-            tv_member_name.setText(terminalBean.getLteNo());
+        TerminalEnum terminalEnum = TerminalEnum.valueOf(terminalBean.getTerminalType());
+        switch (terminalEnum) {
+            case TERMINAL_PDT://PDT终端(350M手台)
+                tv_member_name.setText(terminalBean.getPdtNo());
+                break;
+            case TERMINAL_LTE://LTE终端
+                tv_member_name.setText(terminalBean.getLteNo());
+                break;
+            default:
+                break;
         }
-
         //只显示该设备能用的功能
         ImageView[] imageRid = {iv_phone, iv_message, iv_push_video, iv_individual_call};
         TerminalUtils.showOperate(imageRid, terminalBean.getTerminalType());
 
-       // tv_department.setText(TextUtils.isEmpty(memberInfo.getDeptName())?"武汉市公安局":memberInfo.getDeptName());
-        //tv_phone.setText(memberInfo);
-//        tv_speed.setText(memberInfo.getSpeed());
-        tv_time.setText("定位时间："+ TimeUtil.getCurrentTimeYMD());
+        //部门
+        tv_department.setText(TextUtils.isEmpty(terminalBean.getDepartment()) ? "" : terminalBean.getDepartment());
+        //电话
+        tv_phone.setText(TextUtils.isEmpty(terminalBean.getPhoneNumber()) ? "" : terminalBean.getPhoneNumber());
+        //速度
+        tv_speed.setText(TextUtils.isEmpty(terminalBean.getSpeed()) ? "" : terminalBean.getSpeed());
+
+        // TODO 定位时间
+        tv_time.setText(TextUtils.isEmpty(terminalBean.getSpeed()) ? "" : terminalBean.getSpeed());
     }
 
     /**
@@ -170,9 +177,7 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
 //        String personnelNo = personnelBean.getPersonnelNo();
         PullLiveManager liveManager = new PullLiveManager(getContext());
         String terminalUniqueNo = TerminalUtils.getPullLiveUniqueNo(terminalBean);
-        liveManager.pullVideo(terminalBean.getAccount(), terminalBean.getTerminalType(), terminalUniqueNo);
-
-
+        liveManager.pullVideo(terminalBean.getAccount(), TerminalEnum.valueOf(terminalBean.getTerminalType()), terminalUniqueNo);
     }
 
     /**
@@ -240,24 +245,25 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
         TerminalInfoFragment terminalInfoFragment = new TerminalInfoFragment();
         Bundle args = new Bundle();
         args.putSerializable(TERMINAL, terminalBean);
-        args.putSerializable(TERMINAL_ENUM,terminalEnum);
+        args.putSerializable(TERMINAL_ENUM, terminalEnum);
         terminalInfoFragment.setArguments(args);
         FragmentManager supportFragmentManager = fragmentActivity.getSupportFragmentManager();
         //replace 会将上一个Fragment干掉
         FragmentTransaction fragmentTransaction = supportFragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fl_layer_member_info, terminalInfoFragment,FRAGMENT_TAG);
+        fragmentTransaction.replace(R.id.fl_layer_member_info, terminalInfoFragment, FRAGMENT_TAG);
         fragmentTransaction.commit();
     }
 
     /**
      * 关闭 TerminalInfoFragment
+     *
      * @param fragmentActivity
      */
-    public static void closeMemberInfoFragment(FragmentActivity fragmentActivity){
+    public static void closeMemberInfoFragment(FragmentActivity fragmentActivity) {
         FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();
         Fragment memberInfo = fragmentManager.findFragmentByTag(FRAGMENT_TAG);
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        if(memberInfo!=null){
+        if (memberInfo != null) {
             fragmentTransaction.remove(memberInfo);
         }
         fragmentTransaction.commit();

@@ -1,6 +1,6 @@
 package com.vsxin.terminalpad.manager.operation;
 
-import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,40 +17,40 @@ public class OperationConfig {
      * 个呼
      */
     public static String[] INDIVIDUAL_CALL_CONFIG = new String[]{
-            TerminalType.TERMINAL_PHONE,//警务通
-            TerminalType.TERMINAL_UAV,//无人机
-            TerminalType.TERMINAL_PDT,//PDT终端(350M)
-            TerminalType.TERMINAL_LTE,//LTE终端
-            TerminalType.TERMINAL_PERSONNEL,//民警
+            TerminalEnum.TERMINAL_PHONE.toString(),//警务通
+            TerminalEnum.TERMINAL_UAV.toString(),//无人机
+            TerminalEnum.TERMINAL_PDT.toString(),//PDT终端(350M)
+            TerminalEnum.TERMINAL_LTE.toString(),//LTE终端
+            TerminalEnum.TERMINAL_PERSONNEL.toString(),//民警
     };
 
     /**
      * 消息
      */
     public static String[] MESSAGE_PAGE_CONFIG = new String[]{
-            TerminalType.TERMINAL_PHONE,//警务通
-            TerminalType.TERMINAL_UAV,//民警
-            TerminalType.TERMINAL_PERSONNEL,//民警
+            TerminalEnum.TERMINAL_PHONE.toString(),//警务通
+            TerminalEnum.TERMINAL_UAV.toString(),//民警
+            TerminalEnum.TERMINAL_PERSONNEL.toString(),//民警
     };
 
     /**
      * 打电话
      */
     public static String[] PHONE_CALL_CONFIG = new String[]{
-            TerminalType.TERMINAL_PHONE,//警务通
-            TerminalType.TERMINAL_PERSONNEL,//民警
+            TerminalEnum.TERMINAL_PHONE.toString(),//警务通
+            TerminalEnum.TERMINAL_PERSONNEL.toString(),//民警
     };
 
     /**
      * 拉视频
      */
     public static String[] PULL_LIVE_CONFIG = new String[]{
-            TerminalType.TERMINAL_PHONE,//警务通
-            TerminalType.TERMINAL_BODY_WORN_CAMERA,//执法仪
-            TerminalType.TERMINAL_UAV,//无人机
-            TerminalType.TERMINAL_LTE,//LTE
-            TerminalType.TERMINAL_BULL,//布控球
-            TerminalType.TERMINAL_CAMERA,//城市摄像头
+            TerminalEnum.TERMINAL_PHONE.toString(),//警务通
+            TerminalEnum.TERMINAL_BODY_WORN_CAMERA.toString(),//执法仪
+            TerminalEnum.TERMINAL_UAV.toString(),//无人机
+            TerminalEnum.TERMINAL_LTE.toString(),//LTE
+            TerminalEnum.TERMINAL_BALL.toString(),//布控球
+            TerminalEnum.TERMINAL_CAMERA.toString(),//城市摄像头
     };
 
     /**

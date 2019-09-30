@@ -29,7 +29,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="2dp"
                 android:textColor="@color/white"
-                android:textSize="@dimen/sp_20" />
+                android:textSize="27px" />
 
             <TextView
                 android:id="@+id/tv_member_id_request"
@@ -37,7 +37,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
                 android:textColor="@color/white"
-                android:textSize="@dimen/sp_15" />
+                android:textSize="23px" />
         </LinearLayout>
 
         <TextView
@@ -95,8 +95,8 @@
             android:orientation="vertical">
 
             <ImageView
-                android:layout_width="@dimen/dp_80"
-                android:layout_height="@dimen/dp_30"
+                android:layout_width="160dp"
+                android:layout_height="40dp"
                 android:background="@drawable/phone_withe_shape1"
                 android:src="@drawable/phone_withe" />
         </LinearLayout>

@@ -82,13 +82,13 @@ public class StartCallManager {
      * 发起个呼请求
      * @param member
      */
-    private void startIndividualCall(Member member){
+    public void startIndividualCall(Member member){
         SensorUtil.getInstance().registSensor();
         PromptManager.getInstance().IndividualCallRequestRing();
-        int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(member.getId(), member.getUniqueNo(), "");
+        int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(member.getNo(), member.getUniqueNo(), "");
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {
             //getView().setMemberinfo();//设置头像名称
-            IndividualCallFragment.startIndividualCallFragment((FragmentActivity)context,member.getName(),member.getId()+"");
+            IndividualCallFragment.startIndividualCallFragment((FragmentActivity)context,member.getName(),member.getNo()+"");
         } else {
             ToastUtil.individualCallFailToast(context, resultCode);
             stopIndividualCall();

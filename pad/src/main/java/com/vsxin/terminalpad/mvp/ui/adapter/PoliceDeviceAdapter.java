@@ -13,7 +13,7 @@ import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.manager.PullLiveManager;
 import com.vsxin.terminalpad.manager.StartCallManager;
 import com.vsxin.terminalpad.manager.operation.OperationEnum;
-import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
 import com.vsxin.terminalpad.mvp.entity.PersonnelBean;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 import com.vsxin.terminalpad.utils.NumberUtil;
@@ -84,7 +84,7 @@ public class PoliceDeviceAdapter extends RecyclerView.Adapter<PoliceDeviceAdapte
      */
     private void getPullLive(TerminalBean terminalBean){
         String terminalUniqueNo = TerminalUtils.getPullLiveUniqueNo(terminalBean);
-        pullLiveManager.pullVideo(terminalBean.getAccount(), terminalBean.getTerminalType(), terminalUniqueNo);
+        pullLiveManager.pullVideo(terminalBean.getAccount(), TerminalEnum.valueOf(terminalBean.getTerminalType()), terminalUniqueNo);
     }
 
     /**
@@ -94,19 +94,38 @@ public class PoliceDeviceAdapter extends RecyclerView.Adapter<PoliceDeviceAdapte
     private void individualCall(TerminalBean terminalBean){
         //手台个呼
         if(terminalBean!=null){
-            if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_PDT)){
-                Long uniqueNo = NumberUtil.strToLong(terminalBean.getPdtNo());
-                //startCallManager.startIndividualCall("手台", terminalBean.getPdtNo(), uniqueNo);
-                startCallManager.startIndividualCall("手台", "72020855", uniqueNo);
-            }else if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_LTE)){//lte暂不能个呼.因为取不到uniqueNo
-//                    Long uniqueNo = NumberUtil.strToLong(terminalBean.getPdtNo());
-//                    startCallManager.startIndividualCall("手台", terminalBean.getPdtNo(), uniqueNo);
-            }else if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_PHONE)){//正常情况,警务通就是民警,不会走这
-                    Long uniqueNo = NumberUtil.strToLong(terminalBean.getTerminalUniqueNo());
-                    startCallManager.startIndividualCall(personnel.getPersonnelName(), personnel.getPersonnelNo(),uniqueNo );
-            }else{
-                ToastUtil.showToast(context,"暂不支持该设备个呼");
+
+//            if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_PDT)){
+//                Long uniqueNo = NumberUtil.strToLong(terminalBean.getPdtNo());
+//                //startCallManager.startIndividualCall("手台", terminalBean.getPdtNo(), uniqueNo);
+//                startCallManager.startIndividualCall("手台", "72020855", uniqueNo);
+//            }else if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_LTE)){//lte暂不能个呼.因为取不到uniqueNo
+////                    Long uniqueNo = NumberUtil.strToLong(terminalBean.getPdtNo());
+////                    startCallManager.startIndividualCall("手台", terminalBean.getPdtNo(), uniqueNo);
+//            }else if(terminalBean.getTerminalType().equals(TerminalType.TERMINAL_PHONE)){//正常情况,警务通就是民警,不会走这
+//                    Long uniqueNo = NumberUtil.strToLong(terminalBean.getTerminalUniqueNo());
+//                    startCallManager.startIndividualCall(personnel.getPersonnelName(), personnel.getPersonnelNo(),uniqueNo );
+//            }else{
+//                ToastUtil.showToast(context,"暂不支持该设备个呼");
+//            }
+            TerminalEnum  terminalEnum = TerminalEnum.valueOf(terminalBean.getTerminalType());
+            Long uniqueNo = null;
+            switch (terminalEnum) {
+                case TERMINAL_PDT:
+                    uniqueNo = NumberUtil.strToLong(terminalBean.getTerminalUniqueNo());
+                    startCallManager.startIndividualCall(terminalEnum.getDes(), terminalBean.getPdtNo(), uniqueNo);
+                    break;
+                case TERMINAL_LTE:
+                    break;
+                case TERMINAL_PHONE:
+                    uniqueNo = NumberUtil.strToLong(terminalBean.getTerminalUniqueNo());
+                    startCallManager.startIndividualCall(terminalEnum.getDes(), terminalBean.getAccount(), uniqueNo);
+                    break;
+                default:
+                    ToastUtil.showToast(context, "暂不支持该设备个呼");
+                    break;
             }
+
             //getPresenter().startIndividualCall("72020850", TerminalMemberType.TERMINAL_PDT);
         }else{
             ToastUtil.showToast(context,"暂不支持该设备个呼");

@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -13,7 +14,6 @@ import com.ixiaoma.xiaomabus.architecture.mvp.refresh.adapter.BaseRecycleViewAda
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.fragment.RefreshRecycleViewFragment;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
-import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.mvp.contract.presenter.CarBoatInfoPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.ICarBoatInfoView;
 import com.vsxin.terminalpad.mvp.entity.CarBean;
@@ -52,6 +52,15 @@ public class CarOrPatrolInfoFragment extends RefreshRecycleViewFragment<DeviceBe
     @BindView(R.id.tv_department)
     TextView tv_department;//部门
 
+    @BindView(R.id.tv_phone)
+    TextView tv_phone;//电话
+
+    @BindView(R.id.tv_speed)
+    TextView tv_speed;//速度
+
+    @BindView(R.id.tv_time)
+    TextView tv_time;//定位时间
+
     private TerminalEnum terminalEnum;
     private PatrolBean patrolBean;
     private CarBean carBean;
@@ -77,21 +86,11 @@ public class CarOrPatrolInfoFragment extends RefreshRecycleViewFragment<DeviceBe
         terminalEnum = (TerminalEnum) getArguments().getSerializable(TERMINAL_ENUM);
         patrolBean = (PatrolBean) getArguments().getSerializable(PATROL);
         carBean = (CarBean) getArguments().getSerializable(CAR);
-        if(terminalEnum==TerminalEnum.TERMINAL_CAR){//车
+        if (terminalEnum == TerminalEnum.TERMINAL_CAR) {//车
             initCar(carBean);
-        }else if(terminalEnum==TerminalEnum.TERMINAL_PATROL){//船
+        } else if (terminalEnum == TerminalEnum.TERMINAL_PATROL) {//船
             initPatrol(patrolBean);
         }
-//        List<DeviceBean> deviceBeans = new ArrayList<>();
-//        deviceBeans.add(new DeviceBean(false));
-//        deviceBeans.add(new DeviceBean(false));
-//        deviceBeans.add(new DeviceBean(false));
-//        deviceBeans.add(new DeviceBean(true));
-//        deviceBeans.add(new DeviceBean(true));
-//        deviceBeans.add(new DeviceBean(true));
-//        deviceBeans.add(new DeviceBean(true));
-//        deviceBeans.add(new DeviceBean(true));
-//        refreshOrLoadMore(deviceBeans);
     }
 
 
@@ -99,14 +98,34 @@ public class CarOrPatrolInfoFragment extends RefreshRecycleViewFragment<DeviceBe
      * 初始化 船
      */
     private void initPatrol(PatrolBean patrol) {
-        tv_name.setText(patrol.getPatrolName() + "    " + patrol.getPatrolNo());
-        tv_department.setText(patrol.getPatrolOccupant());
-        Map<String, PersonnelBean> personnelDtoMap = patrol.getPersonnelDtoMap();
-        //Todo 其他单独终端设备列表
+        List<DeviceBean> deviceBeanList = new ArrayList<>();
 
-        List<PersonnelBean> personnels = getPresenter().getPersonnels(personnelDtoMap);
-        List<DeviceBean> devices = getPresenter().getDevices(personnels);
-        //refreshOrLoadMore(devices);
+        //名称
+        tv_name.setText(TextUtils.isEmpty(patrol.getPatrolName()) ? "" : patrol.getPatrolName());
+        //部门
+        tv_department.setText(TextUtils.isEmpty(patrol.getPatrolOccupant()) ? "" : patrol.getPatrolOccupant());
+        //电话
+        tv_phone.setText(TextUtils.isEmpty(patrol.getPhoneNumber()) ? "" : patrol.getPhoneNumber());
+        //速度
+        tv_speed.setText(TextUtils.isEmpty(patrol.getSpeed()) ? "" : patrol.getSpeed());
+        //TODO 定位时间
+        tv_time.setText(TextUtils.isEmpty(patrol.getSpeed()) ? "" : patrol.getSpeed());
+
+        //获取 终端设备集合
+        Map<String, TerminalBean> terminalDtoMap = patrol.getTerminalDtoMap();
+        //获取 民警集合
+        Map<String, PersonnelBean> personnelDtoMap = patrol.getPersonnelDtoMap();
+
+        List<TerminalBean> terminalBeans = getPresenter().getTerminalBeans(terminalDtoMap);
+        List<PersonnelBean> personnelBeans = getPresenter().getPersonnels(personnelDtoMap);
+
+        List<DeviceBean> deviceBeans = getPresenter().changerTerminalToDevice(terminalBeans);
+        List<DeviceBean> devices = getPresenter().changerPersonnelToDevice(personnelBeans);
+
+        deviceBeanList.addAll(deviceBeans);
+        deviceBeanList.addAll(devices);
+        refreshOrLoadMore(deviceBeanList);
+
     }
 
     /**
@@ -114,29 +133,34 @@ public class CarOrPatrolInfoFragment extends RefreshRecycleViewFragment<DeviceBe
      */
     private void initCar(CarBean car) {
         List<DeviceBean> deviceBeanList = new ArrayList<>();
-        tv_name.setText(car.getCarName() + "    " + car.getCarNo());
-        tv_department.setText(car.getCarOccupant());
+
+        String carName = TextUtils.isEmpty(car.getCarName()) ? "" : car.getCarName();
+        String carNo = TextUtils.isEmpty(car.getCarNo()) ? "" : car.getCarNo();
+
+        //名称
+        tv_name.setText(carName + "    " + carNo);
+        //部门
+        tv_department.setText(TextUtils.isEmpty(car.getCarOccupant()) ? "" : car.getCarOccupant());
+        //电话
+        tv_phone.setText(TextUtils.isEmpty(car.getPhoneNumber()) ? "" : car.getPhoneNumber());
+        //速度
+        tv_speed.setText(TextUtils.isEmpty(car.getSpeed()) ? "" : car.getSpeed());
+        // TODO 定位时间
+        tv_time.setText(TextUtils.isEmpty(car.getSpeed()) ? "" : car.getSpeed());
+
+        //获取 终端设备集合
+        Map<String, TerminalBean> terminalDtoMap = car.getTerminalDtoMap();
+        //获取 民警集合
         Map<String, PersonnelBean> personnelDtoMap = car.getPersonnelDtoMap();
-        //Todo 其他单独终端设备列表
-        List<TerminalBean> terminals = car.getTerminals();
 
-        TerminalBean terminalBean = new TerminalBean();
-        terminalBean.setTerminalType(TerminalType.TERMINAL_BULL);
-        terminalBean.setGb28181No("32010000001320000114");
+        List<TerminalBean> terminalBeans = getPresenter().getTerminalBeans(terminalDtoMap);
+        List<PersonnelBean> personnelBeans = getPresenter().getPersonnels(personnelDtoMap);
 
-        if(terminals==null){
-            terminals = new ArrayList<>();
-            terminals.add(terminalBean);
-        }else{
-            terminals.add(terminalBean);
-        }
-        List<DeviceBean> terminals1 = getPresenter().getTerminals(terminals);
-        List<PersonnelBean> personnels = getPresenter().getPersonnels(personnelDtoMap);
-        List<DeviceBean> devices = getPresenter().getDevices(personnels);
+        List<DeviceBean> deviceBeans = getPresenter().changerTerminalToDevice(terminalBeans);
+        List<DeviceBean> devices = getPresenter().changerPersonnelToDevice(personnelBeans);
 
-        deviceBeanList.addAll(terminals1);
+        deviceBeanList.addAll(deviceBeans);
         deviceBeanList.addAll(devices);
-
         refreshOrLoadMore(deviceBeanList);
     }
 
