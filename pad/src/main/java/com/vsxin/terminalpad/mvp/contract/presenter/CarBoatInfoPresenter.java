@@ -3,13 +3,11 @@ package com.vsxin.terminalpad.mvp.contract.presenter;
 import android.content.Context;
 
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.RefreshPresenter;
-import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.mvp.contract.view.ICarBoatInfoView;
 import com.vsxin.terminalpad.mvp.entity.DeviceBean;
 import com.vsxin.terminalpad.mvp.entity.PersonnelBean;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 
-import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -41,10 +39,26 @@ public class CarBoatInfoPresenter extends RefreshPresenter<DeviceBean, ICarBoatI
     }
 
     /**
-     * 拼接民警数据
+     * 获取 TerminalBean list
+     * @param terminalBeanMap
      * @return
      */
-    public List<DeviceBean> getTerminals(List<TerminalBean> terminalBeans){
+    public List<TerminalBean> getTerminalBeans(Map<String, TerminalBean> terminalBeanMap){
+        List<TerminalBean> terminalBeans = new ArrayList<>();
+        for(String key:terminalBeanMap.keySet()){//keySet获取map集合key的集合  然后在遍历key即可
+            TerminalBean personnelBean = terminalBeanMap.get(key);//
+            terminalBeans.add(personnelBean);
+        }
+        return terminalBeans;
+    }
+
+
+
+    /**
+     * 将TerminalBean转化为DeviceBean
+     * @return
+     */
+    public List<DeviceBean> changerTerminalToDevice(List<TerminalBean> terminalBeans){
         List<DeviceBean> deviceBeans = new ArrayList<>();
         for (TerminalBean terminalBean : terminalBeans){
             DeviceBean deviceBean = new DeviceBean();
@@ -56,10 +70,10 @@ public class CarBoatInfoPresenter extends RefreshPresenter<DeviceBean, ICarBoatI
     }
 
     /**
-     * 拼接民警数据
+     * 将PersonnelBean转化为DeviceBean
      * @return
      */
-    public List<DeviceBean> getDevices(List<PersonnelBean> personnels){
+    public List<DeviceBean> changerPersonnelToDevice(List<PersonnelBean> personnels){
         List<DeviceBean> deviceBeans = new ArrayList<>();
         for (PersonnelBean personnelBean : personnels){
             DeviceBean deviceBean = new DeviceBean();

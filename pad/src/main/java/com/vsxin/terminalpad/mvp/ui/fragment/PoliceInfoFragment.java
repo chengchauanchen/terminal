@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
@@ -47,6 +48,16 @@ public class PoliceInfoFragment extends RefreshRecycleViewFragment<TerminalBean,
     TextView tv_name;
     @BindView(R.id.tv_department)
     TextView tv_department;
+
+    @BindView(R.id.tv_phone)
+    TextView tv_phone;
+
+    @BindView(R.id.tv_speed)
+    TextView tv_speed;
+
+    @BindView(R.id.tv_time)
+    TextView tv_time;
+
     private PersonnelBean personnelBean;
 
     @Override
@@ -67,14 +78,29 @@ public class PoliceInfoFragment extends RefreshRecycleViewFragment<TerminalBean,
     @Override
     protected void initData() {
         super.initData();
-        //personnelBean = (PersonnelBean) getArguments().getSerializable(PERSONNEL);
+        personnelBean = (PersonnelBean) getArguments().getSerializable(PERSONNEL);
+        if(personnelBean==null){
+            return;
+        }
         TerminalEnum terminalEnum = (TerminalEnum) getArguments().getSerializable(TERMINAL_ENUM);
 
         List<TerminalBean> terminalDtoList = personnelBean.getTerminalDtoList();
         refreshOrLoadMore(terminalDtoList);
 
-        tv_name.setText(personnelBean.getPersonnelName()+" "+ personnelBean.getPersonnelNo());
-        tv_department.setText("");
+        String name = TextUtils.isEmpty(personnelBean.getName())?"":personnelBean.getName();
+        String no = TextUtils.isEmpty(personnelBean.getPersonnelNo())?"":personnelBean.getPersonnelNo();
+        //名称
+        tv_name.setText(name + "    " + no);
+        //部门
+        tv_department.setText(TextUtils.isEmpty(personnelBean.getDepartment()) ? "" : personnelBean.getDepartment());
+        //电话
+        tv_phone.setText(TextUtils.isEmpty(personnelBean.getPhoneNumber()) ? "" : personnelBean.getPhoneNumber());
+        //速度
+        tv_speed.setText(TextUtils.isEmpty(personnelBean.getSpeed()) ? "" : personnelBean.getSpeed());
+
+        // TODO 定位时间
+        tv_time.setText(TextUtils.isEmpty(personnelBean.getSpeed()) ? "" : personnelBean.getSpeed());
+
     }
 
     @Override

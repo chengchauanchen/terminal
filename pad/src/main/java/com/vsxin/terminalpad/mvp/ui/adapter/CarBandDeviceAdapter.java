@@ -13,7 +13,7 @@ import android.widget.TextView;
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.adapter.BaseRecycleViewAdapter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.manager.operation.OperationEnum;
-import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
 import com.vsxin.terminalpad.mvp.entity.DeviceBean;
 import com.vsxin.terminalpad.mvp.entity.PersonnelBean;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
@@ -73,7 +73,7 @@ public class CarBandDeviceAdapter extends BaseRecycleViewAdapter<DeviceBean, Car
         holder.tv_device_name.setText(personnel.getPersonnelName());
         //根据装备类型,显示操作按钮
         ImageView[] imageRid = {holder.iv_call_phone, holder.iv_message, holder.iv_push_video, holder.iv_individual_call};
-        TerminalUtils.showOperate(imageRid, TerminalType.TERMINAL_PERSONNEL);
+        TerminalUtils.showOperate(imageRid, TerminalEnum.TERMINAL_PERSONNEL.toString());
         holder.iv_call_phone.setOnClickListener(view -> {//打电话
             //ToastUtil.showToast(getContext(),"民警-打电话");
             callPhone(personnel,personnel.getTerminalDtoList(), OperationEnum.CALL_PHONE);

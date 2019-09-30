@@ -17,14 +17,11 @@ import com.ixiaoma.xiaomabus.architecture.mvp.refresh.adapter.BaseRecycleViewAda
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.manager.PullLiveManager;
 import com.vsxin.terminalpad.manager.StartCallManager;
-import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
 import com.vsxin.terminalpad.mvp.ui.widget.ChooseDevicesDialog;
-import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
 import com.vsxin.terminalpad.utils.BitmapUtil;
 import com.vsxin.terminalpad.utils.CallPhoneUtil;
 import com.vsxin.terminalpad.utils.HandleIdUtil;
-import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
-import com.vsxin.terminalpad.utils.TerminalUtils;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.TerminalMemberStatusEnum;
@@ -111,7 +108,7 @@ public class GroupMemberAdapter extends BaseRecycleViewAdapter<Member, GroupMemb
                     //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
                     //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
                     PullLiveManager liveManager = new PullLiveManager(getContext());
-                    liveManager.pullVideo(member.no+"", TerminalType.TERMINAL_BODY_WORN_CAMERA, member.getUniqueNo()+"");
+                    liveManager.pullVideo(member.no+"", TerminalEnum.TERMINAL_BODY_WORN_CAMERA, member.getUniqueNo()+"");
                 }
             }else{
                 //打个呼
