@@ -223,21 +223,21 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = new ReceiveSendUuidResponseHandler() {
         @Override
         public void handler(int resultCode, final String resultDesc, boolean isRegisted) {
-            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                if (isRegisted) {//注册过，在后台登录，session超时也走这
-                    myHandler.post(()->{
+            myHandler.post(()-> {
+                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                    if (isRegisted) {//注册过，在后台登录，session超时也走这
                         noNetWork.setVisibility(View.VISIBLE);
                         tv_status.setText(R.string.connecting_server);
-                    });
-                } else {//没注册过，关掉主界面，去注册界面
-                    startActivity(new Intent(NewMainActivity.this, RegistActivity.class));
-                    NewMainActivity.this.finish();
-                    stopService(new Intent(NewMainActivity.this, LockScreenService.class));
+                    } else {//没注册过，关掉主界面，去注册界面
+                        startActivity(new Intent(NewMainActivity.this, RegistActivity.class));
+                        NewMainActivity.this.finish();
+                        stopService(new Intent(NewMainActivity.this, LockScreenService.class));
+                    }
+                }else {
+                    noNetWork.setVisibility(View.VISIBLE);
+                    tv_status.setText(resultDesc);
                 }
-            }else {
-                noNetWork.setVisibility(View.VISIBLE);
-                myHandler.post(()-> tv_status.setText(resultDesc));
-            }
+            });
         }
     };
 
