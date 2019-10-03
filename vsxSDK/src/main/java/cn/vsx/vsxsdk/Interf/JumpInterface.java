@@ -7,6 +7,9 @@ import java.util.List;
 
 public interface JumpInterface {
 
+    //询问 融合通信状态
+    boolean askVsxProcessState(Context activity);
+
     /***************自动下载 相关方法***************/
     void autoDownloadApk(Context activity);
 

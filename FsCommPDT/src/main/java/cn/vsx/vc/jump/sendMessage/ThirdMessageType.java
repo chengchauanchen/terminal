@@ -5,7 +5,7 @@ package cn.vsx.vc.jump.sendMessage;
  */
 public enum  ThirdMessageType {
 
-    //
+    HEART_BEAT("心跳",0),
     NOTIFY_DATA_MESSAGE("接收到普通消息",1),
     NOTIFY_INDIVIDUAL_CALL_IN_COMMING("个呼来了",2),
     GO_WATCH_RTSP("观看上报视频",3),

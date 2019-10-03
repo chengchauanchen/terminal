@@ -970,12 +970,12 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         ll_emergency_prompt.setVisibility(View.GONE);
         MyTerminalFactory.getSDK().registNetworkChangeHandler();
 //        thridAppJoin();
-        //初始化 向地三方应用同步消息的service
-        ThirdSendMessage.initVsxSendMessage(this);
-        //注册 连接jumpService的广播
-        ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().register(this);
-//        GetPublicKey.getSignInfo(this);
-        ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().sendBroadcast(this);
+//        //初始化 向地三方应用同步消息的service
+//        ThirdSendMessage.initVsxSendMessage(this);
+//        //注册 连接jumpService的广播
+//        ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().register(this);
+////        GetPublicKey.getSignInfo(this);
+//        ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().sendBroadcast(this);
 
     }
 

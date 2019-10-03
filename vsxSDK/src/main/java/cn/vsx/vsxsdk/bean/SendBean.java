@@ -14,6 +14,43 @@ public class SendBean extends BaseBean {
     List<String> groupList;//组号list
     private String phoneNo;//手机号
 
+    private int whatVsxSDKProcess;//融合通信后台进程的状态怎么样?
+    private String loginState;//登录状态
+    private long time;//当前时间戳
+    private boolean isAuth;//是否走广播认证(自启动)
+
+    public int getWhatVsxSDKProcess() {
+        return whatVsxSDKProcess;
+    }
+
+    public void setWhatVsxSDKProcess(int whatVsxSDKProcess) {
+        this.whatVsxSDKProcess = whatVsxSDKProcess;
+    }
+
+    public String getLoginState() {
+        return loginState;
+    }
+
+    public void setLoginState(String loginState) {
+        this.loginState = loginState;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
+
+    public boolean isAuth() {
+        return isAuth;
+    }
+
+    public void setAuth(boolean auth) {
+        isAuth = auth;
+    }
+
     public String getGroupName() {
         return groupName;
     }

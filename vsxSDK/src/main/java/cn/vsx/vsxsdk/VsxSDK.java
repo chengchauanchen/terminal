@@ -18,6 +18,7 @@ import cn.vsx.vsxsdk.broadcastReceiver.RegisterBroadcastReceiver;
 import cn.vsx.vsxsdk.constant.ParamKey;
 import cn.vsx.vsxsdk.message.RegistMessageListener;
 import cn.vsx.vsxsdk.service.VsxReceivedService;
+import cn.vsx.vsxsdk.utils.ReceivedVsxProcessState;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -35,6 +36,7 @@ public class VsxSDK {
     private  JumpInterface jumpSDK;
     private  static VsxSDK vsxSDK;
     private static RegistMessageListener registMessageListener;
+    private static ReceivedVsxProcessState receivedVsxProcessState;
     private Context mContext;
     private RegisterBroadcastReceiver registerBroadcastReceiver;
 
@@ -102,7 +104,16 @@ public class VsxSDK {
         return jumpSDK;
     }
 
-
+    /**
+     *  获取融合通信进程状态
+     * @return
+     */
+    public ReceivedVsxProcessState getReceivedVsxProcessState() {
+        if (receivedVsxProcessState == null) {
+            receivedVsxProcessState = new ReceivedVsxProcessState(mContext);
+        }
+        return receivedVsxProcessState;
+    }
 
     public RegistMessageListener getRegistMessageListener() {
         if (registMessageListener == null) {

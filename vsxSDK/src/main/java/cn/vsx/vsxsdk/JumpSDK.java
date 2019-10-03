@@ -17,15 +17,35 @@ import cn.vsx.vsxsdk.constant.CommandEnum;
 import cn.vsx.vsxsdk.utils.BackgroundServicesTimer;
 import cn.vsx.vsxsdk.utils.BackgroundServicesTimer.TimerListener;
 import cn.vsx.vsxsdk.utils.GsonUtils;
+import cn.vsx.vsxsdk.utils.ReceivedVsxProcessState;
 import cn.vsx.vsxsdk.utils.SystemUtil;
 import cn.vsx.vsxsdk.utils.download.DownLoadApkUtils;
 
 public class JumpSDK implements JumpInterface {
 
+
+
     private Context context;
 
     public JumpSDK(Context context) {
         this.context = context;
+    }
+
+    @Override
+    public boolean askVsxProcessState(Context activity) {
+        //记录发送的次数
+        ReceivedVsxProcessState.addSendCount();
+
+        Log.e("JumpSDK","定时启动--askVsxProcessState");
+        String json = GsonUtils.getAskVsxProcessStateGson();
+        try {
+            VsxSDK.getInstance().getIJump().jumpPage(json, CommandEnum.SdkProcess.getType());
+            return true;
+        } catch (Exception e) {
+            Log.e("JumpSDK", "askVsxProcessState失败");
+            return false;
+            //doCacheCommandAndLaunchedVSXApp(json, CommandEnum.AddMemberToGroup.getType());
+        }
     }
 
     @Override
@@ -58,8 +78,15 @@ public class JumpSDK implements JumpInterface {
                 } else {//没安装
                     Log.e("--vsx--","未安装融合通信app:"+packageName);
                 }
+                startVsxProcessState();
             }
         }).start();
+    }
+
+    private void startVsxProcessState(){
+        VsxSDK.getInstance().getReceivedVsxProcessState().judgeLinkState();
+        //请求融合通信进程状态
+        VsxSDK.getInstance().getJumpSDK().askVsxProcessState(context);
     }
 
     @Override

@@ -63,6 +63,7 @@ public class RegisterBroadcastReceiver {
         //FLAG_INCLUDE_STOPPED_PACKAGES
         intent.addFlags(Intent.FLAG_INCLUDE_STOPPED_PACKAGES);
         context.sendBroadcast(intent);
+        Log.e("--vsx--广播","发送标准广播_开启惟实性后台服务end");
     }
 
 
