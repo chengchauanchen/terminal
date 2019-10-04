@@ -282,7 +282,7 @@ public class FileTransferOperation {
                                     //判断是否是执法记录仪，是的话就自动上传文件
                                     // TODO: 2019/7/24  判断是否是执法记录仪,是的话就自动上传文件,随后要改成服务配置参数
                                     if(isRecorderDevice()){
-                                        uploadFileByPath(path, 0, 0L,true);
+                                        uploadFileByPath(path, 0, 0L,false);
                                     }
                                     deleteBITFileTreeBean(list);
                                 } else {
