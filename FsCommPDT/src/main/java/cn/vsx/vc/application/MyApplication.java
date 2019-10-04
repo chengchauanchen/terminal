@@ -202,6 +202,9 @@ public class MyApplication extends BaseApplication{
 				unbindService(conn);
 				isBinded=false;
 			}
+			if (TerminalFactory.getSDK().isServerConnected()) {
+				TerminalFactory.getSDK().disConnectToServer();
+			}
 			stopService(new Intent(this, ReceiveHandlerService.class));
 			killAllProcess();
 		}
