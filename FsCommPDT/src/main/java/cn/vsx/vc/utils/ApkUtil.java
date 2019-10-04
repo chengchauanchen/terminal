@@ -10,6 +10,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.CHUTIANYUN;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.POLICESTORE;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.TIANJIN;
+import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.WUTIE;
 
 /**
  * 作者：ly-xuxiaolong
@@ -42,7 +43,8 @@ public class ApkUtil{
     //是否为移动警务平台的包
     public static boolean isAppStore(){
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
-        return TextUtils.equals(AuthManagerTwo.POLICESTORE,apkType) || TextUtils.equals(AuthManagerTwo.XIANGYANGPOLICESTORE,apkType)||TextUtils.equals(TIANJIN,apkType);
+        return TextUtils.equals(AuthManagerTwo.POLICESTORE,apkType) || TextUtils.equals(AuthManagerTwo.XIANGYANGPOLICESTORE,apkType)
+            ||TextUtils.equals(TIANJIN,apkType)||TextUtils.equals(WUTIE,apkType);
 //        return MyTerminalFactory.getSDK().getParam(Params.IS_ANJIAN, false);
     }
 

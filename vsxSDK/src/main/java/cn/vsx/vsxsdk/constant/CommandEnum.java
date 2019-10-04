@@ -4,6 +4,7 @@ package cn.vsx.vsxsdk.constant;
  *
  */
 public enum  CommandEnum {
+    SdkProcess("返回sdk进程状态",0),//组会话页面
     GroupChat("组会话页面",1),//组会话页面
     IndividualCall("个呼",2),//个呼
     OtherLive("请求别人上报",3),//请求别人上报

@@ -2,11 +2,9 @@ package com.vsxin.terminalpad.mvp.ui.adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -16,19 +14,12 @@ import com.ixiaoma.xiaomabus.architecture.mvp.refresh.adapter.BaseRecycleViewAda
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.manager.PullLiveManager;
 import com.vsxin.terminalpad.manager.StartCallManager;
-import com.vsxin.terminalpad.mvp.contract.constant.MemberTypeEnum;
-import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
-import com.vsxin.terminalpad.mvp.entity.DeviceBean;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
 import com.vsxin.terminalpad.mvp.entity.PersonnelBean;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
-import com.vsxin.terminalpad.mvp.ui.fragment.IndividualCallFragment;
 import com.vsxin.terminalpad.utils.NumberUtil;
 import com.vsxin.terminalpad.utils.TerminalUtils;
 
-import java.util.List;
-import java.util.Map;
-
-import cn.vsx.hamster.common.TerminalMemberType;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -69,12 +60,9 @@ public class PoliceBandDeviceAdapter extends BaseRecycleViewAdapter<TerminalBean
 
         holder.iv_individual_call.setOnClickListener(v -> {
             //IndividualCallFragment.startIndividualCallFragment((FragmentActivity)getContext(),"警察好","10000201");
-
             //呼警务通
             StartCallManager startCallManager = new StartCallManager(getContext());
             //startCallManager.startIndividualCall("10000201", TerminalMemberType.TERMINAL_PHONE);
-
-
             if (personnelBean != null) {
                 String personnelName = personnelBean.getPersonnelName();
                 String personnelNo = personnelBean.getPersonnelNo();
@@ -92,7 +80,7 @@ public class PoliceBandDeviceAdapter extends BaseRecycleViewAdapter<TerminalBean
                 String personnelNo = personnelBean.getPersonnelNo();
                 PullLiveManager liveManager = new PullLiveManager(getContext());
                 String terminalUniqueNo = TerminalUtils.getPullLiveUniqueNo(terminalBean);
-                liveManager.pullVideo(personnelNo, terminalBean.getTerminalType(), terminalUniqueNo);
+                liveManager.pullVideo(personnelNo, TerminalEnum.valueOf(terminalType), terminalUniqueNo);
             } else {
                 ToastUtil.showToast(getContext(), "personnelBean 为空");
             }

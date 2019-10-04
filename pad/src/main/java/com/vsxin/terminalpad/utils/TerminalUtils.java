@@ -6,7 +6,6 @@ import android.widget.ImageView;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.manager.operation.OperationConstants;
 import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
-import com.vsxin.terminalpad.mvp.contract.constant.TerminalType;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 
 import java.util.HashMap;
@@ -29,11 +28,13 @@ public class TerminalUtils {
      */
     public static String getIndividualCallUniqueNo(TerminalBean terminalBean) {
         String uniqueNo = "";
-        switch (terminalBean.getTerminalType()) {
-            case TerminalType.TERMINAL_PHONE://警务通
+        TerminalEnum terminalEnum = TerminalEnum.valueOf(terminalBean.getTerminalType());
+
+        switch (terminalEnum) {
+            case TERMINAL_PHONE://警务通
                 uniqueNo = terminalBean.getTerminalUniqueNo();
                 break;
-            case TerminalType.TERMINAL_PDT://手台
+            case TERMINAL_PDT://手台
                 uniqueNo = terminalBean.getPdtNo();
                 break;
             default:
@@ -49,11 +50,12 @@ public class TerminalUtils {
      */
     public static Boolean isAllowIndividualCall(TerminalBean terminalBean) {
         Boolean isAllow = false;
-        switch (terminalBean.getTerminalType()) {
-            case TerminalType.TERMINAL_PHONE://警务通
+        TerminalEnum terminalEnum = TerminalEnum.valueOf(terminalBean.getTerminalType());
+        switch (terminalEnum) {
+            case TERMINAL_PHONE://警务通
                 isAllow = true;
                 break;
-            case TerminalType.TERMINAL_PDT://手台
+            case TERMINAL_PDT://手台
                 isAllow = true;
                 break;
             default:
@@ -69,23 +71,25 @@ public class TerminalUtils {
      */
     public static Boolean isAllowPullLive(TerminalBean terminalBean) {
         Boolean isAllow = false;
-        switch (terminalBean.getTerminalType()) {
-            case TerminalType.TERMINAL_PHONE://警务通
+        TerminalEnum terminalEnum = TerminalEnum.valueOf(terminalBean.getTerminalType());
+
+        switch (terminalEnum) {
+            case TERMINAL_PHONE://警务通
                 isAllow = true;
                 break;
-            case TerminalType.TERMINAL_BODY_WORN_CAMERA://执法仪
+            case TERMINAL_BODY_WORN_CAMERA://执法仪
                 isAllow = true;
                 break;
-            case TerminalType.TERMINAL_UAV://无人机
+            case TERMINAL_UAV://无人机
                 isAllow = true;
                 break;
-            case TerminalType.TERMINAL_LTE://lte
+            case TERMINAL_LTE://lte
                 isAllow = true;
                 break;
-            case TerminalType.TERMINAL_BULL://不控球
+            case TERMINAL_BALL://不控球
                 isAllow = true;
                 break;
-            case TerminalType.TERMINAL_CAMERA://城市摄像头
+            case TERMINAL_CAMERA://城市摄像头
                 isAllow = true;
                 break;
             default:
@@ -102,23 +106,25 @@ public class TerminalUtils {
      */
     public static String getPullLiveUniqueNo(TerminalBean terminalBean) {
         String uniqueNo = "";
-        switch (terminalBean.getTerminalType()) {
-            case TerminalType.TERMINAL_PHONE://警务通
+        TerminalEnum terminalEnum = TerminalEnum.valueOf(terminalBean.getTerminalType());
+
+        switch (terminalEnum) {
+            case TERMINAL_PHONE://警务通
                 uniqueNo = terminalBean.getTerminalUniqueNo();
                 break;
-            case TerminalType.TERMINAL_BODY_WORN_CAMERA://执法仪
+            case TERMINAL_BODY_WORN_CAMERA://执法仪
                 uniqueNo = terminalBean.getTerminalUniqueNo();
                 break;
-            case TerminalType.TERMINAL_UAV://无人机
+            case TERMINAL_UAV://无人机
                 uniqueNo = terminalBean.getTerminalUniqueNo();
                 break;
-            case TerminalType.TERMINAL_LTE://lte
+            case TERMINAL_LTE://lte
                 uniqueNo = terminalBean.getGb28181No();
                 break;
-            case TerminalType.TERMINAL_BULL://不控球
+            case TERMINAL_BALL://不控球
                 uniqueNo = terminalBean.getGb28181No();
                 break;
-            case TerminalType.TERMINAL_CAMERA://城市摄像头
+            case TERMINAL_CAMERA://城市摄像头
                 uniqueNo = terminalBean.getGb28181No();
                 break;
             default:
@@ -153,50 +159,52 @@ public class TerminalUtils {
 
     public static Map<String, Boolean> getOperationForTerminalType(String terminalType) {
         Map<String, Boolean> operatShow = new HashMap<>();
-        switch (terminalType) {
-            case TerminalType.TERMINAL_PHONE://警务通终端
+        TerminalEnum terminalEnum = TerminalEnum.valueOf(terminalType);
+
+        switch (terminalEnum) {
+            case TERMINAL_PHONE://警务通终端
                 operatShow.put(OperationConstants.CALL_PHONE, false);
                 operatShow.put(OperationConstants.MESSAGE, false);
                 operatShow.put(OperationConstants.LIVE, true);
                 operatShow.put(OperationConstants.INDIVIDUAL_CALL, true);
                 break;
-            case TerminalType.TERMINAL_BODY_WORN_CAMERA://执法记录仪
+            case TERMINAL_BODY_WORN_CAMERA://执法记录仪
                 operatShow.put(OperationConstants.CALL_PHONE, false);
                 operatShow.put(OperationConstants.MESSAGE, false);
                 operatShow.put(OperationConstants.LIVE, true);
                 operatShow.put(OperationConstants.INDIVIDUAL_CALL, false);
                 break;
-            case TerminalType.TERMINAL_UAV://无人机
+            case TERMINAL_UAV://无人机
                 operatShow.put(OperationConstants.CALL_PHONE, false);
                 operatShow.put(OperationConstants.MESSAGE, false);
                 operatShow.put(OperationConstants.LIVE, true);
                 operatShow.put(OperationConstants.INDIVIDUAL_CALL, false);
                 break;
-            case TerminalType.TERMINAL_PDT://PDT终端(350M)
+            case TERMINAL_PDT://PDT终端(350M)
                 operatShow.put(OperationConstants.CALL_PHONE, false);
                 operatShow.put(OperationConstants.MESSAGE, false);
                 operatShow.put(OperationConstants.LIVE, false);
                 operatShow.put(OperationConstants.INDIVIDUAL_CALL, true);
                 break;
-            case TerminalType.TERMINAL_LTE://LTE终端
+            case TERMINAL_LTE://LTE终端
                 operatShow.put(OperationConstants.CALL_PHONE, false);
                 operatShow.put(OperationConstants.MESSAGE, false);
                 operatShow.put(OperationConstants.LIVE, true);
                 operatShow.put(OperationConstants.INDIVIDUAL_CALL, false);
                 break;
-            case TerminalType.TERMINAL_BULL://布控球
+            case TERMINAL_BALL://布控球
                 operatShow.put(OperationConstants.CALL_PHONE, false);
                 operatShow.put(OperationConstants.MESSAGE, false);
                 operatShow.put(OperationConstants.LIVE, true);
                 operatShow.put(OperationConstants.INDIVIDUAL_CALL, false);
                 break;
-            case TerminalType.TERMINAL_CAMERA://摄像头
+            case TERMINAL_CAMERA://摄像头
                 operatShow.put(OperationConstants.CALL_PHONE, false);
                 operatShow.put(OperationConstants.MESSAGE, false);
                 operatShow.put(OperationConstants.LIVE, true);
                 operatShow.put(OperationConstants.INDIVIDUAL_CALL, false);
                 break;
-            case TerminalType.TERMINAL_PERSONNEL://民警
+            case TERMINAL_PERSONNEL://民警
                 operatShow.put(OperationConstants.CALL_PHONE, false);
                 operatShow.put(OperationConstants.MESSAGE, false);
                 operatShow.put(OperationConstants.LIVE, true);
@@ -207,6 +215,7 @@ public class TerminalUtils {
         }
         return operatShow;
     }
+
     /**
      * 通过终端设备类型 获取 对应图标
      *
@@ -215,20 +224,22 @@ public class TerminalUtils {
      */
     public static int getDialogImageForTerminalType(String terminalType) {
         int imgRid = 0;
-        switch (terminalType) {
-            case TerminalType.TERMINAL_PHONE://警务通终端
+        TerminalEnum terminalEnum = TerminalEnum.valueOf(terminalType);
+
+        switch (terminalEnum) {
+            case TERMINAL_PHONE://警务通终端
                 imgRid = R.mipmap.ic_phone_dialog;
                 break;
-            case TerminalType.TERMINAL_BODY_WORN_CAMERA://执法记录仪
+            case TERMINAL_BODY_WORN_CAMERA://执法记录仪
                 imgRid = R.mipmap.ic_zfy_dialog;
                 break;
-            case TerminalType.TERMINAL_UAV://无人机
+            case TERMINAL_UAV://无人机
                 imgRid = R.mipmap.ic_uav_dialog;
                 break;
-            case TerminalType.TERMINAL_PDT://PDT终端(350M)
+            case TERMINAL_PDT://PDT终端(350M)
                 imgRid = R.mipmap.ic_pdt_dialog;
                 break;
-            case TerminalType.TERMINAL_LTE://lte
+            case TERMINAL_LTE://lte
                 imgRid = R.mipmap.ic_lte_dialog;
                 break;
             default:
@@ -244,44 +255,45 @@ public class TerminalUtils {
      * @return
      */
     public static int getImageForTerminalType(String terminalType) {
-        TerminalEnum terminalEnum = null;
-        switch (terminalType) {
-            case TerminalType.TERMINAL_PHONE://警务通终端
-                terminalEnum = TerminalEnum.TERMINAL_PHONE;
-                break;
-            case TerminalType.TERMINAL_BODY_WORN_CAMERA://执法记录仪
-                terminalEnum = TerminalEnum.TERMINAL_BODY_WORN_CAMERA;
-                break;
-            case TerminalType.TERMINAL_UAV://无人机
-                terminalEnum = TerminalEnum.TERMINAL_UAV;
-                break;
-            case TerminalType.TERMINAL_PDT://PDT终端(350M)
-                terminalEnum = TerminalEnum.TERMINAL_PDT;
-                break;
-            case TerminalType.TERMINAL_LTE://LTE终端
-                terminalEnum = TerminalEnum.TERMINAL_LTE;
-                break;
-            case TerminalType.TERMINAL_BULL://布控球
-                terminalEnum = TerminalEnum.TERMINAL_BULL;
-                break;
-            case TerminalType.TERMINAL_CAMERA://摄像头
-                terminalEnum = TerminalEnum.TERMINAL_CAMERA;
-                break;
+        TerminalEnum terminalEnum = TerminalEnum.valueOf(terminalType);
 
-            //载具
-            case TerminalType.TERMINAL_PATROL://船
-                terminalEnum = TerminalEnum.TERMINAL_PATROL;
-                break;
-            case TerminalType.TERMINAL_CAR://警车
-                terminalEnum = TerminalEnum.TERMINAL_CAR;
-                break;
-            case TerminalType.TERMINAL_PERSONNEL://民警
-                terminalEnum = TerminalEnum.TERMINAL_PERSONNEL;
-                break;
-            default:
-                terminalEnum = null;
-                break;
-        }
+//        switch (terminalEnum) {
+//            case TERMINAL_PHONE://警务通终端
+//                terminalEnum = TerminalEnum.TERMINAL_PHONE;
+//                break;
+//            case TERMINAL_BODY_WORN_CAMERA://执法记录仪
+//                terminalEnum = TerminalEnum.TERMINAL_BODY_WORN_CAMERA;
+//                break;
+//            case TERMINAL_UAV://无人机
+//                terminalEnum = TerminalEnum.TERMINAL_UAV;
+//                break;
+//            case TERMINAL_PDT://PDT终端(350M)
+//                terminalEnum = TerminalEnum.TERMINAL_PDT;
+//                break;
+//            case TERMINAL_LTE://LTE终端
+//                terminalEnum = TerminalEnum.TERMINAL_LTE;
+//                break;
+//            case TERMINAL_BALL://布控球
+//                terminalEnum = TerminalEnum.TERMINAL_BALL;
+//                break;
+//            case TERMINAL_CAMERA://摄像头
+//                terminalEnum = TerminalEnum.TERMINAL_CAMERA;
+//                break;
+//
+//            //载具
+//            case TERMINAL_PATROL://船
+//                terminalEnum = TerminalEnum.TERMINAL_PATROL;
+//                break;
+//            case TERMINAL_CAR://警车
+//                terminalEnum = TerminalEnum.TERMINAL_CAR;
+//                break;
+//            case TERMINAL_PERSONNEL://民警
+//                terminalEnum = TerminalEnum.TERMINAL_PERSONNEL;
+//                break;
+//            default:
+//                terminalEnum = null;
+//                break;
+//        }
         return terminalEnum == null ? TerminalEnum.TERMINAL_PHONE.getRid() : terminalEnum.getRid();
     }
 
@@ -292,44 +304,44 @@ public class TerminalUtils {
      * @return
      */
     public static String getNameForTerminalType(String terminalType) {
-        TerminalEnum terminalEnum = null;
-        switch (terminalType) {
-            case TerminalType.TERMINAL_PHONE://警务通终端
-                terminalEnum = TerminalEnum.TERMINAL_PHONE;
-                break;
-            case TerminalType.TERMINAL_BODY_WORN_CAMERA://执法记录仪
-                terminalEnum = TerminalEnum.TERMINAL_BODY_WORN_CAMERA;
-                break;
-            case TerminalType.TERMINAL_UAV://无人机
-                terminalEnum = TerminalEnum.TERMINAL_UAV;
-                break;
-            case TerminalType.TERMINAL_PDT://PDT终端(350M)
-                terminalEnum = TerminalEnum.TERMINAL_PDT;
-                break;
-            case TerminalType.TERMINAL_LTE://LTE终端
-                terminalEnum = TerminalEnum.TERMINAL_LTE;
-                break;
-            case TerminalType.TERMINAL_BULL://布控球
-                terminalEnum = TerminalEnum.TERMINAL_BULL;
-                break;
-            case TerminalType.TERMINAL_CAMERA://摄像头
-                terminalEnum = TerminalEnum.TERMINAL_CAMERA;
-                break;
-
-            //载具
-            case TerminalType.TERMINAL_PATROL://船
-                terminalEnum = TerminalEnum.TERMINAL_PATROL;
-                break;
-            case TerminalType.TERMINAL_CAR://警车
-                terminalEnum = TerminalEnum.TERMINAL_CAR;
-                break;
-            case TerminalType.TERMINAL_PERSONNEL://民警
-                terminalEnum = TerminalEnum.TERMINAL_PERSONNEL;
-                break;
-            default:
-                terminalEnum = null;
-                break;
-        }
+        TerminalEnum terminalEnum = TerminalEnum.valueOf(terminalType);
+//        switch (terminalType) {
+//            case TerminalType.TERMINAL_PHONE://警务通终端
+//                terminalEnum = TerminalEnum.TERMINAL_PHONE;
+//                break;
+//            case TerminalType.TERMINAL_BODY_WORN_CAMERA://执法记录仪
+//                terminalEnum = TerminalEnum.TERMINAL_BODY_WORN_CAMERA;
+//                break;
+//            case TerminalType.TERMINAL_UAV://无人机
+//                terminalEnum = TerminalEnum.TERMINAL_UAV;
+//                break;
+//            case TerminalType.TERMINAL_PDT://PDT终端(350M)
+//                terminalEnum = TerminalEnum.TERMINAL_PDT;
+//                break;
+//            case TerminalType.TERMINAL_LTE://LTE终端
+//                terminalEnum = TerminalEnum.TERMINAL_LTE;
+//                break;
+//            case TerminalType.TERMINAL_BULL://布控球
+//                terminalEnum = TerminalEnum.TERMINAL_BULL;
+//                break;
+//            case TerminalType.TERMINAL_CAMERA://摄像头
+//                terminalEnum = TerminalEnum.TERMINAL_CAMERA;
+//                break;
+//
+//            //载具
+//            case TerminalType.TERMINAL_PATROL://船
+//                terminalEnum = TerminalEnum.TERMINAL_PATROL;
+//                break;
+//            case TerminalType.TERMINAL_CAR://警车
+//                terminalEnum = TerminalEnum.TERMINAL_CAR;
+//                break;
+//            case TerminalType.TERMINAL_PERSONNEL://民警
+//                terminalEnum = TerminalEnum.TERMINAL_PERSONNEL;
+//                break;
+//            default:
+//                terminalEnum = null;
+//                break;
+//        }
         return terminalEnum == null ? TerminalEnum.TERMINAL_PHONE.getDes() : terminalEnum.getDes();
     }
 

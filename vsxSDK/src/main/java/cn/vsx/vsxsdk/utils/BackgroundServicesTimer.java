@@ -7,7 +7,7 @@ import android.os.Message;
  * 定时执行 启动融合通信后台服务
  */
 public class BackgroundServicesTimer {
-    private static final int time = 20 * 1000;//10秒
+    private static final int time = 10 * 1000;//10秒
     private static final int UPDATE = 0;
     private TimerListener listener;
     private static BackgroundServicesTimer backgroundServicesTimer;

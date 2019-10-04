@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">vsxSDK</string>
     <string name="vsx_app_name">VSX_APP</string>
+    <string name="text_tempt">提示</string>
+    <string name="text_sure">确定</string>
+    <string name="text_cancel">取消</string>
+    <string name="text_install">请重新安装启融合通信</string>
+    <string name="text_open">请开启融合通信</string>
 </resources>

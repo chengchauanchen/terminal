@@ -42,4 +42,8 @@ public class BaseApplication extends Application{
 
     public void startPromptManager(){
     }
+
+    public void initVsxSendMessage(){
+
+    }
 }

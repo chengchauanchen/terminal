@@ -8,6 +8,17 @@ import cn.vsx.vsxsdk.bean.SendBean;
 
 public class GsonUtils {
 
+
+    /**
+     * 询问融合通信进程状态
+     * @return
+     */
+    public static String getAskVsxProcessStateGson(){
+        SendBean sendBean = new SendBean();
+        sendBean.setWhatVsxSDKProcess(ReceivedVsxProcessState.sendNum);
+        return new Gson().toJson(sendBean);
+    }
+
     /**
      * 将 memberNo businessId 转化为SendBean json对象
      * @param nos

@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 //        VsxSDK.getInstance().getJumpSDK().registerConnectJumpReceiver(this);
         initView();
-        initDownLoadApk();
+//        initDownLoadApk();
     }
 
     private void initDownLoadApk() {
@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // VsxSDK.getInstance().getJumpSDK().activeStartLive("021222");
-                VsxSDK.getInstance().getJumpSDK().sendStartAppBroadcast(MainActivity.this);
+                //VsxSDK.getInstance().getJumpSDK().sendStartAppBroadcast(MainActivity.this);
 //                VsxSDK.getInstance().getJumpSDK().startVsxService(MainActivity.this);
 
 //                if(!isGrantExternalRW(MainActivity.this)){

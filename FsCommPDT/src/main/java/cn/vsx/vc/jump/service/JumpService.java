@@ -9,10 +9,15 @@ import android.util.Log;
 
 import org.apache.log4j.Logger;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.TerminalSDKBaseImpl;
+import cn.vsx.hamster.terminalsdk.manager.auth.LoginModel;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler;
+import cn.vsx.hamster.terminalsdk.tools.JudgeWhetherConnect;
 import cn.vsx.vc.IJump;
 import cn.vsx.vc.jump.command.FactoryCommand;
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
+import ptt.terminalsdk.service.KeepLiveManager;
 
 /**
  * 第三方应用与本应用通信Service
@@ -29,6 +34,7 @@ public class JumpService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        KeepLiveManager.getInstance().setServiceForeground(this);
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -47,7 +53,12 @@ public class JumpService extends Service {
         public void noticeConnectReceivedService(String packageName) throws RemoteException {
             logger.info("--vsxSDK--"+"接收到"+packageName+"发送过来的连接ReceivedService通知");
             if(ThirdSendMessage.getInstance()!=null){
-                ThirdSendMessage.getInstance().connectReceivedService(getApplicationContext(),packageName,false);
+                TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        ThirdSendMessage.getInstance().connectReceivedService(getApplicationContext(),packageName,false);
+                    }
+                });
             }
         }
     }

@@ -1,11 +1,16 @@
 package cn.vsx.vc.activity;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.ImageView;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.Account;
+import cn.vsx.hamster.terminalsdk.model.Department;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.dialog.BandDeviceDialog;
@@ -71,7 +76,7 @@ public class AddEquipmentActivity extends BaseActivity {
             deviceListDialog = new BandDeviceListDialog(AddEquipmentActivity.this, new SureBindListener() {
                 @Override
                 public void bind(Car car) {
-                    bandDevice(car.getVehicleType(), car.getUniqueNo(), new BandDeviceListener() {
+                    getAccount(car.getVehicleType(), car.getUniqueNo(), new BandDeviceListener() {
                         @Override
                         public void result(String msg, int code) {
                             ToastUtil.showToast(AddEquipmentActivity.this, TextUtils.isEmpty(msg) ? "绑定成功" : msg);
@@ -88,7 +93,7 @@ public class AddEquipmentActivity extends BaseActivity {
         //船
         iv_boat.setOnClickListener(v -> {
             shipDialog = new BandShipDialog(AddEquipmentActivity.this, boat -> {
-                bandDevice(boat.getVehicleType(), boat.getUniqueNo(), new BandDeviceListener() {
+                getAccount(boat.getVehicleType(), boat.getUniqueNo(), new BandDeviceListener() {
                     @Override
                     public void result(String msg, int code) {
                         ToastUtil.showToast(AddEquipmentActivity.this, TextUtils.isEmpty(msg) ? "绑定成功" : msg);
@@ -113,7 +118,7 @@ public class AddEquipmentActivity extends BaseActivity {
                 ToastUtil.showToast(AddEquipmentActivity.this, "请输入设备编号");
                 return;
             }
-            bandDevice(equipmentType, deviceNo, new BandDeviceListener() {
+            getAccount(equipmentType, deviceNo, new BandDeviceListener() {
                 @Override
                 public void result(String msg, int code) {
                     ToastUtil.showToast(AddEquipmentActivity.this, TextUtils.isEmpty(msg) ? "绑定成功" : msg);
@@ -141,12 +146,46 @@ public class AddEquipmentActivity extends BaseActivity {
 
     }
 
+    /**
+     * 是否为东湖部门
+     *
+     * @return
+     */
+    public void getAccount(String equipmentType, String equipmentNo,BandDeviceListener bandDeviceListener) {
 
-    private void bandDevice(String equipmentType, String equipmentNo, BandDeviceListener bandDeviceListener) {
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            int no = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+            if (bandDeviceListener != null) {
+                Account account = DataUtil.getAccountByMemberNo(no, true);
+                if(account!=null){
+                    String name = account.getName();
+                    String phoneNumber = account.getPhoneNumber();
+                    String department = account.getDepartmentName();
+                    bandDevice(equipmentType,equipmentNo,name,phoneNumber,department,bandDeviceListener);
+                }
+            }
+        });
+    }
+
+    private String userName;//5
+
+    private String phoneNumber;//6
+
+    private String department;//7
+
+
+    private void bandDevice(String equipmentType, String equipmentNo,String userName, String phoneNumber,String department,BandDeviceListener bandDeviceListener) {
         Relationship relationship = new Relationship();
+        relationship.setUniqueNo(MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "");
+        relationship.setAccountNo(TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "");
+
         relationship.setEquipmentType(equipmentType);
         relationship.setEquipmentNo(equipmentNo);
-        relationship.setUniqueNo(MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "");
+
+        relationship.setUserName(userName);
+        relationship.setPhoneNumber(phoneNumber);
+        relationship.setDepartment(department);
+
         String ip = MyTerminalFactory.getSDK().getParam(Params.GPS_IP);
         int port = MyTerminalFactory.getSDK().getParam(Params.GPS_PORT, 0);
 //			final String url = "http://192.168.1.174:6666/save";

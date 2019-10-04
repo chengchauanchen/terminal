@@ -6,6 +6,7 @@ import cn.vsx.vsxsdk.Interf.GoWatchRTSPListener;
 import cn.vsx.vsxsdk.Interf.IndividualCallListener;
 import cn.vsx.vsxsdk.Interf.LiveInComeListener;
 import cn.vsx.vsxsdk.Interf.TempGroupListener;
+import cn.vsx.vsxsdk.Interf.VsxProcessStateListener;
 import cn.vsx.vsxsdk.constant.ThirdMessageType;
 
 public class RegistMessageListener {
@@ -16,6 +17,7 @@ public class RegistMessageListener {
     private LiveInComeListener liveInComeListener;
     private CommonMessageListener commonMessageListener;
     private TempGroupListener tempGroupListener;
+    private VsxProcessStateListener vsxProcessStateListener;
 
     public void receivedMessage(String messageJson, int messageType) {
         if (messageType == ThirdMessageType.NOTIFY_DATA_MESSAGE.getCode()) {//接收到普通消息
@@ -41,6 +43,10 @@ public class RegistMessageListener {
         }else if(messageType == ThirdMessageType.NOTIFY_MEMBER_ABOUT_TEMP_GROUP.getCode()){
             if (tempGroupListener != null) {
                 tempGroupListener.onReceived(messageJson);
+            }
+        }else if(messageType ==ThirdMessageType.HEART_BEAT.getCode()){//心跳,返回融合通信进程状态
+            if(vsxProcessStateListener!=null){
+                vsxProcessStateListener.onReceived(messageJson);
             }
         }
     }
@@ -97,5 +103,14 @@ public class RegistMessageListener {
      */
     public void setTempGroupListener(TempGroupListener tempGroupListener) {
         this.tempGroupListener = tempGroupListener;
+    }
+
+    /**
+     * 融合通信进程状态消息
+     *
+     * @param vsxProcessStateListener
+     */
+    public void setVsxProcessStateListener(VsxProcessStateListener vsxProcessStateListener) {
+        this.vsxProcessStateListener = vsxProcessStateListener;
     }
 }

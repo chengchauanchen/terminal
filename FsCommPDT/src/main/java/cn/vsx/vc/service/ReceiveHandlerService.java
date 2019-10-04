@@ -1005,7 +1005,8 @@ public class ReceiveHandlerService extends Service{
                     .setWhen(System.currentTimeMillis())//设置通知时间
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
                     .setOngoing(false)
-                    .setContentIntent(pIntent).setDefaults(Notification.DEFAULT_SOUND); //设置通知点击事件
+                    .setContentIntent(pIntent)//设置通知点击事件
+                    .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE);
             Notification notification = myBuilder.build();
             if(null != notificationManager){
                 notificationManager.notify(noticeId,notification);
@@ -1020,7 +1021,8 @@ public class ReceiveHandlerService extends Service{
                     .setOngoing(false)
                     .setWhen(System.currentTimeMillis())//设置通知时间
                     .setPriority(Notification.PRIORITY_HIGH)//高优先级
-                    .setContentIntent(pIntent).setDefaults(Notification.DEFAULT_SOUND); //设置通知点击事件
+                    .setContentIntent(pIntent)//设置通知点击事件
+                    .setDefaults(Notification.DEFAULT_LIGHTS|Notification.DEFAULT_VIBRATE);
             if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
                 //设置任何情况都会显示通知
                 myBuilder.setVisibility(Notification.VISIBILITY_PUBLIC);

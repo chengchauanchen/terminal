@@ -23,6 +23,9 @@ public class FactoryCommand {
         IJumpCommand jumpCommand;
 
         switch (commandType) {
+            case 0:
+                jumpCommand = new SendVsxSDKProcess(context);//绿之云询问我当前的状态
+                break;
             case 1:
                 jumpCommand = new GroupChat(context);
                 break;

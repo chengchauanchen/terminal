@@ -9,10 +9,16 @@ import com.blankj.utilcode.util.ToastUtils;
 import com.ixiaoma.xiaomabus.architecture.mvp.refresh.RefreshPresenter;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
+import com.vsxin.terminalpad.manager.StartCallManager;
+import com.vsxin.terminalpad.mvp.contract.constant.NoticeInOrOutEnum;
+import com.vsxin.terminalpad.mvp.contract.constant.NoticeOutCallEnum;
+import com.vsxin.terminalpad.mvp.contract.constant.NoticeTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.view.IBaseMessageView;
 import com.vsxin.terminalpad.mvp.entity.MediaBean;
+import com.vsxin.terminalpad.mvp.entity.NoticeBean;
 import com.vsxin.terminalpad.mvp.entity.PlayType;
 import com.vsxin.terminalpad.mvp.ui.widget.ChooseDevicesDialog;
+import com.vsxin.terminalpad.prompt.PromptManager;
 import com.vsxin.terminalpad.receiveHandler.ReceiveGetHistoryLiveUrlsHandler2;
 import com.vsxin.terminalpad.receiveHandler.ReceiveGoWatchLiveHandler2;
 import com.vsxin.terminalpad.receiveHandler.ReceiverActivePushVideoHandler;
@@ -22,6 +28,8 @@ import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
 import com.vsxin.terminalpad.record.MediaManager;
 import com.vsxin.terminalpad.utils.DensityUtil;
 import com.vsxin.terminalpad.utils.MyDataUtil;
+import com.vsxin.terminalpad.utils.SensorUtil;
+import com.vsxin.terminalpad.utils.TimeUtil;
 import com.zectec.imageandfileselector.receivehandler.ReceiverSendFileCheckMessageHandler;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
@@ -51,6 +59,8 @@ import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
+import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -103,10 +113,12 @@ public class BaseMessagePresenter<V extends IBaseMessageView> extends RefreshPre
     private boolean isSameItem = true;
     protected boolean isReject=false;
     private ExecutorService executorService = Executors.newFixedThreadPool(1);
+    private final StartCallManager startCallManager;
 
 
     public BaseMessagePresenter(Context mContext){
         super(mContext);
+        startCallManager = new StartCallManager(mContext);
     }
 
 
@@ -205,6 +217,16 @@ public class BaseMessagePresenter<V extends IBaseMessageView> extends RefreshPre
             });
         }
     };
+    /**
+     * 主动发起个呼
+     */
+    private ReceiveCurrentGroupIndividualCallHandler receiveCurrentGroupIndividualCallHandler = (member) -> {
+        getView().getLogger().info("当前呼叫对象:" + member);
+    };
+
+
+
+
     /**
      * 从网络获取数据后刷新页面
      */
@@ -632,7 +654,8 @@ public class BaseMessagePresenter<V extends IBaseMessageView> extends RefreshPre
         boolean network = MyTerminalFactory.getSDK().hasNetwork();
         if (network) {
             if(member!=null){
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+                startCallManager.startIndividualCall(member);
+                //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
             }else {
                 getView().showMsg(R.string.text_get_member_info_fail);
             }

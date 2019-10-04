@@ -11,13 +11,18 @@ import android.os.IBinder;
 import android.support.annotation.RequiresApi;
 import android.util.Log;
 
+import com.squareup.haha.perflib.Main;
+
 import org.apache.log4j.Logger;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.jump.broadcastReceiver.RegisterBroadcastReceiver;
 import cn.vsx.vc.jump.constant.ParamKey;
 import cn.vsx.vc.jump.service.JumpService;
 import cn.vsx.vsxsdk.IReceivedVSXMessage;
+import ptt.terminalsdk.context.SDKProcessStateEnum;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 
@@ -85,14 +90,20 @@ public class ThirdSendMessage {
 //        }else{
 //            context.startService(new Intent(context, JumpService.class));
 //        }
-        context.startService(new Intent(context, JumpService.class));
+        if(VERSION.SDK_INT>= VERSION_CODES.O){//SDK>8.0
+            context.startForegroundService(new Intent(context, JumpService.class));
+        }else{
+            context.startService(new Intent(context, JumpService.class));
+        }
+
+
     }
 
     /**
      * 发送消息到第三方应用
      * @param messageJson
      */
-    protected void sendMessageToThird(String messageJson,ThirdMessageType messageType){
+    public void sendMessageToThird(String messageJson,ThirdMessageType messageType){
         try{
             Connect3rdParty.getInstance().receivedMessage(messageJson,messageType.getCode());
         }catch (Exception e){

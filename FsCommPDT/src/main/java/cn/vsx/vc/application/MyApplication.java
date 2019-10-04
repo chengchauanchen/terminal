@@ -31,15 +31,19 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
+import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.BaseApplication;
+import ptt.terminalsdk.context.SDKProcessStateEnum;
 import skin.support.SkinCompatManager;
 import skin.support.design.app.SkinMaterialViewInflater;
 
 public class MyApplication extends BaseApplication{
+
+
 
 	public int mAppStatus = Constants.FORCE_KILL;//App运行状态，是否被强杀
 	public boolean isBinded=false;
@@ -95,7 +99,8 @@ public class MyApplication extends BaseApplication{
         //清空刷NFC需要传的数据
         MyApplication.instance.setBindTranslateBean(null);
         // TODO 初始化 向地三方应用同步消息的service
-		//ThirdSendMessage.initVsxSendMessage(this);
+		//初始化 ThirdSendMessage
+		BaseApplication.getApplication().initVsxSendMessage();
 	}
 
 	protected void initSdk(){
@@ -260,5 +265,14 @@ public class MyApplication extends BaseApplication{
 			}
 			android.os.Process.killProcess(android.os.Process.myPid());
 		}
+	}
+
+	@Override
+	public void initVsxSendMessage(){
+		//初始化 向地三方应用同步消息的service
+		ThirdSendMessage.initVsxSendMessage(this);
+		//注册 连接jumpService的广播
+		ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().register(this);
+		ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().sendBroadcast(this);
 	}
 }

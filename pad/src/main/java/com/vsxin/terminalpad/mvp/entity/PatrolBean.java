@@ -14,7 +14,20 @@ public class PatrolBean extends BaseBean {
     private String patrolOccupant;//所在部门
     private String patrolLat;
     private String patrolLng;
+
+    private String phoneNumber;//电话号码
+    private String bearing;//方向
+    private String altitude;//海拔高度
+    private String group;//组id
+    private String speed;//速度
+    private String terminalType;//类型
+    private String status;//类型
+    private Long crateTime;//
+    private Long updateTime;//
+    private Long gpsGenerationTime;//定位时间
+
     private Map<String,PersonnelBean> personnelDtoMap;//key:88021206,value:警员map
+    private Map<String,TerminalBean> terminalDtoMap;//key:88021206,value:设备map
 
     public String getPatrolNo() {
         return patrolNo;
@@ -63,37 +76,92 @@ public class PatrolBean extends BaseBean {
     public void setPersonnelDtoMap(Map<String, PersonnelBean> personnelDtoMap) {
         this.personnelDtoMap = personnelDtoMap;
     }
+
+    public String getBearing() {
+        return bearing;
+    }
+
+    public void setBearing(String bearing) {
+        this.bearing = bearing;
+    }
+
+    public String getAltitude() {
+        return altitude;
+    }
+
+    public void setAltitude(String altitude) {
+        this.altitude = altitude;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
+    public String getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(String speed) {
+        this.speed = speed;
+    }
+
+    public String getTerminalType() {
+        return terminalType;
+    }
+
+    public void setTerminalType(String terminalType) {
+        this.terminalType = terminalType;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Long getCrateTime() {
+        return crateTime;
+    }
+
+    public void setCrateTime(Long crateTime) {
+        this.crateTime = crateTime;
+    }
+
+    public Long getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(Long updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public Long getGpsGenerationTime() {
+        return gpsGenerationTime;
+    }
+
+    public void setGpsGenerationTime(Long gpsGenerationTime) {
+        this.gpsGenerationTime = gpsGenerationTime;
+    }
+
+    public Map<String, TerminalBean> getTerminalDtoMap() {
+        return terminalDtoMap;
+    }
+
+    public void setTerminalDtoMap(Map<String, TerminalBean> terminalDtoMap) {
+        this.terminalDtoMap = terminalDtoMap;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
 }
-
-/**
- *  * "patrol": [{
- *  * 		"patrolNo": "巡逻船B",
- *  * 		"patrolName": "听涛派出所,巡逻船B",
- *  * 		"patrolOccupant": "听涛派出所",
- *  * 		"patrolLat": "30.475625040574773",
- *  * 		"patrolLng": "114.41593570510226",
- *  * 		"personnelDtoMap": {
- *  * 			"88021206": {
- *  * 				"personnelName": "测试小大",
- *  * 				"personnelNo": "88021206",
- *  * 				"personnelLat": "30.475625040574773",
- *  * 				"personnelLng": "114.41593570510226",
- *  * 				"terminalDtoList": [{
- *  * 					"terminalType": "TERMINAL_PHONE",
- *  * 					"terminalGroupNo": "100040",
- *  * 					"terminalUniqueNo": "156015518354393289"
- *  *                                }]* 			},
- *  * 			"88021204": {
- *  * 				"personnelName": "测试小大",
- *  * 				"personnelNo": "88021204",
- *  * 				"personnelLat": "30.475625040574773",
- *  * 				"personnelLng": "114.41593570510226",
- *  * 				"terminalDtoList": [{
- *  * 					"terminalType": "TERMINAL_PHONE",
- *  * 					"terminalGroupNo": "100040",
- *  * 					"terminalUniqueNo": "156015518354393286"
- *  * 				}]
- *  *                    }* 		}
- *  * 	}]
- */
-

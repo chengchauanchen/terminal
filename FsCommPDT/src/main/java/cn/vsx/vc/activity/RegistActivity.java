@@ -940,8 +940,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 netWorkDialog.dismiss();
             }
             changeProgressMsg(getString(R.string.text_get_info_now));
-            //襄阳包就启动安全VPN服务
-            if(TextUtils.equals(AuthManagerTwo.XIANGYANGPOLICESTORE,apkType) || TextUtils.equals(AuthManagerTwo.XIANGYANG,apkType)){
+            //襄阳、武铁包启动安全VPN服务
+            if(TextUtils.equals(AuthManagerTwo.XIANGYANGPOLICESTORE,apkType) || TextUtils.equals(AuthManagerTwo.XIANGYANG,apkType)
+                || TextUtils.equals(AuthManagerTwo.WUTIE,apkType)){
                 startVPNService();
             }else if(TextUtils.equals(AuthManagerTwo.TIANJIN,apkType)){
                 getTianJinStringToken();
@@ -962,6 +963,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
      */
     private void getTianJinStringToken() {
         MyTerminalFactory.getSDK().putParam(Params.IDENTIFY_TYPE, "");
+        MyTerminalFactory.getSDK().putParam(UrlParams.TIANJIN_STORE,false);
         Cursor cursor = getContentResolver().query(Uri.parse(Constants.AUTH_TIAN_JIN_TOKEN_URI),null,null,null,null);
         logger.info("getTianJinStringToken--cursor:"+cursor+"--count:"+((cursor!=null)?cursor.getCount():0));
         if (cursor != null && cursor.moveToFirst()) {
@@ -1349,7 +1351,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, false);
             MyApplication.instance.setTerminalMemberType();
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,AuthManagerTwo.POLICESTORE);
-            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)){
+            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)
+                || AuthManagerTwo.WUTIE.equals(apkType)){
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_open_wuhan_police_work_first));
             }
 
