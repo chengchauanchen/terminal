@@ -4,25 +4,17 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.Build;
 import android.os.Build.VERSION;
 import android.os.Build.VERSION_CODES;
 import android.os.IBinder;
-import android.support.annotation.RequiresApi;
 import android.util.Log;
-
-import com.squareup.haha.perflib.Main;
 
 import org.apache.log4j.Logger;
 
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.jump.broadcastReceiver.RegisterBroadcastReceiver;
 import cn.vsx.vc.jump.constant.ParamKey;
 import cn.vsx.vc.jump.service.JumpService;
 import cn.vsx.vsxsdk.IReceivedVSXMessage;
-import ptt.terminalsdk.context.SDKProcessStateEnum;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 

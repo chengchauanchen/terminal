@@ -37,7 +37,6 @@ import cn.vsx.vc.service.ReceiveHandlerService;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
 import ptt.terminalsdk.context.BaseApplication;
-import ptt.terminalsdk.context.SDKProcessStateEnum;
 import skin.support.SkinCompatManager;
 import skin.support.design.app.SkinMaterialViewInflater;
 
@@ -206,8 +205,9 @@ public class MyApplication extends BaseApplication{
 				TerminalFactory.getSDK().disConnectToServer();
 			}
 			stopService(new Intent(this, ReceiveHandlerService.class));
-			killAllProcess();
 		}
+		TerminalFactory.getSDK().stop();
+		killAllProcess();
 	}
 
 	public RecorderBindTranslateBean getBindTranslateBean() {
