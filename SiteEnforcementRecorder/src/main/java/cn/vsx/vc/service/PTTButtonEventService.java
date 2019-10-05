@@ -177,7 +177,7 @@ public class PTTButtonEventService extends Service {
    */
   private void pttUpDoThing() {
     logger.info("ptt.pttUpDoThing执行了 isPttPress：" + MyApplication.instance.isPttPress);
-
+    TerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
     if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_TALK.name())) {
       return;
     }
