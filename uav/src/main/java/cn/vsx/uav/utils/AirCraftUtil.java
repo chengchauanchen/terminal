@@ -88,6 +88,7 @@ public class AirCraftUtil{
         if(getAircraftInstance() != null){
             return getAircraftInstance().getFlightController();
         }else {
+            logger.error("获取FlightController 为null！！！");
             return null;
         }
     }
@@ -111,19 +112,14 @@ public class AirCraftUtil{
 
     public static synchronized String getAircraftLocation(){
         StringBuilder sb = new StringBuilder();
-        if(getAircraftInstance() !=null){
-            Aircraft aircraft = getAircraftInstance();
-            LocationCoordinate3D location = aircraft.getFlightController().getState().getAircraftLocation();
-            logger.info("location.getLatitude():"+location.getLatitude());
-            logger.info("location.getLongitude():"+location.getLongitude());
-            logger.info("location.getAltitude():"+location.getAltitude());
-            if(checkLatitude(location.getLatitude()) && checkLongitude(location.getLongitude())){
+        FlightController flightController = getFlightController();
+        if(flightController != null && flightController.getState() != null){
+            LocationCoordinate3D location = flightController.getState().getAircraftLocation();
+            if(location != null && checkLatitude(location.getLatitude()) && checkLongitude(location.getLongitude())){
                 sb.append(location.getLatitude()).append(",").append(location.getLongitude()).append(",").append(location.getAltitude());
             }
-
-
+            logger.info("无人机位置："+sb.toString());
         }
-        logger.info("无人机位置："+sb.toString());
         return sb.toString();
     }
 
@@ -177,8 +173,9 @@ public class AirCraftUtil{
     public static synchronized boolean checkCompass(){
         boolean hasError = false;
         Aircraft aircraft = getAircraftInstance();
-        if(aircraft !=null){
-            Compass compass = aircraft.getFlightController().getCompass();
+        FlightController flightController = getFlightController();
+        if(flightController !=null){
+            Compass compass = flightController.getCompass();
             hasError = compass.hasError();
         }
         return hasError;
@@ -189,9 +186,9 @@ public class AirCraftUtil{
      */
     @SuppressWarnings("unused")
     public static synchronized void calibratCompass(){
-        Aircraft aircraft = getAircraftInstance();
-        if(aircraft !=null){
-            Compass compass = aircraft.getFlightController().getCompass();
+        FlightController flightController = getFlightController();
+        if(flightController !=null){
+            Compass compass = flightController.getCompass();
             boolean hasError = compass.hasError();
             logger.info("指南针是否需要校准:"+hasError);
             if(hasError){
