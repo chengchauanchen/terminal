@@ -74,7 +74,7 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
                     MyTerminalFactory.getSDK().getLiveManager().sendAircraftConnectStatus(true);
                     setConnectionFailBehavior();
                     setCollisionAvoidance();
-                    myHandler.postDelayed(() -> checkBattery(aircraft),2000);
+                    myHandler.postDelayed(() -> checkBattery(),2000);
                     setUploadTime();
                     //校准
                     AirCraftUtil.calibratCompass();
@@ -120,15 +120,6 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
                     logger.error("启动主动避障失败---"+djiError.getDescription());
                 }
             });
-            //启用避免碰撞。启用后，飞机将停止并尝试绕过检测到的障碍物。
-            flightController.getFlightAssistant().setCollisionAvoidanceEnabled(true, djiError -> {
-                if(djiError == null){
-                    logger.info("启动防碰撞成功");
-                }else {
-                    logger.error("启动防碰撞失败---"+djiError.getDescription());
-                }
-            });
-
         }
     }
 
@@ -153,9 +144,9 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
      * 设置遥控器和飞机失联动作
      */
     private void setConnectionFailBehavior(){
-        Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-        if(aircraft !=null){
-            aircraft.getFlightController().setConnectionFailSafeBehavior(ConnectionFailSafeBehavior.GO_HOME, djiError -> {
+        FlightController flightController = AirCraftUtil.getFlightController();
+        if(flightController !=null){
+            flightController.setConnectionFailSafeBehavior(ConnectionFailSafeBehavior.GO_HOME, djiError -> {
                 if(djiError == null){
                     logger.error("设置失联自动返航成功");
                 }else {
@@ -187,49 +178,38 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
     /**
      * 监听电量
      */
-    private void checkBattery(Aircraft aircraft){
+    private void checkBattery(){
         //测试一下如果只有单个电池会不会走下面代码
-        List<Battery> batteries = aircraft.getBatteries();
-        if(batteries !=null && !batteries.isEmpty()){
-            logger.info("电池个数："+batteries.size());
-            Battery battery = batteries.get(0);
-            battery.setStateCallback(batteryState -> {
-                //电池电量小于等于10%时自动返航
-                //                logger.info("无人机电池电量:"+batteryState.getChargeRemainingInPercent());
-                if(batteryState.getChargeRemainingInPercent() == 15){
-                    if(!aircraft.getFlightController().getState().isGoingHome()){
-                        //自动返航代码
-                        autoGoHome();
+        Aircraft aircraft = AirCraftUtil.getAircraftInstance();
+        if(aircraft != null){
+            List<Battery> batteries = aircraft.getBatteries();
+            if(batteries != null && !batteries.isEmpty()){
+                logger.info("电池个数：" + batteries.size());
+                Battery battery = batteries.get(0);
+                battery.setStateCallback(batteryState -> {
+                    //电池电量小于等于10%时自动返航
+                    //                logger.info("无人机电池电量:"+batteryState.getChargeRemainingInPercent());
+                    if(batteryState.getChargeRemainingInPercent() == 15){
+                        FlightController flightController = AirCraftUtil.getFlightController();
+                        if(flightController != null){
+                            if(!flightController.getState().isGoingHome()){
+                                //自动返航代码
+                                autoGoHome();
+                            }
+                        }
                     }
-                }
-            });
+                });
+            }
         }
-
-        //        if(mProduct.getBattery() !=null){
-        //
-        //            mProduct.getBattery().setStateCallback(new BatteryState.Callback(){
-        //                @Override
-        //                public void onUpdate(BatteryState batteryState){
-        //                    //电池电量小于等于10%时自动返航
-        //                    //                logger.info("无人机电池电量:"+batteryState.getChargeRemainingInPercent());
-        //                    if(batteryState.getChargeRemainingInPercent() == 10){
-        //                        if(!((Aircraft) mProduct).getFlightController().getState().isGoingHome()){
-        //                            //自动返航代码
-        //                            autoGoHome(mProduct);
-        //                        }
-        //                    }
-        //                }
-        //            });
-        //        }
     }
 
     /**
      * 自动返航
      */
     private void autoGoHome(){
-        Aircraft aircraft = AirCraftUtil.getAircraftInstance();
-        if(null != aircraft){
-            aircraft.getFlightController().startGoHome(djiError -> {
+        FlightController flightController = AirCraftUtil.getFlightController();
+        if(null != flightController){
+            flightController.startGoHome(djiError -> {
                 if(djiError == null ){
                     logger.info("自动返航成功");
                 }else {
