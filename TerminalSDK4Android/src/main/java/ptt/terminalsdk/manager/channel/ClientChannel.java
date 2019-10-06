@@ -9,9 +9,6 @@ import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import cn.vsx.hamster.common.MessageFunEnum;
 import cn.vsx.hamster.protolbuf.codec.PTTMsgCodec;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -42,24 +39,31 @@ public class ClientChannel extends AbsClientChannel {
 			getDispatcher().notifyMessageReceived(PTTMsgCodec.INSTANCE.getDecode().decodeMessage(data, offset, length));
 		}
 	};
-	private List<ServerConnectionEstablishedHandler> serverConnectionEstablishedHandlers = new ArrayList<>();
+//	private List<ServerConnectionEstablishedHandler> serverConnectionEstablishedHandlers = new ArrayList<>();
+	private ServerConnectionEstablishedHandler serverConnectionEstablishedHandler;
 	private ServerConnectionEstablishedHandlerAidl handlerAidl = new ServerConnectionEstablishedHandlerAidl.Stub() {
 		@Override
 		public void handler(boolean connected) throws RemoteException {
-			for (ServerConnectionEstablishedHandler handler : serverConnectionEstablishedHandlers){
-				handler.handler(connected);
+			if(serverConnectionEstablishedHandler !=null){
+				serverConnectionEstablishedHandler.handler(connected);
 			}
+//			for (ServerConnectionEstablishedHandler handler : serverConnectionEstablishedHandlers){
+//				handler.handler(connected);
+//			}
 		}
 	};
 
+	@Override
 	public <Message extends GeneratedMessage> void registMessageReceivedHandler(final ServerMessageReceivedHandler<Message> handler) {
 		getDispatcher().registMessageReceivedHandler(handler);
 	}
 
+	@Override
 	public <Message extends GeneratedMessage> void unregistMessageReceivedHandler(final ServerMessageReceivedHandler<Message> handler) {
 		getDispatcher().unregistMessageReceivedHandler(handler);
 	}
 
+	@Override
 	public void sendMessage(GeneratedMessage message, final PushMessageSendResultHandler handler){
 		sendMessage(message, handler, MessageFunEnum.MESSAGE_FOR_WORK.getCode());
 	}
@@ -91,14 +95,19 @@ public class ClientChannel extends AbsClientChannel {
 		}
 	}
 
+	@Override
 	public void registServerConnectionEstablishedHandler(final ServerConnectionEstablishedHandler handler){
-		if (!serverConnectionEstablishedHandlers.contains(handler)){
-			serverConnectionEstablishedHandlers.add(handler);
-		}
-		logger.error("serverConnectionEstablishedHandlers = "+serverConnectionEstablishedHandlers);
+		serverConnectionEstablishedHandler = handler;
+//		if (!serverConnectionEstablishedHandlers.contains(handler)){
+//			serverConnectionEstablishedHandlers.add(handler);
+//		}
+		logger.error("registServerConnectionEstablishedHandler");
 	}
+
+	@Override
 	public void unregistServerConnectionEstablishedHandler(final ServerConnectionEstablishedHandler handler){
-		serverConnectionEstablishedHandlers.remove(handler);
+		serverConnectionEstablishedHandler = null;
+//		serverConnectionEstablishedHandlers.remove(handler);
 	}
 
 	boolean isStarted;
@@ -131,7 +140,8 @@ public class ClientChannel extends AbsClientChannel {
 				messageService.unregistMessageReceivedHandler(handler);
 				messageService.unregistServerConnectionEstablishedHandler(handlerAidl);
 			}
-			serverConnectionEstablishedHandlers.clear();
+			serverConnectionEstablishedHandler = null;
+//			serverConnectionEstablishedHandlers.clear();
 			messageService = null;
 			isStarted = false;
 		} catch (RemoteException e) {
