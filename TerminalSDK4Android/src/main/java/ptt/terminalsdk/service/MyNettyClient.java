@@ -152,6 +152,7 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
     public void stop(boolean isClearHandler)  {
         super.stop();
         try {
+            //todo 需要判断之前的状态，否则会触发多次
             if(handler!=null){
                 handler.handler(false);
             }

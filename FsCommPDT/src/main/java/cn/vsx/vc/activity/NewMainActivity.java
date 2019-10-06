@@ -118,7 +118,6 @@ import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.HongHuUtils;
-import cn.vsx.vc.utils.HongHuUtils.DonghuAccount;
 import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.view.BottomView;
@@ -223,8 +222,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = new ReceiveSendUuidResponseHandler() {
         @Override
         public void handler(int resultCode, final String resultDesc, boolean isRegisted) {
-            myHandler.post(()-> {
-                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                myHandler.post(()->{
                     if (isRegisted) {//注册过，在后台登录，session超时也走这
                         noNetWork.setVisibility(View.VISIBLE);
                         tv_status.setText(R.string.connecting_server);
@@ -233,11 +232,13 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                         NewMainActivity.this.finish();
                         stopService(new Intent(NewMainActivity.this, LockScreenService.class));
                     }
-                }else {
+                });
+            }else {
+                myHandler.post(()->{
                     noNetWork.setVisibility(View.VISIBLE);
-                    tv_status.setText(resultDesc);
-                }
-            });
+                    tv_status.setText("认证时"+resultDesc);
+                });
+            }
         }
     };
 
