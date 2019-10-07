@@ -608,5 +608,13 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         }
     }
 
+    /**
+     * 获取是否是显示或者隐藏的状态
+     * @return
+     */
+    public boolean getHiddenState(){
+        return !(groupFragmentNew!=null && !groupFragmentNew.getHiddenState());
+    }
+
 
 }

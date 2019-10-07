@@ -73,6 +73,7 @@ public class NewGroupFragment extends BaseFragment{
     //    private HashMap<Integer, String> idNameMap = TerminalFactory.getSDK().getSerializable(Params.ID_NAME_MAP, new HashMap<>());
     private boolean tempGroupUpdateCompleted;
     private boolean groupUpdateCompleted;
+    private boolean isHidden = false;
     private ReceivegUpdateGroupHandler receivegUpdateGroupHandler = new ReceivegUpdateGroupHandler(){
         @Override
         public void handler(int depId, String depName, List<Department> departments, List<Group> groups){
@@ -466,5 +467,20 @@ public class NewGroupFragment extends BaseFragment{
         }else{
             mActivity.exit();
         }
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        logger.info("NewGroupFragment---onHiddenChanged---hidden:"+hidden);
+        isHidden = hidden;
+    }
+
+    /**
+     * 获取是否是显示或者隐藏的状态
+     * @return
+     */
+    public boolean getHiddenState(){
+        return isHidden;
     }
 }
