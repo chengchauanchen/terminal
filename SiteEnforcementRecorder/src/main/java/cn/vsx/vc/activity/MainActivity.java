@@ -102,6 +102,7 @@ import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.receiver.NFCCardReader;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.APPStateUtil;
+import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.FragmentUtil;
@@ -761,53 +762,113 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     private ReceiverVideoButtonEventHandler receiverCameraButtonEventHandler = new ReceiverVideoButtonEventHandler() {
         @Override
         public void handler(boolean isLongPress) {
-            if(isLongPress){
-                //上报视频
-                logger.info("视频实体按钮，上报视频");
-                if(!TerminalFactory.getSDK().getAuthManagerTwo().isOnLine()){
-                    ToastUtil.showToast(MainActivity.this,getString(R.string.text_no_login_can_not_push));
-                    return;
-                }
-                if(mMediaStream!=null) {
-                    if (mMediaStream.isStreaming()) {
-                        ToastUtil.showToast(MainActivity.this, "上报中");
-                    } else {
-                        if(MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus() != AudioRecordStatus.STATUS_STOPED){
-                            stopRecordAudio();
-                        }
-                        requestStartLive();
+            if(ApkUtil.isXinZhou()){
+                isPressFromXinZhou(isLongPress);
+            }else{
+                isPressFromOther(isLongPress);
+            }
+        }
+    };
+
+    /**
+     * 图像按钮-新洲
+     */
+    private void isPressFromXinZhou(boolean isLongPress){
+        if(isLongPress){
+            //当前没有录像，开始录像
+            if(mMediaStream!=null) {
+                if (mMediaStream.isRecording()) {
+                    ToastUtil.showToast(MainActivity.this, "录像中");
+                } else {
+                    if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(MyTerminalFactory.getSDK().getFileTransferOperation().getExternalUsableStorageDirectory())) {
+                        ToastUtil.showToast(MainActivity.this, "开始录像");
+                        PromptManager.getInstance().startVideoTap();
+                        mMediaStream.startRecord();
+                    }else{
+                        ToastUtil.showToast(MainActivity.this, "存储空间不可用");
                     }
                 }
-            }else{
-                //录像  （判断当前的状态，如果已经在录像，停止录像）
-                if(mMediaStream!=null) {
+            }
 
-                    if(mMediaStream.isStreaming()){
-                        updateNormalPushingState(false);
-                        stopPush(true);
-                        if(mMediaStream.isRecording()){
-                            mMediaStream.stopRecord();
-                        }
-                        ToastUtil.showToast(MainActivity.this, "停止上报");
-                    }else if (mMediaStream.isRecording()) {
-                        //已经在录像，停止录像
-                        ToastUtil.showToast(MainActivity.this,"停止录像");
-                        PromptManager.getInstance().stopVideoTap();
+        }else{
+            //录像  （判断当前的状态，如果已经在录像，停止录像）
+            if(mMediaStream!=null) {
+                if(mMediaStream.isStreaming()){
+                    updateNormalPushingState(false);
+                    stopPush(true);
+                    if(mMediaStream.isRecording()){
                         mMediaStream.stopRecord();
-                    } else {
-                        //当前没有录像，开始录像
-                        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(MyTerminalFactory.getSDK().getFileTransferOperation().getExternalUsableStorageDirectory())) {
-                            ToastUtil.showToast(MainActivity.this, "开始录像");
-                            PromptManager.getInstance().startVideoTap();
-                            mMediaStream.startRecord();
-                        }else{
-                            ToastUtil.showToast(MainActivity.this, "存储空间不可用");
-                        }
+                    }
+                    ToastUtil.showToast(MainActivity.this, "停止上报");
+                }else if (mMediaStream.isRecording()) {
+                    //已经在录像，停止录像
+                    ToastUtil.showToast(MainActivity.this,"停止录像");
+                    PromptManager.getInstance().stopVideoTap();
+                    mMediaStream.stopRecord();
+                } else {
+                    //上报视频
+                    logger.info("视频实体按钮，上报视频");
+                    if(!TerminalFactory.getSDK().getAuthManagerTwo().isOnLine()){
+                        ToastUtil.showToast(MainActivity.this,getString(R.string.text_no_login_can_not_push));
+                        return;
+                    }
+                    if(MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus() != AudioRecordStatus.STATUS_STOPED){
+                        stopRecordAudio();
+                    }
+                    requestStartLive();
+                }
+            }
+        }
+    }
+    /**
+     * 图像按钮-其他
+     */
+    private void isPressFromOther(boolean isLongPress){
+        if(isLongPress){
+            //上报视频
+            logger.info("视频实体按钮，上报视频");
+            if(!TerminalFactory.getSDK().getAuthManagerTwo().isOnLine()){
+                ToastUtil.showToast(MainActivity.this,getString(R.string.text_no_login_can_not_push));
+                return;
+            }
+            if(mMediaStream!=null) {
+                if (mMediaStream.isStreaming()) {
+                    ToastUtil.showToast(MainActivity.this, "上报中");
+                } else {
+                    if(MyTerminalFactory.getSDK().getRecordingAudioManager().getStatus() != AudioRecordStatus.STATUS_STOPED){
+                        stopRecordAudio();
+                    }
+                    requestStartLive();
+                }
+            }
+        }else{
+            //录像  （判断当前的状态，如果已经在录像，停止录像）
+            if(mMediaStream!=null) {
+                if(mMediaStream.isStreaming()){
+                    updateNormalPushingState(false);
+                    stopPush(true);
+                    if(mMediaStream.isRecording()){
+                        mMediaStream.stopRecord();
+                    }
+                    ToastUtil.showToast(MainActivity.this, "停止上报");
+                }else if (mMediaStream.isRecording()) {
+                    //已经在录像，停止录像
+                    ToastUtil.showToast(MainActivity.this,"停止录像");
+                    PromptManager.getInstance().stopVideoTap();
+                    mMediaStream.stopRecord();
+                } else {
+                    //当前没有录像，开始录像
+                    if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(MyTerminalFactory.getSDK().getFileTransferOperation().getExternalUsableStorageDirectory())) {
+                        ToastUtil.showToast(MainActivity.this, "开始录像");
+                        PromptManager.getInstance().startVideoTap();
+                        mMediaStream.startRecord();
+                    }else{
+                        ToastUtil.showToast(MainActivity.this, "存储空间不可用");
                     }
                 }
             }
         }
-    };
+    }
 
     /**
      * 拍照实体按钮

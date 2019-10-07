@@ -64,6 +64,7 @@ android {
         xiangYangPoliceStore{}
         chuTianYun{}
         jiaXing{}
+        xinZhou{}
     }
     productFlavors.all {
         flavor -> flavor.manifestPlaceholders = [apk_type: name]
