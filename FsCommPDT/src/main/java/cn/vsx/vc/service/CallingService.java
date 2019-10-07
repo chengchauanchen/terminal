@@ -614,7 +614,7 @@ public class CallingService extends BaseService{
     }
 
     private void halfPttUpDothing(){
-//        MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+        MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
 //        if(MyApplication.instance.isPttPress){
 //            MyApplication.instance.isPttPress = false;
             if(MyApplication.instance.getGroupListenenState() == LISTENING){

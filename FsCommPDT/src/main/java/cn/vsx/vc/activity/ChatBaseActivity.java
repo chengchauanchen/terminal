@@ -387,8 +387,10 @@ public abstract class ChatBaseActivity extends BaseActivity
     protected void onStop() {
         super.onStop();
         stopRecord();
-        funcation.hideKeyboard(true);
-        funcation.hideKeyboardAndBottom();
+        if(funcation!=null){
+            funcation.hideKeyboard(true);
+            funcation.hideKeyboardAndBottom();
+        }
     }
 
     /**
@@ -1058,7 +1060,9 @@ public abstract class ChatBaseActivity extends BaseActivity
 
 
     public void hideKey() {
-        funcation.hideKey();
+        if(funcation!=null){
+            funcation.hideKey();
+        }
     }
 
     /**
@@ -1630,7 +1634,9 @@ public abstract class ChatBaseActivity extends BaseActivity
                 if (getMergeTransmitState()) {
                     //检查是否选择了消息
                     if (checkChooseMessageToMergeTransmit()) {
-                        funcation.setMergeTransmitVisibility(View.GONE);
+                        if(funcation!=null){
+                            funcation.setMergeTransmitVisibility(View.GONE);
+                        }
                         if (temporaryAdapter != null) {
                             temporaryAdapter.setIsForWardMore(false);
                             temporaryAdapter.notifyDataSetChanged();
@@ -2243,8 +2249,10 @@ public abstract class ChatBaseActivity extends BaseActivity
     private View.OnTouchListener mMessageTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View v, MotionEvent event) {
-            funcation.hideKeyboardAndBottom();
-            funcation.showBottom(false);
+            if(funcation!=null){
+                funcation.hideKeyboardAndBottom();
+                funcation.showBottom(false);
+            }
             return false;
         }
     };
@@ -2290,6 +2298,7 @@ public abstract class ChatBaseActivity extends BaseActivity
             } else {
                 if (MyApplication.instance.isPttPress) {
                     MyApplication.instance.isPttPress = false;
+                    MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
                     MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
                 }
             }
@@ -2326,7 +2335,9 @@ public abstract class ChatBaseActivity extends BaseActivity
 //                temporaryAdapter.notifyItemChanged(position);
                 temporaryAdapter.setUploadFinished();
             });
-            funcation.showBottom(false);
+            if(funcation!=null){
+                funcation.showBottom(false);
+            }
             scrollMyListViewToBottom();
         }
     };

@@ -283,6 +283,7 @@ public class LockScreenActivity extends BaseActivity {
     private void lockPttUpDoThing() {
         if (MyApplication.instance.isPttPress) {
             MyApplication.instance.isPttPress = false;
+            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
             if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
                 change2Listening();
             } else {
@@ -701,6 +702,7 @@ public class LockScreenActivity extends BaseActivity {
         //        talkback_change_session.setEnabled(true);
         if (MyApplication.instance.isPttPress) {
             MyApplication.instance.isPttPress = false;
+            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
             //            canScroll = true;
             if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
 

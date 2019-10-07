@@ -1028,6 +1028,9 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         noNetWork.setOnClickListener(v -> {
             LoginState loginState = TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().getCurrentState();
             if(loginState!= LoginState.LOGIN && loginState != LoginState.UPDATE_DATA && loginState != LoginState.ONLINE){
+                if (TerminalFactory.getSDK().isServerConnected()) {
+                    TerminalFactory.getSDK().disConnectToServer();
+                }
                 TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
                 tv_status.setText(R.string.authing);
             }

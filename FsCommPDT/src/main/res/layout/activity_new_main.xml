@@ -258,7 +258,6 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/x40"
         android:orientation="horizontal"
-        android:layout_below="@id/rl_topbar"
         android:background="@drawable/nonet">
         <ImageView
             android:src="@drawable/duanwang"
