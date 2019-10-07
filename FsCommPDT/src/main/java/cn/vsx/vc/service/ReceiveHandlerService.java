@@ -837,7 +837,7 @@ public class ReceiveHandlerService extends Service{
         if(ActivityCollector.isActivityExist(GroupCallNewsActivity.class) && GroupCallNewsActivity.isForeground && terminalMessage.messageToId == GroupCallNewsActivity.mGroupId){
             return;
         }
-//        createNotification(terminalMessage);
+//         createNotification(terminalMessage);
     };
 
     private void createNotification(TerminalMessage terminalMessage){
