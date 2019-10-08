@@ -320,16 +320,20 @@ public class LocationManager {
             isChatSendLocation = false;
             //取消来自会话页面定位可能因为超时发送的伪定位信息
             mHandler.removeMessages(HANDLER_WHAT_LOCATION_UPDATE_BY_CHAT_TIMEOUT);
+            //停止定位（省电）,如果来自会话页面的定位之前就没有开始定位，会话页面定位之后就不断的定位，因为没有停止定位
+            stopUpload();
+            mHandler.sendEmptyMessageDelayed(HANDLER_WHAT_LOCATION_CHECK,DELAYED_TIME);
         } else {
             MyTerminalFactory.getSDK().getLocationManager().upLoadLocation(location);
         }
+//        stopUpload();
         //检查上传位置信息的状态（状态切换有可能时间间隔不同，有可能已经不需要上传位置信息）
-        TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
-            @Override
-            public void run() {
+//        TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+//            @Override
+//            public void run() {
 //                mHandler.sendEmptyMessageDelayed(HANDLER_WHAT_LOCATION_CHECK,DELAYED_TIME);
-            }
-        });
+//            }
+//        });
     }
 
     /**
@@ -422,7 +426,7 @@ public class LocationManager {
      */
     public long getUploadTime(boolean isCommonUpload, boolean isChat) {
         if (isChat) {
-            return 1000;
+            return 2000;
         }
         if (isCommonUpload) {
 //			return Math.max(1 * 60 * 1000, MyTerminalFactory.getSDK().getParam(Params.GPS_UPLOAD_INTERVAL, 5 * 60 * 1000));//普通上传最小间隔是一分钟

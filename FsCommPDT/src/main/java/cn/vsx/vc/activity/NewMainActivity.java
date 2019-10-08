@@ -83,6 +83,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePopBackStackHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestLoginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
@@ -202,17 +203,37 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
     };
 
+    /**
+     * 请求登录
+     */
+    private ReceiveRequestLoginHandler receiveRequestLoginHandler = new ReceiveRequestLoginHandler(){
+        @Override
+        public void handler(int code,LoginState state){
+            if(code == BaseCommonCode.SUCCESS_CODE){
+                myHandler.post(()->{
+                    noNetWork.setVisibility(View.VISIBLE);
+                    tv_status.setText(R.string.logining);
+                });
+            }else if(state!=null&&state == LoginState.IDLE){
+                myHandler.post(()->{
+                    noNetWork.setVisibility(View.VISIBLE);
+                    tv_status.setText(R.string.authing);
+                });
+            }else{
+                myHandler.post(()-> noNetWork.setVisibility(View.GONE));
+            }
+        }
+    };
+
     private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler(){
         @Override
         public void handler(boolean connected){
-            myHandler.post(()->{
-                noNetWork.setVisibility(View.VISIBLE);
-                if(connected){
-                    tv_status.setText(R.string.logining);
-                }else {
+            if(!connected){
+                myHandler.post(()->{
+                    noNetWork.setVisibility(View.VISIBLE);
                     tv_status.setText(R.string.text_disconnection_of_network_connection);
-                }
-            });
+                });
+            }
         }
     };
 
@@ -1006,6 +1027,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestLoginHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceivePopBackStackHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendDataMessageSuccessHandler);
 //        MyTerminalFactory.getSDK().registReceiveHandler(receiveSwitchMainFrgamentHandler);
@@ -1597,6 +1619,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler );
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestLoginHandler );
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateFoldersAndGroupsHandler );

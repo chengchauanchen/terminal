@@ -120,10 +120,13 @@ public class MessageService extends Service {
     public boolean onUnbind(Intent intent) {
         logger.info("MessageService执行了onUnbind()");
         try {
-            connectionClient.stop(true);
-            connectionClient = null;
+            if(connectionClient!=null){
+                connectionClient.stop(true);
+                connectionClient = null;
+            }
             logger.info("MessageService调用了connectionClient的stop()");
         } catch (Exception e) {
+            logger.error("MessageService调用了onUnbind--e"+e);
             e.printStackTrace();
         }
         return super.onUnbind(intent);
