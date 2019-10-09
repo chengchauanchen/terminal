@@ -610,4 +610,9 @@
     <color name="white_04">#04000000</color>
     <color name="white_40">#40ffffff</color>
     <color name="color_FAFAFA">#FAFAFA</color>
+
+    <color name="group_call_center_1">#0091ff</color>
+    <color name="group_call_center_2">#EFB152</color>
+    <color name="group_call_center_3">#ff3737</color>
+    <color name="group_call_center_4">#990091ff</color>
 </resources>
