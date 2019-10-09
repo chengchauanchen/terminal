@@ -1,0 +1,309 @@
+apply plugin: 'com.android.application'
+//apply plugin: 'com.antfortune.freeline'
+Properties props = new Properties()
+props.load(project.rootProject.file('local.properties').newDataInputStream())
+
+android {
+    compileSdkVersion 26
+    buildToolsVersion '28.0.3'
+    flavorDimensions "default"
+    defaultConfig {
+        applicationId "cn.vsx.vc"
+        minSdkVersion 19
+        targetSdkVersion 26
+
+
+        multiDexEnabled true
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                includeCompileClasspath = true
+            }
+        }
+        ndk {
+            abiFilters "armeabi", "armeabi-v7a"
+        }
+    }
+
+    //debug和release版本的签名配置
+    signingConfigs {
+        release {
+            storeFile file(props['release.keystore'])
+
+            keyAlias = props['keyAlias']
+            keyPassword = props['keyPassword']
+            storePassword = props['storePassword']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true//去掉不用资源
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            minifyEnabled false
+            shrinkResources false//去掉不用资源
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+            signingConfig signingConfigs.release
+        }
+    }
+
+    productFlavors {
+        common {}
+        policeTest {}
+        policeStore {}
+        policeStoreOut {}
+        xiangYang {}
+        xiangYangPoliceStore {}
+        teJing {}
+        chuTianYun {}
+        jiaXing {}
+        tianJin {}
+        wuTie {}
+    }
+    productFlavors.all {
+        flavor -> flavor.manifestPlaceholders = [apk_type: name]
+    }
+
+    //版本比较多时，自定义导出的APK名称，不同的渠道编出的APK的文件名应该是不一样的
+    //Android插件3.0迁移指南所示：
+    //用all()而不是each()
+    //如果您只更改文件名（这是您的情况），请使用outputFileName而不是output.outputFile
+    applicationVariants.all { variant ->
+        variant.outputs.all() { output ->
+            def flavor = variant.productFlavors[0]
+            def fileName = "phone_${variant.flavorName}_${signTime()}_${variant.versionName}_${variant.versionCode}.apk"
+            /*//默认打包方式，打包到app的子目录下
+            outputFileName = fileName*/
+            //修改打包路径，工程apkpackage文件夹下
+            //也可以在打包时手动选择对应目录
+            def des = output.packageApplication.outputDirectory.toPath().relativize(rootDir.toPath()).toFile()
+            outputFileName = new File("$des/apkpackage", fileName)
+        }
+    }
+
+    packagingOptions {
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/plexus/components.xml'
+        exclude 'licenses/javolution.license.TXT'
+        exclude 'licenses/thoughtworks.TXT'
+        exclude 'org/apache/maven/project/pom-4.0.0.xml'
+        exclude 'licenses/extreme.indiana.edu.license.TXT'
+        exclude 'org/cyberneko/html/res/HTMLlat1.properties'
+        exclude 'org/cyberneko/html/res/ErrorMessages_ja.properties'
+        exclude 'org/cyberneko/html/res/ErrorMessages_ja.txt'
+        exclude 'org/cyberneko/html/res/ErrorMessages.properties'
+        exclude 'org/codehaus/plexus/plexus-bootstrap.xml'
+        exclude 'org/cyberneko/html/res/HTMLspecial.properties'
+        exclude 'org/cyberneko/html/res/XMLbuiltin.properties'
+        exclude 'org/cyberneko/html/res/HTMLsymbol.properties'
+    }
+
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    dexOptions {
+//        incremental true
+        javaMaxHeapSize "4g"
+    }
+
+    lintOptions {
+        ignoreWarnings true
+        checkReleaseBuilds false
+    }
+}
+
+def signTime() {
+    return new Date().format("MM-dd")
+}
+
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:multidex:1.0.3'
+    //noinspection GradleCompatible
+    implementation "com.android.support:support-v4:$support_version"
+    //noinspection GradleCompatible
+    implementation "com.android.support:appcompat-v7:$support_version"
+    implementation 'com.github.liuguangqiang.swipeback:library:1.0.2@aar'
+    //noinspection GradleCompatible
+    implementation "com.android.support:design:$support_version"
+    implementation 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+    compile project(':imageandfileselector')
+    //    compile project(':skin-support-design')
+    compile project(':SpecificSDK4GPTT')
+//    compile project(':vsxSDK')
+    //    compile 'cjt.library.wheel:camera:1.1.9'
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    implementation 'skin.support:skin-support:2.2.3'
+    // skin-support 基础控件支持
+    implementation 'skin.support:skin-support-design:2.2.3'
+    // skin-support-design material design 控件支持[可选]
+    implementation "android.arch.lifecycle:runtime:$lifecycle_version"
+    implementation "android.arch.lifecycle:extensions:$lifecycle_version"
+    implementation "android.arch.lifecycle:reactivestreams:$lifecycle_version"
+    annotationProcessor "android.arch.lifecycle:compiler:$lifecycle_version"
+    implementation 'io.reactivex.rxjava2:rxjava:2.1.6'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    //时间选择器
+    implementation 'com.contrarywind:Android-PickerView:3.2.7'
+    implementation files('libs/HyteraSDK2.0.jar')
+    /*二维码*/
+    implementation 'com.github.yuzhiqiang1993:zxing:2.2.8'
+    implementation 'com.qw:soulpermission:1.1.6'
+}
+
+
+
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}
+
+
+
+
+
+
+////以下代码是打无人机包
+//apply plugin: 'com.android.library'
+//android {
+//    compileSdkVersion 26
+//    buildToolsVersion '28.0.3'
+//    flavorDimensions "default"
+//    defaultConfig {
+//        minSdkVersion 19
+//        targetSdkVersion 26
+//
+//        javaCompileOptions {
+//            annotationProcessorOptions {
+//                includeCompileClasspath = true
+//            }
+//        }
+//        ndk {
+//            abiFilters "armeabi", "armeabi-v7a"
+//        }
+//    }
+//
+//
+//    buildTypes {
+//        release {
+//            minifyEnabled true
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+//        }
+//        debug {
+//            minifyEnabled false
+//            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-project.txt'
+//        }
+//    }
+//
+//
+//    packagingOptions {
+//        exclude 'META-INF/LICENSE'
+//        exclude 'META-INF/DEPENDENCIES'
+//        exclude 'META-INF/plexus/components.xml'
+//        exclude 'licenses/javolution.license.TXT'
+//        exclude 'licenses/thoughtworks.TXT'
+//        exclude 'org/apache/maven/project/pom-4.0.0.xml'
+//        exclude 'licenses/extreme.indiana.edu.license.TXT'
+//        exclude 'org/cyberneko/html/res/HTMLlat1.properties'
+//        exclude 'org/cyberneko/html/res/ErrorMessages_ja.properties'
+//        exclude 'org/cyberneko/html/res/ErrorMessages_ja.txt'
+//        exclude 'org/cyberneko/html/res/ErrorMessages.properties'
+//        exclude 'org/codehaus/plexus/plexus-bootstrap.xml'
+//        exclude 'org/cyberneko/html/res/HTMLspecial.properties'
+//        exclude 'org/cyberneko/html/res/XMLbuiltin.properties'
+//        exclude 'org/cyberneko/html/res/HTMLsymbol.properties'
+//
+//    }
+//
+//
+//    compileOptions {
+//        sourceCompatibility JavaVersion.VERSION_1_8
+//        targetCompatibility JavaVersion.VERSION_1_8
+//    }
+//
+//    dexOptions {
+//        javaMaxHeapSize "4g"
+//    }
+//
+//    lintOptions {
+//        ignoreWarnings true
+//        checkReleaseBuilds false
+//    }
+//}
+//
+//
+//
+//repositories {
+//    flatDir {
+//        dirs 'libs'
+//    }
+//    mavenCentral()
+//}
+//
+//dependencies {
+//    api 'com.android.support.constraint:constraint-layout:1.0.2'
+//    compile fileTree(include: ['*.jar'], dir: 'libs')
+//    api 'com.android.support:multidex:1.0.3'
+//    //noinspection GradleCompatible
+//    implementation "com.android.support:support-v4:$support_version"
+//    //noinspection GradleCompatible
+//    implementation "com.android.support:appcompat-v7:$support_version"
+//    implementation 'com.github.liuguangqiang.swipeback:library:1.0.2@aar'
+//    //noinspection GradleCompatible
+//    implementation "com.android.support:design:$support_version"
+//    implementation 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+//    compile project(':imageandfileselector')
+//    //    compile project(':skin-support-design')
+//    compile project(':SpecificSDK4GPTT')
+//    //    compile 'cjt.library.wheel:camera:1.1.9'
+//    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.4'
+//    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+//    implementation 'skin.support:skin-support:2.2.3'
+//    // skin-support 基础控件支持
+//    implementation 'skin.support:skin-support-design:2.2.3'
+//    // skin-support-design material design 控件支持[可选]
+//    api 'android.arch.lifecycle:runtime:1.1.1'
+//    api 'android.arch.lifecycle:extensions:1.1.1'
+//    api 'android.arch.lifecycle:reactivestreams:1.1.1'
+//    annotationProcessor "android.arch.lifecycle:compiler:1.1.1"
+//    implementation 'io.reactivex.rxjava2:rxjava:2.1.6'
+//    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
+//    compile(name: 'libuvccamera-release', ext: 'aar') {
+//        exclude module: 'support-v4'
+//        exclude module: 'appcompat-v7'
+//    }
+//    //时间选择器
+//    implementation 'com.contrarywind:Android-PickerView:3.2.7'
+//    implementation files('libs/HyteraSDK2.0.jar')
+//    /*二维码*/
+//    implementation 'com.github.yuzhiqiang1993:zxing:2.2.8'
+//    api 'com.qw:soulpermission:1.1.6'
+//}
+//
+//
+//allprojects {
+//    repositories {
+//        jcenter()
+//        maven { url "https://jitpack.io" }
+//    }
+//}

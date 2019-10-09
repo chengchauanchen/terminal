@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/dp_50"
+    android:orientation="horizontal"
+    android:id="@+id/compound"
+    android:background="@drawable/regist_org_shape_a" >
+
+    <TextView
+        android:layout_marginLeft="@dimen/x7"
+        android:layout_marginTop="@dimen/y5"
+        android:id="@+id/text"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="@dimen/dp_40"
+        android:textColor="@color/regist_host_text"
+        android:paddingLeft="@dimen/dp_10"
+        android:text="添加单位"
+        android:gravity="center_vertical"
+        android:textSize="@dimen/sp_18"
+        android:padding="@dimen/dp_5"
+        android:singleLine="true" />
+    <ImageView
+        android:layout_marginTop="@dimen/y5"
+        android:id="@+id/btn"
+        android:layout_width="@dimen/dp_35"
+        android:layout_height="@dimen/dp_35"
+        android:layout_marginRight="@dimen/dp_15"
+        android:layout_toRightOf="@+id/text"
+        android:src="@drawable/regist_down_arrowhead"
+        android:padding="@dimen/dp_10"
+        android:layout_centerVertical="true"
+        android:gravity="center"/>
+</LinearLayout>

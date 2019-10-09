@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--闪兰色2 -->
+    <color name="transparent">#00000000</color><!--透明 -->
+    <color name="white">#FFFFFF</color><!--白色 -->
+    <!--白色 -->
+    <!--背景蓝 -->
+    <!--象牙色 -->
+    <!--亮黄色-->
+    <!--黄色 -->
+    <!--雪白色 -->
+    <!--花白色 -->
+    <!--柠檬绸色 -->
+    <!--米绸色 -->
+    <!--海贝色 -->
+    <!--淡紫红 -->
+    <!--番木色 -->
+    <!--白杏色 -->
+    <!--浅玫瑰色 -->
+    <!--桔黄色 -->
+    <!--鹿皮色 -->
+    <!--ptt长形按钮颜色 -->
+    <!--纳瓦白 -->
+    <!--桃色 -->
+    <!--金色 -->
+    <!--粉红色 -->
+    <!--亮粉红色-->
+    <!--橙色 -->
+    <!--亮肉色 -->
+    <!--暗桔黄色 -->
+    <!--珊瑚色 -->
+    <!--热粉红色 -->
+    <!--西红柿色 -->
+    <!--红橙色 -->
+    <!--深粉红色 -->
+    <!--紫红色 -->
+    <!--红紫色 -->
+    <!--红色 -->
+    <!--老花色 -->
+    <!--亮金黄色 -->
+    <!--亚麻色 -->
+    <!--古董白 -->
+    <!--鲜肉色 -->
+    <!--幽灵白 -->
+    <!--薄荷色 -->
+    <!--烟白色 -->
+    <!--米色 -->
+    <!--浅黄色 -->
+    <!--沙褐色-->
+    <!--天蓝色 -->
+    <!--蜜色 -->
+    <!--艾利斯兰 -->
+    <!--黄褐色 -->
+    <!--亮珊瑚色 -->
+    <!--苍麒麟色 -->
+    <!--紫罗兰色 -->
+    <!--暗肉色 -->
+    <!--淡紫色 -->
+    <!--亮青色 -->
+    <!--实木色 -->
+    <!--洋李色 -->
+    <!--淡灰色 -->
+    <!--暗深红色 -->
+    <!--苍紫罗兰色 -->
+    <!--金麒麟色 -->
+    <!--淡紫色 -->
+    <!--蓟色 -->
+    <!--亮灰色 -->
+    <!--茶色 -->
+    <!--巧可力色 -->
+    <!--秘鲁色 -->
+    <!--印第安红 -->
+    <!--中紫罗兰色 -->
+    <!--银色 -->
+    <!--暗黄褐色 -->
+    <!--褐玫瑰红 -->
+    <!--中粉紫色 -->
+    <!--暗金黄色 -->
+    <!--火砖色 -->
+    <!--粉蓝色 -->
+    <!--亮钢兰色 -->
+    <!--苍宝石绿 -->
+    <!--黄绿色 -->
+    <!--亮蓝色 -->
+    <!--暗灰色 -->
+    <!--暗灰色 -->
+    <!--褐色 -->
+    <!--赭色 -->
+    <!--暗紫色-->
+    <!--苍绿色 -->
+    <!--暗紫罗兰色 -->
+    <!--中紫色 -->
+    <!--亮绿色 -->
+    <!--暗海兰色 -->
+    <!--重褐色 -->
+    <!--暗洋红 -->
+    <!--暗红色 -->
+    <!--紫罗兰蓝色 -->
+    <!--亮天蓝色 -->
+    <!--天蓝色 -->
+    <!--灰色 -->
+    <!--灰色 -->
+    <!--橄榄色 -->
+    <!--紫色 -->
+    <!--粟色 -->
+    <!--碧绿色-->
+    <!--黄绿色 -->
+    <!--草绿色 -->
+    <!--中暗蓝色 -->
+    <!--亮蓝灰 -->
+    <!--亮蓝灰 -->
+    <!--灰石色 -->
+    <!--灰石色 -->
+    <!--深绿褐色 -->
+    <!--石蓝色 -->
+    <!--暗灰色 -->
+    <!--暗灰色 -->
+    <!--中绿色 -->
+    <!--菊兰色 -->
+    <!--军兰色 -->
+    <!--暗橄榄绿  -->
+    <!--靛青色 -->
+    <!--中绿宝石 -->
+    <!--暗灰蓝色 -->
+    <!--钢兰色 -->
+    <!--皇家蓝 -->
+    <!--青绿色 -->
+    <!--中海蓝 -->
+    <!--橙绿色 -->
+    <!--暗瓦灰色 -->
+    <!--暗瓦灰色 -->
+    <!--海绿色 -->
+    <!--森林绿 -->
+    <!--亮海蓝色 -->
+    <color name="dodgerblue">#1E90FF</color><!--闪兰色 -->
+    <!--中灰兰色 -->
+    <!--浅绿色 -->
+    <!--青色 -->
+    <!--春绿色-->
+    <!--酸橙色 -->
+    <!--中春绿色 -->
+    <!--暗宝石绿 -->
+    <!--深天蓝色 -->
+    <!--暗青色 -->
+    <!--水鸭色 -->
+    <color name="green">#008000</color><!--绿色 -->
+    <!--暗绿色 -->
+    <!--蓝色 -->
+    <!--中兰色 -->
+    <!--暗蓝色 -->
+    <!--海军色 -->
+    <color name="black">#000000</color><!--黑色 -->
+    <!--黑色 -->
+    <color name="liantong">#13223f</color>
+    <!--刷新背景色 -->
+
+
+    <!--白色 -->
+
+
+    <!--新组呼界面-->
+    <color name="new_call_star_blue">#0090FF</color>
+
+    <!--组呼消息界面-->
+    <!--组呼消息界面，进度条-->
+    <!--正在组呼，个呼来了-->
+    <!--组呼界面，正在说话条目-->
+
+    <!--组呼消息界面item-->
+    <!--文本语音界面-->
+
+    <!--消息界面fragment-->
+
+    <!--个呼消息界面-->
+
+    <!--个呼消息界面item-->
+
+    <!--自定义控件funcation-->
+    <!--top-->
+
+
+    <!--titleBar-->
+    <!--title背景蓝色 -->
+    <!--title背景黑色 -->
+    <!--title字体白色 -->
+
+    <!--通讯录界面-->
+    <!--通讯录背景灰色 -->
+    <!--通讯录背景灰色 -->
+    <!--通讯下划线蓝色 -->
+    <!--通讯下划线蓝色 -->
+
+    <!--通讯录-群组-->
+    <!--白色 -->
+    <!--白色 -->
+    <!--白色 -->
+    <!--通讯录字体灰色1 -->
+    <!--通讯录字体灰色2 -->
+    <!--通讯录字体灰色3 -->
+    <!--通讯录字体黑色 -->
+
+    <!--通讯录-个人-->
+    <!--灰色 -->
+    <!--灰色 -->
+    <!--灰色 -->
+    <!--白色 -->
+
+    <!--设置页面-->
+
+
+    <!--查看组成员页面-->
+
+    <!--搜索界面-->
+
+    <!--关于4GPTT页面-->
+    <color name="about_text_black">#71a3e0</color>
+
+    <!--扫描组页面-->
+
+    <!--设置-切换主组/页面-->
+
+    <!--个人信息页面-->
+
+    <!--通用下划线-->
+
+    <!--toggolebutton-->
+
+    <!--电话盘-->
+
+
+    <!--全局搜索页面-->
+    <color name="colorPrimary">#0d182b</color>
+    <color name="colorPrimaryDark">#0d182b</color>
+    <color name="colorAccent">#71a3df</color>
+
+
+    <!--消息界面-->
+    <!--消息title背景 -->
+    <!--消息title线 -->
+    <!--消息title组名字字体颜色 -->
+    <!--消息下方button字体颜色 -->
+
+    <!--注册页面-->
+    <color name="regist_button">#809eb6</color>
+    <!--登录页面-->
+    <!--背景蓝色 -->
+
+
+    <!--组呼/个呼 界面-->
+    <!--灰色背景 -->
+    <!--组呼字体黑色 -->
+    <!--组呼字体灰色 -->
+    <!--组呼字体红色色 -->
+
+    <!--灰色气泡选择栏-->
+    <!--组呼字体红色色 -->
+
+    <color name="color_48baf3">#48BAF3</color>
+    <color name="transparent_70_black">#4C000000</color>
+    <color name="color_e5e5e5">#E5E5E5</color>
+    <color name="md_blue_grey_100">#CFD8DC</color>
+    <color name="md_blue_grey_200">#B0BBC5</color>
+    <color name="md_blue_grey_500">#607D8B</color>
+    <color name="md_blue_grey_600">#546E7A</color>
+    <color name="md_blue_grey_700">#455A64</color>
+    <!--grey-->
+    <color name="md_grey_50">#FAFAFA</color>
+    <color name="md_grey_100">#F5F5F5</color>
+    <color name="md_grey_200">#EEEEEE</color>
+    <color name="md_grey_400">#BDBDBD</color>
+    <color name="md_grey_600">#757575</color>
+    <color name="md_grey_700">#616161</color>
+    <color name="md_grey_900">#212121</color>
+    <color name="md_black_1000">#000000</color>
+    <color name="md_white_1000">#ffffff</color>
+
+
+    <color name="common_bg">#0d182b</color>
+    <color name="icon_text">#395270</color>
+    <color name="forbid_text">#FFFFFF</color>
+    <color name="message">#FFFFFF</color>
+    <color name="company_text">#395270</color>
+    <color name="ptt_silence_text">#a9a9a9</color>
+    <color name="ptt_speaking_text">#a9a9a9</color>
+    <color name="ptt_waiting_text">#a9a9a9</color>
+    <color name="regist_bg">#000000</color>
+    <color name="regist_title">#637e9e</color>
+    <color name="regist_host_name">#637e9e</color>
+    <color name="regist_add_host_name">#0091ff</color>
+    <color name="regist_item_bg">#13223f</color>
+    <color name="regist_pop_bg">#efefef</color>
+    <color name="regist_btn_bg">#003c69</color>
+    <color name="regist_btn_pre_bg">#FFC125</color>
+    <color name="regist_host_text">#65809e</color>
+    <color name="regist_edit_hint">#65809e</color>
+    <color name="regist_edit">#71a3e0</color>
+    <color name="loading_tv">#71a3df</color>
+
+    <!--锁屏界面-->
+
+
+    <color name="regist_org_bg">#13223f</color>
+
+    <!--ble-->
+
+    <!--临时组-->
+
+
+    <color name="group_call_center_1">#0091ff</color>
+    <color name="group_call_center_2">#EFB152</color>
+    <color name="group_call_center_3">#ff3737</color>
+    <color name="group_call_center_4">#990091ff</color>
+</resources>

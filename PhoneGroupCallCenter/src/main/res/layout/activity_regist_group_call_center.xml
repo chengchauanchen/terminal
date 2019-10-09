@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/regist_bg"
+    android:orientation="vertical"
+    android:weightSum="10">
+
+    <View
+        android:id="@+id/view_pop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/ll_regist"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:alpha="0.8"
+        android:orientation="vertical"
+        android:weightSum="10">
+
+        <ImageView
+            android:layout_width="@dimen/dp_40"
+            android:layout_height="@dimen/dp_60"
+            android:layout_gravity="center"
+            android:paddingLeft="@dimen/x5"
+            android:layout_marginBottom="@dimen/x10"
+            android:layout_marginTop="@dimen/x20"
+            android:src="@drawable/pdtlogo" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginBottom="@dimen/x5"
+            android:text="@string/app_name"
+            android:textColor="@color/regist_title"
+            android:textSize="@dimen/sp_20" />
+
+        <LinearLayout
+
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="bottom"
+            android:layout_marginTop="@dimen/y10"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:orientation="vertical">
+
+            <LinearLayout
+
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:weightSum="10">
+
+                <cn.vsx.vc.view.XCDropDownListView
+                    android:id="@+id/xcd_available_ip"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="8"
+                    android:gravity="center_vertical"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/x7"
+                android:gravity="center_horizontal"
+                android:weightSum="10">
+
+                <EditText
+                    android:id="@+id/userOrg"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/y20"
+                    android:layout_marginTop="8.4px"
+                    android:layout_weight="8"
+                    android:background="@drawable/regist_org_shape_a"
+                    android:hint="@string/regist_org_hint"
+                    android:inputType="date"
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/x10"
+                    android:paddingRight="@dimen/x10"
+                    android:textColorHint="@color/regist_edit_hint"
+                    android:textColor="@color/regist_edit"
+                    android:textCursorDrawable="@drawable/color_cursor">
+
+                </EditText>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/x7"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal"
+                android:weightSum="10">
+
+                <EditText
+                    android:id="@+id/userName"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/y20"
+                    android:layout_marginTop="8.4px"
+                    android:layout_weight="8"
+                    android:background="@drawable/regist_org_shape_a"
+                    android:hint="@string/regist_name_hint"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/x10"
+                    android:paddingRight="@dimen/x10"
+                    android:textColorHint="@color/regist_edit_hint"
+                    android:textColor="@color/regist_edit"
+                    android:textCursorDrawable="@drawable/color_cursor">
+
+                </EditText>
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/ll_reauth_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/x7"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:weightSum="10">
+
+                <EditText
+                    android:id="@+id/account"
+                    android:layout_width="@dimen/x255"
+                    android:layout_height="@dimen/y20"
+                    android:layout_marginTop="@dimen/y3"
+                    android:layout_weight="8"
+                    android:background="@drawable/regist_org_shape_a"
+                    android:hint="@string/regist_police_no_hint"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/x10"
+                    android:paddingRight="@dimen/x10"
+                    android:textColorHint="@color/regist_edit_hint"
+                    android:textColor="@color/regist_edit"
+                    android:textCursorDrawable="@drawable/color_cursor" />
+
+                <EditText
+                    android:id="@+id/name"
+                    android:layout_width="@dimen/x255"
+                    android:layout_height="@dimen/y20"
+                    android:layout_marginTop="@dimen/y3"
+                    android:background="@drawable/regist_org_shape_a"
+                    android:hint="@string/regist_police_name_hint"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/x10"
+                    android:paddingRight="@dimen/x10"
+                    android:textColorHint="@color/regist_edit_hint"
+                    android:textColor="@color/regist_edit"
+                    android:textCursorDrawable="@drawable/color_cursor" />
+
+                <EditText
+                    android:id="@+id/departmentId"
+                    android:layout_width="@dimen/x255"
+                    android:layout_height="@dimen/y20"
+                    android:layout_marginTop="@dimen/y3"
+                    android:layout_weight="8"
+                    android:background="@drawable/regist_org_shape_a"
+                    android:hint="@string/regist_department_number_hint"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/x10"
+                    android:paddingRight="@dimen/x10"
+                    android:textColorHint="@color/regist_edit_hint"
+                    android:textColor="@color/regist_edit"
+                    android:textCursorDrawable="@drawable/color_cursor" />
+                <EditText
+                    android:id="@+id/departmentName"
+                    android:layout_width="@dimen/x255"
+                    android:layout_height="@dimen/y20"
+                    android:layout_marginTop="@dimen/y3"
+                    android:layout_weight="8"
+                    android:background="@drawable/regist_org_shape_a"
+                    android:hint="@string/regist_department_name_hint"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/x10"
+                    android:paddingRight="@dimen/x10"
+                    android:textColorHint="@color/regist_edit_hint"
+                    android:textColor="@color/regist_edit"
+                    android:textCursorDrawable="@drawable/color_cursor" />
+
+            </LinearLayout>
+            <!--模拟身份证号登陆-->
+            <LinearLayout
+                android:visibility="gone"
+                android:id="@+id/ll_idcard_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/x7"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:weightSum="10">
+        
+                <EditText
+                    android:id="@+id/et_idcard"
+                    android:layout_width="@dimen/x255"
+                    android:layout_height="@dimen/y20"
+                    android:layout_marginTop="@dimen/y3"
+                    android:layout_weight="8"
+                    android:background="@drawable/regist_org_shape_a"
+                    android:hint="请输入身份证号"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/x10"
+                    android:paddingRight="@dimen/x10"
+                    android:textColorHint="@color/regist_edit_hint"
+                    android:textColor="@color/regist_edit"
+                    android:textCursorDrawable="@drawable/color_cursor" />
+        
+                <EditText
+                    android:id="@+id/et_name"
+                    android:layout_width="@dimen/x255"
+                    android:layout_height="@dimen/y20"
+                    android:layout_marginTop="@dimen/y3"
+                    android:background="@drawable/regist_org_shape_a"
+                    android:hint="@string/regist_police_name_hint"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:paddingLeft="@dimen/x10"
+                    android:paddingRight="@dimen/x10"
+                    android:textColorHint="@color/regist_edit_hint"
+                    android:textColor="@color/regist_edit"
+                    android:textCursorDrawable="@drawable/color_cursor" />
+                
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/y15"
+                android:gravity="center_horizontal"
+                android:weightSum="10">
+
+                <Button
+                    android:id="@+id/btn_addMember"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/y32"
+                    android:layout_weight="3"
+                    android:background="@drawable/regist_button_shape"
+                    android:text="@string/simulated_police_officer"
+                    android:textSize="@dimen/sp_18"
+                    android:textColor="@color/regist_button" />
+
+            </LinearLayout>
+    
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/y15"
+                android:gravity="center_horizontal"
+                android:weightSum="10">
+        
+                <Button
+                    android:id="@+id/btn_idcard_login"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/y32"
+                    android:layout_weight="3"
+                    android:background="@drawable/regist_button_shape"
+                    android:text="模拟身份证号登陆"
+                    android:textSize="@dimen/sp_18"
+                    android:textColor="@color/regist_button" />
+    
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dp_15"
+                android:gravity="center_horizontal"
+                android:weightSum="10">
+
+                <Button
+                    android:id="@+id/btn_confirm"
+                    android:layout_width="0dp"
+                    android:layout_height="@dimen/y32"
+                    android:layout_weight="8"
+                    android:background="@drawable/regist_button_shape"
+                    android:text="@string/regist_button"
+                    android:textSize="@dimen/sp_18"
+                    android:textColor="@color/regist_button" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/y15"
+                android:gravity="center_horizontal"
+                android:weightSum="10">
+                
+            </LinearLayout>
+
+
+
+            <TextView
+                android:id="@+id/tv_version_prompt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginBottom="@dimen/y13"
+                android:layout_marginRight="@dimen/x18"
+                android:layout_weight="1"
+                android:textColor="@color/black"
+                android:visibility="gone"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@+id/ll_regist"
+        android:layout_toRightOf="@+id/ll_regist"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:weightSum="10">
+
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/y32"
+            android:background="@drawable/pdtlogo" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/y125"
+            android:layout_alignParentBottom="true" />
+
+    </RelativeLayout>
+
+</RelativeLayout>

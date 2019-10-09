@@ -1,0 +1,74 @@
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+        Base application theme, dependent on API level. This theme is replaced
+        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
+    -->
+    <style name="AppBaseTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!--
+            Theme customizations available in newer API levels can go in
+            res/values-vXX/styles.xml, while customizations related to
+            backward-compatibility can go here.
+        -->
+    </style>
+    <!-- Application theme. -->
+    <style name="AppTheme" parent="AppBaseTheme">
+        <!-- All customizations that are NOT specific to a particular API-level can go here. -->
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <!--<item name="android:configChanges">keyboardHidden|orientation|screenSize</item>-->
+    </style>
+
+    <!-- 对讲界面顶部图标 -->
+    <!--显示在线人数的文本样式 -->
+    <!-- 显示当前文件夹的文本样式 -->
+    <!-- 显示当前组的文本样式 -->
+    <!-- 准备说话-->
+    <!-- 我正在说话 -->
+    <!-- 当前说话人 -->
+    <!-- 准备说话-->
+    <!-- 切组两边的圆圈 -->
+
+    <!-- PTT按钮 -->
+    <!-- 进度条样式 -->
+    <style name="progress_dialog" parent="@android:style/Theme.Dialog">
+        <item name="android:windowFrame">@null</item> <!-- Dialog的windowFrame框为无 -->
+        <item name="android:windowIsFloating">false</item> <!-- 是否漂现在activity上 -->
+        <item name="android:windowIsTranslucent">true</item> <!-- 是否半透明 -->
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+    <!-- 改名dialog样式 -->
+
+    <!--不带输入框-->
+
+    <!--带输入框-->
+
+
+    <!--群组界面-组名style-->
+    <!--<style name="LiveAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        &lt;!&ndash; Customize your theme here. &ndash;&gt;
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>-->
+
+    <!-- 设置弹出窗口的属性，frame叠加，isfloat是否浮动，tarnslucent是否半透明，dim是背景是否变暗 -->
+
+    <style name="pttwWhiteText">
+        <item name="android:textColor">@color/white</item>
+    </style>
+    
+    <style name="pttSilenceText">
+        <item name="android:textColor">@color/ptt_silence_text</item>
+    </style>
+
+    <style name="pttSpeakingText">
+        <item name="android:textColor">@color/ptt_speaking_text</item>
+    </style>
+    
+    <style name="pttWaitingText">
+        <item name="android:textColor">@color/ptt_waiting_text</item>
+    </style>
+
+</resources>

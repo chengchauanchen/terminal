@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+    <string-array name="sent_voice_anim">
+        <item>@drawable/sound_blank</item>
+        <item>@drawable/sound_chat_send_one_right</item>
+        <item>@drawable/sound_chat_send_two_right</item>
+        <item>@drawable/sound_item_right</item>
+    </string-array>
+
+
+</resources>

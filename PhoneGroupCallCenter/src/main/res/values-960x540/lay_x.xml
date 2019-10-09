@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="x5">8.43px</dimen>
+    <dimen name="x7">11.81px</dimen>
+    <dimen name="x10">16.87px</dimen>
+    <dimen name="x17">28.68px</dimen>
+<dimen name="x18">30.37px</dimen>
+    <dimen name="x20">33.75px</dimen>
+    <dimen name="x30">50.62px</dimen>
+    <dimen name="x80">135.0px</dimen>
+    <dimen name="x255">430.31px</dimen>
+</resources>

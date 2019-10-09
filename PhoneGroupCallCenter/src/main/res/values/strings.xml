@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources >
+    <string name="app_name">融合通信</string>
+    <!--<string name="app_name">襄阳融合通信测试</string>-->
+    <!-- <string name="app_name">宽带对讲</string> -->
+     <!--<string name="app_name">平安站车</string>-->
+    <string name="authing">正在认证...</string>
+    <string name="auth_fail">认证失败...</string>
+    <string name="logining">正在登录...</string>
+    <string name="connecting_server">正在连接服务器</string>
+    <string name="updating_data">正在更新数据</string>
+    <string name="please_regist_account">请注册账号</string>
+    <string name="action_settings">Settings</string>
+    <string name="regist_org_hint">请输入注册码</string>
+    <string name="regist_name_hint">请输入姓名</string>
+    <string name="regist_police_no_hint">请输入警号</string>
+    <string name="regist_police_name_hint">请输入警员名称</string>
+    <string name="regist_department_number_hint">请输入部门编号</string>
+    <string name="regist_department_name_hint">请输入部门名称</string>
+    <string name="simulated_police_officer">模拟警员</string>
+    <string name="regist_button">注册</string>
+    <string name="press_to_talk_text">按住说话</string>
+    <!-- 自动更新 -->
+    <string name="soft_update_no">已经是最新版本</string>
+    <string name="soft_update_title">软件更新</string>
+    <string name="soft_update_info">检测到新版本，立即更新吗</string>
+    <string name="soft_update_updatebtn">更新</string>
+    <string name="soft_update_later">稍后更新</string>
+    <string name="soft_updating">正在更新</string>
+    <string name="soft_update_cancel">取消</string>
+    <!-- 设置界面 -->
+    <!-- 下拉刷新 -->
+    <!--文件发送-->
+    <string name="size">已选%1$s</string>
+    <string name="send">发送(%1$s)</string>
+    <string name="count">共%1$s个文件</string>
+    <!--录音-->
+    <!--个呼-->
+    <string name="open_self_permisson">请打开%1$s自启动权限</string>
+    <string name="cannot_talk">当前组是只听组，不能发起组呼</string>
+    <!--收到视频上报-->
+    <!--视频上报-->
+    <string name="text_ready_to_speak">准备说话</string>
+    <string name="activity_killed_text_one">您已被禁止使用!</string>
+    <string name="activity_killed_text_two">如有疑问请联系管理员</string>
+    <string name="corporate_name">武汉惟实信技术有限公司</string>
+    <string name="text_sure">确定</string>
+    <string name="text_cancel">取消</string>
+    <string name="text_back">返回</string>
+    <string name="text_add_unit_hint_name">请输入所在单位名称</string>
+    <string name="text_add_unit_hint_ip">请输入IP地址</string>
+    <string name="text_add_unit_hint_port">请输入端口号</string>
+    <string name="text_connectivity_test">连通效验</string>
+    <string name="press_blank_space_talk_text">按住&#160;&#160;说话</string>
+    <string name="text_audio_frequency_is_not_open_audio_is_not_used">录制音频权限未打开，语音功能将不能使用。</string>
+    <string name="button_press_to_line_up">按住&#160;&#160;排队</string>
+    <string name="button_release_end">松开结束</string>
+    <string name="text_has_no_group_call_authority">没有组呼权限</string>
+    <string name="text_has_no_group_call_listener_authority">没有组呼听的功能权限</string>
+    <string name="text_no_group_calls">禁止组呼</string>
+    <string name="text_network_connection_abnormal_please_check_the_network">网络连接异常，请检查网络！</string>
+    <string name="text_voip_regist_fail_please_check_server_configure">voip注册失败，请检查服务器配置</string>
+    <string name="text_file_save_path">已保存到%1$s文件夹</string>
+    <string name="text_camera_not_open_audio_is_not_used">相机未打开，图像上报功能将不能使用。</string>
+    <string name="text_location_not_open_locat_is_not_used">位置信息权限未打开，定位功能将不能使用。</string>
+    <string name="text_prompt">提示</string>
+    <string name="text_temporarily_unavailable_permissions">:暂时未开通权限</string>
+    <string name="text_departmental_delegation_expires">:部门授权过期</string>
+    <string name="text_terminal_type_error">:认证失败，类型不匹配</string>
+    <string name="text_terminal_repeat">:登录失败，找到多个重复用户</string>
+    <string name="text_invitation_code_wrong_please_regist_again">邀请码错误，请重新注册！</string>
+    <string name="text_regist_fail_please_check_all_info_is_correct">注册失败，请检查各项信息是否正确！</string>
+    <string name="text_selection_unit">选择单位</string>
+    <string name="text_please_select_unit">请选择单位</string>
+    <string name="text_please_input_invitation_code">请输入邀请码</string>
+    <string name="text_please_input_invitation_code_by_six_number">请输入六位数字邀请码</string>
+    <string name="text_please_input_name">请输入姓名</string>
+    <string name="text_please_input_correct_name">请输入合法的姓名;\n2-7个字符,支持中英文,数字;\n首位不能是数字</string>
+    <string name="text_invitation_code_regist">邀请码注册</string>
+    <string name="text_simulated_police_officer">模拟警员</string>
+    <string name="text_invitation_code_not_correct">邀请码不合法;\n请输入六位数字</string>
+    <string name="text_unit_name_is_not_correct">请输入单位名称;\n2-10个字符,支持中英文,数字;\n首位不能是数字</string>
+    <string name="text_connect_fail_please_input_corrent_ip_and_port">连通失败,请输入正确的IP和端口号</string>
+    <string name="text_input_ip_and_port_is_not_used">输入的IP和端口号不可用</string>
+    <string name="text_unit_name_is_not_correct_one">单位名称不合法;\n首位不能是数字</string>
+    <string name="text_unit_name_is_not_correct_two">单位名称不合法;\n支持中英文,数字</string>
+    <string name="text_network_is_not_connected_check_network_is_open">网络没有连接，是否打开网络？</string>
+    <string name="text_get_info_now">正在获取信息</string>
+    <string name="text_registing">正在注册...</string>
+    <string name="text_start_success">启动成功...</string>
+    <string name="text_please_open_wuhan_police_work_first">请先打开武汉移动警务！</string>
+    <string name="text_client_id_is_empty">client_id 为空！</string>
+    <string name="text_client_id_is_illegal">client_id 非法！</string>
+    <string name="text_authorization_code_illegal">授权码 非法！</string>
+    <string name="text_unknown_error">未知错误！</string>
+    <string name="text_access_token_expire">access_token过期！</string>
+    <string name="text_unauthorized_resources">资源未授权！</string>
+    <string name="text_allow_unknown_app_sources_otherwise_can_not_install">请允许安装未知应用来源，否则无法安装</string>
+    <string name="text_save_fail">保存失败</string>
+    <string name="text_no_radio_resources_available">无可用电台资源！</string>
+    <string name="text_personal_pulling_can_not_group_call">观看图像中，不能组呼</string>
+    <string name="text_personal_calling_can_not_group_call">个呼中，不能组呼</string>
+    <string name="get_data_now">正在获取数据...</string>
+    <string name="force_off_line">该账号被强制下线</string>
+
+    <string name="text_request_bind_success">绑定请求发送成功</string>
+    <string name="text_request_bind_fail">绑定请求发送失败</string>
+    <string name="text_input_name_regex">输入2-7位汉字、字母、数字且数字不在首位</string>
+
+    <string name="text_get_token_fail">获取票据失败</string>
+
+</resources>
