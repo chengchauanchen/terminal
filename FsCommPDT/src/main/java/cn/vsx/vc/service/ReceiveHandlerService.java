@@ -1000,7 +1000,7 @@ public class ReceiveHandlerService extends Service{
             myBuilder.setContentTitle(noticeTitle)//设置通知标题
                     .setContentText(unReadCountText + noticeContent)//设置通知内容
                     .setTicker(getString(R.string.text_you_has_a_new_message))//设置状态栏提示消息
-                    .setSmallIcon(R.drawable.pttpdt)//设置通知图标
+                    .setSmallIcon(R.drawable.new_logo_icon)//设置通知图标
                     .setAutoCancel(true)//点击后取消
                     .setWhen(System.currentTimeMillis())//设置通知时间
                     .setVisibility(Notification.VISIBILITY_PUBLIC)
@@ -1016,7 +1016,7 @@ public class ReceiveHandlerService extends Service{
             myBuilder.setContentTitle(noticeTitle)//设置通知标题
                     .setContentText(unReadCountText + noticeContent)//设置通知内容
                     .setTicker(getString(R.string.text_you_has_a_new_message))//设置状态栏提示消息
-                    .setSmallIcon(R.drawable.pttpdt)//设置通知图标
+                    .setSmallIcon(R.drawable.new_logo_icon)//设置通知图标
                     .setAutoCancel(true)//点击后取消
                     .setOngoing(false)
                     .setWhen(System.currentTimeMillis())//设置通知时间

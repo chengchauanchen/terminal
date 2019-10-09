@@ -13,6 +13,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.UpdateManager;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ApkUtil;
 
 public class AboutActivity extends BaseActivity implements View.OnClickListener{
 
@@ -34,6 +35,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener{
     @Override
     public void initView() {
         barTitle = (TextView) findViewById(R.id.bar_title);
+        ImageView ivLogo = (ImageView) findViewById(R.id.iv_logo);
         rightBtn = (ImageView) findViewById(R.id.right_btn);
         ok_btn = (Button) findViewById(R.id.ok_btn);
         tv_version = (TextView) findViewById(R.id.tv_version);
@@ -41,6 +43,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener{
         ok_btn.setVisibility(View.GONE);
         barTitle.setText(String.format(getResources().getString(R.string.text_about_app),getResources().getString(R.string.app_name)));
         tv_version.setText(String.format(getResources().getString(R.string.activity_about_version),getResources().getString(R.string.app_name),getVersionName()));
+        ivLogo.setImageResource(ApkUtil.isWuTie()?R.drawable.new_logo_icon_wutie:R.drawable.new_logo_icon);
         findViewById(R.id.help).setOnClickListener(this);
         findViewById(R.id.tv_update).setOnClickListener(this);
         findViewById(R.id.news_bar_back).setOnClickListener(this);

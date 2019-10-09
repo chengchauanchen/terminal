@@ -3,9 +3,14 @@ package ptt.terminalsdk.tools;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.text.TextUtils;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
+
+import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.POLICESTORE;
+import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.WUTIE;
 
 /**
  * 作者：ly-xuxiaolong
@@ -24,6 +29,13 @@ public class ApkUtil{
     //是否为安监
     public static boolean isAnjian(){
         return MyTerminalFactory.getSDK().getParam(Params.IS_ANJIAN, false);
+    }
+
+    //是否为武铁
+    public static boolean isWuTie(){
+        String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
+        return TextUtils.equals(apkType,WUTIE);
+//        return MyTerminalFactory.getSDK().getParam(Params.IS_ANJIAN, false);
     }
 
     /**

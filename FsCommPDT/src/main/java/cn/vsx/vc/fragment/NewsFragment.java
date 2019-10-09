@@ -983,13 +983,13 @@ public class NewsFragment extends BaseFragment {
                     updateFrequentMembers();
                     unReadCountChanged();
                     //通知notification
-                    for(int i = messageList.size()-1; 0 <=i; i--){
-                        TerminalMessage terminalMessage = messageList.get(i);
-                        //如果当前组是new出来的新消息messageFromId默认为0
-                        if(terminalMessage.messageFromId != 0 && terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
-                            generateNotification(terminalMessage,i);
-                        }
-                    }
+//                    for(int i = messageList.size()-1; 0 <=i; i--){
+//                        TerminalMessage terminalMessage = messageList.get(i);
+//                        //如果当前组是new出来的新消息messageFromId默认为0
+//                        if(terminalMessage.messageFromId != 0 && terminalMessage.messageFromId != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
+//                            generateNotification(terminalMessage,i);
+//                        }
+//                    }
                 });
             }
         }
@@ -1270,7 +1270,7 @@ public class NewsFragment extends BaseFragment {
         myBuilder.setContentTitle(noticeTitle)//设置通知标题
                 .setContentText(unReadCountText+noticeContent)//设置通知内容
                 .setTicker(getString(R.string.text_you_has_a_new_message))//设置状态栏提示消息
-                .setSmallIcon(R.drawable.pttpdt)//设置通知图标
+                .setSmallIcon(R.drawable.new_logo_icon)//设置通知图标
                 .setAutoCancel(true)//点击后取消
                 .setWhen(System.currentTimeMillis())//设置通知时间
                 .setPriority(Notification.PRIORITY_HIGH)//高优先级
