@@ -1,6 +1,7 @@
 package ptt.terminalsdk.tools;
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import org.apache.log4j.Logger;
 
@@ -63,8 +64,7 @@ public class AuthUtil{
             TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, false);
             BaseApplication.getApplication().setTerminalMemberType();
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)
-                || AuthManagerTwo.WUTIE.equals(apkType)){
+            if(TextUtils.equals(AuthManagerTwo.POLICESTORE,apkType)){
                 ToastUtil.showToast(BaseApplication.getApplication().getApplicationContext(), context.getString(R.string.text_please_open_wuhan_police_work_first));
             }
         }

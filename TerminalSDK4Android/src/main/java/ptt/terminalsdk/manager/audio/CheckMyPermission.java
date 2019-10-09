@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.PermissionChecker;
 
+import ptt.terminalsdk.tools.ApkUtil;
 import ptt.terminalsdk.tools.DialogUtil;
 
 /**
@@ -101,7 +102,7 @@ public class CheckMyPermission {
             new DialogUtil() {
                 @Override
                 public CharSequence getMessage() {
-                    return getDesForPermission(permissionName);
+                    return getDesForPermission(permissionName, ApkUtil.getAppName(activity));
                 }
                 @Override
                 public Context getContext() {
@@ -134,17 +135,17 @@ public class CheckMyPermission {
         }
     }
 
-    public static String getDesForPermission(String permissionName){
+    public static String getDesForPermission(String permissionName,String appName){
         if (permissionName.equals(permission.RECORD_AUDIO)){
-            return "要允许融合通信录制音频吗？";
+            return "要允许"+appName+"录制音频吗？";
         }else if (permissionName.equals(permission.CAMERA)){
-            return "要允许融合通信拍摄照片和录制视频吗？";
+            return "要允许"+appName+"拍摄照片和录制视频吗？";
         }else if (permissionName.equals(permission.ACCESS_FINE_LOCATION)){
-            return "要允许融合通信使用此设备的位置信息吗？";
+            return "要允许"+appName+"使用此设备的位置信息吗？";
         }else if (permissionName.equals(permission.WRITE_EXTERNAL_STORAGE)){
-            return "要允许融合通信访问您设备上的照片、媒体内容和文件吗？";
+            return "要允许"+appName+"访问您设备上的照片、媒体内容和文件吗？";
         }else if (permissionName.equals(permission.READ_PHONE_STATE)){
-            return "要允许融合通信使用电话吗？";
+            return "要允许"+appName+"使用电话吗？";
         }
         return "";
     }

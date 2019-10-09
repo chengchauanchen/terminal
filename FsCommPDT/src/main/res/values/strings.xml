@@ -3,7 +3,7 @@
     <string name="app_name">融合通信</string>
     <!--<string name="app_name">襄阳融合通信测试</string>-->
     <!-- <string name="app_name">宽带对讲</string> -->
-<!--     <string name="app_name">平安站车</string>-->
+     <!--<string name="app_name">平安站车</string>-->
     <string name="authing">正在认证...</string>
     <string name="auth_fail">认证失败...</string>
     <string name="logining">正在登录...</string>
@@ -91,7 +91,7 @@
     <string name="other_cancel">对方已取消</string>
     <string name="other_stop_call">对方已挂断</string>
     <string name="open_overlay_permisson">请打开悬浮窗权限，否则私密呼叫和图像功能无法使用！</string>
-    <string name="open_self_permisson">请打开融合通信自启动权限</string>
+    <string name="open_self_permisson">请打开%1$s自启动权限</string>
     <string name="no_recorde_permisson">没有开启悬浮窗权限</string>
     <string name="no_group_call_permission">没有组呼权限</string>
     <string name="i_pre_speaking">我准备说话</string>
@@ -204,7 +204,7 @@
     <string name="text_settings_lock_screen">锁屏设置</string>
     <string name="text_daytime_mode">白天模式</string>
     <string name="text_help_and_feedback">帮助与反馈</string>
-    <string name="text_about_app">关于融合通信APP</string>
+    <string name="text_about_app">关于%1$sAPP</string>
     <string name="text_send">发送</string>
     <string name="text_ptt">PTT</string>
     <string name="text_group_members">组内成员</string>
@@ -302,7 +302,7 @@
     <string name="text_hour">时</string>
     <string name="text_minute">分</string>
     <string name="text_second">秒</string>
-    <string name="activity_about_version">融合通信&#160;&#160;%1$s</string>
+    <string name="activity_about_version">%1$s&#160;&#160;%2$s</string>
     <string name="activity_create_temporary_groups_time">%1$d时%2$d分%3$d秒</string>
     <string name="activity_create_temporary_groups_name">临时组%1$d-%2$s</string>
     <string name="activity_create_temporary_groups_tempts_exist_time">23时59分59秒</string>
@@ -581,7 +581,7 @@
     <string name="tv_combat_group">合成作战组</string>
     <string name="tv_history_combat_group">历史组</string>
     <string name="only_choose_one_device">只能选择单个设备</string>
-    <string name="pc_login_confirm">融合通信PC端登录确认</string>
+    <string name="pc_login_confirm">PC端登录确认</string>
     <string name="login">登录</string>
     <string name="login_cancel">取消登录</string>
     <string name="input_search_content">请输入搜索内容</string>
@@ -599,7 +599,7 @@
     <string name="join_temp_group">%1$s&#160;加入群组</string>
     <string name="main_group_cannot_cancel_monitor">主组不能取消监听!</string>
     <string name="response_group_cannot_cancel_monitor">响应组不能取消监听!</string>
-    <string name="pc_login_state_logined">融合通信PC端已登录</string>
+    <string name="pc_login_state_logined">PC端已登录</string>
     <string name="text_pushing_cannot_pull">视频上报中，无法观看</string>
     <string name="text_pulling_cannot_pull">视频观看中，无法观看</string>
     <string name="text_calling_cannot_pull">个呼中，无法观看</string>

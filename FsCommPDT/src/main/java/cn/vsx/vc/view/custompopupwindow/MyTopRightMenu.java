@@ -29,7 +29,6 @@ import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.HongHuUtils;
-import cn.vsx.vc.utils.HongHuUtils.DonghuAccount;
 import cn.vsx.vc.utils.SystemUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
@@ -206,7 +205,7 @@ public class MyTopRightMenu {
             @Override
             public CharSequence getMessage() {
                 //                            return "4GPTT需要访问您设备上的照片、媒体内容和文件，否则无法工作；去打开权限?";
-                return CheckMyPermission.getDesForPermission(Manifest.permission.CAMERA);
+                return CheckMyPermission.getDesForPermission(Manifest.permission.CAMERA,activity.getResources().getString(R.string.app_name));
             }
 
             @Override

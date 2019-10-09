@@ -998,7 +998,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             @Override
             public CharSequence getMessage() {
 //                            return "4GPTT需要访问您设备上的照片、媒体内容和文件，否则无法工作；去打开权限?";
-                return CheckMyPermission.getDesForPermission(permissionName);
+                return CheckMyPermission.getDesForPermission(permissionName,getResources().getString(R.string.app_name));
             }
 
             @Override
@@ -1283,7 +1283,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private void startSelfStartupPermission(){
         logger.info("开启自启动权限返回--startSelfStartupPermission");
         SelfStartupPermissionUtils.startToAutoStartSetting(this,SELF_STARTUP_PERMISSION_CODE);
-        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.open_self_permisson));
+        String string = String.format(getResources().getString(R.string.open_self_permisson),getResources().getString(R.string.app_name));
+        ToastUtil.showToast(MyApplication.instance.getApplicationContext(), string);
     }
 
     @Override
@@ -1351,8 +1352,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, false);
             MyApplication.instance.setTerminalMemberType();
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,AuthManagerTwo.POLICESTORE);
-            if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)
-                || AuthManagerTwo.WUTIE.equals(apkType)){
+            if(TextUtils.equals(AuthManagerTwo.POLICESTORE,apkType)){
                 ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_open_wuhan_police_work_first));
             }
 

@@ -133,6 +133,8 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
         ll_group_scan = mRootView.findViewById(R.id.ll_group_scan);
         tvLockScreen = mRootView.findViewById(R.id.tv_lock_screen);
+        TextView tvAbout = mRootView.findViewById(R.id.tv_about);
+        tvAbout.setText(String.format(getResources().getString(R.string.text_about_app),getResources().getString(R.string.app_name)));
         activity = getActivity();
         mRootView.findViewById(R.id.rl_ble).setOnClickListener(this);
         mRootView.findViewById(R.id.ll_helpAndfeedback).setOnClickListener(this);

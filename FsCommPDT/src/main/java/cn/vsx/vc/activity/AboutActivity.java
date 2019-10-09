@@ -39,8 +39,8 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener{
         tv_version = (TextView) findViewById(R.id.tv_version);
         rightBtn.setVisibility(View.INVISIBLE);
         ok_btn.setVisibility(View.GONE);
-        barTitle.setText(getResources().getString(R.string.text_about_app));
-        tv_version.setText(String.format(getResources().getString(R.string.activity_about_version),getVersionName()));
+        barTitle.setText(String.format(getResources().getString(R.string.text_about_app),getResources().getString(R.string.app_name)));
+        tv_version.setText(String.format(getResources().getString(R.string.activity_about_version),getResources().getString(R.string.app_name),getVersionName()));
         findViewById(R.id.help).setOnClickListener(this);
         findViewById(R.id.tv_update).setOnClickListener(this);
         findViewById(R.id.news_bar_back).setOnClickListener(this);
