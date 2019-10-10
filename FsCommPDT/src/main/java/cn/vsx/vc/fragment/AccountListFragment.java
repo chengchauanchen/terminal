@@ -29,6 +29,7 @@ import cn.vsx.vc.receiveHandle.OnSearchListener;
 import cn.vsx.vc.receiveHandle.ReceiveRemoveSelectedMemberHandler;
 import cn.vsx.vc.receiveHandle.ReceiveTransponBackPressedHandler;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.WuTieUtil;
 
 /**
  * 显示账号列表
@@ -67,10 +68,9 @@ public class AccountListFragment extends BaseFragment{
         //搜索布局
         mRlSearch = mRootView.findViewById(R.id.parent_recyclerview);
         mIvSearch = mRootView.findViewById(R.id.iv_search);
-        CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
         mRlSearch.setLayoutManager(new LinearLayoutManager(getActivity(), OrientationHelper.HORIZONTAL,false));
         mCatalogDatas.clear();
-        mCatalogDatas.add(memberCatalogBean);
+        mCatalogDatas.add(WuTieUtil.addRootDetpCatalogNames());
         mCatalogAdapter=new GroupCatalogAdapter(getActivity(),mCatalogDatas);
         mCatalogAdapter.setOnItemClick(searchItemClickListener);
         mRlSearch.setAdapter(mCatalogAdapter);
@@ -276,7 +276,7 @@ public class AccountListFragment extends BaseFragment{
         if(isClear){
             mCatalogDatas.clear();
         }
-        CatalogBean catalogBean = new CatalogBean(deptName,deptId);
+        CatalogBean catalogBean = WuTieUtil.getCatalogBean( deptId, deptName);
         if(!mCatalogDatas.contains(catalogBean)){
             mCatalogDatas.add(catalogBean);
         }

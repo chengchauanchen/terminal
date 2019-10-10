@@ -21,6 +21,7 @@ import cn.vsx.vc.adapter.ContactAdapter;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.WuTieUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
@@ -93,8 +94,7 @@ public class NewPoliceAffairsFragment extends BaseFragment {
         mActivity= (NewMainActivity) getActivity();
         TerminalFactory.getSDK().getConfigManager().updataPhoneMemberInfo();
         initFrequentContacts();
-        CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
-        catalogNames.add(memberCatalogBean);
+        catalogNames.add(WuTieUtil.addRootDetpCatalogNames());
     }
 
     private void updateFrequentContacts(){
@@ -210,8 +210,7 @@ public class NewPoliceAffairsFragment extends BaseFragment {
         swipeRefreshLayout.setOnRefreshListener(() -> {
             initFrequentContacts();
             catalogNames.clear();
-            CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
-            catalogNames.add(memberCatalogBean);
+            catalogNames.add(WuTieUtil.addRootDetpCatalogNames());
             TerminalFactory.getSDK().getConfigManager().updataPhoneMemberInfo();
             myHandler.postDelayed(() -> {
                 // 加载完数据设置为不刷新状态，将下拉进度收起来

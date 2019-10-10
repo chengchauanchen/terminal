@@ -30,6 +30,7 @@ import cn.vsx.vc.receiveHandle.ReceiveRemoveSelectedMemberHandler;
 import cn.vsx.vc.receiveHandle.ReceiveShowSearchFragmentHandler;
 import cn.vsx.vc.receiveHandle.ReceiverMemberFragmentBackHandler;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.WuTieUtil;
 
 /**
  * 显示成员列表
@@ -104,6 +105,9 @@ public class MemberListFragment extends BaseFragment implements GroupCatalogAdap
         TerminalFactory.getSDK().registReceiveHandler(receiveGetTerminalHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveRemoveSelectedMemberHandler);
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
+            catalogNames.clear();
+            catalogNames.add(WuTieUtil.addRootDetpCatalogNames());
+            parentRecyclerAdapter.notifyDataSetChanged();
             TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), type);
             mHandler.postDelayed(()-> mSwipeRefreshLayout.setRefreshing(false),1200);
         });
@@ -132,9 +136,8 @@ public class MemberListFragment extends BaseFragment implements GroupCatalogAdap
     @Override
     public void initData(){
         TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), type);
-
-        CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
-        catalogNames.add(groupCatalogBean);
+        catalogNames.clear();
+        catalogNames.add(WuTieUtil.addRootDetpCatalogNames());
     }
 
     private ReceiveRemoveSelectedMemberHandler receiveRemoveSelectedMemberHandler = contactItemBean -> {
