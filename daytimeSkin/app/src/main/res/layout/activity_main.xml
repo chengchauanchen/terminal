@@ -20,7 +20,7 @@
             android:id="@+id/btn_log1"
             android:layout_width="wrap_content"
             android:layout_height="60dp"
-            android:text="自己上报，邀请别人来观看" />
+            android:text="下载融合通信APK" />
 
         <Button
             android:id="@+id/btn_log2"
