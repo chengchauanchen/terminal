@@ -26,6 +26,7 @@ import com.vsxin.terminalpad.mvp.contract.view.IHalfDuplexIndividualCallView;
 import com.vsxin.terminalpad.mvp.ui.widget.IndividualCallView;
 import com.vsxin.terminalpad.prompt.PromptManager;
 import com.vsxin.terminalpad.utils.Constants;
+import com.vsxin.terminalpad.utils.NumberUtil;
 import com.vsxin.terminalpad.utils.SensorUtil;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
@@ -105,7 +106,7 @@ public class HalfDuplexIndividualCallFragment extends MvpFragment<IHalfDuplexInd
         String name = getArguments().getString(Constants.MEMBER_NAME);
         String no = getArguments().getString(Constants.MEMBER_ID);
         tvMemberNameHalfDuplex.setText(name);
-        tvMemberIdHalfDuplex.setText(no);
+        tvMemberIdHalfDuplex.setText(NumberUtil.remove88(no));
 
         ivIndividualCallHangupHalfDuplex.setOnClickListener(v -> {
             //挂断

@@ -12,7 +12,6 @@ import com.vsxin.terminalpad.mvp.entity.CatalogBean;
 import com.vsxin.terminalpad.receiveHandler.ReceiverMonitorViewClickHandler;
 import com.vsxin.terminalpad.utils.CommonGroupUtil;
 import com.vsxin.terminalpad.utils.Constants;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

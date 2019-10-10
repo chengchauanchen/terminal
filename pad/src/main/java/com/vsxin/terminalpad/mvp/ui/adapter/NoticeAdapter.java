@@ -22,7 +22,6 @@ import com.vsxin.terminalpad.mvp.contract.constant.NoticeOutLiveEnum;
 import com.vsxin.terminalpad.mvp.contract.constant.NoticeTypeEnum;
 import com.vsxin.terminalpad.mvp.contract.presenter.NoticePresenter;
 import com.vsxin.terminalpad.mvp.entity.NoticeBean;
-
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**

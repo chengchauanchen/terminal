@@ -2,14 +2,18 @@ package com.vsxin.terminalpad.manager;
 
 import android.content.Context;
 import android.support.v4.app.FragmentActivity;
+import android.text.TextUtils;
 
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
+import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 import com.vsxin.terminalpad.mvp.ui.fragment.IndividualCallFragment;
 import com.vsxin.terminalpad.prompt.PromptManager;
 import com.vsxin.terminalpad.utils.MemberUtil;
 import com.vsxin.terminalpad.utils.NumberUtil;
 import com.vsxin.terminalpad.utils.SensorUtil;
+import com.vsxin.terminalpad.utils.TerminalUtils;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -98,10 +102,9 @@ public class StartCallManager {
     /**
      * 发起个呼
      * @param memberName 警员名称
-     * @param memberId 警员编号
-     * @param uniqueNo
+     * @param terminal 警员编号
      */
-    public void startIndividualCall(String memberName,String memberId,long uniqueNo){
+    public void startIndividualCall(String memberName, TerminalBean terminal){
         if (PadApplication.getPadApplication().getVideoLivePlayingState() != VideoLivePlayingState.IDLE) {
             ToastUtil.showToast(context,context.getString(R.string.text_watching_can_not_private_call));
             return;
@@ -113,6 +116,34 @@ public class StartCallManager {
         if (PadApplication.getPadApplication().getIndividualState() != IndividualCallState.IDLE) {
             ToastUtil.showToast(context, context.getString(R.string.text_personal_calling_can_not_do_others));
             return;
+        }
+
+        TerminalEnum terminalEnum = TerminalEnum.valueOf(terminal.getTerminalType());
+        Long uniqueNo = null;
+        String memberId = null;
+        switch (terminalEnum) {
+            case TERMINAL_PDT:
+            case TERMINAL_PDT_CAR:
+                if(TextUtils.isEmpty(terminal.getPdtNo())){
+                    ToastUtil.showToast(context, "电台号异常");
+                    return;
+                }
+                uniqueNo = NumberUtil.strToLong(terminal.getPdtNo());
+                memberId = terminal.getPdtNo();
+                break;
+            case TERMINAL_LTE:
+                break;
+            case TERMINAL_PHONE:
+                if(TextUtils.isEmpty(terminal.getTerminalUniqueNo())){
+                    ToastUtil.showToast(context, "警员编号异常");
+                    return;
+                }
+                uniqueNo = NumberUtil.strToLong(terminal.getTerminalUniqueNo());
+                memberId = terminal.getAccount();
+                break;
+            default:
+                ToastUtil.showToast(context, "暂不支持该设备个呼");
+                break;
         }
 
         //加88
@@ -128,7 +159,7 @@ public class StartCallManager {
         int resultCode = MyTerminalFactory.getSDK().getIndividualCallManager().requestIndividualCall(no, uniqueNo, "");
         if (resultCode == BaseCommonCode.SUCCESS_CODE) {
             //getView().setMemberinfo();//设置头像名称
-            IndividualCallFragment.startIndividualCallFragment((FragmentActivity)context,memberName,memberId+"");
+            IndividualCallFragment.startIndividualCallFragment((FragmentActivity)context,memberName,memberId);
         } else {
             ToastUtil.individualCallFailToast(context, resultCode);
             stopIndividualCall();

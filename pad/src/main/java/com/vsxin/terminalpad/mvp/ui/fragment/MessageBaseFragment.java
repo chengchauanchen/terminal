@@ -452,13 +452,13 @@ public abstract class MessageBaseFragment<V extends IBaseMessageView,P extends B
         if (terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
             //如果在视频上报、观看、个呼中不允许观看
             if (PadApplication.getPadApplication().getVideoLivePushingState() != VideoLivePushingState.IDLE) {
-                ToastUtils.showShort(R.string.text_pushing_cannot_pull);
+                ToastUtil.showToast(R.string.text_pushing_cannot_pull);
                 return;
             } else if (PadApplication.getPadApplication().getVideoLivePlayingState() != VideoLivePlayingState.IDLE) {
-                ToastUtils.showShort(R.string.text_pulling_cannot_pull);
+                ToastUtil.showToast(R.string.text_pulling_cannot_pull);
                 return;
             } else if (PadApplication.getPadApplication().getIndividualState() != IndividualCallState.IDLE) {
-                ToastUtils.showShort(R.string.text_calling_cannot_pull);
+                ToastUtil.showToast(R.string.text_calling_cannot_pull);
                 return;
             }
             //先请求看视频上报是否已经结束

@@ -1,5 +1,6 @@
 package com.vsxin.terminalpad.utils;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -46,4 +47,20 @@ public class TimeUtil {
         return m;
     }
 
+    /**
+     * //获取日期格式器  yyyy-MM-dd HH:mm:ss
+     * @param timeLong
+     * @return
+     */
+    public static String formatLongToStr(Long timeLong){
+        String format = "";
+        try{
+            Date date2 = new Date(timeLong);
+            SimpleDateFormat dateFormat =   new SimpleDateFormat( " yyyy-MM-dd HH:mm:ss " );
+            format = dateFormat.format(date2);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return format;
+    }
 }

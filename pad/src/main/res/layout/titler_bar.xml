@@ -22,6 +22,7 @@
             android:textSize="27px" />
 
         <ImageView
+            android:visibility="invisible"
             android:id="@+id/iv_plus"
             android:layout_width="46px"
             android:layout_height="46px"

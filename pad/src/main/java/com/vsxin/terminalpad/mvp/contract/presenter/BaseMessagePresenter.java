@@ -669,7 +669,7 @@ public class BaseMessagePresenter<V extends IBaseMessageView> extends RefreshPre
      */
     public void goToCall(Member member) {
         if(android.text.TextUtils.isEmpty(member.getPhone())){
-            ToastUtils.showShort(R.string.text_has_no_member_phone_number);
+            ToastUtil.showToast(R.string.text_has_no_member_phone_number);
             return;
         }
         if(member.getUniqueNo() == 0){
@@ -731,7 +731,7 @@ public class BaseMessagePresenter<V extends IBaseMessageView> extends RefreshPre
     private void stopRefreshAndToast(final String messge) {
         mHandler.post(() -> {
             getView().stopReFreshing();
-            ToastUtils.showShort(messge);
+            ToastUtil.showToast(messge);
         });
     }
 

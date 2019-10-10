@@ -19,7 +19,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.vsxin.terminalpad.R;
-
 import org.apache.log4j.Logger;
 
 import java.lang.reflect.Constructor;

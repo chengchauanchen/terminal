@@ -42,6 +42,7 @@ public class GroupMemberFragment extends RefreshRecycleViewFragment<Member, IGro
 
     @BindView(R.id.member_num)
     TextView member_num;//在线成员人数
+
     private int groupId;
     private String groupName;
 

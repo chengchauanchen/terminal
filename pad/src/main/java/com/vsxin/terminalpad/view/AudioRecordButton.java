@@ -214,7 +214,7 @@ public class AudioRecordButton extends android.support.v7.widget.AppCompatButton
         switch (action) {
             case MotionEvent.ACTION_DOWN:
                 if (!CheckMyPermission.selfPermissionGranted(getContext(), Manifest.permission.RECORD_AUDIO)){
-                    ToastUtils.showShort(R.string.no_record_perssion);
+                    ToastUtil.showToast(R.string.no_record_perssion);
                 }
                 if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
                     ToastUtil.showToast(mContext,mContext.getString(R.string.text_has_no_send_message_authority));

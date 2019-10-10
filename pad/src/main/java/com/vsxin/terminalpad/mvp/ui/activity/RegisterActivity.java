@@ -282,7 +282,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             String registIP = TerminalFactory.getSDK().getAuthManagerTwo().getTempIp();
             String registPort = TerminalFactory.getSDK().getAuthManagerTwo().getTempPort();
             if (TextUtils.isEmpty(registIP) || TextUtils.isEmpty(registPort)) {
-                ToastUtils.showShort(R.string.text_please_select_unit);
+                ToastUtil.showToast(R.string.text_please_select_unit);
             } else {
                 changeProgressMsg(getString(R.string.text_registing));
 
@@ -658,7 +658,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             PadApplication.getPadApplication().setTerminalMemberType();
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
             if (AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType) || AuthManagerTwo.XIANGYANGPOLICESTORE.equals(apkType)) {
-                ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_please_open_wuhan_police_work_first));
+                ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_please_open_wuhan_police_work_first));
             }
 
         }
@@ -909,7 +909,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
                         TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
                     }
                     if (!isRegisted) {
-                        ToastUtils.showShort(R.string.please_regist_account);
+                        ToastUtil.showToast(R.string.please_regist_account);
                         ll_regist.setVisibility(View.VISIBLE);
                         hideProgressDialog();
                     } else {
@@ -1324,7 +1324,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             }
         }
         if (!result) {
-            ptt.terminalsdk.tools.ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_input_name_regex));
+            ToastUtil.showToast(RegisterActivity.this, getString(R.string.text_input_name_regex));
         }
         return result;
     }

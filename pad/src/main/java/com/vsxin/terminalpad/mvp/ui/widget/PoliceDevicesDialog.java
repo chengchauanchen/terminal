@@ -7,6 +7,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -29,14 +30,16 @@ public class PoliceDevicesDialog extends Dialog {
     private TextView text_title;
     private PersonnelBean personnel;
     private Context context;
+    private View.OnClickListener onClickListener;
 
-    public PoliceDevicesDialog(Context context, PersonnelBean personnel, List<TerminalBean> terminalBeans, OperationEnum operationEnum) {
+    public PoliceDevicesDialog(Context context, PersonnelBean personnel, List<TerminalBean> terminalBeans, OperationEnum operationEnum,View.OnClickListener onClickListener) {
         super(context, R.style.dialog);
         this.context =context;
         this.operationEnum = operationEnum;
         this.personnel = personnel;
         this.terminalBeans.clear();
         this.terminalBeans.addAll(terminalBeans);
+        this.onClickListener = onClickListener;
     }
 
     @Override
@@ -64,7 +67,7 @@ public class PoliceDevicesDialog extends Dialog {
         }else if(operationEnum==OperationEnum.INDIVIDUAL_CALL){//个呼
             terminalBeans = getAllowIndividualCallList(terminalBeans);
         }
-        PoliceDeviceAdapter policeDeviceAdapter = new PoliceDeviceAdapter(context, personnel,operationEnum,terminalBeans);
+        PoliceDeviceAdapter policeDeviceAdapter = new PoliceDeviceAdapter(context, personnel,operationEnum,terminalBeans,onClickListener);
         recyclerView.setAdapter(policeDeviceAdapter);
     }
 

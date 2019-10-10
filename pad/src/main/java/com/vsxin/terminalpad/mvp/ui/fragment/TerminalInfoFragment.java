@@ -20,6 +20,7 @@ import com.vsxin.terminalpad.mvp.contract.view.ITerminalInfoView;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 import com.vsxin.terminalpad.utils.NumberUtil;
 import com.vsxin.terminalpad.utils.TerminalUtils;
+import com.vsxin.terminalpad.utils.TimeUtil;
 
 import butterknife.BindView;
 import cn.vsx.hamster.terminalsdk.model.Account;
@@ -51,6 +52,9 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
 
     @BindView(R.id.tv_phone)
     TextView tv_phone;//电话号
+
+    @BindView(R.id.tv_group_no)
+    TextView tv_group_no;//当前组号
 
     @BindView(R.id.tv_speed)
     TextView tv_speed;//速度
@@ -104,22 +108,9 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
         iv_individual_call.setOnClickListener(v -> {
             //手台个呼
             if (terminalBean != null) {
-                Long uniqueNo = null;
-                switch (terminalEnum) {
-                    case TERMINAL_PDT:
-                        uniqueNo = NumberUtil.strToLong(terminalBean.getTerminalUniqueNo());
-                        startCallManager.startIndividualCall(terminalEnum.getDes(), terminalBean.getPdtNo(), uniqueNo);
-                        break;
-                    case TERMINAL_LTE:
-                        break;
-                    case TERMINAL_PHONE:
-                        uniqueNo = NumberUtil.strToLong(terminalBean.getTerminalUniqueNo());
-                        startCallManager.startIndividualCall(terminalEnum.getDes(), terminalBean.getAccount(), uniqueNo);
-                        break;
-                    default:
-                        ToastUtil.showToast(getContext(), "暂不支持该设备个呼");
-                        break;
-                }
+                StartCallManager startCallManager = new StartCallManager(getContext());
+                TerminalEnum  terminalEnum = TerminalEnum.valueOf(terminalBean.getTerminalType());
+                startCallManager.startIndividualCall(terminalEnum.getDes(), terminalBean);
             } else {
                 ToastUtil.showToast(getContext(), "暂不支持该设备个呼");
             }
@@ -139,29 +130,41 @@ public class TerminalInfoFragment extends MvpFragment<ITerminalInfoView, Termina
 
     private void bindMemberInfo(TerminalBean terminalBean) {
         TerminalEnum terminalEnum = TerminalEnum.valueOf(terminalBean.getTerminalType());
+        String no = "";
         switch (terminalEnum) {
             case TERMINAL_PDT://PDT终端(350M手台)
-                tv_member_name.setText(terminalBean.getPdtNo());
+                no = terminalBean.getPdtNo();
+                break;
+            case TERMINAL_DDT://交管电台
+                no = terminalBean.getDdtNo();
+                break;
+            case TERMINAL_PDT_CAR://PDT终端(350M手台)
+                no = terminalBean.getPdtNo();
                 break;
             case TERMINAL_LTE://LTE终端
-                tv_member_name.setText(terminalBean.getLteNo());
+                no = terminalBean.getLteNo();
                 break;
             default:
+                no = "";
                 break;
         }
         //只显示该设备能用的功能
         ImageView[] imageRid = {iv_phone, iv_message, iv_push_video, iv_individual_call};
-        TerminalUtils.showOperate(imageRid, terminalBean.getTerminalType());
-
+        TerminalEnum terminalEnum1 = TerminalEnum.valueOf(terminalBean.getTerminalType());
+        TerminalUtils.showOperate(imageRid,terminalBean.getTerminalType());
+        //名称
+        tv_member_name.setText(TextUtils.isEmpty(terminalBean.getName())?""+no:terminalBean.getName()+" "+no);
+        //当前组号
+        tv_group_no.setText(TextUtils.isEmpty(terminalBean.getGroup()) ? "" : terminalBean.getGroup());
         //部门
-        tv_department.setText(TextUtils.isEmpty(terminalBean.getDepartment()) ? "" : terminalBean.getDepartment());
+        tv_department.setText(TextUtils.isEmpty(terminalBean.getDepartment()) ? getString(R.string.donghu) : terminalBean.getDepartment());
         //电话
         tv_phone.setText(TextUtils.isEmpty(terminalBean.getPhoneNumber()) ? "" : terminalBean.getPhoneNumber());
         //速度
-        tv_speed.setText(TextUtils.isEmpty(terminalBean.getSpeed()) ? "" : terminalBean.getSpeed());
+        tv_speed.setText(TextUtils.isEmpty(terminalBean.getSpeed()) ? "0km/h" : terminalBean.getSpeed()+"km/h");
 
-        // TODO 定位时间
-        tv_time.setText(TextUtils.isEmpty(terminalBean.getSpeed()) ? "" : terminalBean.getSpeed());
+        String time =  TextUtils.isEmpty(terminalBean.getGpsGenerationTime()) ? "" : terminalBean.getGpsGenerationTime();
+        tv_time.setText("定位时间："+TimeUtil.formatLongToStr(NumberUtil.strToLong(time)));
     }
 
     /**

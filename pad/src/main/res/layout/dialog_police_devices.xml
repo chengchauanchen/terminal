@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="264px"
-    android:layout_height="575px"
+    android:layout_width="300px"
+    android:layout_height="wrap_content"
     android:layout_marginTop="200dp"
     android:layout_marginRight="50dp"
     android:background="@color/white">

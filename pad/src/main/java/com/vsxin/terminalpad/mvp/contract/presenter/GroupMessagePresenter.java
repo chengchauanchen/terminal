@@ -20,6 +20,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandle
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * 作者：ly-xuxiaolong
@@ -68,7 +69,7 @@ public class GroupMessagePresenter extends BaseMessagePresenter<IGroupMessageVie
                         MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, "");
                     });
                 } else if (methodResult == SignalServerErrorCode.CANT_SPEAK_IN_GROUP.getErrorCode()) {//只听组
-                    mHandler.post(() -> ToastUtils.showShort(R.string.text_current_group_only_listener_can_not_speak));
+                    mHandler.post(() -> ToastUtil.showToast(R.string.text_current_group_only_listener_can_not_speak));
                 } else if (methodResult == SignalServerErrorCode.GROUP_CALL_WAIT.getErrorCode()) {//请求等待中
                     mHandler.post(() -> getView().change2Waiting());
                 } else {//请求失败
@@ -91,7 +92,7 @@ public class GroupMessagePresenter extends BaseMessagePresenter<IGroupMessageVie
 //        speakingId = groupId;
 //        speakingName = memberName;
         if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
-            ToastUtils.showShort(R.string.text_has_no_group_call_listener_authority);
+            ToastUtil.showToast(R.string.text_has_no_group_call_listener_authority);
         }
 
         if (currentCallMode == CallMode.GENERAL_CALL_MODE) {

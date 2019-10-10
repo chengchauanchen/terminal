@@ -24,6 +24,9 @@ import com.vsxin.terminalpad.mvp.entity.MemberInfoBean;
 import com.vsxin.terminalpad.mvp.entity.PersonnelBean;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 import com.vsxin.terminalpad.mvp.ui.adapter.PoliceBandDeviceAdapter;
+import com.vsxin.terminalpad.utils.NumberUtil;
+import com.vsxin.terminalpad.utils.SortUtil;
+import com.vsxin.terminalpad.utils.TimeUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,6 +54,9 @@ public class PoliceInfoFragment extends RefreshRecycleViewFragment<TerminalBean,
 
     @BindView(R.id.tv_phone)
     TextView tv_phone;
+
+    @BindView(R.id.tv_group_no)
+    TextView tv_group_no;
 
     @BindView(R.id.tv_speed)
     TextView tv_speed;
@@ -83,24 +89,24 @@ public class PoliceInfoFragment extends RefreshRecycleViewFragment<TerminalBean,
             return;
         }
         TerminalEnum terminalEnum = (TerminalEnum) getArguments().getSerializable(TERMINAL_ENUM);
-
-        List<TerminalBean> terminalDtoList = personnelBean.getTerminalDtoList();
-        refreshOrLoadMore(terminalDtoList);
-
         String name = TextUtils.isEmpty(personnelBean.getName())?"":personnelBean.getName();
         String no = TextUtils.isEmpty(personnelBean.getPersonnelNo())?"":personnelBean.getPersonnelNo();
         //名称
-        tv_name.setText(name + "    " + no);
+        tv_name.setText(name + "    " + NumberUtil.remove88(no));
         //部门
-        tv_department.setText(TextUtils.isEmpty(personnelBean.getDepartment()) ? "" : personnelBean.getDepartment());
+        tv_department.setText(TextUtils.isEmpty(personnelBean.getDepartment()) ? getString(R.string.donghu) : personnelBean.getDepartment());
         //电话
         tv_phone.setText(TextUtils.isEmpty(personnelBean.getPhoneNumber()) ? "" : personnelBean.getPhoneNumber());
+        //当前组号
+        tv_group_no.setText(TextUtils.isEmpty(personnelBean.getGroup()) ? "" : personnelBean.getGroup());
         //速度
-        tv_speed.setText(TextUtils.isEmpty(personnelBean.getSpeed()) ? "" : personnelBean.getSpeed());
+        tv_speed.setText(TextUtils.isEmpty(personnelBean.getSpeed()) ? "0km/h" : personnelBean.getSpeed()+"km/h");
 
-        // TODO 定位时间
-        tv_time.setText(TextUtils.isEmpty(personnelBean.getSpeed()) ? "" : personnelBean.getSpeed());
+        String personnelLastGpsGenerationTime = SortUtil.getPersonnelLastGpsGenerationTime(personnelBean);
+        tv_time.setText("定位时间："+TimeUtil.formatLongToStr(NumberUtil.strToLong(personnelLastGpsGenerationTime)));
 
+        List<TerminalBean> terminalDtoList = personnelBean.getTerminalDtoList();
+        refreshOrLoadMore(terminalDtoList);
     }
 
     @Override
@@ -115,8 +121,7 @@ public class PoliceInfoFragment extends RefreshRecycleViewFragment<TerminalBean,
 
     @Override
     protected BaseRecycleViewAdapter createAdapter() {
-        personnelBean = (PersonnelBean) getArguments().getSerializable(PERSONNEL);
-        return new PoliceBandDeviceAdapter(getContext(),personnelBean);
+        return new PoliceBandDeviceAdapter(getContext());
     }
 
     @Override

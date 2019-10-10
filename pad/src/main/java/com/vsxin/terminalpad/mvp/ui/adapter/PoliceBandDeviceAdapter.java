@@ -3,6 +3,7 @@ package com.vsxin.terminalpad.mvp.ui.adapter;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,11 +30,12 @@ import ptt.terminalsdk.tools.ToastUtil;
  */
 public class PoliceBandDeviceAdapter extends BaseRecycleViewAdapter<TerminalBean, PoliceBandDeviceAdapter.ViewHolder> {
 
-    private PersonnelBean personnelBean;
+    private final StartCallManager startCallManager;
 
-    public PoliceBandDeviceAdapter(Context mContext, PersonnelBean personnelBean) {
+    public PoliceBandDeviceAdapter(Context mContext) {
         super(mContext);
-        this.personnelBean = personnelBean;
+        //呼警务通
+        startCallManager = new StartCallManager(getContext());
     }
 
     @NonNull
@@ -58,32 +60,26 @@ public class PoliceBandDeviceAdapter extends BaseRecycleViewAdapter<TerminalBean
         ImageView[] imageRid = {holder.iv_call_phone,holder.iv_message,holder.iv_push_video,holder.iv_individual_call};
         TerminalUtils.showOperate(imageRid,terminalType);
 
-        holder.iv_individual_call.setOnClickListener(v -> {
-            //IndividualCallFragment.startIndividualCallFragment((FragmentActivity)getContext(),"警察好","10000201");
-            //呼警务通
-            StartCallManager startCallManager = new StartCallManager(getContext());
-            //startCallManager.startIndividualCall("10000201", TerminalMemberType.TERMINAL_PHONE);
-            if (personnelBean != null) {
-                String personnelName = personnelBean.getPersonnelName();
-                String personnelNo = personnelBean.getPersonnelNo();
-                Long uniqueNo = NumberUtil.strToLong(terminalBean.getTerminalUniqueNo());
-                startCallManager.startIndividualCall(personnelName, personnelNo, uniqueNo);
-            } else {
-                ToastUtil.showToast(getContext(), "personnelBean 为空");
+        try{
+            TerminalEnum terminalEnum = TerminalEnum.valueOf(terminalType);
+            if(terminalEnum!=null){
+                holder.tv_device_name.setText(terminalEnum.getDes());
             }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        holder.iv_individual_call.setOnClickListener(v -> {
+            TerminalEnum  terminalEnum = TerminalEnum.valueOf(terminalBean.getTerminalType());
+            StartCallManager startCallManager = new StartCallManager(getContext());
+            startCallManager.startIndividualCall(terminalEnum.getDes(), terminalBean);
         });
 
         holder.iv_push_video.setOnClickListener(v -> {
             //拉视频
-            if (personnelBean != null) {
-                String personnelName = personnelBean.getPersonnelName();
-                String personnelNo = personnelBean.getPersonnelNo();
-                PullLiveManager liveManager = new PullLiveManager(getContext());
-                String terminalUniqueNo = TerminalUtils.getPullLiveUniqueNo(terminalBean);
-                liveManager.pullVideo(personnelNo, TerminalEnum.valueOf(terminalType), terminalUniqueNo);
-            } else {
-                ToastUtil.showToast(getContext(), "personnelBean 为空");
-            }
+            PullLiveManager liveManager = new PullLiveManager(getContext());
+            String terminalUniqueNo = TerminalUtils.getPullLiveUniqueNo(terminalBean);
+            liveManager.pullVideo(terminalBean.getAccount(), TerminalEnum.valueOf(terminalType), terminalUniqueNo);
         });
     }
 

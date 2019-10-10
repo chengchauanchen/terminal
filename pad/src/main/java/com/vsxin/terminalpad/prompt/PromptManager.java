@@ -10,6 +10,8 @@ import android.text.TextUtils;
 import com.alibaba.fastjson.JSONObject;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
+import com.vsxin.terminalpad.receiveHandler.ReceiverRequestLteBullHandler;
+import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.log4j.Logger;
 
@@ -17,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TimerTask;
 
+import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
@@ -39,6 +42,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveStartCeaseGroupCallHandl
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveTalkWillTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * 提示管理器
@@ -165,6 +169,21 @@ public class PromptManager {
 	private ReceiveGetRtspStreamUrlHandler receiveGetRtspStreamUrlHandler = new ReceiveGetRtspStreamUrlHandler() {
 		@Override
 		public void handler(final String rtspUrl, Member liveMember, long callId) {
+			if (!TextUtils.isEmpty(rtspUrl)) {
+				vibrator = (Vibrator) MyTerminalFactory.getSDK().getApplication().getSystemService(Context.VIBRATOR_SERVICE);
+				logger.info("请求别人视频直播成功，振动");
+				vibrator.vibrate(new long[]{0, 200},-1);
+				cancelVibrator();
+			}
+		}
+	};
+
+	/**
+	 * 拉取不控球视频
+	 */
+	private ReceiverRequestLteBullHandler receiverRequestLteBullHandler = new ReceiverRequestLteBullHandler() {
+		@Override
+		public void handler(String rtspUrl, String type, String title) {
 			if (!TextUtils.isEmpty(rtspUrl)) {
 				vibrator = (Vibrator) MyTerminalFactory.getSDK().getApplication().getSystemService(Context.VIBRATOR_SERVICE);
 				logger.info("请求别人视频直播成功，振动");
@@ -353,6 +372,9 @@ public class PromptManager {
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
 		MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
+
+		//拉取不控球视频
+		OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestLteBullHandler);
 	}
 
 	public void stop(){
@@ -364,6 +386,9 @@ public class PromptManager {
 		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
 		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
 		MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
+
+		//拉取不控球视频
+		OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestLteBullHandler);
 
 		soundMap.clear();
 		if(soundPool != null){

@@ -12,7 +12,6 @@ import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
 import com.vsxin.terminalpad.utils.MemberUtil;
 import com.vsxin.terminalpad.utils.NumberUtil;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
-
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -59,22 +58,37 @@ public class PullLiveManager {
                 return;
             }
 
-            //加88
-            String number = NumberUtil.checkMemberNo(memberNo + "");
-            int no = NumberUtil.strToInt(number);
-            if (no == 0) {
-                ToastUtil.showToast(context, "警员编号异常");
-                return;
-            }
+
             switch (terminalEnum) {
                 case TERMINAL_PHONE://警务通
+                    //加88
+                    String number = NumberUtil.checkMemberNo(memberNo + "");
+                    int no = NumberUtil.strToInt(number);
+                    if (no == 0) {
+                        ToastUtil.showToast(context, "警员编号异常");
+                        return;
+                    }
                     pullVideoForMemberNo(no, TerminalMemberType.TERMINAL_PHONE);
                     break;
                 case TERMINAL_BODY_WORN_CAMERA://执法记录仪
-                    pullVideoForMemberNo(no, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA);
+                    //加88
+                    String number2 = NumberUtil.checkMemberNo(memberNo + "");
+                    int no2 = NumberUtil.strToInt(number2);
+                    if (no2 == 0) {
+                        ToastUtil.showToast(context, "警员编号异常");
+                        return;
+                    }
+                    pullVideoForMemberNo(no2, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA);
                     break;
                 case TERMINAL_UAV://无人机
-                    pullVideoForMemberNo(no, TerminalMemberType.TERMINAL_UAV);
+                    //加88
+                    String number3 = NumberUtil.checkMemberNo(memberNo + "");
+                    int no3 = NumberUtil.strToInt(number3);
+                    if (no3 == 0) {
+                        ToastUtil.showToast(context, "警员编号异常");
+                        return;
+                    }
+                    pullVideoForMemberNo(no3, TerminalMemberType.TERMINAL_UAV);
                     break;
                 case TERMINAL_LTE://LTE
                     playRTSPUrl(terminalUniqueNo, TerminalEnum.TERMINAL_LTE.toString(), "LTE");
@@ -89,6 +103,8 @@ public class PullLiveManager {
                     ToastUtil.showToast(context, "暂不支持拉取该设备视频");
                     break;
             }
+        }else{
+            ToastUtil.showToast(context, "正在组呼,暂不能播放视频");
         }
     }
 

@@ -12,7 +12,6 @@ import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.view.IGroupMemberView;
 import com.vsxin.terminalpad.mvp.contract.view.IGroupMessageView;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
-
 import java.util.Collections;
 import java.util.List;
 

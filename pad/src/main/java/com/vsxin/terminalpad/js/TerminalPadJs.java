@@ -29,6 +29,7 @@ import java.util.logging.Logger;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import ptt.terminalsdk.tools.ToastUtil;
 
 import static com.alibaba.fastjson.JSON.parseObject;
 
@@ -127,7 +128,7 @@ public class TerminalPadJs {
     public void monitor(String groupNoStr) {
         int groupNo = NumberUtil.strToInt(groupNoStr);
         if (TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0) == groupNo) {
-            ToastUtils.showShort(R.string.current_group_cannot_cancel_monitor);
+            ToastUtil.showToast(R.string.current_group_cannot_cancel_monitor);
         } else {
             TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class, groupNo);
         }

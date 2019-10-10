@@ -11,7 +11,6 @@ import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.mvp.contract.view.IFullDuplexIndividualCallView;
 import com.vsxin.terminalpad.mvp.contract.view.IHalfDuplexIndividualCallView;
 import com.vsxin.terminalpad.prompt.PromptManager;
-
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.IndividualCallType;
