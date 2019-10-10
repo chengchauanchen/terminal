@@ -57,7 +57,6 @@ public class FullDuplexIndividualCallFragment extends MvpFragment<IFullDuplexInd
     @Override
     protected void initViews(View view) {
         getPresenter().registerReceiveHandler();
-
         //默认免提
         getPresenter().setSpeakPhoneOn(iv_individual_call_hand_free,true);
         //默认非静音
