@@ -22,6 +22,7 @@ import cn.vsx.vc.adapter.ContactAdapter;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.WuTieUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
@@ -74,8 +75,7 @@ public class LteFragment extends BaseFragment{
     public void initData() {
         mActivity= (NewMainActivity) getActivity();
         catalogNames.clear();
-        CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
-        catalogNames.add(memberCatalogBean);
+        catalogNames.add(WuTieUtil.addRootDetpCatalogNames());
         TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), TerminalMemberType.TERMINAL_LTE.toString());
     }
 
@@ -149,8 +149,7 @@ public class LteFragment extends BaseFragment{
         });
         swipeRefreshLayout.setOnRefreshListener(() -> {
             catalogNames.clear();
-            CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
-            catalogNames.add(memberCatalogBean);
+            catalogNames.add(WuTieUtil.addRootDetpCatalogNames());
             TerminalFactory.getSDK().getConfigManager().getTerminal(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), TerminalMemberType.TERMINAL_LTE.toString());
             myHandler.postDelayed(() -> {
                 // 加载完数据设置为不刷新状态，将下拉进度收起来

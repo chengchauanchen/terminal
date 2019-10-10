@@ -99,7 +99,7 @@ public class PttButtonPresenter extends BasePresenter<IPttButton> {
         getView().getLogger().info("组呼来了---ReceiveGroupCallIncommingHandler---");
 
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-            ptt.terminalsdk.tools.ToastUtil.showToast(getContext(),getContext().getString(R.string.text_has_no_group_call_listener_authority));
+            ToastUtil.showToast(getContext(),getContext().getString(R.string.text_has_no_group_call_listener_authority));
         }else{
             //Todo 1显示 当前组呼人
             //change2Listening();//听

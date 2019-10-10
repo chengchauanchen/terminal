@@ -22,6 +22,7 @@ import com.vsxin.terminalpad.mvp.ui.widget.ChooseDevicesDialog;
 import com.vsxin.terminalpad.utils.BitmapUtil;
 import com.vsxin.terminalpad.utils.CallPhoneUtil;
 import com.vsxin.terminalpad.utils.HandleIdUtil;
+import com.vsxin.terminalpad.utils.NumberUtil;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.TerminalMemberStatusEnum;
@@ -62,7 +63,7 @@ public class GroupMemberAdapter extends BaseRecycleViewAdapter<Member, GroupMemb
         }
         String no = HandleIdUtil.handleId(member.no);
         holder.tv_member_name.setText(member.getName());
-        holder.tv_member_id.setText(no);
+        holder.tv_member_id.setText(NumberUtil.remove88(no));
 
         //执法记录仪是否绑定
         if(member.type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
@@ -80,7 +81,8 @@ public class GroupMemberAdapter extends BaseRecycleViewAdapter<Member, GroupMemb
             holder.message_to.setVisibility(View.GONE);
             holder.call_to.setVisibility(View.GONE);
         }else {
-            holder.shoutai_dial_to.setVisibility(View.VISIBLE);
+            //TODO 10/9 不要打电话
+            holder.shoutai_dial_to.setVisibility(View.GONE);
             holder.message_to.setVisibility(View.VISIBLE);
             holder.call_to.setVisibility(View.VISIBLE);
 
@@ -129,7 +131,7 @@ public class GroupMemberAdapter extends BaseRecycleViewAdapter<Member, GroupMemb
         holder.shoutai_dial_to.setOnClickListener(view12 -> {
             Account account = DataUtil.getAccountByMember(member);
             if(TextUtils.isEmpty(account.getPhone())){
-                ToastUtils.showShort(R.string.text_has_no_member_phone_number);
+                ToastUtil.showToast(R.string.text_has_no_member_phone_number);
                 return;
             }
             new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog, member1) -> {

@@ -26,7 +26,7 @@ public class GroupVideoLiveListAdapter extends BaseRecycleViewAdapter<TerminalMe
     private boolean isGroupVideoLiving;
     private OnItemClickListerner onItemClickListerner;
 
-    public GroupVideoLiveListAdapter(Context mContext,boolean isGroupVideoLiving) {
+    public GroupVideoLiveListAdapter(Context mContext, boolean isGroupVideoLiving) {
         super(mContext);
         this.isGroupVideoLiving = isGroupVideoLiving;
     }
@@ -34,56 +34,59 @@ public class GroupVideoLiveListAdapter extends BaseRecycleViewAdapter<TerminalMe
     @NonNull
     @Override
     public GroupVideoLiveListAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(getContext()).inflate(R.layout.item_group_video_live,parent,false);
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.item_group_video_live, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         TerminalMessage item = getDatas().get(position);
-        if (item!=null) {
+        if (item != null) {
             item.messageUrl = "";
             //图标
             holder.iv_user_photo.setImageResource(BitmapUtil.getPadDeviceImageResourceByType(
                     TerminalMemberType.valueOf(
-                            TextUtils.isEmpty(item.terminalMemberType)?TerminalMemberType.TERMINAL_PHONE.toString():item.terminalMemberType)
+                            TextUtils.isEmpty(item.terminalMemberType) ? TerminalMemberType.TERMINAL_PHONE.toString() : item.terminalMemberType)
                             .getCode()
             ));
             JSONObject messageBody = item.messageBody;
-            if (messageBody!=null&&!TextUtils.isEmpty(messageBody.toJSONString())) {
+            if (messageBody != null && !TextUtils.isEmpty(messageBody.toJSONString())) {
                 //姓名
-                if(messageBody.containsKey(JsonParam.BACKUP)){
+                if (messageBody.containsKey(JsonParam.BACKUP)) {
                     String backUp = messageBody.getString(JsonParam.BACKUP);
-                    if(!TextUtils.isEmpty(backUp)&&backUp.contains("_")){
+                    if (!TextUtils.isEmpty(backUp) && backUp.contains("_")) {
                         String[] split = backUp.split("_");
-                        if(split.length>1){
+                        if (split.length > 1) {
                             holder.tv_user_name.setText(split[1]);
-                        }else{
+                        } else {
                             holder.tv_user_name.setText("");
                         }
-                    }else{
+                    } else {
                         holder.tv_user_name.setText("");
                     }
                 }
                 //警号
-                if(messageBody.containsKey(JsonParam.LIVERNO)){
+                if (messageBody.containsKey(JsonParam.LIVERNO)) {
                     holder.tv_user_number.setText(String.valueOf(messageBody.getIntValue(JsonParam.LIVERNO)));
-                }else{
+                } else {
                     holder.tv_user_number.setText("");
                 }
             }
             //时间
-            holder.tv_time.setVisibility(!isGroupVideoLiving?View.VISIBLE:View.GONE);
+            holder.tv_time.setVisibility(!isGroupVideoLiving ? View.VISIBLE : View.GONE);
             holder.tv_time.setText(StringUtil.stringToDate(item.sendTime));
+
+            //如果是历史上报,则不显示分析
+            holder.iv_forward.setVisibility(isGroupVideoLiving ? View.VISIBLE : View.GONE);
             //点击：观看
             holder.iv_watch.setOnClickListener(v -> {
-                if(onItemClickListerner!=null){
+                if (onItemClickListerner != null) {
                     onItemClickListerner.goToWatch(item);
                 }
             });
             //点击：转发
             holder.iv_forward.setOnClickListener(v -> {
-                if(onItemClickListerner!=null){
+                if (onItemClickListerner != null) {
                     onItemClickListerner.goToForward(item);
                 }
             });
@@ -95,7 +98,7 @@ public class GroupVideoLiveListAdapter extends BaseRecycleViewAdapter<TerminalMe
         return getDatas().size();
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder{
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView iv_user_photo;
         ImageView iv_watch;
@@ -103,6 +106,7 @@ public class GroupVideoLiveListAdapter extends BaseRecycleViewAdapter<TerminalMe
         TextView tv_user_name;
         TextView tv_user_number;
         TextView tv_time;
+
         ViewHolder(View itemView) {
             super(itemView);
             iv_user_photo = itemView.findViewById(R.id.iv_user_photo);
@@ -114,12 +118,13 @@ public class GroupVideoLiveListAdapter extends BaseRecycleViewAdapter<TerminalMe
         }
     }
 
-    public void setOnItemClickListerner(OnItemClickListerner onItemClickListerner){
+    public void setOnItemClickListerner(OnItemClickListerner onItemClickListerner) {
         this.onItemClickListerner = onItemClickListerner;
     }
 
-    public interface  OnItemClickListerner{
+    public interface OnItemClickListerner {
         void goToWatch(TerminalMessage item);
+
         void goToForward(TerminalMessage item);
     }
 }

@@ -54,27 +54,28 @@
                     android:id="@+id/iv_call_phone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginRight="50px"
                     android:src="@mipmap/ic_phone" />
 
                 <ImageView
                     android:id="@+id/iv_message"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="50px"
+                    android:layout_marginRight="50px"
                     android:src="@mipmap/ic_messige" />
 
                 <ImageView
                     android:id="@+id/iv_push_video"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="50px"
+                    android:layout_marginRight="50px"
                     android:src="@mipmap/ic_video" />
 
                 <ImageView
                     android:id="@+id/iv_individual_call"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="50px"
+                    android:layout_marginRight="50px"
                     android:src="@mipmap/ic_call" />
             </LinearLayout>
         </LinearLayout>

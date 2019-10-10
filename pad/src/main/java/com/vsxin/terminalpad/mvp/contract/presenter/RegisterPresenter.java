@@ -46,7 +46,7 @@ public class RegisterPresenter extends BasePresenter<IRegisterView> {
         String registIP = TerminalFactory.getSDK().getAuthManagerTwo().getTempIp();
         String registPort = TerminalFactory.getSDK().getAuthManagerTwo().getTempPort();
         if (TextUtils.isEmpty(registIP) || TextUtils.isEmpty(registPort)) {
-            ToastUtils.showShort(R.string.text_please_select_unit);
+            ToastUtil.showToast(R.string.text_please_select_unit);
         } else {
             getView().changeProgressMsg(getContext().getString(R.string.text_registing));
             TerminalFactory.getSDK().getAuthManagerTwo().regist(userName, invitationCode);

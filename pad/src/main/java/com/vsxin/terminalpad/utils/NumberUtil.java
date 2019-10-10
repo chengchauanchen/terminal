@@ -1,5 +1,7 @@
 package com.vsxin.terminalpad.utils;
 
+import android.text.TextUtils;
+
 public class NumberUtil {
     /**
      * 将字符串转化成int
@@ -44,6 +46,18 @@ public class NumberUtil {
             return memberNo;
         }
         return memberNo;
+    }
+
+    public static String remove88(String no){
+        if(TextUtils.isEmpty(no)){
+            return "";
+        }
+        String b=no.substring(0,2);
+        if(TextUtils.equals("88",b)){
+            return no.substring(2);
+        }else {
+            return no;
+        }
     }
 
 

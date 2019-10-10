@@ -12,6 +12,7 @@ import com.ixiaoma.xiaomabus.architecture.mvp.view.layout.MvpLinearLayout;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.mvp.contract.presenter.LiveSmallCoverPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.ILiveSmallCoverView;
+import com.vsxin.terminalpad.utils.NumberUtil;
 import com.vsxin.terminalpad.utils.ResUtil;
 
 /**
@@ -142,7 +143,7 @@ public class LiveSmallCoverView extends MvpLinearLayout<ILiveSmallCoverView, Liv
      */
     public void setMemberInfo(String name,String no){
         tv_member_name.setText(name);
-        tv_member_no.setText(no);
+        tv_member_no.setText(NumberUtil.remove88(no));
     }
 
     /**

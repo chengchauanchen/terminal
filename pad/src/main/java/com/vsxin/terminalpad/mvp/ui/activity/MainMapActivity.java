@@ -182,13 +182,19 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     }
 
     private void reloadWebView() {
-//        web_map.reload(); //刷新
+        //web_map.reload(); //刷新
         //TerminalInfoFragment.startMemberInfoFragment(this, null, MemberTypeEnum.PHONE);
-        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(HistoryReportPlayerHandler.class);
+        //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(HistoryReportPlayerHandler.class);
 //        CarOrPatrolInfoFragment.startCarBoatInfoFragment(this,new PatrolBean(), TerminalEnum.TERMINAL_PATROL);
 //        List<TerminalBean> terminalBeans = new ArrayList<>();
 //        PoliceDevicesDialog policeDevicesDialog = new PoliceDevicesDialog(this,terminalBeans, OperationEnum.INDIVIDUAL_CALL);
 //        policeDevicesDialog.show();
+
+        ToastUtil.showToast(R.string.text_has_no_member_phone_number);
+
+        //ToastUtil.showToast(this,getString(R.string.video_not_support));
+
+        //ToastUtil.showToast("qiuzhiwen");
     }
 
     /**

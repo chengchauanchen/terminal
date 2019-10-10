@@ -28,10 +28,12 @@ public class TerminalBean extends BaseBean {
     private String terminalUniqueNo;//终端UniqueNo
 
     private String department;//部门
+    private String name;//名称
 
     private String account;
     private String gb28181No;
     private String group;
+    private String ddtNo;
     private String lteNo;
     private String pdtNo;
     private String ddtType;//交管电台类型
@@ -42,6 +44,22 @@ public class TerminalBean extends BaseBean {
     private String lng;
     private String status;
     private String gpsGenerationTime;//定位时间
+
+    public String getDdtNo() {
+        return ddtNo;
+    }
+
+    public void setDdtNo(String ddtNo) {
+        this.ddtNo = ddtNo;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getDepartment() {
         return department;

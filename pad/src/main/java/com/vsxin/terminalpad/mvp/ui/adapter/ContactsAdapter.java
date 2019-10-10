@@ -30,6 +30,7 @@ import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.GroupAndDepartment;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import ptt.terminalsdk.tools.ToastUtil;
 
 /**
  * @author qzw
@@ -196,7 +197,7 @@ public class ContactsAdapter extends BaseRecycleViewAdapter<GroupAndDepartment, 
 
             groupViewHolder.ivMonitor.setOnClickListener(view -> {
                 if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == group.getNo()){
-                    ToastUtils.showShort(R.string.current_group_cannot_cancel_monitor);
+                    ToastUtil.showToast(R.string.current_group_cannot_cancel_monitor);
                 }else {
                     TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,group.getNo());
                 }

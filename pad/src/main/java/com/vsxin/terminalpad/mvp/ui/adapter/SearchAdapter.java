@@ -270,7 +270,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
      */
     private void callPhone(Account account){
         if(TextUtils.isEmpty(account.getPhone())){
-            ToastUtils.showShort(R.string.text_has_no_member_phone_number);
+            ToastUtil.showToast(R.string.text_has_no_member_phone_number);
             return;
         }
         new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog, member) -> {

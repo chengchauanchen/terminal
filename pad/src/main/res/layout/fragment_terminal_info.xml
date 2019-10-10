@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@mipmap/member_info_bg_icon"
+    android:clickable="true"
     android:orientation="vertical">
 
     <ImageView
@@ -19,8 +20,8 @@
         android:layout_marginTop="226px"
         android:src="@mipmap/ic_phone"
         android:scaleType="fitXY"
-        android:layout_width="47px"
-        android:layout_height="69px" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 
     <LinearLayout
@@ -64,6 +65,27 @@
 
             <TextView
                 android:id="@+id/tv_phone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/color_42A5F6"
+                android:textSize="27px"
+                android:text=""/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_marginTop="20px"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/white"
+                android:textSize="27px"
+                android:text="当前组号："/>
+
+            <TextView
+                android:id="@+id/tv_group_no"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/color_42A5F6"

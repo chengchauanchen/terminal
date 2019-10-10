@@ -22,6 +22,8 @@ import com.vsxin.terminalpad.mvp.entity.PatrolBean;
 import com.vsxin.terminalpad.mvp.entity.PersonnelBean;
 import com.vsxin.terminalpad.mvp.entity.TerminalBean;
 import com.vsxin.terminalpad.mvp.ui.adapter.CarBandDeviceAdapter;
+import com.vsxin.terminalpad.utils.NumberUtil;
+import com.vsxin.terminalpad.utils.TimeUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,6 +56,9 @@ public class CarOrPatrolInfoFragment extends RefreshRecycleViewFragment<DeviceBe
 
     @BindView(R.id.tv_phone)
     TextView tv_phone;//电话
+
+    @BindView(R.id.tv_group_no)
+    TextView tv_group_no;//当前组号
 
     @BindView(R.id.tv_speed)
     TextView tv_speed;//速度
@@ -103,13 +108,16 @@ public class CarOrPatrolInfoFragment extends RefreshRecycleViewFragment<DeviceBe
         //名称
         tv_name.setText(TextUtils.isEmpty(patrol.getPatrolName()) ? "" : patrol.getPatrolName());
         //部门
-        tv_department.setText(TextUtils.isEmpty(patrol.getPatrolOccupant()) ? "" : patrol.getPatrolOccupant());
+        tv_department.setText(TextUtils.isEmpty(patrol.getPatrolOccupant()) ? getString(R.string.donghu) : patrol.getPatrolOccupant());
         //电话
         tv_phone.setText(TextUtils.isEmpty(patrol.getPhoneNumber()) ? "" : patrol.getPhoneNumber());
+        //当前组号
+        tv_group_no.setText(TextUtils.isEmpty(patrol.getGroup()) ? "" : patrol.getGroup());
         //速度
-        tv_speed.setText(TextUtils.isEmpty(patrol.getSpeed()) ? "" : patrol.getSpeed());
-        //TODO 定位时间
-        tv_time.setText(TextUtils.isEmpty(patrol.getSpeed()) ? "" : patrol.getSpeed());
+        tv_speed.setText(TextUtils.isEmpty(patrol.getSpeed()) ? "0km/h" : patrol.getSpeed()+"km/h");
+
+        String patrolLastGpsGenerationTime = getPresenter().getPatrolLastGpsGenerationTime(patrol);
+        tv_time.setText("定位时间："+TimeUtil.formatLongToStr(NumberUtil.strToLong(patrolLastGpsGenerationTime)));
 
         //获取 终端设备集合
         Map<String, TerminalBean> terminalDtoMap = patrol.getTerminalDtoMap();
@@ -140,13 +148,16 @@ public class CarOrPatrolInfoFragment extends RefreshRecycleViewFragment<DeviceBe
         //名称
         tv_name.setText(carName + "    " + carNo);
         //部门
-        tv_department.setText(TextUtils.isEmpty(car.getCarOccupant()) ? "" : car.getCarOccupant());
+        tv_department.setText(TextUtils.isEmpty(car.getCarOccupant()) ? getString(R.string.donghu) : car.getCarOccupant());
         //电话
         tv_phone.setText(TextUtils.isEmpty(car.getPhoneNumber()) ? "" : car.getPhoneNumber());
+        //当前组号
+        tv_group_no.setText(TextUtils.isEmpty(car.getGroup()) ? "" : car.getGroup());
         //速度
-        tv_speed.setText(TextUtils.isEmpty(car.getSpeed()) ? "" : car.getSpeed());
-        // TODO 定位时间
-        tv_time.setText(TextUtils.isEmpty(car.getSpeed()) ? "" : car.getSpeed());
+        tv_speed.setText(TextUtils.isEmpty(car.getSpeed()) ? "0km/h" : car.getSpeed()+"km/h");
+
+        String carLastGpsGenerationTime = getPresenter().getCarLastGpsGenerationTime(carBean);
+        tv_time.setText("定位时间："+TimeUtil.formatLongToStr(NumberUtil.strToLong(carLastGpsGenerationTime)));
 
         //获取 终端设备集合
         Map<String, TerminalBean> terminalDtoMap = car.getTerminalDtoMap();

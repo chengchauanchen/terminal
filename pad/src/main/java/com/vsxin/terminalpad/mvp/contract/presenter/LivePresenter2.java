@@ -22,7 +22,6 @@ import com.vsxin.terminalpad.receiveHandler.ReceiverRequestLteBullHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiverRequestVideoHandler;
 import com.vsxin.terminalpad.utils.Constants;
 import com.vsxin.terminalpad.utils.OperateReceiveHandlerUtilSync;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -136,6 +135,9 @@ public class LivePresenter2 extends BasePresenter<ILiveView2> {
                 //getView().setMemberInfo(liveMember);//设置成员信息
                 getView().startPullLive(rtspUrl);//播放
             }, 1200);
+
+            Member member = new Member();
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveStartPullLiveHandler.class,member);
         }
     }
 

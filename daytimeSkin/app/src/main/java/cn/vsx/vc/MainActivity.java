@@ -2,9 +2,14 @@ package cn.vsx.vc;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
+import android.provider.Settings;
+import android.support.annotation.RequiresApi;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,10 +44,34 @@ public class MainActivity extends AppCompatActivity {
 //        VsxSDK.getInstance().getJumpSDK().registerConnectJumpReceiver(this);
         initView();
 //        initDownLoadApk();
+        //open();
     }
 
     private void initDownLoadApk() {
         loadApkUtils = new DownLoadApkUtils(this);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private void open(){
+            boolean isGranted = this.getPackageManager().canRequestPackageInstalls();
+            //安装应用的逻辑(写自己的就可以)
+            if(!isGranted){
+                new AlertDialog.Builder(this)
+                        .setCancelable(false)
+                        .setTitle("安装应用需要打开未知来源权限，请去设置中开启权限")
+                        .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface d, int w) {
+                                //开启列表
+                                //Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+                                //mAct.startActivityForResult(intent, UNKNOWN_CODE);
+                                //开启指定应用 打开 安装未知来源权限
+                                Uri packageURI = Uri.parse("package:"+getPackageName());
+                                Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,packageURI);
+                                startActivity(intent);
+                            }
+                        })
+                        .show();
+            }
     }
 
 
@@ -73,14 +102,14 @@ public class MainActivity extends AppCompatActivity {
                 //VsxSDK.getInstance().getJumpSDK().sendStartAppBroadcast(MainActivity.this);
 //                VsxSDK.getInstance().getJumpSDK().startVsxService(MainActivity.this);
 
-//                if(!isGrantExternalRW(MainActivity.this)){
-//                    Log.e("MainActivity","没得权限");
-//                    return;
-//                }else{
-////                    final String url = "http://192.168.1.100:6063/u/phone_common_08-28_1.0.40_40.apk";
-////                    loadApkUtils.startDownLoadApk(url);
-//                    VsxSDK.getInstance().getJumpSDK().autoDownloadApk(MainActivity.this);
-//                }
+                if(!isGrantExternalRW(MainActivity.this)){
+                    Log.e("MainActivity","没得权限");
+                    return;
+                }else{
+//                    final String url = "http://192.168.1.100:6063/u/phone_common_08-28_1.0.40_40.apk";
+//                    loadApkUtils.startDownLoadApk(url);
+                    VsxSDK.getInstance().getJumpSDK().autoDownloadApk(MainActivity.this);
+                }
             }
         });
         //请求别人上报

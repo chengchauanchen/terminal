@@ -28,7 +28,7 @@ public enum TerminalEnum {
 //    TERMINAL_PERSONNEL("民警", "personnel", R.mipmap.img_police),
 
     TERMINAL_TETRA("Tetra终端", 2,0),
-    TERMINAL_PAD("Pad终端", 3,0),
+    TERMINAL_PAD("Pad终端", 3,R.mipmap.img_phone),
     TERMINAL_HDMI("HDMI终端", 4,0),
     TERMINAL_PC("PC终端", 6,0),
     TERMINAL_SUPER("超级终端", 7,0),
@@ -36,18 +36,17 @@ public enum TerminalEnum {
     TERMINAL_MOUNT_SELF("飞手", 99,0),
     TERMINAL_TEST("测试终端", 100,0),
 
-
-    TERMINAL_PHONE("警务通终端", 1,R.mipmap.img_phone),
+    TERMINAL_PHONE("警务通", 1,R.mipmap.img_phone),
     TERMINAL_BODY_WORN_CAMERA("执法记录仪", 10,R.mipmap.img_recorder),
     TERMINAL_UAV("无人机", 11,R.mipmap.img_uav),
-    TERMINAL_PDT("PDT终端(350M手台)", 5,R.mipmap.img_hand),
+    TERMINAL_PDT("350M手台", 5,R.mipmap.img_hand),
     TERMINAL_LTE("LTE终端", 9, R.mipmap.img_lte),
     TERMINAL_PATROL("船", 13,R.mipmap.img_boat),
     TERMINAL_CAR("警车", 14,0),
     TERMINAL_BALL("布控球", 15,R.mipmap.img_cammera),
     TERMINAL_CAMERA("摄像头", 16, R.mipmap.img_cammera),
     TERMINAL_PERSONNEL("民警", 17,R.mipmap.img_hand),
-    TERMINAL_DDT("交管电台", 97,R.mipmap.img_hand),
+    TERMINAL_DDT("交管电台", 97,R.mipmap.img_hand),//暂时还不通
     TERMINAL_PDT_CAR("350M车载台", 98,R.mipmap.img_hand);
 
 

@@ -51,6 +51,7 @@ public class PlayerPresenter extends BasePresenter<IPlayerView> {
      * 主动拉流
      */
     private ReceiveStartPullLiveHandler receiveStartPullLiveHandler = (member) -> {
+        getView().getLogger().info("直播播放器显示了");
         getView().showFragmentForTag(FragmentTagConstants.LIVE);
     };
 

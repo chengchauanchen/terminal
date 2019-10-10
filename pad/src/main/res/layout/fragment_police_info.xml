@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/color_374350"
+    android:clickable="true"
     android:orientation="vertical">
 
     <ImageView
@@ -57,6 +58,27 @@
 
                 <TextView
                     android:id="@+id/tv_phone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="@color/color_42A5F6"
+                    android:textSize="27px" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="36px">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="当前组号："
+                    android:textColor="@color/white"
+                    android:textSize="27px" />
+
+                <TextView
+                    android:id="@+id/tv_group_no"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text=""
