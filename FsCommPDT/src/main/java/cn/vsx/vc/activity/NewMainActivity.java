@@ -616,7 +616,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
     /**=====================================================================================================Listener================================================================================================================================**/
     private CallManager callManager;
-    private UpdateManager updateManager;
 
     /**
      * 视频来了，关闭提示框
@@ -1439,8 +1438,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     }
 
     public static final int OVERLAY_PERMISSION_REQ_CODE = 1234;
-    public static final int REQUEST_INSTALL_PACKAGES_CODE = 1235;
-    public static final int GET_UNKNOWN_APP_SOURCES = 1236;
     public static final int REQUEST_CODE_SCAN = 1237;
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -1454,10 +1451,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     // 创建直播服务
                     startLiveService();
                 }
-            }
-        }else if(requestCode == GET_UNKNOWN_APP_SOURCES){
-            if(null !=updateManager){
-                updateManager.checkIsAndroidO(false);
             }
         } else if (requestCode == CODE_FNC_REQUEST) {
             int userId = MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);//当前组id
@@ -1500,11 +1493,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     permissionDenied(requestCode);
                 }
                 break;
-            case REQUEST_INSTALL_PACKAGES_CODE:
-                if(grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED){
-                    Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
-                    startActivityForResult(intent, GET_UNKNOWN_APP_SOURCES);
-                }
             default:
                 break;
 
