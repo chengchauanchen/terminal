@@ -90,9 +90,10 @@ public class GroupMemberAdapter extends BaseRecycleViewAdapter<Member, GroupMemb
             if(member.type == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
                 holder.shoutai_dial_to.setVisibility(View.GONE);
                 holder.message_to.setVisibility(View.GONE);
-                holder.iv_call.setBackgroundResource(R.drawable.new_live_icon);
+                holder.iv_call.setBackgroundResource(R.mipmap.ic_video);
             }else{
-                holder.iv_call.setBackgroundResource(R.drawable.new_call_icon);
+//                holder.iv_call.setBackgroundResource(R.drawable.new_call_icon);
+                holder.iv_call.setBackgroundResource(R.mipmap.ic_call);
             }
         }
 

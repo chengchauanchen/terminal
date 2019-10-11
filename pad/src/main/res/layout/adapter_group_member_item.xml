@@ -60,7 +60,7 @@
                 android:gravity="center_vertical"
                 android:text="ID:123456"
                 android:textColor="@color/white"
-                android:textSize="21px"
+                android:textSize="18px"
                 android:textStyle="normal" />
         </LinearLayout>
 
@@ -79,7 +79,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/tel" />
+                android:background="@mipmap/ic_phone" />
 
         </LinearLayout>
 
@@ -93,7 +93,7 @@
             <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/new_message_icon" />
+                android:background="@mipmap/ic_messige" />
 
         </LinearLayout>
 
@@ -115,7 +115,7 @@
                     android:id="@+id/iv_call"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/new_call_icon" />
+                    android:background="@mipmap/ic_call" />
             </LinearLayout>
         </RelativeLayout>
 

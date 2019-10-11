@@ -87,6 +87,7 @@ import cn.vsx.hamster.terminalsdk.tools.JudgeWhetherConnect;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
+import ptt.terminalsdk.tools.ApkUtil;
 import ptt.terminalsdk.tools.DeleteData;
 import ptt.terminalsdk.tools.DialogUtil;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -594,7 +595,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
             @Override
             public CharSequence getMessage() {
 //                            return "4GPTT需要访问您设备上的照片、媒体内容和文件，否则无法工作；去打开权限?";
-                return CheckMyPermission.getDesForPermission(permissionName);
+                return CheckMyPermission.getDesForPermission(permissionName, ApkUtil.getAppName(RegisterActivity.this));
             }
 
             @Override
