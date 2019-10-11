@@ -23,7 +23,7 @@ public class ApkUtil{
 
     //是否为市局的包
     public static boolean showLteApk(){
-        return MyTerminalFactory.getSDK().getParam(Params.SHOW_LTE, false);
+        return (ptt.terminalsdk.tools.ApkUtil.isWuTie())?false:MyTerminalFactory.getSDK().getParam(Params.SHOW_LTE, false);
     }
 
     //是否为安监

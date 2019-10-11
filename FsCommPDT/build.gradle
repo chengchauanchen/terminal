@@ -8,7 +8,8 @@ android {
     buildToolsVersion '28.0.3'
     flavorDimensions "default"
     defaultConfig {
-        applicationId "cn.vsx.vc"
+//        applicationId "cn.vsx.vc"
+        applicationId "com.vsxin.pstation"
         minSdkVersion 19
         targetSdkVersion 26
 
