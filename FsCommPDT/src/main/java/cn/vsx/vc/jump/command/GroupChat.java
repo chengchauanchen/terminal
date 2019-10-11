@@ -65,7 +65,8 @@ public class GroupChat extends BaseCommand {
         Group group =  DataUtil.getTempGroupByGroupName(groupName);
         if(group==null){
             //为空，主动请求一次
-            TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(false);
+            //TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(false);
+            TerminalFactory.getSDK().getConfigManager().updateAllGroups();
             Group group2 =  DataUtil.getTempGroupByGroupName(groupName);
             if(group2==null){
                 ToastUtil.showToast(context,"未找到当前组,请重试");
