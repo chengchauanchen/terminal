@@ -28,6 +28,7 @@ import cn.vsx.vc.fragment.SearchFragment;
 import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.WuTieUtil;
 
 /**
  * 作者：ly-xuxiaolong
@@ -85,8 +86,7 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
         swipeRefreshLayout.setColorSchemeResources(R.color.colorAccent, R.color.colorPrimary, R.color.colorPrimaryDark);
         swipeRefreshLayout.setOnRefreshListener(() -> {
             catalogNames.clear();
-            CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
-            catalogNames.add(groupCatalogBean);
+            catalogNames.add(WuTieUtil.addRootDetpCatalogNames());
             TerminalFactory.getSDK().getConfigManager().updateGroup(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), TerminalFactory.getSDK().getParam(Params.DEP_NAME, ""));
             myHandler.postDelayed(() -> {
                 // 加载完数据设置为不刷新状态，将下拉进度收起来
@@ -125,9 +125,8 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
         parentRecyclerAdapter = new GroupCatalogAdapter(this,catalogNames);
         parentRecyclerAdapter.setOnItemClick(this);
         mParentRecyclerview.setAdapter(parentRecyclerAdapter);
-
-        CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
-        catalogNames.add(groupCatalogBean);
+        catalogNames.clear();
+        catalogNames.add(WuTieUtil.addRootDetpCatalogNames());
         TerminalFactory.getSDK().getConfigManager().updateGroup(TerminalFactory.getSDK().getParam(Params.DEP_ID, 0), TerminalFactory.getSDK().getParam(Params.DEP_NAME, ""));
     }
 
@@ -180,11 +179,12 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
             catalogNames.clear();
         }
         //请求一个添加一个部门标题
-        CatalogBean memberCatalogBean = new CatalogBean(depName,depId);
-        catalogNames.add(memberCatalogBean);
-
+        CatalogBean catalogBean = WuTieUtil.getCatalogBean( depId, depName);
+        catalogNames.add(catalogBean);
+        //过滤根部门中的组
+        List<Group> groupList = WuTieUtil.filterRootDeptment(depId,groups);
         //添加组
-        for(Group group : groups){
+        for(Group group : groupList){
             ContactItemBean<Group> groupAndDepartment = new ContactItemBean<>();
             groupAndDepartment.setType(Constants.TYPE_GROUP);
             groupAndDepartment.setBean(group);

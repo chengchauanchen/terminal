@@ -34,7 +34,8 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.tools.PhoneAdapter;
 
-import static cn.vsx.vc.activity.NewMainActivity.REQUEST_INSTALL_PACKAGES_CODE;
+import static cn.vsx.vc.activity.BaseActivity.REQUEST_INSTALL_PACKAGES_CODE;
+
 
 public class UpdateManager
 {
@@ -240,7 +241,7 @@ public class UpdateManager
 					// 获得存储卡的路径
 					String sdpath = Environment.getExternalStorageDirectory() + "/";
 					mSavePath = sdpath + "download";
-					logger.info("下载APK的路径url_apk："+url_apk);
+					logger.info("下载APK的路径url_apk："+url_apk+"--mSavePath:"+mSavePath);
 					URL url = new URL(url_apk);
 					// 创建连接
 					HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -304,12 +305,12 @@ public class UpdateManager
 			return;
 		}
 		// 通过Intent安装APK文件
-
 		Intent intent = new Intent(Intent.ACTION_VIEW);
 		//判断是否是AndroidN以及更高的版本
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+			intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
 			Uri contentUri = FileProvider.getUriForFile(mContext, getFileProviderName(mContext), apkfile);
 			intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
 		} else {

@@ -8,12 +8,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -53,6 +55,7 @@ import cn.vsx.hamster.terminalsdk.tools.OperateReceiveHandlerUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.application.UpdateManager;
 import cn.vsx.vc.dialog.NFCBindingDialog;
 import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.receive.Actions;
@@ -86,6 +89,9 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     protected boolean oritationPort;
 
     protected static final int CODE_FNC_REQUEST = 0x15;
+    public static final int REQUEST_INSTALL_PACKAGES_CODE = 1235;
+    public static final int GET_UNKNOWN_APP_SOURCES = 1236;
+    public UpdateManager updateManager;
 
     //成员被删除了
     private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
@@ -355,6 +361,31 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     private void unregisterHeadsetPlugReceiver() {
         if (headsetPlugReceiver != null) {
             unregisterReceiver(headsetPlugReceiver);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == GET_UNKNOWN_APP_SOURCES){
+            if(null !=updateManager){
+                updateManager.checkIsAndroidO((this instanceof AboutActivity));
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case REQUEST_INSTALL_PACKAGES_CODE:
+                if(grantResults.length > 0 && grantResults[0] != PackageManager.PERMISSION_GRANTED){
+                    Intent intent = new Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES);
+                    startActivityForResult(intent, GET_UNKNOWN_APP_SOURCES);
+                }
+            default:
+                break;
+
         }
     }
 

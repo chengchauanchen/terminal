@@ -38,6 +38,7 @@ import cn.vsx.vc.model.CatalogBean;
 import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.WuTieUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -223,8 +224,7 @@ public class NewGroupFragment extends BaseFragment{
                 catalogNames.clear();
                 tempCatalogNames.clear();
 
-                CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
-                catalogNames.add(groupCatalogBean);
+                catalogNames.add(WuTieUtil.addRootDetpCatalogNames());
                 TerminalFactory.getSDK().getConfigManager().updateAllGroups();
             });
         }
@@ -248,8 +248,7 @@ public class NewGroupFragment extends BaseFragment{
     public void initData(){
         mActivity = (NewMainActivity) getActivity();
         TerminalFactory.getSDK().getConfigManager().updateAllGroups();
-        CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
-        catalogNames.add(groupCatalogBean);
+        catalogNames.add(WuTieUtil.addRootDetpCatalogNames());
     }
 
     public synchronized void updateData(int depId, String depName, List<Department> departments, List<Group> groups){
@@ -282,8 +281,10 @@ public class NewGroupFragment extends BaseFragment{
             Title.setType(Constants.TYPE_TITLE);
             Title.setBean(new Object());
             commonGroupDatas.add(Title);
+            //过滤根部门中的组
+            List<Group> groupList = WuTieUtil.filterRootDeptment(depId,groups);
             //添加组
-            for(Group group : groups){
+            for(Group group : groupList){
                 GroupAndDepartment<Group> groupAndDepartment = new GroupAndDepartment<>();
                 groupAndDepartment.setType(Constants.TYPE_GROUP);
                 groupAndDepartment.setBean(group);
@@ -296,6 +297,7 @@ public class NewGroupFragment extends BaseFragment{
                 groupAndDepartment.setBean(department);
                 commonGroupDatas.add(groupAndDepartment);
             }
+
             groupUpdateCompleted = true;
         }
         if(updateCompleted()){
@@ -303,6 +305,8 @@ public class NewGroupFragment extends BaseFragment{
             sortList();
         }
     }
+
+
 
     @Override
     public void initListener(){
@@ -322,8 +326,7 @@ public class NewGroupFragment extends BaseFragment{
             catalogNames.clear();
             tempCatalogNames.clear();
 
-            CatalogBean groupCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
-            catalogNames.add(groupCatalogBean);
+            catalogNames.add(WuTieUtil.addRootDetpCatalogNames());
             TerminalFactory.getSDK().getConfigManager().updateAllGroups();
             TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(false);
             myHandler.postDelayed(() -> {

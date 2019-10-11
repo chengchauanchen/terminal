@@ -78,6 +78,7 @@ import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.InputMethodUtil;
 import cn.vsx.vc.utils.MyDataUtil;
+import cn.vsx.vc.utils.WuTieUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -422,12 +423,11 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
      * 设置搜索布局
      */
     private void setSearchView() {
-        CatalogBean memberCatalogBean = new CatalogBean(TerminalFactory.getSDK().getParam(Params.DEP_NAME,""),TerminalFactory.getSDK().getParam(Params.DEP_ID,0));
         mRlSearch.setLayoutManager(new LinearLayoutManager(this, OrientationHelper.HORIZONTAL,false));
         mAllCatalogNames.clear();
         for (int i = 0; i < rls.size(); i++) {
             List<CatalogBean> list = new ArrayList<>();
-            list.add(memberCatalogBean);
+            list.add(WuTieUtil.addRootDetpCatalogNames());
             mAllCatalogNames.add(list);
         }
 
@@ -1117,7 +1117,9 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         int index = 0;
         if(android.text.TextUtils.equals(tabTypes.get(index),Constants.TYPE_GROUP_STRING)){
             mAllDatas.get(index).clear();
-            for(Group group : groups){
+            //过滤根部门中的组
+            List<Group> groupList = WuTieUtil.filterRootDeptment(depId,groups);
+            for(Group group : groupList){
                 ContactItemBean<Group> contactItemBean = new ContactItemBean<>();
                 contactItemBean.setBean(group);
                 contactItemBean.setType(Constants.TYPE_GROUP);
@@ -1563,7 +1565,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
         if(isClear){
             mAllCatalogNames.get(currentIndex).clear();
         }
-        CatalogBean catalogBean = new CatalogBean(deptName,deptId);
+        CatalogBean catalogBean = WuTieUtil.getCatalogBean( deptId, deptName);
         if(!mAllCatalogNames.get(currentIndex).contains(catalogBean)){
             mAllCatalogNames.get(currentIndex).add(catalogBean);
         }
