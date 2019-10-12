@@ -280,15 +280,18 @@ public class FloatWindowManager {
                                 result.confirmResult(true);
                                 dialog.dismiss();
                             }
-                        }).setNegativeButton("暂不开启",
-                        new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                result.confirmResult(false);
-                                dialog.dismiss();
-                            }
-                        }).create();
+                        })
+//                .setNegativeButton("暂不开启",
+//                        new DialogInterface.OnClickListener() {
+//
+//                            @Override
+//                            public void onClick(DialogInterface dialog, int which) {
+//                                result.confirmResult(false);
+//                                dialog.dismiss();
+//                            }
+//                        })
+                .create();
+        dialog.setCancelable(false);
         dialog.show();
     }
 
