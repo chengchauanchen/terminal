@@ -903,7 +903,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         new DialogUtil() {
             @Override
             public CharSequence getMessage() {
-                return CheckMyPermission.getDesForPermission(permissionName);
+                return CheckMyPermission.getDesForPermission(permissionName,getResources().getString(R.string.app_name));
             }
 
             @Override
