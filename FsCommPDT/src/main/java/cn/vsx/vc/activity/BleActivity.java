@@ -40,10 +40,12 @@ import java.util.List;
 
 import cn.vsx.vc.R;
 import cn.vsx.vc.model.MyBleDevice;
-import ptt.terminalsdk.tools.StringUtil;
+import cn.vsx.vc.receiveHandle.ReceiveBluetoothListenerHandler;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.MToggleButton;
+import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.service.BluetoothLeService;
+import ptt.terminalsdk.tools.StringUtil;
 
 public class BleActivity extends BaseActivity implements View.OnClickListener {
 
@@ -102,32 +104,18 @@ public class BleActivity extends BaseActivity implements View.OnClickListener {
             if (currState) {
                 //打开蓝牙
                 if (enableBluetooth(true)) {
-                    tv_close_ble.setVisibility(View.GONE);
-                    rl_usable_device.setVisibility(View.VISIBLE);
-                    mHandler.postDelayed(scanDevice, 2000);
                 } else {
-                    switch_ble.initToggleState(false);
                     ToastUtil.showToast(BleActivity.this, getString(R.string.text_please_open_bluetooth_privileges));
                 }
+                switch_ble.initToggleState(false);
             } else {
                 //关闭蓝牙
-                if (enableBluetooth(false)) {
-                    connectedDevice = null;
-                    if (mScanning) {
-                        scanLeDevice(false);
-                    }
-                    mLeDevices.clear();
-                    devices.clear();
-                    mLeDeviceListAdapter.notifyDataSetChanged();
-                    rl_usable_device.setVisibility(View.GONE);
-                    tv_close_ble.setVisibility(View.VISIBLE);
-                } else {
-                    switch_ble.initToggleState(true);
-                }
+                enableBluetooth(false);
+                switch_ble.initToggleState(true);
             }
         });
-
-
+        //蓝牙是否打开的监听
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveBluetoothListenerHandler);
     }
 
     @Override
@@ -192,6 +180,8 @@ public class BleActivity extends BaseActivity implements View.OnClickListener {
 
         });
     }
+
+
 
     /**
      * 打开或者关闭蓝牙是否成功
@@ -364,6 +354,12 @@ public class BleActivity extends BaseActivity implements View.OnClickListener {
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveBluetoothListenerHandler);
+    }
+
+    @Override
     public void doOtherDestroy() {
         hideConnectingAnimate();
         unbindService(mServiceConnection);
@@ -439,6 +435,51 @@ public class BleActivity extends BaseActivity implements View.OnClickListener {
             }
         }
     }
+
+    /**
+     * 蓝牙是否打开
+     */
+    private ReceiveBluetoothListenerHandler receiveBluetoothListenerHandler = new ReceiveBluetoothListenerHandler(){
+        @Override
+        public void handler(int blueState){
+            mHandler.post(() -> {
+                switch (blueState) {
+                    case BluetoothAdapter.STATE_TURNING_ON:
+                        //蓝牙正在打开中
+                        ToastUtil.showToast(BleActivity.this,getString(R.string.text_bluetooth_is_opening));
+                        break;
+                    case BluetoothAdapter.STATE_ON:
+                        //蓝牙已经打开
+                        tv_close_ble.setVisibility(View.GONE);
+                        rl_usable_device.setVisibility(View.VISIBLE);
+                        switch_ble.initToggleState(true);
+                        mHandler.postDelayed(scanDevice, 2000);
+                        ToastUtil.showToast(BleActivity.this,getString(R.string.text_bluetooth_is_opened));
+                        break;
+                    case BluetoothAdapter.STATE_TURNING_OFF:
+                         //蓝牙正在关闭中
+                        ToastUtil.showToast(BleActivity.this,getString(R.string.text_bluetooth_is_closing));
+                        break;
+                     case BluetoothAdapter.STATE_OFF:
+                         //蓝牙已经关闭;
+                         connectedDevice = null;
+                         if (mScanning) {
+                             scanLeDevice(false);
+                         }
+                         mLeDevices.clear();
+                         devices.clear();
+                         mLeDeviceListAdapter.notifyDataSetChanged();
+                         rl_usable_device.setVisibility(View.GONE);
+                         tv_close_ble.setVisibility(View.VISIBLE);
+                         switch_ble.initToggleState(false);
+                         ToastUtil.showToast(BleActivity.this,getString(R.string.text_bluetooth_is_closeed));
+                        break;
+                     default:
+                        break;
+                }
+            });
+        }
+    };
 
     // 适配器为持有设备通过扫描发现。
     private class LeDeviceListAdapter extends BaseAdapter {

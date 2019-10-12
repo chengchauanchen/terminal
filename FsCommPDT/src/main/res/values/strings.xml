@@ -642,4 +642,8 @@
 
     <string name="text_tianjin_group">融合组</string>
     <string name="text_tianjin_car_4">4G图传车</string>
+    <string name="text_bluetooth_is_opened">蓝牙已打开</string>
+    <string name="text_bluetooth_is_closeed">蓝牙已关闭</string>
+    <string name="text_bluetooth_is_opening">蓝牙正在打开...</string>
+    <string name="text_bluetooth_is_closing">蓝牙正在关闭...</string>
 </resources>

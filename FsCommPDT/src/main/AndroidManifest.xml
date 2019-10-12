@@ -222,7 +222,12 @@
         <receiver
             android:name="ptt.terminalsdk.broadcastreceiver.TickAlarmReceiver"
             android:permission="2147483647" />
-        
+        <receiver android:name=".receiver.BluetoothListenerReceiver">
+            <intent-filter>
+                <action android:name="android.bluetooth.adapter.action.STATE_CHANGED"/>
+            </intent-filter>
+        </receiver>
+
         <service android:name=".service.LockScreenService" />
         <service android:name="org.easydarwin.easypusher.BackgroundCameraService" />
         <!--<service-->
