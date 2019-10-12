@@ -71,6 +71,9 @@
   <!-- 要求当前设备必须要有NFC芯片 -->
   <uses-feature android:name="android.hardware.nfc" android:required="true" />
   <uses-permission android:name="android.permission.GET_TASKS"/>
+  <uses-permission android:name="android.REQUEST_INSTALL_PACKAGES.GET_TASKS" />
+  <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+  <uses-permission android:name="android.permission.FLAG_GRANT_PERSISTABLE_URI_PERMISSION" />
 
   <uses-feature android:name="android.hardware.camera"/>
   <uses-feature

@@ -417,7 +417,7 @@ public class RegistNFCActivity extends BaseActivity implements RecvCallBack, Act
             @Override
             public CharSequence getMessage() {
 //                            return "4GPTT需要访问您设备上的照片、媒体内容和文件，否则无法工作；去打开权限?";
-                return CheckMyPermission.getDesForPermission(permissionName);
+                return CheckMyPermission.getDesForPermission(permissionName,getResources().getString(R.string.app_name));
             }
 
             @Override

@@ -327,6 +327,7 @@ public class UpdateManager
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
 			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+			intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
 			Uri contentUri = FileProvider.getUriForFile(mContext, getFileProviderName(mContext), apkfile);
 			intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
 		} else {
