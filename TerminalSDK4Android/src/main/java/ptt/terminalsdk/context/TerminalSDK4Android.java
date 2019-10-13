@@ -1153,6 +1153,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	@Override
 	public void setAPKUpdateAddress(String identifyPath) {
 		String updatePath = identifyPath.replace("/register/private/identify", "/apk/version.xml");
+		String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+		if(TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
+			updatePath = identifyPath.replace("/register/private/identify", "/record/version.xml");
+		}
 		TerminalFactory.getSDK().putParam(Params.UPDATE_URL, updatePath);
 	}
 
