@@ -115,6 +115,7 @@ import ptt.terminalsdk.manager.video.VideoProxy;
 import ptt.terminalsdk.manager.voip.VoipManager;
 import ptt.terminalsdk.service.BluetoothLeService;
 import ptt.terminalsdk.service.MessageService;
+import ptt.terminalsdk.tools.ApkUtil;
 import ptt.terminalsdk.tools.DeleteData;
 import ptt.terminalsdk.tools.HttpUtil;
 
@@ -1151,13 +1152,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	};
 
 	@Override
-	public void setAPKUpdateAddress(String identifyPath) {
-		String updatePath = identifyPath.replace("/register/private/identify", "/apk/version.xml");
-		String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
-		if(TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
-			updatePath = identifyPath.replace("/register/private/identify", "/record/version.xml");
-		}
-		TerminalFactory.getSDK().putParam(Params.UPDATE_URL, updatePath);
+	public void setAPKUpdateAddress(String path) {
+		TerminalFactory.getSDK().putParam(Params.UPDATE_URL, ApkUtil.getAPKUpdateAddress(path));
 	}
 
 	public SharedPreferences getAccount(){

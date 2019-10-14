@@ -5,6 +5,8 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.text.TextUtils;
 
+import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -54,5 +56,28 @@ public class ApkUtil{
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * 获取不同终端的自动更新的路径
+     * @return
+     */
+    public static String getAPKUpdateAddress(String path){
+        StringBuffer address = new StringBuffer();
+        address.append(path);
+        String deviceType = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+        if(TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
+            address.append("/record/");
+        }else if(TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_UAV.getCode()){
+            address.append("/uav/");
+        }else if(TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_PAD.getCode()){
+            address.append("/pad/");
+        }else if(TerminalMemberType.valueOf(deviceType).getCode() == TerminalMemberType.TERMINAL_HDMI.getCode()){
+            address.append("/hdmi/");
+        }else{
+            address.append("/apk/");
+        }
+        address.append("version.xml");
+        return address.toString();
     }
 }
