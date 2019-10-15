@@ -103,6 +103,7 @@ public class PhonePushService extends BaseService{
     private MemberEnterAdapter enterOrExitMemberAdapter;
     private static final int CURRENTTIME = 0;
     private static final int HIDELIVINGVIEW = 1;
+    private static final int AUTOFOCUS = 2;
     private boolean isGroupPushLive;
     private int width = 640;
     private int height = 480;
@@ -245,6 +246,13 @@ public class PhonePushService extends BaseService{
             case OFF_LINE:
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_push));
                 finishVideoLive();
+                break;
+            case AUTOFOCUS:
+                mHandler.removeMessages(AUTOFOCUS);
+                if(mMediaStream != null){
+                    handleFocus(mMediaStream.getCamera());
+                }
+                mHandler.sendEmptyMessageDelayed(AUTOFOCUS,5000);
                 break;
         }
     }
@@ -766,6 +774,7 @@ public class PhonePushService extends BaseService{
         if(mMediaStream.isStreaming()){
             ToastUtil.showToast(PhonePushService.this, getResources().getString(R.string.pushing_stream));
         }
+        mHandler.sendEmptyMessage(AUTOFOCUS);
     }
 
     private int getDgree(){
