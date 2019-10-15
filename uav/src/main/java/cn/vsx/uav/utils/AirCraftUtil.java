@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAirCraftStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.uav.R;
 import cn.vsx.uav.UavApplication;
 import cn.vsx.uav.receiveHandler.ReceiveAircraftFilesHandler;
 import cn.vsx.uav.receiveHandler.ReceiveProductRegistHandler;
@@ -260,6 +261,7 @@ public class AirCraftUtil{
                             camera.setMode(SettingsDefinitions.CameraMode.SHOOT_PHOTO, djiError -> {
                                 if(djiError !=null){
                                     logger.error("设置相机模式失败:"+djiError);
+                                    ToastUtils.showShort("设置相机模式失败:"+djiError);
                                 }else {
                                     camera.getShootPhotoMode(new CommonCallbacks.CompletionCallbackWith<SettingsDefinitions.ShootPhotoMode>(){
                                         @Override
@@ -270,6 +272,7 @@ public class AirCraftUtil{
                                                         startShootPhoto(camera);
                                                     }else {
                                                         logger.error("设置单张拍照模式失败:"+ djiError1);
+                                                        ToastUtils.showShort("设置单张拍照模式失败:"+ djiError1);
                                                     }
                                                 });
                                             }else {
@@ -314,7 +317,7 @@ public class AirCraftUtil{
                 logger.error("拍摄照片失败:"+djiError.getDescription());
 
             }else {
-//                ToastUtils.showShort(R.string.uav_take_photo_success);
+                ToastUtils.showShort(R.string.uav_take_photo_success);
                 logger.error("拍摄照片成功");
             }
         });
@@ -372,6 +375,7 @@ public class AirCraftUtil{
                 BitmapUtil.saveBitmapFile(preview,MyTerminalFactory.getSDK().getPhotoRecordDirectory(),fileName);
                 FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
                 operation.generateFileComplete(MyTerminalFactory.getSDK().getPhotoRecordDirectory(),filePath);
+                ToastUtils.showShort(R.string.uav_picture_download_finish);
             }else {
                 logger.info("获取预览图片失败："+djiError.getDescription());
             }

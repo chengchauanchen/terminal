@@ -363,6 +363,8 @@ public class UavPushActivity extends BaseActivity{
     @Override
     protected void onResume(){
         super.onResume();
+        mapMinWebview.onResume();
+        mapMaxWebview.onResume();
         ScreenSwitchUtils.init(this).setCurrentState(ScreenState.getInstanceByCode(getRequestedOrientation()));
         ScreenSwitchUtils.init(this).start(this);
     }
@@ -371,6 +373,8 @@ public class UavPushActivity extends BaseActivity{
     protected void onPause(){
         super.onPause();
         ScreenSwitchUtils.init(this).stop();
+        mapMinWebview.onPause();
+        mapMaxWebview.onPause();
     }
 
     @Override
@@ -740,10 +744,10 @@ public class UavPushActivity extends BaseActivity{
         if(flightController != null && flightController.getFlightAssistant() != null){
             flightController.getFlightAssistant().setCollisionAvoidanceEnabled(open, djiError -> {
                 if(null == djiError){
-                    ToastUtil.showToast(getApplicationContext(), "开启或关闭防碰撞成功:" + open);
+//                    ToastUtil.showToast(getApplicationContext(), "开启或关闭防碰撞成功:" + open);
                     logger.info(TAG + "开启或关闭防碰撞成功:" + open);
                 }else{
-                    ToastUtil.showToast(getApplicationContext(), "开启或关闭防碰撞失败:--" + open + "-----" + djiError.getDescription());
+//                    ToastUtil.showToast(getApplicationContext(), "开启或关闭防碰撞失败:--" + open + "-----" + djiError.getDescription());
                     logger.info(TAG + "开启或关闭防碰撞失败:--" + open + "-----" + djiError.getDescription());
                 }
             });

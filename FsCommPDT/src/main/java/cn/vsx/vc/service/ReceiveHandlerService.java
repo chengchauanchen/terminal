@@ -1076,7 +1076,7 @@ public class ReceiveHandlerService extends Service{
             }else {
                 ToastUtils.showShort(message.getResultDesc());
             }
-        }else {
+        }else if(message.getResultCode() != BaseCommonCode.SUCCESS_CODE){
             ToastUtils.showShort(message.getResultDesc());
         }
     };

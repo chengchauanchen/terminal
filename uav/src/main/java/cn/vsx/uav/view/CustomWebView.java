@@ -103,7 +103,6 @@ public class CustomWebView extends WebView{
         }
         // 设置是否可以交互Javascript
         settings.setJavaScriptEnabled(true);
-        settings.setDomStorageEnabled(true);
         settings.setBlockNetworkImage(false);//解决图片不显示
         //        // 设置允许JS弹窗
         //        settings.setJavaScriptCanOpenWindowsAutomatically(true);
@@ -130,7 +129,8 @@ public class CustomWebView extends WebView{
         requestFocus();
         //settings.setGeolocationDatabasePath("/data/data/org.itri.html5webview/databases/");     // enable Web Storage: localStorage, sessionStorage
         //开启 DOM storage API 功能
-        //        settings.setDomStorageEnabled(false);
+        settings.setDomStorageEnabled(true);
+        setScrollBarStyle(0);
         //        settings.setAllowContentAccess(true);
         setWebChromeClient(new WebChromeClient());//这行最好不要丢掉
         setWebViewClient(new WebViewClient(){
