@@ -31,6 +31,8 @@ import com.ixiaoma.xiaomabus.architecture.mvp.lifecycle.MvpActivity;
 import com.vsxin.terminalpad.R;
 import com.vsxin.terminalpad.app.PadApplication;
 import com.vsxin.terminalpad.js.TerminalPadJs;
+import com.vsxin.terminalpad.manager.PullLiveManager;
+import com.vsxin.terminalpad.mvp.contract.constant.TerminalEnum;
 import com.vsxin.terminalpad.mvp.contract.presenter.MainMapPresenter;
 import com.vsxin.terminalpad.mvp.contract.view.IMainMapView;
 import com.vsxin.terminalpad.mvp.ui.fragment.LayerMapFragment;
@@ -186,17 +188,20 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     private void reloadWebView() {
         web_map.reload(); //刷新
         //TerminalInfoFragment.startMemberInfoFragment(this, null, MemberTypeEnum.PHONE);
-        //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(HistoryReportPlayerHandler.class);
-//        CarOrPatrolInfoFragment.startCarBoatInfoFragment(this,new PatrolBean(), TerminalEnum.TERMINAL_PATROL);
-//        List<TerminalBean> terminalBeans = new ArrayList<>();
-//        PoliceDevicesDialog policeDevicesDialog = new PoliceDevicesDialog(this,terminalBeans, OperationEnum.INDIVIDUAL_CALL);
-//        policeDevicesDialog.show();
-
-//        ToastUtil.showToast(R.string.text_has_no_member_phone_number);
-
-        //ToastUtil.showToast(this,getString(R.string.video_not_support));
-
-        //ToastUtil.showToast("qiuzhiwen");
+//        //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(HistoryReportPlayerHandler.class);
+////        CarOrPatrolInfoFragment.startCarBoatInfoFragment(this,new PatrolBean(), TerminalEnum.TERMINAL_PATROL);
+////        List<TerminalBean> terminalBeans = new ArrayList<>();
+////        PoliceDevicesDialog policeDevicesDialog = new PoliceDevicesDialog(this,terminalBeans, OperationEnum.INDIVIDUAL_CALL);
+////        policeDevicesDialog.show();
+//
+////        ToastUtil.showToast(R.string.text_has_no_member_phone_number);
+//
+//        //ToastUtil.showToast(this,getString(R.string.video_not_support));
+//
+//        //ToastUtil.showToast("qiuzhiwen");
+//
+//        playCityCamera("42010209001322583663");
+//
     }
 
     /**
@@ -225,7 +230,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 //        web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
         //李翔本机
         getLogger().info("http://192.168.20.189:6062/donghuMap/index.html");
-        web_map.loadUrl("http://192.168.1.152:8080/#/");
+        web_map.loadUrl("http://192.168.20.189:6062/donghuMap/index.html");
 //        web_map.loadUrl("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
     }
 
@@ -1068,4 +1073,12 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
             // finish完成之后当前进程依然在
         }
     }
+
+
+    public void playCityCamera(String gb28181) {
+        //Todo 点击地图 城市摄像头观看视频监控
+        PullLiveManager liveManager = new PullLiveManager(this);
+        liveManager.pullVideo("1", TerminalEnum.TERMINAL_CAMERA, gb28181);
+    }
+
 }

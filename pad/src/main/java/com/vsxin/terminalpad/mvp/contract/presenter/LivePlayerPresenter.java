@@ -142,11 +142,14 @@ public class LivePlayerPresenter extends BasePresenter<ILivePlayerView> {
                 String resultDataString = resultData.getString("event-msg");
                 //getView().getLogger().error("视频流播放状态：" + errorCode + "=========" + resultDataString + "-----count:" + pullcount);
                 getView().getLogger().error("视频流播放状态：" + errorCode + "=========" + resultDataString);
+                ToastUtil.showToast(getContext(), resultDataString);
                 if (errorCode == 500 || errorCode == 404 || errorCode == -32 || errorCode == -101) {
                     //在这些异常中，需循环重新播放
                 } else if (errorCode != 0) {
                     stopPullLive();
                 }
+            }else {
+                ToastUtil.showToast("播放异常");
             }
         }
     }

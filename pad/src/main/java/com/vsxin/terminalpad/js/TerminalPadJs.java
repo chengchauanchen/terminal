@@ -98,7 +98,8 @@ public class TerminalPadJs {
     }
 
     @JavascriptInterface
-    public void playCityCamera(String gb28181) {
+    public void playCityCamera(String gb28181 ) {
+        logger.info(gb28181);
         //Todo 点击地图 城市摄像头观看视频监控
         PullLiveManager liveManager = new PullLiveManager(context);
         liveManager.pullVideo("1", TerminalEnum.TERMINAL_CAMERA, gb28181);

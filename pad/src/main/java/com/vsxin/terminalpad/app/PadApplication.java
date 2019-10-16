@@ -63,7 +63,7 @@ public class PadApplication extends App {
 //                .addInflater(new SkinMaterialViewInflater())            // material design 控件换肤初始化[可选]
 //                .loadSkin();
         //配置c5内容
-        initC5();
+//        initC5();
     }
 
     /**
