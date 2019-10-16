@@ -55,6 +55,58 @@ public class MyHttpClient extends HttpClientBaseImpl{
 		}
 		return null;
 	}
+
+	@Override
+	public String postJson2(String url, String jsonMessage) {
+		try {
+			HttpPost request = new HttpPost(url);
+			request.setEntity(new ByteArrayEntity(jsonMessage.getBytes(DEFAULT_ENCODING)));
+			request.setHeader("Accept", "application/json");
+			request.setHeader("Content-type","application/json;charset=UTF-8");
+			DefaultHttpClient client = getHttpClient(timeOut);
+			client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
+			logger.debug("发送的数据是：" + jsonMessage);
+			HttpResponse response = client.execute(request);
+			if (null != response) {
+				String responseString = new String(EntityUtils.toByteArray(response.getEntity()), DEFAULT_ENCODING);
+				logger.info("发送了一个get请求：url="+url+",收到的信息为："+responseString);
+				return responseString;
+			}
+		} catch (Exception e) {
+			logger.error("命令发送失败，url=" + url + ", jsonMessage=" + jsonMessage,
+					e);
+		}
+		return null;
+	}
+
+
+	@Override
+	public String post2(String url, Map<String, String> paramsMap) {
+		try {
+			HttpPost request = new HttpPost(url);
+			Set<String> keys = paramsMap.keySet();
+			List<NameValuePair> formparams = new ArrayList<>();
+			for (String key : keys) {
+				formparams.add(new BasicNameValuePair(key, paramsMap.get(key)));
+				logger.info("发送了一个post请求：key="+key+",vaule："+paramsMap.get(key));
+			}
+			request.setEntity(new UrlEncodedFormEntity( formparams , HTTP.UTF_8 ));
+			request.setHeader("Accept", "application/json");
+			request.setHeader("Content-type", "application/json;charset=UTF-8");
+			DefaultHttpClient client = getHttpClient(timeOut);
+			client.setHttpRequestRetryHandler(new DefaultHttpRequestRetryHandler(0, false));
+			HttpResponse response = client.execute(request);
+			if (null != response) {
+				String responseString = new String(EntityUtils.toByteArray(response.getEntity()), DEFAULT_ENCODING);
+				logger.info("发送了一个post请求：url="+url+",收到的信息为："+responseString);
+				return responseString;
+			}
+		} catch (Exception e) {
+			logger.error("命令发送失败，url=" + url  , e);
+		}
+		return null;
+	}
+
 	@Override
 	public String post(String url, Map<String, String> paramsMap) {
 		try {
