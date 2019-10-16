@@ -381,7 +381,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
                 startVPNService();
             } else {
                 // todo authorize();//认证并获取user信息
-                authorize();//认证并获取user信息
+                //authorize();//认证并获取user信息
                 requestDrawOverLays();
             }
         } else {
@@ -668,7 +668,7 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
     private void reauthorize() {
         PstoreAuth auth = new PstoreAuth(this, CLIENT_ID);
         SsoHandler mSsoHandler = new SsoHandler(this, auth);
-        mSsoHandler.authorizeRefresh(new AuthListener());
+//        mSsoHandler.authorizeRefresh(new AuthListener());
     }
 
     private PstoreAPIImpl pstoreAPI = new PstoreAPIImpl();
@@ -681,108 +681,108 @@ public class RegisterActivity extends MvpActivity<IRegisterView, RegisterPresent
      * 4. 进入APP。
      * 具体流程见文档（android-pstore-sdk-v2.xx）2.1流程图。
      */
-    class AuthListener implements PstoreAuthListener {
+//    class AuthListener implements PstoreAuthListener {
+//
+//        @Override
+//        public void onComplete(Oauth2AccessToken accessToken) {
+//            logger.info("onComplete-------------->" + accessToken.toBundle());
+//            pstoreAPI.requestUserInfo(RegisterActivity.this, response, CLIENT_ID, accessToken.getToken());
+//        }
+//
+//        @Override
+//        public void onPstoreException(PstoreException pstoreException) {
+//            if (pstoreException instanceof PstoreAuthException) {
+//                PstoreAuthException e = (PstoreAuthException) pstoreException;
+//                switch (e.getErrorCode()) {
+//                    // client_id 为空
+//                    case PstoreAuthException.ERROR_CLIENTID_NULL:
+//                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_client_id_is_empty));
+//                        break;
+//                    // client_id 非法
+//                    case PstoreAuthException.ERROR_CLIENTID_ILLEGAL:
+//                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_client_id_is_illegal));
+//                        break;
+//                    // 授权码非法
+//                    case PstoreAuthException.ERROR_GRANT_CODE_ILLEGAL:
+//                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_authorization_code_illegal));
+//                        break;
+//                    default:
+//                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_unknown_error));
+//                        break;
+//                }
+//                logger.error("AuthPstoreAuthException：" + pstoreException.getMessage());
+//            } else {
+//                // Unknown exception. pstoreException.getMessage()
+//                logger.error("Auth未知错误：" + pstoreException.getMessage());
+//            }
+//            finishActivity();
+//        }
+//
+//        @Override
+//        public void onCancel() {
+//        }
+//    }
 
-        @Override
-        public void onComplete(Oauth2AccessToken accessToken) {
-            logger.info("onComplete-------------->" + accessToken.toBundle());
-            pstoreAPI.requestUserInfo(RegisterActivity.this, response, CLIENT_ID, accessToken.getToken());
-        }
-
-        @Override
-        public void onPstoreException(PstoreException pstoreException) {
-            if (pstoreException instanceof PstoreAuthException) {
-                PstoreAuthException e = (PstoreAuthException) pstoreException;
-                switch (e.getErrorCode()) {
-                    // client_id 为空
-                    case PstoreAuthException.ERROR_CLIENTID_NULL:
-                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_client_id_is_empty));
-                        break;
-                    // client_id 非法
-                    case PstoreAuthException.ERROR_CLIENTID_ILLEGAL:
-                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_client_id_is_illegal));
-                        break;
-                    // 授权码非法
-                    case PstoreAuthException.ERROR_GRANT_CODE_ILLEGAL:
-                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_authorization_code_illegal));
-                        break;
-                    default:
-                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_unknown_error));
-                        break;
-                }
-                logger.error("AuthPstoreAuthException：" + pstoreException.getMessage());
-            } else {
-                // Unknown exception. pstoreException.getMessage()
-                logger.error("Auth未知错误：" + pstoreException.getMessage());
-            }
-            finishActivity();
-        }
-
-        @Override
-        public void onCancel() {
-        }
-    }
-
-    private IPstoreHandler.Response response = new IPstoreHandler.Response() {
-        @Override
-        public void onResponse(Bundle bundle) {
-            Map<String, String> userInfo = UserInfo.getUserInfo(RegisterActivity.this);
-            logger.info("请求userInfo：" + userInfo);
-
-            String userJson = GsonUtils.toJson(UserInfo.getUser(RegisterActivity.this));
-            logger.info("请求userJson：" + userJson);
-
-            logger.error("请求user0：" + bundle.toString());
-            UserObject user = UserObject.fromBundle(bundle);
-            logger.info("请求user1：" + user);
-            PadApplication.getPadApplication().setTerminalMemberType();
-            MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, user.getAccount());
-            MyTerminalFactory.getSDK().putParam(UrlParams.NAME, user.getName());
-            MyTerminalFactory.getSDK().putParam(UrlParams.PHONE, user.getPhone());
-            MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_ID, user.getDeptId());
-            MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_NAME, user.getDeptName());
-            MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, "");
-            MyTerminalFactory.getSDK().putParam(UrlParams.SEX, "");
-            MyTerminalFactory.getSDK().putParam(UrlParams.EMAIL, "");
-//            MyTerminalFactory.getSDK().putParam(UrlParams.AVATAR_URL, "");
-            MyTerminalFactory.getSDK().putParam(UrlParams.COMPANY, "");
-            MyTerminalFactory.getSDK().putParam(UrlParams.POSITION, "");
-            MyTerminalFactory.getSDK().putParam(UrlParams.ROLE_CODE, "");
-            MyTerminalFactory.getSDK().putParam(UrlParams.ROLE_NAME, "");
-            MyTerminalFactory.getSDK().putParam(UrlParams.PRIVILEGE_CODE, "");
-            MyTerminalFactory.getSDK().putParam(UrlParams.PRIVILEGE_NAME, "");
-        }
-
-        @Override
-        public void onPstoreException(PstoreException e) {
-            if (e instanceof PstoreUserException) {
-                PstoreUserException e1 = (PstoreUserException) e;
-                logger.error("请求user的错误码：" + e1.getErrorCode());
-
-                switch (e1.getErrorCode()) {
-                    // access_token过期
-                    case PstoreUserException.ERROR_ACCESS_TOKEN_EXPIRED:
-                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_access_token_expire));
-                        reauthorize();
-                        break;
-                    // 资源未授权
-                    case PstoreUserException.ERROR_RES_UNAUTHORIZED:
-                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_unauthorized_resources));
-                        break;
-                    // 未知错误
-                    case PstoreUserException.ERROR_UNKONWN:
-                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_unknown_error));
-                        break;
-                    default:
-                        break;
-                }
-            } else {
-                // Unknown exception. pstoreException.getMessage()
-                logger.error("请求user未知错误：" + e.getMessage());
-            }
-            finishActivity();
-        }
-    };
+//    private IPstoreHandler.Response response = new IPstoreHandler.Response() {
+//        @Override
+//        public void onResponse(Bundle bundle) {
+//            Map<String, String> userInfo = UserInfo.getUserInfo(RegisterActivity.this);
+//            logger.info("请求userInfo：" + userInfo);
+//
+//            String userJson = GsonUtils.toJson(UserInfo.getUser(RegisterActivity.this));
+//            logger.info("请求userJson：" + userJson);
+//
+//            logger.error("请求user0：" + bundle.toString());
+//            UserObject user = UserObject.fromBundle(bundle);
+//            logger.info("请求user1：" + user);
+//            PadApplication.getPadApplication().setTerminalMemberType();
+//            MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, user.getAccount());
+//            MyTerminalFactory.getSDK().putParam(UrlParams.NAME, user.getName());
+//            MyTerminalFactory.getSDK().putParam(UrlParams.PHONE, user.getPhone());
+//            MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_ID, user.getDeptId());
+//            MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_NAME, user.getDeptName());
+//            MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, "");
+//            MyTerminalFactory.getSDK().putParam(UrlParams.SEX, "");
+//            MyTerminalFactory.getSDK().putParam(UrlParams.EMAIL, "");
+////            MyTerminalFactory.getSDK().putParam(UrlParams.AVATAR_URL, "");
+//            MyTerminalFactory.getSDK().putParam(UrlParams.COMPANY, "");
+//            MyTerminalFactory.getSDK().putParam(UrlParams.POSITION, "");
+//            MyTerminalFactory.getSDK().putParam(UrlParams.ROLE_CODE, "");
+//            MyTerminalFactory.getSDK().putParam(UrlParams.ROLE_NAME, "");
+//            MyTerminalFactory.getSDK().putParam(UrlParams.PRIVILEGE_CODE, "");
+//            MyTerminalFactory.getSDK().putParam(UrlParams.PRIVILEGE_NAME, "");
+//        }
+//
+//        @Override
+//        public void onPstoreException(PstoreException e) {
+//            if (e instanceof PstoreUserException) {
+//                PstoreUserException e1 = (PstoreUserException) e;
+//                logger.error("请求user的错误码：" + e1.getErrorCode());
+//
+//                switch (e1.getErrorCode()) {
+//                    // access_token过期
+//                    case PstoreUserException.ERROR_ACCESS_TOKEN_EXPIRED:
+//                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_access_token_expire));
+//                        reauthorize();
+//                        break;
+//                    // 资源未授权
+//                    case PstoreUserException.ERROR_RES_UNAUTHORIZED:
+//                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_unauthorized_resources));
+//                        break;
+//                    // 未知错误
+//                    case PstoreUserException.ERROR_UNKONWN:
+//                        ToastUtil.showToast(PadApplication.getPadApplication().getApplicationContext(), getString(R.string.text_unknown_error));
+//                        break;
+//                    default:
+//                        break;
+//                }
+//            } else {
+//                // Unknown exception. pstoreException.getMessage()
+//                logger.error("请求user未知错误：" + e.getMessage());
+//            }
+//            finishActivity();
+//        }
+//    };
 
     private void finishActivity() {
         myHandler.postDelayed(() -> finish(), 2000);

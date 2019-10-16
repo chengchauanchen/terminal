@@ -3,14 +3,16 @@
     android:id="@+id/ll_row"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="120px"
     android:gravity="center_vertical"
-    android:orientation="horizontal">
+    android:minHeight="95px"
+    android:orientation="vertical">
+
     <LinearLayout
         android:id="@+id/ll_person_search_item"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/dp_60"
-        android:gravity="center_vertical">
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:minHeight="95px">
 
         <RelativeLayout
             android:layout_width="@dimen/dp_50"
@@ -20,7 +22,7 @@
             <ImageView
                 android:id="@+id/user_logo"
                 android:layout_width="@dimen/dp_50"
-                android:layout_height="@dimen/dp_50"/>
+                android:layout_height="@dimen/dp_50" />
 
             <ImageView
                 android:id="@+id/recorder_binded_logo"
@@ -28,7 +30,7 @@
                 android:layout_height="6dp"
                 android:layout_alignParentRight="true"
                 android:src="@drawable/ico_phone_recorder_binded"
-                android:visibility="gone"/>
+                android:visibility="gone" />
 
         </RelativeLayout>
 
@@ -45,7 +47,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"
                 android:ellipsize="end"
-                android:gravity="center_vertical"
+                android:gravity="bottom"
                 android:maxLength="12"
                 android:text="张星星"
                 android:textColor="@color/white"
@@ -57,7 +59,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:gravity="center_vertical"
+                android:gravity="top"
                 android:text="ID:123456"
                 android:textColor="@color/white"
                 android:textSize="18px"
@@ -123,10 +125,9 @@
     </LinearLayout>
 
     <View
-        android:id="@+id/lay_line"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dp_half_one"
-        android:background="@color/diver_bg"
-        android:orientation="vertical" />
+        android:layout_alignParentBottom="true"
+        android:background="@color/diver_bg" />
 </LinearLayout>
 

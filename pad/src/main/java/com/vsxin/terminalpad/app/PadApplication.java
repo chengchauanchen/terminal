@@ -2,7 +2,10 @@ package com.vsxin.terminalpad.app;
 
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.util.Log;
 
+import com.tencent.smtt.sdk.QbSdk;
+import com.tencent.smtt.sdk.TbsListener;
 import com.vsxin.terminalpad.mvp.contract.constant.AppStatusConstants;
 import com.vsxin.terminalpad.utils.CommonGroupUtil;
 import com.vsxin.terminalpad.utils.SystemUtils;
@@ -20,6 +23,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingStateMachine;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine;
+import ptt.terminalsdk.tools.ToastUtil;
 import skin.support.SkinCompatManager;
 import skin.support.design.app.SkinMaterialViewInflater;
 
@@ -58,7 +62,50 @@ public class PadApplication extends App {
 //        SkinCompatManager.withoutActivity(this)                         // 基础控件换肤初始化
 //                .addInflater(new SkinMaterialViewInflater())            // material design 控件换肤初始化[可选]
 //                .loadSkin();
+        //配置c5内容
+        initC5();
+    }
 
+    /**
+     *  配置c5内容
+     */
+    private void initC5(){
+//搜集本地tbs内核信息并上报服务器，服务器返回结果决定使用哪个内核。
+
+        QbSdk.PreInitCallback cb = new QbSdk.PreInitCallback() {
+
+            @Override
+            public void onViewInitFinished(boolean arg0) {
+                // TODO Auto-generated method stub
+                //x5內核初始化完成的回调，为true表示x5内核加载成功，否则表示x5内核加载失败，会自动切换到系统内核。
+                Log.d("app", " onViewInitFinished is " + arg0);
+
+                ToastUtil.showToast(" onViewInitFinished is " + arg0);
+            }
+
+            @Override
+            public void onCoreInitFinished() {
+                // TODO Auto-generated method stub
+            }
+        };
+        //x5内核初始化接口
+        QbSdk.initX5Environment(getApplicationContext(),  cb);
+        QbSdk.setTbsListener(new TbsListener(){
+            @Override
+            public void onDownloadFinish(int i){
+                Log.e("onDownloadFinish", "i:" + i);
+            }
+
+            @Override
+            public void onInstallFinish(int i){
+                Log.e("onInstallFinish", "i:" + i);
+            }
+
+            @Override
+            public void onDownloadProgress(int i){
+                Log.e("onDownloadProgress", "i:" + i);
+            }
+        });
     }
 
     /**

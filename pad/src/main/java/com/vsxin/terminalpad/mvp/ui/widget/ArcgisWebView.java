@@ -15,7 +15,9 @@ import android.webkit.WebViewClient;
 
 import java.io.IOException;
 
-public class ArcgisWebView extends WebView {
+import me.jessyan.autosize.internal.CustomAdapt;
+
+public class ArcgisWebView extends WebView implements CustomAdapt {
 
     private static final String TAG = "ArcgisWebView";
 
@@ -32,9 +34,12 @@ public class ArcgisWebView extends WebView {
         Log.i(TAG, "initView");
         this.requestFocus();
         this.getSettings().setJavaScriptEnabled(true);
+        this.getSettings().setSupportZoom(false);
+//        this.getSettings().setJavaScriptCanOpenWindowsAutomatically(true);
+//        this.getSettings().setBuiltInZoomControls(true);
         this.getSettings().setSaveFormData(false);
         this.getSettings().setSavePassword(false);
-        this.getSettings().setSupportZoom(false);
+//        this.getSettings().setSupportZoom(false);
         this.getSettings().setUseWideViewPort(true);
         this.getSettings().setLoadWithOverviewMode(true);
         this.getSettings().setDomStorageEnabled(true); // 开启 DOM storage API 功能
@@ -97,5 +102,15 @@ public class ArcgisWebView extends WebView {
             e.printStackTrace();
         }
         return null;
+    }
+
+    @Override
+    public boolean isBaseOnWidth() {
+        return true;
+    }
+
+    @Override
+    public float getSizeInDp() {
+        return 540;
     }
 }
