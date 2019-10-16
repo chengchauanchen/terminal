@@ -39,6 +39,7 @@ import com.vsxin.terminalpad.mvp.ui.fragment.PlayerFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.SmallMapFragment;
 import com.vsxin.terminalpad.mvp.ui.fragment.VsxFragment;
 import com.vsxin.terminalpad.mvp.ui.widget.ArcgisWebView;
+import com.vsxin.terminalpad.mvp.ui.widget.X5WebView;
 import com.vsxin.terminalpad.receiveHandler.HistoryReportPlayerHandler;
 import com.vsxin.terminalpad.receiveHandler.ReceiveUpdateMainFrgamentPTTButtonHandler;
 import com.vsxin.terminalpad.utils.HandleIdUtil;
@@ -95,7 +96,7 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
 public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter> implements IMainMapView {
 
     @BindView(R.id.web_map)
-    ArcgisWebView web_map;
+    com.tencent.smtt.sdk.WebView web_map;
     @BindView(R.id.fl_layer_member_info)
     FrameLayout fl_layer_member_info;
     @BindView(R.id.rl_group_call)
@@ -182,7 +183,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     }
 
     private void reloadWebView() {
-        //web_map.reload(); //刷新
+        web_map.reload(); //刷新
         //TerminalInfoFragment.startMemberInfoFragment(this, null, MemberTypeEnum.PHONE);
         //OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(HistoryReportPlayerHandler.class);
 //        CarOrPatrolInfoFragment.startCarBoatInfoFragment(this,new PatrolBean(), TerminalEnum.TERMINAL_PATROL);
@@ -190,7 +191,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 //        PoliceDevicesDialog policeDevicesDialog = new PoliceDevicesDialog(this,terminalBeans, OperationEnum.INDIVIDUAL_CALL);
 //        policeDevicesDialog.show();
 
-        ToastUtil.showToast(R.string.text_has_no_member_phone_number);
+//        ToastUtil.showToast(R.string.text_has_no_member_phone_number);
 
         //ToastUtil.showToast(this,getString(R.string.video_not_support));
 
@@ -201,17 +202,17 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
      * 初始化地图
      */
     private void initWebMap() {
-        web_map.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public void onProgressChanged(WebView view, int progress) {
-                if (progress >= 100) {
-                    //地图加载完成后，显示所有图层
-                    getPresenter().defaultLoadAllLayer();
-                    getLogger().info("web_map===加载完成");
-                    ToastUtil.showToast(MainMapActivity.this, "地图加载完成");
-                }
-            }
-        });
+//        web_map.setWebChromeClient(new WebChromeClient() {
+//            @Override
+//            public void onProgressChanged(WebView view, int progress) {
+//                if (progress >= 100) {
+//                    //地图加载完成后，显示所有图层
+//                    getPresenter().defaultLoadAllLayer();
+//                    getLogger().info("web_map===加载完成");
+//                    ToastUtil.showToast(MainMapActivity.this, "地图加载完成");
+//                }
+//            }
+//        });
         //将Android里面定义的类对象AndroidJs暴露给javascript
         web_map.addJavascriptInterface(new TerminalPadJs(this), "TerminalPadJs");
 

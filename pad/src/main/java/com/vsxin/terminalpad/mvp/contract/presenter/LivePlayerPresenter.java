@@ -51,7 +51,7 @@ public class LivePlayerPresenter extends BasePresenter<ILivePlayerView> {
     public void startPullLive(SurfaceTexture surface, String rtspUrl) {
         this.rtspUrl = rtspUrl;
         getView().show(true);
-        mHandler.postDelayed(() -> initEasyPlay(surface), 1200);
+        mHandler.postDelayed(() -> initEasyPlay(surface), 2000);
     }
 
     public void stopPullLive() {

@@ -8,6 +8,7 @@
     <include layout="@layout/titler_bar2"/>
 
     <LinearLayout
+        android:visibility="gone"
         android:id="@+id/ll_member_num"
         android:layout_width="match_parent"
         android:layout_height="15dp"

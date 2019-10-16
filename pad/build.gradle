@@ -89,6 +89,7 @@ def signTime() {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+
     annotationProcessor rootProject.ext.dependencies["butterknife-compiler"]
     compile 'com.android.support:multidex:1.0.3'
     implementation 'android.arch.lifecycle:runtime:1.1.1'
