@@ -96,7 +96,8 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
 public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter> implements IMainMapView {
 
     @BindView(R.id.web_map)
-    com.tencent.smtt.sdk.WebView web_map;
+//    com.tencent.smtt.sdk.WebView web_map;
+            ArcgisWebView web_map;
     @BindView(R.id.fl_layer_member_info)
     FrameLayout fl_layer_member_info;
     @BindView(R.id.rl_group_call)
@@ -176,7 +177,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
         iv_fold.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                fl_vsx.setVisibility(!isShow ? View.VISIBLE :View.GONE );
+                fl_vsx.setVisibility(!isShow ? View.VISIBLE : View.GONE);
                 isShow = !isShow;
             }
         });
@@ -202,17 +203,17 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
      * 初始化地图
      */
     private void initWebMap() {
-//        web_map.setWebChromeClient(new WebChromeClient() {
-//            @Override
-//            public void onProgressChanged(WebView view, int progress) {
-//                if (progress >= 100) {
-//                    //地图加载完成后，显示所有图层
-//                    getPresenter().defaultLoadAllLayer();
-//                    getLogger().info("web_map===加载完成");
-//                    ToastUtil.showToast(MainMapActivity.this, "地图加载完成");
-//                }
-//            }
-//        });
+        web_map.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int progress) {
+                if (progress >= 100) {
+                    //地图加载完成后，显示所有图层
+                    getPresenter().defaultLoadAllLayer();
+                    getLogger().info("web_map===加载完成");
+                    ToastUtil.showToast(MainMapActivity.this, "地图加载完成");
+                }
+            }
+        });
         //将Android里面定义的类对象AndroidJs暴露给javascript
         web_map.addJavascriptInterface(new TerminalPadJs(this), "TerminalPadJs");
 
@@ -224,7 +225,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
 //        web_map.loadUrl("http://192.168.1.187:9011/offlineMap/indexPad.html?" + format);
         //李翔本机
         getLogger().info("http://192.168.20.189:6062/donghuMap/index.html");
-        web_map.loadUrl("http://192.168.20.189:6062/donghuMap/index.html");
+        web_map.loadUrl("http://192.168.1.152:8080/#/");
 //        web_map.loadUrl("http://192.168.20.188:9011/offlineMapForLin/indexPad.html?" + format);
     }
 
@@ -260,14 +261,14 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     }
 
     //组呼来了
-    private void jsGroupCallComing(int memberId, final String memberName, final int groupId, String groupName, CallMode currentCallMode, long uniqueNo){
+    private void jsGroupCallComing(int memberId, final String memberName, final int groupId, String groupName, CallMode currentCallMode, long uniqueNo) {
 
-        Map<Object,Object> json = new HashMap<>();
-        json.put("memberId",memberId);
-        json.put("memberName",memberName);
-        json.put("groupId",groupId);
-        json.put("currentCallMode",currentCallMode.getCode());
-        json.put("uniqueNo",uniqueNo);
+        Map<Object, Object> json = new HashMap<>();
+        json.put("memberId", memberId);
+        json.put("memberName", memberName);
+        json.put("groupId", groupId);
+        json.put("currentCallMode", currentCallMode.getCode());
+        json.put("uniqueNo", uniqueNo);
 
         Gson gson = new Gson();
         String s = gson.toJson(json);
@@ -275,7 +276,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
     }
 
     //组呼来了
-    private void jsGroupCallEnd(int type, boolean isShow){
+    private void jsGroupCallEnd(int type, boolean isShow) {
         web_map.loadUrl("javascript:chooseEquipment(" + type + "," + isShow + ")");
     }
 
@@ -886,7 +887,7 @@ public class MainMapActivity extends MvpActivity<IMainMapView, MainMapPresenter>
                 MyTerminalFactory.getSDK().putParam(Params.CURRENT_SPEAKER, memberName);
 
                 //TODO 调地图的js
-                jsGroupCallComing(memberId,memberName,groupId,groupName,currentCallMode,uniqueNo);
+                jsGroupCallComing(memberId, memberName, groupId, groupName, currentCallMode, uniqueNo);
             });
 
 //            speakingId = groupId;

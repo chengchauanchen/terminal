@@ -15,7 +15,7 @@
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="match_parent" />-->
 
-        <com.vsxin.terminalpad.mvp.ui.widget.X5WebView
+        <com.vsxin.terminalpad.mvp.ui.widget.ArcgisWebView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/web_map"/>
