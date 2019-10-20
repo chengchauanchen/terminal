@@ -5,9 +5,11 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.ActivityCompat;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -36,6 +38,8 @@ public class LocationManager {
     private Logger logger = Logger.getLogger(getClass());
 
     public static final String TAG = "LocationManager---";
+    //传递地理位置信息的key
+    public static final String BUNDLE_ADDRESS = "bundle_address";
 
     //最后一次上传位置信息的时间
     private long lastUpLocationTime;
@@ -371,6 +375,7 @@ public class LocationManager {
             params.put("speed",location.getSpeed());
             params.put("bearing",location.getBearing());
             params.put("altitude",location.getAltitude());
+            params.put("addressStr",getAddressString(location.getExtras()));
             params.put("mountType", MountType.MOUNT_SELF.toString());
             Gson gson = new Gson();
             final String json = gson.toJson(params);
@@ -434,6 +439,33 @@ public class LocationManager {
         } else {
             return Math.max(5 * 1000, MyTerminalFactory.getSDK().getParam(Params.GPS_FORCE_UPLOAD_INTERVAL, 5 * 1000));//强制上传最小间隔是5秒钟
         }
+    }
+
+    /**
+     * 获取含有地址信息的Bundle
+     * @param address
+     * @return
+     */
+    public Bundle getAddressBundle(String address){
+        Bundle bundle  = new Bundle();
+        bundle.putString(BUNDLE_ADDRESS,address);
+        return bundle;
+    }
+
+    /**
+     * 获取含有地址信息的String
+     * @param bundle
+     * @return
+     */
+    public String getAddressString(Bundle bundle){
+        String address = "";
+        if(bundle!=null&&bundle.containsKey(BUNDLE_ADDRESS)){
+            address = bundle.getString(BUNDLE_ADDRESS);
+        }
+        if(TextUtils.isEmpty(address)){
+            address = "";
+        }
+        return address;
     }
 
 }

@@ -1,6 +1,8 @@
 package ptt.terminalsdk.manager.gps.recoder;
 
 import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -69,7 +71,29 @@ public class RecorderGPSManager {
 
 			@Override
 			public void onLocationChanged(Location location) {
-				logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager中onLocationChanged--Longitude:" + location.getLongitude()+"--Latitude:" +location.getLatitude());
+				logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager中onLocationChanged--Longitude:" + location.getLongitude()+"--Latitude:" +location.getLatitude()
+						+"--location:" +location);
+				StringBuffer stringBuffer = new StringBuffer();
+				try {
+					List<Address> addresses = new Geocoder(context).getFromLocation(
+							location.getLatitude(), location.getLongitude(),
+							1);
+					if (addresses.size() > 0) {
+						Address address = addresses.get(0);
+						stringBuffer.append(address.getCountryName());
+                        if(address.getMaxAddressLineIndex() == 0){
+                            stringBuffer.append(address.getAddressLine(0));
+                        }else{
+                            for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+                                stringBuffer.append(address.getAddressLine(i));
+                            }
+                        }
+					}
+				}catch (Exception e){
+					e.printStackTrace();
+				}
+				location.setExtras(MyTerminalFactory.getSDK().getLocationManager().getAddressBundle(stringBuffer.toString()));
+				logger.info(ptt.terminalsdk.manager.gps.recoder.LocationManager.TAG+"GPSManager中onLocationChanged--addresses:" + stringBuffer.toString());
 				MyTerminalFactory.getSDK().getLocationManager().dispatchCommitLocation(location);
 			}
 		};

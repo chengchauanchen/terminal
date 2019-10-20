@@ -79,6 +79,7 @@ public class MyRecorderLocationListener extends BDAbstractLocationListener {
         location.setLongitude(longitude);
         location.setSpeed(bdLocation.getSpeed());
         location.setAltitude(bdLocation.getAltitude());
+        location.setExtras(MyTerminalFactory.getSDK().getLocationManager().getAddressBundle(bdLocation.getAddrStr()));
         return location;
     }
 
