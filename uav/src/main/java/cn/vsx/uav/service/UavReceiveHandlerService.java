@@ -169,6 +169,7 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
         params.put("speed",0.0f);
         params.put("bearing",0.0f);
         params.put("altitude",altitude);
+        params.put("addressStr","");
         params.put("mountType", MountType.MOUNT_UAV.toString());
         Gson gson = new Gson();
         final String json = gson.toJson(params);
