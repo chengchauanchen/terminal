@@ -165,6 +165,9 @@ public class MyNettyClient extends NettyClient implements IConnectionClient{
 //        }
         if(isClearHandler){
             serverMessageReceivedHandlerAidls.clear();
+            if(handler != null){
+                unregistServerConnectionEstablishedHandler(handler);
+            }
         }
     }
 

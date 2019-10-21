@@ -77,17 +77,22 @@
                     android:layout_centerInParent="true"
                     android:clickable="false"
                     android:src="@drawable/video" />
+    
+                <TextView
+                    android:id="@+id/tv_voice_length"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBottom="@id/iv_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginLeft="@dimen/dp_5"
+                    android:textSize="12sp"
+                    android:textColor="@color/chat_name"
+                    android:gravity="center" />
+            
             </RelativeLayout>
 
-            <TextView
-                android:id="@+id/tv_voice_length"
-                style="@style/chat_text_name_style"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@id/rl_content"
-                android:layout_marginLeft="@dimen/dp_5"
-                android:layout_toRightOf="@id/rl_content"
-                android:gravity="center" />
+            
 
             <com.zectec.imageandfileselector.view.LoadingCircleView
                 android:id="@+id/loading_view"

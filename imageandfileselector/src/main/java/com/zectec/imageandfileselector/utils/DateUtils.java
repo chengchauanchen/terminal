@@ -1,5 +1,8 @@
 package com.zectec.imageandfileselector.utils;
 
+import android.util.Log;
+
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -232,5 +235,24 @@ public class DateUtils {
     public static String getYearTime(long time,String yearTimeFormat) {
         SimpleDateFormat format = new SimpleDateFormat(yearTimeFormat);
         return format.format(new Date(time));
+    }
+
+    public static String formatDateTime(long milliseconds) {
+        StringBuilder sb = new StringBuilder();
+        long mss = milliseconds / 1000;
+        long days = mss / (60 * 60 * 24);
+        long hours = (mss % (60 * 60 * 24)) / (60 * 60);
+        long minutes = (mss % (60 * 60)) / 60;
+        long seconds = mss % 60;
+        DecimalFormat format = new DecimalFormat("00");
+        Log.d("Time", "--days:"+days+"--hours:"+hours+"--minutes:"+minutes+"--seconds:"+seconds);
+        if (days > 0 || hours > 0) {
+            sb.append(format.format(hours)).append(":").append(format.format(minutes)).append(":").append(format.format(seconds));
+        }else {
+            sb.append(format.format(minutes)).append(":").append(format.format(seconds));
+        }
+
+        Log.d("Time", "--data:"+sb.toString());
+        return sb.toString();
     }
 }

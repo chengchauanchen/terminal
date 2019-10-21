@@ -4,6 +4,7 @@ import android.os.RemoteException;
 
 import com.google.protobuf.GeneratedMessage;
 
+import org.ddpush.im.client.v1.ServerConnectionChangedHandler;
 import org.ddpush.im.client.v1.ServerConnectionEstablishedHandler;
 import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import cn.vsx.hamster.terminalsdk.manager.channel.ServerMessageReceivedHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.IMessageService;
 import ptt.terminalsdk.PushMessageSendResultHandlerAidl;
+import ptt.terminalsdk.ServerConnectionChangedHandlerAidl;
 import ptt.terminalsdk.ServerConnectionEstablishedHandlerAidl;
 import ptt.terminalsdk.ServerMessageReceivedHandlerAidl;
 import ptt.terminalsdk.ServerMessageReceivedHandlerAidl.Stub;
@@ -50,6 +52,16 @@ public class ClientChannel extends AbsClientChannel {
 //			for (ServerConnectionEstablishedHandler handler : serverConnectionEstablishedHandlers){
 //				handler.handler(connected);
 //			}
+		}
+	};
+
+	private ServerConnectionChangedHandler serverConnectionChangedHandler;
+	private ServerConnectionChangedHandlerAidl connectionChangedHandler = new ServerConnectionChangedHandlerAidl.Stub(){
+		@Override
+		public void handler(boolean connected) throws RemoteException{
+			if(serverConnectionChangedHandler != null){
+				serverConnectionChangedHandler.handler(connected);
+			}
 		}
 	};
 
@@ -110,6 +122,16 @@ public class ClientChannel extends AbsClientChannel {
 //		serverConnectionEstablishedHandlers.remove(handler);
 	}
 
+	@Override
+	public void registServerConnectionChangedHandler(ServerConnectionChangedHandler handler){
+		serverConnectionChangedHandler = handler;
+	}
+
+	@Override
+	public void unregistServerConnectionChangedHandler(){
+		serverConnectionChangedHandler = null;
+	}
+
 	boolean isStarted;
 	@Override
 	public void start() {
@@ -118,6 +140,7 @@ public class ClientChannel extends AbsClientChannel {
 				String protocolType = TerminalFactory.getSDK().getParam(Params.PROTOCOL_TYPE, Params.UDP);
 				messageService.initConnectionClient(protocolType);
 				messageService.registServerConnectionEstablishedHandler(handlerAidl);
+				messageService.registServerConnectionChangedHandler(connectionChangedHandler);
 				messageService.registMessageReceivedHandler(handler);
 				isStarted = true;
 				logger.info("ClientChannel  start成功!");

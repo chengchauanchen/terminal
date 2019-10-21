@@ -541,7 +541,7 @@
         
         <ListView
             android:id="@+id/lv_aircraft_live_member_info"
-            android:layout_width="80dp"
+            android:layout_width="120dp"
             android:layout_height="120dp"
             android:layout_centerVertical="true"
             android:layout_marginRight="20dp"

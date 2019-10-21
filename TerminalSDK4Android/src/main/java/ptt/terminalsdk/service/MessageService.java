@@ -19,6 +19,7 @@ import de.mindpipe.android.logging.log4j.LogConfigurator;
 import ptt.terminalsdk.IMessageService;
 import ptt.terminalsdk.IMessageService.Stub;
 import ptt.terminalsdk.PushMessageSendResultHandlerAidl;
+import ptt.terminalsdk.ServerConnectionChangedHandlerAidl;
 import ptt.terminalsdk.ServerConnectionEstablishedHandlerAidl;
 import ptt.terminalsdk.ServerMessageReceivedHandlerAidl;
 
@@ -31,6 +32,7 @@ public class MessageService extends Service {
     private Logger logger = LoggerFactory.getLogger(MessageService.class);
     private static final String TAG = "MessageService--";
     private IConnectionClient connectionClient;
+    private ServerConnectionChangedHandlerAidl serverConnectionChangedHandlerAidl;
 
     @Override
     public void onCreate() {
@@ -129,6 +131,14 @@ public class MessageService extends Service {
             logger.error("MessageService调用了onUnbind--e"+e);
             e.printStackTrace();
         }
+        // Service 有时被系统杀死，会调用此方法，此时应该重新去连接
+        try{
+            if(serverConnectionChangedHandlerAidl != null){
+                serverConnectionChangedHandlerAidl.handler(false);
+            }
+        }catch(RemoteException e){
+            e.printStackTrace();
+        }
         return super.onUnbind(intent);
     }
 
@@ -191,6 +201,16 @@ public class MessageService extends Service {
         public void initConnectionClient(String protocolType) throws RemoteException{
             logger.info("initConnectionClient--"+protocolType);
             initClient(protocolType);
+        }
+
+        @Override
+        public void registServerConnectionChangedHandler(ServerConnectionChangedHandlerAidl handler) throws RemoteException{
+            MessageService.this.serverConnectionChangedHandlerAidl = handler;
+        }
+
+        @Override
+        public void unregistServerConnectionChangedHandler() throws RemoteException{
+            MessageService.this.serverConnectionChangedHandlerAidl = null;
         }
     };
 

@@ -3,6 +3,7 @@ package ptt.terminalsdk;
 import ptt.terminalsdk.ServerMessageReceivedHandlerAidl;
 import ptt.terminalsdk.PushMessageSendResultHandlerAidl;
 import ptt.terminalsdk.ServerConnectionEstablishedHandlerAidl;
+import ptt.terminalsdk.ServerConnectionChangedHandlerAidl;
 
 interface IMessageService {
     void registMessageReceivedHandler(ServerMessageReceivedHandlerAidl handler);
@@ -11,4 +12,6 @@ interface IMessageService {
     void registServerConnectionEstablishedHandler(ServerConnectionEstablishedHandlerAidl handler);
     void unregistServerConnectionEstablishedHandler(ServerConnectionEstablishedHandlerAidl handler);
     void initConnectionClient(in String protocolType);
+    void registServerConnectionChangedHandler(ServerConnectionChangedHandlerAidl handler);
+    void unregistServerConnectionChangedHandler();
 }

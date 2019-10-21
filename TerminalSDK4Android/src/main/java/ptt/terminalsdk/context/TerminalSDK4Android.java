@@ -45,6 +45,7 @@ import com.google.gson.internal.LinkedTreeMap;
 import com.google.gson.reflect.TypeToken;
 
 import org.apache.log4j.Level;
+import org.ddpush.im.client.v1.ServerConnectionChangedHandler;
 import org.ddpush.im.client.v1.ServerConnectionEstablishedHandler;
 import org.ddpush.im.util.StringUtil;
 import org.easydarwin.push.UVCCameraService;
@@ -1129,6 +1130,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			logger.error("MessageService --- onServiceConnected");
 			messageService = Stub.asInterface(service);
 			clientChannel = null;
+			getClientChannel().registServerConnectionChangedHandler(serverConnectionChangedHandler);
 			getClientChannel().registServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
 			getClientChannel().start();
 			startService();//bind方式启动onlineservice，普通方式启动bluetoothservice
@@ -1142,6 +1144,20 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	public ServiceConnection getMessageServiceConn(){
 		return messageServiceConn;
 	}
+
+	/**
+	 * MessageService 执行了unbind的时候
+	 */
+	private ServerConnectionChangedHandler serverConnectionChangedHandler = new ServerConnectionChangedHandler(){
+		@Override
+		public void handler(boolean connected){
+			logger.info("ServerConnectionChangedHandler:"+connected);
+			if(!connected && bindService){
+				connectToServer();
+			}
+		}
+	};
+
 	private ServerConnectionEstablishedHandler serverConnectionEstablishedHandler = new ServerConnectionEstablishedHandler() {
 		@Override
 		public void handler(boolean connected) {
@@ -1391,7 +1407,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 						hashMap.put("appVersion", getVersionName());
 						hashMap.put("Accept", "application/json");
 						hashMap.put("Content-type",
-								"application/x-www-form-urlencoded");
+								"application/json;charset=UTF-8");
 						hashMap.put("client", "android");
 						return hashMap;
 					}

@@ -16,7 +16,10 @@
         tools:replace="label, theme">
         <activity
             android:name=".activity.UavPushActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"></activity>
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:launchMode="singleTask">
+            
+        </activity>
         <!-- DJI SDK -->
         <uses-library android:name="com.android.future.usb.accessory" />
         <activity

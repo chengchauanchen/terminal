@@ -181,6 +181,12 @@ public class UavPushActivity extends BaseActivity{
     }
 
     @Override
+    protected void onNewIntent(Intent intent){
+        setIntent(intent);
+        initData();
+    }
+
+    @Override
     public Resources getResources(){
         return AdaptScreenUtils.adaptWidth(super.getResources(), 1200);
     }
@@ -246,6 +252,9 @@ public class UavPushActivity extends BaseActivity{
             //            mBtnStopPush.setVisibility(View.GONE);
             mIvTakePhoto.setImageResource(R.drawable.uav_take_photo);
         }
+        myHandler.postDelayed((Runnable) () -> {
+            mIvCloseVoice.setVisibility(View.GONE);
+        },5000);
     }
 
     @Override

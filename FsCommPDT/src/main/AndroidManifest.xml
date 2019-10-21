@@ -75,7 +75,6 @@
     <!--打无人机包的时候把Application的name属性去掉即可-->
     <!--android:name=".application.MyApplication"-->
     <application
-        android:name=".application.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -213,12 +212,6 @@
         <receiver
             android:name=".receiver.HeadsetPlugReceiver"
             android:permission="2147483647" />
-        <receiver android:name="ptt.terminalsdk.broadcastreceiver.PhoneBroadcastReceiver">
-            <intent-filter>
-                <action android:name="android.intent.action.PHONE_STATE" />
-                <action android:name="android.intent.action.NEW_OUTGOING_CALL" />
-            </intent-filter>
-        </receiver>
         <receiver
             android:name="ptt.terminalsdk.broadcastreceiver.TickAlarmReceiver"
             android:permission="2147483647" />

@@ -58,7 +58,6 @@ import cn.vsx.hamster.common.MessageSendStateEnum;
 import cn.vsx.hamster.common.MessageStatus;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.common.Remark;
-import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
@@ -875,7 +874,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 e.printStackTrace();
             }
             if(videoTime >0){
-                setText(holder.tvDuration, videoTime/1000 + "''");
+                setText(holder.tvDuration, DateUtils.formatDateTime(videoTime));
             }
             if(terminalMessage.messageBody.containsKey(JsonParam.PICTURE_THUMB_URL)){
                 String pictureThumbUrl = terminalMessage.messageBody.getString(JsonParam.PICTURE_THUMB_URL);

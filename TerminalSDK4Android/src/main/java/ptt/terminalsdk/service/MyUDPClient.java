@@ -174,6 +174,9 @@ public class MyUDPClient extends UDPClientBase implements IConnectionClient{
             super.stop();
             if(isClearHandler){
                 serverMessageReceivedHandlerAidls.clear();
+                if(handler != null){
+                    unregistServerConnectionEstablishedHandler(handler);
+                }
             }
         }catch(Exception e){
             e.printStackTrace();

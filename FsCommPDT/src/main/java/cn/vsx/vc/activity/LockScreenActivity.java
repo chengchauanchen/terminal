@@ -281,17 +281,15 @@ public class LockScreenActivity extends BaseActivity {
     }
 
     private void lockPttUpDoThing() {
-        if (MyApplication.instance.isPttPress) {
-            MyApplication.instance.isPttPress = false;
-            MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
-            if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
-                change2Listening();
-            } else {
-                change2Silence();
-            }
-            logger.info("锁屏界面的PTT抬起");
-            MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
+        MyApplication.instance.isPttPress = false;
+        MyTerminalFactory.getSDK().getAudioProxy().volumeCancelQuiet();
+        if (MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING) {
+            change2Listening();
+        } else {
+            change2Silence();
         }
+        logger.info("锁屏界面的PTT抬起");
+        MyTerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
     }
 
 
