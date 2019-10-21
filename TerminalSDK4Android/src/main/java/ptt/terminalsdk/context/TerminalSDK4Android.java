@@ -145,6 +145,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private boolean bindService;
 	private String accessServerIp;
 	private int accessServerPort;
+	private String protocolType;
     private VoipManager voipManager;
     private LiveManager liveManager;
 	//DDpush连接
@@ -1074,7 +1075,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 //		disConnectToServer();
 		uuidByte = StringUtil.hexStringToByteArray(getUuid());
 		accessServerIp = getParam(Params.ACCESS_SERVER_IP, "");
-		String protocolType = getParam(Params.PROTOCOL_TYPE, Params.UDP);
+		protocolType = getParam(Params.PROTOCOL_TYPE, Params.UDP);
 		if(Params.TCP.equals(protocolType)){
 			accessServerPort = getParam(Params.ACCESS_SERVER_TCP_PORT,0);
 		}else if(Params.UDP.equals(protocolType)){
@@ -1083,25 +1084,28 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		logger.info("uuidByte.length"+ uuidByte.length +"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
 
 
-		Intent messageService = new Intent(application, MessageService.class);
+		Intent messageServiceIntent = new Intent(application, MessageService.class);
 
 		logger.error("确定另一个进程messageService的哈希值------------->messageService.hashCode = "+this.messageService);
 
 		//首先要绑定服务，获取service实例，才能注册handler。
 
 		if (uuidByte.length != 0 && accessServerIp.length() != 0 && accessServerPort != 0) {
-			messageService.putExtra("uuid", uuidByte);
-			messageService.putExtra("accessServerIp", accessServerIp);
-			messageService.putExtra("accessServerPort", accessServerPort);
-			messageService.putExtra("protocolType",protocolType);
-			application.startService(messageService);
+			messageServiceIntent.putExtra("uuid", uuidByte);
+			messageServiceIntent.putExtra("accessServerIp", accessServerIp);
+			messageServiceIntent.putExtra("accessServerPort", accessServerPort);
+			messageServiceIntent.putExtra("protocolType",protocolType);
+			application.startService(messageServiceIntent);
 			logger.info("开始启动服务MessageService, 连接到信令服务");
-
-			if (this.messageService == null) {
-				application.bindService(messageService, messageServiceConn, BIND_AUTO_CREATE);
+            //如果messageService不为空把Service先unbind,再bindService，保证onServiceConnected可以正常被调用
+			if(this.messageService !=null){
+				unBindMessageService();
+			}
+//			if (this.messageService == null) {
+				application.bindService(messageServiceIntent, messageServiceConn, BIND_AUTO_CREATE);
 				bindService = true;
 				logger.info("开始绑定服务MessageService"+bindService);
-			}
+//			}
 		}else {
 			logger.error("接入服务地址不对！！不能出现这种情况");
 		}
@@ -1123,6 +1127,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			logger.error("连接停止时出现异常", e);
 		}
 	}
+
 	private IMessageService messageService;
 	private ServiceConnection messageServiceConn = new ServiceConnection() {
 		@Override
@@ -1134,6 +1139,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			getClientChannel().registServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
 			getClientChannel().start();
 			startService();//bind方式启动onlineservice，普通方式启动bluetoothservice
+			//当绑定成功之后再开始连接Client
+			notifyConnetClientToServer();
 		}
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
@@ -1141,6 +1148,33 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			connectToServer();
 		}
 	};
+
+	/**
+	 * 如果messageService不为空把Service先unbind,再bindService，保证onServiceConnected可以正常被调用
+	 */
+	private void unBindMessageService() {
+		if (bindService && messageServiceConn != null) {
+			application.unbindService(messageServiceConn);
+			logger.error("停止与服务器的连接");
+		}
+		bindService = false;
+		messageService = null;
+	}
+
+	/**
+	 * 当绑定成功之后再开始连接Client
+	 */
+	private void notifyConnetClientToServer(){
+		Intent intent = new Intent(Params.BR_START_CONNECT_CLIENT);
+		if (uuidByte.length != 0 && accessServerIp.length() != 0 && accessServerPort != 0) {
+			intent.putExtra("uuid", uuidByte);
+			intent.putExtra("accessServerIp", accessServerIp);
+			intent.putExtra("accessServerPort", accessServerPort);
+			intent.putExtra("protocolType", protocolType);
+		}
+		application.sendBroadcast(intent);
+	}
+
 	public ServiceConnection getMessageServiceConn(){
 		return messageServiceConn;
 	}

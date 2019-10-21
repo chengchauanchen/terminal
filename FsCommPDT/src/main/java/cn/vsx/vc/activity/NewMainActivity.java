@@ -219,6 +219,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     noNetWork.setVisibility(View.VISIBLE);
                     tv_status.setText(R.string.authing);
                 });
+            }else if(state!=null&&state == LoginState.LOGIN){
+                //正在登录时，再次登录不修改UI
             }else{
                 myHandler.post(()-> noNetWork.setVisibility(View.GONE));
             }

@@ -2,11 +2,15 @@ package ptt.terminalsdk.service;
 
 import android.annotation.SuppressLint;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 
 import org.apache.log4j.Level;
 import org.slf4j.Logger;
@@ -37,6 +41,9 @@ public class MessageService extends Service {
     @Override
     public void onCreate() {
         configLogger();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(Params.BR_START_CONNECT_CLIENT);
+        registerReceiver(receiveStartConnectClientHandler, intentFilter);
         logger.info("MessageService执行了onCreate()");
     }
 
@@ -50,6 +57,15 @@ public class MessageService extends Service {
     public int onStartCommand(Intent intent,  int flags, int startId) {
         logger.info("MessageService执行了onStartCommand()---flags:"+flags+"------startId:"+startId);
         KeepLiveManager.getInstance().setServiceForeground(this);
+
+        return super.onStartCommand(intent,flags,startId);
+    }
+
+    /**
+     * 开始连接Client
+     * @param intent
+     */
+    private void startConnect(Intent intent){
         byte[] uuid = new byte[0];
         String accessServerIp = "";
         int accessServerPort = 0;
@@ -72,8 +88,6 @@ public class MessageService extends Service {
         logger.info("MessageService ----> onStartCommand---- protocolType:"+protocolType+"--uuid = "+ uuid.length+"  accessServerIp = "+ accessServerIp +"  accessServerPort = "+ accessServerPort);
         initClient(protocolType);
         startClient(uuid,accessServerIp,accessServerPort);
-
-        return super.onStartCommand(intent,flags,startId);
     }
 
     private synchronized void initClient(String protocolType){
@@ -145,6 +159,9 @@ public class MessageService extends Service {
     @Override
     public void onDestroy() {
         logger.info("MessageService执行了onDestroy()--connectionClient:"+(connectionClient!=null));
+        if(receiveStartConnectClientHandler != null){
+            unregisterReceiver(receiveStartConnectClientHandler);
+        }
         try {
             if(connectionClient!=null){
                 connectionClient.stop(true);
@@ -253,4 +270,17 @@ public class MessageService extends Service {
                 + File.separator + this.getApplicationInfo().loadLabel(this.getPackageManager())+ File.separator + "logs"
                 + File.separator;
     }
+
+    /**
+     * 通知开始连接Client
+     */
+    private BroadcastReceiver receiveStartConnectClientHandler = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent){
+            String action = intent.getAction();
+            if(action != null && TextUtils.equals(Params.BR_START_CONNECT_CLIENT,action)){
+                startConnect(intent);
+            }
+        }
+    };
 }
