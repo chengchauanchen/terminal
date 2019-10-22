@@ -7,7 +7,7 @@
         </shape>
     </item>
 
-    <item android:width="140px" android:height="140px" android:left="20px" android:top="20px">
+    <item android:width="150px" android:height="150px" android:left="15px" android:top="15px">
         <shape android:shape="oval" >
             <solid android:color="@color/group_call_wait_1"/>
         </shape>

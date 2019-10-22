@@ -66,7 +66,7 @@ public class MessageListPresenter extends RefreshPresenter<TerminalMessage, IMes
             terminalMessageData.clear();
             clearData();
             List<TerminalMessage> messageList = TerminalFactory.getSDK().getTerminalMessageManager().getMessageList();
-            getView().getLogger().info("从数据库取出消息列表：" + messageList);
+            getView().getLogger().info("从数据库取出消息列表：" + messageList.toString());
             addData(messageList);
         }
     }
@@ -396,7 +396,7 @@ public class MessageListPresenter extends RefreshPresenter<TerminalMessage, IMes
      * 保存会话列表到本地数据库
      */
     private void saveConversationListToDB() {
-        getView().getLogger().info("---------保存消息列表---------" + messageList);
+//        getView().getLogger().info("---------保存消息列表---------" + messageList);
         //该方法本身为同步方法,线程安全
         MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(messageList);
     }
@@ -493,7 +493,7 @@ public class MessageListPresenter extends RefreshPresenter<TerminalMessage, IMes
     }
 
     private synchronized void saveMessagesToSql(){
-        getView().getLogger().info("---------保存消息列表---------"+messageList);
+//        getView().getLogger().info("---------保存消息列表---------"+messageList);
         MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(messageList);
     }
 
