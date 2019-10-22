@@ -130,7 +130,6 @@
                     android:lines="2"
                     android:ellipsize="end"
                     android:textSize="23px"
-                    android:text="aindoawinroianobniaoinfb"
                     android:textColor="@color/white"
                     android:layout_below="@+id/tx_ptt_time"/>
             </RelativeLayout>
