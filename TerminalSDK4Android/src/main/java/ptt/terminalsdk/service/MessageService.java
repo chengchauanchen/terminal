@@ -279,6 +279,7 @@ public class MessageService extends Service {
         public void onReceive(Context context, Intent intent){
             String action = intent.getAction();
             if(action != null && TextUtils.equals(Params.BR_START_CONNECT_CLIENT,action)){
+                logger.info("receiveStartConnectClientHandler--开始连接服务器");
                 startConnect(intent);
             }
         }
