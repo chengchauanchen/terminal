@@ -72,6 +72,7 @@ public class ChangeGroupView extends FrameLayout{
 					}
 					if(commandQueue.size() == 0 && onGroupChangedListener != null){
 						GroupBean bean = getGroupData(currentDataIndex);
+						logger.info("ChangeGroupView:---data:"+data+"--currentDataIndex-"+currentDataIndex);
 						onGroupChangedListener.onGroupChanged((bean!=null)?bean.getNo():0, (bean!=null)?bean.getName():"");
 					}
 				} catch (InterruptedException e) {
