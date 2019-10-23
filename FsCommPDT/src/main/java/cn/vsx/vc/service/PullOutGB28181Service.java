@@ -60,6 +60,8 @@ public class PullOutGB28181Service extends BaseService{
 
     private EasyRTSPClient mStreamRender;
     private TerminalMessage terminalMessage;
+    //是否开始拉流
+    private boolean started;
 
 
     public PullOutGB28181Service(){}
@@ -157,7 +159,7 @@ public class PullOutGB28181Service extends BaseService{
             }
         }else {
             mHandler.removeMessages(OFF_LINE);
-            if(null != mSvGb28181.getSurfaceTexture()){
+            if(checkIfStartPull()){
                 startPullGB28121(mSvGb28181.getSurfaceTexture());
             }
         }
@@ -201,7 +203,6 @@ public class PullOutGB28181Service extends BaseService{
      * 收到OutGB28181的播放地址
      **/
     private ReceiveHiKvisionUrlHandler receiveHiKvisionUrlHandler = (success,result,deviceId) -> {
-        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.force_stop_watch));
         mHandler.post(new Runnable() {
             @Override
             public void run() {
@@ -209,6 +210,9 @@ public class PullOutGB28181Service extends BaseService{
                     gb28181Url = result;
                     logger.info("播放地址："+ gb28181Url);
                     mVideoPlatform.setVisibility(View.VISIBLE);
+                    if(!started && null != mSvGb28181.getSurfaceTexture()){
+                        startPullGB28121(mSvGb28181.getSurfaceTexture());
+                    }
                 }else{
                     ToastUtil.showToast(MyTerminalFactory.getSDK().application,result);
                     stopBusiness();
@@ -233,7 +237,10 @@ public class PullOutGB28181Service extends BaseService{
     private TextureView.SurfaceTextureListener GB28181SurfaceTextureListener  = new TextureView.SurfaceTextureListener(){
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height){
-            startPullGB28121(surface);
+            logger.info("onSurfaceTextureAvailable");
+            if(checkIfStartPull()){
+                startPullGB28121(surface);
+            }
         }
 
         @Override
@@ -242,6 +249,7 @@ public class PullOutGB28181Service extends BaseService{
 
         @Override
         public boolean onSurfaceTextureDestroyed(SurfaceTexture surface){
+            logger.info("onSurfaceTextureDestroyed");
             stopPull();
             return true;
         }
@@ -251,10 +259,15 @@ public class PullOutGB28181Service extends BaseService{
         }
     };
 
+    private boolean checkIfStartPull(){
+        return mSvGb28181.getSurfaceTexture() != null && !android.text.TextUtils.isEmpty(gb28181Url);
+    }
+
     private void stopPull(){
         mHandler.removeMessages(CURRENTTIME);
         if (mStreamRender != null) {
             mStreamRender.stop();
+            started = false;
             mStreamRender = null;
         }
     }
@@ -268,17 +281,19 @@ public class PullOutGB28181Service extends BaseService{
             try {
                 if (gb28181Url != null) {
                     mStreamRender.start(gb28181Url, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
-
+                    started = true;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
                 //Toast.makeText(IndividualCallService.this, e.getMessage(), Toast.LENGTH_SHORT).show();
-                logger.error("IndividualCallService :"+e.toString());
+                logger.error("拉流失败 :"+e);
             }
-        }else {
-            ToastUtil.showToast(PullOutGB28181Service.this,getResources().getString(R.string.no_rtsp_data));
-            stopBusiness();
         }
+        //去海康服务请求视频地址可能还没返回
+        //        else {
+        //            ToastUtil.showToast(PullOutGB28181Service.this,getResources().getString(R.string.no_rtsp_data));
+        //            stopBusiness();
+        //        }
     }
 
 
@@ -293,9 +308,9 @@ public class PullOutGB28181Service extends BaseService{
             if (resultCode == EasyRTSPClient.RESULT_VIDEO_DISPLAYED) {
                 pullcount = 0;
             } else if (resultCode == EasyRTSPClient.RESULT_VIDEO_SIZE) {
-//                if(isPulling){
-//                    return;
-//                }
+                //                if(isPulling){
+                //                    return;
+                //                }
                 mLiveWidth = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_WIDTH);
                 mLiveHeight = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_HEIGHT);
                 onVideoSizeChange();

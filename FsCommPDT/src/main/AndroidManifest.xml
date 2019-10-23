@@ -75,6 +75,7 @@
     <!--打无人机包的时候把Application的name属性去掉即可-->
     <!--android:name=".application.MyApplication"-->
     <application
+        android:name=".application.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
