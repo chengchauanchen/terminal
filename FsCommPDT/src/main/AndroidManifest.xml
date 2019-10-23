@@ -2,8 +2,8 @@
 <manifest package="cn.vsx.vc"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="54"
-    android:versionName="1.0.54">
+    android:versionCode="56"
+    android:versionName="1.0.56">
     <!-- android:sharedUserId="android.uid.system" -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -48,6 +48,8 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.NFC" /> <!-- 声明需要硬件支持nfc -->
+    <!-- android 9.0上使用前台服务，需要添加权限 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-feature
         android:name="android.hardware.nfc.hce"
         android:required="true" />
