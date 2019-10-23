@@ -162,6 +162,9 @@ public class MyUDPClient extends UDPClientBase implements IConnectionClient{
     @Override
     public void start(){
         try{
+            if(isStarted()){
+                super.stop();
+            }
             super.start();
         }catch(Exception e){
             e.printStackTrace();

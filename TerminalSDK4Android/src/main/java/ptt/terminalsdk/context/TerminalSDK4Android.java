@@ -1089,7 +1089,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		logger.error("确定另一个进程messageService的哈希值------------->messageService.hashCode = "+this.messageService);
 
 		//首先要绑定服务，获取service实例，才能注册handler。
-
+		//如果messageService不为空把Service先unbind,再bindService，保证onServiceConnected可以正常被调用
+		if(this.messageService !=null){
+			unBindMessageService();
+		}
 		if (uuidByte.length != 0 && accessServerIp.length() != 0 && accessServerPort != 0) {
 			messageServiceIntent.putExtra("uuid", uuidByte);
 			messageServiceIntent.putExtra("accessServerIp", accessServerIp);
@@ -1097,10 +1100,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 			messageServiceIntent.putExtra("protocolType",protocolType);
 			application.startService(messageServiceIntent);
 			logger.info("开始启动服务MessageService, 连接到信令服务");
-            //如果messageService不为空把Service先unbind,再bindService，保证onServiceConnected可以正常被调用
-			if(this.messageService !=null){
-				unBindMessageService();
-			}
+
+
 //			if (this.messageService == null) {
 				application.bindService(messageServiceIntent, messageServiceConn, BIND_AUTO_CREATE);
 				bindService = true;
