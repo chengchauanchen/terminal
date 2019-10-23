@@ -1149,6 +1149,7 @@ public class UavPushActivity extends BaseActivity{
                     mVDrakBackgroupd.setVisibility(View.VISIBLE);
                     //                    mBtnStopPush.setVisibility(View.VISIBLE);
                     mIvTakePhoto.setImageResource(R.drawable.uav_take_photo_disable);
+                    pushService.removeVideoDataListener();
                 }else{
                     AirCraftUtil.loginToActivationIfNeeded();
                     initAircraft();
@@ -1273,7 +1274,7 @@ public class UavPushActivity extends BaseActivity{
                 if(resultCode == BaseCommonCode.SUCCESS_CODE){
                     mVDrakBackgroupd.setText(R.string.connecting_server);
                 }else {
-                    mVDrakBackgroupd.setText(resultDesc);
+                    mVDrakBackgroupd.setText("认证时"+resultDesc);
                 }
             });
         }
@@ -1304,6 +1305,11 @@ public class UavPushActivity extends BaseActivity{
                         ToastUtil.showToast(getApplicationContext(), getResources().getString(R.string.net_work_disconnect));
                         mVDrakBackgroupd.setText(R.string.net_work_disconnect);
                     }
+                }
+                if(connected){
+                    //网络恢复的时候重新发起上报
+                    TerminalFactory.getSDK().getLiveManager().ceaseLiving();
+                    requestStartLive();
                 }
                 onNetworkChanged(connected);
             });

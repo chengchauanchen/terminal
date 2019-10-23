@@ -302,6 +302,34 @@ public class AirCraftUtil{
         }
     }
 
+    public static void setVideoMode(){
+        Camera camera = getAircraftCamera();
+        if(camera != null){
+            camera.getMode(new CommonCallbacks.CompletionCallbackWith<SettingsDefinitions.CameraMode>(){
+                @Override
+                public void onSuccess(SettingsDefinitions.CameraMode cameraMode){
+                    if(cameraMode != SettingsDefinitions.CameraMode.RECORD_VIDEO){
+                        camera.setMode(SettingsDefinitions.CameraMode.RECORD_VIDEO, new CommonCallbacks.CompletionCallback(){
+                            @Override
+                            public void onResult(DJIError djiError){
+                                if(djiError == null){
+                                    logger.info("设置录像模式成功");
+                                }else {
+                                    logger.info("设置录像模式失败:"+djiError.getDescription());
+                                }
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onFailure(DJIError djiError){
+                }
+            });
+
+        }
+    }
+
     public static void setFileListener(){
         Camera camera = getAircraftCamera();
         if(camera != null){
@@ -362,6 +390,8 @@ public class AirCraftUtil{
         }
     }
 
+    private static String lastFileName;
+
     public static void fetchFileData(MediaFile mediaFile){
         File dir = new File(MyTerminalFactory.getSDK().getPhotoRecordDirectory());
         if(!dir.exists()){
@@ -371,6 +401,11 @@ public class AirCraftUtil{
         String filePath = MyTerminalFactory.getSDK().getPhotoRecordDirectory()+File.separator+fileName;
         mediaFile.fetchPreview(djiError -> {
             if(djiError == null){
+                logger.info("下载照片成功");
+                if(TextUtils.equals(fileName,lastFileName)){
+                    return;
+                }
+                lastFileName = fileName;
                 Bitmap preview = mediaFile.getPreview();
                 BitmapUtil.saveBitmapFile(preview,MyTerminalFactory.getSDK().getPhotoRecordDirectory(),fileName);
                 FileTransferOperation operation = MyTerminalFactory.getSDK().getFileTransferOperation();
@@ -379,6 +414,7 @@ public class AirCraftUtil{
             }else {
                 logger.info("获取预览图片失败："+djiError.getDescription());
             }
+            setVideoMode();
         });
         //下载原图时间太长了，要90秒
 //        mediaFile.fetchFileData(dir, fileName, new DownloadHandler<String>(fileName));

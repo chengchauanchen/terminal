@@ -331,14 +331,16 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
     });
 
     private ReceiveFileSelectChangeHandler receiveFileSelectChangeHandler = (selected, fileBean) -> {
-        if(selected){
-            if(!selectFiles.contains(fileBean)){
-                selectFiles.add(fileBean);
+        myHandler.post(()->{
+            if(selected){
+                if(!selectFiles.contains(fileBean)){
+                    selectFiles.add(fileBean);
+                }
+            }else {
+                selectFiles.remove(fileBean);
             }
-        }else {
-            selectFiles.remove(fileBean);
-        }
-        mTvUavChoice.setText(getString(R.string.text_cancel)+"("+selectFiles.size()+")");
+            mTvUavChoice.setText(getString(R.string.text_cancel)+"("+selectFiles.size()+")");
+        });
     };
 
     public void transponMessage(TerminalMessage transponMessage,ArrayList<ContactItemBean> list) {

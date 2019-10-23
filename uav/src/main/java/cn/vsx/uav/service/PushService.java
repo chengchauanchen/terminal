@@ -172,6 +172,10 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     public void onDestroy(){
         super.onDestroy();
         TerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);
+        removeVideoDataListener();
+    }
+
+    public void removeVideoDataListener(){
         if(DJISDKManager.getInstance().getProduct() != null){
             VideoFeeder.getInstance().getPrimaryVideoFeed().removeVideoDataListener(mReceivedVideoDataListener);
         }
@@ -237,10 +241,10 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     private long lastRecvDataTime;
     @Override
     public void onDataRecv(byte[] data, int width, int height){
-        if(System.currentTimeMillis() - lastRecvDataTime > 3*1000){
+        if(System.currentTimeMillis() - lastRecvDataTime > 5*1000){
             logger.info("收到YUV数据"+data.length);
+            lastRecvDataTime = System.currentTimeMillis();
         }
-        lastRecvDataTime = System.currentTimeMillis();
         if(airCraftMediaStream != null){
             airCraftMediaStream.push(data, width, height);
         }
@@ -268,10 +272,10 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     private VideoFeeder.VideoDataListener mReceivedVideoDataListener = new VideoFeeder.VideoDataListener(){
         @Override
         public void onReceive(byte[] videoBuffer, int size){
-            if(System.currentTimeMillis() - lastupdate > 3000){
+            if(System.currentTimeMillis() - lastupdate > 5000){
                 logger.info("收到无人机视频数据:"+size);
+                lastupdate = System.currentTimeMillis();
             }
-            lastupdate = System.currentTimeMillis();
             if(null != yuvPlayer){
                 yuvPlayer.parseH264(videoBuffer, size);
             }
@@ -331,6 +335,7 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
 
     private void stopAircraftPush(){
         logger.info(TAG+"stopAircraftPush");
+        removeVideoDataListener();
         if(null != airCraftMediaStream){
             logger.info(TAG+"结束无人机推流");
             airCraftMediaStream.stopStream();
