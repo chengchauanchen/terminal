@@ -107,25 +107,29 @@
                     android:layout_height="wrap_content"
                     android:textSize="35px"
                     android:textColor="@color/white"
-                    android:layout_centerInParent="true"/>
+                    android:includeFontPadding="false"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="45px"/>
 
                 <ImageView
                     android:id="@+id/iv_ptt"
                     android:layout_width="@dimen/icon_ptt_size"
                     android:layout_height="@dimen/icon_ptt_size"
                     android:src="@drawable/icon_ptt"
-                    android:layout_centerInParent="true"/>
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="45px" />
 
                 <TextView
                     android:id="@+id/tx_ptt_group_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="6px"
                     android:gravity="center"
                     android:paddingLeft="30px"
                     android:paddingRight="30px"
-                    android:singleLine="true"
+                    android:lines="2"
                     android:ellipsize="end"
-                    android:textSize="24px"
+                    android:textSize="23px"
                     android:textColor="@color/white"
                     android:layout_below="@+id/tx_ptt_time"/>
             </RelativeLayout>

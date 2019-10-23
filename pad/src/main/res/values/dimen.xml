@@ -121,7 +121,7 @@
 
     <dimen name="progress_dialog_size">200px</dimen>
     <dimen name="progress_dialog_text_size">40px</dimen>
-    <dimen name="icon_ptt_size">50px</dimen>
+    <dimen name="icon_ptt_size">45px</dimen>
 
 
     <dimen name="select_member_content_margin">20px</dimen>
