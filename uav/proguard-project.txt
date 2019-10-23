@@ -313,3 +313,6 @@
 #无人机
 -keep class cn.vsx.uav.bean.** { *; }
 -keep class cn.vsx.uav.receiveHandler.** { *; }
+
+#百度
+-keep class com.baidu.** { *; }
