@@ -347,6 +347,7 @@ public class UavPushActivity extends BaseActivity{
 
     @Override
     public void doOtherDestroy(){
+        myHandler.removeCallbacksAndMessages(null);
         mapMinWebview.destroy();
         mapMinWebview.destroy();
         pushService.finishVideoLive();
@@ -1306,11 +1307,6 @@ public class UavPushActivity extends BaseActivity{
                         mVDrakBackgroupd.setText(R.string.net_work_disconnect);
                     }
                 }
-                if(connected){
-                    //网络恢复的时候重新发起上报
-                    TerminalFactory.getSDK().getLiveManager().ceaseLiving();
-                    requestStartLive();
-                }
                 onNetworkChanged(connected);
             });
         }
@@ -1323,8 +1319,10 @@ public class UavPushActivity extends BaseActivity{
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
                 //登陆成功
                 mVDrakBackgroupd.setText(R.string.login_success);
-                logger.info("GONE---ReceiveLoginResponseHandler");
                 mVDrakBackgroupd.setVisibility(View.GONE);
+                //网络恢复的时候重新发起上报
+                TerminalFactory.getSDK().getLiveManager().ceaseLiving();
+                requestStartLive();
             }else {
                 mVDrakBackgroupd.setText(resultDesc);
                 mVDrakBackgroupd.setVisibility(View.VISIBLE);
@@ -1334,6 +1332,9 @@ public class UavPushActivity extends BaseActivity{
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
                 mVDrakBackgroupd.setText(R.string.uav_disconnect);
                 mVDrakBackgroupd.setVisibility(View.VISIBLE);
+                //网络恢复的时候重新发起上报
+                TerminalFactory.getSDK().getLiveManager().ceaseLiving();
+                requestStartLive();
             }else {
                 mVDrakBackgroupd.setText(resultDesc);
                 mVDrakBackgroupd.setVisibility(View.VISIBLE);

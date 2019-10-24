@@ -224,6 +224,7 @@ public class UAVAudioStream{
             super("WriteAudio");
         }
 
+        private long lastTime;
         @Override
         public void run() {
             int index = 0;
@@ -262,7 +263,10 @@ public class UAVAudioStream{
                         Pusher ps = it.next();
                         if(TerminalFactory.getSDK().getDataManager().isUavVoiceOpen()){
                             ps.push(mBuffer.array(), 0, mBufferInfo.size + 7, mBufferInfo.presentationTimeUs / 1000, 0);
-                            logger.debug("推送音频"+mBufferInfo.size);
+                            if(System.currentTimeMillis() - lastTime > 5*1000){
+                                logger.debug("推送音频"+mBufferInfo.size);
+                                lastTime = System.currentTimeMillis();
+                            }
                         }
                     }
 
