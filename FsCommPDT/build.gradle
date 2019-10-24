@@ -64,6 +64,7 @@ android {
         jiaXing {}
         tianJin {}
         wuTie {}
+        yingJiGuanLiTing {}
     }
     productFlavors.all {
         flavor -> flavor.manifestPlaceholders = [apk_type: name]

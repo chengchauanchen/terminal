@@ -11,6 +11,7 @@ import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.CHUTIANYUN;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.POLICESTORE;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.TIANJIN;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.WUTIE;
+import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.YINGJIGUANLITING;
 
 /**
  * 作者：ly-xuxiaolong
@@ -29,7 +30,7 @@ public class ApkUtil{
     //是否为安监
     public static boolean isAnjian(){
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
-        return TextUtils.equals(apkType,CHUTIANYUN);
+        return TextUtils.equals(apkType,CHUTIANYUN)||TextUtils.equals(apkType,YINGJIGUANLITING);
 //        return MyTerminalFactory.getSDK().getParam(Params.IS_ANJIAN, false);
     }
 
