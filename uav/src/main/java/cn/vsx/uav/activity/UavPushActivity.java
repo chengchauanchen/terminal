@@ -39,6 +39,7 @@ import java.util.Map;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.errcode.BaseCommonCode;
+import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.VideoMember;
@@ -1176,7 +1177,7 @@ public class UavPushActivity extends BaseActivity{
     }
 
     private ReceiveResponseMyselfLiveHandler receiveResponseMyselfLiveHandler = (resultCode, resultDesc) -> {
-        if(resultCode != BaseCommonCode.SUCCESS_CODE){
+        if(resultCode != BaseCommonCode.SUCCESS_CODE && resultCode != SignalServerErrorCode.ALREADY_VIDEO_ON_LIVE.getErrorCode()){
             ToastUtil.showToast(getApplicationContext(), resultDesc);
             pushService.finishVideoLive();
             finish();

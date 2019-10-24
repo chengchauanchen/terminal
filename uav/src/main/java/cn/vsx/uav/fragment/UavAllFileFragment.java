@@ -189,7 +189,10 @@ public class UavAllFileFragment extends BaseFragment implements BaseQuickAdapter
         }
     };
 
-    private ReceiveSendFileFinishHandler receiveSendFileFinishHandler = () -> mHandler.post(()->{
+    private ReceiveSendFileFinishHandler receiveSendFileFinishHandler = (selectFiles) -> mHandler.post(()->{
+        for(FileBean fileBean : data){
+            fileBean.setSelected(false);
+        }
         showCheckbox = false;
         adapter.setShowCheckbox(false);
         adapter.notifyDataSetChanged();

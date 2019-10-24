@@ -8,7 +8,6 @@ import android.content.IntentFilter;
 import org.apache.log4j.Logger;
 
 import cn.vsx.vc.jump.sendMessage.Connect3rdParty;
-import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
 
 public class RegisterBroadcastReceiver {
 
@@ -19,6 +18,7 @@ public class RegisterBroadcastReceiver {
     private static final String THIRD_PACKAGE_NAME = "com.gcstorage.superpolice" ;
     private static final String CONNECT_JUMP_RECEIVER = "cn.vsx.vsxsdk.broadcastReceiver.ConnectJumpReceiver" ;
     private ConnectMessageReceiver receiver;
+    private boolean registed;
 
     public RegisterBroadcastReceiver() {
         receiver = new ConnectMessageReceiver();
@@ -33,10 +33,14 @@ public class RegisterBroadcastReceiver {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(MESSAGE_ACTION);
         context.registerReceiver(receiver, intentFilter);
+        registed = true;
     }
 
     public void kill(Context context){
-        unregisterReceiver(context);
+        if(registed){
+            unregisterReceiver(context);
+            registed = false;
+        }
         Connect3rdParty.getConns().clear();
     }
     /**
@@ -44,9 +48,14 @@ public class RegisterBroadcastReceiver {
      * @param context
      */
     public void unregisterReceiver(Context context){
-        if(receiver!=null){
-            logger.error("--vsx--ConnectMessageReceiver 被销毁了");
-            context.unregisterReceiver(receiver);
+        try{
+            if(receiver!=null && registed){
+                logger.error("--vsx--ConnectMessageReceiver 被销毁了");
+                context.unregisterReceiver(receiver);
+                registed = false;
+            }
+        }catch(Exception e){
+            e.printStackTrace();
         }
     }
 

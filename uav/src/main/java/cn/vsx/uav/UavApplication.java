@@ -9,6 +9,7 @@ import android.util.Log;
 
 import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.TerminalMemberType;
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.uav.service.PushService;
 import cn.vsx.uav.service.UavReceiveHandlerService;
 import cn.vsx.vc.application.MyApplication;
@@ -22,6 +23,7 @@ import cn.vsx.vc.application.MyApplication;
  */
 public class UavApplication extends MyApplication{
 
+    private boolean bindPushService;
     private PushService pushService;
     private static UavApplication app;
 
@@ -66,9 +68,10 @@ public class UavApplication extends MyApplication{
 
     @Override
     public void stopHandlerService(){
+        if (TerminalFactory.getSDK().isServerConnected()) {
+            TerminalFactory.getSDK().disConnectToServer();
+        }
         if (serviceConnection != null) {
-            Log.i("服务状态1：",""+serviceConnection);
-            Log.i("服务状态2：",""+isBinded);
             if (isBinded) {
                 unbindService(serviceConnection);
                 isBinded=false;
@@ -76,12 +79,15 @@ public class UavApplication extends MyApplication{
             stopService(new Intent(this, UavReceiveHandlerService.class));
         }
 
-        if(pushServiceConnection != null){
+        if(pushServiceConnection != null && bindPushService){
             if(pushService !=null){
                 unbindService(pushServiceConnection);
+                bindPushService = false;
             }
             stopService(new Intent(this, PushService.class));
         }
+        TerminalFactory.getSDK().stop();
+        killAllProcess();
     }
 
     public static UavApplication getApplication(){
@@ -106,6 +112,6 @@ public class UavApplication extends MyApplication{
 
     public void startPushService(){
         Intent intent = new Intent(this, PushService.class);
-        isBinded=bindService(intent,pushServiceConnection,BIND_AUTO_CREATE);
+        bindPushService = bindService(intent,pushServiceConnection,BIND_AUTO_CREATE);
     }
 }

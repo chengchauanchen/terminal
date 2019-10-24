@@ -285,7 +285,6 @@ public class AirCraftMediaStream {
     }
 
     public void stopStream() {
-        mEasyPusher.stop();
         if (audioStream != null) {
             audioStream.removePusher(mEasyPusher);
             audioStream = null;
@@ -303,7 +302,7 @@ public class AirCraftMediaStream {
             mMuxer.release();
             mMuxer = null;
         }
-//        mEasyPusher.stop();
+        mEasyPusher.stop();
         pushStream = false;
 
     }

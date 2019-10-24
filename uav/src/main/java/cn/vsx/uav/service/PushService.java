@@ -38,7 +38,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class PushService extends BaseService implements YuvPlayer.YuvDataListener{
 
-    private YuvPlayer yuvPlayer;
+//    private YuvPlayer yuvPlayer;
     private AirCraftMediaStream airCraftMediaStream;
     private long lastupdate;
     private static String TAG = "PushService---";
@@ -182,7 +182,9 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     }
 
     public void startPush(int surfaceWidth, int surfaceHeight, Surface surface1){
-        yuvPlayer.start(surfaceWidth, surfaceHeight, 16, surface1);
+        YuvPlayer.start(getApplicationContext(),surfaceWidth, surfaceHeight, 16, surface1);
+        YuvPlayer.yuvPlayer._setYuvDataListener(this);
+        logger.info("yuvPlayer.start");
         if(airCraftMediaStream != null && !airCraftMediaStream.isStreaming()){
             airCraftMediaStream.startPreView(1280, 720);
         }
@@ -196,9 +198,9 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     }
 
     public void setSufaceWidthHeight(int width, int height){
-        if(null != yuvPlayer){
-            yuvPlayer.setSufaceWidthHeight(width, height);
-        }
+//        if(null != yuvPlayer){
+            YuvPlayer.setSufaceWidthHeight(width, height);
+//        }
     }
 
     public void startAircraftPush(String ip,String port,String id){
@@ -216,10 +218,11 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     }
 
     public void initYuvPlayer(){
-        if(null == yuvPlayer){
-            yuvPlayer = new YuvPlayer(getApplicationContext());
-            yuvPlayer.setYuvDataListener(this);
-        }
+//        if(null == yuvPlayer){
+//            yuvPlayer = new YuvPlayer(getApplicationContext());
+//            yuvPlayer.setYuvDataListener(this);
+            logger.info("yuvPlayer.setYuvDataListener");
+//        }
     }
 
     public void initAirCraftMediaStream(){
@@ -231,11 +234,12 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     }
 
     public void stopYuvPlayer(){
-        if(yuvPlayer != null){
-            yuvPlayer.stop();
-            yuvPlayer.setYuvDataListener(null);
-            yuvPlayer = null;
-        }
+//        if(yuvPlayer != null){
+        YuvPlayer.yuvPlayer._setYuvDataListener(null);
+        YuvPlayer.stop();
+        logger.info("yuvPlayer.stop");
+//            yuvPlayer = null;
+//        }
     }
 
     private long lastRecvDataTime;
@@ -276,9 +280,9 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
                 logger.info("收到无人机视频数据:"+size);
                 lastupdate = System.currentTimeMillis();
             }
-            if(null != yuvPlayer){
-                yuvPlayer.parseH264(videoBuffer, size);
-            }
+//            if(null != yuvPlayer){
+                YuvPlayer.parseH264(videoBuffer, size);
+//            }
         }
     };
 
@@ -389,6 +393,6 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     }
 
     public void changeSurface(Surface surface,int width,int height){
-        yuvPlayer.changeSurface(surface,width,height);
+//        yuvPlayer.changeSurface(surface,width,height);
     }
 }

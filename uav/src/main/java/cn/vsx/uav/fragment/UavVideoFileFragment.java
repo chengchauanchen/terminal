@@ -180,7 +180,10 @@ public class UavVideoFileFragment extends BaseFragment implements BaseQuickAdapt
         TerminalFactory.getSDK().unregistReceiveHandler(receiveSendFileFinishHandler);
     }
 
-    private ReceiveSendFileFinishHandler receiveSendFileFinishHandler = () -> mHandler.post(() -> {
+    private ReceiveSendFileFinishHandler receiveSendFileFinishHandler = (selectFiles) -> mHandler.post(() -> {
+        for(FileBean fileBean : data){
+            fileBean.setSelected(false);
+        }
         showCheckbox = false;
         adapter.setShowCheckbox(false);
         adapter.notifyDataSetChanged();

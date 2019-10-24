@@ -193,16 +193,16 @@ public class MyApplication extends BaseApplication{
 	@Override
 	public void stopHandlerService(){
 		Log.e("MyApplication", "stopHandlerService");
-		if (conn != null) {
+		if (TerminalFactory.getSDK().isServerConnected()) {
+			TerminalFactory.getSDK().disConnectToServer();
+		}
 
+		if (conn != null) {
 			Log.i("conn：",""+conn);
 			Log.i("isBinded：",""+isBinded);
 			if (isBinded) {
 				unbindService(conn);
 				isBinded=false;
-			}
-			if (TerminalFactory.getSDK().isServerConnected()) {
-				TerminalFactory.getSDK().disConnectToServer();
 			}
 			stopService(new Intent(this, ReceiveHandlerService.class));
 		}
@@ -258,16 +258,16 @@ public class MyApplication extends BaseApplication{
 	}
 
 	public void killAllProcess() {
-		ActivityManager mActivityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-		if (null != mActivityManager) {
-			List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
-			for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList) {
-				if (runningAppProcessInfo.pid != android.os.Process.myPid()) {
-					android.os.Process.killProcess(runningAppProcessInfo.pid);
-				}
+		//注意：不能先杀掉主进程，否则逻辑代码无法继续执行，需先杀掉相关进程最后杀掉主进程
+		ActivityManager mActivityManager = (ActivityManager)this.getSystemService(Context.ACTIVITY_SERVICE);
+		List<ActivityManager.RunningAppProcessInfo> mList = mActivityManager.getRunningAppProcesses();
+		for (ActivityManager.RunningAppProcessInfo runningAppProcessInfo : mList){
+			if (runningAppProcessInfo.pid != android.os.Process.myPid()){
+				android.os.Process.killProcess(runningAppProcessInfo.pid);
 			}
-			android.os.Process.killProcess(android.os.Process.myPid());
 		}
+		android.os.Process.killProcess(android.os.Process.myPid());
+		System.exit(0);
 	}
 
 	@Override
