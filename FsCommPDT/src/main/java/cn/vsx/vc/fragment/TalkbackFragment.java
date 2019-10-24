@@ -284,6 +284,7 @@ public class TalkbackFragment extends BaseFragment {
         to_current_group.setEnabled(isEanble);
         talkback_change_session.setEnabled(isEanble);
         iv_volume_off_call.setEnabled(isEanble);
+        talkback_add_icon.setEnabled(isEanble);
     }
 
     /**
@@ -1472,7 +1473,6 @@ public class TalkbackFragment extends BaseFragment {
      * 开始说话
      */
     private void change2Speaking() {
-        talkback_add_icon.setEnabled(false);
         logger.info("change2Speaking");
         allViewDefault();
         ll_speaking.setVisibility(View.VISIBLE);
