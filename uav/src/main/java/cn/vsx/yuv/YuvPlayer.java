@@ -256,57 +256,58 @@ public class YuvPlayer {
 //        private float nowRealFrameTime;
         @Override
         public void run() {
-            int outIndex;
+            int outIndex = -1;
             YuvData yuvData;
             try {
-                while (runStatus) {
+                while (runStatus && decodeH264Status) {
                     if(mediaCodec == null){
                         Thread.sleep(1000);
+                        continue;
                     }
                     try {
                         outIndex = mediaCodec.dequeueOutputBuffer(bufferInfo, 1000);
+                        if (outIndex >= 0) {
+//                            System.out.println("decodeFrame: outIndex: " + outIndex);
+                            ByteBuffer yuvDataBuf;
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                yuvDataBuf = mediaCodec.getOutputBuffer(outIndex);
+                            } else {
+                                yuvDataBuf = mediaCodec.getOutputBuffers()[outIndex];
+                            }
+                            yuvDataBuf.position(bufferInfo.offset);
+                            yuvDataBuf.limit(bufferInfo.size - bufferInfo.offset);
+
+//                            if(startTime != 0 && (System.currentTimeMillis() - startTime) > 0){
+//                                nowRealFrameTime = (nowRealFrameTime * realFrameIndex + (System.currentTimeMillis() - startTime)) / (realFrameIndex + 1);
+//                                System.out.println("real Data frame time = " + nowRealFrameTime + ", " + (System.currentTimeMillis() - startTime) + ", " + realFrameIndex);
+//                                realFrameIndex++;
+//                            }
+//                            startTime = System.currentTimeMillis();
+//
+//                            System.out.println("yuvDataBuf, size = " + yuvDataBuf.remaining() + ", videoWidth = " + videoWidth + ", videoHeight = " + videoHeight);
+                            yuvData = yuvDataObjectPool.getObject();
+                            if(yuvData != null){
+                                if(yuvData.data == null){
+                                    yuvData.data = new byte[videoYuvSize];
+                                }
+                                yuvDataBuf.get(yuvData.data);
+                                yuvData.width = videoWidth;
+                                yuvData.height = videoHeight;
+                                dualOuterYuvDataTask.inQueue(yuvData);
+                                push(yuvData);
+                            }
+                            else {
+                                System.err.println("yuvDataObjectPool is full");
+                            }
+                            // All the output buffer must be release no matter whether the yuv data is output or
+                            // not, so that the codec can reuse the buffer.
+                            mediaCodec.releaseOutputBuffer(outIndex, true);
+                        } else {
+//                            System.out.println("outIndex = " + outIndex);
+                        }
+
                     } catch (IllegalStateException e) {
                         e.printStackTrace();
-                        break;
-                    }
-                    if (outIndex >= 0) {
-//                        System.out.println("decodeFrame: outIndex: " + outIndex);
-                        ByteBuffer yuvDataBuf;
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                            yuvDataBuf = mediaCodec.getOutputBuffer(outIndex);
-                        } else {
-                            yuvDataBuf = mediaCodec.getOutputBuffers()[outIndex];
-                        }
-                        yuvDataBuf.position(bufferInfo.offset);
-                        yuvDataBuf.limit(bufferInfo.size - bufferInfo.offset);
-
-//                        if(startTime != 0 && (System.currentTimeMillis() - startTime) > 0){
-//                            nowRealFrameTime = (nowRealFrameTime * realFrameIndex + (System.currentTimeMillis() - startTime)) / (realFrameIndex + 1);
-//                            System.out.println("real Data frame time = " + nowRealFrameTime + ", " + (System.currentTimeMillis() - startTime) + ", " + realFrameIndex);
-//                            realFrameIndex++;
-//                        }
-//                        startTime = System.currentTimeMillis();
-
-//                        System.out.println("yuvDataBuf, size = " + yuvDataBuf.remaining() + ", videoWidth = " + videoWidth + ", videoHeight = " + videoHeight);
-                        yuvData = yuvDataObjectPool.getObject();
-                        if(yuvData != null){
-                            if(yuvData.data == null){
-                                yuvData.data = new byte[videoYuvSize];
-                            }
-                            yuvDataBuf.get(yuvData.data);
-                            yuvData.width = videoWidth;
-                            yuvData.height = videoHeight;
-                            dualOuterYuvDataTask.inQueue(yuvData);
-                            push(yuvData);
-                        }
-                        else {
-                            System.err.println("yuvDataObjectPool is full");
-                        }
-                        // All the output buffer must be release no matter whether the yuv data is output or
-                        // not, so that the codec can reuse the buffer.
-                        mediaCodec.releaseOutputBuffer(outIndex, true);
-                    } else {
-//                        System.out.println("outIndex = " + outIndex);
                     }
                 }
             }
@@ -525,32 +526,42 @@ public class YuvPlayer {
         }
     }
 
+    private Object stopDecodeH264ThreadLock = new Object();
     private void stopDecodeH264Thread(){
 
-        System.out.println("DecodeH264Thread stop");
-        if(dualOuterYuvDataThread != null) {
-            dualOuterYuvDataThread.interrupt();
-            try {
-                dualOuterYuvDataThread.join();
-            } catch ( InterruptedException e) {
+        synchronized (stopDecodeH264ThreadLock) {
+            System.out.println("DecodeH264Thread stop");
+            if (dualOuterYuvDataThread != null) {
+                dualOuterYuvDataThread.interrupt();
+                try {
+                    dualOuterYuvDataThread.join();
+                } catch (InterruptedException e) {
 
+                }
+                dualOuterYuvDataThread = null;
             }
-            dualOuterYuvDataThread = null;
-        }
-        if(decodeH264DataThread != null) {
-            decodeH264DataThread.interrupt();
-            if(mediaCodec != null) {
-                mediaCodec.stop();
-                mediaCodec.release();
-            }
-            try {
-                decodeH264DataThread.join();
-            } catch (InterruptedException e) {
+            if (decodeH264DataThread != null) {
+                decodeH264Status = false;
+                decodeH264DataThread.interrupt();
+                try {
+                    decodeH264DataThread.join();
+                } catch (InterruptedException e) {
 
+                }
+                if (mediaCodec != null) {
+                    try {
+                        mediaCodec.stop();
+                    } catch (IllegalStateException e) {
+                    }
+                    try {
+                        mediaCodec.release();
+                    } catch (IllegalStateException e) {
+                    }
+                }
+                decodeH264DataThread = null;
+                decodeH264DataTask = null;
+                mediaCodec = null;
             }
-            decodeH264DataThread = null;
-            decodeH264DataTask = null;
-            mediaCodec = null;
         }
     }
 
@@ -892,6 +903,7 @@ public class YuvPlayer {
 
 
     private int lastCanUseFrameNum = -1;
+    private boolean decodeH264Status = false;
     /**
      * 收到一帧数据时候的回调
      * @param buf
@@ -902,44 +914,14 @@ public class YuvPlayer {
      */
     public void onFrameDataRecv(byte[] buf, int size, int frameNum, boolean isKeyFrame, int width, int height) {
 //        if(isKeyFrame) {
-            System.out.println("onFrameDataRecv, size = " + size + ", frameNum = " + frameNum + ", isKeyFrame = " + isKeyFrame + ", width = " + width + ", height = " + height);
+//            System.out.println("onFrameDataRecv, size = " + size + ", frameNum = " + frameNum + ", isKeyFrame = " + isKeyFrame + ", width = " + width + ", height = " + height);
 //        }
 
         if (width != 0 && height != 0) {
             if (videoHeight != height || videoWidth != width) {
                 System.out.println("width or height changed, new width = " + width + ", new height = " + height);
-                if (mediaCodec != null) {
-                    stopDecodeH264Thread();
-                }
-                // Create the codec instance.
-                try {
-                    mediaCodec = MediaCodec.createDecoderByType("video/avc");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                // create the media format
-                MediaFormat format = MediaFormat.createVideoFormat("video/avc", width, height);
-                // set the color format to YUV420SP.
-                format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
-                // Configure the codec. What should be noted here is that the hardware decoder would not output
-                // any yuv data if a surface is configured into, which mean that if you want the yuv frames, you
-                // should set "null" surface when calling the "configure" method of MediaCodec.
-                mediaCodec.configure(format, null, null, 0);
-                bufferInfo = new MediaCodec.BufferInfo();
 
-                mediaCodec.start();
-
-                //解码H264数据线程
-                decodeH264DataTask = new DecodeH264DataTask();
-                decodeH264DataThread = new Thread(decodeH264DataTask);
-                decodeH264DataThread.setDaemon(true);
-                decodeH264DataThread.start();
-
-                //将加码后的数据推送给第三方接口的线程
-                dualOuterYuvDataTask = new DualOuterYuvDataTask();
-                dualOuterYuvDataThread = new Thread(dualOuterYuvDataTask);
-                dualOuterYuvDataThread.setDaemon(true);
-                dualOuterYuvDataThread.start();
+                resetDecodeH264(width, height);
 
                 videoWidth = width;
                 videoHeight = height;
@@ -948,10 +930,14 @@ public class YuvPlayer {
 
             if(lastCanUseFrameNum != -1 && iFrameGot){
                 if(frameNum != 0 && frameNum <= lastCanUseFrameNum){
+                    iFrameGot = false;
+                    stopDecodeH264Thread();
+                    videoWidth = 0;
+                    videoHeight = 0;
+                    videoYuvSize = 0;
                     return;
                 }
             }
-            lastCanUseFrameNum = frameNum;
 
             if (!iFrameGot) {// check the I frame flag
                 if (frameNum != 1 && !isKeyFrame) {
@@ -978,6 +964,41 @@ public class YuvPlayer {
             }
 
             inQueueMediaCodec(buf, size);
+
+            lastCanUseFrameNum = frameNum;
+        }
+    }
+
+    private void resetDecodeH264(int width, int height){
+        try {
+            stopDecodeH264Thread();
+            mediaCodec = MediaCodec.createDecoderByType("video/avc");
+            // create the media format
+            MediaFormat format = MediaFormat.createVideoFormat("video/avc", width, height);
+            // set the color format to YUV420SP.
+            format.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420SemiPlanar);
+            // Configure the codec. What should be noted here is that the hardware decoder would not output
+            // any yuv data if a surface is configured into, which mean that if you want the yuv frames, you
+            // should set "null" surface when calling the "configure" method of MediaCodec.
+            mediaCodec.configure(format, null, null, 0);
+            bufferInfo = new MediaCodec.BufferInfo();
+
+            mediaCodec.start();
+
+            //解码H264数据线程
+            decodeH264Status = true;
+            decodeH264DataTask = new DecodeH264DataTask();
+            decodeH264DataThread = new Thread(decodeH264DataTask);
+            decodeH264DataThread.setDaemon(true);
+            decodeH264DataThread.start();
+
+            //将加码后的数据推送给第三方接口的线程
+            dualOuterYuvDataTask = new DualOuterYuvDataTask();
+            dualOuterYuvDataThread = new Thread(dualOuterYuvDataTask);
+            dualOuterYuvDataThread.setDaemon(true);
+            dualOuterYuvDataThread.start();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -985,29 +1006,36 @@ public class YuvPlayer {
 
         if(mediaCodec != null) {
             ByteBuffer buffer;
-            int inIndex = mediaCodec.dequeueInputBuffer(0);
-//            System.out.println("inIndex = " + inIndex);
-            // Decode the frame using MediaCodec
-            if (inIndex >= 0) {
-                //Log.d(TAG, "decodeFrame: index=" + inIndex);
+            int inIndex = -1;
+            try {
+                inIndex = mediaCodec.dequeueInputBuffer(0);
+//                System.out.println("inIndex = " + inIndex);
+                // Decode the frame using MediaCodec
+                if (inIndex >= 0) {
+                    //Log.d(TAG, "decodeFrame: index=" + inIndex);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    buffer = mediaCodec.getInputBuffer(inIndex);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        buffer = mediaCodec.getInputBuffer(inIndex);
+                    } else {
+                        buffer = mediaCodec.getInputBuffers()[inIndex];
+                    }
+                    buffer.put(buf, 0, size);
+                    // Feed the frame data to the decoder.
+                    mediaCodec.queueInputBuffer(inIndex, 0, size, System.currentTimeMillis(), 0);
                 } else {
-                    buffer = mediaCodec.getInputBuffers()[inIndex];
+//                    System.out.println("dequeueInputBuffer index = " + inIndex);
+//                    mediaCodec.flush();
                 }
-                buffer.put(buf, 0, size);
-                // Feed the frame data to the decoder.
-                mediaCodec.queueInputBuffer(inIndex, 0, size, System.currentTimeMillis(), 0);
-            } else {
-//                System.out.println("dequeueInputBuffer index = " + inIndex);
-//                mediaCodec.flush();
+
+            }
+            catch (IllegalStateException e){
+                e.printStackTrace();
             }
         }
     }
 
     /**
-     * 结束播放，清楚资源
+     * 结束播放，清除资源
      */
     private native void close();
 }
