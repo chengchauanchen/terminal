@@ -70,10 +70,13 @@ public class LinphoneService extends Service implements LinphoneCoreListener {
         super.onDestroy();
         Log.e(TAG, "LinphoneService onDestroy execute");
         removeAllCallback();
-        LinphoneManager.getLc().destroy();
-        LinphoneManager.destroy();
-
-//        if (mWakeLock != null) {
+        try{
+//            LinphoneManager.getLc().destroy();
+            LinphoneManager.destroy();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+        //        if (mWakeLock != null) {
 //            mWakeLock.release();
 //            mWakeLock = null;
 //        }

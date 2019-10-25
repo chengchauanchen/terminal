@@ -529,12 +529,12 @@ public class SettingFragmentNew extends BaseFragment implements View.OnClickList
         stoppedCallIntent.putExtra("stoppedResult", "0");
         SendRecvHelper.send(getActivity(), stoppedCallIntent);
 
-        for (Activity activity : ActivityCollector.getAllActivity().values()) {
-            activity.finish();
-        }
         MyApplication.instance.isClickVolumeToCall = false;
         MyApplication.instance.isPttPress = false;
         MyApplication.instance.stopHandlerService();
+        for (Activity activity : ActivityCollector.getAllActivity().values()) {
+            activity.finish();
+        }
     }
 
 

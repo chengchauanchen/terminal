@@ -547,7 +547,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
             //    private long count;
             Surface surface1 = new Surface(surface);
             initYuvPlayer();
-            yuvPlayer.start(surfaceWidth, surfaceHeight, 16, surface1);
+//            yuvPlayer.start(surfaceWidth, surfaceHeight, 16, surface1);
             if(!airCraftMediaStream.isStreaming()){
                 airCraftMediaStream.startPreView(1280, 720);
             }
@@ -577,7 +577,7 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
     private void stopYuvPlayer(){
         if(yuvPlayer != null){
             yuvPlayer.stop();
-            yuvPlayer.setYuvDataListener(null);
+//            yuvPlayer.setYuvDataListener(null);
             yuvPlayer = null;
         }
     }
@@ -719,8 +719,8 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
 
     private void initYuvPlayer(){
         if(null == yuvPlayer){
-            yuvPlayer = new YuvPlayer(getApplicationContext());
-            yuvPlayer.setYuvDataListener(this);
+//            yuvPlayer = new YuvPlayer(getApplicationContext());
+//            yuvPlayer.setYuvDataListener(this);
         }
     }
 

@@ -302,7 +302,7 @@ public class UavFileListActivity extends BaseActivity implements View.OnClickLis
                         for(FileBean selectFile : selectFiles){
                             selectFile.setSelected(false);
                         }
-                        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveSendFileFinishHandler.class);
+                        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveSendFileFinishHandler.class,selectFiles);
                         showCheckbox = false;
                         selectFiles.clear();
                         mTvUavChoice.setText(R.string.uav_choice);

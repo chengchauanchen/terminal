@@ -113,7 +113,11 @@ public class UAVEasyMuxer implements BaseEasyMuxer{
             outputBuffer.limit(bufferInfo.offset + bufferInfo.size);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                mMuxer.writeSampleData(isVideo ? mVideoTrackIndex : mAudioTrackIndex, outputBuffer, bufferInfo);
+                try{
+                    mMuxer.writeSampleData(isVideo ? mVideoTrackIndex : mAudioTrackIndex, outputBuffer, bufferInfo);
+                }catch(Exception e){
+                    e.printStackTrace();
+                }
             }
             //            if (VERBOSE)
             //            logger.info(TAG+String.format("sent %s [" + bufferInfo.size + "] with timestamp:[%d] to muxer", isVideo ? "video" : "audio", bufferInfo.presentationTimeUs / 1000));

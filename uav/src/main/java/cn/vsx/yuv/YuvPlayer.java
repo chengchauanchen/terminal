@@ -45,8 +45,36 @@ public class YuvPlayer {
 
     private Context context;
 
-    public YuvPlayer(Context context){
+    private YuvPlayer(Context context){
         this.context = context;
+    }
+
+    public static YuvPlayer yuvPlayer;
+
+    public synchronized static void start(Context context, int width, int height, int playFps, Surface surface){
+        if(yuvPlayer == null){
+            yuvPlayer = new YuvPlayer(context);
+        }
+        yuvPlayer._start(width, height, playFps, surface);
+    }
+
+    public synchronized static void stop(){
+        if(yuvPlayer != null){
+            yuvPlayer._stop();
+            yuvPlayer = null;
+        }
+    }
+
+    public static void parseH264(byte[] buf, int size){
+        if(yuvPlayer != null){
+            yuvPlayer._parseH264(buf, size);
+        }
+    }
+
+    public synchronized static void setSufaceWidthHeight(int width, int height){
+        if(yuvPlayer != null){
+            yuvPlayer._setSufaceWidthHeight(width, height);
+        }
     }
 
     private class YuvData{
@@ -56,8 +84,9 @@ public class YuvPlayer {
         private YuvData(){ }
     }
 
-    enum Cookie{PLAY, DUAL_OUTER}
-    class YuvDataObjectPool extends ObjectPool<YuvData>{
+    /** 释放原因 */
+    enum Cookie{/** 播放结束而释放 */PLAY, /** 外部原因释放 */DUAL_OUTER}
+    class YuvDataObjectPool extends ObjectPool<YuvData> {
 
         private HashMap<YuvData, HashMap<Cookie, Boolean>> releasedStatus;
 
@@ -69,7 +98,7 @@ public class YuvPlayer {
         protected YuvData createObject() {
             YuvData yuvData = new YuvData();
             HashMap<Cookie, Boolean> hashMap = new HashMap<>(Cookie.values().length);
-            for (int i = 0; i < Cookie.values().length ; i++){
+            for (int i = 0 ; i < Cookie.values().length ; i++){
                 hashMap.put(Cookie.values()[i], true);
             }
             if(releasedStatus == null){
@@ -85,7 +114,7 @@ public class YuvPlayer {
             if(yuvData != null) {
                 HashMap<Cookie, Boolean> hashMap = releasedStatus.get(yuvData);
                 if (hashMap != null) {
-                    for (int i = 0; i < Cookie.values().length ; i++){
+                    for (int i = 0 ; i < Cookie.values().length ; i++){
                         hashMap.put(Cookie.values()[i], false);
                     }
                 }
@@ -100,7 +129,7 @@ public class YuvPlayer {
                     if (hashMap != null) {
                         hashMap.put(cookie, true);
                         boolean ret = true;
-                        for (int i = 0; i < Cookie.values().length ; i++){
+                        for (int i = 0 ; i < Cookie.values().length ; i++){
                             if(!hashMap.get(Cookie.values()[i])){
                                 ret = false;
                                 break;
@@ -119,6 +148,7 @@ public class YuvPlayer {
     private class PlayYuvDataTask implements Runnable{
         int yuvType;
         int playFps;
+        Surface surface;
         private long startPlayTime;
         private long remainTime;
         ArrayBlockingQueue<YuvData> yuvDataArrayBlockingQueue = new ArrayBlockingQueue<>(100);
@@ -135,12 +165,11 @@ public class YuvPlayer {
             try {
                 int mspf = 1000 / playFps;
                 YuvData yuvData;
-                setWidthHeight(surfaceWidth, surfaceHeight);
-                while ((yuvData = yuvDataArrayBlockingQueue.take()) != null){
+                while (runStatus && (yuvData = yuvDataArrayBlockingQueue.take()) != null){
                     try {
                         remainTime = mspf - (System.currentTimeMillis() - startPlayTime);
                         if (remainTime > 0) {
-//                            System.out.println("PlayYuvDataTask sleep " + remainTime + "ms");
+                            System.out.println("PlayYuvDataTask /sleep " + remainTime + "ms");
                             Thread.sleep(remainTime);
                         }
                         startPlayTime = System.currentTimeMillis();
@@ -152,10 +181,7 @@ public class YuvPlayer {
                 }
             }
             catch (InterruptedException e){
-                e.printStackTrace();
-            }
-            finally {
-                close();
+
             }
         }
 
@@ -186,7 +212,7 @@ public class YuvPlayer {
         public void run() {
             YuvData yuvData;
             try {
-                while ((yuvData = yuvDataArrayBlockingQueue.take()) != null){
+                while (runStatus && (yuvData = yuvDataArrayBlockingQueue.take()) != null){
                     try {
                         if (yuvDataListener != null) {
 //                            startTime = System.currentTimeMillis();
@@ -204,7 +230,7 @@ public class YuvPlayer {
                 }
             }
             catch (InterruptedException e){
-                e.printStackTrace();
+
             }
         }
         private long frameIndex = 0;
@@ -233,7 +259,7 @@ public class YuvPlayer {
             int outIndex;
             YuvData yuvData;
             try {
-                while (true) {
+                while (runStatus) {
                     if(mediaCodec == null){
                         Thread.sleep(1000);
                     }
@@ -244,7 +270,7 @@ public class YuvPlayer {
                         break;
                     }
                     if (outIndex >= 0) {
-//                        Log.d(TAG, "decodeFrame: outIndex: " + outIndex);
+//                        System.out.println("decodeFrame: outIndex: " + outIndex);
                         ByteBuffer yuvDataBuf;
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                             yuvDataBuf = mediaCodec.getOutputBuffer(outIndex);
@@ -278,18 +304,14 @@ public class YuvPlayer {
                         }
                         // All the output buffer must be release no matter whether the yuv data is output or
                         // not, so that the codec can reuse the buffer.
-                        try{
-                            mediaCodec.releaseOutputBuffer(outIndex, true);
-                        }catch(Exception e){
-                            e.printStackTrace();
-                        }
+                        mediaCodec.releaseOutputBuffer(outIndex, true);
                     } else {
 //                        System.out.println("outIndex = " + outIndex);
                     }
                 }
             }
-            catch (Exception e){
-                e.printStackTrace();
+            catch (InterruptedException e){
+
             }
         }
     }
@@ -313,14 +335,12 @@ public class YuvPlayer {
                 h264Data.h264Data = null;
             }
         };
-        Surface surface;
         @Override
         public void run() {
             H264Data h264Data;
             byte[] outBuff = new byte[2097152];
             try {
-                init(surface);
-                while ((h264Data = h264DataArrayBlockingQueue.take()) != null){
+                while (runStatus && (h264Data = h264DataArrayBlockingQueue.take()) != null){
                     try {
                         parse(h264Data.h264Data, h264Data.size, outBuff);
                     }
@@ -330,7 +350,7 @@ public class YuvPlayer {
                 }
             }
             catch (InterruptedException e){
-                e.printStackTrace();
+
             }
         }
         public void inQueue(byte[] data, int size){
@@ -364,6 +384,8 @@ public class YuvPlayer {
     private ParseH264DataTask parseH264DataTask;
     private DualOuterYuvDataTask dualOuterYuvDataTask;
     private Thread dualOuterYuvDataThread;
+    private boolean runStatus = false;
+    private final Object statusLock = new Object();
 
     /**
      * 启动播放，准备播放资源
@@ -372,34 +394,42 @@ public class YuvPlayer {
      * @param playFps 播放时使用的图像帧率
      * @param surface 图像显示的地方
      */
-    public void start(int width, int height, int playFps, Surface surface){
+    private void _start(int width, int height, int playFps, Surface surface){
         System.out.println("YuvPlayer start");
         if(width <= 0 || height <= 0 || playFps <= 0 || surface == null){
             throw new IllegalArgumentException("参数错误");
         }
-        //播放线程
-        if(playYuvDataThread != null){
-            stop();
+
+        synchronized (statusLock) {
+            if(runStatus){
+                System.out.println("YuvPlayer have been started");
+                return;
+            }
+            runStatus = true;
+
+            init(surface);
+            setWidthHeight(width, height);
+
+            yuvDataObjectPool = new YuvDataObjectPool(101);
+
+            //播放线程
+            playYuvDataTask = new PlayYuvDataTask();
+            playYuvDataTask.playFps = playFps;
+            surfaceWidth = width;
+            surfaceHeight = height;
+            playYuvDataTask.yuvType = CV_FMT_NV12;
+            playYuvDataTask.surface = surface;
+            playYuvDataTask._init();
+            playYuvDataThread = new Thread(playYuvDataTask);
+            playYuvDataThread.setDaemon(true);
+            playYuvDataThread.start();
+
+            //拆分H264数据线程
+            parseH264DataTask = new ParseH264DataTask();
+            parseH264DataThread = new Thread(parseH264DataTask);
+            parseH264DataThread.setDaemon(true);
+            parseH264DataThread.start();
         }
-
-        yuvDataObjectPool = new YuvDataObjectPool(101);
-
-        playYuvDataTask = new PlayYuvDataTask();
-        playYuvDataTask.playFps = playFps;
-        surfaceWidth = width;
-        surfaceHeight = height;
-        playYuvDataTask.yuvType = CV_FMT_NV12;
-        playYuvDataTask._init();
-        playYuvDataThread = new Thread(playYuvDataTask);
-        playYuvDataThread.setDaemon(true);
-        playYuvDataThread.start();
-
-        //拆分H264数据线程
-        parseH264DataTask = new ParseH264DataTask();
-        parseH264DataTask.surface = surface;
-        parseH264DataThread = new Thread(parseH264DataTask);
-        parseH264DataThread.setDaemon(true);
-        parseH264DataThread.start();
     }
 
     public interface YuvDataListener {
@@ -419,7 +449,7 @@ public class YuvPlayer {
      * should set "null" surface when calling the "configure" method of MediaCodec.
      * @param yuvDataListener
      */
-    public void setYuvDataListener(YuvDataListener yuvDataListener) {
+    public void _setYuvDataListener(YuvDataListener yuvDataListener) {
         this.yuvDataListener = yuvDataListener;
     }
 
@@ -429,7 +459,7 @@ public class YuvPlayer {
      * 将一帧图像推送至播放端
      * @param yuvData 推送的图像数据
      */
-    public void push(YuvData yuvData){
+    private void push(YuvData yuvData){
         if(yuvData == null || yuvData.data == null || yuvData.data.length < (yuvData.width * yuvData.height * 3 / 2)){
             throw new IllegalArgumentException("参数错误");
         }
@@ -443,51 +473,70 @@ public class YuvPlayer {
      * @param size
      * @return
      */
-    public void parseH264(byte[] buf, int size){
+    private void _parseH264(byte[] buf, int size){
 //        System.out.println("parseH264, size = " + size);
         if(buf == null || buf.length < size || size < 0){
             throw new IllegalArgumentException("参数错误");
         }
-        if(parseH264DataThread != null && parseH264DataTask != null){
-            parseH264DataTask.inQueue(buf, size);
+        if(runStatus) {
+            if (parseH264DataThread != null && parseH264DataTask != null) {
+                parseH264DataTask.inQueue(buf, size);
+            }
         }
     }
 
     /**
      * 停止播放
      */
-    public void stop(){
+    private void _stop(){
         System.out.println("YuvPlayer stop");
-        if(parseH264DataThread != null){
+
+        synchronized (statusLock) {
+            if(!runStatus){
+                System.out.println("YuvPlayer have been stoped");
+            }
+            runStatus = false;
+
             parseH264DataThread.interrupt();
-            try{
+            try {
                 parseH264DataThread.join();
-            }catch(InterruptedException e){
-                e.printStackTrace();
+            } catch (InterruptedException e) {
+
             }
             parseH264DataThread = null;
             parseH264DataTask = null;
-        }
 
-        stopDecodeH264Thread();
+            stopDecodeH264Thread();
 
-        if(playYuvDataThread != null) {
-            playYuvDataThread.interrupt();
-            try {
-                playYuvDataThread.join();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (playYuvDataThread != null) {
+                playYuvDataThread.interrupt();
+                try {
+                    playYuvDataThread.join();
+                } catch (InterruptedException e) {
+
+                }
+                playYuvDataThread = null;
+                playYuvDataTask = null;
             }
-            playYuvDataThread = null;
-            playYuvDataTask = null;
-        }
 
-        yuvDataObjectPool = null;
+            yuvDataObjectPool = null;
+
+            close();
+        }
     }
 
     private void stopDecodeH264Thread(){
 
         System.out.println("DecodeH264Thread stop");
+        if(dualOuterYuvDataThread != null) {
+            dualOuterYuvDataThread.interrupt();
+            try {
+                dualOuterYuvDataThread.join();
+            } catch ( InterruptedException e) {
+
+            }
+            dualOuterYuvDataThread = null;
+        }
         if(decodeH264DataThread != null) {
             decodeH264DataThread.interrupt();
             if(mediaCodec != null) {
@@ -497,7 +546,7 @@ public class YuvPlayer {
             try {
                 decodeH264DataThread.join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+
             }
             decodeH264DataThread = null;
             decodeH264DataTask = null;
@@ -505,7 +554,7 @@ public class YuvPlayer {
         }
     }
 
-    public void setSufaceWidthHeight(int width, int height){
+    private void _setSufaceWidthHeight(int width, int height){
         setWidthHeight(width, height);
     }
 
@@ -536,7 +585,7 @@ public class YuvPlayer {
      * @param size
      * @return
      */
-    public native void parse(byte[] buf, int size, byte[] outBuff);
+    private native void parse(byte[] buf, int size, byte[] outBuff);
 
     private boolean iFrameGot = false;
 
@@ -547,7 +596,7 @@ public class YuvPlayer {
      * @param width Width of current video stream.
      * @return Resource ID of the IDR frame
      */
-    public int getIframeRawId(Model pModel, int width, int height) {
+    private int getIframeRawId(Model pModel, int width, int height) {
         int iframeId = R.raw.iframe_1280x720_ins;
 
         switch(pModel) {
@@ -841,6 +890,8 @@ public class YuvPlayer {
         return null;
     }
 
+
+    private int lastCanUseFrameNum = -1;
     /**
      * 收到一帧数据时候的回调
      * @param buf
@@ -851,7 +902,7 @@ public class YuvPlayer {
      */
     public void onFrameDataRecv(byte[] buf, int size, int frameNum, boolean isKeyFrame, int width, int height) {
 //        if(isKeyFrame) {
-//            System.out.println("onFrameDataRecv, size = " + size + ", frameNum = " + frameNum + ", isKeyFrame = " + isKeyFrame + ", width = " + width + ", height = " + height);
+            System.out.println("onFrameDataRecv, size = " + size + ", frameNum = " + frameNum + ", isKeyFrame = " + isKeyFrame + ", width = " + width + ", height = " + height);
 //        }
 
         if (width != 0 && height != 0) {
@@ -895,6 +946,13 @@ public class YuvPlayer {
                 videoYuvSize = width * height * 3 / 2;
             }
 
+            if(lastCanUseFrameNum != -1 && iFrameGot){
+                if(frameNum != 0 && frameNum <= lastCanUseFrameNum){
+                    return;
+                }
+            }
+            lastCanUseFrameNum = frameNum;
+
             if (!iFrameGot) {// check the I frame flag
                 if (frameNum != 1 && !isKeyFrame) {
 //                    System.err.println("the timing for setting iframe has not yet come.");
@@ -928,7 +986,7 @@ public class YuvPlayer {
         if(mediaCodec != null) {
             ByteBuffer buffer;
             int inIndex = mediaCodec.dequeueInputBuffer(0);
-//                System.out.println("inIndex = " + inIndex);
+//            System.out.println("inIndex = " + inIndex);
             // Decode the frame using MediaCodec
             if (inIndex >= 0) {
                 //Log.d(TAG, "decodeFrame: index=" + inIndex);
@@ -946,12 +1004,6 @@ public class YuvPlayer {
 //                mediaCodec.flush();
             }
         }
-    }
-
-    public void changeSurface(Surface surface,int surfaceWidth, int surfaceHeight){
-        this.surfaceWidth = surfaceWidth;
-        this.surfaceHeight = surfaceHeight;
-        parseH264DataTask.surface = surface;
     }
 
     /**
