@@ -13,6 +13,7 @@ import java.util.Map;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MountType;
 import cn.vsx.hamster.common.ReceiveObjectMode;
+import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
@@ -164,6 +165,7 @@ public class UavReceiveHandlerService extends ReceiveHandlerService{
         Map<String,Object> params = new HashMap<>();
         params.put("terminalno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
         params.put("memberuniqueno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L));
+        params.put("terminalType",MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE));
         params.put("longitude",longitude);
         params.put("latitude",latitude);
         params.put("speed",0.0f);

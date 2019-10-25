@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.TimerTask;
 
 import cn.vsx.hamster.common.MountType;
+import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf.NotifyForceUploadGpsMessage;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -273,6 +274,8 @@ public class GPSManager {
 			params.put("speed",location.getSpeed());
 			params.put("bearing",location.getBearing());
 			params.put("altitude",location.getAltitude());
+			params.put("terminalType",MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE));
+			params.put("addressStr","");
 			params.put("mountType", MountType.MOUNT_SELF.toString());
 			Gson gson = new Gson();
 			final String json = gson.toJson(params);
