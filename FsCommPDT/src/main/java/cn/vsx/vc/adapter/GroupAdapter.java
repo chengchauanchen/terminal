@@ -174,7 +174,7 @@ public class GroupAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>{
                 groupViewHolder.iv_current_group.setVisibility(View.VISIBLE);
             }else {
                 groupViewHolder.tv_change_group.setVisibility(View.VISIBLE);
-                groupViewHolder.iv_current_group.setVisibility(View.GONE);
+                groupViewHolder.iv_current_group.setVisibility(View.INVISIBLE);
             }
 
             groupViewHolder.tv_change_group.setOnClickListener(view ->{
