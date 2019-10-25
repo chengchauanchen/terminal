@@ -150,7 +150,7 @@ public class MessageService extends Service {
             if(serverConnectionChangedHandlerAidl != null){
                 serverConnectionChangedHandlerAidl.handler(false);
             }
-        }catch(RemoteException e){
+        }catch(Exception e){
             e.printStackTrace();
         }
         return super.onUnbind(intent);

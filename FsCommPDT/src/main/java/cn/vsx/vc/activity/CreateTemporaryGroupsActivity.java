@@ -28,9 +28,10 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.CreateTemporaryGroupsDialog;
-import ptt.terminalsdk.tools.StringUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.tools.AppUtil;
+import ptt.terminalsdk.tools.StringUtil;
 
 public class CreateTemporaryGroupsActivity extends BaseActivity implements View.OnClickListener {
 
@@ -250,7 +251,9 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
             myHandler.post(() -> {
                 checkDialogIsNotNull();
                 if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                    createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_SUCCESS, "", scanGroup);
+                    if(AppUtil.checkActivityIsRun(CreateTemporaryGroupsActivity.this)){
+                        createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_SUCCESS, "", scanGroup);
+                    }
                     //临时组创建成功之后，开启一个定时任务，到期时给用户一个提示
                     myHandler.postDelayed(() -> {
                         //刷新通讯录组群列表
@@ -272,7 +275,9 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
                         }
                     }, 2000);
                 } else {
-                    createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_FAIL, resultDesc, scanGroup);
+                    if(AppUtil.checkActivityIsRun(CreateTemporaryGroupsActivity.this)){
+                        createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_FAIL, resultDesc, scanGroup);
+                    }
                     myHandler.postDelayed(() -> dismissTemporaryGroupDialog(), 2000);
 
                 }
@@ -349,7 +354,9 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
             }
             //显示提示框
             checkDialogIsNotNull();
-            createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_CREATTING, "", scanGroup);
+            if(AppUtil.checkActivityIsRun(CreateTemporaryGroupsActivity.this)){
+                createTemporaryGroupsDialog.updateTemporaryGroupDialog(CreateTemporaryGroupsDialog.CREATE_GROUP_STATE_CREATTING, "", scanGroup);
+            }
             logger.error("创建临时组：" + "scanGroup" + scanGroup + ",temporaryGroupsName" + temporaryGroupsName + ",pushMemberList" + list.toString() + ",existTime" + existTime);
             //延时创建临时组
             if (timerTaskLock != null) {
