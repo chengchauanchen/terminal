@@ -189,10 +189,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler(int resultCode, String resultDesc){
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                myHandler.post(()->{
-                    tv_status.setText(R.string.login_success);
-                    noNetWork.setVisibility(View.GONE);
-                });
+                myHandler.post(()-> tv_status.setText(R.string.login_success));
+                myHandler.postDelayed(()-> noNetWork.setVisibility(View.GONE),1000);
                 MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
             }else {
                 myHandler.post(()->{
