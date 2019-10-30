@@ -37,8 +37,8 @@ public class SpecificSDK extends TerminalSDK4Android {
     private static SpecificSDK specificSDK;
     private static final String TAG = "SpecificSDK";
 
-    private SpecificSDK(Application mapplication) {
-        super(mapplication);
+    private SpecificSDK(Application mapplication,String terminalMemberType) {
+        super(mapplication,terminalMemberType);
         MyTerminalFactory.setTerminalSDK(this);
     }
 
@@ -293,7 +293,7 @@ public class SpecificSDK extends TerminalSDK4Android {
      */
     public static void init(Application application,String terminalMemberType){
         //SpecificSDK是TerminalSDK4Android的子类，而TerminalSDK4Android继承TerminalSDKBaseImpl实现ITerminalSDK接口(具备了很多通用的业务功能)
-        specificSDK = new SpecificSDK(application);
+        specificSDK = new SpecificSDK(application,terminalMemberType);
         //如果消息服务是开启的，直接关闭
         MyTerminalFactory.getSDK().setLoginFlag();
         //设置程序的key和type(见具体的清单文件配置)
@@ -302,7 +302,7 @@ public class SpecificSDK extends TerminalSDK4Android {
         //开启程序的所有后台服务(包含新开的消息监听进程和很多后台监听和全局控制的服务，程序的登录流程也在对应的服务中自动进行)
         MyTerminalFactory.getSDK().start();
         //根据前面获取到的type，这里设置地址(不同的类型对应的地址不一样)
-        SpecificSDK.setTerminalMemberType(terminalMemberType);
+//        SpecificSDK.setTerminalMemberType(terminalMemberType);
         //设置注册服务地址
         String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
         if(!TextUtils.isEmpty(deviceType)&&TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.toString())){

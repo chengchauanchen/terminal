@@ -10,19 +10,16 @@ import android.widget.ImageView;
 
 import com.google.gson.Gson;
 import com.uuzuche.lib_zxing.DisplayUtil;
-import com.uuzuche.lib_zxing.activity.CodeUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.model.RecorderBindBean;
 import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentPopBackStackHandler;
+import cn.vsx.vc.utils.CodeUtils;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**

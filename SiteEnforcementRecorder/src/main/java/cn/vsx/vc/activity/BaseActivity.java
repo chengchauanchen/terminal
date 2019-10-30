@@ -4,7 +4,9 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -28,6 +30,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Surface;
@@ -71,7 +75,6 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.dialog.ExitAccountDialog;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
@@ -84,7 +87,9 @@ import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
+import cn.vsx.vc.receiver.BatteryBroadcastReceiver;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
+import cn.vsx.vc.receiver.MyPhoneStateListener;
 import cn.vsx.vc.receiver.NFCCardReader;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.BITDialogUtil;
@@ -93,6 +98,7 @@ import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.utils.VolumeToastUitl;
+import ptt.terminalsdk.broadcastreceiver.LivingStopTimeReceiver;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
@@ -131,10 +137,14 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     protected boolean onCameraDenied;
     public static final int REQUEST_PERMISSION_SETTING = 1235;
     private int pushcount;
+    public TelephonyManager mTelephonyManager;
+    public MyPhoneStateListener myPhoneStateListener;
+    private AlarmManager alarmManager;
+    private PendingIntent pendingIntent;
 
     private AlertDialog pushDialog;
     private AlertDialog logDialog;
-    private ExitAccountDialog exitAccountDialog;
+//    private ExitAccountDialog exitAccountDialog;
 //    protected boolean isFristLogin = true;
 
     @Override
@@ -1075,7 +1085,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         //切换账号的时候，清除账号相关的信息
         TerminalFactory.getSDK().getDataManager().clearDataByAccountChanged();
 //        MyTerminalFactory.getSDK().stop();
-//        TerminalFactory.getSDK().getClientChannel().stop();
+        TerminalFactory.getSDK().getClientChannel().stop();
     }
 
     /**
@@ -1093,6 +1103,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 if (TerminalFactory.getSDK().isServerConnected()) {
                     TerminalFactory.getSDK().disConnectToServer();
                 }
+//                TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().stop();
                 //登录绑定账号
                 checkLogin(true, LOGIN_DELAY_TIME);
             }
@@ -1309,38 +1320,97 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             }
         }.showDialog();
     }
-
     /**
-     * 弹窗提示是否是否退出账号
+     * 注册电量广播
      */
-    protected void showExitDialog() {
-        boolean showExitAccount = TerminalFactory.getSDK().getAuthManagerTwo().isOnLine();
-        exitAccountDialog = new ExitAccountDialog(this, showExitAccount, new ExitAccountDialog.OnClickListener() {
-            @Override
-            public void onMoveTaskToBack() {
-                moveTaskToBack(true);
-            }
-
-            @Override
-            public void onExitAccount() {
-                exitApp();
-            }
-        });
-        exitAccountDialog.show();
+    public void registBatterBroadcastReceiver(BatteryBroadcastReceiver batteryBroadcastReceiver){
+        if(batteryBroadcastReceiver!=null){
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+            registerReceiver(batteryBroadcastReceiver,filter);
+        }
     }
 
     /**
-     * 隐藏退出账号弹窗
+     * 注销电量的广播
      */
-    protected void dismissDialog() {
-        if (exitAccountDialog != null && exitAccountDialog.isShowing()) {
-            exitAccountDialog.dismiss();
+    public void unRegistBatterBroadcastReceiver(BatteryBroadcastReceiver batteryBroadcastReceiver){
+        if(batteryBroadcastReceiver!=null){
+            unregisterReceiver(batteryBroadcastReceiver);
         }
-        if (logDialog != null && logDialog.isShowing()) {
-            logDialog.dismiss();
+    }
+
+    /**
+     * 初始化手机信号的监听
+     */
+    protected void initPhoneStateListener(){
+        //获取telephonyManager
+        mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        //开始监听
+        myPhoneStateListener = new MyPhoneStateListener(this);
+        //监听信号强度
+        mTelephonyManager.listen(myPhoneStateListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+    }
+
+    /**
+     * 注册手机信号的监听
+     */
+    protected void registPhoneStateListener(){
+        if(mTelephonyManager != null && myPhoneStateListener != null){
+            mTelephonyManager.listen(myPhoneStateListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
         }
-        if (pushDialog != null && pushDialog.isShowing()) {
-            pushDialog.dismiss();
+    }
+    /**
+     * 注销手机信号的监听
+     */
+    protected void unRegistPhoneStateListener(){
+        if(mTelephonyManager != null&&myPhoneStateListener != null){
+            myPhoneStateListener.onStop();
+            mTelephonyManager.listen(myPhoneStateListener, PhoneStateListener.LISTEN_NONE);
         }
+    }
+
+    /**
+     * 开启上报结束的倒计时
+     */
+    public void startLivingStopAlarmManager() {
+        long currentTime = System.currentTimeMillis();
+        long intervalTime = TerminalFactory.getSDK().getParam(Params.MAX_LIVING_TIME, 0L)*1000;
+        long delayTime = Constants.LIVING_STOP_DELAY_TIME;
+        long endTime = currentTime+intervalTime+delayTime;
+        logger.info(TAG + "startLivingStopAlarmManager:intervalTime-" + intervalTime+"-endTime："+endTime);
+        getAlarmManager().set(AlarmManager.RTC_WAKEUP, endTime, getPendingIntent());
+    }
+
+    /**
+     * 关闭上报结束的倒计时
+     */
+    public void cancelLivingStopAlarmAlarmManager() {
+        logger.info(TAG + "cancelLivingStopAlarmAlarmManager");
+        getAlarmManager().cancel(getPendingIntent());
+    }
+
+    /**
+     * 获取AlarmManager
+     *
+     * @return
+     */
+    private AlarmManager getAlarmManager() {
+        if (alarmManager == null) {
+            alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+        }
+        return alarmManager;
+    }
+
+    /**
+     * 获取PendingIntent
+     */
+    private PendingIntent getPendingIntent() {
+        if (pendingIntent == null) {
+            Intent intent = new Intent(this, LivingStopTimeReceiver.class);
+            intent.setAction("vsxin.action.livingstoptime");
+            pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        }
+        return pendingIntent;
     }
 }

@@ -54,6 +54,10 @@ public class Constants {
     public static final String FRAGMENT_TAG_SET_SERVER = "setServerFragment";//setServerFragment
     public static final String FRAGMENT_TAG_GROUP_CHANGE = "groupChangeFragment";//groupChangeFragment
     public static final String FRAGMENT_TAG_GROUP_SEARCH = "groupSearchFragment";//groupSearchFragment
+    public static final String FRAGMENT_TAG_SET_LIVING_STOP_TIME = "setLivingStopTimeFragment";//setLivingStopTimeFragment
+    public static final String FRAGMENT_TAG_APP_LIST = "appListFragment";//appListFragment
+
+    public static final long LIVING_STOP_DELAY_TIME = 2*60*1000;//上报停止延时时间
 
 
 }

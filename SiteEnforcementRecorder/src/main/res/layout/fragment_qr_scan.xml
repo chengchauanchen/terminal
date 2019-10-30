@@ -13,7 +13,7 @@
         android:id="@+id/iv_qr"
         android:layout_width="@dimen/dp_260"
         android:layout_height="@dimen/dp_260"
-        android:background="@drawable/bg_circle_white_10"
+        android:background="@drawable/bg_circle_grey_10"
         android:padding="@dimen/dp_10"
         android:layout_centerInParent="true" />
 

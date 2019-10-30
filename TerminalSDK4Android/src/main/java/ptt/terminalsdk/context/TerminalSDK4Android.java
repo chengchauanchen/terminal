@@ -158,9 +158,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private boolean isBindedUVCCameraService;
 	private VPNConnectionChangeReceiver vpnConnectionChangeReceiver;
 
-	public TerminalSDK4Android (Application mApplication){
+	public TerminalSDK4Android (Application mApplication,String terminalMemberType){
 		application = mApplication;
 		account = application.getSharedPreferences(Params.DEFAULT_PRE_NAME,Context.MODE_MULTI_PROCESS);
+		putParam(UrlParams.TERMINALMEMBERTYPE, terminalMemberType);
 	}
 
 	@Override

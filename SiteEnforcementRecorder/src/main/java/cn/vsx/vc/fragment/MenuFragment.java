@@ -19,19 +19,15 @@ import butterknife.OnClick;
 import cn.com.cybertech.pdk.utils.DisplayUtil;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.manager.auth.LoginState;
-import cn.vsx.hamster.terminalsdk.manager.auth.LoginStateMachine;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import cn.vsx.vc.activity.MainActivity;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentPopBackStackHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentShowHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 /**
@@ -157,6 +153,7 @@ public class MenuFragment extends Fragment implements View.OnClickListener {
         ButterKnife.unbind(this);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);//更新数据
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiverStopAllBusniessHandler);//退出
+        mHandler.removeCallbacksAndMessages(null);
     }
 
 }

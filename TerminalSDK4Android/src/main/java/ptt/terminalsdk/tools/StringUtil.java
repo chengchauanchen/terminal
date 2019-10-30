@@ -172,6 +172,27 @@ public class StringUtil{
         return data;
     }
 
+    /**
+     * 小时转秒
+     * @return
+     */
+    public static  long  hourToSeconds(int time){
+        return time*3600;
+    }
+    /**
+     * 秒转小时
+     * @return
+     */
+    public static  long  secondsToHour(long time){
+        return time/3600;
+    }
 
+    /**
+     * 秒转分钟
+     * @return
+     */
+    public static  long  secondsToMinute(long time){
+        return time/60;
+    }
 
 }
