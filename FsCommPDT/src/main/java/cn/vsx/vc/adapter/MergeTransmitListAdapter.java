@@ -1374,7 +1374,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                     cn.vsx.vc.utils.ToastUtil.showToast(activity, activity.getString(R.string.text_please_go_to_the_management_background_configuration_location_url));
                 } else {
                     LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
-                    locationFragment.setFragment_contener(fragment_contener);
+                    locationFragment.setFrameLayout(fragment_contener);
                     activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commitAllowingStateLoss();
                 }
             } else {
@@ -1384,7 +1384,7 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                     cn.vsx.vc.utils.ToastUtil.showToast(activity, activity.getString(R.string.text_please_go_to_the_management_background_configuration_location_url));
                 } else {
                     LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
-                    locationFragment.setFragment_contener(fragment_contener);
+                    locationFragment.setFrameLayout(fragment_contener);
                     activity.getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commitAllowingStateLoss();
                 }
             }

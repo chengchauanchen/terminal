@@ -51,7 +51,6 @@ public class LocationFragment extends Fragment{
     String url;
     private boolean isLocation;
     private String name;
-    private FrameLayout fragment_contener;
     private Logger logger = Logger.getLogger(getClass());
     private Handler myHandler = new Handler();
 
@@ -90,6 +89,7 @@ public class LocationFragment extends Fragment{
     public void initView(View mRootView){
         tv_name_face = (TextView) mRootView.findViewById(R.id.tv_name_face);
         iv_back_face = (ImageView) mRootView.findViewById(R.id.iv_back_face);
+        ImageView iv_back = (ImageView) mRootView.findViewById(R.id.iv_back);
         ll_top_bar = (LinearLayout) mRootView.findViewById(R.id.ll_top_bar);
         ll_pb = (LinearLayout) mRootView.findViewById(R.id.ll_pb);
         wv_help = (WebView) mRootView.findViewById(R.id.wv_help);
@@ -98,9 +98,21 @@ public class LocationFragment extends Fragment{
         name = getArguments().getString("name");
         if(!TextUtils.isEmpty(name)){
             ll_top_bar.setVisibility(View.VISIBLE);
+            iv_back.setVisibility(View.GONE);
             tv_name_face.setText(name);
             iv_back_face.setOnClickListener(v -> {
-                frameLayout.setVisibility(View.GONE);
+                if (frameLayout!=null) {
+                    frameLayout.setVisibility(View.GONE);
+                }
+                getFragmentManager().popBackStack();
+            });
+        }else{
+            ll_top_bar.setVisibility(View.GONE);
+            iv_back.setVisibility(View.VISIBLE);
+            iv_back.setOnClickListener(v -> {
+                if (frameLayout!=null) {
+                    frameLayout.setVisibility(View.GONE);
+                }
                 getFragmentManager().popBackStack();
             });
         }
@@ -159,8 +171,8 @@ public class LocationFragment extends Fragment{
             }
         }
         ((BaseActivity) getActivity()).setBackListener(() -> {
-            if(null !=fragment_contener){
-                fragment_contener.setVisibility(View.GONE);
+            if(null !=frameLayout){
+                frameLayout.setVisibility(View.GONE);
             }
             if(null != getActivity() && !isDetached()){
                 getActivity().getSupportFragmentManager().beginTransaction().remove(LocationFragment.this).commit();
@@ -168,10 +180,6 @@ public class LocationFragment extends Fragment{
                 ((BaseActivity) getActivity()).setBackListener(null);
             }
         });
-    }
-
-    public void setFragment_contener(FrameLayout fragment_contener){
-        this.fragment_contener = fragment_contener;
     }
 
     private void hookWebView(){

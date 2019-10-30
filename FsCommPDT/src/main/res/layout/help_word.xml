@@ -75,4 +75,15 @@
             android:layout_height="wrap_content"
             android:text="@string/text_loading" />
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/iv_back"
+        android:layout_width="@dimen/dp_40"
+        android:layout_height="@dimen/dp_40"
+        android:layout_margin="@dimen/dp_10"
+        android:padding="@dimen/dp_10"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="@dimen/x19"
+        android:src="@drawable/forx"
+        android:visibility="gone"/>
 </RelativeLayout>
