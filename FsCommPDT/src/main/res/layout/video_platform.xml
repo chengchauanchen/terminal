@@ -79,6 +79,9 @@
         </LinearLayout>
     </RelativeLayout>
 
+    <include layout="@layout/layout_refreshing"
+        android:visibility="gone"/>
+
     <include layout="@layout/layout_no_network"
         android:visibility="gone"/>
 </RelativeLayout>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll_refreshing"
+    android:layout_width="@dimen/dp_100"
+    android:layout_height="@dimen/dp_100"
+    android:layout_centerInParent="true"
+    android:background="@drawable/bg_refresh"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="@dimen/dp_5">
+
+    <ImageView
+        android:id="@+id/refreshing_icon"
+        android:layout_width="@dimen/dp_40"
+        android:layout_height="@dimen/dp_40"
+        android:layout_gravity="center"
+        android:background="@drawable/refreshing" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/dp_10"
+        android:layout_gravity="center"
+        android:includeFontPadding="false"
+        android:text="@string/text_loading"
+        android:textColor="@color/white"
+        android:textSize="@dimen/sp_18" />
+</LinearLayout>
