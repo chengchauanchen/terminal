@@ -2,6 +2,8 @@ package ptt.terminalsdk.manager;
 
 import android.text.TextUtils;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.allen.library.manage.RxUrlManager;
 import com.allen.library.observer.CommonObserver;
@@ -14,10 +16,13 @@ import java.util.List;
 import java.util.Map;
 
 import cn.vsx.hamster.common.RequestDataType;
+import cn.vsx.hamster.common.TerminalMemberStatusEnum;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.data.DataManager;
+import cn.vsx.hamster.terminalsdk.model.Department;
+import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -27,6 +32,7 @@ import ptt.terminalsdk.bean.GroupBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.http.AppUrlConfig;
 import ptt.terminalsdk.manager.http.api.ApiManager;
+import ptt.terminalsdk.receiveHandler.ReceiveGetTerminalDeviceHandler;
 import ptt.terminalsdk.receiveHandler.ReceiveUpdateDepGroupHandler;
 
 /**
@@ -86,6 +92,65 @@ public class MyDataManager extends DataManager{
                             TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateDepGroupHandler.class,groupList);
                         }else {
 //                            logger.info("请求当前组部门下的所有组数据为null");
+                        }
+                    }
+                });
+
+    }
+
+    @Override
+    public void getDeptDeviceList(int depId, List<String> type){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("id",String.valueOf(depId));
+        jsonObject.put("uniqueNo",String.valueOf(TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L)));
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.addAll(type);
+        jsonObject.put("type",jsonArray);
+
+        ApiManager.getFileServerApi()
+                .getDeptList(jsonObject.toJSONString())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CommonObserver<String>(){
+                    @Override
+                    protected void onError(String errorMsg){
+                        logger.error("请求设备列表失败--"+errorMsg);
+                    }
+
+                    @Override
+                    protected void onSuccess(String result){
+                        JSONObject jsonObject = JSONObject.parseObject(result);
+                        if(jsonObject != null){
+                            List<Department> departments = new ArrayList<>();
+                            JSONArray deptList = jsonObject.getJSONArray("deptList");
+                            for(int i = 0; i < deptList.size(); i++){
+                                JSONObject dep = deptList.getJSONObject(i);
+                                Department department = JSON.parseObject(dep.toJSONString(), Department.class);
+                                departments.add(department);
+                            }
+                            List<Member> members = new ArrayList<>();
+                            JSONArray terminals = jsonObject.getJSONArray("terminals");
+                            for(int i = 0; i < terminals.size(); i++){
+                                JSONObject terminal = terminals.getJSONObject(i);
+                                Member member = new Member();
+                                member.setId(terminal.getIntValue("id"));
+                                JSONObject account = terminal.getJSONObject("account");
+                                member.setNo(account.getIntValue("no"));
+                                member.setName(account.getString("name"));
+                                member.setPhone(account.getString("phoneNumber"));
+                                member.setBind(account.containsKey("bind") && account.getBoolean("bind"));
+                                JSONObject department = account.getJSONObject("department");
+                                member.setDeptId(department.getIntValue("id"));
+                                member.setDepartmentName(department.getString("name"));
+                                member.setUniqueNo(terminal.getLongValue("uniqueNo"));
+                                member.setType((TerminalMemberType.valueOf(terminal.getString("terminalMemberType")).getCode()));
+                                member.setTerminalMemberType(terminal.getString("terminalMemberType"));
+                                member.setStatus(TerminalMemberStatusEnum.valueOf(terminal.getString("terminalMemberStatus")).getCode());
+                                member.setGb28181No(terminal.getString("gb28181No"));
+                                //                            member.setTerminalMemberMode(terminal.getString("terminalMemberMode"));
+                                members.add(member);
+                            }
+                            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetTerminalDeviceHandler.class, depId, type, departments, members);
                         }
                     }
                 });

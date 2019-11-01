@@ -953,7 +953,8 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         public void handler(final List<Member> memberList, final String status,int groupId) {
             Log.e("GroupCallNewsActivity", "memberList:" + memberList);
             mHandler.post(() -> {
-                if (isFinishing() ||(TerminalMemberStatusEnum.valueOf(status).getCode() != TerminalMemberStatusEnum.ONLINE.getCode())) {
+                if (isFinishing() ||(TerminalMemberStatusEnum.valueOf(status).getCode() != TerminalMemberStatusEnum.ONLINE.getCode())
+                || groupId != userId) {
                     return;
                 }
                 if (DataUtil.isExistGroup(userId)) {

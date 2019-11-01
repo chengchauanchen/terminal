@@ -21,6 +21,7 @@ import java.util.List;
 
 import cn.com.cybertech.pdk.utils.DisplayUtil;
 import cn.vsx.hamster.common.Authority;
+import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
@@ -173,143 +174,175 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 //                userViewHolder.llLiveTo.setVisibility(View.GONE);
 //            }
         }else if(getItemViewType(position) == Constants.TYPE_USER){
-            UserViewHolder userViewHolder = (UserViewHolder) holder;
-            final Member member = (Member) mDatas.get(position).getBean();
-            if(!TextUtils.isEmpty(member.getName())){
-                userViewHolder.tvName.setText(member.getName() + "");
-            }
-            userViewHolder.tvId.setText(member.getNo() + "");
-            userViewHolder.llDialTo.setOnClickListener(view -> {
-                Account account = DataUtil.getAccountByMember(member);
-                callPhone(account);
-            });
-            userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName(),member.getType()));
-            userViewHolder.llCallTo.setOnClickListener(view -> {
-                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
-                }else{
-                    activeIndividualCall(member);
-                }
-            });
-            //请求图像
-            userViewHolder.llLiveTo.setOnClickListener(view -> {
-                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
-                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
-                }else{
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
-                }
-            });
-            //个人信息页面
-            userViewHolder.ivLogo.setImageResource(BitmapUtil.getUserPhoto());
-            userViewHolder.ivLogo.setOnClickListener(view -> {
-                Intent intent = new Intent(mContext, UserInfoActivity.class);
-                intent.putExtra("userId", member.getNo());
-                intent.putExtra("userName", member.getName());
-                mContext.startActivity(intent);
-            });
-            //如果是自己的不显示业务按钮
-            if(member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
-                userViewHolder.llDialTo.setVisibility(View.GONE);
-                userViewHolder.llMessageTo.setVisibility(View.GONE);
-                userViewHolder.llCallTo.setVisibility(View.GONE);
-            }else{
-                userViewHolder.llDialTo.setVisibility(View.VISIBLE);
-                userViewHolder.llMessageTo.setVisibility(View.VISIBLE);
-                userViewHolder.llCallTo.setVisibility(View.VISIBLE);
-            }
-            //电话按钮，是否显示
-            if(contractType == Constants.TYPE_CONTRACT_MEMBER && member.getNo() != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
-                userViewHolder.llDialTo.setVisibility(View.VISIBLE);
-                userViewHolder.llLiveTo.setVisibility(View.VISIBLE);
-            }else{
-                //电台不显示电话
-                userViewHolder.llDialTo.setVisibility(View.GONE);
-                userViewHolder.llLiveTo.setVisibility(View.GONE);
-            }
+            setUserData((UserViewHolder) holder, position);
         }else if(getItemViewType(position) == Constants.TYPE_LTE){
             //LTE
+            setLTEData((UserViewHolder) holder, position);
+        }else if(getItemViewType(position) == Constants.TYPE_RECORDER){
+            //执法记录仪
+            setRecoderData((UserViewHolder) holder, position);
+        }else if(getItemViewType(position) == Constants.TYPE_TERMINAL){
             UserViewHolder userViewHolder = (UserViewHolder) holder;
             final Member member = (Member) mDatas.get(position).getBean();
+            String terminalMemberType = member.getTerminalMemberType();
+            TerminalMemberType memberType = TerminalMemberType.getInstanceByName(terminalMemberType);
+            switch(memberType){
+                case TERMINAL_BODY_WORN_CAMERA:
+                case TERMINAL_HDMI:
+                    setRecoderData((UserViewHolder) holder, position);
+                    break;
+                case TERMINAL_LTE:
+                case TERMINAL_LTE_HYTERA:
+                case TERMINAL_UAV:
+                    setLTEData((UserViewHolder) holder, position);
+                    break;
+                case TERMINAL_PDT:
+                case TERMINAL_PDT_WANGE:
+                case TERMINAL_PDT_HAIGE:
+                    setUserData((UserViewHolder) holder, position);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    private void setRecoderData(UserViewHolder holder, int position){
+        UserViewHolder userViewHolder = holder;
+        final Member member = (Member) mDatas.get(position).getBean();
+        if (member.isBind()) {
             if(!TextUtils.isEmpty(member.getName())){
                 userViewHolder.tvName.setText(member.getName() + "");
             }
             userViewHolder.tvId.setText(member.getNo() + "");
-            userViewHolder.llDialTo.setVisibility(View.GONE);
-
-            userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName(),member.getType()));
-            userViewHolder.llCallTo.setOnClickListener(view -> {
-                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
-                }else{
-                    activeIndividualCall(member);
-                }
-            });
-            //请求图像
-            userViewHolder.llLiveTo.setOnClickListener(view -> {
-                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
-                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
-                }else{
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
-                }
-            });
-            //个人信息页面
-            userViewHolder.ivLogo.setImageResource(BitmapUtil.getUserPhoto());
-            userViewHolder.ivLogo.setOnClickListener(view -> {
-                Intent intent = new Intent(mContext, UserInfoActivity.class);
-                intent.putExtra("userId", member.getNo());
-                intent.putExtra("userName", member.getName());
-                mContext.startActivity(intent);
-            });
-            //如果是自己的不显示业务按钮
-            if(member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
-                userViewHolder.llMessageTo.setVisibility(View.GONE);
-                userViewHolder.llCallTo.setVisibility(View.GONE);
-                userViewHolder.llLiveTo.setVisibility(View.GONE);
+            userViewHolder.tvId.setVisibility(View.VISIBLE);
+        }else{
+            userViewHolder.tvName.setText(member.getNo() + "");
+            userViewHolder.tvId.setVisibility(View.GONE);
+        }
+        userViewHolder.ivLogo.setImageResource(R.drawable.icon_recorder);
+        userViewHolder.rBindedLogo.setVisibility(member.isBind()?View.VISIBLE:View.GONE);
+        userViewHolder.llDialTo.setVisibility(View.GONE);
+        userViewHolder.llMessageTo.setVisibility(View.GONE);
+        userViewHolder.llLiveTo.setVisibility(View.VISIBLE);
+        userViewHolder.llCallTo.setVisibility(View.GONE);
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) userViewHolder.llLiveTo.getLayoutParams();
+        lp.rightMargin = recorderLiveRightMargin;
+        userViewHolder.llLiveTo.setLayoutParams(lp);
+        //请求图像
+        userViewHolder.llLiveTo.setOnClickListener(view -> {
+            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
+                ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
             }else{
-                userViewHolder.llMessageTo.setVisibility(View.VISIBLE);
-                userViewHolder.llCallTo.setVisibility(View.VISIBLE);
-                userViewHolder.llLiveTo.setVisibility(View.VISIBLE);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
             }
+        });
+        //个人信息页面
+        userViewHolder.ivLogo.setOnClickListener(view -> {
+            Intent intent = new Intent(mContext, UserInfoActivity.class);
+            intent.putExtra("userId", member.getNo());
+            intent.putExtra("userName", member.getName());
+            mContext.startActivity(intent);
+        });
+    }
 
-        }else if(getItemViewType(position) == Constants.TYPE_RECORDER){
-            //执法记录仪
-            UserViewHolder userViewHolder = (UserViewHolder) holder;
-            final Member member = (Member) mDatas.get(position).getBean();
-            if (member.isBind()) {
-                if(!TextUtils.isEmpty(member.getName())){
-                    userViewHolder.tvName.setText(member.getName() + "");
-                }
-                userViewHolder.tvId.setText(member.getNo() + "");
-                userViewHolder.tvId.setVisibility(View.VISIBLE);
+    private void setLTEData(UserViewHolder holder, int position){
+        UserViewHolder userViewHolder = holder;
+        final Member member = (Member) mDatas.get(position).getBean();
+        if(!TextUtils.isEmpty(member.getName())){
+            userViewHolder.tvName.setText(member.getName() + "");
+        }
+        userViewHolder.tvId.setText(member.getNo() + "");
+        userViewHolder.llDialTo.setVisibility(View.GONE);
+        userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName(),member.getType()));
+        userViewHolder.llCallTo.setOnClickListener(view -> {
+            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
             }else{
-                userViewHolder.tvName.setText(member.getNo() + "");
-                userViewHolder.tvId.setVisibility(View.GONE);
+                activeIndividualCall(member);
             }
-            userViewHolder.ivLogo.setImageResource(R.drawable.icon_recorder);
-            userViewHolder.rBindedLogo.setVisibility(member.isBind()?View.VISIBLE:View.GONE);
+        });
+        //请求图像
+        userViewHolder.llLiveTo.setOnClickListener(view -> {
+            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
+                ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
+            }else{
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
+            }
+        });
+        //个人信息页面
+        userViewHolder.ivLogo.setImageResource(BitmapUtil.getUserPhoto());
+        userViewHolder.ivLogo.setOnClickListener(view -> {
+            Intent intent = new Intent(mContext, UserInfoActivity.class);
+            intent.putExtra("userId", member.getNo());
+            intent.putExtra("userName", member.getName());
+            mContext.startActivity(intent);
+        });
+        //如果是自己的不显示业务按钮
+        if(member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
+            userViewHolder.llMessageTo.setVisibility(View.GONE);
+            userViewHolder.llCallTo.setVisibility(View.GONE);
+            userViewHolder.llLiveTo.setVisibility(View.GONE);
+        }else{
+            userViewHolder.llMessageTo.setVisibility(View.VISIBLE);
+            userViewHolder.llCallTo.setVisibility(View.VISIBLE);
+            userViewHolder.llLiveTo.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void setUserData(UserViewHolder holder, int position){
+        UserViewHolder userViewHolder = holder;
+        final Member member = (Member) mDatas.get(position).getBean();
+        if(!TextUtils.isEmpty(member.getName())){
+            userViewHolder.tvName.setText(member.getName() + "");
+        }
+        userViewHolder.tvId.setText(member.getNo() + "");
+        userViewHolder.llDialTo.setOnClickListener(view -> {
+            Account account = DataUtil.getAccountByMember(member);
+            callPhone(account);
+        });
+        userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, member.no, member.getName(),member.getType()));
+        userViewHolder.llCallTo.setOnClickListener(view -> {
+            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
+            }else{
+                activeIndividualCall(member);
+            }
+        });
+        //请求图像
+        userViewHolder.llLiveTo.setOnClickListener(view -> {
+            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
+                ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
+            }else{
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
+            }
+        });
+        //个人信息页面
+        userViewHolder.ivLogo.setImageResource(BitmapUtil.getUserPhoto());
+        userViewHolder.ivLogo.setOnClickListener(view -> {
+            Intent intent = new Intent(mContext, UserInfoActivity.class);
+            intent.putExtra("userId", member.getNo());
+            intent.putExtra("userName", member.getName());
+            mContext.startActivity(intent);
+        });
+        //如果是自己的不显示业务按钮
+        if(member.getNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
             userViewHolder.llDialTo.setVisibility(View.GONE);
             userViewHolder.llMessageTo.setVisibility(View.GONE);
-            userViewHolder.llLiveTo.setVisibility(View.VISIBLE);
             userViewHolder.llCallTo.setVisibility(View.GONE);
-
-            android.widget.LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) userViewHolder.llLiveTo.getLayoutParams();
-            lp.rightMargin = recorderLiveRightMargin;
-            userViewHolder.llLiveTo.setLayoutParams(lp);
-            //请求图像
-            userViewHolder.llLiveTo.setOnClickListener(view -> {
-                if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
-                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
-                }else{
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
-                }
-            });
-            //个人信息页面
-            userViewHolder.ivLogo.setOnClickListener(view -> {
-                Intent intent = new Intent(mContext, UserInfoActivity.class);
-                intent.putExtra("userId", member.getNo());
-                intent.putExtra("userName", member.getName());
-                mContext.startActivity(intent);
-            });
+        }else{
+            userViewHolder.llDialTo.setVisibility(View.VISIBLE);
+            userViewHolder.llMessageTo.setVisibility(View.VISIBLE);
+            userViewHolder.llCallTo.setVisibility(View.VISIBLE);
+        }
+        //电话按钮，是否显示
+        if(contractType == Constants.TYPE_CONTRACT_MEMBER && member.getNo() != MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)){
+            userViewHolder.llDialTo.setVisibility(View.VISIBLE);
+            userViewHolder.llLiveTo.setVisibility(View.VISIBLE);
+        }else{
+            //电台不显示电话
+            userViewHolder.llDialTo.setVisibility(View.GONE);
+            userViewHolder.llLiveTo.setVisibility(View.GONE);
         }
     }
 
@@ -375,7 +408,10 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             return Constants.TYPE_LTE;
         }else if(bean.getType() == Constants.TYPE_RECORDER){
             return Constants.TYPE_RECORDER;
-        }else{
+        }else if(bean.getType() == Constants.TYPE_TERMINAL){
+            return Constants.TYPE_TERMINAL;
+        }
+        else{
             return -1;
         }
     }

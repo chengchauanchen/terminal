@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources >
+<resources>
     <string name="app_name">融合通信</string>
     <!--<string name="app_name">襄阳融合通信测试</string>-->
     <!-- <string name="app_name">宽带对讲</string> -->
-     <!--<string name="app_name">平安站车</string>-->
+    <!--<string name="app_name">平安站车</string>-->
     <string name="authing">正在认证...</string>
     <string name="auth_fail">认证失败...</string>
     <string name="logining">正在登录...</string>
@@ -606,7 +606,6 @@
     <string name="list_data_is_empty">暂无数据</string>
     <string name="main_group_message_cannot_delete">主组消息不能删除</string>
     <string name="please_select_delete_member">请选择要删除的成员</string>
-
     <string name="qr_binding">扫描二维码绑定</string>
     <string name="binding_qr_tempt">扫一扫,绑定我的警务通</string>
     <string name="text_temp_group_members_title">全部成员(%1$d/%2$d)</string>
@@ -627,23 +626,21 @@
     <string name="temp_group_cannot_remove">临时组不能移除监听</string>
     <string name="response_group_cannot_remove">响应组不能移除监听</string>
     <string name="text_input_name_regex">输入2-7位汉字、字母、数字且数字不在首位</string>
-
     <string name="text_call_hand_free">免提</string>
-
     <string name="text_temp_set_lock_screen">锁屏页面未弹出？找到“锁屏显示”或类似选项，选择“允许”。</string>
     <string name="text_head_set_can_not_hand_free">耳机模式下，不能打开扬声器</string>
     <string name="text_pull_data_error">播放数据错误</string>
     <string name="text_person">人员</string>
     <string name="text_change_group_data_wrong">切组数据错误</string>
-    
     <string name="text_play_live_fail">历史图像未生成</string>
     <string name="text_please_select_group">请选择组</string>
     <string name="text_get_token_fail">获取票据失败</string>
-
     <string name="text_tianjin_group">融合组</string>
     <string name="text_tianjin_car_4">4G图传车</string>
     <string name="text_bluetooth_is_opened">蓝牙已打开</string>
     <string name="text_bluetooth_is_closeed">蓝牙已关闭</string>
     <string name="text_bluetooth_is_opening">蓝牙正在打开...</string>
     <string name="text_bluetooth_is_closing">蓝牙正在关闭...</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

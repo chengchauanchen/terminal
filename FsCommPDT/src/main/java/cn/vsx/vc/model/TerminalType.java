@@ -24,4 +24,7 @@ public class TerminalType {
     public static final String TERMINAL_PATROL = "TERMINAL_PATROL";//船
     public static final String TERMINAL_CAR = "TERMINAL_CAR";//警车
     public static final String TERMINAL_PERSONNEL = "TERMINAL_PERSONNEL";//民警
+
+    public static final String GROUP = "group";
+    public static final String POLICE = "police";
 }

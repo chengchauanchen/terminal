@@ -305,4 +305,9 @@
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
     
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
+    
+    <style name="TabLayoutTextStyle">
+        <item name="android:textSize">@dimen/sp_17</item>
+    </style>
+    
 </resources>
