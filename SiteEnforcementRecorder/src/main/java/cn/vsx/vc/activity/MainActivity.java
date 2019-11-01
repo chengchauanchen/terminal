@@ -459,6 +459,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
             } else {
                 //没有注册服务地址，去探测地址
                 if(availableIPlist.isEmpty()){
+                    TerminalFactory.getSDK().getAuthManagerTwo().setChangeServer();
                     TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
                 }else{
                     ToastUtil.showToast(MainActivity.this,(!isRegisted)?getString(R.string.text_please_regist_first):resultDesc);

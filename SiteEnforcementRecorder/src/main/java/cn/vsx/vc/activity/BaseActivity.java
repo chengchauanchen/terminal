@@ -968,7 +968,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         if (TextUtils.isEmpty(authUrl)) {
             //平台包或者没获取到类型，直接用AuthManager中的地址,
             //设置切换的环境
-            setChangeServer();
+            TerminalFactory.getSDK().getAuthManagerTwo().setChangeServer();
             String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
             if (defaultAddress.length >= 2) {
                 if(NetworkUtil.isConnected(this)){
@@ -1157,16 +1157,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         BaseActivity.this.finish();
     }
 
-
-    /**
-     * 重置服务ip和port
-     */
-    private void setChangeServer() {
-        RecorderServerBean bean = DataUtil.getRecorderServerBean();
-        if (bean != null) {
-            TerminalFactory.getSDK().getAuthManagerTwo().resetServer(bean.getIp(), DataUtil.stringToInt(bean.getPort()), bean.getName());
-        }
-    }
 
     /**
      * 获取退出时的提示
