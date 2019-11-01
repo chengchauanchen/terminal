@@ -43,9 +43,9 @@ import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.DensityUtil;
-import cn.vsx.vc.utils.TablayoutUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.DialPopupwindow;
+import cn.vsx.vc.view.TabLayoutView;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -186,6 +186,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     @Override
     public void initData() {
+        imgbtn_dial.setVisibility(View.GONE);
         FragmentManager childFragmentManager = getChildFragmentManager();
         FragmentTransaction transaction = childFragmentManager.beginTransaction();
         //添加tab
@@ -195,6 +196,11 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         groupFragmentNew = new NewGroupFragment();
         fragments.add(groupFragmentNew);
         TabLayout.Tab groupTab = tabLayout.newTab();
+
+        TabLayoutView groupTabView = new TabLayoutView(getContext());
+        groupTabView.setmTabName(titles.get(0));
+        groupTabView.setSelect(true);
+        groupTab.setCustomView(groupTabView);
         groupTab.setText(titles.get(0));
         tabLayout.addTab(groupTab);
         tabs.add(groupTab);
@@ -202,6 +208,10 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         policeAffairsFragment = new NewPoliceAffairsFragment();
         fragments.add(policeAffairsFragment);
         TabLayout.Tab policeTab = tabLayout.newTab();
+        TabLayoutView policeTabView = new TabLayoutView(getContext());
+        policeTabView.setSelect(false);
+        policeTabView.setmTabName(titles.get(1));
+        policeTab.setCustomView(policeTabView);
         policeTab.setText(titles.get(1));
         tabLayout.addTab(policeTab);
         tabs.add(policeTab);
@@ -212,9 +222,12 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
             titles.add(terminalContactTabs.get(i).getTabName());
             TabLayout.Tab tab = tabLayout.newTab();
             tab.setText(terminalContactTabs.get(i).getTabName());
+            TabLayoutView tabView = new TabLayoutView(getContext());
+            tabView.setmTabName(terminalContactTabs.get(i).getTabName());
+            tabView.setSelect(false);
+            tab.setCustomView(tabView);
             tabLayout.addTab(tab);
             tabs.add(tab);
-            updateTabTextView(tab,false);
             TerminalFragment terminalFragment = TerminalFragment.newInstance(terminalContactTabs.get(i).getTerminalMemberTypes());
             fragments.add(terminalFragment);
         }
@@ -225,11 +238,8 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         int tabCount = screenWidth / scrollableTabMinWidth;
         if(tabs.size()>tabCount){
             tabLayout.setTabMode(MODE_SCROLLABLE);
-            mHandler.post(()-> TablayoutUtil.setIndicator(tabLayout,20,20));
-
         }else {
             tabLayout.setTabMode(MODE_FIXED);
-            mHandler.post(()-> TablayoutUtil.setIndicator(tabLayout,tabs.size()*20,tabs.size()*20));
         }
 
         transaction.add(R.id.contacts_viewPager, groupFragmentNew).show(groupFragmentNew).commit();
@@ -240,18 +250,29 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
             public void onTabSelected(TabLayout.Tab tab){
                 logger.info("onTabSelected");
                 int position = tab.getPosition();
+                if(position == 0){
+                    imgbtn_dial.setVisibility(View.GONE);
+                }else {
+                    imgbtn_dial.setVisibility(View.VISIBLE);
+                }
                 BaseFragment currentFrgment = fragments.get(position);
                 if(lastFragment !=currentFrgment ){
+                    TabLayoutView customView = (TabLayoutView) tab.getCustomView();
+                    if(customView != null){
+                        customView.setSelect(true);
+                    }
                     switchFragment(lastFragment,currentFrgment);
-                    updateTabTextView(tab,true);
                     lastFragment = currentFrgment;
                 }
             }
 
             @Override
             public void onTabUnselected(TabLayout.Tab tab){
+                TabLayoutView customView = (TabLayoutView) tab.getCustomView();
+                if(customView != null){
+                    customView.setSelect(false);
+                }
                 logger.info("onTabUnselected");
-                updateTabTextView(tab,false);
             }
 
             @Override
@@ -431,17 +452,4 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         return !(fragments.get(0)!=null && !fragments.get(0).isHidden());
     }
 
-    private void updateTabTextView(TabLayout.Tab tab, boolean isSelect) {
-
-        if (isSelect) {
-            //选中加粗
-//            TextView tabSelect = tab.getCustomView().findViewById(android.R.id.text1);
-//            tabSelect.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-//            tabSelect.setText(tab.getText());
-        } else {
-//            TextView tabUnSelect = tab.getCustomView().findViewById(android.R.id.text1);
-//            tabUnSelect.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-//            tabUnSelect.setText(tab.getText());
-        }
-    }
 }

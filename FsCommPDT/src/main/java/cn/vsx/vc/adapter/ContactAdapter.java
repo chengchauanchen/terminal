@@ -17,6 +17,7 @@ import android.widget.TextView;
 import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cn.com.cybertech.pdk.utils.DisplayUtil;
@@ -60,12 +61,13 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private CatalogItemClickListener catalogItemClickListener;
     private int contractType;
     private int recorderLiveRightMargin = 0;
-
-    public ContactAdapter(Context context, List<ContactItemBean> datas,List<CatalogBean> catalogNames, int contractType){
+    private ArrayList<String> terminalMemberTypes;
+    public ContactAdapter(Context context, List<ContactItemBean> datas, List<CatalogBean> catalogNames, int contractType, ArrayList<String> terminalMemberTypes){
         this.mContext = context;
         this.mDatas = datas;
         this.catalogNames = catalogNames;
         this.contractType = contractType;
+        this.terminalMemberTypes = terminalMemberTypes;
         recorderLiveRightMargin = DisplayUtil.dip2px(context,12);
     }
 
@@ -107,7 +109,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if(System.currentTimeMillis() - lastSearchTime<1000){
                     return;
                 }
-                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class, contractType);
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverShowPersonFragmentHandler.class, contractType,terminalMemberTypes);
                 lastSearchTime = System.currentTimeMillis();
             });
         }
@@ -185,7 +187,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             UserViewHolder userViewHolder = (UserViewHolder) holder;
             final Member member = (Member) mDatas.get(position).getBean();
             String terminalMemberType = member.getTerminalMemberType();
-            TerminalMemberType memberType = TerminalMemberType.getInstanceByName(terminalMemberType);
+            TerminalMemberType memberType = TerminalMemberType.valueOf(terminalMemberType);
             switch(memberType){
                 case TERMINAL_BODY_WORN_CAMERA:
                 case TERMINAL_HDMI:
@@ -202,6 +204,7 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                     setUserData((UserViewHolder) holder, position);
                     break;
                 default:
+                    setUserData((UserViewHolder) holder, position);
                     break;
             }
         }

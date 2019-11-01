@@ -39,6 +39,7 @@ public class Constants{
     public final static int TYPE_CONTRACT_MEMBER=108;
     //搜索 通讯录的PDT
     public final static int TYPE_CONTRACT_PDT=109;
+    public final static int TYPE_CONTRACT_TERMINAL=11;
     //搜索 通讯录的LTE
     public final static int TYPE_CONTRACT_LTE=117;
     //搜索 通讯录的recorder

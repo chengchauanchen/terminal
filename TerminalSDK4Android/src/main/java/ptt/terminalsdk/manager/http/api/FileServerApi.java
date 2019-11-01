@@ -25,4 +25,9 @@ public interface FileServerApi{
     @Headers("Content-type: application/json;charset=UTF-8")
     @POST("/file/getDeptList")
     Observable<String> getDeptList(@Body String params);
+
+    @Headers("Content-type: application/json;charset=UTF-8")
+    @POST("/file/terminal/findByDeptAndKeyList")
+    Observable<String> findByDeptAndKeyList(@Body String params);
+
 }

@@ -84,7 +84,7 @@ public class NewPoliceAffairsFragment extends BaseFragment {
         mRecyclerview = (RecyclerView) mRootView.findViewById(R.id.recyclerview);
         swipeRefreshLayout = (SwipeRefreshLayout) mRootView.findViewById(R.id.swipeRefreshLayout);
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mContactAdapter=new ContactAdapter(getActivity(),mDatas,catalogNames,Constants.TYPE_CONTRACT_MEMBER);
+        mContactAdapter=new ContactAdapter(getActivity(),mDatas,catalogNames,Constants.TYPE_CONTRACT_MEMBER,null);
         mRecyclerview.setAdapter(mContactAdapter);
 
     }

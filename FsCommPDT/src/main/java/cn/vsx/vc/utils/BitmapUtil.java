@@ -210,7 +210,8 @@ public class BitmapUtil {
 			return R.drawable.icon_uav;
 		} else if (type == TerminalMemberType.TERMINAL_HDMI.getCode()) {
 			return R.drawable.icon_hdmi;
-		} else if (type == TerminalMemberType.TERMINAL_LTE.getCode()) {
+		} else if (type == TerminalMemberType.TERMINAL_LTE.getCode() ||
+				   type == TerminalMemberType.TERMINAL_LTE_HYTERA.getCode()) {
 			return R.drawable.icon_lte;
 		} else {
 			return R.drawable.icon_phone;
@@ -232,7 +233,8 @@ public class BitmapUtil {
 			return R.drawable.icon_uav_offline;
 		} else if (type == TerminalMemberType.TERMINAL_HDMI.getCode()) {
 			return R.drawable.icon_hdmi_offline;
-		} else if (type == TerminalMemberType.TERMINAL_LTE.getCode()) {
+		} else if (type == TerminalMemberType.TERMINAL_LTE.getCode() ||
+				   type == TerminalMemberType.TERMINAL_LTE_HYTERA.getCode()) {
 			return R.drawable.icon_lte_offline;
 		} else {
 			return R.drawable.icon_phone_offline;

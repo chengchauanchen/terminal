@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.text.Html;
 import android.text.Spanned;
 import android.text.TextUtils;
+import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.blankj.utilcode.util.ToastUtils;
@@ -68,6 +70,7 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
         addItemType(Constants.TYPE_CHECK_SEARCH_RECODER, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_ACCOUNT, R.layout.layout_item_user);
         addItemType(Constants.TYPE_CHECK_SEARCH_LTE, R.layout.layout_item_user);
+        addItemType(Constants.TYPE_CONTRACT_TERMINAL, R.layout.item_search_contacts);
     }
 
     public void setFilterKeyWords(String keyWords){
@@ -108,62 +111,21 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 break;
             case Constants.TYPE_CONTRACT_PDT:
                 Member contractpdt = (Member) item.getBean();
-                ImageView ivLogoPdt = holder.getView(R.id.iv_member_portrait);
-                ivLogoPdt.setImageResource(BitmapUtil.getUserPhoto());
-                TextView memberNamePdt = holder.getView(R.id.tv_member_name);
-                TextView memberIdPdt = holder.getView(R.id.tv_member_id);
-                setKeyWordsView(memberNamePdt,HandleIdUtil.handleName(contractpdt.getName()));
-                setKeyWordsView(memberIdPdt,HandleIdUtil.handleId(contractpdt.getNo()));
-
-                //发送消息
-                holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractpdt.getNo(), contractpdt.getName(),TerminalMemberType.TERMINAL_PDT.getCode()));
-
-                //拨打个呼
-                holder.setOnClickListener(R.id.iv_search_call, v -> {
-                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                        ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
-                    }else{
-                        activeIndividualCall(contractpdt);
-                    }
-                });
+                setContractPdtData(holder, contractpdt);
                 break;
+            case Constants.TYPE_CONTRACT_TERMINAL:
+                Member contractMember = (Member) item.getBean();
+                String terminalMemberType = contractMember.getTerminalMemberType();
+                TerminalMemberType memberType = TerminalMemberType.valueOf(terminalMemberType);
+                setTerminalData(memberType,holder,contractMember);
 
             case Constants.TYPE_CONTRACT_LTE:
                 Member contractLte = (Member) item.getBean();
-                ImageView ivLogoLte = holder.getView(R.id.iv_member_portrait);
-                ivLogoLte.setImageResource(BitmapUtil.getUserPhoto());
-                setKeyWordsView(holder.getView(R.id.tv_member_name),HandleIdUtil.handleName(contractLte.getName()));
-                setKeyWordsView(holder.getView(R.id.tv_member_id),HandleIdUtil.handleId(contractLte.getNo()));
-
-                //发送消息
-                holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractLte.getNo(), contractLte.getName(),TerminalMemberType.TERMINAL_LTE.getCode()));
-
-                //拉流
-                holder.setOnClickListener(R.id.shoutai_live_to, v ->  OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, contractLte));
-
-                //拨打个呼
-                holder.setOnClickListener(R.id.iv_search_call, v -> {
-                    if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
-                        ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
-                    }else{
-                        activeIndividualCall(contractLte);
-                    }
-                });
-
+                setLteData(holder, contractLte);
                 break;
             case Constants.TYPE_CONTRACT_RECORDER:
                 Member contractRecorder = (Member) item.getBean();
-                holder.setGone(R.id.recorder_binded_logo,contractRecorder.isBind());
-                if(contractRecorder.isBind()){
-                    setKeyWordsView(holder.getView(R.id.tv_member_name),HandleIdUtil.handleName(contractRecorder.getName()));
-                    setKeyWordsView(holder.getView(R.id.tv_member_id),HandleIdUtil.handleId(contractRecorder.getNo()));
-                    holder.setGone(R.id.tv_member_id,true);
-                }else{
-                    setKeyWordsView(holder.getView(R.id.tv_member_name),HandleIdUtil.handleId(contractRecorder.getNo()));
-                    holder.setGone(R.id.tv_member_id,false);
-                }
-                //拉流
-                holder.setOnClickListener(R.id.shoutai_live_to, v ->  OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, contractRecorder));
+                setContractRecoderData(holder, contractRecorder);
                 break;
             case Constants.TYPE_CHECK_SEARCH_GROUP:
             case Constants.TYPE_CHECK_SEARCH_BUTTON_GROUP:
@@ -235,6 +197,70 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 });
                 break;
             default:
+        }
+    }
+
+    private void setContractRecoderData(BaseViewHolder holder, Member contractRecorder){
+        holder.setGone(R.id.recorder_binded_logo,contractRecorder.isBind());
+        if(contractRecorder.isBind()){
+            setKeyWordsView(holder.getView(R.id.tv_member_name), HandleIdUtil.handleName(contractRecorder.getName()));
+            setKeyWordsView(holder.getView(R.id.tv_member_id),HandleIdUtil.handleId(contractRecorder.getNo()));
+            holder.setGone(R.id.tv_member_id,true);
+        }else{
+            setKeyWordsView(holder.getView(R.id.tv_member_name),HandleIdUtil.handleId(contractRecorder.getNo()));
+            holder.setGone(R.id.tv_member_id,false);
+        }
+        //拉流
+        holder.setOnClickListener(R.id.shoutai_live_to, v ->  OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, contractRecorder));
+    }
+
+    private void setContractPdtData(BaseViewHolder holder, Member contractpdt){
+        ImageView ivLogoPdt = holder.getView(R.id.iv_member_portrait);
+        ivLogoPdt.setImageResource(BitmapUtil.getUserPhoto());
+        TextView memberNamePdt = holder.getView(R.id.tv_member_name);
+        TextView memberIdPdt = holder.getView(R.id.tv_member_id);
+        setKeyWordsView(memberNamePdt, HandleIdUtil.handleName(contractpdt.getName()));
+        setKeyWordsView(memberIdPdt,HandleIdUtil.handleId(contractpdt.getNo()));
+        //发送消息
+        holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractpdt.getNo(), contractpdt.getName(), TerminalMemberType.TERMINAL_PDT.getCode()));
+        //拨打个呼
+        holder.setOnClickListener(R.id.iv_search_call, v -> {
+            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
+            }else{
+                activeIndividualCall(contractpdt);
+            }
+        });
+        LinearLayout pullLive = holder.getView(R.id.shoutai_live_to);
+        if(pullLive != null){
+            pullLive.setVisibility(View.GONE);
+        }
+        LinearLayout callPhone = holder.getView(R.id.shoutai_dial_to);
+        if(callPhone != null){
+            callPhone.setVisibility(View.GONE);
+        }
+    }
+
+    private void setLteData(BaseViewHolder holder, Member contractLte){
+        ImageView ivLogoLte = holder.getView(R.id.iv_member_portrait);
+        ivLogoLte.setImageResource(BitmapUtil.getUserPhoto());
+        setKeyWordsView(holder.getView(R.id.tv_member_name), HandleIdUtil.handleName(contractLte.getName()));
+        setKeyWordsView(holder.getView(R.id.tv_member_id),HandleIdUtil.handleId(contractLte.getNo()));
+        //发送消息
+        holder.setOnClickListener(R.id.iv_search_msg, v -> IndividualNewsActivity.startCurrentActivity(mContext,contractLte.getNo(), contractLte.getName(), TerminalMemberType.TERMINAL_LTE.getCode()));
+        //拉流
+        holder.setOnClickListener(R.id.shoutai_live_to, v ->  OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, contractLte));
+        //拨打个呼
+        holder.setOnClickListener(R.id.iv_search_call, v -> {
+            if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+                ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
+            }else{
+                activeIndividualCall(contractLte);
+            }
+        });
+        LinearLayout callPhone = holder.getView(R.id.shoutai_dial_to);
+        if(callPhone != null){
+            callPhone.setVisibility(View.GONE);
         }
     }
 
@@ -331,6 +357,28 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
         }
         else {
             textView.setText(name);
+        }
+    }
+
+    private void setTerminalData(TerminalMemberType memberType,BaseViewHolder holder, Member member){
+        switch(memberType){
+            case TERMINAL_BODY_WORN_CAMERA:
+            case TERMINAL_HDMI:
+                setContractRecoderData(holder, member);
+                break;
+            case TERMINAL_LTE:
+            case TERMINAL_LTE_HYTERA:
+            case TERMINAL_UAV:
+                setLteData(holder, member);
+                break;
+            case TERMINAL_PDT:
+            case TERMINAL_PDT_WANGE:
+            case TERMINAL_PDT_HAIGE:
+                setContractPdtData(holder, member);
+                break;
+            default:
+                setLteData(holder, member);
+                break;
         }
     }
 }

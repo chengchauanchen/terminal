@@ -56,8 +56,13 @@ public class TabLayoutView extends RelativeLayout{
     public void setSelect(boolean select){
         if(select){
             mLine.setVisibility(VISIBLE);
+            setBoldType();
+            setTextAppearance(R.style.contacts_title_checked_text);
+
         }else {
             mLine.setVisibility(INVISIBLE);
+            setNormalType();
+            setTextAppearance(R.style.contacts_title_unchecked_text);
         }
     }
 

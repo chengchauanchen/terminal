@@ -27,7 +27,7 @@
             app:tabIndicatorColor="@color/contacts_line_blue"
             app:tabTextColor="@color/contacts_title_unchecked_text"
             app:tabSelectedTextColor="@color/contacts_title_checked_text"
-            app:tabIndicatorHeight="@dimen/dp_4"/>
+            app:tabIndicatorHeight="0dp"/>
 
         <FrameLayout
             android:id="@+id/contacts_viewPager"

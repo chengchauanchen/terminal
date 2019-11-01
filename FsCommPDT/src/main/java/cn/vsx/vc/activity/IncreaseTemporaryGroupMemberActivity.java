@@ -57,7 +57,7 @@ public class IncreaseTemporaryGroupMemberActivity extends BaseActivity{
     };
 
     private ReceiveShowSearchFragmentHandler receiveShowSearchFragmentHandler = (type,selectedNos) -> {
-        SearchFragment searchFragment = SearchFragment.newInstance(type,selectedNos);
+        SearchFragment searchFragment = SearchFragment.newInstance(type,selectedNos,null);
         searchFragment.setBacklistener(() -> {
             onBackPressed();
             searchOrSelectedFragmentShow = false;

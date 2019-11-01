@@ -79,7 +79,7 @@ public class TerminalFragment extends BaseFragment{
         mCatalogRecyclerview = (RecyclerView) mRootView.findViewById(R.id.catalog_recyclerview);
 
         mRecyclerview.setLayoutManager(new LinearLayoutManager(getActivity()));
-        mContactAdapter = new ContactAdapter(getActivity(), mDatas,catalogNames,Constants.TYPE_CONTRACT_LTE);
+        mContactAdapter = new ContactAdapter(getActivity(), mDatas,catalogNames,Constants.TYPE_CONTRACT_TERMINAL,terminalMemberTypes);
         mRecyclerview.setAdapter(mContactAdapter);
     }
 

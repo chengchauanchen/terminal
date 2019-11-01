@@ -444,8 +444,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     /**  弹出好友列表的搜索fragment **/
     private ReceiverShowPersonFragmentHandler mReceiverShowPersonFragmentHandler = new ReceiverShowPersonFragmentHandler() {
         @Override
-        public void handler(int type) {
-            SearchFragment searchFragment = SearchFragment.newInstance(type,new ArrayList<>());
+        public void handler(int type,ArrayList<String> terminalMemberTypes) {
+            SearchFragment searchFragment = SearchFragment.newInstance(type,new ArrayList<>(),terminalMemberTypes);
             searchFragment.setBacklistener(() -> {
                 ll_content.setVisibility(View.VISIBLE);
                 getSupportFragmentManager().popBackStack();

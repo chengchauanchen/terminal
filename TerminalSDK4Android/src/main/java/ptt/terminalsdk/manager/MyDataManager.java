@@ -23,6 +23,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.data.DataManager;
 import cn.vsx.hamster.terminalsdk.model.Department;
 import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSearchMemberResultHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -152,6 +153,60 @@ public class MyDataManager extends DataManager{
                             }
                             TerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetTerminalDeviceHandler.class, depId, type, departments, members);
                         }
+                    }
+                });
+
+    }
+
+    @Override
+    public void findByDeptAndKeyList(int page,int pageSize,List<String> type, final String keywords){
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("deptId",String.valueOf(TerminalFactory.getSDK().getParam(Params.CURRENT_DEP_ID,0L)));
+        JSONArray jsonArray = new JSONArray();
+        jsonArray.addAll(type);
+        jsonObject.put("type",jsonArray);
+        jsonObject.put("key",keywords);
+        jsonObject.put("page",page);
+        jsonObject.put("addChild",true);
+        jsonObject.put("pageSize",pageSize);
+        ApiManager.getFileServerApi()
+                .findByDeptAndKeyList(jsonObject.toJSONString())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CommonObserver<String>(){
+                    @Override
+                    protected void onError(String errorMsg){
+                        logger.error("搜索失败---"+errorMsg);
+                    }
+
+                    @Override
+                    protected void onSuccess(String result){
+                        JSONObject jsonResult = JSONObject.parseObject(result);
+                        int number = jsonResult.getIntValue("number");
+                        int totalPages = jsonResult.getIntValue("totalPages");
+                        int size = jsonResult.getIntValue("totalElements");
+                        JSONArray jsonArray = jsonResult.getJSONArray("content");
+                        List<Member> members = new ArrayList<>();
+                        for(int i = 0; i < jsonArray.size(); i++){
+                            Member member = new Member();
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            member.setId(Integer.valueOf(jsonObject.getString("id")));
+                            member.setUniqueNo(Long.parseLong(jsonObject.getString("uniqueNo")));
+                            member.setType(TerminalMemberType.valueOf(jsonObject.getString("terminalMemberType")).getCode());
+                            member.setStatus(TerminalMemberStatusEnum.valueOf(jsonObject.getString("terminalMemberStatus")).getCode());
+                            JSONObject account = jsonObject.getJSONObject("account");
+                            member.setName(account.getString("name"));
+                            member.setPhone(account.getString("phoneNumber"));
+                            member.setNo(account.getIntValue("no"));
+                            member.setBind(account.containsKey("bind")&&account.getBoolean("bind"));
+                            JSONObject department = account.getJSONObject("department");
+                            member.setDeptId(Integer.valueOf(department.getString("id")));
+                            member.setDepartmentName(department.getString("name"));
+                            member.setGb28181No(jsonObject.getString("gb28181No"));
+                            member.setTerminalMemberType(jsonObject.getString("terminalMemberType"));
+                            members.add(member);
+                        }
+                        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveSearchMemberResultHandler.class,number,totalPages,size,members);
                     }
                 });
 

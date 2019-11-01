@@ -100,7 +100,7 @@ public class SetSecondGroupActivity extends BaseActivity implements GroupCatalog
             if(selectGroupNo !=0){
                 selectedNos.add(selectGroupNo);
             }
-            SearchFragment searchFragment = SearchFragment.newInstance(Constants.TYPE_CHECK_SEARCH_BUTTON_GROUP, selectedNos);
+            SearchFragment searchFragment = SearchFragment.newInstance(Constants.TYPE_CHECK_SEARCH_BUTTON_GROUP, selectedNos,null);
             searchFragment.setBacklistener(() -> {
                 flFragmentContainer.setVisibility(View.GONE);
                 getSupportFragmentManager().beginTransaction().remove(searchFragment).commit();
