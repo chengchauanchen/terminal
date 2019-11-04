@@ -425,7 +425,7 @@ public class PromptManager {
     }
 
     /**
-     * 电量不足时提示
+     * 信号弱时提示
      */
     public void weakSignal() {
         if (soundPool != null) {
@@ -434,7 +434,7 @@ public class PromptManager {
     }
 
     /**
-     * 电量不足时提示
+     * 将要到达上报最大时长时的提示
      */
     public void livingStopTime(long livingTime) {
         if (soundPool != null) {

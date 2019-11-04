@@ -199,7 +199,7 @@ public class MyPhoneStateListener extends PhoneStateListener {
 //    }
 
     /**
-     * 检查wifi的信号的强度
+     * 检查数据的信号的强度
      * 1.大于-97时候，等级为SIGNAL_STRENGTH_GREAT，即为4
      * 2.大于-105时候，等级为SIGNAL_STRENGTH_GOOD，即为3
      * 3.大于-110时候，等级为SIGNAL_STRENGTH_MODERATE，即为2

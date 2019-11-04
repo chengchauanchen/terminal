@@ -18,6 +18,8 @@ import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +46,8 @@ public class AppListFragment extends Fragment implements View.OnClickListener {
     private List<PackageInfo> data = new ArrayList<>();
 
     private Handler mHandler = new Handler(Looper.getMainLooper());
+
+    public Logger logger = Logger.getLogger(getClass());
 
     public static AppListFragment newInstance() {
         AppListFragment fragment = new AppListFragment();
@@ -78,10 +82,14 @@ public class AppListFragment extends Fragment implements View.OnClickListener {
         String packageName = getActivity().getPackageName();
         PackageManager pm = this.getContext().getPackageManager();
         List<PackageInfo> packages = pm.getInstalledPackages(0);
+        logger.info("PackageInfo---packageName:"+packageName);
         for (PackageInfo info : packages) {
             if (info != null) {
                 if (!TextUtils.equals(info.packageName, packageName)) {
-                    data.add(info);
+                    logger.info("PackageInfo---info.packageName:"+info.packageName);
+                    if(TextUtils.equals("abero.com.testa7",info.packageName)){
+                        data.add(info);
+                    }
                 }
             }
         }

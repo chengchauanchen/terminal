@@ -12,6 +12,7 @@ import cn.vsx.vc.fragment.MenuFragment;
 import cn.vsx.vc.fragment.NFCFragment;
 import cn.vsx.vc.fragment.QRScanFragment;
 import cn.vsx.vc.fragment.SetFragment;
+import cn.vsx.vc.fragment.SetInfraRedFragment;
 import cn.vsx.vc.fragment.SetLivingStopTimeFragment;
 import cn.vsx.vc.fragment.SetServerFragment;
 
@@ -44,6 +45,10 @@ public class FragmentUtil {
             case Constants.FRAGMENT_TAG_SET:
                 //设置
                 mFragment = SetFragment.newInstance();
+                break;
+            case Constants.FRAGMENT_TAG_INFRA_RED:
+                //红外设置
+                mFragment = SetInfraRedFragment.newInstance();
                 break;
             case Constants.FRAGMENT_TAG_SET_LIVING_STOP_TIME:
                 //设置实时视频上报时长

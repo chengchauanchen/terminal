@@ -83,13 +83,17 @@ public class SetFragment extends Fragment implements View.OnClickListener {
         MyTerminalFactory.getSDK().registReceiveHandler(receiverStopAllBusniessHandler);//退出
     }
 
-    @OnClick({R.id.iv_return, R.id.iv_close,R.id.tv_set_living_stop_time, R.id.tv_set_server, R.id.tv_set_vpn,R.id.tv_app_list})
+    @OnClick({R.id.iv_return, R.id.iv_close,R.id.tv_set_infra_red,R.id.tv_set_living_stop_time, R.id.tv_set_server, R.id.tv_set_vpn,R.id.tv_app_list})
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.iv_return:
             case R.id.iv_close:
                 //关闭页面
                 OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentPopBackStackHandler.class);
+                break;
+            case R.id.tv_set_infra_red:
+                //红外设置
+                OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverFragmentShowHandler.class, Constants.FRAGMENT_TAG_INFRA_RED);
                 break;
             case R.id.tv_set_living_stop_time:
                 //实时视频上报时长设置

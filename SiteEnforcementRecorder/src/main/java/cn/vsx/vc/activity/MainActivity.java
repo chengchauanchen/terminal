@@ -161,6 +161,8 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     private static final int HANDLE_CODE_HIDE_INFO_LAYOUT = 1;
     //定时写入上报时间点
     private static final int HANDLE_WRITE_AUTO_PUSH_INTERVAL_TIME = 2;
+    //上报最长时间延长时间
+    private static final int HANDLE_LIVING_STOP_TIME_DELAY_TIME = 3;
     private static final int WRITE_AUTO_PUSH_INTERVAL_TIME = 10*1000;
     //间隔时间
     private static final int AUTO_PUSH_INTERVAL_TIME = 10*60*1000;
@@ -242,6 +244,12 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
 //            height = 640;
 //        }
         enableReaderMode();
+        //停止上报最长时长的倒计时
+        cancelLivingStopAlarmAlarmManager();
+        myHandler.removeMessages(HANDLE_LIVING_STOP_TIME_DELAY_TIME);
+
+        //初始化红外的开关的状态
+        initInfraRedState();
     }
 
     @Override
@@ -325,7 +333,6 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         notificationManager.cancelAll();
 
         enableReaderMode();
-
     }
 
     @Override
@@ -377,6 +384,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         unregisterHeadsetPlugReceiver();
         unRegistBatterBroadcastReceiver(batteryBroadcastReceiver);//注销电量的广播
         unRegistPhoneStateListener();//注册手机信号的监听
+        stopInfraRed();
     }
 
     @OnClick({R.id.sv_live,R.id.tv_login_info,R.id.bt_bind_state})
@@ -425,6 +433,10 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
                     TerminalFactory.getSDK().putParam(Params.RECORDER_AUTO_PUSH_INTERVAL_TIME, System.currentTimeMillis());
                     sendEmptyMessageDelayed(HANDLE_WRITE_AUTO_PUSH_INTERVAL_TIME,WRITE_AUTO_PUSH_INTERVAL_TIME);
                     break;
+                case HANDLE_LIVING_STOP_TIME_DELAY_TIME:
+                    removeMessages(HANDLE_LIVING_STOP_TIME_DELAY_TIME);
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveLivingStopTimeHandler.class);
+                    break;
             }
         }
     };
@@ -451,7 +463,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
                     myHandler.postDelayed(() -> {
                         //发生异常的时候重试几次，因为网络原因经常导致一个io异常
                     TerminalFactory.getSDK().getAuthManagerTwo().startAuthByDefaultAddress();
-                    },30*1000);
+                    },5*1000);
                 }
                 ToastUtil.showToast(MainActivity.this,TextUtils.isEmpty(resultDesc)?getString(R.string.text_auth_error):resultDesc);
             }else if(resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()){
@@ -1103,10 +1115,18 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
                         livingStopTimeDialog = null;
                     }
                     livingStopTimeDialog  = new LivingStopTimeDialog(MainActivity.this, livingTime, surplusTime, () ->
-                            TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                                TerminalFactory.getSDK().getLiveManager().requestSetLivingTimeMessage(
-                                        TerminalFactory.getSDK().getParam(Params.MAX_LIVING_TIME, 0L),true);
-                            }));
+                            //拒绝
+                    {
+                        ToastUtil.showToast(MainActivity.this,getResources().getString(R.string.text_set_success));
+                        myHandler.removeMessages(HANDLE_LIVING_STOP_TIME_DELAY_TIME);
+                        cancelLivingStopAlarmAlarmManager();
+                        startLivingStopAlarmManager(true,true);
+                    });
+
+//                            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+//                                TerminalFactory.getSDK().getLiveManager().requestSetLivingTimeMessage(
+//                                        TerminalFactory.getSDK().getParam(Params.MAX_LIVING_TIME, 0L),true);
+//                            }));
                     if(!MainActivity.this.isFinishing()){
                         livingStopTimeDialog.show();
                         myHandler.postDelayed(() -> {
@@ -1116,6 +1136,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
                             }
                         },15*1000);
                     }
+                    myHandler.sendEmptyMessageDelayed(HANDLE_LIVING_STOP_TIME_DELAY_TIME,Params.LIVING_STOP_TIME_DELAY_TIME);
                 });
             }
         }
@@ -1130,18 +1151,12 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
                 //重新保存上报最长时长
                 TerminalFactory.getSDK().putParam(Params.MAX_LIVING_TIME,livingTime);
-                String content = getResources().getString(R.string.text_set_success);
                 if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
-                    if(isResetLiving){
-                        //重新设置倒计时时间
-                        startLivingStopAlarmManager();
-                    }else{
-                        //弹窗提示
-                        content =  getResources().getString(R.string.text_set_success_next_used);
-                    }
+                    //重新设置倒计时时间
+                    startLivingStopAlarmManager(true,isResetLiving);
                 }
                 //提示不同
-                ToastUtil.showToast(MainActivity.this,content);
+                ToastUtil.showToast(MainActivity.this,getResources().getString(R.string.text_set_success));
                 //通知页面刷新
                 TerminalFactory.getSDK().notifyReceiveHandler(ReceiveResponseSetLivingTimeMessageUIHandler.class,livingTime,isResetLiving);
             }else{
@@ -1261,7 +1276,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         }
         //开始上报结束的倒计时
         cancelLivingStopAlarmAlarmManager();
-        startLivingStopAlarmManager();
+        startLivingStopAlarmManager(false,false);
     }
 
     private void startCamera() {
@@ -1376,6 +1391,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         TerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateUploadFileRateLimitHandler.class,false);
         //关闭上报结束的倒计时
         cancelLivingStopAlarmAlarmManager();
+        myHandler.removeMessages(HANDLE_LIVING_STOP_TIME_DELAY_TIME);
     }
 
 

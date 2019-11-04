@@ -9,6 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import ptt.terminalsdk.service.LivingStopTimeService;
 
+/**
+ * 到设置上报图像最长时长时
+ */
 public class LivingStopTimeReceiver extends BroadcastReceiver {
     private Logger logger = LoggerFactory.getLogger(LivingStopTimeReceiver.class);
     public static final String TAG = "LivingStopTime---";

@@ -151,4 +151,8 @@
     <string name="text_set_fail">设置失败</string>
     <string name="text_set_success_next_used">设置成功,下次生效</string>
     <string name="text_app_list">应用列表</string>
+    <string name="tv_set_infra_red">红外设置</string>
+    <string name="tv_set_close">关</string>
+    <string name="tv_set_open">开</string>
+    <string name="tv_set_automatic">自动</string>
 </resources>

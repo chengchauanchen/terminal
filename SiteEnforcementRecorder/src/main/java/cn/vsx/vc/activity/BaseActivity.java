@@ -75,17 +75,21 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.infrared.IHardwareAIDLHandler;
+import cn.vsx.vc.model.InfraRedState;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
 import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receiveHandle.ReceiverAudioButtonEventHandler;
+import cn.vsx.vc.receiveHandle.ReceiverChangeInfraRedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverChangeServerHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentClearHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentShowHandler;
 import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopBusniessHandler;
+import cn.vsx.vc.receiveHandle.ReceiverUpdateInfraRedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.receiver.BatteryBroadcastReceiver;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
@@ -142,6 +146,9 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     private AlarmManager alarmManager;
     private PendingIntent pendingIntent;
 
+    private IHardwareAIDLHandler hardwareAIDLHandler;
+    private int infraRedState;
+
     private AlertDialog pushDialog;
     private AlertDialog logDialog;
 //    private ExitAccountDialog exitAccountDialog;
@@ -169,6 +176,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyZfyBoundPhoneMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiverChangeServerHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);//临时组相关的通知
+        MyTerminalFactory.getSDK().registReceiveHandler(receiverChangeInfraRedHandler);//设置红外开关
         setPttVolumeChangedListener();
     }
 
@@ -315,13 +323,13 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             }
         } else {
             if (DataUtil.getRecorderBindBean() != null) {
-                ToastUtil.showToast(BaseActivity.this, getString(R.string.text_bind_success));
-                RecorderBindBean bindBean = DataUtil.getRecorderBindBean();
-                if (TextUtils.isEmpty(bindBean.getWarningId())) {
-                    ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindPoliceSuccess();
-                } else {
-                    ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindPoliceAlertSuccess();
-                }
+                    ToastUtil.showToast(BaseActivity.this, getString(R.string.text_bind_success));
+                    RecorderBindBean bindBean = DataUtil.getRecorderBindBean();
+                    if (TextUtils.isEmpty(bindBean.getWarningId())) {
+                        ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindPoliceSuccess();
+                    } else {
+                        ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindPoliceAlertSuccess();
+                    }
             }
         }
     };
@@ -502,6 +510,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyZfyBoundPhoneMessageHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiverChangeServerHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);//临时组相关的通知
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiverChangeInfraRedHandler);//设置红外开关
 
             if (mBroadcastReceiv != null) {
                 LocalBroadcastManager.getInstance(BaseActivity.this).unregisterReceiver(
@@ -1031,6 +1040,32 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     };
 
     /**
+     * 临时组相关的通知
+     */
+    private ReceiverChangeInfraRedHandler receiverChangeInfraRedHandler = new ReceiverChangeInfraRedHandler() {
+        @Override
+        public void handler(int state) {
+            infraRedState = state;
+            TerminalFactory.getSDK().putParam(Params.INFRA_RED_STATE,state);
+           if(state == InfraRedState.CLOSE.getCode()){
+               if(hardwareAIDLHandler !=null){
+                   hardwareAIDLHandler.stopInfredSensing();
+               }
+               closeInfraRed();
+           }else if(state == InfraRedState.OPEN.getCode()){
+               if(hardwareAIDLHandler !=null){
+                   hardwareAIDLHandler.stopInfredSensing();
+               }
+               openInfraRed();
+           }else if(state == InfraRedState.AUTO.getCode()){
+               if(hardwareAIDLHandler!=null){
+                   hardwareAIDLHandler.startInfreSensing();
+               }
+           }
+        }
+    };
+
+    /**
      * 读取NFC数据的回调
      *
      * @param resultCode
@@ -1363,11 +1398,23 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     /**
      * 开启上报结束的倒计时
      */
-    public void startLivingStopAlarmManager() {
-        long currentTime = System.currentTimeMillis();
-        long intervalTime = TerminalFactory.getSDK().getParam(Params.MAX_LIVING_TIME, 0L)*1000;
-        long delayTime = Constants.LIVING_STOP_DELAY_TIME;
-        long endTime = currentTime+intervalTime+delayTime;
+    public void startLivingStopAlarmManager(boolean isLiving,boolean isResetLiving) {
+        long intervalTime  = TerminalFactory.getSDK().getParam(Params.MAX_LIVING_TIME, 0L)*1000;
+        long startTime = 0L;
+        if(isLiving){
+            if(isResetLiving){
+                //延时
+                startTime = System.currentTimeMillis();
+            }else{
+                //
+                startTime =  TerminalFactory.getSDK().getParam(Params.MAX_LIVING_TIME_START, 0L);
+            }
+        }else{
+            startTime = System.currentTimeMillis();
+            TerminalFactory.getSDK().putParam(Params.MAX_LIVING_TIME_START,startTime);
+            TerminalFactory.getSDK().putParam(Params.MAX_LIVING_TIME_TEMPT,intervalTime);
+        }
+        long endTime = startTime+intervalTime;
         logger.info(TAG + "startLivingStopAlarmManager:intervalTime-" + intervalTime+"-endTime："+endTime);
         getAlarmManager().set(AlarmManager.RTC_WAKEUP, endTime, getPendingIntent());
     }
@@ -1402,5 +1449,65 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
         }
         return pendingIntent;
+    }
+
+    /**
+     *初始化红外
+     */
+    protected void initInfraRedState(){
+        hardwareAIDLHandler = IHardwareAIDLHandler.getInstance();
+        hardwareAIDLHandler.setOnHardwareCallback(new IHardwareAIDLHandler.OnHardwareCallback() {
+            @Override
+            public void onInfredOpen() {
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverUpdateInfraRedHandler.class);
+            }
+
+            @Override
+            public void onInfredClose() {
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverUpdateInfraRedHandler.class);
+            }
+
+            @Override
+            public void onSensor(final float value) {
+                if(infraRedState == InfraRedState.AUTO.getCode()){
+                   if(value>1){
+                      openInfraRed();
+                    }else{
+                      closeInfraRed();
+                    }
+                }
+            }
+        });
+        hardwareAIDLHandler.getHardwareService();
+        int state = TerminalFactory.getSDK().getParam(Params.INFRA_RED_STATE, InfraRedState.CLOSE.getCode());
+        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverChangeInfraRedHandler.class, state);
+    }
+
+    /**
+     * 开启红外
+     */
+    private void openInfraRed(){
+        if(hardwareAIDLHandler !=null){
+            hardwareAIDLHandler.openInfred();
+        }
+    }
+
+    /**
+     * 关闭红外
+     */
+    private void closeInfraRed(){
+        if(hardwareAIDLHandler !=null){
+            hardwareAIDLHandler.closeInfred();
+        }
+    }
+
+    /**
+     * 停止
+     */
+    protected void stopInfraRed(){
+        if(hardwareAIDLHandler!=null){
+            hardwareAIDLHandler.quit();
+            hardwareAIDLHandler = null;
+        }
     }
 }
