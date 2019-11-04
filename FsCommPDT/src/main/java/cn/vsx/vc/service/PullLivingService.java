@@ -17,6 +17,7 @@ import android.os.Message;
 import android.os.ResultReceiver;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -622,8 +623,9 @@ public class PullLivingService extends BaseService{
             if(null == mResultReceiver){
                 mResultReceiver = new RtspReceiver(new Handler());
             }
+//            url = "rtsp://192.168.1.230:554/main";
             if(null != surface.getSurfaceTexture()){
-                mStreamRender = new EasyRTSPClient(this, MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(), surface.getSurfaceTexture(), mResultReceiver);
+                mStreamRender = new EasyRTSPClient(this, MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(), new Surface(surface.getSurfaceTexture()), mResultReceiver);
                 try{
                     if(!android.text.TextUtils.isEmpty(url)){
                         mStreamRender.start(url, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);

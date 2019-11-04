@@ -1,11 +1,10 @@
-package org.easydarwin.util;
+package org.easydarwin.video;
 
 import android.annotation.TargetApi;
 import android.arch.lifecycle.Lifecycle;
 import android.arch.lifecycle.LifecycleObserver;
 import android.arch.lifecycle.OnLifecycleEvent;
 import android.content.Context;
-import android.graphics.SurfaceTexture;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -24,17 +23,8 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 
-import org.apache.log4j.Logger;
 import org.easydarwin.audio.AudioCodecExt;
 import org.easydarwin.audio.EasyAACMuxer;
-import org.easydarwin.push.EasyPusher;
-import org.easydarwin.push.InitCallback;
-import org.easydarwin.push.Pusher;
-import org.easydarwin.video.EasyMuxer;
-import org.easydarwin.video.EasyMuxer2;
-import org.easydarwin.video.EasyRTSPClient;
-import org.easydarwin.video.RTSPClient;
-import org.easydarwin.video.VideoCodecExt;
 
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -57,9 +47,9 @@ import static org.easydarwin.video.EasyMuxer2.VIDEO_TYPE_H265;
 import static org.easydarwin.video.RTSPClient.TRANSTYPE_TCP;
 
 /**
- * Created by John on 2016/3/17.
+ * RTSP播放
  */
-public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
+public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
 
     private static final long LEAST_FRAME_INTERVAL = 10000l;
 
@@ -121,9 +111,6 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
     private static final int NAL_SPS = 33;
     private static final int NAL_PPS = 34;
 
-    private Pusher mPusher;
-    private InitCallback mRtspCallBack;
-    private String ip,port,id;
     private final String mKey;
     private Surface mSurface;
     private volatile Thread mThread, mAudioThread;
@@ -139,7 +126,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
     short mWidth = 0;
     private ByteBuffer mCSD0;
     private ByteBuffer mCSD1;
-    private final EasyRTSPClient.I420DataCallback i420callback;
+    private final I420DataCallback i420callback;
     private boolean mMuxerWaitingKeyVideo;
     private EasyAACMuxer mObject;
     /**
@@ -148,14 +135,14 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
     private int mRecordingStatus;
     private long muxerPausedMillis = 0L;
     private long mMuxerCuttingMillis = 0L;
-    private Logger logger = Logger.getLogger(this.getClass());
+
     //    private RtmpClient mRTMPClient = new RtmpClient();
 
     public boolean isRecording() {
         return !TextUtils.isEmpty(mRecordingPath);
     }
 
-    private static class FrameInfoQueue extends PriorityQueue<RTSPClient.FrameInfo>{
+    public static class FrameInfoQueue extends PriorityQueue<RTSPClient.FrameInfo> {
         public static final int CAPACITY = 500;
         public static final int INITIAL_CAPACITY = 300;
 
@@ -293,18 +280,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
         }
     }
 
-    /**
-     * 创建SDK对象
-     *
-     * @param context 上下文对象
-     * @param key     SDK key
-     * @param surface 显示视频用的surface
-     */
-    public EasyRTSPPlayer(Context context, String key, SurfaceTexture surface, ResultReceiver receiver) {
-        this(context, key, new Surface(surface), receiver, null);
-    }
-
-    private EasyRTSPClient.FrameInfoQueue mQueue = new EasyRTSPClient.FrameInfoQueue();
+    private FrameInfoQueue mQueue = new FrameInfoQueue();
 
 
     private final Context mContext;
@@ -323,7 +299,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
      * @param key     SDK key
      * @param surface 显示视频用的surface
      */
-    public EasyRTSPPlayer(Context context, String key, Surface surface, ResultReceiver receiver) {
+    public EasyRTSPClient(Context context, String key, Surface surface, ResultReceiver receiver) {
         this(context, key, surface, receiver, null);
     }
 
@@ -334,7 +310,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
      * @param key     SDK key
      * @param surface 显示视频用的surface
      */
-    public EasyRTSPPlayer(Context context, String key, Surface surface, ResultReceiver receiver, EasyRTSPClient.I420DataCallback callback) {
+    public EasyRTSPClient(Context context, String key, Surface surface, ResultReceiver receiver, I420DataCallback callback) {
         mSurface = surface;
         mContext = context;
         mKey = key;
@@ -343,7 +319,7 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
 
     }
 
-    public EasyRTSPPlayer(Context context, String key, final TextureView view, ResultReceiver receiver, EasyRTSPClient.I420DataCallback callback) {
+    public EasyRTSPClient(Context context, String key, final TextureView view, ResultReceiver receiver, I420DataCallback callback) {
 
         mContext = context;
         mKey = key;
@@ -364,26 +340,26 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
             }
         };
 
-        //        if (context instanceof LifecycleOwner) {
-        //            LifecycleObserver observer = new LifecycleObserver() {
-        //                @OnLifecycleEvent(value = Lifecycle.Event.ON_DESTROY)
-        //                public void destory() {
-        //                    stop();
-        //                }
-        //
-        //                @OnLifecycleEvent(value = Lifecycle.Event.ON_PAUSE)
-        //                private void pause() {
-        //                    EasyPlayerClient.this.pause();
-        //                }
-        //
-        //
-        //                @OnLifecycleEvent(value = Lifecycle.Event.ON_RESUME)
-        //                private void resume() {
-        //                    EasyPlayerClient.this.resume();
-        //                }
-        //            };
-        //            ((LifecycleOwner) context).getLifecycle().addObserver(observer);
-        //        }
+//        if (context instanceof LifecycleOwner) {
+//            LifecycleObserver observer = new LifecycleObserver() {
+//                @OnLifecycleEvent(value = Lifecycle.Event.ON_DESTROY)
+//                public void destory() {
+//                    stop();
+//                }
+//
+//                @OnLifecycleEvent(value = Lifecycle.Event.ON_PAUSE)
+//                private void pause() {
+//                    EasyPlayerClient.this.pause();
+//                }
+//
+//
+//                @OnLifecycleEvent(value = Lifecycle.Event.ON_RESUME)
+//                private void resume() {
+//                    EasyPlayerClient.this.resume();
+//                }
+//            };
+//            ((LifecycleOwner) context).getLifecycle().addObserver(observer);
+//        }
     }
 
 
@@ -1368,13 +1344,6 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
                         startRecord(mRecordingPath);
                     }
                 }
-                mPusher.initPush(mContext, mRtspCallBack);
-                logger.info("initPush ---mMediaInfo:" + mMediaInfo);
-                Log.e(TAG, "initPush ---mMediaInfo:" + mMediaInfo);
-                if(null != mMediaInfo){
-                    mPusher.setMediaInfo(mMediaInfo.videoCodec,mMediaInfo.fps,mMediaInfo.audioCodec,mMediaInfo.channel,mMediaInfo.sample,mMediaInfo.bitPerSample);
-                }
-                mPusher.start(ip, port, String.format("%s.sdp", id), Pusher.TransType.EASY_RTP_OVER_TCP);
             }else{
                 int width = frameInfo.width;
                 int height = frameInfo.height;
@@ -1390,12 +1359,6 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
                         Log.i(TAG, String.format("RESULT_VIDEO_SIZE:%d*%d", frameInfo.width, frameInfo.height));
                         if (rr != null) rr.send(RESULT_VIDEO_SIZE, bundle);
                     }
-            }
-            Log.e(TAG, "视频frameInfo.codec:" + frameInfo.codec+"--frameInfo.buffer:"+frameInfo.buffer.length+"--frameInfo.offset:"+frameInfo.offset+"--frameInfo.length:"+frameInfo.length);
-            if(mPusher != null) {
-                mPusher.push(frameInfo.buffer, frameInfo.offset, frameInfo.length, 0, EasyPusher.FrameType.FRAME_TYPE_VIDEO);
-                logger.info("push------视频frameInfo.codec:" + frameInfo.codec+"--frameInfo.buffer:"+frameInfo.buffer.length+"--frameInfo.offset:"+frameInfo.offset+"--frameInfo.length:"+frameInfo.length);
-
             }
             //            Log.d(TAG, String.format("queue size :%d", mQueue.size()));
             try {
@@ -1419,12 +1382,6 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
                         }
                     }
                     return;
-                }
-                if(frameInfo.codec == EASY_SDK_AUDIO_CODEC_AAC){
-                    if(mPusher != null){
-                        mPusher.push(frameInfo.buffer, frameInfo.offset, frameInfo.length, 0, EasyPusher.FrameType.FRAME_TYPE_AUDIO);
-                        logger.info("push-----音频"+frameInfo.buffer);
-                    }
                 }
 
             }
@@ -1476,17 +1433,5 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
                 break;
         }
         if (rr != null) rr.send(RESULT_EVENT, resultData);
-    }
-
-    public void setRTSPInfo(Pusher pusher, String ip, String port, String id, InitCallback callBack){
-        mPusher = pusher;
-        this.ip = ip;
-        this.port = port;
-        this.id = id;
-        mRtspCallBack = callBack;
-    }
-
-    public void setSurfaceTexture(SurfaceTexture surfaceTexture){
-        mSurface = new Surface(surfaceTexture);
     }
 }

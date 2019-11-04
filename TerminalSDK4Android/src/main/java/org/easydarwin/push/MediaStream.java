@@ -240,6 +240,11 @@ public class MediaStream {
             parameters.setPreviewSize(width, height);
             parameters.setPreviewFrameRate(20);
 
+//            List<String> supportedFocusModes = parameters.getSupportedFocusModes();
+//            if (supportedFocusModes == null) supportedFocusModes = new ArrayList<>();
+//            if (supportedFocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE)) {
+//                parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+//            }
             mCamera.setParameters(parameters);
             Log.i(TAG, "setParameters");
             int displayRotation;

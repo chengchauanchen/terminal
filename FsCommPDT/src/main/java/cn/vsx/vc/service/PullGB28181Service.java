@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.ResultReceiver;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -267,7 +268,7 @@ public class PullGB28181Service extends BaseService{
         if(!TextUtils.isEmpty(gb28181Url)){
 
             mStreamRender = new EasyRTSPClient(PullGB28181Service.this, MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(),
-                    surface, mResultReceiver);
+                    new Surface(surface), mResultReceiver);
             try {
                 if (gb28181Url != null) {
                     mStreamRender.start(gb28181Url, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
