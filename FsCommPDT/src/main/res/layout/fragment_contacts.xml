@@ -15,19 +15,19 @@
         <!--<include layout="@layout/title_bar" />-->
         <include layout="@layout/title_bar" />
 
-        <android.support.design.widget.TabLayout
+        <cn.vsx.vc.view.MyTabLayout.MyTabLayout
             android:id="@+id/tabLayout"
             android:layout_width="match_parent"
             android:layout_height="@dimen/y30"
             app:tabMode="scrollable"
-            app:tabMaxWidth="0dp"
+            app:tabMinWidth="40dp"
             app:tabGravity="fill"
             app:tabBackground="@color/transparent"
             app:tabTextAppearance="@style/TabLayoutTextStyle"
             app:tabIndicatorColor="@color/contacts_line_blue"
             app:tabTextColor="@color/contacts_title_unchecked_text"
             app:tabSelectedTextColor="@color/contacts_title_checked_text"
-            app:tabIndicatorHeight="0dp"/>
+            app:tabIndicatorHeight="2dp"/>
 
         <FrameLayout
             android:id="@+id/contacts_viewPager"
