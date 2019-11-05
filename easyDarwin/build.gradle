@@ -36,6 +36,7 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     //noinspection GradleCompatible
     implementation "com.android.support:appcompat-v7:$support_version"
+    implementation 'log4j:log4j:1.2.17'
 }
 
 //def定义的变量才会在project中

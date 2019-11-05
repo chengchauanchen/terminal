@@ -23,6 +23,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 
+import org.apache.log4j.Logger;
 import org.easydarwin.audio.AudioCodecExt;
 import org.easydarwin.audio.EasyAACMuxer;
 
@@ -135,6 +136,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
     private int mRecordingStatus;
     private long muxerPausedMillis = 0L;
     private long mMuxerCuttingMillis = 0L;
+    private Logger logger = Logger.getLogger(getClass());
 
     //    private RtmpClient mRTMPClient = new RtmpClient();
 
@@ -340,26 +342,26 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
             }
         };
 
-//        if (context instanceof LifecycleOwner) {
-//            LifecycleObserver observer = new LifecycleObserver() {
-//                @OnLifecycleEvent(value = Lifecycle.Event.ON_DESTROY)
-//                public void destory() {
-//                    stop();
-//                }
-//
-//                @OnLifecycleEvent(value = Lifecycle.Event.ON_PAUSE)
-//                private void pause() {
-//                    EasyPlayerClient.this.pause();
-//                }
-//
-//
-//                @OnLifecycleEvent(value = Lifecycle.Event.ON_RESUME)
-//                private void resume() {
-//                    EasyPlayerClient.this.resume();
-//                }
-//            };
-//            ((LifecycleOwner) context).getLifecycle().addObserver(observer);
-//        }
+        //        if (context instanceof LifecycleOwner) {
+        //            LifecycleObserver observer = new LifecycleObserver() {
+        //                @OnLifecycleEvent(value = Lifecycle.Event.ON_DESTROY)
+        //                public void destory() {
+        //                    stop();
+        //                }
+        //
+        //                @OnLifecycleEvent(value = Lifecycle.Event.ON_PAUSE)
+        //                private void pause() {
+        //                    EasyPlayerClient.this.pause();
+        //                }
+        //
+        //
+        //                @OnLifecycleEvent(value = Lifecycle.Event.ON_RESUME)
+        //                private void resume() {
+        //                    EasyPlayerClient.this.resume();
+        //                }
+        //            };
+        //            ((LifecycleOwner) context).getLifecycle().addObserver(observer);
+        //        }
     }
 
 
@@ -388,6 +390,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
      * @return
      */
     public int start(final String url, int type, int mediaType, String user, String pwd, String recordPath) {
+        logger.info("start");
         if (url == null) {
             throw new NullPointerException("url is null");
         }
@@ -452,6 +455,7 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
      * 终止播放
      */
     public void stop() {
+        logger.info("stop");
         Thread t = mThread;
         mThread = null;
         if (t != null) {
@@ -462,6 +466,9 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                 e.printStackTrace();
             }
         }
+
+        mSurface.release();
+        mSurface = null;
 
         t = mAudioThread;
         mAudioThread = null;
@@ -818,7 +825,6 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                 Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
                 MediaCodec mCodec = null;
                 int mColorFormat = 0;
-                VideoCodecExt.VideoDecoderLiteExt mDecoder = null, displayer = null;
                 try {
                     boolean pushBlankBuffersOnStop = true;
 
@@ -834,12 +840,13 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                     MediaCodec.BufferInfo info = new MediaCodec.BufferInfo();
                     while (mThread != null) {
                         RTSPClient.FrameInfo frameInfo;
-                        if (mCodec == null && mDecoder == null) {
+
+                        if (mCodec == null) {
                             frameInfo = mQueue.takeVideoFrame();
                             try {
-                                if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("use-sw-codec", false)) {
-                                    throw new IllegalStateException("user set sw codec");
-                                }
+                                //                                if (PreferenceManager.getDefaultSharedPreferences(mContext).getBoolean("use-sw-codec", false)) {
+                                //                                    throw new IllegalStateException("user set sw codec");
+                                //                                }
                                 final String mime = frameInfo.codec == EASY_SDK_VIDEO_CODEC_H264 ? "video/avc" : "video/hevc";
                                 MediaFormat format = MediaFormat.createVideoFormat(mime, mWidth, mHeight);
                                 format.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 0);
@@ -866,21 +873,18 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                                     Log.i(TAG, "media codec " + ci.getName() + (supported ? "support" : "not support") + mWidth + "*" + mHeight);
                                 }
                                 Log.i(TAG, String.format("config codec:%s", format));
-                                codec.configure(format, i420callback != null ? null : mSurface, null, 0);
-                                codec.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT);
-                                codec.start();
-                                mCodec = codec;
-                                if (i420callback != null) {
-                                    final VideoCodecExt.VideoDecoderLiteExt decoder = new VideoCodecExt.VideoDecoderLiteExt();
-                                    decoder.create(mSurface, frameInfo.codec == EASY_SDK_VIDEO_CODEC_H264);
-                                    displayer = decoder;
+                                try{
+                                    codec.configure(format, i420callback != null ? null : mSurface, null, 0);
+                                    codec.setVideoScalingMode(MediaCodec.VIDEO_SCALING_MODE_SCALE_TO_FIT);
+                                    codec.start();
+                                    mCodec = codec;
+                                }catch(Exception e){
+                                    logger.error("init codec error due to", e);
+                                    codec.release();
+                                    codec = null;
                                 }
                             } catch (Throwable e) {
-                                Log.e(TAG, String.format("init codec error due to %s", e.getMessage()));
-                                e.printStackTrace();
-                                final VideoCodecExt.VideoDecoderLiteExt decoder = new VideoCodecExt.VideoDecoderLiteExt();
-                                decoder.create(mSurface, frameInfo.codec == EASY_SDK_VIDEO_CODEC_H264);
-                                mDecoder = decoder;
+                                logger.error("init codec error due to", e);
                             }
                             //                            previewTickUs = mTexture.getTimestamp();
                             //                            differ = previewTickUs - frameInfo.stamp;
@@ -898,181 +902,137 @@ public class EasyRTSPClient implements RTSPClient.RTSPSourceCallBack {
                             frameInfo = mQueue.takeVideoFrame(5);
                         }
                         if (frameInfo != null) {
-                            Log.d(TAG, "video " + frameInfo.stamp + " take[" + (frameInfo.stamp - lastFrameStampUs) + "]");
+                            //                            Log.d(TAG, "video " + frameInfo.stamp + " take[" + (frameInfo.stamp - lastFrameStampUs) + "]");
                             pumpVideoSample(frameInfo);
                             lastFrameStampUs = frameInfo.stamp;
                         }
 
                         do {
-                            if (mDecoder != null) {
-                                if (frameInfo != null) {
-                                    long decodeBegin = SystemClock.elapsedRealtime();
-                                    int[] size = new int[2];
-                                    //                                mDecoder.decodeFrame(frameInfo, size);
-                                    ByteBuffer buf = mDecoder.decodeFrameYUV(frameInfo, size);
-                                    if (i420callback != null && buf != null)
-                                        i420callback.onI420Data(buf);
-                                    if (buf != null) mDecoder.releaseBuffer(buf);
-                                    long decodeSpend = SystemClock.elapsedRealtime() - decodeBegin;
-
-                                    boolean firstFrame = previousStampUs == 0l;
-                                    if (firstFrame) {
-                                        Log.i(TAG, String.format("POST VIDEO_DISPLAYED!!!"));
-                                        ResultReceiver rr = mRR;
-                                        if (rr != null) {
-                                            Bundle data = new Bundle();
-                                            data.putInt(KEY_VIDEO_DECODE_TYPE, 0);
-                                            rr.send(RESULT_VIDEO_DISPLAYED, data);
-                                        }
-                                    }
-
-                                    //Log.d(TAG, String.format("timestamp=%d diff=%d",current, current - previousStampUs ));
-
-                                    if (previousStampUs != 0l) {
-                                        long sleepTime = frameInfo.stamp - previousStampUs - decodeSpend * 1000;
-                                        if (sleepTime > 100000) {
-                                            Log.w(TAG, "sleep time.too long:" + sleepTime);
-                                            sleepTime = 100000;
-                                        }
-                                        if (sleepTime > 0) {
-                                            sleepTime %= 100000;
-                                            long cache = mNewestStample - frameInfo.stamp;
-                                            sleepTime = fixSleepTime(sleepTime, cache, 50000);
-                                            if (sleepTime > 0) {
-                                                Thread.sleep(sleepTime / 1000);
-                                            }
-                                            Log.d(TAG, "cache:" + cache);
-                                        }
-                                    }
-                                    previousStampUs = frameInfo.stamp;
-                                }
-                            } else {
-                                try {
-                                    do {
-                                        if (frameInfo != null) {
-                                            byte[] pBuf = frameInfo.buffer;
-                                            index = mCodec.dequeueInputBuffer(10);
-                                            if (false)
-                                                throw new IllegalStateException("fake state");
-                                            if (index >= 0) {
-                                                ByteBuffer buffer = mCodec.getInputBuffers()[index];
-                                                buffer.clear();
-                                                if (pBuf.length > buffer.remaining()) {
-                                                    mCodec.queueInputBuffer(index, 0, 0, frameInfo.stamp, 0);
-                                                } else {
-                                                    buffer.put(pBuf, frameInfo.offset, frameInfo.length);
-                                                    mCodec.queueInputBuffer(index, 0, buffer.position(), frameInfo.stamp + differ, 0);
-                                                }
-                                                frameInfo = null;
-                                            }
-                                        }
-
-                                        index = mCodec.dequeueOutputBuffer(info, 10); //
-                                        switch (index) {
-                                            case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
-                                                Log.i(TAG, "INFO_OUTPUT_BUFFERS_CHANGED");
-                                                break;
-                                            case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
-                                                MediaFormat mf = mCodec.getOutputFormat();
-                                                Log.i(TAG, "INFO_OUTPUT_FORMAT_CHANGED ：" + mf);
-                                                break;
-                                            case MediaCodec.INFO_TRY_AGAIN_LATER:
-                                                // 输出为空
-                                                break;
-                                            default:
-                                                // 输出队列不为空
-                                                // -1表示为第一帧数据
-                                                long newSleepUs = -1;
-                                                boolean firstTime = previousStampUs == 0l;
-                                                if (!firstTime) {
-                                                    long sleepUs = (info.presentationTimeUs - previousStampUs);
-                                                    if (sleepUs > 100000) {
-                                                        // 时间戳异常，可能服务器丢帧了。
-                                                        Log.w(TAG, "sleep time.too long:" + sleepUs);
-                                                        sleepUs = 100000;
-                                                    } else if (sleepUs < 0) {
-                                                        Log.w(TAG, "sleep time.too short:" + sleepUs);
-                                                        sleepUs = 0;
-                                                    }
-
-                                                    {
-                                                        long cache = mNewestStample - lastFrameStampUs;
-                                                        newSleepUs = fixSleepTime(sleepUs, cache, 100000);
-                                                        // Log.d(TAG, String.format("sleepUs:%d,newSleepUs:%d,Cache:%d", sleepUs, newSleepUs, cache));
-                                                    }
-                                                }
-
-                                                //previousStampUs = info.presentationTimeUs;
-                                                ByteBuffer outputBuffer;
-                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                                                    outputBuffer = mCodec.getOutputBuffer(index);
-                                                } else {
-                                                    outputBuffer = mCodec.getOutputBuffers()[index];
-                                                }
-                                                if (i420callback != null && outputBuffer != null) {
-                                                    if (mColorFormat != COLOR_FormatYUV420Flexible && mColorFormat != COLOR_FormatYUV420Planar && mColorFormat != 0) {
-                                                        //                                                        JNIUtil.yuvConvert();
-                                                    }
-                                                    i420callback.onI420Data(outputBuffer);
-                                                    displayer.decoder_decodeBuffer(outputBuffer, mWidth, mHeight);
-                                                }
-                                                //previewStampUs = info.presentationTimeUs;
-                                                if (false && Build.VERSION.SDK_INT >= 21) {
-                                                    Log.d(TAG, String.format("releaseoutputbuffer:%d,stampUs:%d", index, previousStampUs));
-                                                    mCodec.releaseOutputBuffer(index, previousStampUs);
-                                                } else {
-                                                    if (newSleepUs < 0) {
-                                                        newSleepUs = 0;
-                                                    }
-                                                    //                                            Log.d(TAG,String.format("sleep:%d", newSleepUs/1000));
-                                                    Thread.sleep(newSleepUs / 1000);
-                                                    mCodec.releaseOutputBuffer(index, i420callback == null);
-                                                }
-                                                if (firstTime) {
-                                                    Log.i(TAG, String.format("POST VIDEO_DISPLAYED!!!"));
-                                                    ResultReceiver rr = mRR;
-                                                    if (rr != null) {
-                                                        Bundle data = new Bundle();
-                                                        data.putInt(KEY_VIDEO_DECODE_TYPE, 1);
-                                                        rr.send(RESULT_VIDEO_DISPLAYED, data);
-                                                    }
-                                                }
-                                                previousStampUs = info.presentationTimeUs;
-                                        }
-
-                                    }
-                                    while (frameInfo != null || index < MediaCodec.INFO_TRY_AGAIN_LATER);
-                                } catch (IllegalStateException ex) {
-                                    // mediacodec error...
-                                    ex.printStackTrace();
-                                    Log.e(TAG, String.format("init codec error due to %s", ex.getMessage()));
-                                    final VideoCodecExt.VideoDecoderLiteExt decoder = new VideoCodecExt.VideoDecoderLiteExt();
-                                    decoder.create(mSurface, frameInfo.codec == EASY_SDK_VIDEO_CODEC_H264);
-                                    mDecoder = decoder;
-                                    if (mCodec != null) {
-                                        mCodec.release();
-                                        mCodec = null;
-                                    }
-                                    continue;
-                                }
-
+                            if(mCodec == null){
+                                return;
                             }
+
+                            try {
+                                do {
+                                    if (frameInfo != null) {
+                                        byte[] pBuf = frameInfo.buffer;
+                                        index = mCodec.dequeueInputBuffer(10);
+                                        if (false)
+                                            throw new IllegalStateException("fake state");
+                                        if (index >= 0) {
+                                            ByteBuffer buffer = mCodec.getInputBuffers()[index];
+                                            buffer.clear();
+                                            if (pBuf.length > buffer.remaining()) {
+                                                mCodec.queueInputBuffer(index, 0, 0, frameInfo.stamp, 0);
+                                            } else {
+                                                buffer.put(pBuf, frameInfo.offset, frameInfo.length);
+                                                mCodec.queueInputBuffer(index, 0, buffer.position(), frameInfo.stamp + differ, 0);
+                                            }
+                                            frameInfo = null;
+                                        }
+                                    }
+
+                                    index = mCodec.dequeueOutputBuffer(info, 10); //
+                                    switch (index) {
+                                        case MediaCodec.INFO_OUTPUT_BUFFERS_CHANGED:
+                                            Log.i(TAG, "INFO_OUTPUT_BUFFERS_CHANGED");
+                                            break;
+                                        case MediaCodec.INFO_OUTPUT_FORMAT_CHANGED:
+                                            MediaFormat mf = mCodec.getOutputFormat();
+                                            Log.i(TAG, "INFO_OUTPUT_FORMAT_CHANGED ：" + mf);
+                                            break;
+                                        case MediaCodec.INFO_TRY_AGAIN_LATER:
+                                            // 输出为空
+                                            break;
+                                        default:
+                                            // 输出队列不为空
+                                            // -1表示为第一帧数据
+                                            long newSleepUs = -1;
+                                            boolean firstTime = previousStampUs == 0l;
+                                            if (!firstTime) {
+                                                long sleepUs = (info.presentationTimeUs - previousStampUs);
+                                                if (sleepUs > 100000) {
+                                                    // 时间戳异常，可能服务器丢帧了。
+                                                    logger.error("时间戳异常，可能服务器丢帧了---sleep time.too long:" + sleepUs);
+                                                    sleepUs = 100000;
+                                                } else if (sleepUs < 0) {
+                                                    Log.w(TAG, "sleep time.too short:" + sleepUs);
+                                                    sleepUs = 0;
+                                                }
+
+                                                {
+                                                    long cache = mNewestStample - lastFrameStampUs;
+                                                    newSleepUs = fixSleepTime(sleepUs, cache, 100000);
+                                                    // Log.d(TAG, String.format("sleepUs:%d,newSleepUs:%d,Cache:%d", sleepUs, newSleepUs, cache));
+                                                }
+                                            }
+
+                                            //previousStampUs = info.presentationTimeUs;
+                                            ByteBuffer outputBuffer;
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                                                outputBuffer = mCodec.getOutputBuffer(index);
+                                            } else {
+                                                outputBuffer = mCodec.getOutputBuffers()[index];
+                                            }
+                                            if (i420callback != null && outputBuffer != null) {
+                                                if (mColorFormat != COLOR_FormatYUV420Flexible && mColorFormat != COLOR_FormatYUV420Planar && mColorFormat != 0) {
+                                                    //                                                        JNIUtil.yuvConvert();
+                                                }
+                                                i420callback.onI420Data(outputBuffer);
+                                            }
+                                            //previewStampUs = info.presentationTimeUs;
+                                            if (false && Build.VERSION.SDK_INT >= 21) {
+                                                Log.d(TAG, String.format("releaseoutputbuffer:%d,stampUs:%d", index, previousStampUs));
+                                                mCodec.releaseOutputBuffer(index, previousStampUs);
+                                            } else {
+                                                if (newSleepUs < 0) {
+                                                    newSleepUs = 0;
+                                                }
+                                                //                                            Log.d(TAG,String.format("sleep:%d", newSleepUs/1000));
+                                                Thread.sleep(newSleepUs / 1000);
+                                                mCodec.releaseOutputBuffer(index, i420callback == null);
+                                            }
+                                            if (firstTime) {
+                                                Log.i(TAG, String.format("POST VIDEO_DISPLAYED!!!"));
+                                                ResultReceiver rr = mRR;
+                                                if (rr != null) {
+                                                    Bundle data = new Bundle();
+                                                    data.putInt(KEY_VIDEO_DECODE_TYPE, 1);
+                                                    rr.send(RESULT_VIDEO_DISPLAYED, data);
+                                                }
+                                            }
+                                            previousStampUs = info.presentationTimeUs;
+                                    }
+
+                                }
+                                while (frameInfo != null || index < MediaCodec.INFO_TRY_AGAIN_LATER);
+                            } catch (IllegalStateException ex) {
+                                // mediacodec error...
+                                logger.error("init codec error due to %s", ex);
+                                if (mCodec != null) {
+                                    mCodec.release();
+                                    mCodec = null;
+                                }
+                                continue;
+                            }
+
+
                             break;
                         } while (true);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.error("出现异常：",e);
                 } finally {
                     if (mCodec != null) {
                         //                        mCodec.stop();
                         mCodec.release();
                     }
-                    if (mDecoder != null) {
-                        mDecoder.close();
-                    }
-                    if (displayer != null) {
-                        displayer.close();
-                    }
+                    //                    if (mDecoder != null) {
+                    //                        mDecoder.close();
+                    //                    }
+                    //                    if (displayer != null) {
+                    //                        displayer.close();
+                    //                    }
                 }
             }
         };
