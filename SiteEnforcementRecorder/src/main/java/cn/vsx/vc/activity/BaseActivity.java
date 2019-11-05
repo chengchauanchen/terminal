@@ -1040,28 +1040,12 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     };
 
     /**
-     * 临时组相关的通知
+     * 设置红外的开关的通知
      */
     private ReceiverChangeInfraRedHandler receiverChangeInfraRedHandler = new ReceiverChangeInfraRedHandler() {
         @Override
         public void handler(int state) {
-            infraRedState = state;
-            TerminalFactory.getSDK().putParam(Params.INFRA_RED_STATE,state);
-           if(state == InfraRedState.CLOSE.getCode()){
-               if(hardwareAIDLHandler !=null){
-                   hardwareAIDLHandler.stopInfredSensing();
-               }
-               closeInfraRed();
-           }else if(state == InfraRedState.OPEN.getCode()){
-               if(hardwareAIDLHandler !=null){
-                   hardwareAIDLHandler.stopInfredSensing();
-               }
-               openInfraRed();
-           }else if(state == InfraRedState.AUTO.getCode()){
-               if(hardwareAIDLHandler!=null){
-                   hardwareAIDLHandler.startInfreSensing();
-               }
-           }
+            changeInfraRed(state);
         }
     };
 
@@ -1399,7 +1383,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
      * 开启上报结束的倒计时
      */
     public void startLivingStopAlarmManager(boolean isLiving,boolean isResetLiving) {
-        long intervalTime  = TerminalFactory.getSDK().getParam(Params.MAX_LIVING_TIME, 0L)*1000;
+        long intervalTimeSeconds  = TerminalFactory.getSDK().getParam(Params.MAX_LIVING_TIME, 0L);
+        long intervalTime  = intervalTimeSeconds*1000;
         long startTime = 0L;
         if(isLiving){
             if(isResetLiving){
@@ -1412,7 +1397,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         }else{
             startTime = System.currentTimeMillis();
             TerminalFactory.getSDK().putParam(Params.MAX_LIVING_TIME_START,startTime);
-            TerminalFactory.getSDK().putParam(Params.MAX_LIVING_TIME_TEMPT,intervalTime);
+            TerminalFactory.getSDK().putParam(Params.MAX_LIVING_TIME_TEMPT,intervalTimeSeconds);
         }
         long endTime = startTime+intervalTime;
         logger.info(TAG + "startLivingStopAlarmManager:intervalTime-" + intervalTime+"-endTime："+endTime);
@@ -1470,6 +1455,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             @Override
             public void onSensor(final float value) {
                 if(infraRedState == InfraRedState.AUTO.getCode()){
+                    logger.info("--光敏值--:"+value);
+//                    ToastUtil.showToast(BaseActivity.this,"光敏值："+value);
                    if(value>1){
                       openInfraRed();
                     }else{
@@ -1479,8 +1466,32 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             }
         });
         hardwareAIDLHandler.getHardwareService();
-        int state = TerminalFactory.getSDK().getParam(Params.INFRA_RED_STATE, InfraRedState.CLOSE.getCode());
-        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverChangeInfraRedHandler.class, state);
+        changeInfraRed(TerminalFactory.getSDK().getParam(Params.INFRA_RED_STATE, InfraRedState.CLOSE.getCode()));
+    }
+
+
+    /**
+     * 设置红外的开关
+     * @param state
+     */
+    private void changeInfraRed(int state) {
+        infraRedState = state;
+        TerminalFactory.getSDK().putParam(Params.INFRA_RED_STATE,state);
+        if(state == InfraRedState.CLOSE.getCode()){
+            if(hardwareAIDLHandler !=null){
+                hardwareAIDLHandler.stopInfredSensing();
+            }
+            closeInfraRed();
+        }else if(state == InfraRedState.OPEN.getCode()){
+            if(hardwareAIDLHandler !=null){
+                hardwareAIDLHandler.stopInfredSensing();
+            }
+            openInfraRed();
+        }else if(state == InfraRedState.AUTO.getCode()){
+            if(hardwareAIDLHandler!=null){
+                hardwareAIDLHandler.startInfreSensing();
+            }
+        }
     }
 
     /**

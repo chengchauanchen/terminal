@@ -132,7 +132,7 @@ public class SetLivingStopTimeFragment extends Fragment implements View.OnClickL
             case R.id.tv_title:
                 //确定
 //                TerminalFactory.getSDK().getThreadPool().execute(() -> {
-//                    TerminalFactory.getSDK().getLiveManager().requestSetLivingTimeMessage(60*7,false);
+//                    TerminalFactory.getSDK().getLiveManager().requestSetLivingTimeMessage(60*1,false);
 //                });
                 break;
             case R.id.tv_sure:
