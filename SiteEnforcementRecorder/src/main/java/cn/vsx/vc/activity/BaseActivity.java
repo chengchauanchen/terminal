@@ -4,7 +4,9 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -28,6 +30,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.Surface;
@@ -71,20 +75,25 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.dialog.ExitAccountDialog;
+import cn.vsx.vc.infrared.IHardwareAIDLHandler;
+import cn.vsx.vc.model.InfraRedState;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.IBroadcastRecvHandler;
 import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receiveHandle.ReceiverAudioButtonEventHandler;
+import cn.vsx.vc.receiveHandle.ReceiverChangeInfraRedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverChangeServerHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentClearHandler;
 import cn.vsx.vc.receiveHandle.ReceiverFragmentShowHandler;
 import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopBusniessHandler;
+import cn.vsx.vc.receiveHandle.ReceiverUpdateInfraRedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
+import cn.vsx.vc.receiver.BatteryBroadcastReceiver;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
+import cn.vsx.vc.receiver.MyPhoneStateListener;
 import cn.vsx.vc.receiver.NFCCardReader;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.BITDialogUtil;
@@ -93,6 +102,7 @@ import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.utils.VolumeToastUitl;
+import ptt.terminalsdk.broadcastreceiver.LivingStopTimeReceiver;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.manager.recordingAudio.AudioRecordStatus;
@@ -131,10 +141,17 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     protected boolean onCameraDenied;
     public static final int REQUEST_PERMISSION_SETTING = 1235;
     private int pushcount;
+    public TelephonyManager mTelephonyManager;
+    public MyPhoneStateListener myPhoneStateListener;
+    private AlarmManager alarmManager;
+    private PendingIntent pendingIntent;
+
+    private IHardwareAIDLHandler hardwareAIDLHandler;
+    private int infraRedState;
 
     private AlertDialog pushDialog;
     private AlertDialog logDialog;
-    private ExitAccountDialog exitAccountDialog;
+//    private ExitAccountDialog exitAccountDialog;
 //    protected boolean isFristLogin = true;
 
     @Override
@@ -159,6 +176,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyZfyBoundPhoneMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiverChangeServerHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberAboutTempGroupHandler);//临时组相关的通知
+        MyTerminalFactory.getSDK().registReceiveHandler(receiverChangeInfraRedHandler);//设置红外开关
         setPttVolumeChangedListener();
     }
 
@@ -305,13 +323,13 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             }
         } else {
             if (DataUtil.getRecorderBindBean() != null) {
-                ToastUtil.showToast(BaseActivity.this, getString(R.string.text_bind_success));
-                RecorderBindBean bindBean = DataUtil.getRecorderBindBean();
-                if (TextUtils.isEmpty(bindBean.getWarningId())) {
-                    ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindPoliceSuccess();
-                } else {
-                    ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindPoliceAlertSuccess();
-                }
+                    ToastUtil.showToast(BaseActivity.this, getString(R.string.text_bind_success));
+                    RecorderBindBean bindBean = DataUtil.getRecorderBindBean();
+                    if (TextUtils.isEmpty(bindBean.getWarningId())) {
+                        ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindPoliceSuccess();
+                    } else {
+                        ptt.terminalsdk.manager.Prompt.PromptManager.getInstance().bindPoliceAlertSuccess();
+                    }
             }
         }
     };
@@ -492,6 +510,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyZfyBoundPhoneMessageHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiverChangeServerHandler);
             MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);//临时组相关的通知
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiverChangeInfraRedHandler);//设置红外开关
 
             if (mBroadcastReceiv != null) {
                 LocalBroadcastManager.getInstance(BaseActivity.this).unregisterReceiver(
@@ -958,7 +977,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         if (TextUtils.isEmpty(authUrl)) {
             //平台包或者没获取到类型，直接用AuthManager中的地址,
             //设置切换的环境
-            setChangeServer();
+            TerminalFactory.getSDK().getAuthManagerTwo().setChangeServer();
             String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
             if (defaultAddress.length >= 2) {
                 if(NetworkUtil.isConnected(this)){
@@ -1021,6 +1040,16 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     };
 
     /**
+     * 设置红外的开关的通知
+     */
+    private ReceiverChangeInfraRedHandler receiverChangeInfraRedHandler = new ReceiverChangeInfraRedHandler() {
+        @Override
+        public void handler(int state) {
+            changeInfraRed(state);
+        }
+    };
+
+    /**
      * 读取NFC数据的回调
      *
      * @param resultCode
@@ -1075,7 +1104,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         //切换账号的时候，清除账号相关的信息
         TerminalFactory.getSDK().getDataManager().clearDataByAccountChanged();
 //        MyTerminalFactory.getSDK().stop();
-//        TerminalFactory.getSDK().getClientChannel().stop();
+        TerminalFactory.getSDK().getClientChannel().stop();
     }
 
     /**
@@ -1093,6 +1122,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 if (TerminalFactory.getSDK().isServerConnected()) {
                     TerminalFactory.getSDK().disConnectToServer();
                 }
+//                TerminalFactory.getSDK().getAuthManagerTwo().getLoginStateMachine().stop();
                 //登录绑定账号
                 checkLogin(true, LOGIN_DELAY_TIME);
             }
@@ -1146,16 +1176,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         BaseActivity.this.finish();
     }
 
-
-    /**
-     * 重置服务ip和port
-     */
-    private void setChangeServer() {
-        RecorderServerBean bean = DataUtil.getRecorderServerBean();
-        if (bean != null) {
-            TerminalFactory.getSDK().getAuthManagerTwo().resetServer(bean.getIp(), DataUtil.stringToInt(bean.getPort()), bean.getName());
-        }
-    }
 
     /**
      * 获取退出时的提示
@@ -1309,38 +1329,196 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             }
         }.showDialog();
     }
-
     /**
-     * 弹窗提示是否是否退出账号
+     * 注册电量广播
      */
-    protected void showExitDialog() {
-        boolean showExitAccount = TerminalFactory.getSDK().getAuthManagerTwo().isOnLine();
-        exitAccountDialog = new ExitAccountDialog(this, showExitAccount, new ExitAccountDialog.OnClickListener() {
-            @Override
-            public void onMoveTaskToBack() {
-                moveTaskToBack(true);
-            }
-
-            @Override
-            public void onExitAccount() {
-                exitApp();
-            }
-        });
-        exitAccountDialog.show();
+    public void registBatterBroadcastReceiver(BatteryBroadcastReceiver batteryBroadcastReceiver){
+        if(batteryBroadcastReceiver!=null){
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+            registerReceiver(batteryBroadcastReceiver,filter);
+        }
     }
 
     /**
-     * 隐藏退出账号弹窗
+     * 注销电量的广播
      */
-    protected void dismissDialog() {
-        if (exitAccountDialog != null && exitAccountDialog.isShowing()) {
-            exitAccountDialog.dismiss();
+    public void unRegistBatterBroadcastReceiver(BatteryBroadcastReceiver batteryBroadcastReceiver){
+        if(batteryBroadcastReceiver!=null){
+            unregisterReceiver(batteryBroadcastReceiver);
         }
-        if (logDialog != null && logDialog.isShowing()) {
-            logDialog.dismiss();
+    }
+
+    /**
+     * 初始化手机信号的监听
+     */
+    protected void initPhoneStateListener(){
+        //获取telephonyManager
+        mTelephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        //开始监听
+        myPhoneStateListener = new MyPhoneStateListener(this);
+        //监听信号强度
+        mTelephonyManager.listen(myPhoneStateListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+    }
+
+    /**
+     * 注册手机信号的监听
+     */
+    protected void registPhoneStateListener(){
+        if(mTelephonyManager != null && myPhoneStateListener != null){
+            mTelephonyManager.listen(myPhoneStateListener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
         }
-        if (pushDialog != null && pushDialog.isShowing()) {
-            pushDialog.dismiss();
+    }
+    /**
+     * 注销手机信号的监听
+     */
+    protected void unRegistPhoneStateListener(){
+        if(mTelephonyManager != null&&myPhoneStateListener != null){
+            myPhoneStateListener.onStop();
+            mTelephonyManager.listen(myPhoneStateListener, PhoneStateListener.LISTEN_NONE);
+        }
+    }
+
+    /**
+     * 开启上报结束的倒计时
+     */
+    public void startLivingStopAlarmManager(boolean isLiving,boolean isResetLiving) {
+        long intervalTimeSeconds  = TerminalFactory.getSDK().getParam(Params.MAX_LIVING_TIME, 0L);
+        long intervalTime  = intervalTimeSeconds*1000;
+        long startTime = 0L;
+        if(isLiving){
+            if(isResetLiving){
+                //延时
+                startTime = System.currentTimeMillis();
+            }else{
+                //
+                startTime =  TerminalFactory.getSDK().getParam(Params.MAX_LIVING_TIME_START, 0L);
+            }
+        }else{
+            startTime = System.currentTimeMillis();
+            TerminalFactory.getSDK().putParam(Params.MAX_LIVING_TIME_START,startTime);
+            TerminalFactory.getSDK().putParam(Params.MAX_LIVING_TIME_TEMPT,intervalTimeSeconds);
+        }
+        long endTime = startTime+intervalTime;
+        logger.info(TAG + "startLivingStopAlarmManager:intervalTime-" + intervalTime+"-endTime："+endTime);
+        getAlarmManager().set(AlarmManager.RTC_WAKEUP, endTime, getPendingIntent());
+    }
+
+    /**
+     * 关闭上报结束的倒计时
+     */
+    public void cancelLivingStopAlarmAlarmManager() {
+        logger.info(TAG + "cancelLivingStopAlarmAlarmManager");
+        getAlarmManager().cancel(getPendingIntent());
+    }
+
+    /**
+     * 获取AlarmManager
+     *
+     * @return
+     */
+    private AlarmManager getAlarmManager() {
+        if (alarmManager == null) {
+            alarmManager = (AlarmManager) this.getSystemService(ALARM_SERVICE);
+        }
+        return alarmManager;
+    }
+
+    /**
+     * 获取PendingIntent
+     */
+    private PendingIntent getPendingIntent() {
+        if (pendingIntent == null) {
+            Intent intent = new Intent(this, LivingStopTimeReceiver.class);
+            intent.setAction("vsxin.action.livingstoptime");
+            pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+        }
+        return pendingIntent;
+    }
+
+    /**
+     *初始化红外
+     */
+    protected void initInfraRedState(){
+        hardwareAIDLHandler = IHardwareAIDLHandler.getInstance();
+        hardwareAIDLHandler.setOnHardwareCallback(new IHardwareAIDLHandler.OnHardwareCallback() {
+            @Override
+            public void onInfredOpen() {
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverUpdateInfraRedHandler.class);
+            }
+
+            @Override
+            public void onInfredClose() {
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverUpdateInfraRedHandler.class);
+            }
+
+            @Override
+            public void onSensor(final float value) {
+                if(infraRedState == InfraRedState.AUTO.getCode()){
+                    logger.info("--光敏值--:"+value);
+//                    ToastUtil.showToast(BaseActivity.this,"光敏值："+value);
+                   if(value>1){
+                      openInfraRed();
+                    }else{
+                      closeInfraRed();
+                    }
+                }
+            }
+        });
+        hardwareAIDLHandler.getHardwareService();
+        changeInfraRed(TerminalFactory.getSDK().getParam(Params.INFRA_RED_STATE, InfraRedState.CLOSE.getCode()));
+    }
+
+
+    /**
+     * 设置红外的开关
+     * @param state
+     */
+    private void changeInfraRed(int state) {
+        infraRedState = state;
+        TerminalFactory.getSDK().putParam(Params.INFRA_RED_STATE,state);
+        if(state == InfraRedState.CLOSE.getCode()){
+            if(hardwareAIDLHandler !=null){
+                hardwareAIDLHandler.stopInfredSensing();
+            }
+            closeInfraRed();
+        }else if(state == InfraRedState.OPEN.getCode()){
+            if(hardwareAIDLHandler !=null){
+                hardwareAIDLHandler.stopInfredSensing();
+            }
+            openInfraRed();
+        }else if(state == InfraRedState.AUTO.getCode()){
+            if(hardwareAIDLHandler!=null){
+                hardwareAIDLHandler.startInfreSensing();
+            }
+        }
+    }
+
+    /**
+     * 开启红外
+     */
+    private void openInfraRed(){
+        if(hardwareAIDLHandler !=null){
+            hardwareAIDLHandler.openInfred();
+        }
+    }
+
+    /**
+     * 关闭红外
+     */
+    private void closeInfraRed(){
+        if(hardwareAIDLHandler !=null){
+            hardwareAIDLHandler.closeInfred();
+        }
+    }
+
+    /**
+     * 停止
+     */
+    protected void stopInfraRed(){
+        if(hardwareAIDLHandler!=null){
+            hardwareAIDLHandler.quit();
+            hardwareAIDLHandler = null;
         }
     }
 }

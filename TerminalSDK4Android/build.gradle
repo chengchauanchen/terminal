@@ -51,8 +51,8 @@ repositories {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     //    compile project(':Hamster-TetraServer')
-    compile project(':rtspclient')
-    compile project(':rtmpClient')
+//    compile project(':rtspclient')
+    compile project(':easyDarwin')
 //    compile project(':push-rtsp')
     compile "com.android.support:appcompat-v7:$support_version"
     compile 'com.android.support.constraint:constraint-layout:1.0.2'

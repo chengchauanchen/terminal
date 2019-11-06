@@ -55,7 +55,7 @@ public class PushRTSPClient{
             }
             tempFile = videoRecord.toString();
 //        }
-        easyRTSPPlayer.start(url,type,mediaType,user,pwd,tempFile,millis,dataStr);
+        easyRTSPPlayer.start(url,type,mediaType,user,pwd,tempFile);
     }
 
     public void stop(){

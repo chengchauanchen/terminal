@@ -13,7 +13,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import cn.vsx.SpecificSDK.SpecificSDK;
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
@@ -119,8 +118,8 @@ public class SplashActivity extends BaseActivity implements RecvCallBack, Action
      */
     private void startSDK(){
         if(!MyTerminalFactory.getSDK().isStart()){
-            TerminalFactory.getSDK().start();
-            TerminalFactory.getSDK().getDataManager().clearMemberNo();
+            MyTerminalFactory.getSDK().start();
+            MyTerminalFactory.getSDK().getDataManager().clearMemberNo();
         }
         PromptManager.getInstance().start();
         handler.postDelayed(this::jump, PROGRESS_TIME);
@@ -191,11 +190,10 @@ public class SplashActivity extends BaseActivity implements RecvCallBack, Action
         }
     }
 
-    @Override
-    public void onBackPressed() {
-        finish();
-        super.onBackPressed();
-    }
+//    @Override
+//    public void onBackPressed() {
+//        super.onBackPressed();
+//    }
 
     /**
      * 跳转逻辑

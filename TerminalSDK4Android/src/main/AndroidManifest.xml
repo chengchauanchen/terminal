@@ -131,6 +131,11 @@
                 <action android:name="vsxin.action.fileexpiretime" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".broadcastreceiver.LivingStopTimeReceiver">
+            <intent-filter >
+                <action android:name="vsxin.action.livingstoptime" />
+            </intent-filter>
+        </receiver>
         <service
             android:name="org.easydarwin.push.UVCCameraService"
             android:enabled="true" />
@@ -138,6 +143,8 @@
         <service android:name=".service.BluetoothLeService"
             android:enabled="true"/>
         <service android:name=".service.FileExpireService"
+            android:enabled="true"/>
+        <service android:name=".service.LivingStopTimeService"
             android:enabled="true"/>
         <service android:name=".service.TestGroupCallService"
             android:enabled="true"

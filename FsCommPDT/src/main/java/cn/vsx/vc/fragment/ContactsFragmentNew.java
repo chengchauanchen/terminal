@@ -2,27 +2,27 @@ package cn.vsx.vc.fragment;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.graphics.Typeface;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.widget.TextViewCompat;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.TempGroupType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
+import cn.vsx.hamster.terminalsdk.model.TerminalContactTab;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
@@ -40,14 +40,17 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
-import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.BitmapUtil;
+import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.DialPopupwindow;
+import cn.vsx.vc.view.MyTabLayout.MyTabLayout;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
+import static cn.vsx.vc.view.MyTabLayout.MyTabLayout.MODE_FIXED;
+import static cn.vsx.vc.view.MyTabLayout.MyTabLayout.MODE_SCROLLABLE;
 
 @SuppressLint("ValidFragment")
 public class ContactsFragmentNew extends BaseFragment implements View.OnClickListener {
@@ -56,16 +59,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     ImageView add_icon;
 
-    RelativeLayout isGroup;
-
-    RelativeLayout is_jingwutong;
-
-    View groupLine;
-
-    View shoutai_line;
-    View jingwutong_line;
-    View lte_line;
-    View recoder_line;
 
     FrameLayout viewPager;
 
@@ -73,30 +66,22 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     ImageView voice_image;
 
-    TextView group_tv;
-
-    TextView jingwutong_tv;
-    TextView lte_tv;
-    TextView shoutai_tv;
-    TextView recoder_tv;
-
 
 
     ImageButton imgbtn_dial;
 
     private Fragment currentFragment;
-    private NewGroupFragment groupFragmentNew;//群组
-    //    private PoliceAffairsFragment policeAffairsFragment;
-    private NewPoliceAffairsFragment policeAffairsFragment;//警务通
-    //    private HandPlatformFragment handPlatformFragment;
-    private NewHandPlatformFragment handPlatformFragment;//电台
-    private LteFragment lteFragment;//lte
-    private RecorderFragment recorderFragment;//执法记录仪
-    private FragmentManager childFragmentManager;
     NewMainActivity activity;
     private Handler mHandler = new Handler();
     private DialPopupwindow dialPopupwindow;
     private boolean soundOff;
+    private MyTabLayout tabLayout;
+    private List<String> titles = new ArrayList<>();
+    private List<BaseFragment> fragments = new ArrayList<>();
+    private BaseFragment lastFragment;
+    private List<MyTabLayout.Tab> tabs = new ArrayList<>();
+    private NewGroupFragment groupFragmentNew;//群组
+    private NewPoliceAffairsFragment policeAffairsFragment;//警务通
 
     public ContactsFragmentNew() {
     }
@@ -109,46 +94,19 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     @Override
     public void initView() {
         imgbtn_dial = (ImageButton) mRootView.findViewById(R.id.imgbtn_dial);
-        shoutai_tv = (TextView) mRootView.findViewById(R.id.shoutai_tv);
-        jingwutong_tv = (TextView) mRootView.findViewById(R.id.jingwutong_tv);
-        group_tv = (TextView) mRootView.findViewById(R.id.group_tv);
+        tabLayout = mRootView.findViewById(R.id.tabLayout);
         voice_image = (ImageView) mRootView.findViewById(R.id.voice_image);
         icon_laba = (ImageView) mRootView.findViewById(R.id.icon_laba);
         viewPager = (FrameLayout) mRootView.findViewById(R.id.contacts_viewPager);
-        jingwutong_line = (View) mRootView.findViewById(R.id.jingwutong_line);
-        shoutai_line = (View) mRootView.findViewById(R.id.shoutai_line);
-        groupLine = (View) mRootView.findViewById(R.id.group_line);
-        is_jingwutong = (RelativeLayout) mRootView.findViewById(R.id.is_jingwutong);
-        isGroup = (RelativeLayout) mRootView.findViewById(R.id.is_group);
         add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
         setting_group_name = (TextView) mRootView.findViewById(R.id.setting_group_name);
-        lte_line = mRootView.findViewById(R.id.lte_line);
-        lte_tv = (TextView) mRootView.findViewById(R.id.lte_tv);
 
-        recoder_line = mRootView.findViewById(R.id.recoder_line);
-        recoder_tv = (TextView) mRootView.findViewById(R.id.recoder_tv);
 
         activity = (NewMainActivity) getActivity();
-        mRootView.findViewById(R.id.is_shoutai).setOnClickListener(this);
-        mRootView.findViewById(R.id.is_jingwutong).setOnClickListener(this);
-        mRootView.findViewById(R.id.is_group).setOnClickListener(this);
-        mRootView.findViewById(R.id.is_lte).setOnClickListener(this);
-        mRootView.findViewById(R.id.is_recoder).setOnClickListener(this);
+
         setVideoIcon();
-        childFragmentManager = getChildFragmentManager();
-        initFragment();
+
         setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
-        TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_checked_text);
-        TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
-        TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
-        TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
-        TextViewCompat.setTextAppearance(recoder_tv, R.style.contacts_title_unchecked_text);
-        initTabView();
-        group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-        shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-        jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-        lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-        recoder_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
 
         dialPopupwindow = new DialPopupwindow(context);
         voice_image.setImageResource(BitmapUtil.getVolumeImageResourceByValue(false));
@@ -167,34 +125,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         });
     }
 
-    private void initTabView(){
-        RelativeLayout is_shoutai = mRootView.findViewById(R.id.is_shoutai);
-        RelativeLayout isLte = mRootView.findViewById(R.id.is_lte);
-        RelativeLayout is_recoder = mRootView.findViewById(R.id.is_recoder);
-        group_tv.setText(getString(R.string.text_group));
-        lte_tv.setText(getString(R.string.text_lte));
-        recoder_tv.setText(getString(R.string.text_recoder_abridge));
-        if(ApkUtil.isAnjian()){
-            is_shoutai.setVisibility(View.GONE);
-            isLte.setVisibility(View.GONE);
-            is_recoder.setVisibility(View.GONE);
-            jingwutong_tv.setText(getString(R.string.text_person));
-        }else if(ApkUtil.isTianjin()){
-            group_tv.setText(getString(R.string.text_tianjin_group));
-            is_shoutai.setVisibility(View.GONE);
-            lte_tv.setText(getString(R.string.text_tianjin_car_4));
-            recoder_tv.setText(getString(R.string.text_recoder_abridge_4));
-        }else{
-            jingwutong_tv.setText(getString(R.string.text_police_service));
-            is_shoutai.setVisibility(View.VISIBLE);
-            is_recoder.setVisibility(View.VISIBLE);
-            if(ApkUtil.showLteApk()){
-                isLte.setVisibility(View.VISIBLE);
-            }else {
-                isLte.setVisibility(View.GONE);
-            }
-        }
-    }
 
     @Override
     public void initListener() {
@@ -219,14 +149,10 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         activity.setOnBackListener(() -> {
             if (groupFragmentNew.isVisible()) {
                 groupFragmentNew.onBack();
-            } else if (handPlatformFragment.isVisible()) {
-                handPlatformFragment.onBack();
-            } else if (policeAffairsFragment.isVisible()) {
+            }else if (policeAffairsFragment.isVisible()) {
                 policeAffairsFragment.onBack();
-            } else if (recorderFragment.isVisible()) {
-                recorderFragment.onBack();
-            } else if(lteFragment != null && lteFragment.isAdded() && lteFragment.isVisible()){
-                lteFragment.onBack();
+            }else {
+                ((TerminalFragment) lastFragment).onBack();
             }
         });
 
@@ -259,6 +185,85 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     @Override
     public void initData() {
+        imgbtn_dial.setVisibility(View.GONE);
+        FragmentManager childFragmentManager = getChildFragmentManager();
+        FragmentTransaction transaction = childFragmentManager.beginTransaction();
+        //添加tab
+        titles.add("群组");
+        titles.add("警务通");
+
+        groupFragmentNew = new NewGroupFragment();
+        fragments.add(groupFragmentNew);
+        MyTabLayout.Tab groupTab = tabLayout.newTab();
+
+        groupTab.setText(titles.get(0));
+        tabLayout.addTab(groupTab);
+        tabs.add(groupTab);
+
+        policeAffairsFragment = new NewPoliceAffairsFragment();
+        fragments.add(policeAffairsFragment);
+        MyTabLayout.Tab policeTab = tabLayout.newTab();
+        policeTab.setText(titles.get(1));
+        tabLayout.addTab(policeTab);
+        tabs.add(policeTab);
+
+
+        List<TerminalContactTab> terminalContactTabs = TerminalFactory.getSDK().getDataManager().getTerminalContactTabs();
+        for(int i = 0; i < terminalContactTabs.size(); i++){
+            titles.add(terminalContactTabs.get(i).getTabName());
+            MyTabLayout.Tab tab = tabLayout.newTab();
+            tab.setText(terminalContactTabs.get(i).getTabName());
+            tabLayout.addTab(tab);
+            tabs.add(tab);
+            TerminalFragment terminalFragment = TerminalFragment.newInstance(terminalContactTabs.get(i).getTerminalMemberTypes());
+            fragments.add(terminalFragment);
+        }
+
+        int screenWidth=getResources().getDisplayMetrics().widthPixels;
+        //滑动模式时最小宽度
+        int scrollableTabMinWidth = DensityUtil.dip2px(MyApplication.instance, 72);
+        int tabCount = screenWidth / scrollableTabMinWidth;
+        if(tabs.size()>tabCount){
+            tabLayout.setTabMode(MODE_SCROLLABLE);
+            tabLayout.setTabGravity(MyTabLayout.GRAVITY_CENTER);
+        }else {
+            tabLayout.setTabGravity(MyTabLayout.GRAVITY_FILL);
+            tabLayout.setTabMode(MODE_FIXED);
+        }
+
+        transaction.add(R.id.contacts_viewPager, groupFragmentNew).show(groupFragmentNew).commit();
+        lastFragment = groupFragmentNew;
+
+        tabLayout.addOnTabSelectedListener(new MyTabLayout.OnTabSelectedListener(){
+            @Override
+            public void onTabSelected(MyTabLayout.Tab tab){
+                logger.info("onTabSelected");
+                int position = tab.getPosition();
+                if(position == 0){
+                    imgbtn_dial.setVisibility(View.GONE);
+                }else {
+                    imgbtn_dial.setVisibility(View.VISIBLE);
+                }
+                BaseFragment currentFrgment = fragments.get(position);
+                if(lastFragment !=currentFrgment ){
+                    tab.setSelected(true);
+                    switchFragment(lastFragment,currentFrgment);
+                    lastFragment = currentFrgment;
+                }
+            }
+
+            @Override
+            public void onTabUnselected(MyTabLayout.Tab tab){
+                tab.setSelected(false);
+                logger.info("onTabUnselected");
+            }
+
+            @Override
+            public void onTabReselected(MyTabLayout.Tab tab) {
+                logger.info("onTabReselected");
+            }
+        });
+
     }
 
     private void setVideoIcon() {
@@ -398,72 +403,9 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         }
     };
 
-    private void initFragment() {
-        FragmentTransaction transaction = childFragmentManager.beginTransaction();
-        if (groupFragmentNew == null) {
-            groupFragmentNew = new NewGroupFragment();
-        }
-        if (policeAffairsFragment == null) {
-            policeAffairsFragment = new NewPoliceAffairsFragment();
-        }
-        if (handPlatformFragment == null) {
-            handPlatformFragment = new NewHandPlatformFragment();
-        }
-        if (recorderFragment == null) {
-            recorderFragment = new RecorderFragment();
-        }
-        if (lteFragment == null) {
-            lteFragment = new LteFragment();
-        }
-        //判断是否是安监
-        if(ApkUtil.isAnjian()){
-            transaction.add(R.id.contacts_viewPager, groupFragmentNew)
-                    .add(R.id.contacts_viewPager, policeAffairsFragment)
-                    .hide(policeAffairsFragment)
-                    .show(groupFragmentNew);
-            transaction.commit();
-        }else if(ApkUtil.isTianjin()){
-            transaction.add(R.id.contacts_viewPager, groupFragmentNew)
-                    .add(R.id.contacts_viewPager, policeAffairsFragment)
-                    .add(R.id.contacts_viewPager, lteFragment)
-                    .add(R.id.contacts_viewPager, recorderFragment)
-                    .hide(policeAffairsFragment)
-                    .hide(lteFragment)
-                    .hide(recorderFragment)
-                    .show(groupFragmentNew);
-            transaction.commit();
-        }else{
-            //只有市局的包才有LTE
-            if(ApkUtil.showLteApk()){
-                transaction.add(R.id.contacts_viewPager, groupFragmentNew)
-                        .add(R.id.contacts_viewPager, policeAffairsFragment)
-                        .add(R.id.contacts_viewPager, handPlatformFragment)
-                        .add(R.id.contacts_viewPager, lteFragment)
-                        .add(R.id.contacts_viewPager, recorderFragment)
-                        .hide(policeAffairsFragment)
-                        .hide(handPlatformFragment)
-                        .hide(lteFragment)
-                        .hide(recorderFragment)
-                        .show(groupFragmentNew);
-                transaction.commit();
-            }else {
-                transaction.add(R.id.contacts_viewPager, groupFragmentNew)
-                        .add(R.id.contacts_viewPager, policeAffairsFragment)
-                        .add(R.id.contacts_viewPager, handPlatformFragment)
-                        .add(R.id.contacts_viewPager, recorderFragment)
-                        .hide(policeAffairsFragment)
-                        .hide(handPlatformFragment)
-                        .hide(recorderFragment)
-                        .show(groupFragmentNew);
-                transaction.commit();
-            }
-        }
-        currentFragment = groupFragmentNew;
-        imgbtn_dial.setVisibility(View.GONE);
-    }
-
 
     public void switchFragment(Fragment from, Fragment to) {
+        FragmentManager childFragmentManager = getChildFragmentManager();
         if (currentFragment != to) {
             currentFragment = to;
             FragmentTransaction transaction = childFragmentManager.beginTransaction();
@@ -483,129 +425,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     @Override
     public void onClick(View v) {
-        int i = v.getId();
-        if(i == R.id.is_group){
-            if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                return;
-            if(groupFragmentNew == null){
-                groupFragmentNew = new NewGroupFragment();
-            }
-            TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_checked_text);
-            TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(recoder_tv, R.style.contacts_title_unchecked_text);
-            group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-            shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            recoder_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            switchFragment(currentFragment, groupFragmentNew);
-            groupLine.setVisibility(View.VISIBLE);
-            shoutai_line.setVisibility(View.INVISIBLE);
-            jingwutong_line.setVisibility(View.INVISIBLE);
-            lte_line.setVisibility(View.INVISIBLE);
-            recoder_line.setVisibility(View.INVISIBLE);
-            imgbtn_dial.setVisibility(View.GONE);
-            MyApplication.instance.setIsContactsPersonal(false);
-        }else if(i == R.id.is_shoutai){
-            if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                return;
-            if(handPlatformFragment == null){
-                handPlatformFragment = new NewHandPlatformFragment();
-            }
-            TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_checked_text);
-            TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(recoder_tv, R.style.contacts_title_unchecked_text);
-            group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-            jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            recoder_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            switchFragment(currentFragment, handPlatformFragment);
-            groupLine.setVisibility(View.INVISIBLE);
-            shoutai_line.setVisibility(View.VISIBLE);
-            jingwutong_line.setVisibility(View.INVISIBLE);
-            lte_line.setVisibility(View.INVISIBLE);
-            recoder_line.setVisibility(View.INVISIBLE);
-            imgbtn_dial.setVisibility(View.VISIBLE);
-            MyApplication.instance.setIsContactsPersonal(true);
-        }else if(i == R.id.is_jingwutong){
-            if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                return;
-            if(policeAffairsFragment == null){
-                policeAffairsFragment = new NewPoliceAffairsFragment();
-            }
-            TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_checked_text);
-            TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(recoder_tv, R.style.contacts_title_unchecked_text);
-            group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-            lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            recoder_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            switchFragment(currentFragment, policeAffairsFragment);
-            jingwutong_line.setVisibility(View.VISIBLE);
-            groupLine.setVisibility(View.INVISIBLE);
-            shoutai_line.setVisibility(View.INVISIBLE);
-            lte_line.setVisibility(View.INVISIBLE);
-            recoder_line.setVisibility(View.INVISIBLE);
-            imgbtn_dial.setVisibility(View.VISIBLE);
-            MyApplication.instance.setIsContactsPersonal(true);
-        }else if(i == R.id.is_lte){
-            if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                return;
-            if(lteFragment == null){
-                lteFragment = new LteFragment();
-            }
-            TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(recoder_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_checked_text);
-            group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            recoder_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-            switchFragment(currentFragment, lteFragment);
-            jingwutong_line.setVisibility(View.INVISIBLE);
-            groupLine.setVisibility(View.INVISIBLE);
-            shoutai_line.setVisibility(View.INVISIBLE);
-            recoder_line.setVisibility(View.INVISIBLE);
-            lte_line.setVisibility(View.VISIBLE);
-            imgbtn_dial.setVisibility(View.VISIBLE);
-            MyApplication.instance.setIsContactsPersonal(true);
-        }else if(i == R.id.is_recoder){
-
-            if(MyApplication.instance.getGroupSpeakState() != GroupCallSpeakState.IDLE)
-                return;
-            if(recorderFragment == null){
-                recorderFragment = new RecorderFragment();
-            }
-            TextViewCompat.setTextAppearance(group_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(shoutai_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(jingwutong_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(lte_tv, R.style.contacts_title_unchecked_text);
-            TextViewCompat.setTextAppearance(recoder_tv, R.style.contacts_title_checked_text);
-            group_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            shoutai_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            jingwutong_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            lte_tv.setTypeface(Typeface.defaultFromStyle(Typeface.NORMAL));
-            recoder_tv.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-            switchFragment(currentFragment, recorderFragment);
-            jingwutong_line.setVisibility(View.INVISIBLE);
-            groupLine.setVisibility(View.INVISIBLE);
-            shoutai_line.setVisibility(View.INVISIBLE);
-            lte_line.setVisibility(View.INVISIBLE);
-            recoder_line.setVisibility(View.VISIBLE);
-            imgbtn_dial.setVisibility(View.VISIBLE);
-            MyApplication.instance.setIsContactsPersonal(true);
-        }
     }
 
     /**
@@ -613,8 +432,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
      * @return
      */
     public boolean getHiddenState(){
-        return !(groupFragmentNew!=null && !groupFragmentNew.getHiddenState());
+        return !(fragments.get(0)!=null && !fragments.get(0).isHidden());
     }
-
 
 }

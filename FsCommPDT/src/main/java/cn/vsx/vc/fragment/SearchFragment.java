@@ -46,7 +46,7 @@ import ptt.terminalsdk.context.MyTerminalFactory;
 public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnItemChildClickListener, BaseQuickAdapter.RequestLoadMoreListener, SwipeRefreshLayout.OnRefreshListener{
     private static final String TYPE = "type";
     private static final String SELECTED_NOS = "selectedNos";
-
+    private static final String TERMINALMEMBERTYPES = "terminalMemberTypes";
     private int type;
     private ImageView mIvBack;
     private EditText mEtSearchAllcontacts;
@@ -64,6 +64,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
     private int currentPage = 0;
     private static final int PAGE_SIZE = 20;
     private List<Integer>selectedNos;
+    private ArrayList<String> terminalMemberTypes;
 
     private ReceiveSearchMemberResultHandler receiveSearchMemberResultHandler = new ReceiveSearchMemberResultHandler() {
 
@@ -162,10 +163,11 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
     public SearchFragment(){
     }
 
-    public static SearchFragment newInstance(int type, ArrayList<Integer> selectedNos){
+    public static SearchFragment newInstance(int type, ArrayList<Integer> selectedNos,ArrayList<String> terminalMemberTypes){
         SearchFragment fragment = new SearchFragment();
         Bundle args = new Bundle();
         args.putInt(TYPE, type);
+        args.putStringArrayList(TERMINALMEMBERTYPES, terminalMemberTypes);
         args.putIntegerArrayList(SELECTED_NOS,selectedNos);
         fragment.setArguments(args);
         return fragment;
@@ -177,6 +179,7 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
         if(getArguments() != null){
             type = getArguments().getInt(TYPE);
             selectedNos = getArguments().getIntegerArrayList(SELECTED_NOS);
+            terminalMemberTypes = getArguments().getStringArrayList(TERMINALMEMBERTYPES);
         }
     }
 
@@ -345,6 +348,9 @@ public class SearchFragment extends BaseFragment implements BaseQuickAdapter.OnI
                 break;
             case Constants.TYPE_CHECK_SEARCH_UAV:
                 TerminalFactory.getSDK().getConfigManager().searchMember(currentPage,PAGE_SIZE,TerminalMemberType.TERMINAL_UAV.toString(), keywords);
+                break;
+            case Constants.TYPE_CONTRACT_TERMINAL:
+                TerminalFactory.getSDK().getDataManager().findByDeptAndKeyList(currentPage,PAGE_SIZE,terminalMemberTypes, keywords);
                 break;
             default:
                 break;

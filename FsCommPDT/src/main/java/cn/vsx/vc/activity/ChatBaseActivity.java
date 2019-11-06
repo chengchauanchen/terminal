@@ -1529,7 +1529,7 @@ public abstract class ChatBaseActivity extends BaseActivity
                         ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_please_go_to_the_management_background_configuration_location_url));
                     } else {
                         LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
-                        locationFragment.setFragment_contener(fl_fragment_container);
+                        locationFragment.setFrameLayout(fl_fragment_container);
                         getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commit();
                     }
                 } else {
@@ -1539,7 +1539,7 @@ public abstract class ChatBaseActivity extends BaseActivity
                         ToastUtil.showToast(ChatBaseActivity.this, getString(R.string.text_please_go_to_the_management_background_configuration_location_url));
                     } else {
                         LocationFragment locationFragment = LocationFragment.getInstance(url, "", true);
-                        locationFragment.setFragment_contener(fl_fragment_container);
+                        locationFragment.setFrameLayout(fl_fragment_container);
                         getSupportFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fl_fragment_container, locationFragment).commit();
                     }
                 }

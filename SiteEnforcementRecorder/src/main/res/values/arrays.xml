@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer-array name="living_stop_time" >
+        <item >2</item>
+        <item >4</item>
+        <item >6</item>
+        <item >8</item>
+        <item >10</item>
+        <item >12</item>
+    </integer-array>
+</resources>

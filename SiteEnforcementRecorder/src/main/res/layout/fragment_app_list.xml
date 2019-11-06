@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/transparent_80"
+    android:clickable="true"
+    android:focusable="true"
+    android:paddingTop="@dimen/dp_30"
+    android:orientation="vertical">
+
+    <include layout="@layout/layout_top_sure"/>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rd_recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:overScrollMode="never"
+        android:fadingEdge="none"
+        android:layout_weight="1"
+        android:paddingLeft="@dimen/dp_20"
+        android:paddingRight="@dimen/dp_20"
+        android:paddingTop="@dimen/dp_15"
+        android:paddingBottom="@dimen/dp_15"
+        android:divider="@null"
+        android:scrollbars="none"/>
+
+</LinearLayout>

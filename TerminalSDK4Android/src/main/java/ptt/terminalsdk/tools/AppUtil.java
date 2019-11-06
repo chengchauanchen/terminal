@@ -1,6 +1,9 @@
 package ptt.terminalsdk.tools;
 
 import android.app.Activity;
+import android.content.Context;
+import android.content.res.Configuration;
+
 public class AppUtil {
 
     /**
@@ -16,5 +19,11 @@ public class AppUtil {
             return !activity.isFinishing() || !activity.isDestroyed();
         }
         return !activity.isFinishing();
+    }
+
+    public static boolean getScreenOriention(Context context){
+        Configuration mConfiguration = context.getResources().getConfiguration(); //获取设置的配置信息
+        int ori = mConfiguration.orientation; //获取屏幕方向
+        return (ori == Configuration.ORIENTATION_LANDSCAPE);
     }
 }

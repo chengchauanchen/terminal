@@ -189,10 +189,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler(int resultCode, String resultDesc){
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                myHandler.post(()->{
-                    tv_status.setText(R.string.login_success);
-                    noNetWork.setVisibility(View.GONE);
-                });
+                myHandler.post(()-> tv_status.setText(R.string.login_success));
+                myHandler.postDelayed(()-> noNetWork.setVisibility(View.GONE),1000);
                 MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
             }else {
                 myHandler.post(()->{
@@ -446,8 +444,8 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     /**  弹出好友列表的搜索fragment **/
     private ReceiverShowPersonFragmentHandler mReceiverShowPersonFragmentHandler = new ReceiverShowPersonFragmentHandler() {
         @Override
-        public void handler(int type) {
-            SearchFragment searchFragment = SearchFragment.newInstance(type,new ArrayList<>());
+        public void handler(int type,ArrayList<String> terminalMemberTypes) {
+            SearchFragment searchFragment = SearchFragment.newInstance(type,new ArrayList<>(),terminalMemberTypes);
             searchFragment.setBacklistener(() -> {
                 ll_content.setVisibility(View.VISIBLE);
                 getSupportFragmentManager().popBackStack();

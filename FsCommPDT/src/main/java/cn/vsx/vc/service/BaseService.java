@@ -20,6 +20,9 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -487,6 +490,31 @@ public abstract class BaseService extends Service{
                     startActivity(intent);
                 }
             }
+        }
+    }
+
+    /**
+     * 显示加载UI
+     */
+    protected void showLoadingView(LinearLayout mLlRefreshing,ImageView mRefreshingIcon){
+        if(mLlRefreshing!=null && mRefreshingIcon!=null && mLlRefreshing.getVisibility() == View.GONE){
+            mRefreshingIcon.setVisibility(View.VISIBLE);
+            RotateAnimation refreshingAnimation = (RotateAnimation) AnimationUtils.loadAnimation(
+                    this, R.anim.rotating_refreshing);
+            refreshingAnimation.setInterpolator(new LinearInterpolator());
+            mRefreshingIcon.startAnimation(refreshingAnimation);
+            mLlRefreshing.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * 隐藏加载UI
+     */
+    protected void dismissLoadingView(LinearLayout mLlRefreshing,ImageView mRefreshingIcon){
+        if(mLlRefreshing!=null && mRefreshingIcon!=null){
+            mRefreshingIcon.clearAnimation();
+            mRefreshingIcon.setVisibility(View.GONE);
+            mLlRefreshing.setVisibility(View.GONE);
         }
     }
 }

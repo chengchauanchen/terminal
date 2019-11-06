@@ -17,6 +17,7 @@ import android.os.Message;
 import android.os.ResultReceiver;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,6 +95,8 @@ public class PullLivingService extends BaseService{
     private TextView mTvLiveSpeakingName;
     private TextView mTvLiveGroupName;
     private TextView mTvLiveSpeakingId;
+    protected LinearLayout mLlRefreshing;
+    protected ImageView mRefreshingIcon;
     private boolean rtspPlay = true;
     private String url;
     private RTMPEasyPlayerClient rtmpClient;
@@ -209,15 +212,15 @@ public class PullLivingService extends BaseService{
             }
         }else {
             mHandler.removeMessages(OFF_LINE);
-            if(MyApplication.instance.isMiniLive){
-                if(null != mSvLivePop.getSurfaceTexture()){
-                    startPull(mSvLivePop);
-                }
-            }else {
-                if(null != mSvLive.getSurfaceTexture()){
-                    startPull(mSvLive);
-                }
-            }
+//            if(MyApplication.instance.isMiniLive){
+//                if(null != mSvLivePop.getSurfaceTexture()){
+//                    startPull(mSvLivePop);
+//                }
+//            }else {
+//                if(null != mSvLive.getSurfaceTexture()){
+//                    startPull(mSvLive);
+//                }
+//            }
         }
     }
 
@@ -255,13 +258,13 @@ public class PullLivingService extends BaseService{
         mTvLiveGroupName = rootView.findViewById(R.id.tv_live_groupName);
         mTvLiveSpeakingId = rootView.findViewById(R.id.tv_live_speakingId);
         mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
-
-
+        mLlRefreshing = rootView.findViewById(R.id.ll_refreshing);
+        mRefreshingIcon = rootView.findViewById(R.id.refreshing_icon);
         ImageView mLiveVedioIcon = rootView.findViewById(R.id.live_vedioIcon);
         mLiveVedioIcon.setImageResource(BitmapUtil.getUserPhotoRound());
         ImageView ivLiveSpeakingHead = rootView.findViewById(R.id.iv_live_speaking_head);
         ivLiveSpeakingHead.setImageResource(BitmapUtil.getUserPhotoRound());
-
+        dismissLoadingView(mLlRefreshing,mRefreshingIcon);
     }
 
     @Override
@@ -620,8 +623,9 @@ public class PullLivingService extends BaseService{
             if(null == mResultReceiver){
                 mResultReceiver = new RtspReceiver(new Handler());
             }
+//            url = "rtsp://192.168.1.230:554/main";
             if(null != surface.getSurfaceTexture()){
-                mStreamRender = new EasyRTSPClient(this, MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(), surface.getSurfaceTexture(), mResultReceiver);
+                mStreamRender = new EasyRTSPClient(this, MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(), new Surface(surface.getSurfaceTexture()), mResultReceiver);
                 try{
                     if(!android.text.TextUtils.isEmpty(url)){
                         mStreamRender.start(url, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
@@ -649,6 +653,7 @@ public class PullLivingService extends BaseService{
             super.onReceiveResult(resultCode, resultData);
             if(resultCode == EasyRTSPClient.RESULT_VIDEO_DISPLAYED){
                 pullcount = 0;
+                mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
             }else if(resultCode == EasyRTSPClient.RESULT_VIDEO_SIZE){
                 mLiveWidth = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_WIDTH);
                 mLiveHeight = resultData.getInt(EasyRTSPClient.EXTRA_VIDEO_HEIGHT);
@@ -660,6 +665,7 @@ public class PullLivingService extends BaseService{
             }else if(resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_VIDEO){
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.video_not_support));
             }else if(resultCode == EasyRTSPClient.RESULT_EVENT){
+                mHandler.post(() -> showLoadingView(mLlRefreshing,mRefreshingIcon));
                 int errorcode = resultData.getInt("errorcode");
                 String resultDataString = resultData.getString("event-msg");
                 logger.error("视频流播放状态：" + errorcode + "=========" + resultDataString + "-----count:" + pullcount);
@@ -679,6 +685,7 @@ public class PullLivingService extends BaseService{
                                 pullcount++;
                             }else{
                                 ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_stoped));
+                                mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
                                 stopBusiness();
                             }
                         }catch(Exception e){
@@ -686,10 +693,12 @@ public class PullLivingService extends BaseService{
                         }
                     }else{
                         ToastUtil.showToast(MyTerminalFactory.getSDK().application, getResources().getString(R.string.push_stoped));
+                        mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
                         stopBusiness();
                     }
                 }else if(errorcode != 0){
                     ToastUtil.showToast(MyTerminalFactory.getSDK().application, resultDataString);
+                    mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
                     stopBusiness();
                 }
             }

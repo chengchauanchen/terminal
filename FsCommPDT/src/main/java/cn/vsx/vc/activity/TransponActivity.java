@@ -38,7 +38,7 @@ public class TransponActivity extends BaseActivity implements TransponNewFragmen
     };
 
     private ReceiveShowSearchFragmentHandler receiveShowSearchFragmentHandler = (type,selectedNos) -> {
-        SearchFragment searchFragment = SearchFragment.newInstance(type,selectedNos);
+        SearchFragment searchFragment = SearchFragment.newInstance(type,selectedNos,null);
         searchFragment.setBacklistener(() -> onBackPressed());
         getSupportFragmentManager().beginTransaction().hide(transponNewFragment).add(R.id.search_framelayout, searchFragment).addToBackStack(null).show(searchFragment).commit();
     };

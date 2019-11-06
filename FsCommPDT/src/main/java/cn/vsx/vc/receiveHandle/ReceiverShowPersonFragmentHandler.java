@@ -1,5 +1,7 @@
 package cn.vsx.vc.receiveHandle;
 
+import java.util.ArrayList;
+
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
 
 /**
@@ -8,5 +10,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverShowPersonFragmentHandler extends ReceiveHandler {
-    void handler(int type);
+    void handler(int type, ArrayList<String> terminalMemberTypes);
 }

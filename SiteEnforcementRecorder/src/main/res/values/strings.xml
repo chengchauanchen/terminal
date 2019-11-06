@@ -106,7 +106,7 @@
     <string name="text_tempt_info_with_use_qr_scan">用警务通扫码绑定</string>
     <string name="text_tempt_associated_account">关联账号</string>
     <string name="text_tempt_bind_unbind">NFC绑定、扫码绑定、输警号绑定</string>
-    <string name="text_tempt_set">网络参数、服务器地址</string>
+    <string name="text_tempt_set">实时视频上报时长、网络参数、服务器地址</string>
 
     <string name="text_change_group">转组</string>
     <string name="text_set">设置</string>
@@ -119,6 +119,8 @@
     <string name="text_nfc_state_error">NFC状态异常</string>
     <string name="text_has_no_nfc">该设备不支持NFC</string>
     <string name="text_input_bind_police_id">输入要绑定的ID</string>
+    <string name="text_set_living_stop_time_title">实时视频上报时长</string>
+    <string name="text_set_living_stop_time">实时视频上报时长设置</string>
     <string name="text_set_server">IP、端口号设置</string>
     <string name="text_set_vpn">VPN设置</string>
     <string name="text_set_server_ip">I&#160;P:</string>
@@ -140,4 +142,17 @@
     <string name="text_change_server">切换环境</string>
     <string name="text_move_task_to_back">后台运行</string>
     <string name="text_change_group_success">转组成功</string>
+    <string name="text_refuse">拒绝</string>
+    <string name="text_tempt_living_stop_time">您已经连续上报%1$d小时,%2$d分钟后自动停止上报</string>
+    <string name="text_tempt_living_stop_time_set">超出上报时长将自动停止上报</string>
+    <string name="text_living_stop_time">%1$d小时</string>
+    <string name="text_set_living_stop_time_tempt">当前上报时长已经是%1$d小时</string>
+    <string name="text_set_success">设置成功</string>
+    <string name="text_set_fail">设置失败</string>
+    <string name="text_set_success_next_used">设置成功,下次生效</string>
+    <string name="text_app_list">应用列表</string>
+    <string name="tv_set_infra_red">红外设置</string>
+    <string name="tv_set_close">关</string>
+    <string name="tv_set_open">开</string>
+    <string name="tv_set_automatic">自动</string>
 </resources>

@@ -24,8 +24,6 @@ import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.auth.LoginState;
-import cn.vsx.hamster.terminalsdk.model.Account;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.broadcastreceiver.PTTDownAndUpReceiver;
 import ptt.terminalsdk.broadcastreceiver.TickAlarmReceiver;
@@ -255,6 +253,10 @@ public class OnlineService extends Service {
 
         String authUrl = TerminalFactory.getSDK().getParam(Params.AUTH_URL, "");
         if (android.text.TextUtils.isEmpty(authUrl)) {
+            String type = TerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+            if(TerminalMemberType.valueOf(type).getCode() == TerminalMemberType.TERMINAL_BODY_WORN_CAMERA.getCode()){
+                TerminalFactory.getSDK().getAuthManagerTwo().setChangeServer();
+            }
             String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
             if (defaultAddress.length >= 2) {
                 int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);

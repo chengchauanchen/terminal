@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.ResultReceiver;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,6 +54,8 @@ public class PullGB28181Service extends BaseService{
     private LinearLayout mLlInviteMember;
     private ImageView mIvLiveLookAddmember;
     private RelativeLayout mVideoPlatform;
+    protected LinearLayout mLlRefreshing;
+    protected ImageView mRefreshingIcon;
     private String gb28181Url;
     private Logger logger = Logger.getLogger(this.getClass());
     private static final int CURRENTTIME = 1;
@@ -60,7 +63,6 @@ public class PullGB28181Service extends BaseService{
 
     private EasyRTSPClient mStreamRender;
     private TerminalMessage terminalMessage;
-
 
     public PullGB28181Service(){}
 
@@ -91,6 +93,9 @@ public class PullGB28181Service extends BaseService{
         mLlInviteMember =  rootView.findViewById(R.id.ll_invite_member);
         mIvLiveLookAddmember =  rootView.findViewById(R.id.iv_live_look_addmember);
         mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
+        mLlRefreshing = rootView.findViewById(R.id.ll_refreshing);
+        mRefreshingIcon = rootView.findViewById(R.id.refreshing_icon);
+        dismissLoadingView(mLlRefreshing,mRefreshingIcon);
     }
 
     @Override
@@ -159,9 +164,9 @@ public class PullGB28181Service extends BaseService{
             }
         }else {
             mHandler.removeMessages(OFF_LINE);
-            if(null != mSvGb28181.getSurfaceTexture()){
-                startPullGB28121(mSvGb28181.getSurfaceTexture());
-            }
+//            if(null != mSvGb28181.getSurfaceTexture()){
+//                startPullGB28121(mSvGb28181.getSurfaceTexture());
+//            }
         }
     }
 
@@ -263,7 +268,7 @@ public class PullGB28181Service extends BaseService{
         if(!TextUtils.isEmpty(gb28181Url)){
 
             mStreamRender = new EasyRTSPClient(PullGB28181Service.this, MyTerminalFactory.getSDK().getLiveConfigManager().getPlayKey(),
-                    surface, mResultReceiver);
+                    new Surface(surface), mResultReceiver);
             try {
                 if (gb28181Url != null) {
                     mStreamRender.start(gb28181Url, RTSPClient.TRANSTYPE_TCP, RTSPClient.EASY_SDK_VIDEO_FRAME_FLAG | RTSPClient.EASY_SDK_AUDIO_FRAME_FLAG, "", "", null);
@@ -291,6 +296,7 @@ public class PullGB28181Service extends BaseService{
             super.onReceiveResult(resultCode, resultData);
             if (resultCode == EasyRTSPClient.RESULT_VIDEO_DISPLAYED) {
                 pullcount = 0;
+                mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
             } else if (resultCode == EasyRTSPClient.RESULT_VIDEO_SIZE) {
 //                if(isPulling){
 //                    return;
@@ -308,7 +314,7 @@ public class PullGB28181Service extends BaseService{
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.video_not_support));
                 finishVideoLive();
             } else if (resultCode == EasyRTSPClient.RESULT_EVENT) {
-
+                mHandler.post(() -> showLoadingView(mLlRefreshing,mRefreshingIcon));
                 int errorcode = resultData.getInt("errorcode");
                 String resultDataString = resultData.getString("event-msg");
                 logger.error("视频流播放状态：" + errorcode + "=========" + resultDataString+"-----count:"+ pullcount);
@@ -327,6 +333,7 @@ public class PullGB28181Service extends BaseService{
 
                             }else{
                                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
+                                mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
                                 finishVideoLive();
                             }
 
@@ -335,10 +342,12 @@ public class PullGB28181Service extends BaseService{
                         }
                     } else {
                         ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
+                        mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
                         finishVideoLive();
                     }
                 } else if(errorcode !=0){
                     ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDataString);
+                    mHandler.post(() -> dismissLoadingView(mLlRefreshing,mRefreshingIcon));
                     finishVideoLive();
                 }
             }
