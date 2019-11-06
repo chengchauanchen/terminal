@@ -332,7 +332,7 @@ public class UavPushActivity extends BaseActivity{
                 finish();
             }
         }
-        if(AirCraftUtil.checkIsAircraftConnected()){
+        if(!AirCraftUtil.checkIsAircraftConnected()){
             AirCraftUtil.loginToActivationIfNeeded();
         }
     }

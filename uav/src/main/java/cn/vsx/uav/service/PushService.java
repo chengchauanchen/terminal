@@ -185,7 +185,7 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
         YuvPlayer.start(getApplicationContext(),surfaceWidth, surfaceHeight, 16, surface1);
         YuvPlayer.yuvPlayer._setYuvDataListener(this);
         logger.info("yuvPlayer.start");
-        if(airCraftMediaStream != null && !airCraftMediaStream.isStreaming()){
+        if(airCraftMediaStream != null){
             airCraftMediaStream.startPreView(1280, 720);
         }
         start = true;
