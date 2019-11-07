@@ -9,12 +9,14 @@ import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import org.apache.log4j.Logger;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.utils.NetworkUtil;
 
 /**
  * 信号强度监听
@@ -38,6 +40,7 @@ public class MyPhoneStateListener extends PhoneStateListener {
 
     private static final int HANDLE_SHOW_TEMPT=10;
     private static final int HANDLE_CLEAR_TEMPT=11;
+     TelephonyManager tm;
 
     private Handler myHandler = new Handler(Looper.getMainLooper()){
         @Override
@@ -47,6 +50,7 @@ public class MyPhoneStateListener extends PhoneStateListener {
                 case HANDLE_SHOW_TEMPT:
                     myHandler.removeMessages(HANDLE_SHOW_TEMPT);
                     PromptManager.getInstance().weakSignal();
+                    myHandler.removeMessages(HANDLE_CLEAR_TEMPT);
                     myHandler.sendEmptyMessageDelayed(HANDLE_CLEAR_TEMPT,60*1000);
                     break;
                 case HANDLE_CLEAR_TEMPT:
@@ -60,6 +64,7 @@ public class MyPhoneStateListener extends PhoneStateListener {
 
     public MyPhoneStateListener(Context context){
         this.context = context;
+          tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         TerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
     }
     public void onStop(){
@@ -70,10 +75,10 @@ public class MyPhoneStateListener extends PhoneStateListener {
     @Override
     public void onSignalStrengthsChanged(SignalStrength signalStrength) {
         super.onSignalStrengthsChanged(signalStrength);
-        int gsmSignalStrength = signalStrength.getGsmSignalStrength();
-        int dbm = -113 + 2*gsmSignalStrength;
-        logger.info("MyPhoneStateListener--onSignalStrengthsChanged--gsmSignalStrength:"+gsmSignalStrength+"--dbm:"+dbm);
-        checkTempt(dbm);
+//        int gsmSignalStrength = signalStrength.getGsmSignalStrength();
+//        int dbm = -113 + 2*gsmSignalStrength;
+//        logger.info("MyPhoneStateListener--onSignalStrengthsChanged--gsmSignalStrength:"+gsmSignalStrength+"--dbm:"+dbm);
+//        checkTempt(dbm);
          //获取网络类型
 //        int netWorkType = getNetWorkType(context);
 //        switch (netWorkType) {
@@ -93,6 +98,78 @@ public class MyPhoneStateListener extends PhoneStateListener {
 //                default:
 //                    break;
 //        }
+
+        //获取网络信号强度
+        //获取0-4的5种信号级别，越大信号越好,但是api23开始才能用
+//        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+//            int level = signalStrength.getLevel();
+//            System.out.println("level====" + level);
+//        }
+//        int cdmaDbm = signalStrength.getCdmaDbm();
+//        int evdoDbm = signalStrength.getEvdoDbm();
+//        System.out.println("cdmaDbm=====" + cdmaDbm);
+//        System.out.println("evdoDbm=====" + evdoDbm);
+//
+//        int gsmSignalStrength = signalStrength.getGsmSignalStrength();
+//        int dbm = -113 + 2 * gsmSignalStrength;
+//        System.out.println("dbm===========" + dbm);
+
+        //获取网络类型
+//        int netWorkType = NetUtils.getNetworkState(context);
+//        switch (netWorkType) {
+//            case NetUtils.NETWORK_WIFI:
+//                mTextView.setText("当前网络为wifi,信号强度为：" + gsmSignalStrength);
+//                break;
+//            case NetUtils.NETWORK_2G:
+//                mTextView.setText("当前网络为2G移动网络,信号强度为：" + gsmSignalStrength);
+//                break;
+//            case NetUtils.NETWORK_3G:
+//                mTextView.setText("当前网络为3G移动网络,信号强度为：" + gsmSignalStrength);
+//                break;
+//            case NetUtils.NETWORK_4G:
+//                mTextView.setText("当前网络为4G移动网络,信号强度为：" + gsmSignalStrength);
+//                break;
+//            case NetUtils.NETWORK_NONE:
+//                mTextView.setText("当前没有网络,信号强度为：" + gsmSignalStrength);
+//                break;
+//            case -1:
+//                mTextView.setText("当前网络错误,信号强度为：" + gsmSignalStrength);
+//                break;
+//        }
+
+        String signalInfo = signalStrength.toString();
+        String[] params = signalInfo.split(" ");
+        if (tm.getNetworkType() == TelephonyManager.NETWORK_TYPE_LTE) {
+            //4G网络 最佳范围 >-90dBm 越大越好
+            int Itedbm = Integer.parseInt(params[9]);
+            Log.e("66666", "onSignalStrengthsChanged: " + Itedbm + "");
+            checkTempt(Itedbm);
+        } else if (tm.getNetworkType() == TelephonyManager.NETWORK_TYPE_HSDPA ||
+                tm.getNetworkType() == TelephonyManager.NETWORK_TYPE_HSPA ||
+                tm.getNetworkType() == TelephonyManager.NETWORK_TYPE_HSUPA ||
+                tm.getNetworkType() == TelephonyManager.NETWORK_TYPE_UMTS) {
+            //3G网络最佳范围  >-90dBm  越大越好  ps:中国移动3G获取不到  返回的无效dbm值是正数（85dbm）
+            //在这个范围的已经确定是3G，但不同运营商的3G有不同的获取方法，故在此需做判断 判断运营商与网络类型的工具类在最下方
+            String yys = NetworkUtil.getOperatorName(context);//获取当前运营商
+            if (yys == "中国移动") {
+//                Log.e("66666", "onSignalStrengthsChanged: " + 0 + "");//中国移动3G不可获取，故在此返回0
+                checkTempt(0);
+            } else if (yys == "中国联通") {
+                int cdmaDbm = signalStrength.getCdmaDbm();
+//                Log.e("66666", "onSignalStrengthsChanged: " + cdmaDbm + "");
+                checkTempt(cdmaDbm);
+            } else if (yys == "中国电信") {
+                int evdoDbm = signalStrength.getEvdoDbm();
+//                Log.e("66666", "onSignalStrengthsChanged: " + evdoDbm + "");
+                checkTempt(evdoDbm);
+            }
+        } else {
+            //2G网络最佳范围>-90dBm 越大越好
+            int asu = signalStrength.getGsmSignalStrength();
+            int dbm = -113 + 2 * asu;
+//            Log.e("66666", "onSignalStrengthsChanged: " + dbm + "");
+            checkTempt(dbm);
+        }
     }
 
     public static int getNetWorkType(Context context) {
@@ -209,12 +286,14 @@ public class MyPhoneStateListener extends PhoneStateListener {
      * @param dbm
      */
     private void checkTempt(int dbm) {
-        logger.info("MyPhoneStateListener--checkSingleTempt--dbm:"+dbm);
+        logger.info("MyPhoneStateListener--checkSingleTempt--dbm:"+dbm+"--connect:"+connect);
+//        ToastUtil.showToast(context,"dbm:"+dbm);
         if(connect){
-            if (dbm < -100) {
+            if (dbm < -130) {
                 if(showTempt){
-                    myHandler.sendEmptyMessage(HANDLE_SHOW_TEMPT);
                     showTempt = false;
+                    myHandler.removeMessages(HANDLE_SHOW_TEMPT);
+                    myHandler.sendEmptyMessage(HANDLE_SHOW_TEMPT);
                 }
             }
         }
