@@ -93,7 +93,7 @@ public class ClientChannel extends AbsClientChannel {
 						}
 					});
 				} catch (Exception e) {
-					logger.error("发送命令失败！！"+e);
+					logger.error("发送命令失败！！",e);
 					handler.handler(false, null);
 				}
 			}else {

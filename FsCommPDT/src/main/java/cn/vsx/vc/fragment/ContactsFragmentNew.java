@@ -3,7 +3,6 @@ package cn.vsx.vc.fragment;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Handler;
-import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -45,13 +44,13 @@ import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.DialPopupwindow;
-import cn.vsx.vc.view.TabLayoutView;
+import cn.vsx.vc.view.MyTabLayout.MyTabLayout;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
-import static android.support.design.widget.TabLayout.MODE_FIXED;
-import static android.support.design.widget.TabLayout.MODE_SCROLLABLE;
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
+import static cn.vsx.vc.view.MyTabLayout.MyTabLayout.MODE_FIXED;
+import static cn.vsx.vc.view.MyTabLayout.MyTabLayout.MODE_SCROLLABLE;
 
 @SuppressLint("ValidFragment")
 public class ContactsFragmentNew extends BaseFragment implements View.OnClickListener {
@@ -76,11 +75,11 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     private Handler mHandler = new Handler();
     private DialPopupwindow dialPopupwindow;
     private boolean soundOff;
-    private TabLayout tabLayout;
+    private MyTabLayout tabLayout;
     private List<String> titles = new ArrayList<>();
     private List<BaseFragment> fragments = new ArrayList<>();
     private BaseFragment lastFragment;
-    private List<TabLayout.Tab> tabs = new ArrayList<>();
+    private List<MyTabLayout.Tab> tabs = new ArrayList<>();
     private NewGroupFragment groupFragmentNew;//群组
     private NewPoliceAffairsFragment policeAffairsFragment;//警务通
 
@@ -195,23 +194,15 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
         groupFragmentNew = new NewGroupFragment();
         fragments.add(groupFragmentNew);
-        TabLayout.Tab groupTab = tabLayout.newTab();
+        MyTabLayout.Tab groupTab = tabLayout.newTab();
 
-        TabLayoutView groupTabView = new TabLayoutView(getContext());
-        groupTabView.setmTabName(titles.get(0));
-        groupTabView.setSelect(true);
-        groupTab.setCustomView(groupTabView);
         groupTab.setText(titles.get(0));
         tabLayout.addTab(groupTab);
         tabs.add(groupTab);
 
         policeAffairsFragment = new NewPoliceAffairsFragment();
         fragments.add(policeAffairsFragment);
-        TabLayout.Tab policeTab = tabLayout.newTab();
-        TabLayoutView policeTabView = new TabLayoutView(getContext());
-        policeTabView.setSelect(false);
-        policeTabView.setmTabName(titles.get(1));
-        policeTab.setCustomView(policeTabView);
+        MyTabLayout.Tab policeTab = tabLayout.newTab();
         policeTab.setText(titles.get(1));
         tabLayout.addTab(policeTab);
         tabs.add(policeTab);
@@ -220,12 +211,8 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         List<TerminalContactTab> terminalContactTabs = TerminalFactory.getSDK().getDataManager().getTerminalContactTabs();
         for(int i = 0; i < terminalContactTabs.size(); i++){
             titles.add(terminalContactTabs.get(i).getTabName());
-            TabLayout.Tab tab = tabLayout.newTab();
+            MyTabLayout.Tab tab = tabLayout.newTab();
             tab.setText(terminalContactTabs.get(i).getTabName());
-            TabLayoutView tabView = new TabLayoutView(getContext());
-            tabView.setmTabName(terminalContactTabs.get(i).getTabName());
-            tabView.setSelect(false);
-            tab.setCustomView(tabView);
             tabLayout.addTab(tab);
             tabs.add(tab);
             TerminalFragment terminalFragment = TerminalFragment.newInstance(terminalContactTabs.get(i).getTerminalMemberTypes());
@@ -238,16 +225,18 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         int tabCount = screenWidth / scrollableTabMinWidth;
         if(tabs.size()>tabCount){
             tabLayout.setTabMode(MODE_SCROLLABLE);
+            tabLayout.setTabGravity(MyTabLayout.GRAVITY_CENTER);
         }else {
+            tabLayout.setTabGravity(MyTabLayout.GRAVITY_FILL);
             tabLayout.setTabMode(MODE_FIXED);
         }
 
         transaction.add(R.id.contacts_viewPager, groupFragmentNew).show(groupFragmentNew).commit();
         lastFragment = groupFragmentNew;
 
-        tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener(){
+        tabLayout.addOnTabSelectedListener(new MyTabLayout.OnTabSelectedListener(){
             @Override
-            public void onTabSelected(TabLayout.Tab tab){
+            public void onTabSelected(MyTabLayout.Tab tab){
                 logger.info("onTabSelected");
                 int position = tab.getPosition();
                 if(position == 0){
@@ -257,26 +246,20 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                 }
                 BaseFragment currentFrgment = fragments.get(position);
                 if(lastFragment !=currentFrgment ){
-                    TabLayoutView customView = (TabLayoutView) tab.getCustomView();
-                    if(customView != null){
-                        customView.setSelect(true);
-                    }
+                    tab.setSelected(true);
                     switchFragment(lastFragment,currentFrgment);
                     lastFragment = currentFrgment;
                 }
             }
 
             @Override
-            public void onTabUnselected(TabLayout.Tab tab){
-                TabLayoutView customView = (TabLayoutView) tab.getCustomView();
-                if(customView != null){
-                    customView.setSelect(false);
-                }
+            public void onTabUnselected(MyTabLayout.Tab tab){
+                tab.setSelected(false);
                 logger.info("onTabUnselected");
             }
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab){
+            public void onTabReselected(MyTabLayout.Tab tab) {
                 logger.info("onTabReselected");
             }
         });

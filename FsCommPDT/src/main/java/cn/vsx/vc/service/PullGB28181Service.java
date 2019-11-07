@@ -164,9 +164,9 @@ public class PullGB28181Service extends BaseService{
             }
         }else {
             mHandler.removeMessages(OFF_LINE);
-            if(null != mSvGb28181.getSurfaceTexture()){
-                startPullGB28121(mSvGb28181.getSurfaceTexture());
-            }
+//            if(null != mSvGb28181.getSurfaceTexture()){
+//                startPullGB28121(mSvGb28181.getSurfaceTexture());
+//            }
         }
     }
 

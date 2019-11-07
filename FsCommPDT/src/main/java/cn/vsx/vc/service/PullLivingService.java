@@ -212,15 +212,15 @@ public class PullLivingService extends BaseService{
             }
         }else {
             mHandler.removeMessages(OFF_LINE);
-            if(MyApplication.instance.isMiniLive){
-                if(null != mSvLivePop.getSurfaceTexture()){
-                    startPull(mSvLivePop);
-                }
-            }else {
-                if(null != mSvLive.getSurfaceTexture()){
-                    startPull(mSvLive);
-                }
-            }
+//            if(MyApplication.instance.isMiniLive){
+//                if(null != mSvLivePop.getSurfaceTexture()){
+//                    startPull(mSvLivePop);
+//                }
+//            }else {
+//                if(null != mSvLive.getSurfaceTexture()){
+//                    startPull(mSvLive);
+//                }
+//            }
         }
     }
 

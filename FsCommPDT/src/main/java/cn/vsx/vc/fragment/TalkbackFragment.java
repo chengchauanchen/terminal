@@ -62,6 +62,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCallingCannotClickHandle
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupByNoHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
@@ -1283,6 +1284,7 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupViewHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveTestGroupCallHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
 
         //东湖 绑定设备
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverBindDeviceHandler);
@@ -1674,6 +1676,7 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupViewHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyZfyBoundPhoneMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTestGroupCallHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
 
         //东湖 绑定设备
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverBindDeviceHandler);
@@ -1918,4 +1921,11 @@ public class TalkbackFragment extends BaseFragment {
             getContext().startActivity(intent);
         });
     });
+
+    private ReceiveForceReloginHandler receiveForceReloginHandler = new ReceiveForceReloginHandler() {
+        @Override
+        public void handler(String version) {
+            myHandler.post(()-> change2Silence());
+        }
+    };
 }
