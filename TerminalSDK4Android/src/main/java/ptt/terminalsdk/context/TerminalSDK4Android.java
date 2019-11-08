@@ -77,6 +77,7 @@ import cn.vsx.hamster.terminalsdk.manager.channel.AbsClientChannel;
 import cn.vsx.hamster.terminalsdk.manager.data.DataManager;
 import cn.vsx.hamster.terminalsdk.manager.http.IHttpClient;
 import cn.vsx.hamster.terminalsdk.manager.okhttp.LoggingInterceptor;
+import cn.vsx.hamster.terminalsdk.manager.okhttp.MyCacheInterceptor;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
@@ -1208,6 +1209,14 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		TerminalFactory.getSDK().putParam(Params.UPDATE_URL, ApkUtil.getAPKUpdateAddress(path));
 	}
 
+	@Override
+	public void setDataUpdateAddress(String path) {
+		StringBuffer address = new StringBuffer();
+		address.append(path);
+		address.append(Params.FILE_CHECK_DATA_UPDATE);
+		TerminalFactory.getSDK().putParam(Params.FILE_CHECK_DATA_UPDATE_URL,address.toString());
+	}
+
 	public SharedPreferences getAccount(){
 		return account;
 	}
@@ -1419,10 +1428,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 				//.setConverterFactory(ScalarsConverterFactory.create(),GsonConverterFactory.create(GsonAdapter.buildGson()))
 				//配置全局baseUrl
 				//开启全局配置
-				.setOkClient(createOkHttp());
+				.setOkClient(createOkHttp(10));
 	}
-
-	private OkHttpClient createOkHttp() {
+      @Override
+	  public OkHttpClient createOkHttp(int cacheTime) {
 		//        获取证书
 		//        InputStream cerInputStream = null;
 		//        InputStream bksInputStream = null;
@@ -1448,13 +1457,19 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 						return hashMap;
 					}
 				})
+
 				//添加自定义拦截器
 				.setAddInterceptor(new LoggingInterceptor())
+				.setCacheMaxSize(10*1024*1024)
+				.setAddInterceptor(new MyCacheInterceptor())
+//				.setAddInterceptor(new MyCacheInterceptor())
+//				.cache(new Cache(new File(TerminalFactory.getSDK().getCacheDirectory()), 100*1024*1024))
 				//开启缓存策略(默认false)
 				//1、在有网络的时候，先去读缓存，缓存时间到了，再去访问网络获取数据；
 				//2、在没有网络的时候，去读缓存中的数据。
 				.setCache(true)
-				.setHasNetCacheTime(10)//默认有网络时候缓存60秒
+				.setCachePath(TerminalFactory.getSDK().getCacheDirectory())
+				.setHasNetCacheTime(cacheTime)//默认有网络时候缓存60秒
 				//全局持久话cookie,保存到内存（new MemoryCookieStore()）或者保存到本地（new SPCookieStore(this)）
 				//不设置的话，默认不对cookie做处理
 				.setCookieType(new SPCookieStore(application))

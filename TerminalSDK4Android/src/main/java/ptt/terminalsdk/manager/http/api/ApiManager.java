@@ -2,6 +2,7 @@ package ptt.terminalsdk.manager.http.api;
 
 import com.allen.library.RxHttpUtils;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import ptt.terminalsdk.manager.http.AppUrlConfig;
 
 /**
@@ -12,7 +13,8 @@ import ptt.terminalsdk.manager.http.AppUrlConfig;
  * 修订历史：
  */
 public class ApiManager{
-    public static FileServerApi getFileServerApi(){
+    public static FileServerApi getFileServerApi(int cacheTime){
+        RxHttpUtils.getInstance().config().setOkClient(TerminalFactory.getSDK().createOkHttp(cacheTime));
         return RxHttpUtils.createApi(AppUrlConfig.FILE_SERVER_KEY, AppUrlConfig.getAllUrl().get(AppUrlConfig.FILE_SERVER_KEY), FileServerApi.class);
     }
 }
