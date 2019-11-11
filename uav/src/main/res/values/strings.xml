@@ -293,7 +293,7 @@
     <string name="text_hour">时</string>
     <string name="text_minute">分</string>
     <string name="text_second">秒</string>
-    <string name="activity_about_version">融合通信&#160;&#160;%1$s</string>
+    <string name="activity_about_version">%1$s&#160;&#160;%2$s</string>
     <string name="activity_create_temporary_groups_time">%1$d时%2$d分%3$d秒</string>
     <string name="activity_create_temporary_groups_name">临时组%1$d-%2$s</string>
     <string name="activity_create_temporary_groups_tempts_exist_time">23时59分59秒</string>
