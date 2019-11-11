@@ -721,9 +721,11 @@ public class UavPushActivity extends BaseActivity{
     private View.OnClickListener onVoiceButtonClickListener = v -> {
         if(TerminalFactory.getSDK().getDataManager().isUavVoiceOpen()){
             mBtnVoice.setBackground(getResources().getDrawable(R.drawable.uav_voice_close));
+            logger.error("关闭推送音频");
             TerminalFactory.getSDK().getDataManager().setUavVoiceOpen(false);
         }else{
             mBtnVoice.setBackground(getResources().getDrawable(R.drawable.uav_voice_open));
+            logger.info("打开推送音频");
             TerminalFactory.getSDK().getDataManager().setUavVoiceOpen(true);
         }
     };
