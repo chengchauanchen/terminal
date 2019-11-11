@@ -49,8 +49,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import org.apache.log4j.Logger;
-
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
@@ -83,7 +81,7 @@ public class MyTabLayout extends HorizontalScrollView{
     private static final int ANIMATION_DURATION = 300;
 
     private static final Pools.Pool<MyTabLayout.Tab> sTabPool = new Pools.SynchronizedPool<>(16);
-    private Logger logger = Logger.getLogger(getClass());
+//    private Logger logger = Logger.getLogger(getClass());
     /**
      * Scrollable tabs display a subset of tabs at any given moment, and can contain longer tab
      * labels and a larger number of tabs. They are best used for browsing contexts in touch
@@ -1789,7 +1787,7 @@ public class MyTabLayout extends HorizontalScrollView{
             if (mIndicatorAnimator != null && mIndicatorAnimator.isRunning()) {
                 mIndicatorAnimator.cancel();
             }
-            logger.info("setIndicatorPositionFromTabPosition:"+position);
+//            logger.info("setIndicatorPositionFromTabPosition:"+position);
             mSelectedPosition = position;
             mSelectionOffset = positionOffset;
             updateIndicatorPosition();
@@ -1891,7 +1889,7 @@ public class MyTabLayout extends HorizontalScrollView{
         }
 
         private void updateIndicatorPosition() {
-            logger.info("updateIndicatorPosition----"+mSelectedPosition);
+//            logger.info("updateIndicatorPosition----"+mSelectedPosition);
             final MyTabLayout.TabView selectedTitle = (TabView) getChildAt(mSelectedPosition);
             TextView textView = selectedTitle.getTextView();
             int left, right;
@@ -1899,7 +1897,7 @@ public class MyTabLayout extends HorizontalScrollView{
             if (selectedTitle != null && selectedTitle.getWidth() > 0) {
                 left = selectedTitle.getLeft()+textView.getLeft()-10;
                 right = selectedTitle.getRight()-(selectedTitle.getWidth()-textView.getRight()-10);
-                logger.info("updateIndicatorPosition----left"+left+"----right:"+right);
+//                logger.info("updateIndicatorPosition----left"+left+"----right:"+right);
                 if (mSelectionOffset > 0f && mSelectedPosition < getChildCount() - 1) {
                     // Draw the selection partway between the tabs
                     View nextTitle = getChildAt(mSelectedPosition + 1);
@@ -1944,7 +1942,7 @@ public class MyTabLayout extends HorizontalScrollView{
             //要移到的位置
             final int targetLeft = targetView.getLeft()+textView.getLeft()-10;
             final int targetRight = targetView.getRight()-(targetView.getWidth()-textView.getRight()-10);
-            logger.info("targetLeft:"+targetLeft+"----targetRight:"+targetRight);
+//            logger.info("targetLeft:"+targetLeft+"----targetRight:"+targetRight);
             final int startLeft;
             final int startRight;
 
@@ -1957,7 +1955,7 @@ public class MyTabLayout extends HorizontalScrollView{
             } else {
                 // Else, we'll just grow from the nearest edge
                 final int offset = dpToPx(MOTION_NON_ADJACENT_OFFSET);
-                logger.info("offset:"+offset+"---isRtl:"+isRtl);
+//                logger.info("offset:"+offset+"---isRtl:"+isRtl);
                 if (position < mSelectedPosition) {
                     // We're going end-to-start
                     if (isRtl) {
@@ -1984,8 +1982,8 @@ public class MyTabLayout extends HorizontalScrollView{
                     @Override
                     public void onAnimationUpdate(ValueAnimator animator) {
                         final float fraction = animator.getAnimatedFraction();
-                        logger.info("startLeft:"+startLeft+"----targetLeft:"+targetLeft+"---fraction:"+fraction);
-                        logger.info("startRight:"+startRight+"----targetRight:"+targetRight);
+//                        logger.info("startLeft:"+startLeft+"----targetLeft:"+targetLeft+"---fraction:"+fraction);
+//                        logger.info("startRight:"+startRight+"----targetRight:"+targetRight);
                         setIndicatorPosition(
                                 MyAnimationUtils.lerp(startLeft, targetLeft, fraction),
                                 MyAnimationUtils.lerp(startRight, targetRight, fraction));
@@ -2005,7 +2003,7 @@ public class MyTabLayout extends HorizontalScrollView{
         @Override
         public void draw(Canvas canvas) {
             super.draw(canvas);
-            logger.info("mIndicatorLeft:"+mIndicatorLeft+"---mSelectedIndicatorHeight:"+mSelectedIndicatorHeight+"---mIndicatorRight:"+mIndicatorRight);
+//            logger.info("mIndicatorLeft:"+mIndicatorLeft+"---mSelectedIndicatorHeight:"+mSelectedIndicatorHeight+"---mIndicatorRight:"+mIndicatorRight);
             // Thick colored underline below the current selection
             if (mIndicatorLeft >= 0 && mIndicatorRight > mIndicatorLeft) {
                 canvas.drawRect(mIndicatorLeft, getHeight() - mSelectedIndicatorHeight,

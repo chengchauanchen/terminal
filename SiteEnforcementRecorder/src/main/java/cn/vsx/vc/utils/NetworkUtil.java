@@ -3,6 +3,7 @@ package cn.vsx.vc.utils;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.telephony.TelephonyManager;
 
 /**
  * 作者：徐小龙
@@ -42,5 +43,16 @@ public class NetworkUtil{
         if (connectivity == null) return false;
         return connectivity.getActiveNetworkInfo().getType() == ConnectivityManager.TYPE_WIFI;
 
+    }
+
+    public static String getOperatorName(Context context) {
+        /*
+         * getSimOperatorName()就可以直接获取到运营商的名字
+         * 也可以使用IMSI获取，getSimOperator()，然后根据返回值判断，例如"46000"为移动
+         * IMSI相关链接：http://baike.baidu.com/item/imsi
+         */
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        // getSimOperatorName就可以直接获取到运营商的名字
+        return telephonyManager.getSimOperatorName();
     }
 }
