@@ -32,6 +32,7 @@ import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.model.WarningRecord;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
+import ptt.terminalsdk.tools.PinyinUtils;
 
 /**
  * Created by ysl on 2017/3/24.
@@ -52,6 +53,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     private final static String CALL_RECORD = "callRecord";
     private final static String BIT_STAR_FILE_RECORD = "bitStarFileRecord";
     private final static String WARNING_RECORD = "warningRecord";
+    private final static String ALL_GROUP = "allGroup";
 
     private SQLiteDBManager(Context context) {
         this.context = context;
@@ -1172,5 +1174,77 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     }
 
+    @Override
+    public void updateAllGroup(List<Group> groups){
+        logger.info("保存组数据:"+groups);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        //开始事务
+        db.beginTransaction();
+        try{
+            db.execSQL("DELETE FROM allGroup");
+            for (Group group : groups) {
+                ContentValues values = new ContentValues();
+                values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+                values.put("group_id", group.getId());
+                values.put("group_no", group.getNo());
+                values.put("group_name", group.getName());
+                values.put("group_name_py", PinyinUtils.getPingYin(group.getName()));
+                values.put("group_name_first_py",PinyinUtils.converterToFirstSpell(group.getName()));
+                values.put("department_name", group.getDepartmentName());
+                values.put("temp_group_type", group.getTempGroupType());
+                values.put("business_id", group.getBusinessId());
+                values.put("group_type", group.getGroupType());
+                values.put("unique_no", group.getUniqueNo());
+                values.put("dept_id", group.getDeptId());
+                values.put("created_member_unique_no", group.getCreatedMemberUniqueNo());
+                values.put("response_group_type", group.getResponseGroupType());
+                values.put("high_user", group.isHighUser()?1:0);
+                values.put("processing_state", group.getProcessingState());
+                values.put("created_member_name", group.getCreatedMemberName());
+                values.put("created_member_no", group.getCreatedMemberNo());
+                db.replace(ALL_GROUP, null, values);
+            }
+            db.setTransactionSuccessful();  //设置事务成功完成
+        }catch(Exception e){
+            logger.error(e);
+        }
+        finally{
+            //结束事务
+            db.endTransaction();
+        }
+    }
 
+    @Override
+    public synchronized CopyOnWriteArrayList<Group> getAllGroup(){
+        SQLiteDatabase db = helper.getReadableDatabase();
+        Cursor cursor = db.query(ALL_GROUP, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, "group_no ASC");
+        CopyOnWriteArrayList<Group> groups = new CopyOnWriteArrayList<>();
+        try{
+            if (cursor != null && cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    Group group = new Group();
+                    group.setId(cursor.getInt(cursor.getColumnIndex("group_id")));
+                    group.setNo(cursor.getInt(cursor.getColumnIndex("group_no")));
+                    group.setBusinessId(cursor.getString(cursor.getColumnIndex("business_id")));
+                    group.setCreatedMemberName(cursor.getString(cursor.getColumnIndex("created_member_name")));
+                    group.setCreatedMemberNo(cursor.getInt(cursor.getColumnIndex("created_member_no")));
+                    group.setCreatedMemberUniqueNo(cursor.getLong(cursor.getColumnIndex("created_member_unique_no")));
+                    group.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
+                    group.setDeptId(cursor.getInt(cursor.getColumnIndex("dept_id")));
+                    group.setGroupType(cursor.getString(cursor.getColumnIndex("group_type")));
+                    group.setHighUser(cursor.getInt(cursor.getColumnIndex("high_user")) == 1);
+                    group.setName(cursor.getString(cursor.getColumnIndex("group_name")));
+                    group.setProcessingState(cursor.getString(cursor.getColumnIndex("processing_state")));
+                    group.setResponseGroupType(cursor.getString(cursor.getColumnIndex("response_group_type")));
+                    group.setTempGroupType(cursor.getString(cursor.getColumnIndex("temp_group_type")));
+                    group.setUniqueNo(cursor.getLong(cursor.getColumnIndex("unique_no")));
+                    groups.add(group);
+                }
+                cursor.close();
+            }
+        }catch(Exception e){
+            logger.error(e.toString());
+        }
+        return groups;
+    }
 }

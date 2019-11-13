@@ -149,6 +149,13 @@
         <service android:name=".service.TestGroupCallService"
             android:enabled="true"
             android:exported="false" />
+        
+<!--        <receiver android:name=".broadcastreceiver.PTTDownAndUpReceiver">-->
+<!--            <intent-filter>-->
+<!--                <action android:name="com.chivin.action.MEDIA_PTT_DOWN"/>-->
+<!--                <action android:name="com.chivin.action.MEDIA_PTT_UP"/>-->
+<!--            </intent-filter>-->
+<!--        </receiver>-->
     </application>
 
 </manifest>

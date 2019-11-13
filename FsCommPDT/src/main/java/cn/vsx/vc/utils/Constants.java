@@ -139,4 +139,7 @@ public class Constants{
 
     //天津从统一认证客户端获取票据的URI
     public static final String AUTH_TIAN_JIN_TOKEN_URI = "content://com.xdja.app.pj/cn.vsx.vc";
+
+    public static final String PTT_DOWN_EVENT = "com.chivin.action.MEDIA_PTT_DOWN";
+    public static final String PTT_UP_EVENT = "com.chivin.action.MEDIA_PTT_UP";
 }

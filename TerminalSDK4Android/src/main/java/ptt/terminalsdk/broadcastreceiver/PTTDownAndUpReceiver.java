@@ -18,8 +18,8 @@ import ptt.terminalsdk.service.BluetoothLeService;
 
 public class PTTDownAndUpReceiver extends BroadcastReceiver {
 
-    private static final String[] down = { "BLUE_TOOTH_DOWN", BluetoothLeService.PTT_DOWN, "com.sonim.intent.action.PTT_KEY_DOWN", "android.intent.action.PTT.down", "com.runbo.ptt.key.down","com.yl.ptt.keydown" ,"com.ntdj.ptt_down"};
-    private static final String[] up = { "BLUE_TOOTH_UP",BluetoothLeService.PTT_UP, "com.sonim.intent.action.PTT_KEY_UP", "android.intent.action.PTT.up", "com.runbo.ptt.key.up","com.yl.ptt.keyup" ,"com.ntdj.ptt_up"};
+    private static final String[] down = { "BLUE_TOOTH_DOWN", BluetoothLeService.PTT_DOWN, "com.sonim.intent.action.PTT_KEY_DOWN", "android.intent.action.PTT.down", "com.runbo.ptt.key.down","com.yl.ptt.keydown" ,"com.ntdj.ptt_down","com.chivin.action.MEDIA_PTT_DOWN"};
+    private static final String[] up = { "BLUE_TOOTH_UP",BluetoothLeService.PTT_UP, "com.sonim.intent.action.PTT_KEY_UP", "android.intent.action.PTT.up", "com.runbo.ptt.key.up","com.yl.ptt.keyup" ,"com.ntdj.ptt_up","com.chivin.action.MEDIA_PTT_UP"};
     private Logger logger = Logger.getLogger(getClass());
 
     @Override
@@ -32,6 +32,7 @@ public class PTTDownAndUpReceiver extends BroadcastReceiver {
                 || intent.getAction().equals(down[4])
                 || intent.getAction().equals(down[5])
                 || intent.getAction().equals(down[6])
+                || intent.getAction().equals(down[7])
                 ){
             if(!TerminalFactory.getSDK().getParam(Params.IS_EXIT,false)){
                 TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
@@ -51,6 +52,7 @@ public class PTTDownAndUpReceiver extends BroadcastReceiver {
                 || intent.getAction().equals(up[4])
                 || intent.getAction().equals(up[5])
                 || intent.getAction().equals(up[6])
+                || intent.getAction().equals(up[7])
                 ){
             if(!TerminalFactory.getSDK().getParam(Params.IS_EXIT,false)) {
                 TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {

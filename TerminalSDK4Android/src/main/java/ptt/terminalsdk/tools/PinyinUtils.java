@@ -1,4 +1,4 @@
-package cn.vsx.vc.utils;
+package ptt.terminalsdk.tools;
 
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
@@ -7,7 +7,7 @@ import net.sourceforge.pinyin4j.format.HanyuPinyinToneType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinVCharType;
 import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombination;
 
-public class PinyinUtils {
+public class PinyinUtils{
     /**
      * 获得汉语拼音首字母
      *

@@ -94,6 +94,8 @@ public class OnlineService extends Service {
         intentFilter.addAction("SpeakerKeyDispatch");
         intentFilter.addAction("com.ntdj.ptt_down");
         intentFilter.addAction("com.ntdj.ptt_up");
+        intentFilter.addAction("com.chivin.action.MEDIA_PTT_DOWN");
+        intentFilter.addAction("com.chivin.action.MEDIA_PTT_UP");
         registerReceiver(pttDownAndUpReceiver, intentFilter);
     }
 

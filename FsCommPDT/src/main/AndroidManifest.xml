@@ -141,8 +141,8 @@
         <!-- android:windowSoftInputMode="adjustPan" /> -->
         <activity
             android:name=".activity.IndividualNewsActivity"
-            android:configChanges="keyboardHidden|orientation|screenSize"
             android:launchMode="singleTask"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
             android:name=".activity.GroupCallNewsActivity"
@@ -398,7 +398,6 @@
                 <action android:name="cn.vsx.vc.jump.service.JumpService" />
             </intent-filter>
         </service>
-
 
         <receiver
             android:exported="true"

@@ -3,6 +3,7 @@ package cn.vsx.vc.view;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
@@ -430,12 +431,23 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
                 btn_record.setVisibility(GONE);
                 v_edit_line.setVisibility(VISIBLE);
             }else {
-                groupCallNewsEt.setVisibility(GONE);
-                groupCallNewsKeyboard.setBackgroundResource(R.drawable.soft_keyboard);
-                groupCallNewsKeyboard.setVisibility(VISIBLE);
-                btn_ptt.setVisibility(GONE);
-                btn_record.setVisibility(VISIBLE);
-                v_edit_line.setVisibility(GONE);
+//                String machineType = Build.MODEL;
+//                if(TextUtils.equals("S962A",machineType)){
+                    //这个型号的设备很奇怪，非要把edittext显示出来才正常
+                    groupCallNewsEt.setVisibility(VISIBLE);
+                    groupCallNewsKeyboard.setBackgroundResource(R.drawable.recording);
+                    groupCallNewsKeyboard.setVisibility(VISIBLE);
+                    btn_ptt.setVisibility(GONE);
+                    btn_record.setVisibility(GONE);
+                    v_edit_line.setVisibility(VISIBLE);
+//                }else {
+//                    groupCallNewsEt.setVisibility(GONE);
+//                    groupCallNewsKeyboard.setBackgroundResource(R.drawable.soft_keyboard);
+//                    groupCallNewsKeyboard.setVisibility(VISIBLE);
+//                    btn_ptt.setVisibility(GONE);
+//                    btn_record.setVisibility(VISIBLE);
+//                    v_edit_line.setVisibility(GONE);
+//                }
             }
 
             //PDT终端不支持录音消息类型
