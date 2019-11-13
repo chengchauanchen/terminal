@@ -86,7 +86,7 @@ public class PinyinUtils{
                 try {
                     pinyinName += PinyinHelper.toHanyuPinyinStringArray(
                             nameChar[i], defaultFormat)[0].charAt(0);
-                } catch (BadHanyuPinyinOutputFormatCombination e) {
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
             } else {

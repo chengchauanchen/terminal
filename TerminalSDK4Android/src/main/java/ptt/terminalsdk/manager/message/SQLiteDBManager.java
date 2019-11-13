@@ -23,6 +23,7 @@ import cn.vsx.hamster.common.MessageStatus;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.message.ISQLiteDBManager;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileRecord;
 import cn.vsx.hamster.terminalsdk.model.CallRecord;
 import cn.vsx.hamster.terminalsdk.model.Folder;
@@ -30,6 +31,7 @@ import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.model.WarningRecord;
+import cn.vsx.hamster.terminalsdk.tools.MyGsonUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
 import ptt.terminalsdk.tools.PinyinUtils;
@@ -54,6 +56,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     private final static String BIT_STAR_FILE_RECORD = "bitStarFileRecord";
     private final static String WARNING_RECORD = "warningRecord";
     private final static String ALL_GROUP = "allGroup";
+    private final static String ALL_ACCOUNT = "allAccount";
 
     private SQLiteDBManager(Context context) {
         this.context = context;
@@ -1189,7 +1192,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("group_no", group.getNo());
                 values.put("group_name", group.getName());
                 values.put("group_name_py", PinyinUtils.getPingYin(group.getName()));
-                values.put("group_name_first_py",PinyinUtils.converterToFirstSpell(group.getName()));
+//                values.put("group_name_first_py",PinyinUtils.converterToFirstSpell(group.getName()));
                 values.put("department_name", group.getDepartmentName());
                 values.put("temp_group_type", group.getTempGroupType());
                 values.put("business_id", group.getBusinessId());
@@ -1246,5 +1249,64 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             logger.error(e.toString());
         }
         return groups;
+    }
+
+    @Override
+    public void updateAllAccount(List<Account> accounts){
+        logger.info("保存账号数据:"+accounts);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        //开始事务
+        db.beginTransaction();
+        try{
+            db.execSQL("DELETE FROM allAccount");
+            for (Account account : accounts) {
+                ContentValues values = new ContentValues();
+                values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+                values.put("account_id", account.getId());
+                values.put("account_no", account.getNo());
+                values.put("account_name", account.getName());
+                values.put("name_pinyin", PinyinUtils.getPingYin(account.getName()));
+//                values.put("name_first_pinyin", PinyinUtils.converterToFirstSpell(account.getName()));
+                values.put("account_phone", account.getPhone());
+                values.put("dept_id", account.getDeptId());
+                values.put("members", MyGsonUtil.list2String(true,account.getMembers()));
+                values.put("department_name", account.getDepartmentName());
+                db.replace(ALL_ACCOUNT, null, values);
+            }
+            db.setTransactionSuccessful();  //设置事务成功完成
+        }catch(Exception e){
+            logger.error(e);
+        }
+        finally{
+            //结束事务
+            db.endTransaction();
+        }
+    }
+
+    @Override
+    public CopyOnWriteArrayList<Account> getAllAccount(){
+        SQLiteDatabase db = helper.getReadableDatabase();
+        Cursor cursor = db.query(ALL_ACCOUNT, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, "account_no ASC");
+        CopyOnWriteArrayList<Account> accounts = new CopyOnWriteArrayList<>();
+        try{
+            if (cursor != null && cursor.getCount() > 0) {
+                while (cursor.moveToNext()) {
+                    Account account = new Account();
+                    account.setId(cursor.getInt(cursor.getColumnIndex("account_id")));
+                    account.setNo(cursor.getInt(cursor.getColumnIndex("account_no")));
+                    account.setName(cursor.getString(cursor.getColumnIndex("account_name")));
+                    account.setPhone(cursor.getString(cursor.getColumnIndex("account_phone")));
+                    account.setDeptId(cursor.getInt(cursor.getColumnIndex("dept_id")));
+                    account.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
+                    String members = cursor.getString(cursor.getColumnIndex("members"));
+                    account.setMembers(MyGsonUtil.getList(true,members,new ArrayList<>(),Member.class));
+                    accounts.add(account);
+                }
+                cursor.close();
+            }
+        }catch(Exception e){
+            logger.error(e.toString());
+        }
+        return accounts;
     }
 }
