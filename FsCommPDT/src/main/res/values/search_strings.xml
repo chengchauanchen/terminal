@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ABC">ABC</string>
+    <string name="DEF">DEF</string>
+    <string name="GHI">GHI</string>
+    <string name="JKL">JKL</string>
+    <string name="MNO">MNO</string>
+    <string name="PQRS">PQRS</string>
+    <string name="TUV">TUV</string>
+    <string name="WXYZ">WXYZ</string>
+</resources>

@@ -28,6 +28,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -129,6 +130,7 @@ import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.permission.FloatWindowManager;
 import ptt.terminalsdk.tools.PhoneAdapter;
+import ptt.terminalsdk.tools.PinyinUtils;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -1001,6 +1003,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 ////        GetPublicKey.getSignInfo(this);
 //        ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().sendBroadcast(this);
 
+        getPinYin();
     }
 
     @Override
@@ -1728,5 +1731,12 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 HongHuUtils.getBindDevices();
             }
         });
+    }
+
+
+
+    private void getPinYin(){
+        Log.e("pingying", PinyinUtils.getPingYin("邱志文"));
+        Log.e("pingying",PinyinUtils.converterToFirstSpell("邱志文"));
     }
 }

@@ -40,6 +40,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.search.SearchTabFragment;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -81,7 +82,8 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     private BaseFragment lastFragment;
     private List<MyTabLayout.Tab> tabs = new ArrayList<>();
     private NewGroupFragment groupFragmentNew;//群组
-    private NewPoliceAffairsFragment policeAffairsFragment;//警务通
+//    private NewPoliceAffairsFragment policeAffairsFragment;//警务通
+    private SearchTabFragment searchTabFragment;//警务通
 
     public ContactsFragmentNew() {
     }
@@ -149,8 +151,8 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         activity.setOnBackListener(() -> {
             if (groupFragmentNew.isVisible()) {
                 groupFragmentNew.onBack();
-            }else if (policeAffairsFragment.isVisible()) {
-                policeAffairsFragment.onBack();
+            }else if (searchTabFragment.isVisible()) {
+//                searchFragment.onBack();
             }else {
                 ((TerminalFragment) lastFragment).onBack();
             }
@@ -189,35 +191,42 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         FragmentManager childFragmentManager = getChildFragmentManager();
         FragmentTransaction transaction = childFragmentManager.beginTransaction();
         //添加tab
+        titles.add("搜索");
         titles.add("群组");
-        titles.add("警务通");
+
+        searchTabFragment = new SearchTabFragment();
+        fragments.add(searchTabFragment);
+        MyTabLayout.Tab policeTab = tabLayout.newTab();
+        policeTab.setText(titles.get(0));
+        tabLayout.addTab(policeTab);
+        tabs.add(policeTab);
 
         groupFragmentNew = new NewGroupFragment();
         fragments.add(groupFragmentNew);
         MyTabLayout.Tab groupTab = tabLayout.newTab();
 
-        groupTab.setText(titles.get(0));
+        groupTab.setText(titles.get(1));
         tabLayout.addTab(groupTab);
         tabs.add(groupTab);
 
-        policeAffairsFragment = new NewPoliceAffairsFragment();
-        fragments.add(policeAffairsFragment);
-        MyTabLayout.Tab policeTab = tabLayout.newTab();
-        policeTab.setText(titles.get(1));
-        tabLayout.addTab(policeTab);
-        tabs.add(policeTab);
+//        policeAffairsFragment = new NewPoliceAffairsFragment();
+//        fragments.add(policeAffairsFragment);
+//        MyTabLayout.Tab policeTab = tabLayout.newTab();
+//        policeTab.setText(titles.get(1));
+//        tabLayout.addTab(policeTab);
+//        tabs.add(policeTab);
 
 
-        List<TerminalContactTab> terminalContactTabs = TerminalFactory.getSDK().getDataManager().getTerminalContactTabs();
-        for(int i = 0; i < terminalContactTabs.size(); i++){
-            titles.add(terminalContactTabs.get(i).getTabName());
-            MyTabLayout.Tab tab = tabLayout.newTab();
-            tab.setText(terminalContactTabs.get(i).getTabName());
-            tabLayout.addTab(tab);
-            tabs.add(tab);
-            TerminalFragment terminalFragment = TerminalFragment.newInstance(terminalContactTabs.get(i).getTerminalMemberTypes());
-            fragments.add(terminalFragment);
-        }
+//        List<TerminalContactTab> terminalContactTabs = TerminalFactory.getSDK().getDataManager().getTerminalContactTabs();
+//        for(int i = 0; i < terminalContactTabs.size(); i++){
+//            titles.add(terminalContactTabs.get(i).getTabName());
+//            MyTabLayout.Tab tab = tabLayout.newTab();
+//            tab.setText(terminalContactTabs.get(i).getTabName());
+//            tabLayout.addTab(tab);
+//            tabs.add(tab);
+//            TerminalFragment terminalFragment = TerminalFragment.newInstance(terminalContactTabs.get(i).getTerminalMemberTypes());
+//            fragments.add(terminalFragment);
+//        }
 
         int screenWidth=getResources().getDisplayMetrics().widthPixels;
         //滑动模式时最小宽度
@@ -231,8 +240,8 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
             tabLayout.setTabMode(MODE_FIXED);
         }
 
-        transaction.add(R.id.contacts_viewPager, groupFragmentNew).show(groupFragmentNew).commit();
-        lastFragment = groupFragmentNew;
+        transaction.add(R.id.contacts_viewPager, searchTabFragment).show(searchTabFragment).commit();
+        lastFragment = searchTabFragment;
 
         tabLayout.addOnTabSelectedListener(new MyTabLayout.OnTabSelectedListener(){
             @Override

@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import com.alibaba.fastjson.JSONObject;
+import com.pinyinsearch.util.PinyinUtil;
 
 import org.apache.log4j.Logger;
 
@@ -23,6 +24,8 @@ import cn.vsx.hamster.common.MessageStatus;
 import cn.vsx.hamster.common.MessageType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.message.ISQLiteDBManager;
+import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
+import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileRecord;
 import cn.vsx.hamster.terminalsdk.model.CallRecord;
@@ -1218,14 +1221,15 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override
-    public synchronized CopyOnWriteArrayList<Group> getAllGroup(){
+    public synchronized CopyOnWriteArrayList<GroupSearchBean> getAllGroup(){
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(ALL_GROUP, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, "group_no ASC");
-        CopyOnWriteArrayList<Group> groups = new CopyOnWriteArrayList<>();
+        CopyOnWriteArrayList<GroupSearchBean> groups = new CopyOnWriteArrayList<>();
         try{
             if (cursor != null && cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    Group group = new Group();
+
+                    GroupSearchBean group = new GroupSearchBean();
                     group.setId(cursor.getInt(cursor.getColumnIndex("group_id")));
                     group.setNo(cursor.getInt(cursor.getColumnIndex("group_no")));
                     group.setBusinessId(cursor.getString(cursor.getColumnIndex("business_id")));
@@ -1241,6 +1245,13 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     group.setResponseGroupType(cursor.getString(cursor.getColumnIndex("response_group_type")));
                     group.setTempGroupType(cursor.getString(cursor.getColumnIndex("temp_group_type")));
                     group.setUniqueNo(cursor.getLong(cursor.getColumnIndex("unique_no")));
+
+                    //T9搜索
+                    group.getLabelPinyinSearchUnit().setBaseData(group.getName());
+                    PinyinUtil.parse(group.getLabelPinyinSearchUnit());
+                    String sortKey = PinyinUtil.getSortKey(group.getLabelPinyinSearchUnit()).toUpperCase();
+                    group.setSortKey(praseSortKey(sortKey));
+
                     groups.add(group);
                 }
                 cursor.close();
@@ -1284,14 +1295,14 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override
-    public CopyOnWriteArrayList<Account> getAllAccount(){
+    public CopyOnWriteArrayList<MemberSearchBean> getAllAccount(){
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(ALL_ACCOUNT, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, "account_no ASC");
-        CopyOnWriteArrayList<Account> accounts = new CopyOnWriteArrayList<>();
+        CopyOnWriteArrayList<MemberSearchBean> accounts = new CopyOnWriteArrayList<>();
         try{
             if (cursor != null && cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    Account account = new Account();
+                    MemberSearchBean account = new MemberSearchBean();
                     account.setId(cursor.getInt(cursor.getColumnIndex("account_id")));
                     account.setNo(cursor.getInt(cursor.getColumnIndex("account_no")));
                     account.setName(cursor.getString(cursor.getColumnIndex("account_name")));
@@ -1300,6 +1311,12 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     account.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
                     String members = cursor.getString(cursor.getColumnIndex("members"));
                     account.setMembers(MyGsonUtil.getList(true,members,new ArrayList<>(),Member.class));
+
+                    account.getLabelPinyinSearchUnit().setBaseData(account.getName()+account.getNo());
+                    PinyinUtil.parse(account.getLabelPinyinSearchUnit());
+                    String sortKey = PinyinUtil.getSortKey(account.getLabelPinyinSearchUnit()).toUpperCase();
+                    account.setSortKey(praseSortKey(sortKey));
+
                     accounts.add(account);
                 }
                 cursor.close();
@@ -1308,5 +1325,17 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             logger.error(e.toString());
         }
         return accounts;
+    }
+
+
+    private static String praseSortKey(String sortKey) {
+        if (null == sortKey || sortKey.length() <= 0) {
+            return null;
+        }
+        if ((sortKey.charAt(0) >= 'a' && sortKey.charAt(0) <= 'z') || (sortKey.charAt(0) >= 'A' && sortKey.charAt(0) <= 'Z')) {
+            return sortKey;
+        }
+        return String.valueOf(/*QuickAlphabeticBar.DEFAULT_INDEX_CHARACTER*/'#')
+                + sortKey;
     }
 }

@@ -169,6 +169,8 @@ dependencies {
     /*二维码*/
     implementation 'com.github.yuzhiqiang1993:zxing:2.2.8'
     implementation 'com.qw:soulpermission:1.1.6'
+
+
 }
 
 

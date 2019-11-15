@@ -3,17 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/itemblue">
-    
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefreshLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-    
+
         <android.support.v7.widget.RecyclerView
             android:id="@+id/group_recyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:divider="@null" />
     </android.support.v4.widget.SwipeRefreshLayout>
-    
+
 </LinearLayout>

@@ -72,6 +72,8 @@ dependencies {
         exclude module: 'support-v4'
         exclude module: 'appcompat-v7'
     }
+
+
 }
 
 //def定义的变量才会在project中

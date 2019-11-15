@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/itemblue">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/group_recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@null" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/phone"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_60"
+            android:background="@color/phone_edit_bg"
+            android:gravity="center"
+            android:hint="@string/regist_police_no_hint"
+            android:orientation="horizontal"
+            android:maxLength="8"
+            android:textColor="@color/keyboard_text_blue"
+            android:textColorHint="@color/input_phone"
+            android:textSize="@dimen/sp_20" />
+
+        <cn.vsx.vc.search.SearchKeyboardView
+            android:visibility="gone"
+            android:id="@+id/search_keyboard"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        </cn.vsx.vc.search.SearchKeyboardView>
+
+    </LinearLayout>
+
+</LinearLayout>
