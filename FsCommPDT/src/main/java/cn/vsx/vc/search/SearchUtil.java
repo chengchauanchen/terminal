@@ -71,6 +71,10 @@ public class SearchUtil {
         return Observable.fromCallable(() -> TerminalFactory.getSDK().getSQLiteDBManager().getAllAccount());
     }
 
+    public static Observable<List<GroupSearchBean>> getListenedGroup(){
+        return Observable.fromCallable(()-> TerminalFactory.getSDK().getConfigManager().getMonitorSearchGroup());
+    }
+
     /**
      * 组 拼音搜索Observable
      *

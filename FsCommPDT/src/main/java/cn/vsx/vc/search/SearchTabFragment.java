@@ -22,7 +22,6 @@ import cn.vsx.vc.fragment.BaseFragment;
 import cn.vsx.vc.search.SearchKeyboardView.OnT9TelephoneDialpadView;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -32,6 +31,7 @@ public class SearchTabFragment extends BaseFragment{
 
     private List<GroupSearchBean> groupDatas;
     private List<MemberSearchBean> memberDatas;
+    private List<GroupSearchBean> ListenedGroupDatas;
     private TextView phone;
     private SearchKeyboardView search_keyboard;
     private RecyclerView group_recyclerView;
@@ -94,14 +94,14 @@ public class SearchTabFragment extends BaseFragment{
 
     @Override
     public void initListener(){
-//        TerminalFactory.getSDK().registReceiveHandler(receiveGetAllGroupHandler);
+        TerminalFactory.getSDK().registReceiveHandler(receiveGetAllGroupHandler);
 //        TerminalFactory.getSDK().registReceiveHandler(receiveGetAllAccountHandler);
     }
 
     @Override
     public void onDestroyView(){
         super.onDestroyView();
-//        TerminalFactory.getSDK().unregistReceiveHandler(receiveGetAllGroupHandler);
+        TerminalFactory.getSDK().unregistReceiveHandler(receiveGetAllGroupHandler);
 //        TerminalFactory.getSDK().unregistReceiveHandler(receiveGetAllAccountHandler);
     }
 
@@ -110,6 +110,7 @@ public class SearchTabFragment extends BaseFragment{
         @Override
         public void handler(List<Group> groups) {
             logger.info("SearchTabFragment获取组数据:"+groups);
+            getListenedGroup();
 //            groupDatas = groups;
         }
     };
@@ -221,6 +222,30 @@ public class SearchTabFragment extends BaseFragment{
                     protected void onSuccess(List<MemberSearchBean> allRowSize) {
                         logger.info(allRowSize);
                         memberDatas = allRowSize;
+                    }
+                });
+    }
+
+    private void getListenedGroup(){
+        SearchUtil.getListenedGroup()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CommonObserver<List<GroupSearchBean>>(){
+                    @Override
+                    protected void onError(String errorMsg){
+                    }
+
+                    @Override
+                    protected void onSuccess(List<GroupSearchBean> groupSearchBeans){
+                        logger.info("监听组："+groupSearchBeans);
+                        ListenedGroupDatas = groupSearchBeans;
+                        datas.clear();
+                        if(ListenedGroupDatas!=null && ListenedGroupDatas.size()>0){
+                            SearchTitleBean titleBean = new SearchTitleBean("监听组");
+                            datas.add(titleBean);
+                            datas.addAll(ListenedGroupDatas);
+                            searchAdapter.notifyDataSetChanged();
+                        }
                     }
                 });
     }

@@ -1,6 +1,5 @@
 package cn.vsx.vc.search;
 
-
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +11,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.blankj.utilcode.util.ToastUtils;
+
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
@@ -22,8 +23,10 @@ import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
+import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.UserInfoActivity;
+import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -141,7 +144,37 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
      * @param holder
      */
     private void bindMonitorGroup(GroupSearchBean data, GroupViewHolder holder) {
+        ViewUtil.showTextNormal(holder.tvName, data.getName());
+        holder.tv_department_name.setText(data.getDepartmentName());
+        if(TextUtils.equals(data.getResponseGroupType(),ResponseGroupType.RESPONSE_TRUE.name())){
+            holder.iv_response_group_icon.setVisibility(View.VISIBLE);
+        }else {
+            holder.iv_response_group_icon.setVisibility(View.GONE);
+        }
 
+        holder.tv_change_group.setOnClickListener(v -> {
+            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) != data.getNo()){
+                TerminalFactory.getSDK().getGroupManager().changeGroup(data.getNo());
+            }
+        });
+        holder.ivMessage.setOnClickListener(v -> {
+            Intent intent = new Intent(mContext, GroupCallNewsActivity.class);
+            intent.putExtra("isGroup", true);
+            intent.putExtra("uniqueNo",data.getUniqueNo());
+            intent.putExtra("userId", data.getNo());//组id
+            intent.putExtra("userName", data.getName());
+            intent.putExtra("speakingId",data.getId());
+            intent.putExtra("speakingName",data.getName());
+            mContext.startActivity(intent);
+        });
+
+        holder.ivMonitor.setOnClickListener(v -> {
+            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == data.getNo()){
+                ToastUtils.showShort(R.string.current_group_cannot_cancel_monitor);
+            }else {
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,data.getNo());
+            }
+        });
     }
 
     /**
@@ -163,6 +196,36 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
                 break;
         }
         holder.tv_department_name.setText(data.getDepartmentName());
+
+        if(TextUtils.equals(data.getResponseGroupType(),ResponseGroupType.RESPONSE_TRUE.name())){
+            holder.iv_response_group_icon.setVisibility(View.VISIBLE);
+        }else {
+            holder.iv_response_group_icon.setVisibility(View.GONE);
+        }
+
+        holder.tv_change_group.setOnClickListener(v -> {
+            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) != data.getNo()){
+                TerminalFactory.getSDK().getGroupManager().changeGroup(data.getNo());
+            }
+        });
+        holder.ivMessage.setOnClickListener(v -> {
+            Intent intent = new Intent(mContext, GroupCallNewsActivity.class);
+            intent.putExtra("isGroup", true);
+            intent.putExtra("uniqueNo",data.getUniqueNo());
+            intent.putExtra("userId", data.getNo());//组id
+            intent.putExtra("userName", data.getName());
+            intent.putExtra("speakingId",data.getId());
+            intent.putExtra("speakingName",data.getName());
+            mContext.startActivity(intent);
+        });
+
+        holder.ivMonitor.setOnClickListener(v -> {
+            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == data.getNo()){
+                ToastUtils.showShort(R.string.current_group_cannot_cancel_monitor);
+            }else {
+                TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,data.getNo());
+            }
+        });
     }
 
     /**
