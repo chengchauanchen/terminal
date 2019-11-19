@@ -580,7 +580,9 @@ public class PhonePushService extends BaseService{
     private View.OnTouchListener svOnTouchListener = (v,event)->{
 
         if (event.getPointerCount() == 1) {
-            handleFocus(mMediaStream.getCamera());
+            if(mMediaStream != null){
+                handleFocus(mMediaStream.getCamera());
+            }
         } else {
             switch (event.getAction() & MotionEvent.ACTION_MASK) {
                 case MotionEvent.ACTION_POINTER_DOWN:

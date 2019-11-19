@@ -1071,7 +1071,8 @@ public class ReceiveHandlerService extends Service{
         //推送失败
         if(message.getResultCode() == SignalServerErrorCode.WITHOUT_LIVING.getErrorCode()){
             //如果是自己上报的话需要向信令发起上报
-            if(message.getLiveUniqueNo() == TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L)){
+            if(message.getLiveUniqueNo() == TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L) &&
+                    TerminalFactory.getSDK().getLiveManager().getVideoLivePushingStateMachine().getCurrentState() == VideoLivePushingState.PUSHING){
                 TerminalFactory.getSDK().getLiveManager().requestMyselfLive("","");
             }else {
                 ToastUtils.showShort(message.getResultDesc());
