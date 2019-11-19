@@ -11,7 +11,7 @@ public class HandleIdUtil {
         String account = "";
         String s = memberId +"";
 
-        if (!Util.isEmpty(s) && s.length() > 2 && "88".equals(s.substring(0, 2))) {
+        if (!Util.isEmpty(s) && s.length() > 2 && ("88".equals(s.substring(0, 2))||"86".equals(s.substring(0, 2))|| "87".equals(s.substring(0, 2)))) {
             account = s.substring(2);
         }else {
             account = s;

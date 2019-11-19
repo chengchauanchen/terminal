@@ -45,5 +45,15 @@
         android:layout_marginRight="@dimen/dp_30"
         android:layout_marginBottom="@dimen/dp_30"
         android:background="@drawable/dial"
-        android:visibility="visible" />
+        android:visibility="gone" />
+
+    <cn.vsx.vc.view.ProgressView
+        android:visibility="gone"
+        android:id="@+id/progress_view"
+        android:layout_centerInParent="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    </cn.vsx.vc.view.ProgressView>
+
 </RelativeLayout>

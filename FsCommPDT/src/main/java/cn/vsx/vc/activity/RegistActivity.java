@@ -837,8 +837,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             }
         }
         apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-        //市局包隐藏模拟警员（武汉市公安局、襄阳、天津）
-        if (ApkUtil.isAppStore() || AuthManagerTwo.XIANGYANG.equals(apkType)) {
+        //市局包隐藏模拟警员（武汉市公安局、襄阳、天津、应急管理厅）
+        if (ApkUtil.isAppStore() || AuthManagerTwo.XIANGYANG.equals(apkType)|| AuthManagerTwo.YINGJIGUANLITING.equals(apkType)) {
             btnAddMember.setVisibility(View.GONE);
             btn_idcard_login.setVisibility(View.GONE);
         }

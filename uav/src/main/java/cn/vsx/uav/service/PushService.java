@@ -206,7 +206,7 @@ public class PushService extends BaseService implements YuvPlayer.YuvDataListene
     public void startAircraftPush(String ip,String port,String id){
         if(null != airCraftMediaStream){
             airCraftMediaStream.startStream(ip, port, id, pushCallback);
-            String url = String.format("rtsp://%s:%s/%s.sdp", ip, port, id);
+            String url = String.format("rtsp://%s:%s/%s", ip, port, id);
             logger.info(TAG+"推送地址：" + url);
         }
     }

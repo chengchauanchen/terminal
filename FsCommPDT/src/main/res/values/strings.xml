@@ -16,6 +16,7 @@
     <string name="regist_org_hint">请输入注册码</string>
     <string name="regist_name_hint">请输入姓名</string>
     <string name="regist_police_no_hint">请输入警号</string>
+    <string name="search_hint">搜索</string>
     <string name="regist_police_name_hint">请输入警员名称</string>
     <string name="regist_department_number_hint">请输入部门编号</string>
     <string name="regist_department_name_hint">请输入部门名称</string>

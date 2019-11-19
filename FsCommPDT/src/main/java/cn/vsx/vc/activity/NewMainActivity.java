@@ -286,11 +286,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 NfcUtil.writeData();
             }
             //切到对讲页面，前提是在该页面做的切组操作
-            if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
-                if(contactsFragmentNew!=null&&currentCheckedId == R.id.bv_group_contacts && !contactsFragmentNew.getHiddenState()){
-                    myHandler.post(() -> setTabSelection(R.id.bv_talk_back));
-                }
-            }
+//            if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
+//                if(contactsFragmentNew!=null&&currentCheckedId == R.id.bv_group_contacts && !contactsFragmentNew.getHiddenState()){
+//                    myHandler.post(() -> setTabSelection(R.id.bv_talk_back));
+//                }
+//            }
         }
     };
 

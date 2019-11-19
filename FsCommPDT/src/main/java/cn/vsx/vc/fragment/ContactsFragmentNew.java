@@ -13,19 +13,27 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.allen.library.observer.CommonObserver;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.TempGroupType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
+import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
+import cn.vsx.hamster.terminalsdk.model.Account;
+import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.TerminalContactTab;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllAccountHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupByNoHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
@@ -40,13 +48,24 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.search.CustomException;
 import cn.vsx.vc.search.SearchTabFragment;
+import cn.vsx.vc.search.SearchTabGroupFragment;
+import cn.vsx.vc.search.SearchUtil;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.DialPopupwindow;
 import cn.vsx.vc.view.MyTabLayout.MyTabLayout;
+import cn.vsx.vc.view.ProgressView;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.BiFunction;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
@@ -68,7 +87,6 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     ImageView voice_image;
 
 
-
     ImageButton imgbtn_dial;
 
     private Fragment currentFragment;
@@ -81,9 +99,12 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     private List<BaseFragment> fragments = new ArrayList<>();
     private BaseFragment lastFragment;
     private List<MyTabLayout.Tab> tabs = new ArrayList<>();
-    private NewGroupFragment groupFragmentNew;//群组
-//    private NewPoliceAffairsFragment policeAffairsFragment;//警务通
+//    private NewGroupFragment groupFragmentNew;//群组
+    private SearchTabGroupFragment groupFragmentNew;//群组
+    //    private NewPoliceAffairsFragment policeAffairsFragment;//警务通
     private SearchTabFragment searchTabFragment;//警务通
+
+    private ProgressView progress_view;
 
     public ContactsFragmentNew() {
     }
@@ -125,6 +146,9 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                 soundOff = false;
             }
         });
+
+        //通信录缓存 等待框
+        progress_view = mRootView.findViewById(R.id.progress_view);
     }
 
 
@@ -150,10 +174,10 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
         activity.setOnBackListener(() -> {
             if (groupFragmentNew.isVisible()) {
-                groupFragmentNew.onBack();
-            }else if (searchTabFragment.isVisible()) {
+//                groupFragmentNew.onBack();
+            } else if (searchTabFragment.isVisible()) {
 //                searchFragment.onBack();
-            }else {
+            } else {
                 ((TerminalFragment) lastFragment).onBack();
             }
         });
@@ -201,9 +225,13 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         tabLayout.addTab(policeTab);
         tabs.add(policeTab);
 
-        groupFragmentNew = new NewGroupFragment();
+        groupFragmentNew = new SearchTabGroupFragment();
         fragments.add(groupFragmentNew);
         MyTabLayout.Tab groupTab = tabLayout.newTab();
+
+//        groupFragmentNew = new NewGroupFragment();
+//        fragments.add(groupFragmentNew);
+//        MyTabLayout.Tab groupTab = tabLayout.newTab();
 
         groupTab.setText(titles.get(1));
         tabLayout.addTab(groupTab);
@@ -228,14 +256,14 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 //            fragments.add(terminalFragment);
 //        }
 
-        int screenWidth=getResources().getDisplayMetrics().widthPixels;
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
         //滑动模式时最小宽度
         int scrollableTabMinWidth = DensityUtil.dip2px(MyApplication.instance, 72);
         int tabCount = screenWidth / scrollableTabMinWidth;
-        if(tabs.size()>tabCount){
+        if (tabs.size() > tabCount) {
             tabLayout.setTabMode(MODE_SCROLLABLE);
             tabLayout.setTabGravity(MyTabLayout.GRAVITY_CENTER);
-        }else {
+        } else {
             tabLayout.setTabGravity(MyTabLayout.GRAVITY_FILL);
             tabLayout.setTabMode(MODE_FIXED);
         }
@@ -243,26 +271,26 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
         transaction.add(R.id.contacts_viewPager, searchTabFragment).show(searchTabFragment).commit();
         lastFragment = searchTabFragment;
 
-        tabLayout.addOnTabSelectedListener(new MyTabLayout.OnTabSelectedListener(){
+        tabLayout.addOnTabSelectedListener(new MyTabLayout.OnTabSelectedListener() {
             @Override
-            public void onTabSelected(MyTabLayout.Tab tab){
+            public void onTabSelected(MyTabLayout.Tab tab) {
                 logger.info("onTabSelected");
                 int position = tab.getPosition();
-                if(position == 0){
+                if (position == 0) {
                     imgbtn_dial.setVisibility(View.GONE);
-                }else {
-                    imgbtn_dial.setVisibility(View.VISIBLE);
+                } else {
+//                    imgbtn_dial.setVisibility(View.VISIBLE);
                 }
                 BaseFragment currentFrgment = fragments.get(position);
-                if(lastFragment !=currentFrgment ){
+                if (lastFragment != currentFrgment) {
                     tab.setSelected(true);
-                    switchFragment(lastFragment,currentFrgment);
+                    switchFragment(lastFragment, currentFrgment);
                     lastFragment = currentFrgment;
                 }
             }
 
             @Override
-            public void onTabUnselected(MyTabLayout.Tab tab){
+            public void onTabUnselected(MyTabLayout.Tab tab) {
                 tab.setSelected(false);
                 logger.info("onTabUnselected");
             }
@@ -273,6 +301,8 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
             }
         });
 
+        //同步通讯录数据
+        synchronousData();
     }
 
     private void setVideoIcon() {
@@ -313,7 +343,7 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
     };
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = new ReceiveGroupCallIncommingHandler() {
         @Override
-        public void handler(int memberId, String memberName, int groupId, String groupName,CallMode currentCallMode, long uniqueNo) {
+        public void handler(int memberId, String memberName, int groupId, String groupName, CallMode currentCallMode, long uniqueNo) {
             if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())) {
                 mHandler.post(() -> {
                     setting_group_name.setText(memberName);
@@ -438,10 +468,102 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
 
     /**
      * 获取是否是显示或者隐藏的状态
+     *
      * @return
      */
-    public boolean getHiddenState(){
-        return !(fragments.get(0)!=null && !fragments.get(0).isHidden());
+    public boolean getHiddenState() {
+        return !(fragments.get(0) != null && !fragments.get(0).isHidden());
+    }
+
+    /*---------------------------同步通讯录数据--------------------------------*/
+
+    boolean isShowProgressView = false;
+
+    /**
+     * 显示进度框
+     */
+    private void showProgressView() {
+        logger.info("正在更新通讯录数据");
+
+        if (!isShowProgressView) {
+            progress_view.setVisibility(View.VISIBLE);
+        }
+        isShowProgressView = true;
+    }
+
+    /**
+     * 隐藏进度框
+     */
+    private void hideProgressView() {
+        logger.info("更新通讯录数据 完成");
+
+        if (isShowProgressView) {
+            progress_view.setVisibility(View.GONE);
+        }
+        isShowProgressView = false;
+    }
+
+    private void synchronousData() {
+        long start = System.currentTimeMillis();
+
+        Observable.zip(SearchUtil.getAllGroupFirst(), SearchUtil.getAllAccountFirst(), new BiFunction<List<GroupSearchBean>, List<MemberSearchBean>, List<Object>>() {
+            @Override
+            public List<Object> apply(List<GroupSearchBean> groupSearchBeans, List<MemberSearchBean> memberSearchBeans) throws Exception {
+                List<Object> list = new ArrayList<>();
+                if (groupSearchBeans == null || groupSearchBeans.size() == 0) {
+                    logger.info("更新通讯录组数据 没有缓存正在网络同步");
+                }
+                if (memberSearchBeans == null || memberSearchBeans.size() == 0) {
+                    logger.info("更新通讯录人数据 没有缓存正在网络同步");
+                }
+                list.addAll(groupSearchBeans);
+                list.addAll(memberSearchBeans);
+                return list;
+            }
+        }).flatMap(new Function<List<Object>, ObservableSource<Boolean>>() {
+            @Override
+            public ObservableSource<Boolean> apply(List<Object> objects) throws Exception {
+                long end = System.currentTimeMillis();
+                logger.info("获取数据库数据所耗时间："+(end-start));
+                if(objects.size()==0){
+                    return SearchUtil.syncAllData();
+                }else{
+                    throw new CustomException("有缓存数据，不需要通络同步");
+                }
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CommonObserver<Boolean>() {
+                    @Override
+                    public void doOnSubscribe(Disposable d) {
+                        super.doOnSubscribe(d);
+                        showProgressView();
+                    }
+
+                    @Override
+                    protected String setTag() {
+                        return "";
+                    }
+
+                    @Override
+                    protected boolean isHideToast() {
+                        return true;
+                    }
+
+                    @Override
+                    protected void onError(String errorMsg) {
+                        hideProgressView();
+                        logger.info("更新通讯录组数据 异常："+errorMsg);
+                    }
+
+                    @Override
+                    protected void onSuccess(Boolean allRowSize) {
+                        logger.info(allRowSize);
+                        if (allRowSize) {
+                            hideProgressView();
+                        }
+                    }
+                });
     }
 
 }

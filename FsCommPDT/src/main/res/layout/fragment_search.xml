@@ -17,18 +17,34 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="vertical">
-        <TextView
-            android:id="@+id/phone"
+
+        <LinearLayout
+            android:gravity="center_vertical"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_60"
-            android:background="@color/phone_edit_bg"
-            android:gravity="center"
-            android:hint="@string/regist_police_no_hint"
-            android:orientation="horizontal"
-            android:maxLength="8"
-            android:textColor="@color/keyboard_text_blue"
-            android:textColorHint="@color/input_phone"
-            android:textSize="@dimen/sp_20" />
+            android:layout_height="match_parent">
+            <TextView
+                android:paddingLeft="10dp"
+                android:id="@+id/phone"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="@dimen/dp_60"
+                android:background="@color/phone_edit_bg"
+                android:gravity="center_vertical"
+                android:hint="@string/search_hint"
+                android:orientation="horizontal"
+                android:maxLength="8"
+                android:textColor="@color/keyboard_text_blue"
+                android:textColorHint="@color/input_phone"
+                android:textSize="@dimen/sp_20" />
+            <ImageView
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:src="@drawable/ico_bindingcar_folder"/>
+
+        </LinearLayout>
+
+
 
         <cn.vsx.vc.search.SearchKeyboardView
             android:visibility="gone"

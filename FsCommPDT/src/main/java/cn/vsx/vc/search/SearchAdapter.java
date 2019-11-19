@@ -1,5 +1,7 @@
 package cn.vsx.vc.search;
 
+
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
@@ -12,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.blankj.utilcode.util.ToastUtils;
+import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.List;
 
@@ -20,14 +23,23 @@ import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
 import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
+import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.model.Member;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
 import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.UserInfoActivity;
+import cn.vsx.vc.activity.VoipPhoneActivity;
+import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.receiveHandle.ReceiverMonitorViewClickHandler;
+import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.BitmapUtil;
+import cn.vsx.vc.utils.CallPhoneUtil;
+import cn.vsx.vc.utils.HandleIdUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -106,7 +118,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             case MONITOR_GROUP:
                 GroupSearchBean data2 = (GroupSearchBean) mDatas.get(position);
                 GroupViewHolder holder2 = (GroupViewHolder) viewHolder;
-                bindMonitorGroup(data2, holder2);
+                bindGroup(data2, holder2);
                 break;
             case GROUP:
                 GroupSearchBean data3 = (GroupSearchBean) mDatas.get(position);
@@ -138,46 +150,6 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     /**
-     * 监听组
-     *
-     * @param data
-     * @param holder
-     */
-    private void bindMonitorGroup(GroupSearchBean data, GroupViewHolder holder) {
-        ViewUtil.showTextNormal(holder.tvName, data.getName());
-        holder.tv_department_name.setText(data.getDepartmentName());
-        if(TextUtils.equals(data.getResponseGroupType(),ResponseGroupType.RESPONSE_TRUE.name())){
-            holder.iv_response_group_icon.setVisibility(View.VISIBLE);
-        }else {
-            holder.iv_response_group_icon.setVisibility(View.GONE);
-        }
-
-        holder.tv_change_group.setOnClickListener(v -> {
-            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) != data.getNo()){
-                TerminalFactory.getSDK().getGroupManager().changeGroup(data.getNo());
-            }
-        });
-        holder.ivMessage.setOnClickListener(v -> {
-            Intent intent = new Intent(mContext, GroupCallNewsActivity.class);
-            intent.putExtra("isGroup", true);
-            intent.putExtra("uniqueNo",data.getUniqueNo());
-            intent.putExtra("userId", data.getNo());//组id
-            intent.putExtra("userName", data.getName());
-            intent.putExtra("speakingId",data.getId());
-            intent.putExtra("speakingName",data.getName());
-            mContext.startActivity(intent);
-        });
-
-        holder.ivMonitor.setOnClickListener(v -> {
-            if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == data.getNo()){
-                ToastUtils.showShort(R.string.current_group_cannot_cancel_monitor);
-            }else {
-                TerminalFactory.getSDK().notifyReceiveHandler(ReceiverMonitorViewClickHandler.class,data.getNo());
-            }
-        });
-    }
-
-    /**
      * 组
      *
      * @param data
@@ -201,6 +173,20 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             holder.iv_response_group_icon.setVisibility(View.VISIBLE);
         }else {
             holder.iv_response_group_icon.setVisibility(View.GONE);
+        }
+
+        if(checkIsMonitorGroup(data)){
+            holder.ivMonitor.setImageResource(R.drawable.monitor_open);
+        }else {
+            holder.ivMonitor.setImageResource(R.drawable.monitor_close_blue);
+        }
+
+        if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == data.getNo()){
+            holder.tv_change_group.setVisibility(View.GONE);
+            holder.iv_current_group.setVisibility(View.VISIBLE);
+        }else {
+            holder.tv_change_group.setVisibility(View.VISIBLE);
+            holder.iv_current_group.setVisibility(View.INVISIBLE);
         }
 
         holder.tv_change_group.setOnClickListener(v -> {
@@ -244,23 +230,24 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         }
         //userViewHolder.tvId.setText(account.getNo() + "");
 
-        ViewUtil.showTextHighlight(userViewHolder.tvId, account.getNo() + "", account.getMatchKeywords().toString());
+        String no = HandleIdUtil.handleId(account.getNo());//去掉88 86
+        ViewUtil.showTextHighlight(userViewHolder.tvId, no + "", account.getMatchKeywords().toString());
 
         userViewHolder.shoutai_tv_department.setText(account.getDepartmentName());
 
         userViewHolder.llDialTo.setOnClickListener(view -> {
-            //callPhone(account);
+            callPhone(account);
         });
         userViewHolder.llMessageTo.setOnClickListener(view -> IndividualNewsActivity.startCurrentActivity(mContext, account.getNo(), account.getName(),0));
         userViewHolder.llCallTo.setOnClickListener(view -> {
-            //indivudualCall(account);
+            indivudualCall(account);
         });
         //请求图像
         userViewHolder.llLiveTo.setOnClickListener(view -> {
             if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_ASK.name())){
                 ToastUtil.showToast(mContext, mContext.getString(R.string.text_has_no_image_request_authority));
             }else{
-                //pullStream(account);
+                pullStream(account);
             }
         });
         //个人信息页面
@@ -277,7 +264,8 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 //                userViewHolder.llMessageTo.setVisibility(View.GONE);
 //                userViewHolder.llCallTo.setVisibility(View.GONE);
         }else{
-            userViewHolder.llDialTo.setVisibility(View.VISIBLE);
+            userViewHolder.llDialTo.setVisibility(View.GONE);
+//            userViewHolder.llDialTo.setVisibility(View.VISIBLE);
 //                userViewHolder.llMessageTo.setVisibility(View.VISIBLE);
 //                userViewHolder.llCallTo.setVisibility(View.VISIBLE);
         }
@@ -297,6 +285,57 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     public int getItemCount() {
         return mDatas.size();
     }
+
+    /*------------------------------------*/
+    private void callPhone(Account account){
+        if(TextUtils.isEmpty(account.getPhone())){
+            ToastUtils.showShort(R.string.text_has_no_member_phone_number);
+            return;
+        }
+        new ChooseDevicesDialog(mContext, ChooseDevicesDialog.TYPE_CALL_PHONE, account, (dialog, member) -> {
+            if(member.getUniqueNo() == 0){
+                //普通电话
+                CallPhoneUtil.callPhone((Activity) mContext, account.getPhone());
+            }else{
+                if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS, false)){
+                    Intent intent = new Intent(mContext, VoipPhoneActivity.class);
+                    intent.putExtra("member", member);
+                    mContext.startActivity(intent);
+                }else{
+                    ToastUtil.showToast(mContext, mContext.getString(R.string.text_voip_regist_fail_please_check_server_configure));
+                }
+            }
+            dialog.dismiss();
+        }).showDialog();
+    }
+
+    private void indivudualCall(Account account){
+        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())){
+            ToastUtil.showToast(mContext, mContext.getString(R.string.text_no_call_permission));
+        }else{
+            new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_CALL_PRIVATE, account, (dialog, member) -> {
+                activeIndividualCall(member);
+                dialog.dismiss();
+            }).showDialog();
+        }
+    }
+    private void activeIndividualCall(Member member){
+        MyApplication.instance.isCallState = true;
+        boolean network = MyTerminalFactory.getSDK().hasNetwork();
+        if(network){
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiveCurrentGroupIndividualCallHandler.class, member);
+        }else{
+            ToastUtil.showToast(mContext, mContext.getString(R.string.text_network_connection_abnormal_please_check_the_network));
+        }
+    }
+
+    private void pullStream(Account account){
+        new ChooseDevicesDialog(mContext,ChooseDevicesDialog.TYPE_PULL_LIVE, account, (dialog, member) -> {
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverRequestVideoHandler.class, member);
+            dialog.dismiss();
+        }).showDialog();
+    }
+
 
     /*--------ViewHolder----------*/
 

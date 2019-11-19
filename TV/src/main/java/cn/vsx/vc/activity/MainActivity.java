@@ -1338,7 +1338,7 @@ public class MainActivity extends BaseActivity {
                 jsonObject.put(JsonParam.LIVER, bean.getData().getLiveUniqueNo() + "_" + bean.getData().getLiveName());
                 jsonObject.put(JsonParam.LIVERNO, bean.getData().getLiveNo());
                 String rtspUrl = "rtsp://" + TerminalFactory.getSDK().getParam(Params.MEDIA_SERVER_IP, "") + ":" + TerminalFactory.getSDK().getParam(Params.MEDIA_SERVER_PORT, 0) + "/" +
-                        bean.getData().getLiveUniqueNo() + "_" + bean.getData().getCallId() + ".sdp";
+                        bean.getData().getLiveUniqueNo() + "_" + bean.getData().getCallId() + "";
                 jsonObject.put(JsonParam.EASYDARWIN_RTSP_URL, rtspUrl);
                 builder.setMessageBody(jsonObject.toString());
             } else if (type == RotationImageType.OuterGB28181.getCode()) {

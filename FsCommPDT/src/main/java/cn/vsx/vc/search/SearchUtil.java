@@ -4,7 +4,6 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.pinyinsearch.model.PinyinSearchUnit;
-import com.pinyinsearch.util.PinyinUtil;
 import com.pinyinsearch.util.T9Util;
 
 import java.util.ArrayList;
@@ -21,58 +20,117 @@ import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
+import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 public class SearchUtil {
 
-    private void searchGroupZip(String keyword) {
-        getDbAllGroup4()
-                .map(groupMap -> {
-                    List<Observable<List<GroupSearchBean>>> observables = new ArrayList<>();
-                    for (String key : groupMap.keySet()) {//keySet获取map集合key的集合  然后在遍历key即可
-                        List<GroupSearchBean> value = groupMap.get(key);//
-                        observables.add(searchObservable(keyword,value));
+    public static Observable<List<Object>> searchDbAllData(String curCharacter) {
+        return Observable.zip(SearchUtil.getDbAllGroup(), SearchUtil.getDbAllAccount(), new BiFunction<List<GroupSearchBean>, List<MemberSearchBean>, Map<String, Object>>() {
+            @Override
+            public Map<String, Object> apply(List<GroupSearchBean> groupSearchBeans, List<MemberSearchBean> memberSearchBeans) throws Exception {
+                Map<String, Object> map = new HashMap();
+                if (groupSearchBeans == null || groupSearchBeans.size() == 0) {
+                    Log.i("SearchUtil", "更新通讯录组数据 没有缓存正在网络同步");
+                }
+                if (memberSearchBeans == null || memberSearchBeans.size() == 0) {
+                    Log.i("SearchUtil", "更新通讯录人数据 没有缓存正在网络同步");
+                }
+                map.put("group", groupSearchBeans);
+                map.put("Member", memberSearchBeans);
+                return map;
+            }
+        }).flatMap(new Function<Map<String, Object>, ObservableSource<List<Object>>>() {
+            @Override
+            public ObservableSource<List<Object>> apply(Map<String, Object> map) throws Exception {
+                List<GroupSearchBean> group = (List<GroupSearchBean>) map.get("group");
+                List<MemberSearchBean> members = (List<MemberSearchBean>) map.get("Member");
+                return searcAll(curCharacter, group, members);
+            }
+        });
+    }
+
+
+    public static Observable<List<Object>> searcAll(String curCharacter, List<GroupSearchBean> groupDatas, List<MemberSearchBean> memberDatas) {
+        return Observable.zip(SearchUtil.searchObservable(curCharacter, groupDatas),
+                SearchUtil.searchMemberObservable(curCharacter, memberDatas),
+                (groupSearchBeans, memberSearchBeans) -> {
+                    List<Object> datas = new ArrayList<>();
+                    if (groupSearchBeans != null && groupSearchBeans.size() > 0) {
+                        SearchTitleBean titleBean = new SearchTitleBean("组");
+                        datas.add(titleBean);
+                        datas.addAll(groupSearchBeans);
                     }
-                    return observables;
-                });
 
-
-//        Observable.zipIterable()
-    }
-
-
-    private Observable<Map<String, List<GroupSearchBean>>> getDbAllGroup4() {
-        return SearchUtil.getDbAllGroup()
-                .map(groupSearchBeans -> {
-                    Map<String, List<GroupSearchBean>> stringListMap = splitList(groupSearchBeans, 4);
-                    return stringListMap;
-                });
-    }
-
-    private Observable<Map<String, List<MemberSearchBean>>> getAllAccount4() {
-        return SearchUtil.getDbAllAccount()
-                .map(memberSearchBeans -> {
-                    Map<String, List<MemberSearchBean>> stringListMap = splitList(memberSearchBeans, 4);
-                    return stringListMap;
+                    if (memberSearchBeans != null && memberSearchBeans.size() > 0) {
+                        SearchTitleBean titleBean2 = new SearchTitleBean("工作人员");
+                        datas.add(titleBean2);
+                        datas.addAll(memberSearchBeans);
+                    }
+                    return datas;
                 });
     }
 
 
     /*----------------人-----------------------*/
 
+    public static Observable<Boolean> syncAllData() {
+        return Observable.zip(getGroupsAllObservable(), getDeptAllDataObservable(), new BiFunction<List<Group>, List<Account>, Boolean>() {
+            @Override
+            public Boolean apply(List<Group> groups, List<Account> accounts) throws Exception {
+                if (groups != null && accounts != null) {
+                    Log.i("SearchUtil", "更新通讯录组数据+人数据 网络同步完成:"+groups.size()+","+accounts.size());
+                    return true;
+                } else {
+                    Log.i("SearchUtil", "更新通讯录组数据+人数据 网络同步失败");
+                    return false;
+                }
+            }
+        });
+    }
 
     /**
-     * 获取本地数据库 人数据
+     * 网络同步组数据
      *
      * @return
      */
-    public static Observable<List<MemberSearchBean>> getDbAllAccount() {
-        return Observable.fromCallable(() -> TerminalFactory.getSDK().getSQLiteDBManager().getAllAccount());
+    public static Observable<List<Group>> getGroupsAllObservable() {
+        return Observable.fromCallable(new Callable<List<Group>>() {
+            @Override
+            public List<Group> call() throws Exception {
+                Log.i("SearchUtil", "更新通讯录组数据 没有缓存正在网络同步");
+                return TerminalFactory.getSDK().getConfigManager().getGroupsAllSync(false);
+            }
+        }).subscribeOn(Schedulers.io());
     }
+
+    /**
+     * 网络同步人数据
+     *
+     * @return
+     */
+    public static Observable<List<Account>> getDeptAllDataObservable() {
+        return Observable.fromCallable(new Callable<List<Account>>() {
+            @Override
+            public List<Account> call() throws Exception {
+                Log.i("SearchUtil", "更新通讯录人数据 没有缓存正在网络同步");
+                return TerminalFactory.getSDK().getConfigManager().getDeptAllDataSync(false);
+            }
+        }).subscribeOn(Schedulers.io());
+    }
+
 
     public static Observable<List<GroupSearchBean>> getListenedGroup(){
         return Observable.fromCallable(()-> TerminalFactory.getSDK().getConfigManager().getMonitorSearchGroup());
+    }
+
+    /**
+     * 获取监听组
+     * @return
+     */
+    public static Observable<List<GroupSearchBean>> getMonitorGroupList(){
+        return Observable.fromCallable(()-> TerminalFactory.getSDK().getConfigManager().getMonitorGroupList());
     }
 
     /**
@@ -84,11 +142,8 @@ public class SearchUtil {
      */
     public static Observable<List<MemberSearchBean>> searchMemberObservable(String keyword, List<MemberSearchBean> accounts) {
         return Observable.fromCallable(() -> {
-            long sortStartTime = System.currentTimeMillis();
             List<MemberSearchBean> search = SearchUtil.searchMember(keyword, accounts);
-            Log.e("SearchUtil", "SearchTabFragment搜索成功search.size:" + search.size());
-            long sortEndTime = System.currentTimeMillis();
-            Log.e("SearchUtil", "组搜索耗时:" + (sortEndTime - sortStartTime));
+            Log.e("SearchUtil", "搜索成员数据search.size:" + search.size());
             return search;
         }).subscribeOn(Schedulers.io());
     }
@@ -122,48 +177,31 @@ public class SearchUtil {
         return mQwertySearchGroups;
     }
 
+    /**
+     * 获取本地数据库 人数据
+     *
+     * @return
+     */
+    public static Observable<List<MemberSearchBean>> getDbAllAccount() {
+        return Observable.fromCallable(() -> {
+            List<MemberSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllAccount(new ArrayList<>(),0);
+            Log.e("SearchUtil", "成员数据.size:" + search.size());
+            return search;
+        }).subscribeOn(Schedulers.io());
+    }
 
-//    /**
-//     * 将原始组数据 转化为 可以查询的bean
-//     *
-//     * @param accounts
-//     * @return
-//     */
-//    public static List<MemberSearchBean> getMemberSearchData(List<Account> accounts) {
-//        List<MemberSearchBean> memberSearchsNew = new ArrayList<>();
-//        for (Account account : accounts) {
-//            MemberSearchBean memberSearch = getMemberSearch(account);
-//            memberSearch.getLabelPinyinSearchUnit().setBaseData(memberSearch.getName()+memberSearch.getNo());
-//            PinyinUtil.parse(memberSearch.getLabelPinyinSearchUnit());
-//            String sortKey = PinyinUtil.getSortKey(memberSearch.getLabelPinyinSearchUnit()).toUpperCase();
-//            memberSearch.setSortKey(praseSortKey(sortKey));
-//            memberSearchsNew.add(memberSearch);
-//        }
-//        return memberSearchsNew;
-//    }
-
-//    private static MemberSearchBean getMemberSearch(Account account){
-//        if(null==account){
-//            return null;
-//        }
-//        MemberSearchBean memberSearchBean = new MemberSearchBean();
-//        memberSearchBean.setPrivateTelephone(account.getPrivateTelephone());
-//        memberSearchBean.setChecked(account.isChecked());
-//        memberSearchBean.setDepartment(account.getDepartment());
-//        memberSearchBean.setDepartmentName(account.getDepartmentName());
-//        memberSearchBean.setDeptId(account.getDeptId());
-//        memberSearchBean.setId(account.getId());
-//        memberSearchBean.setMembers(account.getMembers());
-//        memberSearchBean.setName(account.getName());
-//        memberSearchBean.setNo(account.getNo());
-//        memberSearchBean.setPhone(account.getPhone());
-//        memberSearchBean.setPhoneNumber(account.getPhoneNumber());
-//        return memberSearchBean;
-//    }
-
-
-
-
+    /**
+     * 获取本地数据库 人数据
+     *
+     * @return
+     */
+    public static Observable<List<MemberSearchBean>> getAllAccountFirst() {
+        return Observable.fromCallable(() -> {
+            List<MemberSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllAccountFirst();
+            Log.e("SearchUtil", "成员数据.size:" + search.size());
+            return search;
+        }).subscribeOn(Schedulers.io());
+    }
 
 
     /*----------------组-----------------------*/
@@ -174,7 +212,24 @@ public class SearchUtil {
      * @return
      */
     public static Observable<List<GroupSearchBean>> getDbAllGroup() {
-        return Observable.fromCallable(() -> TerminalFactory.getSDK().getSQLiteDBManager().getAllGroup());
+        return Observable.fromCallable(() -> {
+            List<GroupSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllGroup(new ArrayList<>(),0);
+            Log.e("SearchUtil", "组数据.size:" + search.size());
+            return search;
+        }).subscribeOn(Schedulers.io());
+    }
+
+    /**
+     * 获取本地数据库 组数据
+     *
+     * @return
+     */
+    public static Observable<List<GroupSearchBean>> getAllGroupFirst() {
+        return Observable.fromCallable(() -> {
+            List<GroupSearchBean> search = TerminalFactory.getSDK().getSQLiteDBManager().getAllGroupFirst();
+            Log.e("SearchUtil", "组数据.size:" + search.size());
+            return search;
+        }).subscribeOn(Schedulers.io());
     }
 
 
@@ -188,11 +243,8 @@ public class SearchUtil {
     public static Observable<List<GroupSearchBean>> searchObservable(String keyword, List<GroupSearchBean> groupDatas) {
 
         return Observable.fromCallable(() -> {
-            long sortStartTime = System.currentTimeMillis();
             List<GroupSearchBean> search = SearchUtil.searchGroup(keyword, groupDatas);
-            Log.e("SearchUtil", "SearchTabFragment搜索成功search.size:" + search.size());
-            long sortEndTime = System.currentTimeMillis();
-            Log.e("SearchUtil", "组搜索耗时:" + (sortEndTime - sortStartTime));
+            Log.e("SearchUtil", "搜索组数据search.size:" + search.size());
             return search;
         }).subscribeOn(Schedulers.io());
     }
@@ -226,81 +278,29 @@ public class SearchUtil {
         return mQwertySearchGroups;
     }
 
-
     /**
-     * 将原始组数据 转化为 可以查询的bean
+     * 将一个list均分成n个list,主要通过偏移量来实现的
      *
-     * @param groups
+     * @param source
      * @return
      */
-    public static List<GroupSearchBean> getGroupSearchData(List<Group> groups) {
-        List<GroupSearchBean> groupSearchsNew = new ArrayList<>();
-        for (Group group : groups) {
-            GroupSearchBean groupSearchBean = getGroupSearch(group);
-            groupSearchBean.getLabelPinyinSearchUnit().setBaseData(groupSearchBean.getName());
-            PinyinUtil.parse(groupSearchBean.getLabelPinyinSearchUnit());
-            String sortKey = PinyinUtil.getSortKey(groupSearchBean.getLabelPinyinSearchUnit()).toUpperCase();
-            groupSearchBean.setSortKey(praseSortKey(sortKey));
-            groupSearchsNew.add(groupSearchBean);
-        }
-        return groupSearchsNew;
-    }
-
-
-    private static GroupSearchBean getGroupSearch(Group groups) {
-        if (null == groups) {
-            return null;
-        }
-        GroupSearchBean groupSearchBean = new GroupSearchBean();
-        groupSearchBean.setUniqueNoStr(groups.getUniqueNoStr());
-        groupSearchBean.setUniqueNo(groups.getUniqueNo());
-        groupSearchBean.setBusinessDisposeStatus(groups.businessDisposeStatus);
-        groupSearchBean.setBusinessId(groups.getBusinessId());
-        groupSearchBean.setChecked(groups.isChecked);
-        groupSearchBean.setCreatedMemberName(groups.getCreatedMemberName());
-        groupSearchBean.setCreatedMemberNo(groups.getCreatedMemberNo());
-        groupSearchBean.setCreatedMemberUniqueNo(groups.getCreatedMemberUniqueNo());
-        groupSearchBean.setDepartmentName(groups.getDepartmentName());
-        groupSearchBean.setDeptId(groups.getDeptId());
-        groupSearchBean.setGroupType(groups.getGroupType());
-        groupSearchBean.setHighUser(groups.isHighUser());
-        groupSearchBean.setId(groups.getId());
-        groupSearchBean.setName(groups.getName());
-        groupSearchBean.setNo(groups.getNo());
-        groupSearchBean.setProcessingState(groups.getProcessingState());
-        groupSearchBean.setResponseGroupType(groups.getResponseGroupType());
-        groupSearchBean.setTempGroupType(groups.getTempGroupType());
-        return groupSearchBean;
-    }
-
-
-    private static String praseSortKey(String sortKey) {
-        if (null == sortKey || sortKey.length() <= 0) {
-            return null;
-        }
-        if ((sortKey.charAt(0) >= 'a' && sortKey.charAt(0) <= 'z') || (sortKey.charAt(0) >= 'A' && sortKey.charAt(0) <= 'Z')) {
-            return sortKey;
-        }
-        return String.valueOf(/*QuickAlphabeticBar.DEFAULT_INDEX_CHARACTER*/'#')
-                + sortKey;
-    }
-
-    /**
-     * @param num  分的份数
-     * @param list 需要分的集合
-     */
-    public <T> Map<String, List<T>> splitList(List<T> list, Integer num) {
-        int listSize = list.size(); //list 长度
-        HashMap<String, List<T>> stringListHashMap = new HashMap<String, List<T>>(); //用户封装返回的多个list
-        List<T> stringlist = new ArrayList<T>();
-        ;         //用于承装每个等分list
-        for (int i = 0; i < listSize; i++) {                        //for循环依次放入每个list中
-            stringlist.add(list.get(i));                            //先将string对象放入list,以防止最后一个没有放入
-            if (((i + 1) % num == 0) || (i + 1 == listSize)) {               //如果l+1 除以 要分的份数 为整除,或者是最后一份,为结束循环.那就算作一份list,
-                stringListHashMap.put("stringList" + i, stringlist); //将这一份放入Map中.
-                stringlist = new ArrayList<T>();                //新建一个list,用于继续存储对象
+    public static <T> List<List<T>> averageAssign(List<T> source, int n) {
+        List<List<T>> result = new ArrayList<List<T>>();
+        int remaider = source.size() % n; //(先计算出余数)
+        int number = source.size() / n; //然后是商
+        int offset = 0;//偏移量
+        for (int i = 0; i < n; i++) {
+            List<T> value = null;
+            if (remaider > 0) {
+                value = source.subList(i * number + offset, (i + 1) * number + offset + 1);
+                remaider--;
+                offset++;
+            } else {
+                value = source.subList(i * number + offset, (i + 1) * number + offset);
             }
+            result.add(value);
         }
-        return stringListHashMap;                                     //将map返回
+        return result;
     }
+
 }

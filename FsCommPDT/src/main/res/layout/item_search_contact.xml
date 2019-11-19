@@ -47,7 +47,7 @@
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
-                    android:ellipsize="middle"
+                    android:ellipsize="end"
                     android:maxLength="8"
                     android:singleLine="true"
                     android:textColor="@color/group_text_gray"
@@ -75,6 +75,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:visibility="gone"
             android:id="@+id/shoutai_dial_to"
             android:layout_width="@dimen/dp_45"
             android:layout_height="@dimen/dp_45"
@@ -89,6 +90,7 @@
         </LinearLayout>
 
         <LinearLayout
+            android:visibility="gone"
             android:id="@+id/shoutai_message_to"
             android:layout_width="@dimen/dp_45"
             android:layout_height="@dimen/dp_45"
