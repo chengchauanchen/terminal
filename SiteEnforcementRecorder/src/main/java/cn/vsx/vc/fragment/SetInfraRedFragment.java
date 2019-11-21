@@ -129,7 +129,7 @@ public class SetInfraRedFragment extends Fragment implements View.OnClickListene
      */
     private ReceiverUpdateInfraRedHandler receiverUpdateInfraRedHandler = new ReceiverUpdateInfraRedHandler() {
         @Override
-        public void handler() {
+        public void handler(boolean open) {
             mHandler.post(() -> updateUI());
         }
     };

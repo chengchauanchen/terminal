@@ -286,7 +286,7 @@ public class MyPhoneStateListener extends PhoneStateListener {
      * @param dbm
      */
     private void checkTempt(int dbm) {
-        logger.info("MyPhoneStateListener--checkSingleTempt--dbm:"+dbm+"--connect:"+connect);
+//        logger.info("MyPhoneStateListener--checkSingleTempt--dbm:"+dbm+"--connect:"+connect);
 //        ToastUtil.showToast(context,"dbm:"+dbm);
         if(connect){
             if (dbm < -130) {

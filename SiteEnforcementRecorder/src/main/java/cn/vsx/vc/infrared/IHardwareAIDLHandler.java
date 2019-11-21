@@ -277,14 +277,14 @@ public class IHardwareAIDLHandler {
                     case INFRED_OPEN:
                         Log.i(TAG, "handleMessage: INFRED_OPEN");
                         mHardwareService.IRLEDBrightness(255);
-                        mHardwareService.IRCUTReverse();
+                        mHardwareService.IRCUTForward();
                         if (mCallback != null)
                             mCallback.onInfredOpen();
                         break;
                     case INFRED_CLOSE:
                         Log.i(TAG, "handleMessage:  INFRED_CLOSE");
                         mHardwareService.IRLEDBrightness(0);
-                        mHardwareService.IRCUTForward();
+                        mHardwareService.IRCUTReverse();
                         if (mCallback != null)
                             mCallback.onInfredClose();
                         break;

@@ -39,6 +39,7 @@ public class Constants {
     public final static String PTTEVEVT_ACTION = "ptt_event_action";
     public static final String PTTEVEVT_ACTION_DOWN = "android.intent.action.PPTEVEVT_ACTION_DOWN";
     public static final String PTTEVEVT_ACTION_UP = "android.intent.action.PPTEVEVT_ACTION_UP";
+    public static final String BUTTON_EVENT_ACTION = "android.intent.action.SIDE_KEY_INTENT";
 
 
     public static final int LOGIN_BIND_STATE_IDLE = 0;//未登录

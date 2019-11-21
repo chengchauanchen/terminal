@@ -68,6 +68,7 @@
                 android:textSize="@dimen/sp_24"
                 android:button="@null"
                 android:stateListAnimator="@null"
+                android:visibility="gone"
                 android:drawableRight="@drawable/bg_rb"
                 android:background="@android:color/transparent"/>
         </RadioGroup>

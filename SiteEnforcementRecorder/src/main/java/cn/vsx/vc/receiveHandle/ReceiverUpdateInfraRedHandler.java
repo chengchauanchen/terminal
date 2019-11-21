@@ -7,5 +7,5 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHandler;
  */
 
 public interface ReceiverUpdateInfraRedHandler extends ReceiveHandler {
-    public void handler();
+    public void handler(boolean open);
 }
