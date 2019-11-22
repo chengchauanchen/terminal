@@ -1007,8 +1007,13 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                 ToastUtil.showToast(BaseActivity.this, getString(R.string.text_network_disconnect));
             }
         }
-        MyTerminalFactory.getSDK().unregistNetworkChangeHandler();
-        MyTerminalFactory.getSDK().registNetworkChangeHandler();
+        try {
+            MyTerminalFactory.getSDK().unregistNetworkChangeHandler();
+        }catch (Exception e){
+            logger.error(e);
+        }finally {
+            MyTerminalFactory.getSDK().registNetworkChangeHandler();
+        }
     }
 
     /**
@@ -1444,12 +1449,12 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         hardwareAIDLHandler.setOnHardwareCallback(new IHardwareAIDLHandler.OnHardwareCallback() {
             @Override
             public void onInfredOpen() {
-                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverUpdateInfraRedHandler.class);
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverUpdateInfraRedHandler.class,true);
             }
 
             @Override
             public void onInfredClose() {
-                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverUpdateInfraRedHandler.class);
+                MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiverUpdateInfraRedHandler.class,false);
             }
 
             @Override
@@ -1506,7 +1511,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     /**
      * 关闭红外
      */
-    private void closeInfraRed(){
+    public void closeInfraRed(){
         if(hardwareAIDLHandler !=null){
             hardwareAIDLHandler.closeInfred();
         }

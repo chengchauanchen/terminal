@@ -103,6 +103,7 @@ import cn.vsx.vc.receiveHandle.ReceiverFragmentShowHandler;
 import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopBusniessHandler;
+import cn.vsx.vc.receiveHandle.ReceiverUpdateInfraRedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.receiver.BatteryBroadcastReceiver;
 import cn.vsx.vc.receiver.NFCCardReader;
@@ -292,6 +293,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLivingStopTimeHandler);//收到上报停止时间到时的通知
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyWarnLivingTimeoutMessageHandler);//终端上报即将超时提醒
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseSetLivingTimeMessageHandler);//响应设置终端上报时长
+        MyTerminalFactory.getSDK().registReceiveHandler(receiverUpdateInfraRedHandler);
         batteryBroadcastReceiver = new BatteryBroadcastReceiver();
         registBatterBroadcastReceiver(batteryBroadcastReceiver);//注册电量的广播
         initPhoneStateListener();//初始化手机信号的监听
@@ -376,6 +378,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLivingStopTimeHandler);//收到上报停止时间到时的通知
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyWarnLivingTimeoutMessageHandler);//终端上报即将超时提醒
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseSetLivingTimeMessageHandler);//响应设置终端上报时长
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiverUpdateInfraRedHandler);
         myHandler.removeCallbacksAndMessages(null);
         PromptManager.getInstance().stopRing();
         stopService(new Intent(MainActivity.this, LockScreenService.class));
@@ -1061,6 +1064,25 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     private ReceiverFragmentPopBackStackHandler receiverFragmentPopBackStackHandler = () -> {
         if(getSupportFragmentManager().getBackStackEntryCount()!=0){
             popBackStack();
+        }
+    };
+
+    /**
+     * 更新红外状态的UI
+     */
+    private ReceiverUpdateInfraRedHandler receiverUpdateInfraRedHandler = new ReceiverUpdateInfraRedHandler() {
+        @Override
+        public void handler(boolean open) {
+            Camera camera = mMediaStream.getCamera();
+            if (camera != null){
+                Camera.Parameters parameters = camera.getParameters();
+                if (open){
+                    parameters.setColorEffect(Camera.Parameters.EFFECT_MONO);
+                }else {
+                    parameters.setColorEffect(Camera.Parameters.EFFECT_NONE);
+                }
+                camera.setParameters(parameters);
+            }
         }
     };
 

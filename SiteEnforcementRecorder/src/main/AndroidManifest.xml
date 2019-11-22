@@ -186,6 +186,11 @@
         <!--<action android:name="android.intent.action.KEYCODE_22_DOWN"/>-->
       </intent-filter>
     </receiver>
+    <!--<receiver android:name=".receiver.ButtonEventReceiver">-->
+      <!--<intent-filter >-->
+        <!--<action android:name="android.intent.action.SIDE_KEY_INTENT"/>-->
+      <!--</intent-filter>-->
+    <!--</receiver>-->
     <receiver
         android:name=".receiver.BootUpReceiver"
         android:enabled="true"

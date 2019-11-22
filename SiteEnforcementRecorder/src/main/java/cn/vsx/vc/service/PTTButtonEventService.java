@@ -31,6 +31,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConforma
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.receiveHandle.ReceiverPTTButtonEventHandler;
+import cn.vsx.vc.receiver.ButtonEventReceiver;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -49,10 +50,16 @@ public class PTTButtonEventService extends Service {
 
   //组呼--记录时间
   private int timeProgress;
+  private ButtonEventReceiver buttonEventReceiver;
+
   @Override public void onCreate() {
     super.onCreate();
     logger.info("PTTButtonEventService = onCreate");
     initListener();
+//    buttonEventReceiver = new ButtonEventReceiver();
+//    IntentFilter intentFilter = new IntentFilter();
+//    intentFilter.addAction("android.intent.action.SIDE_KEY_INTENT");
+//    registerReceiver(buttonEventReceiver,intentFilter);
   }
 
   private void initListener(){
@@ -322,6 +329,7 @@ public class PTTButtonEventService extends Service {
   }
 
   @Override public void onDestroy() {
+//    unregisterReceiver(buttonEventReceiver);
     super.onDestroy();
   }
 }
