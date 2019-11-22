@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnLongClickListener;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -28,13 +29,13 @@ import ptt.terminalsdk.tools.PinyinUtils;
 /**
  * 搜索键盘
  */
-public class SearchKeyboardView extends RelativeLayout implements OnClickListener {
+public class SearchKeyboardView extends RelativeLayout implements OnClickListener, OnLongClickListener {
 
     public Logger logger = Logger.getLogger(getClass());
 
     private OnT9TelephoneDialpadView onT9TelephoneDialpadView;
     private Map<Integer, Integer> map = new HashMap<>();
-    private ImageView hide;
+    private LinearLayout hide;
     private LinearLayout delete;
     private AudioManager am;
     private SoundPool spool;
@@ -79,6 +80,8 @@ public class SearchKeyboardView extends RelativeLayout implements OnClickListene
         hide.setOnClickListener(this);
         delete.setOnClickListener(this);
 
+        delete.setOnLongClickListener(this);
+
         int[] numberID = new int[]{R.id.dialNum0, R.id.dialNum1, R.id.dialNum2, R.id.dialNum3, R.id.dialNum4, R.id.dialNum5, R.id.dialNum6, R.id.dialNum7, R.id.dialNum8, R.id.dialNum9};
         for (int i = 0; i < numberID.length; i++) {
             LinearLayout v = view.findViewById(numberID[i]);
@@ -108,58 +111,95 @@ public class SearchKeyboardView extends RelativeLayout implements OnClickListene
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.dialNum0:
-                play(11);
-                input(v.getTag().toString());
-                break;
-            case R.id.dialNum1:
-                play(1);
-                input(v.getTag().toString());
-                break;
-            case R.id.dialNum2:
-                play(2);
-                input(v.getTag().toString());
-                break;
-            case R.id.dialNum3:
-                play(3);
-                input(v.getTag().toString());
-                break;
-            case R.id.dialNum4:
-                play(4);
-                input(v.getTag().toString());
-                break;
-            case R.id.dialNum5:
-                play(5);
-                input(v.getTag().toString());
-                break;
-            case R.id.dialNum6:
-                play(6);
-                input(v.getTag().toString());
-                break;
-            case R.id.dialNum7:
-                play(7);
-                input(v.getTag().toString());
-                break;
-            case R.id.dialNum8:
-                play(8);
-                input(v.getTag().toString());
-                break;
-            case R.id.dialNum9:
-                play(9);
-                input(v.getTag().toString());
-                break;
-            case R.id.hide:
-//                play(11);
-                hideKeyboard();
-                break;
-            case R.id.delete:
-                play(12);
-                deleteSingleDialCharacter();
-                break;
-            default:
-                break;
+        if(v.getId()==R.id.dialNum0){
+            play(11);
+            input(v.getTag().toString());
+        }else if(v.getId()==R.id.dialNum1){
+            play(1);
+            input(v.getTag().toString());
+        }else if(v.getId()==R.id.dialNum2){
+            play(2);
+            input(v.getTag().toString());
+        }else if(v.getId()==R.id.dialNum3){
+            play(3);
+            input(v.getTag().toString());
+        }else if(v.getId()==R.id.dialNum4){
+            play(4);
+            input(v.getTag().toString());
+        }else if(v.getId()==R.id.dialNum5){
+            play(5);
+            input(v.getTag().toString());
+        }else if(v.getId()==R.id.dialNum6){
+            play(6);
+            input(v.getTag().toString());
+        }else if(v.getId()==R.id.dialNum7){
+            play(7);
+            input(v.getTag().toString());
+        }else if(v.getId()==R.id.dialNum8){
+            play(8);
+            input(v.getTag().toString());
+        }else if(v.getId()==R.id.dialNum9){
+            play(9);
+            input(v.getTag().toString());
+        }else if(v.getId()==R.id.hide){
+            hideKeyboard();
+        }else if(v.getId()==R.id.delete){
+            play(12);
+            deleteSingleDialCharacter();
         }
+
+//        switch (v.getId()) {
+//            case R.id.dialNum0:
+//                play(11);
+//                input(v.getTag().toString());
+//                break;
+//            case R.id.dialNum1:
+//                play(1);
+//                input(v.getTag().toString());
+//                break;
+//            case R.id.dialNum2:
+//                play(2);
+//                input(v.getTag().toString());
+//                break;
+//            case R.id.dialNum3:
+//                play(3);
+//                input(v.getTag().toString());
+//                break;
+//            case R.id.dialNum4:
+//                play(4);
+//                input(v.getTag().toString());
+//                break;
+//            case R.id.dialNum5:
+//                play(5);
+//                input(v.getTag().toString());
+//                break;
+//            case R.id.dialNum6:
+//                play(6);
+//                input(v.getTag().toString());
+//                break;
+//            case R.id.dialNum7:
+//                play(7);
+//                input(v.getTag().toString());
+//                break;
+//            case R.id.dialNum8:
+//                play(8);
+//                input(v.getTag().toString());
+//                break;
+//            case R.id.dialNum9:
+//                play(9);
+//                input(v.getTag().toString());
+//                break;
+//            case R.id.hide:
+////                play(11);
+//                hideKeyboard();
+//                break;
+//            case R.id.delete:
+//                play(12);
+//                deleteSingleDialCharacter();
+//                break;
+//            default:
+//                break;
+//        }
     }
 
     /**
@@ -259,6 +299,17 @@ public class SearchKeyboardView extends RelativeLayout implements OnClickListene
 
     public void setOnT9TelephoneDialpadView(OnT9TelephoneDialpadView onT9TelephoneDialpadView) {
         this.onT9TelephoneDialpadView = onT9TelephoneDialpadView;
+    }
+
+    @Override
+    public boolean onLongClick(View v) {
+        if (inputValue.length() > 0) {
+            inputValue = "";
+            if(onT9TelephoneDialpadView!=null){
+                onT9TelephoneDialpadView.onDialInputTextChanged(inputValue);
+            }
+        }
+        return true;
     }
 
     public interface OnT9TelephoneDialpadView {

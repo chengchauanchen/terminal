@@ -24,14 +24,18 @@ public class MemberUtil {
      * @param memberNo
      * @return
      */
-    private static int checkMemberNo(int memberNo) {
-        String memberNoStr = memberNo + "";
-        if (length(memberNo) <= 6) {
-            memberNoStr = "88" + memberNoStr;
-        } else {
-            return memberNo;
+    public static int checkMemberNo(String memberNo) {
+        try{
+            String memberNoStr = memberNo + "";
+            if (memberNo.length() <= 6) {
+                memberNoStr = "88" + memberNoStr;
+            } else {
+                return Integer.parseInt(memberNo);
+            }
+            return Integer.parseInt(memberNoStr);
+        }catch (Exception e){
+            return 0;
         }
-        return Integer.parseInt(memberNoStr);
     }
 
 

@@ -76,12 +76,18 @@ public abstract class BaseSearchFragment extends BaseFragment {
 
         @Override
         public void handler(int errorCode, String errorDesc) {
+//            if(isHidden){
+//                return;
+//            }
             logger.info("收到转组消息：" + errorCode + "/" + errorDesc);
             if (errorCode == 0 || errorCode == SignalServerErrorCode.INVALID_SWITCH_GROUP.getErrorCode()) {
                 myHandler.post(new Runnable() {
                     @Override
                     public void run() {
                         CommonGroupUtil.setCatchGroupIdList(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0));
+                        if (BaseSearchFragment.this instanceof SearchTabFragment){
+                            changeGroupSuccess();
+                        }
                         searchAdapter.notifyDataSetChanged();
                     }
                 });
@@ -91,12 +97,21 @@ public abstract class BaseSearchFragment extends BaseFragment {
         }
     };
 
+    public void changeGroupSuccess(){
+
+    };
+
     private SparseBooleanArray currentMonitorGroup = new SparseBooleanArray();
     private int monitorGroupNo;
 
     private ReceiverMonitorViewClickHandler receiverMonitorViewClickHandler = new ReceiverMonitorViewClickHandler(){
         @Override
         public void handler(int groupNo){
+
+            if(isHidden){
+                return;
+            }
+
             //响应组不能取消监听
             Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupNo);
             if(ResponseGroupType.RESPONSE_TRUE.toString().equals(group.getResponseGroupType())){
@@ -140,7 +155,7 @@ public abstract class BaseSearchFragment extends BaseFragment {
                         //判断有没有超过5个监听组
                         if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().size()>=5){
                             logger.info(getResources().getString(R.string.monitor_more_than_five));
-                            ToastUtil.showToast(getContext(),getResources().getString(R.string.monitor_more_than_five));
+                            ToastUtil.toast(getActivity(),getResources().getString(R.string.monitor_more_than_five));
                         }else {
                             currentMonitorGroup.put(groupNo,true);
                             MyTerminalFactory.getSDK().getGroupManager().setMonitorGroup(monitorGroups,true);
@@ -257,4 +272,16 @@ public abstract class BaseSearchFragment extends BaseFragment {
         }
     };
 
+    protected boolean isHidden = false;
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if (this instanceof SearchTabFragment){
+            logger.info("SearchTabFragment hidden:"+hidden);
+        }else if(this instanceof SearchTabGroupFragment){
+            logger.info("SearchTabGroupFragment hidden:"+hidden);
+        }
+        isHidden=hidden;
+    }
 }

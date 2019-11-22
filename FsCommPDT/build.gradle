@@ -187,7 +187,7 @@ allprojects {
 
 
 
-////以下代码是打无人机包
+//以下代码是打无人机包
 //apply plugin: 'com.android.library'
 //android {
 //    compileSdkVersion 26

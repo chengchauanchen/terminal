@@ -676,8 +676,8 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
                 String url = terminalMessage.messageBody.getString(JsonParam.EASYDARWIN_RTSP_URL);
                 if(!TextUtils.isEmpty(url)&&url.contains("/")&&url.contains(".")){
                     int index = url.lastIndexOf("/");
-                    int pointIndex = url.lastIndexOf(".");
-                    id = url.substring(index+1,pointIndex);
+//                    int pointIndex = url.lastIndexOf(".");
+                    id = url.substring(index+1);
                 }
             }
         }

@@ -299,18 +299,20 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-            <ImageView
+            <LinearLayout
                 android:id="@+id/hide"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:background="@drawable/keyboard_background_selector"
+                android:gravity="center"
                 android:paddingBottom="@dimen/dp_10"
-                android:paddingTop="@dimen/dp_10"
-                android:tag="*"
-                android:text=""
-                android:src="@drawable/eeeee"
-                android:textSize="@dimen/sp_30" />
+                android:paddingTop="@dimen/dp_10">
+                <ImageView
+                    android:layout_width="@dimen/x30"
+                    android:layout_height="@dimen/x15"
+                    android:src="@drawable/search_hide_keyboard" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/dialNum0"
@@ -351,8 +353,8 @@
                 android:paddingBottom="@dimen/dp_10"
                 android:paddingTop="@dimen/dp_10">
                 <ImageView
-                    android:layout_width="@dimen/x50"
-                    android:layout_height="@dimen/x25"
+                    android:layout_width="@dimen/x30"
+                    android:layout_height="@dimen/x15"
                     android:src="@drawable/keyboard_backspace" />
             </LinearLayout>
         </LinearLayout>
