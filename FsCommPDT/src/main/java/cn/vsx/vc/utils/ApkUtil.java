@@ -8,6 +8,7 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.CHUTIANYUN;
+import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.LANGFANG;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.POLICESTORE;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.TIANJIN;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.WUTIE;
@@ -45,7 +46,7 @@ public class ApkUtil{
     public static boolean isAppStore(){
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
         return TextUtils.equals(AuthManagerTwo.POLICESTORE,apkType) || TextUtils.equals(AuthManagerTwo.XIANGYANGPOLICESTORE,apkType)
-            ||TextUtils.equals(TIANJIN,apkType)||TextUtils.equals(WUTIE,apkType);
+            ||TextUtils.equals(TIANJIN,apkType)||TextUtils.equals(WUTIE,apkType)||TextUtils.equals(LANGFANG,apkType);
 //        return MyTerminalFactory.getSDK().getParam(Params.IS_ANJIAN, false);
     }
 

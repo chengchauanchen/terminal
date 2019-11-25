@@ -11,6 +11,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
+import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.LANGFANG;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.POLICESTORE;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.WUTIE;
 
@@ -38,6 +39,12 @@ public class ApkUtil{
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
         return TextUtils.equals(apkType,WUTIE);
 //        return MyTerminalFactory.getSDK().getParam(Params.IS_ANJIAN, false);
+    }
+
+    //是否为廊坊
+    public static boolean isLangFang(){
+        String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
+        return TextUtils.equals(apkType,LANGFANG);
     }
 
     /**

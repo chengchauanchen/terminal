@@ -37,6 +37,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.blankj.utilcode.util.ToastUtils;
+import com.ycgis.pclient.PService;
 
 import org.apache.log4j.Logger;
 
@@ -947,6 +948,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             }else if(TextUtils.equals(AuthManagerTwo.TIANJIN,apkType)){
                 getTianJinStringToken();
                 requestDrawOverLays();
+            }else if(TextUtils.equals(AuthManagerTwo.LANGFANG,apkType)){
+                authorizeByLangFang();//认证并获取User信息
+                requestDrawOverLays();
             }else {
                 authorize();//认证并获取user信息
                 requestDrawOverLays();
@@ -1293,7 +1297,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
             //根据打包类型，市局才走这个
             if(AuthManagerTwo.POLICESTORE.equals(apkType) || AuthManagerTwo.POLICETEST.equals(apkType)
-                    || AuthManagerTwo.POLICESTOREOUT.equals(apkType)|| AuthManagerTwo.TIANJIN.equals(apkType)){
+                    || AuthManagerTwo.POLICESTOREOUT.equals(apkType)|| AuthManagerTwo.TIANJIN.equals(apkType)
+                    || AuthManagerTwo.LANGFANG.equals(apkType)){
                 startSelfStartupPermission();
             }else{
                 // 创建个呼直播服务
@@ -1526,5 +1531,60 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         explicitIntent.setComponent(component);
 
         return explicitIntent;
+    }
+
+    /**
+     * 廊坊移动警务平台获取用户信息
+     */
+    private void  authorizeByLangFang(){
+        try {
+            //PClient 使用方法   （相关参数，请参照SDK说明文档）
+            PService pService = new PService(this);
+            String strSfz = pService.getSFZ() ;  //获取身份证
+            String strPoliceName =   pService.getPoliceName() ;//警员姓名
+            String strPoliceID = pService.getUserAccount();//警号
+            String strDepartDm = pService.getZZJGDm();//所属组织机构代码
+            String strDepartMc = pService.getZZJGName();//所属住址机构名称
+            String strPhone =  pService.getPHONE();//手机号
+            String strRootUrl = pService.getRootUrl();  //获取http初始路径
+
+            logger.info("廊坊用户信息-姓名:"+strPoliceName+"--警号:"+strPoliceID+"--身份证:"+strSfz+"--所属组织机构代码:"+strDepartDm+"--所属组织机构名称 :"+strDepartMc);
+            if(!TextUtils.isEmpty(strPoliceID)){
+                if (TextUtils.equals(strPoliceID,MyTerminalFactory.getSDK().getParam(UrlParams.ACCOUNT, ""))) {
+                    logger.error("获取到的警号变了，删除所有数据！！！！");
+                    DeleteData.deleteAllData();
+                }
+
+                TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, true);
+                MyApplication.instance.setApkType();
+                MyApplication.instance.setAppKey();
+                MyApplication.instance.setTerminalMemberType();
+                MyTerminalFactory.getSDK().putParam(UrlParams.ACCOUNT, strPoliceID);
+                MyTerminalFactory.getSDK().putParam(UrlParams.NAME, strPoliceName);
+                MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_ID, strDepartDm);
+                MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_NAME, strDepartMc);
+                MyTerminalFactory.getSDK().putParam(UrlParams.IDCARD, strSfz);
+                MyTerminalFactory.getSDK().putParam(UrlParams.PHONE, strPhone);
+            }else{
+                authorizeByLangFangFail();
+            }
+        }
+        catch(Exception err) {
+            err.printStackTrace();
+            authorizeByLangFangFail();
+        }
+
+    }
+
+    /**
+     * 获取用户信息失败
+     */
+    private void authorizeByLangFangFail(){
+        TerminalFactory.getSDK().putParam(Params.POLICE_STORE_APK, false);
+        MyApplication.instance.setTerminalMemberType();
+        String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,AuthManagerTwo.POLICESTORE);
+        if(TextUtils.equals(AuthManagerTwo.LANGFANG,apkType)){
+            ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_open_langfang_police_work_first));
+        }
     }
 }

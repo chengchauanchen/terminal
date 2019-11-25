@@ -59,6 +59,9 @@
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.FLAG_GRANT_PERSISTABLE_URI_PERMISSION" />
 
+    <!-- 廊坊移动警务平台 -->
+    <uses-permission android:name="ycgis.pstore.permission.APP" />
+
     <uses-feature
         android:name="android.hardware.usb.host"
         android:required="true" />

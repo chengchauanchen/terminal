@@ -460,6 +460,7 @@
     <string name="text_login_fail_please_check_network">登录失败，请检查网络是否连接</string>
     <string name="text_start_success">启动成功...</string>
     <string name="text_please_open_wuhan_police_work_first">请先打开武汉移动警务！</string>
+    <string name="text_please_open_langfang_police_work_first">请先打开廊坊移动警务！</string>
     <string name="text_client_id_is_empty">client_id 为空！</string>
     <string name="text_client_id_is_illegal">client_id 非法！</string>
     <string name="text_authorization_code_illegal">授权码 非法！</string>

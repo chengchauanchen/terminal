@@ -10,6 +10,7 @@ android {
     defaultConfig {
         applicationId "cn.vsx.vc"
 //        applicationId "com.vsxin.pstation"
+//        applicationId "com.vsxin.langfang"
         minSdkVersion 19
         targetSdkVersion 26
 
@@ -65,6 +66,7 @@ android {
         tianJin {}
         wuTie {}
         yingJiGuanLiTing {}
+        langFang {}
     }
     productFlavors.all {
         flavor -> flavor.manifestPlaceholders = [apk_type: name]
@@ -166,6 +168,8 @@ dependencies {
     //时间选择器
     implementation 'com.contrarywind:Android-PickerView:3.2.7'
     implementation files('libs/HyteraSDK2.0.jar')
+    //廊坊移动警务平台
+    implementation files('libs/Pclient.jar')
     /*二维码*/
     implementation 'com.github.yuzhiqiang1993:zxing:2.2.8'
     implementation 'com.qw:soulpermission:1.1.6'
