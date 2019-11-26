@@ -251,7 +251,6 @@ public class GroupVideoLiveListFragment extends RefreshRecycleViewFragment<Termi
                 if (!Util.isEmpty(result)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     boolean living = jsonObject.getBoolean("living");
-                    Long endChatTime = jsonObject.getLong("endChatTime");
                     if (living) {
                         int resultCode = LiveUtil.requestToWatchLiving(item);
                         if(resultCode !=0){

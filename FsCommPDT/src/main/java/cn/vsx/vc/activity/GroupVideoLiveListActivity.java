@@ -292,7 +292,6 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
                 if (!Util.isEmpty(result)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     boolean living = jsonObject.getBoolean("living");
-                    Long endChatTime = jsonObject.getLong("endChatTime");
                     if (living) {
                         handler.post(() -> {
                             Intent intent = new Intent(GroupVideoLiveListActivity.this, PullLivingService.class);
@@ -305,7 +304,6 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
                         // TODO: 2018/8/7
                         Intent intent = new Intent(GroupVideoLiveListActivity.this, PlayLiveHistoryActivity.class);
                         intent.putExtra("terminalMessage", item);
-//                      intent.putExtra("endChatTime",endChatTime);
                         GroupVideoLiveListActivity.this.startActivity(intent);
                     }
                 }
@@ -313,7 +311,6 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
         } else {
             Intent intent = new Intent(GroupVideoLiveListActivity.this, PlayLiveHistoryActivity.class);
             intent.putExtra("terminalMessage", item);
-//          intent.putExtra("endChatTime",endChatTime);
             GroupVideoLiveListActivity.this.startActivity(intent);
         }
     }

@@ -475,7 +475,6 @@ public abstract class MessageBaseFragment<V extends IBaseMessageView,P extends B
                 if (!Util.isEmpty(result)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     boolean living = jsonObject.getBoolean("living");
-//                    Long endChatTime = jsonObject.getLong("endChatTime");
                     if (living) {
                         int resultCode = LiveUtil.requestToWatchLiving(terminalMessage);
                         if(resultCode !=0){

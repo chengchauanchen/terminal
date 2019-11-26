@@ -1425,7 +1425,6 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                 if (!Util.isEmpty(result)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     boolean living = jsonObject.getBoolean("living");
-                    Long endChatTime = jsonObject.getLong("endChatTime");
                     if (living) {
                         int resultCode = LiveUtil.requestToWatchLiving(terminalMessage);
                         if(resultCode !=0){

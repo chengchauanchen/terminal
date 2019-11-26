@@ -1584,7 +1584,6 @@ public abstract class ChatBaseActivity extends BaseActivity
                     if (!Util.isEmpty(result)) {
                         JSONObject jsonObject = JSONObject.parseObject(result);
                         boolean living = jsonObject.getBoolean("living");
-                        Long endChatTime = jsonObject.getLong("endChatTime");
                         if (living) {
                             Message msg = Message.obtain();
                             msg.what = WATCH_LIVE;
@@ -1594,7 +1593,6 @@ public abstract class ChatBaseActivity extends BaseActivity
                             // TODO: 2018/8/7
                             Intent intent = new Intent(ChatBaseActivity.this, PlayLiveHistoryActivity.class);
                             intent.putExtra("terminalMessage", terminalMessage);
-//                                intent.putExtra("endChatTime",endChatTime);
                             ChatBaseActivity.this.startActivity(intent);
                         }
                     }

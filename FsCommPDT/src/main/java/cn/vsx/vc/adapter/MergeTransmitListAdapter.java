@@ -1416,7 +1416,6 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                 if (!Util.isEmpty(result)) {
                     JSONObject jsonObject = JSONObject.parseObject(result);
                     boolean living = jsonObject.getBoolean("living");
-                    Long endChatTime = jsonObject.getLong("endChatTime");
                     if (living) {
                         activity.runOnUiThread(() -> {
                             Intent intent = new Intent(activity, PullLivingService.class);
@@ -1429,7 +1428,6 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                         activity.runOnUiThread(() -> {
                             Intent intent = new Intent(activity, PlayLiveHistoryActivity.class);
                             intent.putExtra("terminalMessage", terminalMessage);
-//                                intent.putExtra("endChatTime",endChatTime);
                             activity.startActivity(intent);
                         });
                     }
