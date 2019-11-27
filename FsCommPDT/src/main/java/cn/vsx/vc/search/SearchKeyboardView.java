@@ -34,6 +34,7 @@ public class SearchKeyboardView extends RelativeLayout implements OnClickListene
     public Logger logger = Logger.getLogger(getClass());
 
     private OnT9TelephoneDialpadView onT9TelephoneDialpadView;
+    private HideOnClick hideOnClick;
     private Map<Integer, Integer> map = new HashMap<>();
     private LinearLayout hide;
     private LinearLayout delete;
@@ -142,7 +143,10 @@ public class SearchKeyboardView extends RelativeLayout implements OnClickListene
             play(9);
             input(v.getTag().toString());
         }else if(v.getId()==R.id.hide){
-            hideKeyboard();
+            if(hideOnClick!=null){
+                hideOnClick.onClick();
+            }
+//            hideKeyboard();
         }else if(v.getId()==R.id.delete){
             play(12);
             deleteSingleDialCharacter();
@@ -294,7 +298,9 @@ public class SearchKeyboardView extends RelativeLayout implements OnClickListene
         }
     }
 
-
+    public void setOnHideOnClick(HideOnClick hideOnClick) {
+        this.hideOnClick = hideOnClick;
+    }
 
 
     public void setOnT9TelephoneDialpadView(OnT9TelephoneDialpadView onT9TelephoneDialpadView) {
@@ -318,7 +324,9 @@ public class SearchKeyboardView extends RelativeLayout implements OnClickListene
         void onDialInputTextChanged(String curCharacter);
     }
 
-
+    public interface HideOnClick {
+        void onClick();
+    }
 
 
     /**************************************************************/
@@ -447,7 +455,19 @@ public class SearchKeyboardView extends RelativeLayout implements OnClickListene
         return newStr;
     }
 
-    private void hideKeyboard() {
+    private boolean searchKeyboardIsVisible = true;
+
+    public boolean isSearchKeyboardIsVisible() {
+        return searchKeyboardIsVisible;
+    }
+
+    public void showKeyboard(){
+        searchKeyboardIsVisible = true;
+        this.setVisibility(VISIBLE);
+    }
+
+    public void hideKeyboard() {
+        searchKeyboardIsVisible = false;
         this.setVisibility(GONE);
     }
 

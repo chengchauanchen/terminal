@@ -32,15 +32,32 @@
             android:focusable="false"
             android:visibility="gone"/>
 
-        <ImageView
-            android:id="@+id/iv_userhead"
+        <!--<ImageView-->
+            <!--android:id="@+id/iv_userhead"-->
+            <!--android:layout_width="@dimen/size_avatar"-->
+            <!--android:layout_height="@dimen/size_avatar"-->
+            <!--android:layout_alignParentTop="true"-->
+            <!--android:layout_toLeftOf="@+id/cb_forward"-->
+            <!--android:layout_alignWithParentIfMissing="true"-->
+            <!--android:layout_marginRight="@dimen/margin_chat_activity"-->
+            <!--android:scaleType="fitXY" />-->
+
+        <org.raphets.roundimageview.RoundImageView
             android:layout_width="@dimen/size_avatar"
             android:layout_height="@dimen/size_avatar"
             android:layout_alignParentTop="true"
             android:layout_toLeftOf="@+id/cb_forward"
             android:layout_alignWithParentIfMissing="true"
             android:layout_marginRight="@dimen/margin_chat_activity"
-            android:scaleType="fitXY" />
+            android:scaleType="fitXY"
+            app:border_width="-1dp"
+            app:border_color="@android:color/transparent"
+            app:leftBottom_corner_radius="8dp"
+            app:leftTop_corner_radius="8dp"
+            app:rightBottom_corner_radius="8dp"
+            app:rightTop_corner_radius="8dp"
+            app:type="round" />
+
 
         <RelativeLayout
             android:id="@+id/bubble"

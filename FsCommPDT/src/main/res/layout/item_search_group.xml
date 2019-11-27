@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_height="wrap_content">
 
@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
+
+        <org.raphets.roundimageview.RoundImageView
             android:id="@+id/iv_group_logo"
             android:src="@drawable/group_photo"
             android:layout_width="@dimen/dp_40"
@@ -18,7 +19,14 @@
             android:layout_marginLeft="@dimen/dp_18"
             android:layout_marginRight="@dimen/dp_8"
             android:layout_marginTop="@dimen/dp_8"
-            android:layout_marginBottom="@dimen/dp_8" />
+            android:layout_marginBottom="@dimen/dp_8"
+            app:border_width="-1dp"
+            app:border_color="@android:color/transparent"
+            app:leftBottom_corner_radius="8dp"
+            app:leftTop_corner_radius="8dp"
+            app:rightBottom_corner_radius="8dp"
+            app:rightTop_corner_radius="8dp"
+            app:type="round" />
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -31,6 +39,7 @@
             android:gravity="center_vertical">
 
             <LinearLayout
+                android:id="@+id/ll_name"
                 android:orientation="vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
@@ -45,6 +54,20 @@
                     android:text="响应组11111"
                     android:textColor="@color/group_text_gray"
                     android:textSize="@dimen/sp_16" />
+
+                <TextView
+                    android:id="@+id/tv_group_no"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/dp_2"
+                    android:maxLines="1"
+                    android:maxEms="10"
+                    android:ellipsize="end"
+                    android:text=""
+                    android:textColor="@color/individual_news_item_name"
+                    android:textSize="@dimen/sp_12" />
+
+
                 <TextView
                     android:id="@+id/tv_department_name"
                     android:layout_width="wrap_content"
@@ -54,8 +77,10 @@
                     android:maxEms="10"
                     android:ellipsize="end"
                     android:text="响应组11111"
-                    android:textColor="@color/group_text_gray"
+                    android:textColor="@color/individual_news_item_name"
                     android:textSize="@dimen/sp_12" />
+
+
             </LinearLayout>
 
     
@@ -119,6 +144,7 @@
     
         
         <ImageView
+            android:visibility="gone"
             android:id="@+id/iv_message"
             android:layout_toLeftOf="@id/iv_monitor"
             android:layout_width="@dimen/dp_30"

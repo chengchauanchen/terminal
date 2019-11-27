@@ -160,15 +160,17 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         switch (data.getSearchByType()) {
             case SearchByLabel:
                 ViewUtil.showTextHighlight(holder.tvName, data.getName(), data.getMatchKeywords().toString());
+                ViewUtil.showTextHighlight(holder.tv_group_no, data.getNo()+"", data.getMatchKeywords().toString());
                 break;
             case SearchByNull:
                 ViewUtil.showTextNormal(holder.tvName, data.getName());
+                ViewUtil.showTextNormal(holder.tv_group_no, data.getNo()+"");
                 break;
             default:
                 break;
         }
         holder.tv_department_name.setText(data.getDepartmentName());
-
+//        holder.tv_group_no.setText(data.getNo()+"");
         if(TextUtils.equals(data.getResponseGroupType(),ResponseGroupType.RESPONSE_TRUE.name())){
             holder.iv_response_group_icon.setVisibility(View.VISIBLE);
         }else {
@@ -204,6 +206,31 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             intent.putExtra("speakingName",data.getName());
             mContext.startActivity(intent);
         });
+
+        holder.iv_group_logo.setOnClickListener(v -> {
+            Intent intent = new Intent(mContext, GroupCallNewsActivity.class);
+            intent.putExtra("isGroup", true);
+            intent.putExtra("uniqueNo",data.getUniqueNo());
+            intent.putExtra("userId", data.getNo());//组id
+            intent.putExtra("userName", data.getName());
+            intent.putExtra("speakingId",data.getId());
+            intent.putExtra("speakingName",data.getName());
+            mContext.startActivity(intent);
+        });
+
+        holder.ll_name.setOnClickListener(v -> {
+            Intent intent = new Intent(mContext, GroupCallNewsActivity.class);
+            intent.putExtra("isGroup", true);
+            intent.putExtra("uniqueNo",data.getUniqueNo());
+            intent.putExtra("userId", data.getNo());//组id
+            intent.putExtra("userName", data.getName());
+            intent.putExtra("speakingId",data.getId());
+            intent.putExtra("speakingName",data.getName());
+            mContext.startActivity(intent);
+        });
+
+
+
 
         holder.ivMonitor.setOnClickListener(v -> {
             if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == data.getNo()){
@@ -388,6 +415,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         TextView tvName;
         TextView tv_department_name;
+        TextView tv_group_no;
 
         ImageView ivMonitor;
 
@@ -403,10 +431,13 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         ImageView iv_current_group;
 
+        LinearLayout ll_name;
+
         GroupViewHolder(View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tv_name);
             tv_department_name = itemView.findViewById(R.id.tv_department_name);
+            tv_group_no = itemView.findViewById(R.id.tv_group_no);
             ivMonitor = itemView.findViewById(R.id.iv_monitor);
             ivMessage = itemView.findViewById(R.id.iv_message);
             placeholder = itemView.findViewById(R.id.placeholder);
@@ -414,6 +445,8 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             iv_response_group_icon = itemView.findViewById(R.id.iv_response_group_icon);
             tv_change_group = itemView.findViewById(R.id.tv_change_group);
             iv_current_group = itemView.findViewById(R.id.iv_current_group);
+
+            ll_name = itemView.findViewById(R.id.ll_name);
         }
     }
 

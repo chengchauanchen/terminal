@@ -32,6 +32,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.jump.utils.MemberUtil;
+import cn.vsx.vc.search.SearchKeyboardView.HideOnClick;
 import cn.vsx.vc.search.SearchKeyboardView.OnT9TelephoneDialpadView;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import io.reactivex.Observable;
@@ -52,6 +53,7 @@ public class SearchTabFragment extends BaseSearchFragment {
     private TextView phone;
     private SearchKeyboardView search_keyboard;
     private RecyclerView group_recyclerView;
+    private ImageView iv_hint_search;
 
     private boolean searchKeyboardIsVisible = true;
     private ImageView iv_call;
@@ -65,11 +67,29 @@ public class SearchTabFragment extends BaseSearchFragment {
     public void initView() {
         phone = mRootView.findViewById(R.id.phone);
         iv_call = mRootView.findViewById(R.id.iv_call);
+        iv_hint_search = mRootView.findViewById(R.id.iv_hint_search);
         search_keyboard = mRootView.findViewById(R.id.search_keyboard);
         //打开自定义键盘
         phone.setOnClickListener(v -> {
             search_keyboard.setVisibility(searchKeyboardIsVisible ? View.GONE : View.VISIBLE);
+            iv_hint_search.setVisibility(searchKeyboardIsVisible?View.VISIBLE:View.GONE);
             searchKeyboardIsVisible = !searchKeyboardIsVisible;
+        });
+
+        //打开自定义键盘
+        iv_hint_search.setOnClickListener(v -> {
+            search_keyboard.setVisibility(searchKeyboardIsVisible ? View.GONE : View.VISIBLE);
+            iv_hint_search.setVisibility(searchKeyboardIsVisible?View.VISIBLE:View.GONE);
+            searchKeyboardIsVisible = !searchKeyboardIsVisible;
+        });
+
+        search_keyboard.setOnHideOnClick(new HideOnClick() {
+            @Override
+            public void onClick() {
+                search_keyboard.setVisibility(search_keyboard.isSearchKeyboardIsVisible() ? View.GONE : View.VISIBLE);
+                iv_hint_search.setVisibility(searchKeyboardIsVisible?View.VISIBLE:View.GONE);
+                searchKeyboardIsVisible = !searchKeyboardIsVisible;
+            }
         });
 
         search_keyboard.setOnT9TelephoneDialpadView(new OnT9TelephoneDialpadView() {

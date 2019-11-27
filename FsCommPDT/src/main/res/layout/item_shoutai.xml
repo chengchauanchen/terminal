@@ -9,12 +9,12 @@
         android:background="@color/itemblue">
 
         <ImageView
-        android:id="@+id/is_shoutai"
-        android:layout_width="@dimen/dp_10"
-        android:layout_height="@dimen/dp_10"
-        android:layout_centerVertical="true"
-        android:background="@drawable/new_folder_close"
-        android:layout_marginLeft="@dimen/x30" />
+            android:id="@+id/is_shoutai"
+            android:layout_width="11dp"
+            android:layout_height="4dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="@dimen/x30"
+            android:background="@drawable/new_folder_close" />
 
         <TextView
             android:id="@+id/shoutai_bumen_name"

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/tools"
     android:fitsSystemWindows="true"
     xmlns:zhy="http://schemas.android.com/apk/res-auto">
 
@@ -248,11 +248,24 @@
         android:orientation="horizontal"
         android:id="@+id/ll_speaker">
 
-        <ImageView
+        <org.raphets.roundimageview.RoundImageView
             android:id="@+id/iv_user_photo"
             android:layout_width="@dimen/x30"
             android:layout_height="@dimen/x30"
-            android:layout_marginLeft="@dimen/x20" />
+            android:layout_marginLeft="@dimen/x20"
+            app:border_width="-1dp"
+            app:border_color="@android:color/transparent"
+            app:leftBottom_corner_radius="8dp"
+            app:leftTop_corner_radius="8dp"
+            app:rightBottom_corner_radius="8dp"
+            app:rightTop_corner_radius="8dp"
+            app:type="round" />
+
+        <!--<ImageView-->
+            <!--android:id="@+id/iv_user_photo"-->
+            <!--android:layout_width="@dimen/x30"-->
+            <!--android:layout_height="@dimen/x30"-->
+            <!--android:layout_marginLeft="@dimen/x20" />-->
 
         <TextView
             android:textStyle="bold"

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:aandroid="http://schemas.android.com/tools"
     android:id="@+id/ll_content"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -17,10 +19,22 @@
             android:padding="@dimen/dp_8"
             android:layout_marginLeft="@dimen/dp_10">
 
-            <ImageView
+            <org.raphets.roundimageview.RoundImageView
                 android:id="@+id/shoutai_user_logo"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                app:border_width="-1dp"
+                app:border_color="@android:color/transparent"
+                app:leftBottom_corner_radius="8dp"
+                app:leftTop_corner_radius="8dp"
+                app:rightBottom_corner_radius="8dp"
+                app:rightTop_corner_radius="8dp"
+                app:type="round" />
+
+            <!--<ImageView-->
+                <!--android:id="@+id/shoutai_user_logo"-->
+                <!--android:layout_width="match_parent"-->
+                <!--android:layout_height="match_parent" />-->
 
             <ImageView
                 android:id="@+id/recorder_binded_logo"

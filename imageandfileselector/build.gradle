@@ -50,6 +50,9 @@ dependencies {
     compile project(':TerminalSDK')
 
     compile 'com.bm.photoview:library:1.4.1'
+
+    //圆角图
+    implementation 'org.raphets:roundimageview:1.2.0'
 }
 
 allprojects {

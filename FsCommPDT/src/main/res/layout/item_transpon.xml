@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <LinearLayout
@@ -11,11 +12,24 @@
         android:gravity="center_vertical"
         android:orientation="horizontal">
 
-        <ImageView
+        <org.raphets.roundimageview.RoundImageView
             android:id="@+id/iv_user_logo"
             android:layout_width="@dimen/x36"
             android:layout_height="@dimen/x36"
-            android:layout_marginLeft="@dimen/x12" />
+            android:layout_marginLeft="@dimen/x12"
+            app:border_width="-1dp"
+            app:border_color="@android:color/transparent"
+            app:leftBottom_corner_radius="8dp"
+            app:leftTop_corner_radius="8dp"
+            app:rightBottom_corner_radius="8dp"
+            app:rightTop_corner_radius="8dp"
+            app:type="round" />
+
+        <!--<ImageView-->
+            <!--android:id="@+id/iv_user_logo"-->
+            <!--android:layout_width="@dimen/x36"-->
+            <!--android:layout_height="@dimen/x36"-->
+            <!--android:layout_marginLeft="@dimen/x12" />-->
 
         <TextView
             android:id="@+id/tv_user_name"

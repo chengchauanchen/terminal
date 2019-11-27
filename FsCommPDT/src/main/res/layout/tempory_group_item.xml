@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -9,13 +10,28 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical">
 
-        <ImageView
+        <org.raphets.roundimageview.RoundImageView
             android:id="@+id/iv_group_logo"
             android:layout_width="@dimen/dp_50"
             android:layout_height="@dimen/dp_50"
             android:layout_marginLeft="@dimen/dp_10"
             android:padding="@dimen/dp_8"
-            android:src="@drawable/group_photo" />
+            android:src="@drawable/group_photo"
+            app:border_width="-1dp"
+            app:border_color="@android:color/transparent"
+            app:leftBottom_corner_radius="8dp"
+            app:leftTop_corner_radius="8dp"
+            app:rightBottom_corner_radius="8dp"
+            app:rightTop_corner_radius="8dp"
+            app:type="round" />
+
+        <!--<ImageView-->
+            <!--android:id="@+id/iv_group_logo"-->
+            <!--android:layout_width="@dimen/dp_50"-->
+            <!--android:layout_height="@dimen/dp_50"-->
+            <!--android:layout_marginLeft="@dimen/dp_10"-->
+            <!--android:padding="@dimen/dp_8"-->
+            <!--android:src="@drawable/group_photo" />-->
 
         <TextView
             android:id="@+id/tv_name"

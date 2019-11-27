@@ -78,10 +78,10 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public synchronized void addTerminalMessage(TerminalMessage terminalMessage) {
-        logger.info("向terminalMessage表存消息："+terminalMessage);
+        logger.info("向terminalMessage表存消息：" + terminalMessage);
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("current_member_id",TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+        values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
         values.put("message_id", terminalMessage.messageId);
         values.put("message_body_id", terminalMessage.messageBodyId);
         values.put("message_body", terminalMessage.messageBody.toJSONString());
@@ -96,8 +96,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         values.put("message_version", terminalMessage.messageVersion);
         values.put("result_code", terminalMessage.resultCode);
         values.put("send_time", terminalMessage.sendTime);
-        values.put("message_to_unique_no",terminalMessage.messageToUniqueNo);
-        values.put("message_from_unique_no",terminalMessage.messageFromUniqueNo);
+        values.put("message_to_unique_no", terminalMessage.messageToUniqueNo);
+        values.put("message_from_unique_no", terminalMessage.messageFromUniqueNo);
         values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
         db.replace(TABLE_TERMINAL_MESSAGE, null, values);
 //        db.close();
@@ -111,25 +111,25 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override
-    public void deleteMessageFromSQLite(long message_id){
-        logger.error("删除message_id"+message_id+"消息");
+    public void deleteMessageFromSQLite(long message_id) {
+        logger.error("删除message_id" + message_id + "消息");
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "DELETE FROM terminalMessage WHERE message_id = ?";
-        db.execSQL(sql, new String[]{""+message_id});
+        db.execSQL(sql, new String[]{"" + message_id});
     }
 
     @Override
     public synchronized void deleteMessageFromSQLite(int messageCategory, int targetId, int memberId) {
         SQLiteDatabase db = helper.getWritableDatabase();
-        logger.error("删除targetId"+targetId+"消息");
+        logger.error("删除targetId" + targetId + "消息");
         if (messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
             String sql = "DELETE FROM terminalMessage WHERE current_member_id = ? AND message_to_id = ? AND message_category = ?";
-            db.execSQL(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",targetId + "", 2 + ""});
+            db.execSQL(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "", targetId + "", 2 + ""});
         } else if (messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
             String sql = "DELETE FROM terminalMessage WHERE (current_member_id = ? AND message_from_id = ? AND message_to_id = ? ) AND message_category = ?";
-            db.execSQL(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",targetId + "", memberId + "", 1 + ""});
+            db.execSQL(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "", targetId + "", memberId + "", 1 + ""});
             String sql1 = "DELETE FROM terminalMessage WHERE (current_member_id = ? AND message_from_id = ? AND message_to_id = ? ) AND message_category = ?";
-            db.execSQL(sql1, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",memberId + "", targetId + "", 1 + ""});
+            db.execSQL(sql1, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "", memberId + "", targetId + "", 1 + ""});
         }
 //        db.close();
     }
@@ -138,7 +138,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     public synchronized void updateTerminalMessage(TerminalMessage terminalMessage) {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
-        values.put("current_member_id",TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+        values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
         values.put("message_path", terminalMessage.messagePath);
         values.put("message_body", terminalMessage.messageBody.toJSONString());
         db.update(TABLE_TERMINAL_MESSAGE, values, "message_version = ?", new String[]{terminalMessage.messageVersion + ""});
@@ -147,11 +147,12 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     /**
      * 更新消息的撤回状态
+     *
      * @param messageBodyId
      * @param messageStatus
      */
     @Override
-    public synchronized void updateTerminalMessageWithDraw(String messageBodyId,int messageStatus) {
+    public synchronized void updateTerminalMessageWithDraw(String messageBodyId, int messageStatus) {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("message_status", messageStatus);
@@ -179,18 +180,18 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             if (sendTime == 0) {
                 String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ? AND message_to_id = ? AND message_category = ? ORDER BY send_time DESC LIMIT 0,10";
 //                cursor = db.query(TABLE_TERMINAL_MESSAGE, null,"current_member_id = ? and message_to_id = ? and message_category = ?",new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",targetId + "", "2"},null,null,"send_time DESC","0,10");
-                cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",targetId + "", 2 + ""});
+                cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "", targetId + "", 2 + ""});
             } else {
                 String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ? AND send_time <= ? AND message_to_id = ? AND message_category = ? ORDER BY send_time DESC LIMIT 0,10";
-                cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",sendTime + "", targetId + "", 2 + ""});
+                cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "", sendTime + "", targetId + "", 2 + ""});
             }
         } else if (messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {//个人消息，查message_from_id
             if (sendTime == 0) {
                 String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ? AND (message_from_id = ?  OR (message_to_id = ? AND message_from_id = ?) ) AND message_category = ? ORDER BY send_time DESC LIMIT 0,10";
-                cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",targetId + "", targetId + "", memberId + "", 1 + ""});
+                cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "", targetId + "", targetId + "", memberId + "", 1 + ""});
             } else {
                 String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ? AND send_time <= ? AND (message_from_id = ?  OR (message_to_id = ? AND message_from_id = ?) ) AND message_category = ? ORDER BY send_time DESC LIMIT 0,10";
-                cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",sendTime + "", targetId + "", targetId + "", memberId + "", 1 + ""});
+                cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "", sendTime + "", targetId + "", targetId + "", memberId + "", 1 + ""});
             }
         } else {
             cursor = null;
@@ -204,10 +205,10 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         Cursor cursor;
         if (sendTime == 0) {
             String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ? AND message_from_id = ? AND message_type = ? AND result_code = ? ORDER BY send_time DESC LIMIT 0,10";
-            cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0) + "", memberId + "", MessageType.VIDEO_LIVE.getCode()+"","0"});
+            cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "", memberId + "", MessageType.VIDEO_LIVE.getCode() + "", "0"});
         } else {
             String sql = "SELECT * FROM terminalMessage WHERE current_member_id = ?AND send_time <= ? AND message_from_id = ? AND message_type = ? AND result_code = ? ORDER BY send_time DESC LIMIT 0,10";
-            cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)+"",sendTime  + "", memberId + "",MessageType.VIDEO_LIVE.getCode()+"","0"});
+            cursor = db.rawQuery(sql, new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "", sendTime + "", memberId + "", MessageType.VIDEO_LIVE.getCode() + "", "0"});
         }
         List<TerminalMessage> terminalMessageList = new LinkedList<>();
 
@@ -232,7 +233,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 terminalMessage.messageFromUniqueNo = cursor.getLong(cursor.getColumnIndex("message_from_unique_no"));
                 terminalMessage.messageToUniqueNo = cursor.getLong(cursor.getColumnIndex("message_to_unique_no"));
                 int messageStatus = cursor.getInt(cursor.getColumnIndex("message_status"));
-                terminalMessage.messageStatus = (messageStatus == 1)?MessageStatus.MESSAGE_RECALL.toString():MessageStatus.MESSAGE_NORMAL.toString();
+                terminalMessage.messageStatus = (messageStatus == 1) ? MessageStatus.MESSAGE_RECALL.toString() : MessageStatus.MESSAGE_NORMAL.toString();
                 //消息列表数据库才有unread_count这个字段
                 try {
                     if (cursor.getColumnIndex("unread_count") != -1) {
@@ -242,7 +243,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     e.printStackTrace();
                 }
                 //筛选
-                if(TerminalMessageUtil.isLiveMessage(terminalMessage)){
+                if (TerminalMessageUtil.isLiveMessage(terminalMessage)) {
                     terminalMessageList.add(terminalMessage);
                 }
             }
@@ -258,12 +259,12 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         for (Member member : members) {
             ContentValues values = new ContentValues();
             values.put("member_id", member.id);
-            values.put("member_no",member.getNo());
+            values.put("member_no", member.getNo());
             values.put("member_name", member.getName());
             values.put("member_pinyin", member.getPinyin());
             values.put("member_phone", member.phone);
             values.put("department_name", member.departmentName);
-            values.put("unique_no",member.getUniqueNo());
+            values.put("unique_no", member.getUniqueNo());
             db.replace(PDT_MEMBER, null, values);
         }
     }
@@ -273,11 +274,11 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("member_name", member.getName());
-        values.put("member_no",member.getNo());
+        values.put("member_no", member.getNo());
         values.put("member_pinyin", member.pinyin);
         values.put("member_phone", member.phone);
         values.put("department_name", member.departmentName);
-        values.put("unique_no",member.getUniqueNo());
+        values.put("unique_no", member.getUniqueNo());
         db.update(PDT_MEMBER, values, "member_id = ?", new String[]{member.id + ""});
     }
 
@@ -308,12 +309,12 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         for (Member member : members) {
             ContentValues values = new ContentValues();
             values.put("member_id", member.id);
-            values.put("member_no",member.getNo());
+            values.put("member_no", member.getNo());
             values.put("member_name", member.getName());
             values.put("member_pinyin", member.pinyin);
             values.put("member_phone", member.phone);
             values.put("department_name", member.departmentName);
-            values.put("unique_no",member.getUniqueNo());
+            values.put("unique_no", member.getUniqueNo());
             db.replace(PHONE_MEMBER, null, values);
         }
     }
@@ -323,11 +324,11 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("member_name", member.getName());
-        values.put("member_no",member.getNo());
+        values.put("member_no", member.getNo());
         values.put("member_pinyin", member.pinyin);
         values.put("member_phone", member.phone);
         values.put("department_name", member.departmentName);
-        values.put("unique_no",member.getUniqueNo());
+        values.put("unique_no", member.getUniqueNo());
         db.update(PHONE_MEMBER, values, "member_id = ?", new String[]{member.id + ""});
     }
 
@@ -354,7 +355,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     private synchronized List<TerminalMessage> getTerminalMessageList(SQLiteDatabase db, Cursor cursor) {
         List<TerminalMessage> terminalMessageList = new LinkedList<>();
-        try{
+        try {
             if (cursor != null && cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
                     TerminalMessage terminalMessage = new TerminalMessage();
@@ -376,17 +377,17 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     terminalMessage.messageFromUniqueNo = cursor.getLong(cursor.getColumnIndex("message_from_unique_no"));
                     terminalMessage.messageToUniqueNo = cursor.getLong(cursor.getColumnIndex("message_to_unique_no"));
                     int messageStatus = cursor.getInt(cursor.getColumnIndex("message_status"));
-                    terminalMessage.messageStatus = (messageStatus == 1)?MessageStatus.MESSAGE_RECALL.toString():MessageStatus.MESSAGE_NORMAL.toString();
+                    terminalMessage.messageStatus = (messageStatus == 1) ? MessageStatus.MESSAGE_RECALL.toString() : MessageStatus.MESSAGE_NORMAL.toString();
                     //消息列表数据库才有unread_count这个字段
                     if (cursor.getColumnIndex("unread_count") != -1) {
                         terminalMessage.unReadCount = cursor.getInt(cursor.getColumnIndex("unread_count"));
                     }
-                    logger.info("从数据库取出数据："+terminalMessage);
+                    logger.info("从数据库取出数据：" + terminalMessage);
                     terminalMessageList.add(terminalMessage);
                 }
                 cursor.close();
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             logger.error(e.toString());
         }
 
@@ -396,11 +397,11 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public synchronized void updateMessageList(List<TerminalMessage> terminalMessages) {
-        logger.info("保存消息列表数据:"+terminalMessages);
+        logger.info("保存消息列表数据:" + terminalMessages);
         SQLiteDatabase db = helper.getWritableDatabase();
         //开始事务
         db.beginTransaction();
-        try{
+        try {
             db.execSQL("DELETE FROM messageList");
             for (TerminalMessage terminalMessage : terminalMessages) {
                 ContentValues values = new ContentValues();
@@ -420,16 +421,15 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("result_code", terminalMessage.resultCode);
                 values.put("send_time", terminalMessage.sendTime);
                 values.put("unread_count", terminalMessage.unReadCount);
-                values.put("message_to_unique_no",terminalMessage.messageToUniqueNo);
-                values.put("message_from_unique_no",terminalMessage.messageFromUniqueNo);
+                values.put("message_to_unique_no", terminalMessage.messageToUniqueNo);
+                values.put("message_from_unique_no", terminalMessage.messageFromUniqueNo);
                 values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
                 db.replace(MESSAGE_LIST, null, values);
             }
             db.setTransactionSuccessful();  //设置事务成功完成
-        }catch(Exception e){
+        } catch (Exception e) {
             logger.error(e);
-        }
-        finally{
+        } finally {
             //结束事务
             db.endTransaction();
         }
@@ -440,11 +440,11 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public synchronized void updateCombatMessageList(List<TerminalMessage> terminalMessages) {
-        logger.info("保存合成作战组列表数据:"+terminalMessages);
+        logger.info("保存合成作战组列表数据:" + terminalMessages);
         SQLiteDatabase db = helper.getWritableDatabase();
         //开始事务
         db.beginTransaction();
-        try{
+        try {
             db.execSQL("DELETE FROM combatMessageList");
             for (TerminalMessage terminalMessage : terminalMessages) {
                 ContentValues values = new ContentValues();
@@ -464,16 +464,15 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("result_code", terminalMessage.resultCode);
                 values.put("send_time", terminalMessage.sendTime);
                 values.put("unread_count", terminalMessage.unReadCount);
-                values.put("message_to_unique_no",terminalMessage.messageToUniqueNo);
-                values.put("message_from_unique_no",terminalMessage.messageFromUniqueNo);
+                values.put("message_to_unique_no", terminalMessage.messageToUniqueNo);
+                values.put("message_from_unique_no", terminalMessage.messageFromUniqueNo);
                 values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
                 db.replace(COMBAT_MESSAGE_LIST, null, values);
             }
             db.setTransactionSuccessful();  //设置事务成功完成
-        }catch(Exception e){
+        } catch (Exception e) {
             logger.error(e);
-        }
-        finally{
+        } finally {
             //结束事务
             db.endTransaction();
         }
@@ -484,11 +483,11 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     @Override
     public synchronized void updateHistoryCombatMessageList(List<TerminalMessage> terminalMessages) {
-        logger.info("保存合成作战组历史列表数据:"+terminalMessages);
+        logger.info("保存合成作战组历史列表数据:" + terminalMessages);
         SQLiteDatabase db = helper.getWritableDatabase();
         //开始事务
         db.beginTransaction();
-        try{
+        try {
             db.execSQL("DELETE FROM historyCombatMessageList");
             for (TerminalMessage terminalMessage : terminalMessages) {
                 ContentValues values = new ContentValues();
@@ -508,16 +507,15 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("result_code", terminalMessage.resultCode);
                 values.put("send_time", terminalMessage.sendTime);
                 values.put("unread_count", terminalMessage.unReadCount);
-                values.put("message_to_unique_no",terminalMessage.messageToUniqueNo);
-                values.put("message_from_unique_no",terminalMessage.messageFromUniqueNo);
+                values.put("message_to_unique_no", terminalMessage.messageToUniqueNo);
+                values.put("message_from_unique_no", terminalMessage.messageFromUniqueNo);
                 values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
                 db.replace(HISTORY_COMBAT_MESSAGE_LIST, null, values);
             }
             db.setTransactionSuccessful();  //设置事务成功完成
-        }catch(Exception e){
+        } catch (Exception e) {
             logger.error(e);
-        }
-        finally{
+        } finally {
             //结束事务
             db.endTransaction();
         }
@@ -531,7 +529,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(MESSAGE_LIST, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
         List<TerminalMessage> terminalMessageList = getTerminalMessageList(db, cursor);
-        logger.info("查询消息列表数据："+terminalMessageList);
+        logger.info("查询消息列表数据：" + terminalMessageList);
         return terminalMessageList;
     }
 
@@ -540,7 +538,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(COMBAT_MESSAGE_LIST, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
         List<TerminalMessage> terminalMessageList = getTerminalMessageList(db, cursor);
-        logger.info("查询合成作战组消息列表数据："+terminalMessageList);
+        logger.info("查询合成作战组消息列表数据：" + terminalMessageList);
         return terminalMessageList;
     }
 
@@ -549,7 +547,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         SQLiteDatabase db = helper.getReadableDatabase();
         Cursor cursor = db.query(HISTORY_COMBAT_MESSAGE_LIST, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, null);
         List<TerminalMessage> terminalMessageList = getTerminalMessageList(db, cursor);
-        logger.info("查询合成作战组历史消息列表数据："+terminalMessageList);
+        logger.info("查询合成作战组历史消息列表数据：" + terminalMessageList);
         return terminalMessageList;
     }
 
@@ -638,12 +636,12 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         for (Group group : groups) {
             ContentValues values = new ContentValues();
             values.put("group_id", group.getId());
-            values.put("group_no",group.getNo());
+            values.put("group_no", group.getNo());
             values.put("group_name", group.getName());
-            values.put("department_name",group.getDepartmentName());
-            values.put("group_type",group.getGroupType());
-            values.put("response_group_type",group.getResponseGroupType());
-            values.put("group_unique_no",group.getUniqueNo());
+            values.put("department_name", group.getDepartmentName());
+            values.put("group_type", group.getGroupType());
+            values.put("response_group_type", group.getResponseGroupType());
+            values.put("group_unique_no", group.getUniqueNo());
             db.replace(GROUP_DATA, null, values);
         }
     }
@@ -660,10 +658,10 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         ContentValues values = new ContentValues();
         values.put("group_name", group.getName());
         values.put("group_no", group.getNo());
-        values.put("department_name",group.getDepartmentName());
-        values.put("group_type",group.getGroupType());
-        values.put("response_group_type",group.getResponseGroupType());
-        values.put("group_unique_no",group.getUniqueNo());
+        values.put("department_name", group.getDepartmentName());
+        values.put("group_type", group.getGroupType());
+        values.put("response_group_type", group.getResponseGroupType());
+        values.put("group_unique_no", group.getUniqueNo());
         db.update(GROUP_DATA, values, "group_id = ?", new String[]{group.id + ""});
     }
 
@@ -694,18 +692,18 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         return groupList;
     }
 
-    public void addWarningRecord(WarningRecord warningRecord){
+    public void addWarningRecord(WarningRecord warningRecord) {
         SQLiteDatabase db = helper.getReadableDatabase();
         ContentValues values = getWarningRecordContentValues(warningRecord);
         db.replace(WARNING_RECORD, null, values);
     }
 
     @Override
-    public Map<String,Integer> getWarningRecordsNo(int page,int pageSize){
+    public Map<String, Integer> getWarningRecordsNo(int page, int pageSize) {
         SQLiteDatabase db = helper.getReadableDatabase();
-        StringBuffer sql=new StringBuffer("select * from warningRecord ");
-        sql.append(" order by alarm_time limit "+pageSize+" offset "+(page-1)*pageSize);
-        Cursor cursor=db.rawQuery(sql.toString(), null);
+        StringBuffer sql = new StringBuffer("select * from warningRecord ");
+        sql.append(" order by alarm_time limit " + pageSize + " offset " + (page - 1) * pageSize);
+        Cursor cursor = db.rawQuery(sql.toString(), null);
         //        Cursor cursor = db.query(WARNING_RECORD, new String[]{"alarm_no"}, null, null, null, null, "alarm_time",);
         return getWarningRecordMap(db, cursor);
     }
@@ -720,8 +718,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     @Override
     public WarningRecord getWarningRecordByAlarmNo(String alarmNo) {
         SQLiteDatabase db = helper.getWritableDatabase();
-        Cursor cursor = db.query(WARNING_RECORD, null, "alarm_no=?", new String[] { alarmNo }, null, null, null);
-        WarningRecord record =null;
+        Cursor cursor = db.query(WARNING_RECORD, null, "alarm_no=?", new String[]{alarmNo}, null, null, null);
+        WarningRecord record = null;
         while (cursor.moveToNext()) {
             record = getWarningRecord(cursor);
         }
@@ -730,7 +728,6 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     /**
-     *
      * @param cursor
      * @return
      */
@@ -751,12 +748,12 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         return record;
     }
 
-    private synchronized List<String> getWarningRecordList(SQLiteDatabase db, Cursor cursor){
+    private synchronized List<String> getWarningRecordList(SQLiteDatabase db, Cursor cursor) {
         List<String> warningRecordNoList = new ArrayList<>();
 
         if (cursor != null && cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
-                if(!TextUtils.isEmpty(cursor.getString(cursor.getColumnIndex("alarm_no")))){
+                if (!TextUtils.isEmpty(cursor.getString(cursor.getColumnIndex("alarm_no")))) {
                     warningRecordNoList.add(cursor.getString(cursor.getColumnIndex("alarm_no")));
                 }
             }
@@ -766,11 +763,11 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         return warningRecordNoList;
     }
 
-    private synchronized Map<String,Integer> getWarningRecordMap(SQLiteDatabase db, Cursor cursor){
-        Map<String,Integer> map = new HashMap<>();
+    private synchronized Map<String, Integer> getWarningRecordMap(SQLiteDatabase db, Cursor cursor) {
+        Map<String, Integer> map = new HashMap<>();
         if (cursor != null && cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
-                if(!TextUtils.isEmpty(cursor.getString(cursor.getColumnIndex("alarm_no")))){
+                if (!TextUtils.isEmpty(cursor.getString(cursor.getColumnIndex("alarm_no")))) {
                     map.put(cursor.getString(cursor.getColumnIndex("alarm_no")),
                             cursor.getInt(cursor.getColumnIndex("unread")));
                 }
@@ -781,41 +778,41 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         return map;
     }
 
-    private  ContentValues  getWarningRecordContentValues(WarningRecord warningRecord){
+    private ContentValues getWarningRecordContentValues(WarningRecord warningRecord) {
         ContentValues values = new ContentValues();
         values.put("alarm_no", warningRecord.getAlarmNo());
-        if(warningRecord.getStatus()!= -1){
-            values.put("status",warningRecord.getStatus());
+        if (warningRecord.getStatus() != -1) {
+            values.put("status", warningRecord.getStatus());
         }
-        if(warningRecord.getLevels() !=-1){
+        if (warningRecord.getLevels() != -1) {
             values.put("levels", warningRecord.getLevels());
         }
-        if(!TextUtils.isEmpty(warningRecord.getAlarmTime())){
-            values.put("alarm_time",warningRecord.getAlarmTime());
+        if (!TextUtils.isEmpty(warningRecord.getAlarmTime())) {
+            values.put("alarm_time", warningRecord.getAlarmTime());
         }
-        if(!TextUtils.isEmpty(warningRecord.getAddress())){
-            values.put("address",warningRecord.getAddress());
+        if (!TextUtils.isEmpty(warningRecord.getAddress())) {
+            values.put("address", warningRecord.getAddress());
         }
-        if(!TextUtils.isEmpty(warningRecord.getSummary())){
-            values.put("summary",warningRecord.getSummary());
+        if (!TextUtils.isEmpty(warningRecord.getSummary())) {
+            values.put("summary", warningRecord.getSummary());
         }
-        if(!TextUtils.isEmpty(warningRecord.getApersonPhone())){
-            values.put("apersonphone",warningRecord.getApersonPhone());
+        if (!TextUtils.isEmpty(warningRecord.getApersonPhone())) {
+            values.put("apersonphone", warningRecord.getApersonPhone());
         }
-        if(!TextUtils.isEmpty(warningRecord.getAperson())){
-            values.put("aperson",warningRecord.getAperson());
+        if (!TextUtils.isEmpty(warningRecord.getAperson())) {
+            values.put("aperson", warningRecord.getAperson());
         }
-        if(!TextUtils.isEmpty(warningRecord.getRecvperson())){
-            values.put("recvperson",warningRecord.getRecvperson());
+        if (!TextUtils.isEmpty(warningRecord.getRecvperson())) {
+            values.put("recvperson", warningRecord.getRecvperson());
         }
-        if(!TextUtils.isEmpty(warningRecord.getRecvphone())){
-            values.put("recvphone",warningRecord.getRecvphone());
+        if (!TextUtils.isEmpty(warningRecord.getRecvphone())) {
+            values.put("recvphone", warningRecord.getRecvphone());
         }
-        if(!TextUtils.isEmpty(warningRecord.getDate())){
-            values.put("date",warningRecord.getDate());
+        if (!TextUtils.isEmpty(warningRecord.getDate())) {
+            values.put("date", warningRecord.getDate());
         }
-        if(warningRecord.getStatus()!= -1){
-            values.put("unread",warningRecord.getUnRead());
+        if (warningRecord.getStatus() != -1) {
+            values.put("unread", warningRecord.getUnRead());
         }
         return values;
     }
@@ -837,7 +834,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                         group.name = cursor.getString(cursor.getColumnIndex("group_name"));
 
                         folder.groups.add(group);
-                    }else {
+                    } else {
                         Folder folder = setFolder(cursor);
                         folderMap.put(folder.id, folder);
                     }
@@ -870,16 +867,16 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     @Override
     public void addCallRecord(CopyOnWriteArrayList<CallRecord> callRecords) {
         SQLiteDatabase db = helper.getWritableDatabase();
-        for (CallRecord callRecord :callRecords) {
+        for (CallRecord callRecord : callRecords) {
             ContentValues values = new ContentValues();
             values.put("call_id", callRecord.getCallId());
-            values.put("member_name",callRecord.getMemberName());
+            values.put("member_name", callRecord.getMemberName());
             values.put("call_phone", callRecord.getPhone());
-            values.put("call_records",callRecord.getCallRecords());
-            values.put("call_time",callRecord.getTime());
-            values.put("call_path",callRecord.getPath());
-            values.put("call_download",callRecord.isDownLoad()?"true":"false");
-            values.put("call_playing",callRecord.isPlaying()?"true":"false");
+            values.put("call_records", callRecord.getCallRecords());
+            values.put("call_time", callRecord.getTime());
+            values.put("call_path", callRecord.getPath());
+            values.put("call_download", callRecord.isDownLoad() ? "true" : "false");
+            values.put("call_playing", callRecord.isPlaying() ? "true" : "false");
             db.replace(CALL_RECORD, null, values);
         }
     }
@@ -895,13 +892,13 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("call_id", callRecord.getCallId());
-        values.put("member_name",callRecord.getMemberName());
+        values.put("member_name", callRecord.getMemberName());
         values.put("call_phone", callRecord.getPhone());
-        values.put("call_records",callRecord.getCallRecords());
-        values.put("call_time",callRecord.getTime());
-        values.put("call_path",callRecord.getPath());
-        values.put("call_download",callRecord.isDownLoad());
-        values.put("call_playing",callRecord.isPlaying());
+        values.put("call_records", callRecord.getCallRecords());
+        values.put("call_time", callRecord.getTime());
+        values.put("call_path", callRecord.getPath());
+        values.put("call_download", callRecord.isDownLoad());
+        values.put("call_playing", callRecord.isPlaying());
         db.update(CALL_RECORD, values, "call_id = ?", new String[]{callRecord.callId + ""});
     }
 
@@ -933,13 +930,15 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         logger.info("查询本地数据库CallRecord结果：" + callRecordList);
         return callRecordList;
     }
+
     /**
      * 添加比特星生成的本地文件
+     *
      * @param record
      */
     @Override
     public void addBitStarFileRecord(BitStarFileRecord record) {
-        logger.info("addBitStarFileRecord"+record);
+        logger.info("addBitStarFileRecord" + record);
         SQLiteDatabase db = helper.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put("file_duration", record.getDuration());
@@ -947,7 +946,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         values.put("file_height", record.getHeight());
         values.put("file_date", record.getDate());
         values.put("file_name", record.getFileName());
-        values.put("file_path",record.getFilePath());
+        values.put("file_path", record.getFilePath());
         values.put("file_type", record.getFileType());
         values.put("file_time", record.getFileTime());
         values.put("file_state", record.getFileState());
@@ -956,29 +955,32 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     /**
      * 根据文件名字删除本地文件
+     *
      * @param name
      */
     @Override
     public void deleteBitStarFileRecord(String name) {
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "DELETE FROM bitStarFileRecord WHERE file_name = ?";
-        db.execSQL(sql, new String[]{""+name});
+        db.execSQL(sql, new String[]{"" + name});
     }
 
     /**
      * 一次删除多条数据
+     *
      * @param names
      */
     @Override
     public void deleteBitStarFileRecords(String[] names) {
         SQLiteDatabase db = helper.getWritableDatabase();
         String placeHolder = getPlaceHolder(names.length);
-        String sql = "DELETE FROM bitStarFileRecord WHERE file_name in ("+placeHolder+")";
+        String sql = "DELETE FROM bitStarFileRecord WHERE file_name in (" + placeHolder + ")";
         db.execSQL(sql, names);
     }
 
     /**
      * 更新文件的上传状态
+     *
      * @param name
      * @param fileState
      */
@@ -992,14 +994,15 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     /**
      * 根据文件名字获取文件信息
+     *
      * @param name
      * @return
      */
     @Override
     public BitStarFileRecord getBitStarFileRecord(String name) {
         SQLiteDatabase db = helper.getWritableDatabase();
-        Cursor cursor = db.query(BIT_STAR_FILE_RECORD, null, "file_name=?", new String[] { name }, null, null, null);
-        BitStarFileRecord record =null;
+        Cursor cursor = db.query(BIT_STAR_FILE_RECORD, null, "file_name=?", new String[]{name}, null, null, null);
+        BitStarFileRecord record = null;
         while (cursor.moveToNext()) {
             record = getBitStarFileRecord(cursor);
         }
@@ -1010,6 +1013,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     /**
      * 根据多个文件名字获取多个文件信息
+     *
      * @param names
      * @return
      */
@@ -1018,7 +1022,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         CopyOnWriteArrayList<BitStarFileRecord> list = new CopyOnWriteArrayList<>();
         SQLiteDatabase db = helper.getWritableDatabase();
         String placeHolder = getPlaceHolder(names.length);
-        String sql = "SELECT * FROM bitStarFileRecord WHERE file_name in ("+placeHolder+")";
+        String sql = "SELECT * FROM bitStarFileRecord WHERE file_name in (" + placeHolder + ")";
         Cursor cursor = db.rawQuery(sql, names);
         while (cursor.moveToNext()) {
             list.add(getBitStarFileRecord(cursor));
@@ -1030,25 +1034,27 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     /**
      * 根据文件的状态获取文件的信息列表
+     *
      * @return
      */
     @Override
     public CopyOnWriteArrayList<BitStarFileRecord> getBitStarFileRecordByState(int fileState) {
         CopyOnWriteArrayList<BitStarFileRecord> list = new CopyOnWriteArrayList<>();
         SQLiteDatabase db = helper.getReadableDatabase();
-        Cursor cursor = db.query(BIT_STAR_FILE_RECORD, null, "file_state=?", new String[] { fileState+"" }, null, null, "file_time ASC");
+        Cursor cursor = db.query(BIT_STAR_FILE_RECORD, null, "file_state=?", new String[]{fileState + ""}, null, null, "file_time ASC");
         if (cursor != null && cursor.getCount() > 0) {
             while (cursor.moveToNext()) {
                 list.add(getBitStarFileRecord(cursor));
             }
             cursor.close();
         }
-        logger.info("查询本地数据库getBitStarFileRecordByState结果：fileState："+fileState+"--list--" + list);
+        logger.info("查询本地数据库getBitStarFileRecordByState结果：fileState：" + fileState + "--list--" + list);
         return list;
     }
 
     /**
      * 根据文件的状态获取最早的一条数据
+     *
      * @param fileState
      * @return
      */
@@ -1056,8 +1062,8 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     public BitStarFileRecord getBitStarFileRecordByStateAndFirst(int fileState) {
         SQLiteDatabase db = helper.getWritableDatabase();
         String sql = "SELECT * FROM bitStarFileRecord WHERE file_state = ?  ORDER BY file_time ASC LIMIT 1";
-        Cursor cursor = db.rawQuery(sql, new String[]{fileState+""});
-        BitStarFileRecord record =null;
+        Cursor cursor = db.rawQuery(sql, new String[]{fileState + ""});
+        BitStarFileRecord record = null;
         while (cursor.moveToNext()) {
             record = getBitStarFileRecord(cursor);
         }
@@ -1082,13 +1088,13 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override
-    public CopyOnWriteArrayList<String> getFileDates(int page,int pageSize){
+    public CopyOnWriteArrayList<String> getFileDates(int page, int pageSize) {
         CopyOnWriteArrayList<String> list = new CopyOnWriteArrayList<>();
         SQLiteDatabase db = helper.getReadableDatabase();
-        StringBuffer sql=new StringBuffer("select file_date from bitStarFileRecord GROUP BY file_date ORDER BY file_date desc limit "+pageSize+" offset "+(page-1)*pageSize);
-        Cursor cursor=db.rawQuery(sql.toString(), null);
-        if (cursor != null && cursor.getCount() > 0){
-            while (cursor.moveToNext()){
+        StringBuffer sql = new StringBuffer("select file_date from bitStarFileRecord GROUP BY file_date ORDER BY file_date desc limit " + pageSize + " offset " + (page - 1) * pageSize);
+        Cursor cursor = db.rawQuery(sql.toString(), null);
+        if (cursor != null && cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
                 list.add(cursor.getString(cursor.getColumnIndex("file_date")));
             }
             cursor.close();
@@ -1097,44 +1103,19 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override
-    public CopyOnWriteArrayList<BitStarFileRecord> getBitStarFileRecords(String date,String fileType){
+    public CopyOnWriteArrayList<BitStarFileRecord> getBitStarFileRecords(String date, String fileType) {
         CopyOnWriteArrayList<BitStarFileRecord> list = new CopyOnWriteArrayList<>();
         SQLiteDatabase db = helper.getReadableDatabase();
-        StringBuffer sql=new StringBuffer("select * from bitStarFileRecord where file_date = ");
+        StringBuffer sql = new StringBuffer("select * from bitStarFileRecord where file_date = ");
         sql.append("\'").append(date).append("\'");
-        if(!TextUtils.isEmpty(fileType)){
+        if (!TextUtils.isEmpty(fileType)) {
             sql.append(" AND file_type = ");
             sql.append("\'").append(fileType).append("\'");
         }
         sql.append(" ORDER BY file_date desc");
-        Cursor cursor=db.rawQuery(sql.toString(), null);
-        if (cursor != null && cursor.getCount() > 0){
-            while (cursor.moveToNext()){
-                list.add(getBitStarFileRecord(cursor));
-            }
-            cursor.close();
-        }
-        logger.info("查询本地数据库getBitStarFileRecord结果：" + list);
-        return list;
-    }
-    /**
-     * 分组分页查询存放的文件
-     * @param page 页数，从1开始
-     * @param pageSize 每页数据数量
-     * @return
-     */
-    @Override
-    public CopyOnWriteArrayList<BitStarFileRecord> getBitStarFileRecords(int page,int pageSize,String fileType){
-        CopyOnWriteArrayList<BitStarFileRecord> list = new CopyOnWriteArrayList<>();
-        SQLiteDatabase db = helper.getReadableDatabase();
-        StringBuffer sql=new StringBuffer("select * from bitStarFileRecord ");
-        if(!TextUtils.isEmpty(fileType)){
-            sql.append("where file_type = "+fileType);
-        }
-        sql.append(" GROUP BY file_date "+"ORDER BY file_date desc limit "+pageSize+" offset "+(page-1)*pageSize);
-        Cursor cursor=db.rawQuery(sql.toString(), null);
-        if (cursor != null && cursor.getCount() > 0){
-            while (cursor.moveToNext()){
+        Cursor cursor = db.rawQuery(sql.toString(), null);
+        if (cursor != null && cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
                 list.add(getBitStarFileRecord(cursor));
             }
             cursor.close();
@@ -1144,11 +1125,39 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     /**
-     *获取单个BitStarFileRecord
+     * 分组分页查询存放的文件
+     *
+     * @param page     页数，从1开始
+     * @param pageSize 每页数据数量
+     * @return
+     */
+    @Override
+    public CopyOnWriteArrayList<BitStarFileRecord> getBitStarFileRecords(int page, int pageSize, String fileType) {
+        CopyOnWriteArrayList<BitStarFileRecord> list = new CopyOnWriteArrayList<>();
+        SQLiteDatabase db = helper.getReadableDatabase();
+        StringBuffer sql = new StringBuffer("select * from bitStarFileRecord ");
+        if (!TextUtils.isEmpty(fileType)) {
+            sql.append("where file_type = " + fileType);
+        }
+        sql.append(" GROUP BY file_date " + "ORDER BY file_date desc limit " + pageSize + " offset " + (page - 1) * pageSize);
+        Cursor cursor = db.rawQuery(sql.toString(), null);
+        if (cursor != null && cursor.getCount() > 0) {
+            while (cursor.moveToNext()) {
+                list.add(getBitStarFileRecord(cursor));
+            }
+            cursor.close();
+        }
+        logger.info("查询本地数据库getBitStarFileRecord结果：" + list);
+        return list;
+    }
+
+    /**
+     * 获取单个BitStarFileRecord
+     *
      * @param cursor
      * @return
      */
-    public  BitStarFileRecord getBitStarFileRecord(Cursor cursor){
+    public BitStarFileRecord getBitStarFileRecord(Cursor cursor) {
         BitStarFileRecord record = new BitStarFileRecord();
         record.setDuration(cursor.getInt(cursor.getColumnIndex("file_duration")));
         record.setWidth(cursor.getInt(cursor.getColumnIndex("file_width")));
@@ -1164,10 +1173,11 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
     /**
      * 获取占位符
+     *
      * @param size
      * @return
      */
-    private String getPlaceHolder(int size){
+    private String getPlaceHolder(int size) {
         if (size < 1) {
             return "";
         } else {
@@ -1182,12 +1192,12 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override
-    public void updateAllGroup(List<Group> groups){
-        logger.info("保存组数据:"+groups);
+    public void updateAllGroup(List<Group> groups) {
+        logger.info("保存组数据:" + groups);
         SQLiteDatabase db = helper.getWritableDatabase();
         //开始事务
         db.beginTransaction();
-        try{
+        try {
             db.execSQL("DELETE FROM allGroup");
             for (Group group : groups) {
                 ContentValues values = new ContentValues();
@@ -1205,17 +1215,16 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("dept_id", group.getDeptId());
                 values.put("created_member_unique_no", group.getCreatedMemberUniqueNo());
                 values.put("response_group_type", group.getResponseGroupType());
-                values.put("high_user", group.isHighUser()?1:0);
+                values.put("high_user", group.isHighUser() ? 1 : 0);
                 values.put("processing_state", group.getProcessingState());
                 values.put("created_member_name", group.getCreatedMemberName());
                 values.put("created_member_no", group.getCreatedMemberNo());
                 db.replace(ALL_GROUP, null, values);
             }
             db.setTransactionSuccessful();  //设置事务成功完成
-        }catch(Exception e){
+        } catch (Exception e) {
             logger.error(e);
-        }
-        finally{
+        } finally {
             //结束事务
             db.endTransaction();
         }
@@ -1228,8 +1237,9 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
         String sql = "SELECT * FROM allGroup WHERE 1 = 1 LIMIT 1";
         Cursor cursor = db.rawQuery(sql, new String[]{});
-        GroupSearchBean group =null;
+        GroupSearchBean group = null;
         while (cursor.moveToNext()) {
+            group = new GroupSearchBean();
             group.setId(cursor.getInt(cursor.getColumnIndex("group_id")));
             group.setNo(cursor.getInt(cursor.getColumnIndex("group_no")));
             group.setBusinessId(cursor.getString(cursor.getColumnIndex("business_id")));
@@ -1254,25 +1264,24 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         }
         cursor.close();
         logger.info("查询本地数据库getBitStarFileRecordByStateAndFirst结果：" + group);
-        if(group!=null){
+        if (group != null) {
             groups.add(group);
         }
         return groups;
     }
 
 
-
     @Override
-    public synchronized List<GroupSearchBean> getAllGroup(List<GroupSearchBean> groups,int index){
-        logger.info("分页查询 group index:"+index);
+    public synchronized List<GroupSearchBean> getAllGroup(List<GroupSearchBean> groups, int index) {
+        logger.info("分页查询 group index:" + index);
         long start = System.currentTimeMillis();
         int cursorSize = 0;
         SQLiteDatabase db = helper.getReadableDatabase();
-        Cursor cursor = db.query(ALL_GROUP, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, "group_no ASC LIMIT "+pageSize+" offset "+index);
-        try{
+        Cursor cursor = db.query(ALL_GROUP, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, "group_no ASC LIMIT " + pageSize + " offset " + index);
+        try {
             if (cursor != null && cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    index ++;
+                    index++;
                     cursorSize++;
                     GroupSearchBean group = new GroupSearchBean();
                     group.setId(cursor.getInt(cursor.getColumnIndex("group_id")));
@@ -1292,7 +1301,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     group.setUniqueNo(cursor.getLong(cursor.getColumnIndex("unique_no")));
 
                     //T9搜索
-                    group.getLabelPinyinSearchUnit().setBaseData(group.getName());
+                    group.getLabelPinyinSearchUnit().setBaseData(group.getName()+ group.getNo());
                     PinyinUtil.parse(group.getLabelPinyinSearchUnit());
                     String sortKey = PinyinUtil.getSortKey(group.getLabelPinyinSearchUnit()).toUpperCase();
                     group.setSortKey(praseSortKey(sortKey));
@@ -1301,25 +1310,25 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 }
                 cursor.close();
                 long end = System.currentTimeMillis();
-                logger.info("获取数据库数据所耗时间getAllGroup："+(end-start));
+                logger.info("获取数据库数据所耗时间getAllGroup：" + (end - start));
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             logger.error(e.toString());
         }
 
-        if(cursorSize>=pageSize){
-            getAllGroup(groups,index);
+        if (cursorSize >= pageSize) {
+            getAllGroup(groups, index);
         }
         return groups;
     }
 
     @Override
-    public void updateAllAccount(List<Account> accounts){
-        logger.info("保存账号数据:"+accounts);
+    public void updateAllAccount(List<Account> accounts) {
+        logger.info("保存账号数据:" + accounts);
         SQLiteDatabase db = helper.getWritableDatabase();
         //开始事务
         db.beginTransaction();
-        try{
+        try {
             db.execSQL("DELETE FROM allAccount");
             for (Account account : accounts) {
                 ContentValues values = new ContentValues();
@@ -1331,15 +1340,14 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 //                values.put("name_first_pinyin", PinyinUtils.converterToFirstSpell(account.getName()));
                 values.put("account_phone", account.getPhone());
                 values.put("dept_id", account.getDeptId());
-                values.put("members", MyGsonUtil.list2String(true,account.getMembers()));
+                values.put("members", MyGsonUtil.list2String(true, account.getMembers()));
                 values.put("department_name", account.getDepartmentName());
                 db.replace(ALL_ACCOUNT, null, values);
             }
             db.setTransactionSuccessful();  //设置事务成功完成
-        }catch(Exception e){
+        } catch (Exception e) {
             logger.error(e);
-        }
-        finally{
+        } finally {
             //结束事务
             db.endTransaction();
         }
@@ -1351,8 +1359,9 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         SQLiteDatabase db = helper.getReadableDatabase();
         String sql = "SELECT * FROM allAccount WHERE 1 = 1 LIMIT 1";
         Cursor cursor = db.rawQuery(sql, new String[]{});
-        MemberSearchBean account =null;
+        MemberSearchBean account = null;
         while (cursor.moveToNext()) {
+            account = new MemberSearchBean();
             account.setId(cursor.getInt(cursor.getColumnIndex("account_id")));
             account.setNo(cursor.getInt(cursor.getColumnIndex("account_no")));
             account.setName(cursor.getString(cursor.getColumnIndex("account_name")));
@@ -1360,16 +1369,16 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             account.setDeptId(cursor.getInt(cursor.getColumnIndex("dept_id")));
             account.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
             String members = cursor.getString(cursor.getColumnIndex("members"));
-            account.setMembers(MyGsonUtil.getList(true,members,new ArrayList<>(),Member.class));
+            account.setMembers(MyGsonUtil.getList(true, members, new ArrayList<>(), Member.class));
 
-            account.getLabelPinyinSearchUnit().setBaseData(account.getName()+account.getNo());
+            account.getLabelPinyinSearchUnit().setBaseData(account.getName() + account.getNo());
             PinyinUtil.parse(account.getLabelPinyinSearchUnit());
             String sortKey = PinyinUtil.getSortKey(account.getLabelPinyinSearchUnit()).toUpperCase();
             account.setSortKey(praseSortKey(sortKey));
         }
         cursor.close();
         logger.info("查询本地数据库getAllAccountFirst结果：" + account);
-        if(account!=null){
+        if (account != null) {
             memberList.add(account);
         }
         return memberList;
@@ -1378,17 +1387,17 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     private int pageSize = 500;
 
     @Override
-    public List<MemberSearchBean> getAllAccount(List<MemberSearchBean> accounts,int index){
-        logger.info("分页查询 Account index:"+index);
+    public List<MemberSearchBean> getAllAccount(List<MemberSearchBean> accounts, int index) {
+        logger.info("分页查询 Account index:" + index);
         long start = System.currentTimeMillis();
         int cursorSize = 0;
 
         SQLiteDatabase db = helper.getReadableDatabase();
-        Cursor cursor = db.query(ALL_ACCOUNT, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, "account_no ASC LIMIT "+pageSize+" offset "+index);
-        try{
+        Cursor cursor = db.query(ALL_ACCOUNT, null, "current_member_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + ""}, null, null, "account_no ASC LIMIT " + pageSize + " offset " + index);
+        try {
             if (cursor != null && cursor.getCount() > 0) {
                 while (cursor.moveToNext()) {
-                    index ++;
+                    index++;
                     cursorSize++;
                     MemberSearchBean account = new MemberSearchBean();
                     account.setId(cursor.getInt(cursor.getColumnIndex("account_id")));
@@ -1398,11 +1407,11 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     account.setDeptId(cursor.getInt(cursor.getColumnIndex("dept_id")));
                     account.setDepartmentName(cursor.getString(cursor.getColumnIndex("department_name")));
                     String members = cursor.getString(cursor.getColumnIndex("members"));
-                    account.setMembers(MyGsonUtil.getList(true,members,new ArrayList<>(),Member.class));
+                    account.setMembers(MyGsonUtil.getList(true, members, new ArrayList<>(), Member.class));
 
                     String no = handleId(account.getNo());//去掉88 86
 
-                    account.getLabelPinyinSearchUnit().setBaseData(account.getName()+no);
+                    account.getLabelPinyinSearchUnit().setBaseData(account.getName() + no);
                     PinyinUtil.parse(account.getLabelPinyinSearchUnit());
                     String sortKey = PinyinUtil.getSortKey(account.getLabelPinyinSearchUnit()).toUpperCase();
                     account.setSortKey(praseSortKey(sortKey));
@@ -1412,26 +1421,26 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 cursor.close();
 
                 long end = System.currentTimeMillis();
-                logger.info("获取数据库数据所耗时间getAllAccount："+(end-start));
+                logger.info("获取数据库数据所耗时间getAllAccount：" + (end - start));
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             logger.error(e.toString());
         }
 
-        if(cursorSize>=pageSize){
-            getAllAccount(accounts,index);
+        if (cursorSize >= pageSize) {
+            getAllAccount(accounts, index);
         }
 
         return accounts;
     }
 
-    public static String handleId(int memberId){
+    public static String handleId(int memberId) {
         String account = "";
-        String s = memberId +"";
+        String s = memberId + "";
 
-        if (!Util.isEmpty(s) && s.length() > 2 && ("88".equals(s.substring(0, 2))||"86".equals(s.substring(0, 2))|| "87".equals(s.substring(0, 2)))) {
+        if (!Util.isEmpty(s) && s.length() > 2 && ("88".equals(s.substring(0, 2)) || "86".equals(s.substring(0, 2)) || "87".equals(s.substring(0, 2)))) {
             account = s.substring(2);
-        }else {
+        } else {
             account = s;
         }
         return account;

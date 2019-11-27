@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/itemblue"
     android:orientation="vertical">
 
@@ -33,10 +34,22 @@
             android:layout_height="@dimen/dp_50"
             android:layout_marginLeft="@dimen/dp_12">
 
-            <ImageView
+            <org.raphets.roundimageview.RoundImageView
                 android:id="@+id/user_logo"
                 android:layout_width="@dimen/dp_50"
-                android:layout_height="@dimen/dp_50"/>
+                android:layout_height="@dimen/dp_50"
+                app:border_width="-1dp"
+                app:border_color="@android:color/transparent"
+                app:leftBottom_corner_radius="8dp"
+                app:leftTop_corner_radius="8dp"
+                app:rightBottom_corner_radius="8dp"
+                app:rightTop_corner_radius="8dp"
+                app:type="round" />
+
+            <!--<ImageView-->
+                <!--android:id="@+id/user_logo"-->
+                <!--android:layout_width="@dimen/dp_50"-->
+                <!--android:layout_height="@dimen/dp_50"/>-->
 
             <ImageView
                 android:id="@+id/recorder_binded_logo"

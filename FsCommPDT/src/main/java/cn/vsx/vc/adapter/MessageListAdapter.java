@@ -128,34 +128,34 @@ public class MessageListAdapter extends BaseAdapter {
         }
 
         if(TerminalMessageUtil.isLiveMessage(terminalMessage)) {/**  图像助手 **/
-            viewHolder.iv_user_photo.setBackgroundResource(R.drawable.video_photo);
+            viewHolder.iv_user_photo.setImageResource(R.drawable.video_photo);
         }else if(terminalMessage.messageType == MessageType.CALL_RECORD.getCode()){/** 电话助手 **/
-            viewHolder.iv_user_photo.setBackgroundResource(R.drawable.call_photo);
+            viewHolder.iv_user_photo.setImageResource(R.drawable.call_photo);
         }
         else if(terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_GROUP.getCode()) {
             Group groupInfo = DataUtil.getGroupByGroupNo(terminalMessage.messageToId);
             if(groupInfo.getResponseGroupType()!=null && groupInfo.getResponseGroupType().equals(ResponseGroupType.RESPONSE_TRUE.toString())){
-                viewHolder.iv_user_photo.setBackgroundResource(R.drawable.response_group_photo);
+                viewHolder.iv_user_photo.setImageResource(R.drawable.response_group_photo);
             }else if (TerminalMessageUtil.isCombatGroup(terminalMessage)){
                 if (isNewsFragment) {
-                    viewHolder.iv_user_photo.setBackgroundResource(R.drawable.message_alertgroup);
+                    viewHolder.iv_user_photo.setImageResource(R.drawable.message_alertgroup);
                 } else{
                     if (isGoToHistory){
-                        viewHolder.iv_user_photo.setBackgroundResource(R.drawable.alertgroup_history);
+                        viewHolder.iv_user_photo.setImageResource(R.drawable.alertgroup_history);
                     } else {
-                        viewHolder.iv_user_photo.setBackgroundResource(R.drawable.alertgroup_unfold);
+                        viewHolder.iv_user_photo.setImageResource(R.drawable.alertgroup_unfold);
                     }
                 }
             }else{
-                viewHolder.iv_user_photo.setBackgroundResource(R.drawable.group_photo);
+                viewHolder.iv_user_photo.setImageResource(R.drawable.group_photo);
             }
         }else if(!TerminalMessageUtil.isGroupMessage(terminalMessage) && terminalMessage.messageType == MessageType.WARNING_INSTANCE.getCode()){
-            viewHolder.iv_user_photo.setBackgroundResource(R.drawable.warning_list_icon);
+            viewHolder.iv_user_photo.setImageResource(R.drawable.warning_list_icon);
         } else {
             if (terminalMessage.messageType == MessageType.HYPERLINK.getCode()) {
-                viewHolder.iv_user_photo.setBackgroundResource(R.drawable.face_recognition_photo);
+                viewHolder.iv_user_photo.setImageResource(R.drawable.face_recognition_photo);
             } else {
-                viewHolder.iv_user_photo.setBackgroundResource(BitmapUtil.getUserPhoto());
+                viewHolder.iv_user_photo.setImageResource(BitmapUtil.getUserPhoto());
             }
         }
 
