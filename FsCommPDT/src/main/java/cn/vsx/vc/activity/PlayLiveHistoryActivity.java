@@ -261,7 +261,9 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
                     float progress = seekBar.getProgress();
                     //seekBar进度比例
                     float percent = (progress / sMax);
-                    mediaPlayer.seekTo((int) (maxTime * percent));
+                    if(mediaPlayer!=null){
+                        mediaPlayer.seekTo((int) (maxTime * percent));
+                    }
                     iv_pause.setVisibility(View.GONE);
                 }catch(Exception e){
                     logger.error(e.toString());
