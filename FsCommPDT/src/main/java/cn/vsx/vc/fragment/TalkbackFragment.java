@@ -50,6 +50,7 @@ import cn.vsx.hamster.common.ReceiveObjectMode;
 import cn.vsx.hamster.common.ResponseGroupType;
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
+import cn.vsx.hamster.common.UserStatus;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -83,6 +84,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ResponseSetUserStatusMessageHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.GroupUtils;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -103,6 +105,7 @@ import cn.vsx.vc.utils.HongHuUtils;
 import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.view.ChangeGroupView;
 import cn.vsx.vc.view.ChangeGroupView.OnGroupChangedListener;
+import cn.vsx.vc.view.UserStateDropDownListView;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
 import ptt.terminalsdk.bean.GroupBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -119,7 +122,7 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState.IDLE;
 
 @SuppressLint("ValidFragment")
-public class TalkbackFragment extends BaseFragment {
+public class TalkbackFragment extends BaseFragment implements UserStateDropDownListView.ItemClickListener {
 
 
     /**
@@ -591,6 +594,27 @@ public class TalkbackFragment extends BaseFragment {
             return true;
         }
     };
+
+    /**
+     * 设置用户的工作状态
+     * @param userStatus
+     */
+    @Override
+    public void onItemClickListener(UserStatus userStatus) {
+        if(userStatus!=null){
+            //判断是否与之前的工作状态是否是一样的
+            int oldUserStatusCode = MyTerminalFactory.getSDK().getParam(Params.USER_STATUS, UserStatus.WAITING_ON_DUTY.getCode());
+            if(oldUserStatusCode == userStatus.getCode()){
+                ToastUtil.showToast(TalkbackFragment.this.getContext(),getString(R.string.text_same_to_old_user_status));
+            }else{
+                TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                    TerminalFactory.getSDK().getConfigManager().requestSetUserStatusMessage(
+                            TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L),
+                            userStatus.getCode());
+                });
+            }
+        }
+    }
 
     /**
      * 上下滑动改变音量
@@ -1084,6 +1108,8 @@ public class TalkbackFragment extends BaseFragment {
 
     //解绑布局
     RelativeLayout rlBind;
+
+    private UserStateDropDownListView dropDownListView;
     //    private GestureDetector mGestureDetector;
     private Logger logger = Logger.getLogger(getClass());
     private SpeechSynthesizer speechSynthesizer;
@@ -1142,6 +1168,11 @@ public class TalkbackFragment extends BaseFragment {
         rl_uav_push = mRootView.findViewById(R.id.rl_uav_push);
         tv_uav_push = mRootView.findViewById(R.id.tv_uav_push);
         tx_ptt_group_name = mRootView.findViewById(R.id.tx_ptt_group_name);
+
+        dropDownListView = mRootView.findViewById(R.id.xcd_user_state);
+        dropDownListView.setView(ll_status_bar);
+        dropDownListView.setMyItemClickListener(this);
+
 
         getContext().registerReceiver(mBatInfoReceiver, filter);
         //GH880手机按键服务
@@ -1214,6 +1245,11 @@ public class TalkbackFragment extends BaseFragment {
             Intent intent = new Intent(context, TestGroupCallService.class);
             context.startService(intent);
         });
+        //初始化用户状态的UI
+        int userStatus = MyTerminalFactory.getSDK().getParam(Params.USER_STATUS, UserStatus.WAITING_ON_DUTY.getCode());
+        if(dropDownListView!=null){
+            dropDownListView.setText(UserStatus.getInstanceByCode(userStatus).getValue());
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -1285,6 +1321,7 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupViewHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveTestGroupCallHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(responseSetUserStatusMessageHandler);
 
         //东湖 绑定设备
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverBindDeviceHandler);
@@ -1677,6 +1714,7 @@ public class TalkbackFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyZfyBoundPhoneMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTestGroupCallHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(responseSetUserStatusMessageHandler);
 
         //东湖 绑定设备
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverBindDeviceHandler);
@@ -1928,4 +1966,32 @@ public class TalkbackFragment extends BaseFragment {
             myHandler.post(()-> change2Silence());
         }
     };
+
+    /**
+     * 响应设置工作状态的通知
+     */
+    private ResponseSetUserStatusMessageHandler responseSetUserStatusMessageHandler = new ResponseSetUserStatusMessageHandler() {
+        @Override
+        public void handler(int resultCode, String resultDesc, int userStatusCode) {
+            if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                myHandler.post(()-> {
+                    UserStatus userStatus = UserStatus.getInstanceByCode(userStatusCode);
+                    if(userStatus!=null){
+                        //保存数据
+                        TerminalFactory.getSDK().putParam(Params.USER_STATUS, userStatusCode);
+                        //刷新UI
+                        if(dropDownListView!=null){
+                            dropDownListView.setText(userStatus.getValue());
+                        }
+                    }else{
+                        ToastUtil.showToast(TalkbackFragment.this.getContext(),getString(R.string.text_return_code_error));
+                    }
+                });
+            }else{
+                ToastUtil.showToast(TalkbackFragment.this.getContext(),(TextUtils.isEmpty(resultDesc)?getString(R.string.text_set_fail):resultDesc));
+            }
+        }
+    };
+
+
 }

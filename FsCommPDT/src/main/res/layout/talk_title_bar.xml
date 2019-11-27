@@ -2,14 +2,14 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/talk_title"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/dp_65"
+    android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:paddingTop="@dimen/dp_25">
 
     <LinearLayout
         android:id="@+id/ll_status_bar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/dp_65"
         android:layout_centerVertical="true"
         android:orientation="horizontal"
         android:gravity="center_vertical">
@@ -18,8 +18,7 @@
             android:id="@+id/rl_uav_push"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            >
+            android:orientation="vertical">
             <TextView
                 android:id="@+id/tv_uav_push"
                 android:layout_width="wrap_content"
@@ -104,5 +103,11 @@
             android:visibility="gone" />
 
     </LinearLayout>
+
+    <cn.vsx.vc.view.UserStateDropDownListView
+        android:id="@+id/xcd_user_state"
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"/>
 
 </RelativeLayout>

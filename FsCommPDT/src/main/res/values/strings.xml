@@ -645,4 +645,7 @@
     <string name="text_bluetooth_is_closing">蓝牙正在关闭...</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="text_same_to_old_user_status">与设置前的状态一样</string>
+    <string name="text_set_fail">设置失败</string>
+    <string name="text_return_code_error">返回值错误</string>
 </resources>

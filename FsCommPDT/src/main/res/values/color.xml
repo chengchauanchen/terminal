@@ -542,6 +542,7 @@
     <color name="transparent_40">#66000000</color>
     <color name="transparent_60">#99000000</color>
     <color name="transparent_82">#51000000</color>
+    <color name="transparent_95">#F2000000</color>
 
     <color name="grey_66">#666666</color>
     <color name="grey_b5">#b5b5b5</color>
@@ -615,4 +616,7 @@
     <color name="group_call_center_2">#EFB152</color>
     <color name="group_call_center_3">#ff3737</color>
     <color name="group_call_center_4">#990091ff</color>
+    <color name="blue_00_30">#4d00a4ff</color>
+    <color name="blue_00_10">#1a00a4ff</color>
+    <color name="blue_019_95">#f20D182B</color>
 </resources>
