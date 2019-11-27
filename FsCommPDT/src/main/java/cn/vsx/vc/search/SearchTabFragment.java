@@ -63,6 +63,8 @@ public class SearchTabFragment extends BaseSearchFragment {
         return R.layout.fragment_search;
     }
 
+
+
     @Override
     public void initView() {
         phone = mRootView.findViewById(R.id.phone);
@@ -71,24 +73,18 @@ public class SearchTabFragment extends BaseSearchFragment {
         search_keyboard = mRootView.findViewById(R.id.search_keyboard);
         //打开自定义键盘
         phone.setOnClickListener(v -> {
-            search_keyboard.setVisibility(searchKeyboardIsVisible ? View.GONE : View.VISIBLE);
-            iv_hint_search.setVisibility(searchKeyboardIsVisible?View.VISIBLE:View.GONE);
-            searchKeyboardIsVisible = !searchKeyboardIsVisible;
+            showOrHintKeyboard();
         });
 
         //打开自定义键盘
         iv_hint_search.setOnClickListener(v -> {
-            search_keyboard.setVisibility(searchKeyboardIsVisible ? View.GONE : View.VISIBLE);
-            iv_hint_search.setVisibility(searchKeyboardIsVisible?View.VISIBLE:View.GONE);
-            searchKeyboardIsVisible = !searchKeyboardIsVisible;
+            showOrHintKeyboard();
         });
 
         search_keyboard.setOnHideOnClick(new HideOnClick() {
             @Override
             public void onClick() {
-                search_keyboard.setVisibility(search_keyboard.isSearchKeyboardIsVisible() ? View.GONE : View.VISIBLE);
-                iv_hint_search.setVisibility(searchKeyboardIsVisible?View.VISIBLE:View.GONE);
-                searchKeyboardIsVisible = !searchKeyboardIsVisible;
+                showOrHintKeyboard();
             }
         });
 
@@ -167,6 +163,15 @@ public class SearchTabFragment extends BaseSearchFragment {
 
         /*---------------------------*/
         unregistReceiveHandler();
+    }
+
+    /**
+     * 点击按钮显示或隐藏键盘
+     */
+    private void showOrHintKeyboard(){
+        search_keyboard.setVisibility(searchKeyboardIsVisible ? View.GONE : View.VISIBLE);
+        iv_hint_search.setVisibility(searchKeyboardIsVisible?View.VISIBLE:View.INVISIBLE);
+        searchKeyboardIsVisible = !searchKeyboardIsVisible;
     }
 
     //所有组

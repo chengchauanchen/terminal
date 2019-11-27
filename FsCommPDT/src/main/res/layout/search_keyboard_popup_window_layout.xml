@@ -35,6 +35,7 @@
                     android:textColor="@color/keyboard_text_blue"
                     android:textSize="@dimen/sp_25"/>
                 <TextView
+                    android:layout_marginLeft="@dimen/dp_5"
                     android:visibility="invisible"
                     android:gravity="left"
                     android:layout_width="0dp"
@@ -42,7 +43,7 @@
                     android:layout_height="wrap_content"
                     android:text="ABC"
                     android:textColor="@color/keyboard_text_blue"
-                    android:textSize="@dimen/sp_10"/>
+                    android:textSize="@dimen/sp_15"/>
             </LinearLayout>
 
 
@@ -66,13 +67,14 @@
                     android:textColor="@color/keyboard_text_blue"
                     android:textSize="@dimen/sp_25"/>
                 <TextView
+                    android:layout_marginLeft="@dimen/dp_5"
                     android:gravity="left"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/ABC"
                     android:textColor="@color/keyboard_text_blue"
-                    android:textSize="@dimen/sp_10"/>
+                    android:textSize="@dimen/sp_15"/>
             </LinearLayout>
 
             <LinearLayout
@@ -95,13 +97,14 @@
                     android:textColor="@color/keyboard_text_blue"
                     android:textSize="@dimen/sp_25"/>
                 <TextView
+                    android:layout_marginLeft="@dimen/dp_5"
                     android:gravity="left"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/DEF"
                     android:textColor="@color/keyboard_text_blue"
-                    android:textSize="@dimen/sp_10"/>
+                    android:textSize="@dimen/sp_15"/>
             </LinearLayout>
         </LinearLayout>
         
@@ -130,13 +133,14 @@
                     android:textColor="@color/keyboard_text_blue"
                     android:textSize="@dimen/sp_25"/>
                 <TextView
+                    android:layout_marginLeft="@dimen/dp_5"
                     android:gravity="left"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/GHI"
                     android:textColor="@color/keyboard_text_blue"
-                    android:textSize="@dimen/sp_10"/>
+                    android:textSize="@dimen/sp_15"/>
             </LinearLayout>
 
             <LinearLayout
@@ -159,13 +163,14 @@
                     android:textColor="@color/keyboard_text_blue"
                     android:textSize="@dimen/sp_25"/>
                 <TextView
+                    android:layout_marginLeft="@dimen/dp_5"
                     android:gravity="left"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/JKL"
                     android:textColor="@color/keyboard_text_blue"
-                    android:textSize="@dimen/sp_10"/>
+                    android:textSize="@dimen/sp_15"/>
             </LinearLayout>
 
             <LinearLayout
@@ -188,13 +193,14 @@
                     android:textColor="@color/keyboard_text_blue"
                     android:textSize="@dimen/sp_25"/>
                 <TextView
+                    android:layout_marginLeft="@dimen/dp_5"
                     android:gravity="left"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/MNO"
                     android:textColor="@color/keyboard_text_blue"
-                    android:textSize="@dimen/sp_10"/>
+                    android:textSize="@dimen/sp_15"/>
             </LinearLayout>
         </LinearLayout>
         
@@ -225,6 +231,7 @@
                     android:textSize="@dimen/sp_25"/>
 
                 <TextView
+                    android:layout_marginLeft="@dimen/dp_5"
                     android:layout_toRightOf="@id/tv_7"
                     android:layout_width="0dp"
                     android:layout_weight="1"
@@ -232,7 +239,7 @@
                     android:gravity="left"
                     android:text="@string/PQRS"
                     android:textColor="@color/keyboard_text_blue"
-                    android:textSize="@dimen/sp_10" />
+                    android:textSize="@dimen/sp_15" />
             </LinearLayout>
 
             <LinearLayout
@@ -255,13 +262,14 @@
                     android:textColor="@color/keyboard_text_blue"
                     android:textSize="@dimen/sp_25"/>
                 <TextView
+                    android:layout_marginLeft="@dimen/dp_5"
                     android:gravity="left"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/TUV"
                     android:textColor="@color/keyboard_text_blue"
-                    android:textSize="@dimen/sp_10"/>
+                    android:textSize="@dimen/sp_15"/>
             </LinearLayout>
 
             <LinearLayout
@@ -284,13 +292,14 @@
                     android:textColor="@color/keyboard_text_blue"
                     android:textSize="@dimen/sp_25"/>
                 <TextView
+                    android:layout_marginLeft="@dimen/dp_5"
                     android:gravity="left"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:text="@string/WXYZ"
                     android:textColor="@color/keyboard_text_blue"
-                    android:textSize="@dimen/sp_10"/>
+                    android:textSize="@dimen/sp_15"/>
             </LinearLayout>
         </LinearLayout>
         
@@ -309,7 +318,7 @@
                 android:paddingBottom="@dimen/dp_10"
                 android:paddingTop="@dimen/dp_10">
                 <ImageView
-                    android:layout_width="@dimen/x30"
+                    android:layout_width="@dimen/x20"
                     android:layout_height="@dimen/x15"
                     android:src="@drawable/search_hide_keyboard" />
             </LinearLayout>
@@ -334,6 +343,7 @@
                     android:textColor="@color/keyboard_text_blue"
                     android:textSize="@dimen/sp_25"/>
                 <TextView
+                    android:layout_marginLeft="@dimen/dp_5"
                     android:gravity="left"
                     android:layout_width="0dp"
                     android:layout_weight="1"

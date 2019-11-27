@@ -68,7 +68,7 @@ public class SearchKeyboardView extends RelativeLayout implements OnClickListene
     }
 
     private void initView() {
-        initRingTone();
+//        initRingTone();
 
         String infServie = Context.LAYOUT_INFLATER_SERVICE;
         LayoutInflater layoutInflater = (LayoutInflater) getContext().getSystemService(infServie);
@@ -212,10 +212,10 @@ public class SearchKeyboardView extends RelativeLayout implements OnClickListene
      * @param id
      */
     private void play(int id) {
-        int max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        int current = am.getStreamVolume(AudioManager.STREAM_MUSIC);
-        float value = (float) 0.7 / max * current;
-        spool.setVolume(spool.play(id, value, value, 0, 0, 1f), value, value);
+//        int max = am.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+//        int current = am.getStreamVolume(AudioManager.STREAM_MUSIC);
+//        float value = (float) 0.7 / max * current;
+//        spool.setVolume(spool.play(id, value, value, 0, 0, 1f), value, value);
     }
 
     private void input(String str) {

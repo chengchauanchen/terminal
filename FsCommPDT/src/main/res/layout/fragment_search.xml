@@ -29,13 +29,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
             <ImageView
-                android:visibility="gone"
+                android:visibility="invisible"
+                android:layout_margin="@dimen/dp_20"
                 android:id="@+id/iv_hint_search"
-                android:padding="15dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/search_show_keyboard"/>
-
+                android:layout_width="@dimen/dp_30"
+                android:layout_height="@dimen/dp_30"
+                android:src="@drawable/search_show_keyboard" />
             <TextView
                 android:paddingLeft="10dp"
                 android:id="@+id/phone"
@@ -46,7 +45,7 @@
                 android:orientation="horizontal"
                 android:textColor="@color/keyboard_text_blue"
                 android:textColorHint="@color/input_phone"
-                android:textSize="@dimen/sp_20" />
+                android:textSize="@dimen/sp_25" />
             <ImageView
                 android:id="@+id/iv_call"
                 android:padding="15dp"
