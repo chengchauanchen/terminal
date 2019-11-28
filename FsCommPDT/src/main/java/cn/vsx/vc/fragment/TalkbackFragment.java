@@ -99,6 +99,7 @@ import cn.vsx.vc.dialog.UnbindDialog;
 import cn.vsx.vc.model.BindBean;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverBindDeviceHandler;
+import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.HongHuUtils;
@@ -1172,7 +1173,7 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         dropDownListView = mRootView.findViewById(R.id.xcd_user_state);
         dropDownListView.setView(ll_status_bar);
         dropDownListView.setMyItemClickListener(this);
-
+        dropDownListView.setVisibility((ApkUtil.isXiangYang())?View.VISIBLE:View.GONE);
 
         getContext().registerReceiver(mBatInfoReceiver, filter);
         //GH880手机按键服务

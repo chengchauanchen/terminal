@@ -12,6 +12,9 @@ import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.LANGFANG;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.POLICESTORE;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.TIANJIN;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.WUTIE;
+import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.XIANGYANG;
+import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.XIANGYANGOUT;
+import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.XIANGYANGPOLICESTORE;
 import static cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo.YINGJIGUANLITING;
 
 /**
@@ -42,10 +45,18 @@ public class ApkUtil{
 //        return MyTerminalFactory.getSDK().getParam(Params.IS_ANJIAN, false);
     }
 
+    //是否为襄阳
+    public static boolean isXiangYang(){
+        String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
+        return TextUtils.equals(apkType,XIANGYANG)||TextUtils.equals(apkType,XIANGYANGOUT)
+                ||TextUtils.equals(apkType,XIANGYANGPOLICESTORE);
+//        return MyTerminalFactory.getSDK().getParam(Params.IS_ANJIAN, false);
+    }
+
     //是否为移动警务平台的包
     public static boolean isAppStore(){
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,POLICESTORE);
-        return TextUtils.equals(AuthManagerTwo.POLICESTORE,apkType) || TextUtils.equals(AuthManagerTwo.XIANGYANGPOLICESTORE,apkType)
+        return TextUtils.equals(AuthManagerTwo.POLICESTORE,apkType) || TextUtils.equals(XIANGYANGPOLICESTORE,apkType)
             ||TextUtils.equals(TIANJIN,apkType)||TextUtils.equals(WUTIE,apkType)||TextUtils.equals(LANGFANG,apkType);
 //        return MyTerminalFactory.getSDK().getParam(Params.IS_ANJIAN, false);
     }
