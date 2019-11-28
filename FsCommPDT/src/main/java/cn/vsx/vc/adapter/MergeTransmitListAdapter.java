@@ -858,13 +858,13 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
                     .placeholder(drawable)//加载中显示的图片
                     .error(drawable)//加载失败时显示的图片
                     .into(holder.ivAvatar);
-            holder.ivAvatar.setVisibility(View.VISIBLE);
-            if(position > 0 && position < chatMessageList.size()){
-                TerminalMessage message = chatMessageList.get(position-1);
-                if(terminalMessage!=null&&message!=null&&terminalMessage.messageFromId == message.messageFromId){
-                    holder.ivAvatar.setVisibility(View.INVISIBLE);
-                }
-            }
+//            holder.ivAvatar.setVisibility(View.VISIBLE);
+//            if(position > 0 && position < chatMessageList.size()){
+//                TerminalMessage message = chatMessageList.get(position-1);
+//                if(terminalMessage!=null&&message!=null&&terminalMessage.messageFromId == message.messageFromId){
+//                    holder.ivAvatar.setVisibility(View.INVISIBLE);
+//                }
+//            }
         }
     }
 

@@ -33,14 +33,14 @@
             android:visibility="gone"/>
 
         <!--<ImageView-->
-            <!--android:id="@+id/iv_userhead"-->
-            <!--android:layout_width="@dimen/size_avatar"-->
-            <!--android:layout_height="@dimen/size_avatar"-->
-            <!--android:layout_alignParentTop="true"-->
-            <!--android:layout_toLeftOf="@+id/cb_forward"-->
-            <!--android:layout_alignWithParentIfMissing="true"-->
-            <!--android:layout_marginRight="@dimen/margin_chat_activity"-->
-            <!--android:scaleType="fitXY" />-->
+        <!--android:id="@+id/iv_userhead"-->
+        <!--android:layout_width="@dimen/size_avatar"-->
+        <!--android:layout_height="@dimen/size_avatar"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:layout_toLeftOf="@+id/cb_forward"-->
+        <!--android:layout_alignWithParentIfMissing="true"-->
+        <!--android:layout_marginRight="@dimen/margin_chat_activity"-->
+        <!--android:scaleType="fitXY" />-->
 
         <org.raphets.roundimageview.RoundImageView
             android:id="@+id/iv_userhead"

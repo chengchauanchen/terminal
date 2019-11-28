@@ -154,7 +154,9 @@ public class VsxSDK {
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
-
+                //如果连接断开,再次重起融合通信后台服务
+                Log.e("--vsx--VsxSDK","服务断开，发送启动后台服务广播");
+                VsxSDK.getInstance().getRegisterBroadcastReceiver().sendStartAppBroadcast(context);
             }
         };
 

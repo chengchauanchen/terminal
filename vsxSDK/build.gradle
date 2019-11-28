@@ -47,14 +47,14 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'
 }
 
-//task makeJar(type: Copy){
-//    delete 'build/libs/vsxSDK.jar'
-//    from('build/intermediates/bundles/release/')
-//    into('build/outputs')
-//    include('classes.jar')
-//    rename('classes.jar','vsxSDK.jar')
-//}
-//makeJar.dependsOn(build)
+task makeJar(type: Copy){
+    delete 'build/libs/vsxSDK.jar'
+    from('build/intermediates/bundles/release/')
+    into('build/outputs')
+    include('classes.jar')
+    rename('classes.jar','vsxSDK.jar')
+}
+makeJar.dependsOn(build)
 
 
 //def定义的变量才会在project中
