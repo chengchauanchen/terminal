@@ -1287,7 +1287,7 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
      * 设置头像显示
      */
     private void handlerAvatar(TerminalMessage terminalMessage, int position, ChatViewHolder holder) {
-        if(activity!=null&&!activity.isDestroyed()){
+        if(activity!=null&&!activity.isDestroyed()&&holder.ivAvatar!=null){
             int drawable = BitmapUtil.getUserPhoto();
             Glide.with(activity)
                     .load(drawable)
@@ -1416,8 +1416,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
                 lp.width = DensityUtil.dip2px(activity,25);
                 lp.height = DensityUtil.dip2px(activity,25);
                 holder.ivVoice.setLayoutParams(lp);
-                Glide.with(MyApplication.instance.getApplicationContext()).load(R.drawable.gif_download).asGif().dontAnimate().into(holder.ivVoice);
-
+                if(holder.ivVoice!=null){
+                    Glide.with(MyApplication.instance.getApplicationContext()).load(R.drawable.gif_download).asGif().dontAnimate().into(holder.ivVoice);
+                }
             }else{
                 //显示播放的UI
                 if(holder.tvStatus!=null){

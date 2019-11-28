@@ -851,18 +851,20 @@ public class MergeTransmitListAdapter extends RecyclerView.Adapter<MergeTransmit
      */
     private void handlerAvatar(TerminalMessage terminalMessage, MergeTransmitViewHolder holder, int position) {
         int drawable = BitmapUtil.getUserPhoto();
-        Glide.with(activity)
-                .load(drawable)
-                .asBitmap()
-                .placeholder(drawable)//加载中显示的图片
-                .error(drawable)//加载失败时显示的图片
-                .into(holder.ivAvatar);
-        holder.ivAvatar.setVisibility(View.VISIBLE);
-        if(position > 0 && position < chatMessageList.size()){
-            TerminalMessage message = chatMessageList.get(position-1);
-           if(terminalMessage!=null&&message!=null&&terminalMessage.messageFromId == message.messageFromId){
-             holder.ivAvatar.setVisibility(View.INVISIBLE);
-           }
+        if(holder.ivAvatar!=null){
+            Glide.with(activity)
+                    .load(drawable)
+                    .asBitmap()
+                    .placeholder(drawable)//加载中显示的图片
+                    .error(drawable)//加载失败时显示的图片
+                    .into(holder.ivAvatar);
+            holder.ivAvatar.setVisibility(View.VISIBLE);
+            if(position > 0 && position < chatMessageList.size()){
+                TerminalMessage message = chatMessageList.get(position-1);
+                if(terminalMessage!=null&&message!=null&&terminalMessage.messageFromId == message.messageFromId){
+                    holder.ivAvatar.setVisibility(View.INVISIBLE);
+                }
+            }
         }
     }
 
