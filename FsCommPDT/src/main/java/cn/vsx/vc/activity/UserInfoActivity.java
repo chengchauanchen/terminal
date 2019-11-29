@@ -176,13 +176,19 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
         if (userId == MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0)){//如果是自己，则不显示操作菜单
             mRecyclerView.setVisibility(View.GONE);
         }else {
-
+//            setHasVideo();
             setNoVideo();
             for(Member member :MyTerminalFactory.getSDK().getConfigManager().getCurrentGroupMembers()){
                 if(member.id==userId){
                     setHasVideo();
                 }
             }
+
+            //海能达账号
+            if("80".equals(String.valueOf(account.getNo()).substring(0, 2))){
+                setHasVideoHaiNengDa();
+            }
+
             logger.info("个人信息界面ICON"+mPictures.toString());
             mRecyclerView.setAdapter(mAdapter);
         }
@@ -334,6 +340,13 @@ public class UserInfoActivity extends BaseActivity implements View.OnClickListen
         mPictures.clear();
         mPictures.add(new Picture(getString(R.string.text_send_message),R.drawable.ic_message));
         mPictures.add(new Picture(getString(R.string.text_personal_call),R.drawable.ic_call));
+    }
+
+    private void setHasVideoHaiNengDa(){
+        mPictures.clear();
+//        mPictures.add(new Picture(getString(R.string.text_send_message),R.drawable.ic_message));
+//        mPictures.add(new Picture(getString(R.string.text_personal_call),R.drawable.ic_call));
+        mPictures.add(new Picture(getString(R.string.image_request),R.drawable.ic_picture_back));
     }
 
     private void setHasVideo(){

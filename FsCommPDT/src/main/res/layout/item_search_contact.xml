@@ -80,11 +80,22 @@
 
             <TextView
                 android:id="@+id/shoutai_tv_department"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="@color/group_text_gray_two"
-                android:textSize="@dimen/sp_13"
+                android:textColor="@color/setting_text_gray_two"
+                android:maxLines="1"
+                android:maxEms="10"
+                android:ellipsize="end"
+                android:textSize="@dimen/sp_14"
                 android:textStyle="normal" />
+
+            <TextView
+                android:id="@+id/tv_phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/setting_text_gray_two"
+                android:textSize="@dimen/sp_14"
+                android:textStyle="normal"/>
 
         </LinearLayout>
 

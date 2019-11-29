@@ -260,6 +260,13 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         String no = HandleIdUtil.handleId(account.getNo());//去掉88 86
         ViewUtil.showTextHighlight(userViewHolder.tvId, no + "", account.getMatchKeywords().toString());
 
+        if(!TextUtils.isEmpty(account.getPhone())){
+            userViewHolder.tv_phone.setVisibility(View.VISIBLE);
+            ViewUtil.showTextHighlight(userViewHolder.tv_phone, account.getPhone() + "", account.getMatchKeywords().toString());
+        }else{
+            userViewHolder.tv_phone.setVisibility(View.GONE);
+        }
+
         userViewHolder.shoutai_tv_department.setText(account.getDepartmentName());
 
         userViewHolder.llDialTo.setOnClickListener(view -> {
@@ -305,6 +312,27 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 //                userViewHolder.llDialTo.setVisibility(View.GONE);
 //                userViewHolder.llLiveTo.setVisibility(View.GONE);
 //            }
+    }
+
+    private String getPhone(MemberSearchBean account){
+        String phone = account.getPhone();
+        String phoneNumber = account.getPhoneNumber();
+
+        if(!TextUtils.isEmpty(phone)){
+            return phone;
+        }
+        if(!TextUtils.isEmpty(phoneNumber)){
+            return phoneNumber;
+        }
+
+        for (Member member : account.getMembers()){
+            String phone1 = member.getPhone();
+            if(TextUtils.isEmpty(phone1)){
+                return phone1;
+            }
+        }
+
+        return "";
     }
 
 
@@ -387,6 +415,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         TextView tvId;
 
         TextView shoutai_tv_department;
+        TextView tv_phone;
 
         LinearLayout llDialTo;
 
@@ -403,6 +432,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
             tvName = itemView.findViewById(R.id.shoutai_tv_member_name);
             tvId = itemView.findViewById(R.id.shoutai_tv_member_id);
             shoutai_tv_department = itemView.findViewById(R.id.shoutai_tv_department);
+            tv_phone = itemView.findViewById(R.id.tv_phone);
             llDialTo = itemView.findViewById(R.id.shoutai_dial_to);
             llMessageTo = itemView.findViewById(R.id.shoutai_message_to);
             llCallTo = itemView.findViewById(R.id.shoutai_call_to);

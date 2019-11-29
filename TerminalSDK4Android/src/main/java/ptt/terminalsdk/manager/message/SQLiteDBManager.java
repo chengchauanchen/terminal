@@ -1338,7 +1338,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                 values.put("account_name", account.getName());
                 values.put("name_pinyin", PinyinUtils.getPingYin(account.getName()));
 //                values.put("name_first_pinyin", PinyinUtils.converterToFirstSpell(account.getName()));
-                values.put("account_phone", account.getPhone());
+                values.put("account_phone", getPhone(account));
                 values.put("dept_id", account.getDeptId());
                 values.put("members", MyGsonUtil.list2String(true, account.getMembers()));
                 values.put("department_name", account.getDepartmentName());
@@ -1352,6 +1352,29 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             db.endTransaction();
         }
     }
+
+    private String getPhone(Account account){
+        String phone = account.getPhone();
+        String phoneNumber = account.getPhoneNumber();
+
+        if(!TextUtils.isEmpty(phone)){
+            return phone;
+        }
+        if(!TextUtils.isEmpty(phoneNumber)){
+            return phoneNumber;
+        }
+
+        for (Member member : account.getMembers()){
+            String phone1 = member.getPhone();
+            if(TextUtils.isEmpty(phone1)){
+                return phone1;
+            }
+        }
+
+        return "";
+    }
+
+
 
     @Override
     public List<MemberSearchBean> getAllAccountFirst() {
@@ -1411,7 +1434,9 @@ public class SQLiteDBManager implements ISQLiteDBManager {
 
                     String no = handleId(account.getNo());//去掉88 86
 
-                    account.getLabelPinyinSearchUnit().setBaseData(account.getName() + no);
+                    String phone = account.getPhone();
+
+                    account.getLabelPinyinSearchUnit().setBaseData(account.getName() + no + phone);
                     PinyinUtil.parse(account.getLabelPinyinSearchUnit());
                     String sortKey = PinyinUtil.getSortKey(account.getLabelPinyinSearchUnit()).toUpperCase();
                     account.setSortKey(praseSortKey(sortKey));
