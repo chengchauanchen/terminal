@@ -16,7 +16,7 @@ import java.io.FileFilter;
 
 public class SDCardUtil {
 
-    public final String TAG = "SDCardUtils---";
+    public final static String TAG = "SDCardUtils---";
     static Logger logger = Logger.getLogger(SDCardUtil.class.getName());
 
     /**
@@ -36,6 +36,9 @@ public class SDCardUtil {
      * @param dir     文件夹路径
      */
     public static void scanMtpAsync(Context context, String dir) {
+
+        logger.info(TAG + "scanMtpAsync dir" + dir);
+
         File[] files = new File(dir).listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {

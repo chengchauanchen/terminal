@@ -138,6 +138,7 @@ public class FileTransferOperation {
                 List<String> list = message.getFileNameListList();
 
                 if (list != null && list.size() > 0) {
+                    logger.info(TAG + "ReceiveNotifyMemberUploadFileMessageHandler:list:" + list);
                     //从数据库中获取文件的信息,并上传
                     uploadFileByPaths(getRecordsByNames(list), message.getRequestMemberId(),message.getRequestUniqueNo(), false);
                     //推送视频文件到流媒体服务器
@@ -240,6 +241,7 @@ public class FileTransferOperation {
      * @param path
      */
     public void generateFileComplete(String scanPath, String path) {
+        logger.info(TAG + "generateFileComplete scanPath" + scanPath+"path:"+path);
         //扫描卡中的文件
         SDCardUtil.scanMtpAsync(context, scanPath);
         //上传文件目录和保存文件信息到本地
