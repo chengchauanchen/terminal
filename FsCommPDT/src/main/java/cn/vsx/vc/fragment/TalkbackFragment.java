@@ -1418,18 +1418,23 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
 
     private void setCurrentGroupScanView(final int groupId) {
         tv_current_group.setText(DataUtil.getGroupName(groupId));
+        logger.info("tv_current_folder部门："+DataUtil.getGroupDepartmentName(groupId));
         tv_current_folder.setText(DataUtil.getGroupDepartmentName(groupId));
     }
 
     private void setCurrentGroupScanView(final int groupId, String groupName) {
         String name = DataUtil.getGroupName(groupId);
         if (android.text.TextUtils.isEmpty(name)) {
+            logger.info("name = null tv_current_folder部门："+getString(R.string.text_temporary_group));
             tv_current_group.setText(groupName);
-            tv_current_folder.setText(getString(R.string.text_temporary_group));
+            tv_current_folder.setText(DataUtil.getGroupDepartmentName(groupId));
         } else {
             tv_current_group.setText(name);
+            logger.info("name != null tv_current_folder部门："+DataUtil.getGroupDepartmentName(groupId));
             tv_current_folder.setText(DataUtil.getGroupDepartmentName(groupId));
         }
+        tv_current_folder.setText(DataUtil.getGroupDepartmentName(groupId));
+
     }
 
     private void setChangeGroupView(List<GroupBean> groupList) {
