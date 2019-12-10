@@ -130,7 +130,7 @@ public class LiveRequestService extends BaseService{
     /**
      * 对方拒绝直播，通知界面关闭响铃页
      **/
-    private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc)-> mHandler.post(() -> {
+    private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc, liveMemberId, liveUniqueNo)-> mHandler.post(() -> {
         ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDesc);
         stopBusiness();
     });

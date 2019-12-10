@@ -78,7 +78,7 @@ public class MultipartyCallService extends BaseService{
     protected void initView(Intent intent){
         PromptManager.getInstance().stopRing();
         String userName = intent.getStringExtra(Constants.USER_NAME);
-        mTvMemberNameSpeaking.setText(userName);
+//        mTvMemberNameSpeaking.setText(userName);
         MyTerminalFactory.getSDK().getVoipCallManager().acceptCall();
 
         //打开默认听筒说话，

@@ -77,7 +77,8 @@ public class ReceiveVoipService extends BaseService{
         wakeLock.acquire(10 * 1000);
 //        PromptManager.getInstance().IndividualCallNotifyRing();
         userName = intent.getStringExtra(Constants.USER_NAME);
-        mTvMemberNameChooice.setText(userName);
+        logger.info("userName:"+userName);
+//        mTvMemberNameChooice.setText(userName);
     }
 
     @Override
@@ -109,6 +110,7 @@ public class ReceiveVoipService extends BaseService{
     private View.OnClickListener acceptOnclickListener = v->{
         Intent intent = new Intent(ReceiveVoipService.this,MultipartyCallService.class);
         intent.putExtra(Constants.USER_NAME,userName);
+        logger.info("incomingCall-userName:"+userName);
         startService(intent);
         mHandler.postDelayed(this::removeView,500);
     };

@@ -512,7 +512,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
             IndividualNewsActivity.this.runOnUiThread(() -> funcation.setFunction(false, userId));
         }
     };
-    private ReceiveResponseStartLiveHandler receiveResponseStartLiveHandler = (resultCode, resultDesc) -> PromptManager.getInstance().stopRing();
+    private ReceiveResponseStartLiveHandler receiveResponseStartLiveHandler = (resultCode, resultDesc, liveMemberId, liveUniqueNo) -> PromptManager.getInstance().stopRing();
 
     private ReceiverCloseKeyBoardHandler receiverCloseKeyBoardHandler = new ReceiverCloseKeyBoardHandler() {
         @Override

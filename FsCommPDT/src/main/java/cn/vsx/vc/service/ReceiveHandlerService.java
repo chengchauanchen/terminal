@@ -330,6 +330,7 @@ public class ReceiveHandlerService extends Service{
                     Intent intent = new Intent(ReceiveHandlerService.this,ReceiveVoipService.class);
                     LinphoneAddress from = linphoneCall.getCallLog().getFrom();
                     String userName = from.getUserName();
+                    logger.info("incomingCall-userName:"+userName);
                     intent.putExtra(Constants.USER_NAME,userName);
                     startService(intent);
                 }

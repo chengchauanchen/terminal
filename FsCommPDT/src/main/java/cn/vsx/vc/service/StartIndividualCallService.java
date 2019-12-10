@@ -241,7 +241,7 @@ public class StartIndividualCallService extends BaseService{
     /**
      * 对方拒绝直播，通知界面关闭响铃页
      **/
-    private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc) -> {
+    private ReceiveResponseStartLiveHandler receiveReaponseStartLiveHandler = (resultCode, resultDesc, liveMemberId, liveUniqueNo) -> {
         mTimerView.onStop();
         ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDesc);
         PromptManager.getInstance().IndividualHangUpRing();
