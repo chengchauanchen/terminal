@@ -555,6 +555,7 @@ public class PhonePushService extends BaseService{
                     resultData.putString("event-msg", "EasyRTSP 进程名称长度不匹配");
                     break;
             }
+            logger.info("PhonePushService--PushCallback--msg:"+resultData.getString("event-msg")+"--code:"+code);
         }
     }
 
