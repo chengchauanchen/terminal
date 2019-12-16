@@ -946,7 +946,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 || TextUtils.equals(AuthManagerTwo.WUTIE,apkType)){
                 startVPNService();
             }else if(TextUtils.equals(AuthManagerTwo.TIANJIN,apkType)){
-                getTianJinStringToken();
+//                TerminalFactory.getSDK().getTianJinStringToken();
                 requestDrawOverLays();
             }else if(TextUtils.equals(AuthManagerTwo.LANGFANG,apkType)){
                 authorizeByLangFang();//认证并获取User信息

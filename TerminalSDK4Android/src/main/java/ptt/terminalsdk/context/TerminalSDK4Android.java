@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.ConnectivityManager;
@@ -70,6 +71,7 @@ import java.util.Map;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
+import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.TerminalSDKBaseImpl;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioProxy;
@@ -80,6 +82,7 @@ import cn.vsx.hamster.terminalsdk.manager.okhttp.LoggingInterceptor;
 import cn.vsx.hamster.terminalsdk.manager.okhttp.MyCacheInterceptor;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
 import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.model.IdentifyType;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDownloadProgressHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
@@ -95,6 +98,7 @@ import okhttp3.Response;
 import okhttp3.ResponseBody;
 import ptt.terminalsdk.IMessageService;
 import ptt.terminalsdk.IMessageService.Stub;
+import ptt.terminalsdk.R;
 import ptt.terminalsdk.broadcastreceiver.NetWorkConnectionChangeReceiver;
 import ptt.terminalsdk.broadcastreceiver.VPNConnectionChangeReceiver;
 import ptt.terminalsdk.manager.MyDataManager;
@@ -120,6 +124,7 @@ import ptt.terminalsdk.service.MessageService;
 import ptt.terminalsdk.tools.ApkUtil;
 import ptt.terminalsdk.tools.DeleteData;
 import ptt.terminalsdk.tools.HttpUtil;
+import ptt.terminalsdk.tools.ToastUtil;
 
 import static android.content.Context.BIND_AUTO_CREATE;
 import static android.content.Context.MODE_PRIVATE;
@@ -1413,6 +1418,48 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	@Override
 	public Object getEventManager() {
 		return null;
+	}
+
+	@Override
+	public void getTianJinStringToken() {
+		try{
+			MyTerminalFactory.getSDK().putParam(Params.IDENTIFY_TYPE, "");
+			MyTerminalFactory.getSDK().putParam(UrlParams.TIANJIN_STORE,false);
+			Cursor cursor = application.getContentResolver().query(Uri.parse(Params.AUTH_TIAN_JIN_TOKEN_URI),null,null,null,null);
+			logger.info("getTianJinStringToken--cursor:"+cursor+"--count:"+((cursor!=null)?cursor.getCount():0));
+			if (cursor != null && cursor.moveToFirst()) {
+				do{
+					int resultCode = cursor.getInt(cursor.getColumnIndex("resultCode"));
+					String message = cursor.getString(cursor.getColumnIndex("message"));
+					String billStr = cursor.getString(cursor.getColumnIndex("billStr"));
+					logger.info("getTianJinStringToken--resultCode"+resultCode+"--message:"+message+"--billStr:"+billStr);
+					if(resultCode == BaseCommonCode.SUCCESS_CODE){
+						if(!TextUtils.isEmpty(billStr)){
+							//传给服务端获取警员信息
+							MyTerminalFactory.getSDK().putParam(UrlParams.TIANJIN_STORE,true);
+							MyTerminalFactory.getSDK().putParam(UrlParams.TIANJIN_STRTOKEN,billStr);
+							MyTerminalFactory.getSDK().putParam(Params.IDENTIFY_TYPE, IdentifyType.IDENTIFY_TYPE_TOKEN_OUTER.toString());
+						}else{
+							ToastUtil.showToast(application,application.getString(R.string.text_get_token_fail));
+						}
+					} else {
+						ToastUtil.showToast(application,TextUtils.isEmpty(message)?application.getString(R.string.text_get_token_fail):message);
+					}
+				}while(cursor.moveToNext());
+			}else{
+				ToastUtil.showToast(application,application.getString(R.string.text_get_token_fail));
+			}
+			if(cursor!=null){
+				cursor.close();
+			}
+		}catch (Exception e){
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	public String getPackageName() {
+		return application.getPackageName();
 	}
 
 	/**

@@ -10,4 +10,6 @@
     <string name="text_please_open_wuhan_police_work_first">请先打开武汉移动警务！</string>
     
     <string name="open_overlay_permisson">请打开悬浮窗权限，否则私密呼叫和图像功能无法使用！</string>
+
+    <string name="text_get_token_fail">获取票据失败</string>
 </resources>
