@@ -111,11 +111,11 @@ uploadArchives {
     }
 }
 
-//task makeJar(type: Copy){
-//    delete 'build/libs/TerminalSDK4Android.jar'
-//    from('build/intermediates/bundles/release/')
-//    into('build/outputs')
-//    include('classes.jar')
-//    rename('classes.jar','TerminalSDK4Android.jar')
-//}
-//makeJar.dependsOn(build)
+task makeJar(type: Copy){
+    delete 'build/libs/TerminalSDK4Android.jar'
+    from('build/intermediates/bundles/release/')
+    into('build/outputs')
+    include('classes.jar')
+    rename('classes.jar','TerminalSDK4Android.jar')
+}
+makeJar.dependsOn(build)

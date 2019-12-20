@@ -95,12 +95,12 @@ uploadArchives {
         }
     }
 }
-//task makeJar(type: Copy){
-//    delete 'build/libs/imageandfileselector.jar'
-//    from('build/intermediates/bundles/release/')
-//    into('build/outputs')
-//    include('classes.jar')
-//    rename('classes.jar','imageandfileselector.jar')
-//}
-//makeJar.dependsOn(build)
+task makeJar(type: Copy){
+    delete 'build/libs/imageandfileselector.jar'
+    from('build/intermediates/bundles/release/')
+    into('build/outputs')
+    include('classes.jar')
+    rename('classes.jar','imageandfileselector.jar')
+}
+makeJar.dependsOn(build)
 

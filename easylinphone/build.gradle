@@ -89,11 +89,11 @@ uploadArchives {
     }
 }
 
-//task makeJar(type: Copy){
-//    delete 'build/libs/easylinphone.jar'
-//    from('build/intermediates/bundles/release/')
-//    into('build/outputs')
-//    include('classes.jar')
-//    rename('classes.jar','easylinphone.jar')
-//}
-//makeJar.dependsOn(build)
+task makeJar(type: Copy){
+    delete 'build/libs/easylinphone.jar'
+    from('build/intermediates/bundles/release/')
+    into('build/outputs')
+    include('classes.jar')
+    rename('classes.jar','easylinphone.jar')
+}
+makeJar.dependsOn(build)

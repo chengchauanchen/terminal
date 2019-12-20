@@ -124,6 +124,7 @@ public class NfcUtil {
         return ndefRecord;
     }
 
+
     public static void writeData(){
         int groupNo;
         //如果存在组会话界面，NFC绑定时就是绑定的这个组
@@ -136,18 +137,18 @@ public class NfcUtil {
         }
         HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
         if (hashMap.containsKey(groupNo + "") && !android.text.TextUtils.isEmpty(hashMap.get(groupNo + ""))){
-            writeData(groupNo,hashMap.get(groupNo + ""));
+            writeData(groupNo,hashMap.get(groupNo + ""),"");
         }else {
-            writeData(groupNo,"");
+            writeData(groupNo,"","");
         }
     }
 
-    public static void writeData(int groupId,String warningId){
+    public static void writeData(int groupId,String warningId,String voiceDes){
         logger.info(TAG+"writeData--groupId:"+groupId+"--:"+warningId);
         //设置刷NFC需要传的数据
         int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
         long uniqueNo = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
-        MyApplication.instance.setBindTranslateBean(new RecorderBindTranslateBean(memberId,uniqueNo,groupId,warningId));
+        MyApplication.instance.setBindTranslateBean(new RecorderBindTranslateBean(memberId,uniqueNo,groupId,warningId,voiceDes));
     }
 
 }
