@@ -80,6 +80,7 @@ import cn.vsx.hamster.terminalsdk.manager.data.DataManager;
 import cn.vsx.hamster.terminalsdk.manager.http.IHttpClient;
 import cn.vsx.hamster.terminalsdk.manager.okhttp.LoggingInterceptor;
 import cn.vsx.hamster.terminalsdk.manager.okhttp.MyCacheInterceptor;
+import cn.vsx.hamster.terminalsdk.manager.servicebus.ServiceBusManager;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileDirectory;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.IdentifyType;
@@ -154,6 +155,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private String protocolType;
     private VoipManager voipManager;
     private LiveManager liveManager;
+    private ServiceBusManager serviceBusManager;
 	//DDpush连接
 	private boolean Established = false;
 	//在线状态，手机网络连上和UDP连上
@@ -1462,7 +1464,15 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		return application.getPackageName();
 	}
 
-	/**
+    @Override
+    public ServiceBusManager getServiceBusManager() {
+	    if(serviceBusManager == null){
+            serviceBusManager = new ServiceBusManager();
+        }
+        return serviceBusManager;
+    }
+
+    /**
 	 * 全局请求的统一配置（以下配置根据自身情况选择性的配置即可）
 	 */
 	private void initRxHttpUtils() {

@@ -48,16 +48,20 @@ public class VoipManager{
      * @param callRecord
      */
     public void downloadRecordFile(final CallRecord callRecord, final DownloadCompleteListener downloadCompleteListener, final boolean isNeedUi) {
-        final String url = callRecord.getPath();
+         String url = callRecord.getPath();
         logger.info("录音下载地址："+url);
         if(url.equals("")||url==null){
             downloadCompleteListener.failure();
             return;
         }
+//        if(TerminalFactory.getSDK().getServiceBusManager().canUseServiceBusDeviceType()){
+//            url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
+//        }
         Request request = new Request.Builder().url(url).build();
         mOkHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
+//                TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
                 downloadCompleteListener.failure();
             }
 

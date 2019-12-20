@@ -94,6 +94,7 @@ public class MyDataManager extends DataManager{
                     }
                 }catch (Exception e){
                     e.printStackTrace();
+                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
                 }
             }
         });
@@ -225,6 +226,7 @@ public class MyDataManager extends DataManager{
 //                            });
                 }catch (Exception e){
                     e.printStackTrace();
+                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
                 }
 
             }
@@ -327,6 +329,7 @@ public class MyDataManager extends DataManager{
 //                            });
                 }catch (Exception e){
                     e.printStackTrace();
+                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
                 }
             }
         });

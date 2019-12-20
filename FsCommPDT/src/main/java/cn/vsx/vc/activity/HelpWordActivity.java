@@ -24,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
@@ -50,8 +51,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-
 
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLogFileUploadCompleteHandler;
@@ -247,7 +246,7 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
         }else {
             help_word_url = nightHelpUrl;
         }
-
+//        help_word_url = TerminalFactory.getSDK().getServiceBusManager().getUrl(help_word_url);
 
         logger.info("加载帮助文档的地址" + help_word_url);
         if (!TextUtils.isEmpty(help_word_url)) {
@@ -295,6 +294,12 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
 
                     }
                     return super.shouldInterceptRequest(webView, webResourceRequest);
+                }
+
+                @Override
+                public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                    super.onReceivedError(view, request, error);
+//                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
                 }
             });
             wv_help.setEnabled(false);

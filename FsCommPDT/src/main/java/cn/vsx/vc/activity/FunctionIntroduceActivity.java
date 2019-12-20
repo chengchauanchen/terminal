@@ -7,13 +7,14 @@ import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
-import butterknife.Bind;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -76,6 +77,7 @@ public class FunctionIntroduceActivity extends FragmentActivity{
         }else {
             webView.setEnabled(false);
             ll_pb.setVisibility(View.VISIBLE);
+//            help_word_url = TerminalFactory.getSDK().getServiceBusManager().getUrl(help_word_url);
             webView.loadUrl(help_word_url);
             webView.setOnKeyListener((v, keyCode, event) -> {
                 if((keyCode == KeyEvent.KEYCODE_BACK) && webView.canGoBack()){
@@ -100,6 +102,12 @@ public class FunctionIntroduceActivity extends FragmentActivity{
                     if(webView !=null){
                         webView.setEnabled(true);
                     }
+                }
+
+                @Override
+                public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                    super.onReceivedError(view, request, error);
+//                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
                 }
             });
         }

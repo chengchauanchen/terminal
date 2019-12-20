@@ -19,12 +19,17 @@ import org.apache.http.util.EntityUtils;
 import org.apache.log4j.Logger;
 import org.apache.zectec.http.message.BasicNameValuePair;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.http.HttpClientBaseImpl;
 
 public class MyHttpClient extends HttpClientBaseImpl{
@@ -35,6 +40,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 	@Override
 	public String postJson(String url, String jsonMessage) {
 		try {
+			url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
 			HttpPost request = new HttpPost(url);
 			request.setEntity(new ByteArrayEntity(jsonMessage.getBytes(DEFAULT_ENCODING)));
 			request.setHeader("Accept", "application/json");
@@ -52,6 +58,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 		} catch (Exception e) {
 			logger.error("命令发送失败，url=" + url + ", jsonMessage=" + jsonMessage,
 					e);
+			TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
 		}
 		return null;
 	}
@@ -59,6 +66,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 	@Override
 	public String postJson2(String url, String jsonMessage) {
 		try {
+			url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
 			HttpPost request = new HttpPost(url);
 			request.setEntity(new ByteArrayEntity(jsonMessage.getBytes(DEFAULT_ENCODING)));
 			request.setHeader("Accept", "application/json");
@@ -75,6 +83,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 		} catch (Exception e) {
 			logger.error("命令发送失败，url=" + url + ", jsonMessage=" + jsonMessage,
 					e);
+			TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
 		}
 		return null;
 	}
@@ -83,6 +92,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 	@Override
 	public String post2(String url, Map<String, String> paramsMap) {
 		try {
+			url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
 			HttpPost request = new HttpPost(url);
 			Set<String> keys = paramsMap.keySet();
 			List<NameValuePair> formparams = new ArrayList<>();
@@ -103,6 +113,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 			}
 		} catch (Exception e) {
 			logger.error("命令发送失败，url=" + url  , e);
+			TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
 		}
 		return null;
 	}
@@ -110,6 +121,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 	@Override
 	public String post(String url, Map<String, String> paramsMap) {
 		try {
+			url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
 			HttpPost request = new HttpPost(url);
 			Set<String> keys = paramsMap.keySet();
 			List<NameValuePair> formparams = new ArrayList<>();
@@ -130,12 +142,14 @@ public class MyHttpClient extends HttpClientBaseImpl{
 			}
 		} catch (Exception e) {
 			logger.error("命令发送失败，url=" + url  , e);
+			TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
 		}
 		return null;
 	}
 	@Override
 	public String get(String url, Map<String,String> paramsMap) {
 		try {
+			url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
 			url = getUrl(url, paramsMap);
 			HttpGet request = new HttpGet(url);
 			request.setHeader("Accept", "application/json");
@@ -151,6 +165,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 			}
 		} catch (Exception e) {
 			logger.error("命令发送失败，url=" + url, e);
+			TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
 		}
 		return null;
 	}
@@ -158,6 +173,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 	@Override
 	public String postFile(String url, File file, Map<String, String> paramsMap) {
 		try{
+//			url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
 			HttpPost httppost = new HttpPost(url);
 			logger.info("文件服务器地址为" + url);
 			FileBody bin = new FileBody(file);
@@ -175,6 +191,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
+//			TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
 		}
 		return null;
 	}
@@ -183,5 +200,53 @@ public class MyHttpClient extends HttpClientBaseImpl{
 		HttpConnectionParams.setSoTimeout(httpParams, timeOut);
 		HttpConnectionParams.setConnectionTimeout(httpParams, timeOut);
 		return new DefaultHttpClient(httpParams);
+	}
+
+	@Override
+	public String sendGet(String url) {
+		String result = "";
+		BufferedReader in = null;
+		try {
+			url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
+			logger.info("发送get请求" + url);
+			String urlNameString = url;
+			URL realUrl = new URL(urlNameString);
+			// 打开和URL之间的连接
+			URLConnection connection = realUrl.openConnection();
+			// 设置通用的请求属性
+			connection.setDoOutput(false);
+			connection.setRequestProperty("accept", "*/*");
+			connection.setRequestProperty("connection", "Keep-Alive");
+			connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded;charset=utf8");
+			connection.setRequestProperty("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1;SV1)");
+			// 建立实际的连接
+			connection.connect();
+			// 定义 BufferedReader输入流来读取URL的响应
+			in = new BufferedReader(new InputStreamReader(connection.getInputStream(),"UTF-8"));
+			String line;
+			while ((line = in.readLine()) != null) {
+				result += line;
+			}
+			logger.info("发送了一个get请求：url="+url+"\n 收到的信息为："+result);
+		} catch (Exception e) {
+			logger.error("发送GET请求出现异常！",e);
+			TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
+		}
+		// 使用finally块来关闭输入流
+		finally {
+			try {
+				if (in != null) {
+					in.close();
+				}
+			} catch (Exception e2) {
+				logger.error("",e2);
+			}
+		}
+		return result;
+	}
+
+	@Override
+	public String sendGet(String url, Map<String, String> paramsMap) {
+		return sendGet(getUrl(url, paramsMap));
 	}
 }

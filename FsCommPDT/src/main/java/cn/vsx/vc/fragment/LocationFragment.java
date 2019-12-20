@@ -10,6 +10,8 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.webkit.WebResourceError;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -145,6 +147,7 @@ public class LocationFragment extends Fragment{
         settings.setDomStorageEnabled(false);
         //设置是否获得焦点
         wv_help.requestFocus();
+//        url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
         logger.info("加载定位的地址" + url);
         if(!TextUtils.isEmpty(url)){
             wv_help.setWebViewClient(new WebViewClient(){
@@ -158,6 +161,12 @@ public class LocationFragment extends Fragment{
                             e.printStackTrace();
                         }
                     });
+                }
+
+                @Override
+                public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                    super.onReceivedError(view, request, error);
+//                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
                 }
             });
             wv_help.setEnabled(false);

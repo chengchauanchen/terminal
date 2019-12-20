@@ -347,14 +347,16 @@ public class FileTransferOperation {
                             builder.addFormDataPart("requestMemberId", requestMemberId + "");
                             builder.addFormDataPart("requestUniqueNo", requestUniqueNo + "");
                         }
+                        String url = getUploadFileServerUrl();
+//                        url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
                         Request request = new Request.Builder()
-                                .url(getUploadFileServerUrl() + UPLOAD_FILE_SERVER_PATH)
+                                .url(url + UPLOAD_FILE_SERVER_PATH)
                                 .post(builder.build())
                                 .build();
                         String result = mOkHttpClient.newCall(request).execute().body().string();
 
                         long endTime = System.currentTimeMillis() - startTime;
-                        logger.info(TAG + "uploadFileByPath:url:" + getUploadFileServerUrl() + UPLOAD_FILE_SERVER_PATH + "-fileName-" + fileName + "-result-" + result + "-time-" + endTime);
+                        logger.info(TAG + "uploadFileByPath:url:" + url + UPLOAD_FILE_SERVER_PATH + "-fileName-" + fileName + "-result-" + result + "-time-" + endTime);
                         if (!TextUtils.isEmpty(result)) {
 
                             JSONObject object = JSONObject.parseObject(result);
@@ -388,6 +390,7 @@ public class FileTransferOperation {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+//                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
                     logger.info(TAG + "uploadFileByPath:result:Exception" + e);
                     notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
                 }

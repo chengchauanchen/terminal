@@ -414,6 +414,7 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
         if(mediaPlayer == null){
             mediaPlayer = new MediaPlayer();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+//            url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
             mediaPlayer.setDataSource(url);
             mediaPlayer.prepareAsync();
         }

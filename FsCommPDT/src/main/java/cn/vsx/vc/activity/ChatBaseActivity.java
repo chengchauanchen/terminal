@@ -2765,12 +2765,15 @@ public abstract class ChatBaseActivity extends BaseActivity
                     logger.info("请求录音时URL：" + terminalMessage.messagePath);
                     OkHttpClient mOkHttpClient = new OkHttpClient();
                     MyTerminalFactory.getSDK().getTerminalMessageManager().setMessagePath(terminalMessage, false);
+                    String url = terminalMessage.messagePath;
+//                    url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
                     Request request = new Request.Builder()
-                            .url(terminalMessage.messagePath)
+                            .url(url)
                             .build();
                     mOkHttpClient.newCall(request).enqueue(new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {
+//                            TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
                         }
 
                         @Override
