@@ -9,6 +9,7 @@ android {
     flavorDimensions "default"
     defaultConfig {
         applicationId "cn.vsx.vc"
+        //武铁 1.包名，2.应用名，3.应用图标，4.定位key
 //        applicationId "com.vsxin.pstation"
 //        applicationId "com.vsxin.langfang"
         minSdkVersion 19

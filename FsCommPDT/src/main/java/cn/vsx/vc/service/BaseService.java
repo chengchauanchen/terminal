@@ -409,7 +409,9 @@ public abstract class BaseService extends Service{
                 int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
                 long memberUniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L);
                 String memberName = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");
-                String url = "rtsp://"+streamMediaServerIp+":"+streamMediaServerPort+"/"+memberUniqueNo+"_"+callId;
+
+                String sdp = TerminalFactory.getSDK().getLiveManager().getLivePathSdp();
+                String url = "rtsp://"+streamMediaServerIp+":"+streamMediaServerPort+"/"+memberUniqueNo+"_"+callId+sdp;
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put(JsonParam.SEND_STATE, MessageSendStateEnum.SEND_PRE);
                 jsonObject.put(JsonParam.TOKEN_ID, MyTerminalFactory.getSDK().getMessageSeq());

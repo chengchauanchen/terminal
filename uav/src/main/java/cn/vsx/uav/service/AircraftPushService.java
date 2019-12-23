@@ -871,7 +871,8 @@ public class AircraftPushService extends BaseService implements YuvPlayer.YuvDat
     private void startAircraftPush(){
         if(null != airCraftMediaStream){
             airCraftMediaStream.startStream(ip, port, id, pushCallback);
-            String url = String.format("rtsp://%s:%s/%s", ip, port, id);
+            String sdp = TerminalFactory.getSDK().getLiveManager().getLivePathSdp();
+            String url = String.format("rtsp://%s:%s/%s"+sdp, ip, port, id);
             logger.info(TAG+"推送地址：" + url);
         }
     }

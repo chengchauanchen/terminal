@@ -1282,7 +1282,10 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         }
         //开始推流
         mMediaStream.startStream(ip, port, id, pushCallback);
-        String url = String.format("rtsp://%s:%s/%s", ip, port, id);
+
+        String sdp = TerminalFactory.getSDK().getLiveManager().getLivePathSdp();
+
+        String url = String.format("rtsp://%s:%s/%s"+sdp, ip, port, id);
         logger.info("推送地址：" + url);
         //开始录像
         if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(MyTerminalFactory.getSDK().getFileTransferOperation().getExternalUsableStorageDirectory())) {

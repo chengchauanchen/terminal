@@ -87,7 +87,7 @@ public class QRBindingDialog extends Dialog implements DialogInterface.OnDismiss
     public void showDialog(int groupId,String warningId){
         int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
         long uniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
-         account = new Gson().toJson(new RecorderBindTranslateBean(memberId,uniqueNo,groupId,warningId));
+         account = new Gson().toJson(new RecorderBindTranslateBean(memberId,uniqueNo,groupId,warningId,""));
         if(!TextUtils.isEmpty(account)){
             show();
         }

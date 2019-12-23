@@ -48,6 +48,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+
 import static android.media.AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Flexible;
 import static android.media.MediaCodecInfo.CodecCapabilities.COLOR_FormatYUV420Planar;
@@ -1374,7 +1376,8 @@ public class EasyRTSPPlayer implements RTSPClient.RTSPSourceCallBack{
                 if(null != mMediaInfo){
                     mPusher.setMediaInfo(mMediaInfo.videoCodec,mMediaInfo.fps,mMediaInfo.audioCodec,mMediaInfo.channel,mMediaInfo.sample,mMediaInfo.bitPerSample);
                 }
-                mPusher.start(ip, port, String.format("%s", id), Pusher.TransType.EASY_RTP_OVER_TCP);
+                String sdp = TerminalFactory.getSDK().getLiveManager().getLivePathSdp();
+                mPusher.start(ip, port, String.format("%s"+sdp, id), Pusher.TransType.EASY_RTP_OVER_TCP);
             }else{
                 int width = frameInfo.width;
                 int height = frameInfo.height;

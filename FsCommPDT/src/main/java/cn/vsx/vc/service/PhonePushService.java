@@ -486,7 +486,8 @@ public class PhonePushService extends BaseService{
             pushCallback = new PushCallback();
         }
         mMediaStream.startStream(ip, port, id, pushCallback);
-        String url = String.format("rtsp://%s:%s/%s", ip, port, id);
+        String sdp = TerminalFactory.getSDK().getLiveManager().getLivePathSdp();
+        String url = String.format("rtsp://%s:%s/%s"+sdp, ip, port, id);
         logger.info("推送地址：" + url);
 
     }

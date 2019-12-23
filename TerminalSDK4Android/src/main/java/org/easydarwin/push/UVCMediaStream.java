@@ -40,6 +40,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import dagger.Module;
 import dagger.Provides;
 import ptt.terminalsdk.context.MyTerminalFactory;
@@ -143,7 +144,9 @@ public class UVCMediaStream {
     public void startStream(String ip, String port, String id, InitCallback callback) {
         mEasyPusher.initPush(mApplicationContext, callback);
         mEasyPusher.setMediaInfo(Pusher.Codec.EASY_SDK_VIDEO_CODEC_H264, 25, Pusher.Codec.EASY_SDK_AUDIO_CODEC_AAC, 1, 8000, 16);
-        mEasyPusher.start(ip, port, String.format("%s", id), Pusher.TransType.EASY_RTP_OVER_TCP);
+
+        String sdp = TerminalFactory.getSDK().getLiveManager().getLivePathSdp();
+        mEasyPusher.start(ip, port, String.format("%s"+sdp, id), Pusher.TransType.EASY_RTP_OVER_TCP);
         pushStream = true;
     }
 

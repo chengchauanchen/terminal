@@ -347,7 +347,9 @@ public class LivePresenter extends BasePresenter<ILiveView> {
             pushCallback = new PushCallback();
         }
         getView().getmMediaStream().startStream(ip, port, id, pushCallback);
-        String url = String.format("rtsp://%s:%s/%s", ip, port, id);
+
+        String sdp = TerminalFactory.getSDK().getLiveManager().getLivePathSdp();
+        String url = String.format("rtsp://%s:%s/%s"+sdp, ip, port, id);
         getView().getLogger().info("推送地址：" + url);
 
     }

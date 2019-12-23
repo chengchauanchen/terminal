@@ -782,9 +782,9 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             NFCBindingDialog nfcBindingDialog = new NFCBindingDialog(BaseActivity.this, NFCBindingDialog.TYPE_WAIT);
             HashMap<String, String> hashMap = TerminalFactory.getSDK().getHashMap(Params.GROUP_WARNING_MAP, new HashMap<String, String>());
             if (hashMap.containsKey(userId + "") && !android.text.TextUtils.isEmpty(hashMap.get(userId + ""))) {
-                nfcBindingDialog.showDialog(userId, hashMap.get(userId + ""));
+                nfcBindingDialog.showDialog(userId, hashMap.get(userId + ""),"");
             }else{
-                nfcBindingDialog.showDialog(userId, "");
+                nfcBindingDialog.showDialog(userId, "","");
             }
         }else{
             ToastUtil.showToast(BaseActivity.this,getString(R.string.text_group_id_abnormal));

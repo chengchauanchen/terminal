@@ -5,6 +5,8 @@ import android.content.Context;
 import org.apache.log4j.Logger;
 import org.easydarwin.audio.LocalFileAudioStream;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+
 /**
  * author: zjx.
  * data:on 2018/11/12
@@ -37,7 +39,9 @@ public class LocalVideoPushStream {
         localFileAudioStream.startPush(filePath);
         mEasyPusher.initPush( mApplicationContext, callback);
         mEasyPusher.setMediaInfo(Pusher.Codec.EASY_SDK_VIDEO_CODEC_H264, 25, Pusher.Codec.EASY_SDK_AUDIO_CODEC_AAC, 1, 8000, 16);
-        mEasyPusher.start(ip, port, String.format("%s", id), Pusher.TransType.EASY_RTP_OVER_TCP);
+
+        String sdp = TerminalFactory.getSDK().getLiveManager().getLivePathSdp();
+        mEasyPusher.start(ip, port, String.format("%s"+sdp, id), Pusher.TransType.EASY_RTP_OVER_TCP);
         pushStream = true;
     }
 

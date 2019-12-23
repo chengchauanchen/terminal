@@ -79,6 +79,8 @@
     
     <!--打无人机包的时候把Application的name属性去掉即可-->
     <!--android:name=".application.MyApplication"-->
+
+    <!--武铁2 android:icon="@mipmap/ic_launcher_wutie"-->
     <application
         android:name=".application.MyApplication"
         android:allowBackup="true"
@@ -242,6 +244,13 @@
                 <action android:name="com.baidu.location.service_v2.2" />
             </intent-filter>
         </service>
+
+        <!--武铁4-->
+        <!--<meta-data-->
+            <!--android:name="com.baidu.lbsapi.API_KEY"-->
+            <!--android:value="sFqXQT2W9lG6FWHpkvnIeOTZ5D8hQPnq" /> &lt;!&ndash; key:开发者申请的Key &ndash;&gt;-->
+
+        <!--其它-->
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="M95bUm2bTVEGnTqU5mPgzixHVL69pAGa" /> <!-- key:开发者申请的Key -->
