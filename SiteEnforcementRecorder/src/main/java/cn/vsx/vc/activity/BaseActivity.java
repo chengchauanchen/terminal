@@ -1293,6 +1293,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                     resultData.putString("event-msg", "EasyRTSP 进程名称长度不匹配");
                     break;
             }
+            logger.info("PhonePushService--PushCallback--msg:"+resultData.getString("event-msg")+"--code:"+code);
 //            mResultReceiver.send(EasyRTSPClient.RESULT_EVENT, resultData);
         }
     }

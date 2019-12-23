@@ -106,7 +106,7 @@ public class FileTransferOperation {
     //限速的RequestBody
     private RateLimitingRequestBody rateLimitingRequestBody;
     //上传文件限制的速率
-    private static final int UPLOAD_FILE_RATE_LIMIT = 3 * 1000 * 1000;
+    private static final int UPLOAD_FILE_RATE_LIMIT = 2 * 1000 * 1000;
     //上传文件不限制的速率
     private static final int UPLOAD_FILE_RATE_LIMIT_NO = 0;
 
