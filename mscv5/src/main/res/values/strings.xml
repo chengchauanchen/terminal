@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">MscV5Lib</string>
+    <!-- 请替换成在语音云官网申请的appid -->
+    <string name="app_id">5dfb377e</string>
+
+    <string
+        name="tts_toast_format"
+        formatted="false">缓冲进度为%d%%，播放进度为%d%%</string>
+</resources>

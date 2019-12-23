@@ -67,7 +67,7 @@ public class QRScanFragment extends Fragment implements View.OnClickListener {
         //生成二维码
 //        int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
         long uniqueNo = MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L);
-        String content = new Gson().toJson(new RecorderBindTranslateBean(0,uniqueNo,0,""));
+        String content = new Gson().toJson(new RecorderBindTranslateBean(0,uniqueNo,0,"",""));
         Bitmap mBitmap = CodeUtils.createImage(content, bitmapSize, bitmapSize, null);
         ivQr.setImageBitmap(mBitmap);
     }

@@ -155,4 +155,7 @@ dependencies {
         exclude module: 'support-v4'
         exclude module: 'appcompat-v7'
     }
+
+    //语音合成
+    implementation project(':mscv5')
 }
