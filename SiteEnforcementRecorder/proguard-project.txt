@@ -316,3 +316,7 @@
 }
 -dontwarn io.netty.**
 -dontwarn sun.**
+
+# 语音合成
+-keep class com.iflytek.**{*;}
+-keepattributes Signature
