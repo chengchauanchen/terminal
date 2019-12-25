@@ -115,7 +115,7 @@ public class RecorderGPSManager {
 	 * 检查是否初始化
 	 */
 	private void checkInit(){
-		if(locationManager == null||Util.isEmpty(locationProvider)){
+		if(locationManager == null|| Util.isEmpty(locationProvider)){
 			init();
 		}
 	}

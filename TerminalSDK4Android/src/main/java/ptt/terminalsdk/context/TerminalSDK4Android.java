@@ -112,6 +112,7 @@ import ptt.terminalsdk.manager.gps.GPSManager;
 import ptt.terminalsdk.manager.gps.recoder.LocationManager;
 import ptt.terminalsdk.manager.gps.recoder.RecorderBDGPSManager;
 import ptt.terminalsdk.manager.gps.recoder.RecorderGPSManager;
+import ptt.terminalsdk.manager.gps.recoder.RecorderSfGPSManager;
 import ptt.terminalsdk.manager.http.MyHttpClient;
 import ptt.terminalsdk.manager.http.ProgressHelper;
 import ptt.terminalsdk.manager.http.ProgressUIListener;
@@ -166,7 +167,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	private boolean isBindedUVCCameraService;
 	private VPNConnectionChangeReceiver vpnConnectionChangeReceiver;
 
-	public TerminalSDK4Android (Application mApplication,String terminalMemberType){
+	public TerminalSDK4Android(Application mApplication, String terminalMemberType){
 		application = mApplication;
 		account = application.getSharedPreferences(Params.DEFAULT_PRE_NAME,Context.MODE_MULTI_PROCESS);
 		putParam(UrlParams.TERMINALMEMBERTYPE, terminalMemberType);
@@ -381,7 +382,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
         account.edit().putString(param,result).apply();
     }
 
-	public LinkedTreeMap<String,List<TerminalMessage>> getTerminalMessageListMap(String param,LinkedTreeMap<String, List<TerminalMessage>> defaultValue){
+	public LinkedTreeMap<String,List<TerminalMessage>> getTerminalMessageListMap(String param, LinkedTreeMap<String, List<TerminalMessage>> defaultValue){
 		String strJson = account.getString(param, "");
 		logger.info("getListHashMap:"+strJson);
 		if(TextUtils.isEmpty(strJson)){
@@ -861,6 +862,16 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 		return bdgpsManager;
 	}
+
+	//顺丰定位
+	private RecorderSfGPSManager recorderSfGPSManager;
+	public RecorderSfGPSManager getRecorderSfGPSManager(){
+		if(recorderSfGPSManager == null){
+			recorderSfGPSManager = new RecorderSfGPSManager(application);
+		}
+		return recorderSfGPSManager;
+	}
+
 	private RecorderGPSManager recorderGPSManager;
 	public RecorderGPSManager getRecorderGPSManager(){
 		if(recorderGPSManager == null){
@@ -1003,7 +1014,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	 * @param terminalMessage
 	 * @param isNeedUi
 	 */
-	public void upload(List<Integer> list , List<Long> toUniqueNos,File file, TerminalMessage terminalMessage, boolean isNeedUi){
+	public void upload(List<Integer> list , List<Long> toUniqueNos, File file, TerminalMessage terminalMessage, boolean isNeedUi){
 		TerminalFactory.getSDK().getTerminalMessageManager().uploadDataByOkHttp(list,toUniqueNos, file, terminalMessage, isNeedUi);
 	}
 
@@ -1409,7 +1420,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 
 	@Override
 	public void audioProxyStart(){
-		getAudioProxy().start(TerminalFactory.getSDK().getParam(Params.PROTOCOL_TYPE,Params.UDP));
+		getAudioProxy().start(TerminalFactory.getSDK().getParam(Params.PROTOCOL_TYPE, Params.UDP));
 	}
 
 	@Override

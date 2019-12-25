@@ -309,3 +309,6 @@
 }
 -dontwarn io.netty.**
 -dontwarn sun.**
+
+#顺丰地图
+-keep class com.sfmap.**{*;}

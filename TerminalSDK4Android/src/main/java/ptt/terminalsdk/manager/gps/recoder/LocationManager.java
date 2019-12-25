@@ -22,6 +22,8 @@ import java.util.Map;
 import cn.vsx.hamster.common.MountType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.protolbuf.PTTProtolbuf;
+import cn.vsx.hamster.protolbuf.PTTProtolbuf.NotifyForceUploadGpsMessage;
+import cn.vsx.hamster.protolbuf.PTTProtolbuf.ResponseMemberConfigMessage;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.channel.ServerMessageReceivedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangePersonLocationHandler;
@@ -101,7 +103,11 @@ public class LocationManager {
      */
     public void start() {
         logger.info(TAG + "开启了");
+        //顺丰
+        MyTerminalFactory.getSDK().getRecorderSfGPSManager().init(0);
+        //百度
         MyTerminalFactory.getSDK().getRecorderBDGPSManager().init(0);
+        //gps
         MyTerminalFactory.getSDK().getRecorderGPSManager().init();
 
 
@@ -124,6 +130,7 @@ public class LocationManager {
 
         MyTerminalFactory.getSDK().getRecorderGPSManager().stop();
         MyTerminalFactory.getSDK().getRecorderBDGPSManager().stop();
+        MyTerminalFactory.getSDK().getRecorderSfGPSManager().stop();
         mHandler.removeCallbacksAndMessages(null);
         logger.info(TAG + "销毁了");
     }
@@ -147,7 +154,7 @@ public class LocationManager {
     /**
      * 通知强制上传GPS信息的消息
      */
-    private ServerMessageReceivedHandler<PTTProtolbuf.NotifyForceUploadGpsMessage> notifyForceUploadGpsMessageReceivedHandler = new ServerMessageReceivedHandler<PTTProtolbuf.NotifyForceUploadGpsMessage>() {
+    private ServerMessageReceivedHandler<NotifyForceUploadGpsMessage> notifyForceUploadGpsMessageReceivedHandler = new ServerMessageReceivedHandler<NotifyForceUploadGpsMessage>() {
         @Override
         public void handle(PTTProtolbuf.NotifyForceUploadGpsMessage message) {
             logger.info(TAG + "收到GPS强制上传通知命令" + message);
@@ -161,7 +168,7 @@ public class LocationManager {
     /**
      * 获取到上传GPS信息的消息
      */
-    private ServerMessageReceivedHandler<PTTProtolbuf.ResponseMemberConfigMessage> responseMemberConfigMessageHandler = new ServerMessageReceivedHandler<PTTProtolbuf.ResponseMemberConfigMessage>() {
+    private ServerMessageReceivedHandler<ResponseMemberConfigMessage> responseMemberConfigMessageHandler = new ServerMessageReceivedHandler<ResponseMemberConfigMessage>() {
         @Override
         public void handle(PTTProtolbuf.ResponseMemberConfigMessage message) {
             logger.info(TAG + "获取到上传GPS信息的消息" + message);
@@ -291,11 +298,23 @@ public class LocationManager {
                 if(!isChatSendLocation){
                     isChatSendLocation = isChat;
                 }
+
+                boolean shijuSDP = TerminalFactory.getSDK().getLiveManager().isShijuSDP();
+                logger.info(LocationManager.TAG + "是否市局环境---"+shijuSDP);
+                if(shijuSDP){
+                    //顺丰
+                    logger.info(LocationManager.TAG + "顺丰GPSManager---1");
+                    RecorderSfGPSManager recorderSfGPSManager = MyTerminalFactory.getSDK().getRecorderSfGPSManager();
+                    recorderSfGPSManager.requestLocationInfo(uploadTime);
+                }
+
                 //百度定位
+                logger.info(LocationManager.TAG + "顺丰GPSManager---2");
                 final RecorderBDGPSManager bDGPSManager = MyTerminalFactory.getSDK().getRecorderBDGPSManager();
                 bDGPSManager.requestLocationInfo(uploadTime);
 
                 //GPS定位
+                logger.info(LocationManager.TAG + "顺丰GPSManager---3");
                 final RecorderGPSManager gpsManager = MyTerminalFactory.getSDK().getRecorderGPSManager();
                 if (gpsManager.checkInitCompleteAndIsChat()) {
                     MyTerminalFactory.getSDK().getRecorderGPSManager().getLocationManager().requestLocationUpdates(gpsManager.getlocationProvider(), uploadTime, 0, gpsManager.getLocationListener());
@@ -367,9 +386,9 @@ public class LocationManager {
 //			final String url = "http://192.168.1.187:6666/save";
             final String url = "http://"+ip+":"+port+"/save";
             Map<String,Object> params = new HashMap<>();
-            params.put("terminalno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
-            params.put("memberuniqueno",MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L));
-            params.put("terminalType",MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE));
+            params.put("terminalno", MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID,0));
+            params.put("memberuniqueno", MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,0L));
+            params.put("terminalType", MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE));
             params.put("longitude",location.getLongitude());
             params.put("latitude",location.getLatitude());
             params.put("speed",location.getSpeed());

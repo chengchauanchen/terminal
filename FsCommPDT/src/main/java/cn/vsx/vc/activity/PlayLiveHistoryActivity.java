@@ -677,10 +677,20 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
         if(terminalMessage.messageBody!=null){
             if(terminalMessage.messageBody.containsKey(JsonParam.EASYDARWIN_RTSP_URL)){
                 String url = terminalMessage.messageBody.getString(JsonParam.EASYDARWIN_RTSP_URL);
-                if(!TextUtils.isEmpty(url)&&url.contains("/")&&url.contains(".")){
-                    int index = url.lastIndexOf("/");
-//                    int pointIndex = url.lastIndexOf(".");
-                    id = url.substring(index+1);
+
+                boolean shijuSDP = TerminalFactory.getSDK().getLiveManager().isShijuSDP();
+                if(shijuSDP){
+                    if(!TextUtils.isEmpty(url)&&url.contains("/")&&url.contains(".")){
+                        int index = url.lastIndexOf("/");
+                        //TODO sdp,武铁市局环境目前有.sdp,所以需要截 "."
+                        int pointIndex = url.lastIndexOf(".");
+                        id = url.substring(index+1,pointIndex);
+                    }
+                }else{
+                    if(!TextUtils.isEmpty(url)&&url.contains("/")){
+                        int index = url.lastIndexOf("/");
+                        id = url.substring(index+1);
+                    }
                 }
             }
         }

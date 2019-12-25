@@ -7,8 +7,6 @@ import com.baidu.location.LocationClientOption;
 
 import org.apache.log4j.Logger;
 
-import ptt.terminalsdk.manager.gps.MyLocationListener;
-
 /**
  * Created by zckj on 2017/8/29.
  */
@@ -29,12 +27,14 @@ public class RecorderBDGPSManager {
     public void init(int span) {
         logger.info(LocationManager.TAG + "BDGPSManager初始化了");
         mLocationClient = new LocationClient(application);
-        //声明LocationClient类
-        mLocationClient.registerLocationListener(myListener);
         initLocation(span);
     }
 
     private void initLocation(int span) {
+        logger.info(LocationManager.TAG + "百度BDGPSManager---initLocation");
+
+        //声明LocationClient类
+        mLocationClient.registerLocationListener(myListener);
 
         LocationClientOption option = new LocationClientOption();
         option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);
