@@ -223,7 +223,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(), TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
                     } else {
                         changeProgressMsg(getResources().getString(R.string.auth_fail));
-                        myHandler.postDelayed(() -> exit(), 3000);
+                        // TODO: 2020/1/7 判断是否在自动更新，如果在自动更新就不能退出
+                        if(!MyApplication.instance.isUpdatingAPP){
+                            myHandler.postDelayed(() -> exit(), 3000);
+                        }
                     }
                 } else if (resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()) {
                     //没有注册服务地址，去探测地址
@@ -412,6 +415,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_ID, useDepartmentId);
                 MyTerminalFactory.getSDK().putParam(UrlParams.DEPT_NAME, useDepartmentName);
                 int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
+                checkUpdate();
                 if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                     changeProgressMsg(getString(R.string.authing));
                 }
@@ -423,6 +427,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 MyTerminalFactory.getSDK().putParam(UrlParams.NAME, userName);
                 MyTerminalFactory.getSDK().putParam(UrlParams.XIANGYANG_STORE,true);
                 int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
+                checkUpdate();
                 if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                     changeProgressMsg(getString(R.string.authing));
                 }
@@ -451,8 +456,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     ToastUtils.showShort(R.string.text_please_select_unit);
                 } else {
                     changeProgressMsg(getString(R.string.text_registing));
-
+                    String path = "http://"+ registIP+":"+registPort;
+                    TerminalFactory.getSDK().setAPKUpdateAddress(path);
                     TerminalFactory.getSDK().getAuthManagerTwo().regist(useName, useOrg);
+                    checkUpdate();
                 }
             }
         }
@@ -619,6 +626,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         selectPort = availableIPMap.get(name).getPort();
                         //认证
                         int resultCode = MyTerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
+                        checkUpdate();
                         if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                             changeProgressMsg(getString(R.string.authing));
                         }
@@ -706,6 +714,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             xcd_available_ip.setItemsData(availableIPlist);
             reAuthCount = 0;
             int code = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString());
+            checkUpdate();
             if (code == BaseCommonCode.SUCCESS_CODE) {
                 changeProgressMsg(getString(R.string.authing));
             }
@@ -1054,6 +1063,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
                 if (defaultAddress.length >= 2) {
                     int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);
+                    checkUpdate();
                     if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                         changeProgressMsg(getString(R.string.authing));
                     } else {
@@ -1070,11 +1080,24 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         } else {
             //有注册服务地址，去认证
             int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
+            checkUpdate();
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                 changeProgressMsg(getString(R.string.authing));
             } else {
                 //状态机没有转到正在认证，说明已经在状态机中了，不用处理
             }
+        }
+    }
+
+    /**
+     * 检查更新
+     */
+    private void checkUpdate() {
+        //不是平台线上包打开自动更新
+        if(!ApkUtil.isAppStore()&&!MyApplication.instance.isUpdatingAPP){
+            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                MyApplication.instance.getUpdateManager().checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL,""),false);
+            });
         }
     }
 
@@ -1293,6 +1316,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == OVERLAY_PERMISSION_REQ_CODE) {
             apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
             //根据打包类型，市局才走这个

@@ -55,7 +55,6 @@ import cn.vsx.hamster.terminalsdk.tools.OperateReceiveHandlerUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.application.UpdateManager;
 import cn.vsx.vc.dialog.NFCBindingDialog;
 import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.receive.Actions;
@@ -91,7 +90,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     protected static final int CODE_FNC_REQUEST = 0x15;
     public static final int REQUEST_INSTALL_PACKAGES_CODE = 1235;
     public static final int GET_UNKNOWN_APP_SOURCES = 1236;
-    public UpdateManager updateManager;
 
     //成员被删除了
     private ReceiveMemberDeleteHandler receiveMemberDeleteHandler = new ReceiveMemberDeleteHandler() {
@@ -368,9 +366,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(requestCode == GET_UNKNOWN_APP_SOURCES){
-            if(null !=updateManager){
-                updateManager.checkIsAndroidO((this instanceof AboutActivity));
-            }
+            MyApplication.instance.getUpdateManager().checkIsAndroidO((this instanceof AboutActivity));
         }
     }
 

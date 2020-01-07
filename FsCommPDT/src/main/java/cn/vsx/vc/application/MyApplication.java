@@ -1,5 +1,6 @@
 package cn.vsx.vc.application;
 
+import android.app.Activity;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -78,6 +79,8 @@ public class MyApplication extends BaseApplication{
 	public boolean isLocked;//当前组是否被锁定，能否切走
 	//保存绑定账号需要传的数据
 	private RecorderBindTranslateBean bindTranslateBean;
+	public Activity currentActivity = null;
+	private UpdateManager updateManager;
 
 	@Override
 	public void onCreate() {
@@ -277,5 +280,15 @@ public class MyApplication extends BaseApplication{
 		//注册 连接jumpService的广播
 		ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().register(this);
 		ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().sendBroadcast(this);
+	}
+
+	/**
+	 * 获取自动更新
+	 */
+	public UpdateManager getUpdateManager(){
+		if(updateManager == null){
+			updateManager = new UpdateManager(this);
+		}
+		return updateManager;
 	}
 }

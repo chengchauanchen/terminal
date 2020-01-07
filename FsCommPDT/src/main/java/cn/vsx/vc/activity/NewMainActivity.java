@@ -98,7 +98,6 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.application.UpdateManager;
 import cn.vsx.vc.fragment.ContactsFragmentNew;
 import cn.vsx.vc.fragment.GroupSearchFragment;
 import cn.vsx.vc.fragment.NewsFragment;
@@ -117,7 +116,6 @@ import cn.vsx.vc.receiveHandle.ReceiverShowPersonFragmentHandler;
 import cn.vsx.vc.service.CardService;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.ActivityCollector;
-import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.HongHuUtils;
 import cn.vsx.vc.utils.NfcUtil;
@@ -1164,20 +1162,6 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
             }
 
         }
-        //不是平台线上包打开自动更新
-        if(!ApkUtil.isAppStore()){
-            //版本自动更新检测
-            if (MyTerminalFactory.getSDK().getParam(Params.IS_AUTO_UPDATE, false) && !MyApplication.instance.isUpdatingAPP) {
-                updateManager = new UpdateManager(NewMainActivity.this);
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        updateManager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL,""),false);
-                    }
-                }, 4000);
-            }
-        }
-
         judgePermission();
 
 //        initNFC();

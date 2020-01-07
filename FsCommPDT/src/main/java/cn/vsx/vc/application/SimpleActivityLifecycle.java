@@ -21,6 +21,7 @@ public class SimpleActivityLifecycle implements Application.ActivityLifecycleCal
 
     @Override
     public void onActivityStarted(Activity activity) {
+        MyApplication.instance.currentActivity = activity;
         isForeground=true;
     }
 

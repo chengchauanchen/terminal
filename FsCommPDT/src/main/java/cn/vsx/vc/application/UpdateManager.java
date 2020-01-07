@@ -1,7 +1,7 @@
 package cn.vsx.vc.application;
 
 import android.Manifest;
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.content.Context;
@@ -17,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ProgressBar;
 
 import org.apache.log4j.Logger;
@@ -99,7 +100,7 @@ public class UpdateManager
 			showNoticeDialog();
 		} else {
 			if(showMsg){
-				ToastUtil.showToast(mContext, mContext.getString(R.string.soft_update_no));
+				ToastUtil.showToast(MyApplication.instance, MyApplication.instance.getString(R.string.soft_update_no));
 			}
 		}
 	}
@@ -112,7 +113,7 @@ public class UpdateManager
 	private boolean isUpdate(){
 		try {
 			// 获取当前软件版本
-			int versionCode = getVersionCode(mContext);
+			int versionCode = getVersionCode(MyApplication.instance);
 			System.out.println("UpdateManager-----------"+updateUrl);
 			URL url = new URL(updateUrl);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -121,15 +122,20 @@ public class UpdateManager
 			mHashMap = ParseXmlService.parseXml(inStream);
 			logger.info("检查版本更新时，解析xml文件的结果："+mHashMap);
 			if (null != mHashMap) {
-				int serviceCode = Integer.valueOf(mHashMap.get("version"));
-				if (serviceCode > versionCode) {
-					logger.info("PhoneAdapter.isF32() ----> "+ PhoneAdapter.isF32());
-					if (PhoneAdapter.isF32()){
-						url_apk = mHashMap.get("url_f32");
-					}else {
-						url_apk = mHashMap.get("url");
+				boolean checkVersion = Boolean.valueOf(mHashMap.get("checkVersion"));
+				if(checkVersion){
+					int serviceCode = Integer.valueOf(mHashMap.get("version"));
+					if (serviceCode > versionCode) {
+						logger.info("PhoneAdapter.isF32() ----> "+ PhoneAdapter.isF32());
+						if (PhoneAdapter.isF32()){
+							url_apk = mHashMap.get("url_f32");
+						}else {
+							url_apk = mHashMap.get("url");
+						}
+						return true;
 					}
-					return true;
+				}else{
+					return false;
 				}
 			}
 		} catch (Exception e) {
@@ -165,7 +171,7 @@ public class UpdateManager
 		mHandler.post(() -> {
 			try{
 				// 构造对话框
-				Builder builder = new Builder(mContext);
+				Builder builder = new Builder(MyApplication.instance);
 				builder.setTitle(R.string.soft_update_title);
 				builder.setMessage(R.string.soft_update_info);
 				// 更新
@@ -180,7 +186,13 @@ public class UpdateManager
 					MyApplication.instance.isUpdatingAPP = false;
 				});
 				builder.setCancelable(false);
-				builder.show();
+				AlertDialog dialog = builder.create();
+				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+					dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+				}else{
+					dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+				}
+				dialog.show();
 				MyApplication.instance.isUpdatingAPP = true;
 			}catch(Exception e){
 				e.printStackTrace();
@@ -192,27 +204,37 @@ public class UpdateManager
 	 */
 	private void showDownloadDialog()
 	{
-		// 构造软件下载对话框
-		Builder builder = new Builder(mContext);
-		builder.setTitle(R.string.soft_updating);
-		// 给下载对话框增加进度条
-		final LayoutInflater inflater = LayoutInflater.from(mContext);
-		View v = inflater.inflate(R.layout.softupdate_progress, null);
-		mProgress = (ProgressBar) v.findViewById(R.id.update_progress);
-		builder.setView(v);
-		// 取消更新
-		builder.setNegativeButton(R.string.soft_update_cancel, (dialog, which) -> {
-			dialog.dismiss();
-			MyApplication.instance.isUpdatingAPP = false;
-			// 设置取消状态
-			cancelUpdate = true;
-		});
-		mDownloadDialog = builder.create();
-		mDownloadDialog.setCancelable(false);
-		mDownloadDialog.show();
+		try {
+			// 构造软件下载对话框
+			cancelUpdate = false;
+			Builder builder = new Builder(MyApplication.instance);
+			builder.setTitle(R.string.soft_updating);
+			// 给下载对话框增加进度条
+			final LayoutInflater inflater = LayoutInflater.from(MyApplication.instance);
+			View v = inflater.inflate(R.layout.softupdate_progress, null);
+			mProgress = (ProgressBar) v.findViewById(R.id.update_progress);
+			builder.setView(v);
+			// 取消更新
+			builder.setNegativeButton(R.string.soft_update_cancel, (dialog, which) -> {
+				dialog.dismiss();
+				MyApplication.instance.isUpdatingAPP = false;
+				// 设置取消状态
+				cancelUpdate = true;
+			});
+			mDownloadDialog = builder.create();
+			mDownloadDialog.setCancelable(false);
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+				mDownloadDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+			}else{
+				mDownloadDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+			}
+			mDownloadDialog.show();
 
-		// 下载文件
-		downloadApk();
+			// 下载文件
+			downloadApk();
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -300,27 +322,31 @@ public class UpdateManager
 	 * 安装APK文件
 	 */
 	private void installApk(){
-		File apkfile = new File(mSavePath, "4gptt.apk");
-		if (!apkfile.exists()){
-			return;
-		}
-		// 通过Intent安装APK文件
-		Intent intent = new Intent(Intent.ACTION_VIEW);
-		//判断是否是AndroidN以及更高的版本
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-			intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
-			Uri contentUri = FileProvider.getUriForFile(mContext, getFileProviderName(mContext), apkfile);
-			intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
-		} else {
-			intent.setDataAndType(Uri.fromFile(apkfile), "application/vnd.android.package-archive");
-			intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-		}
-		mContext.startActivity(intent);
-		android.os.Process.killProcess(android.os.Process.myPid());
+		try{
+			File apkfile = new File(mSavePath, "4gptt.apk");
+			if (!apkfile.exists()){
+				return;
+			}
+			// 通过Intent安装APK文件
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+			//判断是否是AndroidN以及更高的版本
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+				intent.addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+				Uri contentUri = FileProvider.getUriForFile(MyApplication.instance, getFileProviderName(MyApplication.instance), apkfile);
+				intent.setDataAndType(contentUri, "application/vnd.android.package-archive");
+			} else {
+				intent.setDataAndType(Uri.fromFile(apkfile), "application/vnd.android.package-archive");
+				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+			}
+			MyApplication.instance.startActivity(intent);
+			android.os.Process.killProcess(android.os.Process.myPid());
 
-		logger.info("下载完成，通过Intent开始安装APK文件");
+			logger.info("下载完成，通过Intent开始安装APK文件");
+		}catch (Exception e){
+			e.printStackTrace();
+		}
 	}
 
 	public String getFileProviderName(Context context){
@@ -328,21 +354,26 @@ public class UpdateManager
 	}
 
 	public void checkIsAndroidO(boolean install){
-		if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.O){
-			boolean b = mContext.getPackageManager().canRequestPackageInstalls();
-			if (b) {
-				installApk();
-			} else {
-				//请求安装未知应用来源的权限
-				if(install){
-					ActivityCompat.requestPermissions((Activity)mContext, new String[]{Manifest.permission.REQUEST_INSTALL_PACKAGES}, REQUEST_INSTALL_PACKAGES_CODE);
-				}else {
-					ToastUtil.showToast(mContext,mContext.getString(R.string.text_allow_unknown_app_sources_otherwise_can_not_install));
+		try{
+			if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.O){
+				boolean b = MyApplication.instance.getPackageManager().canRequestPackageInstalls();
+				if (b) {
+					installApk();
+				} else {
+					//请求安装未知应用来源的权限
+					if(install){
+						if(MyApplication.instance.currentActivity!=null){
+							ActivityCompat.requestPermissions(MyApplication.instance.currentActivity, new String[]{Manifest.permission.REQUEST_INSTALL_PACKAGES}, REQUEST_INSTALL_PACKAGES_CODE);
+						}
+					}else {
+						ToastUtil.showToast(MyApplication.instance,MyApplication.instance.getString(R.string.text_allow_unknown_app_sources_otherwise_can_not_install));
+					}
 				}
+			}else {
+				installApk();
 			}
-		}else {
-			installApk();
+		}catch (Exception e){
+			e.printStackTrace();
 		}
 	}
-
 }

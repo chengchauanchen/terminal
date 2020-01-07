@@ -11,7 +11,7 @@ import android.widget.TextView;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import cn.vsx.vc.application.UpdateManager;
+import cn.vsx.vc.application.MyApplication;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ApkUtil;
 
@@ -72,8 +72,7 @@ public class AboutActivity extends BaseActivity implements View.OnClickListener{
             startActivity(new Intent(this, FunctionIntroduceActivity.class));
         }else if(i == R.id.tv_update){
             TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                UpdateManager manager = new UpdateManager(AboutActivity.this);
-                manager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL, ""), true);
+                MyApplication.instance.getUpdateManager().checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL, ""), true);
             });
             //                Toast.makeText(this, getResources().getString(R.string.text_is_the_latest_version), Toast.LENGTH_SHORT).show();
         }else if(i == R.id.news_bar_back){
