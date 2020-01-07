@@ -20,7 +20,9 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseSetLivingTimeMessageHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.SetLivingStopTimeAdapter;
@@ -86,7 +88,7 @@ public class SetLivingStopTimeFragment extends Fragment implements View.OnClickL
         for (int time: times) {
             SetLivingStopTimeBean bean =  new SetLivingStopTimeBean();
             bean.setTime(time);
-            bean.setChecked(StringUtil.secondsToHour(intervalTime) == time);
+            bean.setChecked(intervalTime == (time*3600));
             data.add(bean);
         }
     }
@@ -132,7 +134,9 @@ public class SetLivingStopTimeFragment extends Fragment implements View.OnClickL
             case R.id.tv_title:
                 //确定
 //                TerminalFactory.getSDK().getThreadPool().execute(() -> {
-//                    TerminalFactory.getSDK().getLiveManager().requestSetLivingTimeMessage(60*1,false);
+////                    TerminalFactory.getSDK().getLiveManager().requestSetLivingTimeMessage(60*1,false);
+//                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveResponseSetLivingTimeMessageHandler.class, BaseCommonCode.SUCCESS_CODE, getString(R.string.text_set_success),
+//                            60*1,false);
 //                });
                 break;
             case R.id.tv_sure:
@@ -140,10 +144,12 @@ public class SetLivingStopTimeFragment extends Fragment implements View.OnClickL
                 long selectedData = getSelectData();
                 if(checkDatas(selectedData)){
                     TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                        TerminalFactory.getSDK().getLiveManager().requestSetLivingTimeMessage(selectedData,false);
+//                        TerminalFactory.getSDK().getLiveManager().requestSetLivingTimeMessage(selectedData,false);
+                        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveResponseSetLivingTimeMessageHandler.class, BaseCommonCode.SUCCESS_CODE, getString(R.string.text_set_success),
+                                selectedData,false);
                     });
                 }else{
-                    ToastUtil.showToast(SetLivingStopTimeFragment.this.getContext(),String.format(getString(R.string.text_set_living_stop_time_tempt),
+                    ToastUtil.showToast(SetLivingStopTimeFragment.this.getContext(),(selectedData == 0)?getString(R.string.text_set_living_no_stop_time_tempt):String.format(getString(R.string.text_set_living_stop_time_tempt),
                             StringUtil.secondsToHour(selectedData)));
                 }
                 break;
@@ -156,7 +162,7 @@ public class SetLivingStopTimeFragment extends Fragment implements View.OnClickL
      */
     private boolean checkDatas(long selectedData) {
         long intervalTime = TerminalFactory.getSDK().getParam(Params.MAX_LIVING_TIME, 0L);
-        return (selectedData!=0) && intervalTime != selectedData;
+        return (intervalTime != selectedData);
     }
 
     /**

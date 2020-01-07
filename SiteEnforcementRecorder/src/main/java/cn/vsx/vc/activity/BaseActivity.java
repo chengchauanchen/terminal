@@ -1430,7 +1430,11 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         }
         long endTime = startTime + intervalTime;
         logger.info(TAG + "startLivingStopAlarmManager:intervalTime-" + intervalTime + "-endTime：" + endTime);
-        getAlarmManager().set(AlarmManager.RTC_WAKEUP, endTime, getPendingIntent());
+        if(intervalTime == 0){
+            cancelLivingStopAlarmAlarmManager();
+        }else{
+            getAlarmManager().set(AlarmManager.RTC_WAKEUP, endTime, getPendingIntent());
+        }
     }
 
     /**

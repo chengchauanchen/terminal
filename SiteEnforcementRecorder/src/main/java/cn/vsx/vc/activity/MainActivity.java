@@ -1175,6 +1175,8 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
                 //重新保存上报最长时长
                 TerminalFactory.getSDK().putParam(Params.MAX_LIVING_TIME, livingTime);
                 if (MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE) {
+                    //防止已经提醒上报到时，5分钟后自动停止上报时，又去设置上报时长，这个时候需要停止5分钟的倒计时。
+                    myHandler.removeMessages(HANDLE_LIVING_STOP_TIME_DELAY_TIME);
                     //重新设置倒计时时间
                     startLivingStopAlarmManager(true, isResetLiving);
                 }

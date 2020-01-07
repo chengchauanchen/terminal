@@ -146,7 +146,9 @@
     <string name="text_tempt_living_stop_time">您已经连续上报%1$d小时,%2$d分钟后自动停止上报</string>
     <string name="text_tempt_living_stop_time_set">超出上报时长将自动停止上报</string>
     <string name="text_living_stop_time">%1$d小时</string>
+    <string name="text_living_stop_time_no_limit">不限时</string>
     <string name="text_set_living_stop_time_tempt">当前上报时长已经是%1$d小时</string>
+    <string name="text_set_living_no_stop_time_tempt">当前上报时长已经是不限时</string>
     <string name="text_set_success">设置成功</string>
     <string name="text_set_fail">设置失败</string>
     <string name="text_set_success_next_used">设置成功,下次生效</string>

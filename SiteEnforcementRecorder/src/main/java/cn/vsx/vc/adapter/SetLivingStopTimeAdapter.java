@@ -43,7 +43,7 @@ public class SetLivingStopTimeAdapter extends RecyclerView.Adapter<RecyclerView.
         LivingStopTimeHolder lHolder = (LivingStopTimeHolder) holder;
         SetLivingStopTimeBean bean = data.get(position);
         if(bean!=null){
-            lHolder.tvTime.setText(String.format(context.getString(R.string.text_living_stop_time), bean.getTime()));
+            lHolder.tvTime.setText((bean.getTime() == 0)?context.getString(R.string.text_living_stop_time_no_limit):String.format(context.getString(R.string.text_living_stop_time), bean.getTime()));
             if(bean.isChecked()){
                 lHolder.tvTime.setTextColor(context.getResources().getColor(R.color.white));
                 lHolder.tvTime.setBackgroundResource(R.drawable.bg_bind_button_blue_white);
