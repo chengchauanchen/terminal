@@ -80,7 +80,6 @@ public class MyApplication extends BaseApplication{
 	//保存绑定账号需要传的数据
 	private RecorderBindTranslateBean bindTranslateBean;
 	public Activity currentActivity = null;
-	private UpdateManager updateManager;
 
 	@Override
 	public void onCreate() {
@@ -282,13 +281,4 @@ public class MyApplication extends BaseApplication{
 		ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().sendBroadcast(this);
 	}
 
-	/**
-	 * 获取自动更新
-	 */
-	public UpdateManager getUpdateManager(){
-		if(updateManager == null){
-			updateManager = new UpdateManager(this);
-		}
-		return updateManager;
-	}
 }

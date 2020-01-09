@@ -1,6 +1,7 @@
 package cn.vsx.vc.application;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
@@ -17,7 +18,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.ProgressBar;
 
 import org.apache.log4j.Logger;
@@ -31,6 +31,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCanUpdateHandler;
 import cn.vsx.vc.R;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.tools.PhoneAdapter;
@@ -61,6 +63,8 @@ public class UpdateManager
 	/* 更新进度条 */
 	private ProgressBar mProgress;
 	private Dialog mDownloadDialog;
+	private String ip;
+	private String port;
 
 	private Handler mHandler = new Handler(Looper.getMainLooper())
 	{
@@ -91,18 +95,29 @@ public class UpdateManager
 	/**
 	 * 检测软件更新
 	 */
-	public void checkUpdate(String updateUrl,boolean showMsg)
+	public void checkUpdate(String updateUrl,boolean showMsg,boolean isAuth)
 	{
 		logger.info("检查更新");
 		this.updateUrl = updateUrl;
 		if (isUpdate()){
 			// 显示提示对话框
-			showNoticeDialog();
+			showNoticeDialog(isAuth);
 		} else {
 			if(showMsg){
 				ToastUtil.showToast(MyApplication.instance, MyApplication.instance.getString(R.string.soft_update_no));
 			}
+			TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCanUpdateHandler.class, false,ip,port,isAuth);
 		}
+	}
+
+	/**
+	 * 检测软件更新
+	 */
+	public void checkUpdate(String updateUrl,boolean showMsg,String ip,String port,boolean isAuth)
+	{
+		this.ip = ip;
+		this.port = port;
+		checkUpdate(updateUrl,showMsg,isAuth);
 	}
 
 	/**
@@ -167,31 +182,32 @@ public class UpdateManager
 	/**
 	 * 显示软件更新对话框
 	 */
-	public void showNoticeDialog(){
+	public void showNoticeDialog(boolean isAuth){
 		mHandler.post(() -> {
 			try{
 				// 构造对话框
-				Builder builder = new Builder(MyApplication.instance);
+				Builder builder = new Builder(mContext);
 				builder.setTitle(R.string.soft_update_title);
 				builder.setMessage(R.string.soft_update_info);
 				// 更新
 				builder.setPositiveButton(R.string.soft_update_updatebtn, (dialog, which) -> {
 					dialog.dismiss();
 					// 显示下载对话框
-					showDownloadDialog();
+					showDownloadDialog(isAuth);
 				});
 				// 稍后更新
 				builder.setNegativeButton(R.string.soft_update_later, (dialog, which) -> {
 					dialog.dismiss();
 					MyApplication.instance.isUpdatingAPP = false;
+					TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCanUpdateHandler.class, false,ip,port,isAuth);
 				});
 				builder.setCancelable(false);
 				AlertDialog dialog = builder.create();
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-					dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
-				}else{
-					dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-				}
+//				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//					dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+//				}else{
+//					dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+//				}
 				dialog.show();
 				MyApplication.instance.isUpdatingAPP = true;
 			}catch(Exception e){
@@ -202,15 +218,15 @@ public class UpdateManager
 	/**
 	 *显示软件下载对话框
 	 */
-	private void showDownloadDialog()
+	private void showDownloadDialog(boolean isAuth)
 	{
 		try {
 			// 构造软件下载对话框
 			cancelUpdate = false;
-			Builder builder = new Builder(MyApplication.instance);
+			Builder builder = new Builder(mContext);
 			builder.setTitle(R.string.soft_updating);
 			// 给下载对话框增加进度条
-			final LayoutInflater inflater = LayoutInflater.from(MyApplication.instance);
+			final LayoutInflater inflater = LayoutInflater.from(mContext);
 			View v = inflater.inflate(R.layout.softupdate_progress, null);
 			mProgress = (ProgressBar) v.findViewById(R.id.update_progress);
 			builder.setView(v);
@@ -220,14 +236,15 @@ public class UpdateManager
 				MyApplication.instance.isUpdatingAPP = false;
 				// 设置取消状态
 				cancelUpdate = true;
+				TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCanUpdateHandler.class, false,ip,port,isAuth);
 			});
 			mDownloadDialog = builder.create();
 			mDownloadDialog.setCancelable(false);
-			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-				mDownloadDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
-			}else{
-				mDownloadDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-			}
+//			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//				mDownloadDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY);
+//			}else{
+//				mDownloadDialog.getWindow().setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
+//			}
 			mDownloadDialog.show();
 
 			// 下载文件
@@ -340,7 +357,7 @@ public class UpdateManager
 				intent.setDataAndType(Uri.fromFile(apkfile), "application/vnd.android.package-archive");
 				intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			}
-			MyApplication.instance.startActivity(intent);
+			mContext.startActivity(intent);
 			android.os.Process.killProcess(android.os.Process.myPid());
 
 			logger.info("下载完成，通过Intent开始安装APK文件");
@@ -362,8 +379,8 @@ public class UpdateManager
 				} else {
 					//请求安装未知应用来源的权限
 					if(install){
-						if(MyApplication.instance.currentActivity!=null){
-							ActivityCompat.requestPermissions(MyApplication.instance.currentActivity, new String[]{Manifest.permission.REQUEST_INSTALL_PACKAGES}, REQUEST_INSTALL_PACKAGES_CODE);
+						if(mContext!=null){
+							ActivityCompat.requestPermissions((Activity) mContext, new String[]{Manifest.permission.REQUEST_INSTALL_PACKAGES}, REQUEST_INSTALL_PACKAGES_CODE);
 						}
 					}else {
 						ToastUtil.showToast(MyApplication.instance,MyApplication.instance.getString(R.string.text_allow_unknown_app_sources_otherwise_can_not_install));
