@@ -76,6 +76,7 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.application.UpdateManager;
 import cn.vsx.vc.infrared.IHardwareAIDLHandler;
 import cn.vsx.vc.model.InfraRedState;
 import cn.vsx.vc.prompt.PromptManager;
@@ -96,6 +97,7 @@ import cn.vsx.vc.receiver.BatteryBroadcastReceiver;
 import cn.vsx.vc.receiver.HeadsetPlugReceiver;
 import cn.vsx.vc.receiver.MyPhoneStateListener;
 import cn.vsx.vc.receiver.NFCCardReader;
+import cn.vsx.vc.receiver.UsbConnetStateReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.BITDialogUtil;
 import cn.vsx.vc.utils.Constants;
@@ -999,6 +1001,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
             if (defaultAddress.length >= 2) {
                 if (NetworkUtil.isConnected(this)) {
+                    //自动更新
+                    updataVersion();
                     int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);
                     if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                         ToastUtil.showToast(BaseActivity.this, getString(R.string.text_authing));
@@ -1015,6 +1019,8 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         } else {
             //有注册服务地址，去认证
             if (NetworkUtil.isConnected(this)) {
+                //自动更新
+                updataVersion();
                 int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
                 if (resultCode == BaseCommonCode.SUCCESS_CODE) {
                     ToastUtil.showToast(BaseActivity.this, getString(R.string.text_authing));
@@ -1122,7 +1128,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             MainActivity mainActivity = (MainActivity) this;
             if (!isChangeAccount) {
                 //解除预览图像的service
-                mainActivity.stopLiveService();
+//                mainActivity.stopLiveService();
             }
             //清空自动上报标记
             mainActivity.updateNormalPushingState(false);
@@ -1378,6 +1384,26 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     }
 
     /**
+     * 注册USB广播
+     */
+    public void registUsbConnetStateReceiver(UsbConnetStateReceiver usbConnetStateReceiver) {
+        if (usbConnetStateReceiver != null) {
+            IntentFilter filter = new IntentFilter();
+            filter.addAction(UsbConnetStateReceiver.ACTION_USB);
+            registerReceiver(usbConnetStateReceiver, filter);
+        }
+    }
+
+    /**
+     * 注销USB的广播
+     */
+    public void unRegistUsbConnetStateReceiver(UsbConnetStateReceiver usbConnetStateReceiver) {
+        if (usbConnetStateReceiver != null) {
+            unregisterReceiver(usbConnetStateReceiver);
+        }
+    }
+
+    /**
      * 初始化手机信号的监听
      */
     protected void initPhoneStateListener() {
@@ -1555,4 +1581,37 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
             hardwareAIDLHandler = null;
         }
     }
+
+
+    /**
+     * 更新版本
+     */
+    private void updataVersion() {
+        if (!MyApplication.instance.isUpdatingAPP) {
+            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                final UpdateManager manager = new UpdateManager(BaseActivity.this);
+                manager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL, ""), false);
+            });
+        }
+    }
+
+    /**
+     * 设置是否打开飞行模式
+     * @param enable
+     */
+    protected void setFlyMode(boolean enable) {
+        try{
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.JELLY_BEAN) {
+                Settings.System.putInt(getContentResolver(), Settings.System.AIRPLANE_MODE_ON, enable ? 1 : 0);
+            } else {
+                Settings.Global.putInt(getContentResolver(), Settings.Global.AIRPLANE_MODE_ON, enable ? 1 : 0);
+            }
+            Intent intent = new Intent(Intent.ACTION_AIRPLANE_MODE_CHANGED);
+            intent.putExtra("state", enable);
+            sendBroadcast(intent);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
 }

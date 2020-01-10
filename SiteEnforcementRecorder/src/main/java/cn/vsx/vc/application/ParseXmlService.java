@@ -1,5 +1,7 @@
 package cn.vsx.vc.application;
 
+import android.text.TextUtils;
+
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -13,7 +15,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 public class ParseXmlService{
 	public static HashMap<String, String> parseXml(InputStream inStream) throws Exception{
-		HashMap<String, String> hashMap = new HashMap<String, String>();
+		HashMap<String, String> hashMap = new HashMap<>();
 
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
@@ -22,7 +24,7 @@ public class ParseXmlService{
 		NodeList childNodes = root.getChildNodes();
 		for (int j = 0; j < childNodes.getLength(); j++)
 		{
-			Node childNode = (Node) childNodes.item(j);
+			Node childNode =  childNodes.item(j);
 			if (childNode.getNodeType() == Node.ELEMENT_NODE)
 			{
 				Element childElement = (Element) childNode;
@@ -45,8 +47,14 @@ public class ParseXmlService{
 				else if (("url_f32".equals(childElement.getNodeName())))
 				{
 					hashMap.put("url_f32",childElement.getFirstChild().getNodeValue());
+				}else if(TextUtils.equals("checkVersion",childElement.getNodeName())){
+					hashMap.put("checkVersion",childElement.getFirstChild().getNodeValue());
 				}
 			}
+		}
+		if(!hashMap.containsKey("checkVersion")){
+			hashMap.put("checkVersion","false");
+//			hashMap.put("checkVersion","true");
 		}
 		return hashMap;
 	}

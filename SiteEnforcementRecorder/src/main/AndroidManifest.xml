@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="cn.vsx.vc">
+    package="cn.vsx.vc"
+    android:sharedUserId="android.uid.system">
 
   <!-- android:sharedUserId="android.uid.system" -->
   <uses-permission android:name="android.permission.INTERNET"/>
@@ -236,9 +237,12 @@
         android:enabled="true"/>
     <!--                service end               -->
 
+    <!--<meta-data-->
+        <!--android:name="com.baidu.lbsapi.API_KEY"-->
+        <!--android:value="M95bUm2bTVEGnTqU5mPgzixHVL69pAGa" /> &lt;!&ndash; key:开发者申请的Key &ndash;&gt;-->
     <meta-data
         android:name="com.baidu.lbsapi.API_KEY"
-        android:value="M95bUm2bTVEGnTqU5mPgzixHVL69pAGa" /> <!-- key:开发者申请的Key -->
+        android:value="u2vnupWs9EzGILtftmwx9KMbjFcTyILo" /> <!-- key:执法记录仪-新洲环境 -->
     <provider
         android:name="android.support.v4.content.FileProvider"
         android:authorities="${applicationId}.fileprovider"

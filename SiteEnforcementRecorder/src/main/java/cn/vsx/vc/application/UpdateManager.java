@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.v4.content.FileProvider;
 import android.view.LayoutInflater;
@@ -56,7 +57,7 @@ public class UpdateManager
 	private ProgressBar mProgress;
 	private Dialog mDownloadDialog;
 
-	private Handler mHandler = new Handler()
+	private Handler mHandler = new Handler(Looper.getMainLooper())
 	{
 		public void handleMessage(Message msg)
 		{
@@ -117,16 +118,22 @@ public class UpdateManager
 			mHashMap = ParseXmlService.parseXml(inStream);
 			logger.info("检查版本更新时，解析xml文件的结果："+mHashMap);
 			if (null != mHashMap) {
-				int serviceCode = Integer.valueOf(mHashMap.get("version"));
-				if (serviceCode > versionCode) {
-					logger.info("PhoneAdapter.isF32() ----> "+ PhoneAdapter.isF32());
-					if (PhoneAdapter.isF32()){
-						url_apk = mHashMap.get("url_f32");
-					}else {
-						url_apk = mHashMap.get("url");
+				boolean checkVersion = Boolean.valueOf(mHashMap.get("checkVersion"));
+				if(checkVersion){
+					int serviceCode = Integer.valueOf(mHashMap.get("version"));
+					if (serviceCode > versionCode) {
+						logger.info("PhoneAdapter.isF32() ----> "+ PhoneAdapter.isF32());
+						if (PhoneAdapter.isF32()){
+							url_apk = mHashMap.get("url_f32");
+						}else {
+							url_apk = mHashMap.get("url");
+						}
+						return true;
 					}
-					return true;
+				}else{
+					return false;
 				}
+
 			}
 		} catch (Exception e) {
 			logger.warn("服务器版本文件读取出错", e);

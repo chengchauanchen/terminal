@@ -5,6 +5,9 @@ import android.nfc.NfcAdapter;
 
 import org.apache.log4j.Logger;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 public class NfcUtil {
 
     private static Logger logger = Logger.getLogger(NfcUtil.class.getName());
@@ -46,6 +49,49 @@ public class NfcUtil {
 
         }else{
             return NFC_ENABLE_NONE;
+        }
+    }
+
+
+    /**
+     * open NFC
+     */
+    public static void enable(Context context){
+        try {
+            mNfcAdapter = NfcAdapter.getDefaultAdapter(context);
+            if(mNfcAdapter!=null){
+                Method method =mNfcAdapter.getClass().getDeclaredMethod("enable");
+                method.invoke(mNfcAdapter);
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * close NFC
+     */
+    public static void disable(Context context){
+        try {
+            mNfcAdapter = NfcAdapter.getDefaultAdapter(context);
+            if(mNfcAdapter!=null){
+                Method method = mNfcAdapter.getClass().getDeclaredMethod("disable");
+                method.invoke(mNfcAdapter);
+            }
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
 }

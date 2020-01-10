@@ -5,13 +5,13 @@ android {
         release {
             keyAlias '4gpttpdt'
             keyPassword '4gpttvsx'
-            storeFile file('E:/vsxin/app.keyStory')
+            storeFile file('E:/vsxin/app_recoder_xinzhou.keyStore')
             storePassword '4gpttvsx'
         }
         debug {
             keyAlias '4gpttpdt'
             keyPassword '4gpttvsx'
-            storeFile file('E:/vsxin/app.keyStory')
+            storeFile file('E:/vsxin/app_recoder_xinzhou.keyStore')
             storePassword '4gpttvsx'
         }
     }

@@ -2,9 +2,7 @@ package cn.vsx.vc.activity;
 
 import android.annotation.SuppressLint;
 import android.app.NotificationManager;
-import android.content.ComponentName;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.SurfaceTexture;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
@@ -13,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.support.v4.app.Fragment;
@@ -32,7 +29,6 @@ import android.widget.TextView;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.log4j.Logger;
-import org.easydarwin.easypusher.BITBackgroundCameraService;
 import org.easydarwin.push.BITMediaStream;
 
 import java.io.File;
@@ -42,7 +38,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
 import java.util.TimerTask;
 
 import butterknife.Bind;
@@ -91,7 +86,6 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.util.StateMachine.IState;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.application.UpdateManager;
 import cn.vsx.vc.dialog.LivingStopTimeDialog;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveResponseSetLivingTimeMessageUIHandler;
@@ -104,9 +98,11 @@ import cn.vsx.vc.receiveHandle.ReceiverPhotoButtonEventHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopAllBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverStopBusniessHandler;
 import cn.vsx.vc.receiveHandle.ReceiverUpdateInfraRedHandler;
+import cn.vsx.vc.receiveHandle.ReceiverUsbConnetStateHandler;
 import cn.vsx.vc.receiveHandle.ReceiverVideoButtonEventHandler;
 import cn.vsx.vc.receiver.BatteryBroadcastReceiver;
 import cn.vsx.vc.receiver.NFCCardReader;
+import cn.vsx.vc.receiver.UsbConnetStateReceiver;
 import cn.vsx.vc.service.LockScreenService;
 import cn.vsx.vc.utils.APPStateUtil;
 import cn.vsx.vc.utils.ApkUtil;
@@ -114,6 +110,7 @@ import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.DataUtil;
 import cn.vsx.vc.utils.FragmentUtil;
 import cn.vsx.vc.utils.NetworkUtil;
+import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.PhotoUtils;
 import cn.vsx.vc.utils.SetToListUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -144,9 +141,8 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     //视频
     @Bind(R.id.sv_live)
     TextureView svLive;
-    private Timer timer = new Timer();
-    private ServiceConnection conn;
-    private IBinder myIBinder;
+//    private ServiceConnection conn;
+//    private IBinder myIBinder;
 
     private Logger logger = Logger.getLogger(getClass());
     // 退出标记
@@ -172,8 +168,8 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     List<String> listResolution;
     List<String> listResolutionName;
 
-    private BITBackgroundCameraService mService;
-    public boolean isBinded = false;
+//    private BITBackgroundCameraService mService;
+//    public boolean isBinded = false;
     int width = 640, height = 480;
 
     private WindowManager windowManager;
@@ -198,6 +194,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
             NfcAdapter.FLAG_READER_NFC_A | NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK;
 
     private BatteryBroadcastReceiver batteryBroadcastReceiver;
+    private UsbConnetStateReceiver usbConnetStateReceiver;
     private LivingStopTimeDialog livingStopTimeDialog;
 
     @Override
@@ -249,8 +246,8 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         cancelLivingStopAlarmAlarmManager();
         myHandler.removeMessages(HANDLE_LIVING_STOP_TIME_DELAY_TIME);
 
-        //初始化红外的开关的状态
-        initInfraRedState();
+//        //初始化红外的开关的状态
+//        initInfraRedState();
     }
 
     @Override
@@ -294,8 +291,11 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyWarnLivingTimeoutMessageHandler);//终端上报即将超时提醒
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseSetLivingTimeMessageHandler);//响应设置终端上报时长
         MyTerminalFactory.getSDK().registReceiveHandler(receiverUpdateInfraRedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiverUsbConnetStateHandler);//USB连接状态
         batteryBroadcastReceiver = new BatteryBroadcastReceiver();
+        usbConnetStateReceiver = new UsbConnetStateReceiver();
         registBatterBroadcastReceiver(batteryBroadcastReceiver);//注册电量的广播
+        registUsbConnetStateReceiver(usbConnetStateReceiver);//注册电量的广播
         initPhoneStateListener();//初始化手机信号的监听
         registPhoneStateListener();//注册手机信号的监听
     }
@@ -379,6 +379,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyWarnLivingTimeoutMessageHandler);//终端上报即将超时提醒
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseSetLivingTimeMessageHandler);//响应设置终端上报时长
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiverUpdateInfraRedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiverUsbConnetStateHandler);//USB连接
         myHandler.removeCallbacksAndMessages(null);
         PromptManager.getInstance().stopRing();
         stopService(new Intent(MainActivity.this, LockScreenService.class));
@@ -386,6 +387,7 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         MyTerminalFactory.getSDK().unregistNetworkChangeHandler();
         unregisterHeadsetPlugReceiver();
         unRegistBatterBroadcastReceiver(batteryBroadcastReceiver);//注销电量的广播
+        unRegistUsbConnetStateReceiver(usbConnetStateReceiver);//注销USB的广播
         unRegistPhoneStateListener();//注册手机信号的监听
         stopInfraRed();
     }
@@ -450,8 +452,8 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = (resultCode, resultDesc, isRegisted) -> {
         myHandler.post(() -> {
             if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                //版本自动更新检测
-                updataVersion();
+//                //版本自动更新检测
+//                updataVersion();
                 ToastUtil.showToast(MainActivity.this, getString(R.string.text_connecting));
             } else if (resultCode == TerminalErrorCode.DEPT_NOT_ACTIVATED.getErrorCode()) {
                 ToastUtil.showToast(MainActivity.this, getString(R.string.text_dept_not_activated));
@@ -1009,11 +1011,8 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
                 if (memorySize < 100) {
                     ToastUtil.showToast(MainActivity.this, "存储空间不足");
                     PromptManager.getInstance().startExternNoStorage();
-                    if (mService != null && mService.getMediaStream() != null) {
-                        //停止上报
-//                        stopPush();
-                        //停止录像
-                        mService.getMediaStream().stopRecord();
+                    if(mMediaStream!=null){
+                        mMediaStream.stopRecord();
                     }
                     //停止录音
                     stopRecordAudio();
@@ -1074,15 +1073,35 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     private ReceiverUpdateInfraRedHandler receiverUpdateInfraRedHandler = new ReceiverUpdateInfraRedHandler() {
         @Override
         public void handler(boolean open) {
-            Camera camera = mMediaStream.getCamera();
-            if (camera != null) {
-                Camera.Parameters parameters = camera.getParameters();
-                if (open) {
-                    parameters.setColorEffect(Camera.Parameters.EFFECT_MONO);
-                } else {
-                    parameters.setColorEffect(Camera.Parameters.EFFECT_NONE);
+            if(mMediaStream!=null){
+                Camera camera = mMediaStream.getCamera();
+                if (camera != null) {
+                    Camera.Parameters parameters = camera.getParameters();
+                    if (open) {
+                        parameters.setColorEffect(Camera.Parameters.EFFECT_MONO);
+                    } else {
+                        parameters.setColorEffect(Camera.Parameters.EFFECT_NONE);
+                    }
+                    camera.setParameters(parameters);
                 }
-                camera.setParameters(parameters);
+            }
+        }
+    };
+
+    /**
+     * 更新USB连接状态的
+     */
+    private ReceiverUsbConnetStateHandler receiverUsbConnetStateHandler = new ReceiverUsbConnetStateHandler() {
+        @Override
+        public void handler(boolean isConnected) {
+            ToastUtil.showToast(MainActivity.this,isConnected?"USB连接":"USB断开");
+            setFlyMode(isConnected);
+            if(isConnected){
+                NfcUtil.disable(MainActivity.this);
+                disableReaderMode();
+            }else{
+                NfcUtil.enable(MainActivity.this);
+                enableReaderMode();
             }
         }
     };
@@ -1325,24 +1344,26 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
     @Override
     protected void startLiveService() {
         MyTerminalFactory.getSDK().getVideoProxy().start().register(this);
-        startService(new Intent(this, BITBackgroundCameraService.class));
-
-        conn = new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-                mService = ((BITBackgroundCameraService.LocalBinder) iBinder).getService();
-                myIBinder = iBinder;
-                logger.error("绑定视频服务成功:" + myIBinder);
-                svLive.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName componentName) {
-                logger.error("绑定视频服务失败:" + componentName);
-            }
-        };
-        //BIND_AUTO_CREATE  如果没有服务就自己创建一个，执行onCreate()；
-        isBinded = bindService(new Intent(this, BITBackgroundCameraService.class), conn, BIND_AUTO_CREATE);
+        if(svLive!=null){
+            svLive.setVisibility(View.VISIBLE);
+        }
+//        startService(new Intent(this, BITBackgroundCameraService.class));
+//        conn = new ServiceConnection() {
+//            @Override
+//            public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+//                mService = ((BITBackgroundCameraService.LocalBinder) iBinder).getService();
+//                myIBinder = iBinder;
+//                logger.error("绑定视频服务成功:" + myIBinder);
+//                svLive.setVisibility(View.VISIBLE);
+//            }
+//
+//            @Override
+//            public void onServiceDisconnected(ComponentName componentName) {
+//                logger.error("绑定视频服务失败:" + componentName);
+//            }
+//        };
+//        //BIND_AUTO_CREATE  如果没有服务就自己创建一个，执行onCreate()；
+//        isBinded = bindService(new Intent(this, BITBackgroundCameraService.class), conn, BIND_AUTO_CREATE);
     }
 
 
@@ -1352,29 +1373,26 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
      * @param surface
      */
     private void initMediaStream(SurfaceTexture surface) {
-        if (mService != null) {
-            BITMediaStream ms = mService.getMediaStream();
-            if (ms != null) {    // switch from background to front
-                ms.stopPreview();
-                mService.inActivePreview();
+        BITMediaStream ms = mMediaStream;
+        if (ms != null) {    // switch from background to front
+            ms.stopPreview();
+//            mService.inActivePreview();
 //                ms.destroyCamera();
-                ms.setSurfaceTexture(surface);
+            ms.setSurfaceTexture(surface);
 //                ms.createCamera();
-                ms.startPreview();
-                mMediaStream = ms;
-                if (ms.isStreaming()) {
-                    ToastUtil.showToast(this, "推流中..");
-                }
-            } else {
-                ms = new BITMediaStream(getApplicationContext(), surface, true, width, height);
-                mMediaStream = ms;
-                startCamera();
-                mService.setMediaStream(ms);
+            ms.startPreview();
+            mMediaStream = ms;
+            if (ms.isStreaming()) {
+                ToastUtil.showToast(this, "推流中..");
             }
         } else {
-            ToastUtil.showToast(getApplicationContext(), "服务启动失败");
-            finishVideoLive();
+            ms = new BITMediaStream(getApplicationContext(), surface, true, width, height);
+            mMediaStream = ms;
+            startCamera();
+//                mService.setMediaStream(ms);
+            initInfraRedState();
         }
+
     }
 
     /**
@@ -1406,10 +1424,10 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         logger.info("isFinishing() = " + "isFinishing()" + "    isStreaming = " + isStreaming);
         if (mMediaStream != null) {
             mMediaStream.stopStream();
-        } else {
-            if (isStreaming) {
-                mService.activePreview();
-            }
+//        } else {
+//            if (isStreaming) {
+//                mService.activePreview();
+//            }
         }
         watchLiveList.clear();
         TerminalFactory.getSDK().getLiveManager().ceaseLiving();
@@ -1442,13 +1460,13 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
             mMediaStream.stopStream();
             mMediaStream.release();
             mMediaStream = null;
-            if (mService != null) {
-                mService.setMediaStream(null);
-            }
-        } else {
-            if (isStreaming) {
-                mService.activePreview();
-            }
+//            if (mService != null) {
+//                mService.setMediaStream(null);
+//            }
+//        } else {
+//            if (isStreaming) {
+//                mService.activePreview();
+//            }
         }
         watchLiveList.clear();
         TerminalFactory.getSDK().getLiveManager().ceaseLiving();
@@ -1474,10 +1492,10 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
      * 拍照
      */
     private void takePicture() {
-        if (mService == null || mService.getMediaStream() == null) {
+        if (mMediaStream == null ) {
             return;
         }
-        Camera camera = mService.getMediaStream().getCamera();
+        Camera camera = mMediaStream.getCamera();
         if (camera == null) {
             return;
         }
@@ -1621,18 +1639,18 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         }
     }
 
-    public void stopLiveService() {
-        if (conn != null) {
-            if (isBinded) {
-                unbindService(conn);
-                isBinded = false;
-            }
-            stopService(new Intent(this, BITBackgroundCameraService.class));
-            conn = null;
-            mService = null;
-
-        }
-    }
+//    public void stopLiveService() {
+//        if (conn != null) {
+//            if (isBinded) {
+//                unbindService(conn);
+//                isBinded = false;
+//            }
+//            stopService(new Intent(this, BITBackgroundCameraService.class));
+//            conn = null;
+//            mService = null;
+//
+//        }
+//    }
 
     /**
      * 显示登陆和绑定的UI
@@ -1733,37 +1751,31 @@ public class MainActivity extends BaseActivity implements NFCCardReader.OnReadLi
         RecorderBindBean bean = cn.vsx.hamster.terminalsdk.tools.DataUtil.getRecorderBindBean();
         long time = TerminalFactory.getSDK().getParam(Params.RECORDER_AUTO_PUSH_INTERVAL_TIME, 0L);
         long result = System.currentTimeMillis() - time;
-        return (isBinded && (bean != null && !TextUtils.isEmpty(bean.getWarningId())) && ((time == 0) || (time != 0) && result < AUTO_PUSH_INTERVAL_TIME));
+        return ((bean != null && !TextUtils.isEmpty(bean.getWarningId())) && ((time == 0) || (time != 0) && result < AUTO_PUSH_INTERVAL_TIME));
     }
 
     private void enableReaderMode() {
         Log.i(TAG, "Enabling reader mode");
-        NfcAdapter nfc = NfcAdapter.getDefaultAdapter(this);
-        if (nfc != null) {
-            nfc.enableReaderMode(this, nfcCardReader, READER_FLAGS, null);
+        try{
+            NfcAdapter nfc = NfcAdapter.getDefaultAdapter(this);
+            if (nfc != null) {
+                nfc.enableReaderMode(this, nfcCardReader, READER_FLAGS, null);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
     private void disableReaderMode() {
         Log.i(TAG, "Disabling reader mode");
-        NfcAdapter nfc = NfcAdapter.getDefaultAdapter(this);
-        if (nfc != null) {
-            nfc.disableReaderMode(this);
+        try{
+            NfcAdapter nfc = NfcAdapter.getDefaultAdapter(this);
+            if (nfc != null) {
+                nfc.disableReaderMode(this);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
-    /**
-     * 更新版本
-     */
-    private void updataVersion() {
-        if (MyTerminalFactory.getSDK().getParam(Params.IS_AUTO_UPDATE, false) && !MyApplication.instance.isUpdatingAPP) {
-            final UpdateManager manager = new UpdateManager(MainActivity.this);
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    manager.checkUpdate(MyTerminalFactory.getSDK().getParam(Params.UPDATE_URL, ""), false);
-                }
-            }, 4000);
-        }
-    }
 }
