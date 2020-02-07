@@ -652,9 +652,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
             if (terminalMessage.messageType == MessageType.AFFICHE.getCode() ||
                     terminalMessage.messageType == MessageType.CALL_RECORD.getCode()||
                     terminalMessage.messageType == MessageType.PRIVATE_CALL.getCode() ||
-                    terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
-                    terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() ||
-                    terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode() ||
+                    //terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode() ||
+                    //terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() ||
+                    //terminalMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode() ||
                     terminalMessage.messageType == MessageType.MULTI_PATH_VIDEO_PUSH.getCode() ||
                     terminalMessage.messageType == MessageType.VIDEO_ENTRANCE.getCode()){
                 logger.info("不能转发和撤回");
@@ -2058,7 +2058,9 @@ public class TemporaryAdapter extends RecyclerView.Adapter<ChatViewHolder> {
         if (transponMessage.messageType == MessageType.WARNING_INSTANCE.getCode()) {
 
         }
-        if (transponMessage.messageType == MessageType.VIDEO_LIVE.getCode()) {
+        if (transponMessage.messageType == MessageType.VIDEO_LIVE.getCode()||
+            transponMessage.messageType == MessageType.GB28181_RECORD.getCode() ||
+            transponMessage.messageType == MessageType.OUTER_GB28181_RECORD.getCode()) {
             transponLiveMessage(transponMessage, toIds,toUniqueNos,pushMessageSendResultHandler);
         }
         if (transponMessage.messageType == MessageType.GROUP_CALL.getCode() || transponMessage.messageType == MessageType.AUDIO.getCode()) {

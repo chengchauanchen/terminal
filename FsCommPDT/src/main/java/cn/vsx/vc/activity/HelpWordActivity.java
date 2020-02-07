@@ -446,11 +446,11 @@ public class HelpWordActivity extends FragmentActivity implements View.OnTouchLi
             myHandler.post(() -> {
               String result = String.valueOf(resultCode);
               if (resultCode == BaseCommonCode.SUCCESS_CODE && "question".equals(type)) {
-                  ToastUtil.toast(HelpWordActivity.this, getString(R.string.text_log_upload_success_thanks));
+                  ToastUtil.toast(HelpWordActivity.this, getString(R.string.text_suggestion_upload_success_thanks));
                   wv_help.loadUrl("javascript: reqSuccess('"+result+ "')");
                   finish();
               } else {
-                  ToastUtil.showToast( getString(R.string.text_log_upload_fail_please_try_later), HelpWordActivity.this);
+                  ToastUtil.showToast( getString(R.string.text_suggestion_upload_fail_please_try_later), HelpWordActivity.this);
                   wv_help.loadUrl("javascript: reqSuccess('"+result+ "')");
               }
             });

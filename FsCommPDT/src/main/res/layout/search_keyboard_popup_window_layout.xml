@@ -17,7 +17,7 @@
 
             <LinearLayout
                 android:id="@+id/dialNum1"
-                android:gravity="center_horizontal"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:tag="1"
                 android:background="@drawable/keyboard_background_selector"
@@ -49,7 +49,7 @@
 
             <LinearLayout
                 android:id="@+id/dialNum2"
-                android:gravity="center_horizontal"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:tag="2"
                 android:background="@drawable/keyboard_background_selector"
@@ -79,7 +79,7 @@
 
             <LinearLayout
                 android:id="@+id/dialNum3"
-                android:gravity="center_horizontal"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:tag="3"
                 android:background="@drawable/keyboard_background_selector"
@@ -115,7 +115,7 @@
 
             <LinearLayout
                 android:id="@+id/dialNum4"
-                android:gravity="center_horizontal"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:tag="4"
                 android:background="@drawable/keyboard_background_selector"
@@ -145,7 +145,7 @@
 
             <LinearLayout
                 android:id="@+id/dialNum5"
-                android:gravity="center_horizontal"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:tag="5"
                 android:background="@drawable/keyboard_background_selector"
@@ -175,7 +175,7 @@
 
             <LinearLayout
                 android:id="@+id/dialNum6"
-                android:gravity="center_horizontal"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:tag="6"
                 android:background="@drawable/keyboard_background_selector"
@@ -211,7 +211,7 @@
 
             <LinearLayout
                 android:id="@+id/dialNum7"
-                android:gravity="center_horizontal"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:tag="7"
                 android:background="@drawable/keyboard_background_selector"
@@ -244,7 +244,7 @@
 
             <LinearLayout
                 android:id="@+id/dialNum8"
-                android:gravity="center_horizontal"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:tag="8"
                 android:background="@drawable/keyboard_background_selector"
@@ -274,7 +274,7 @@
 
             <LinearLayout
                 android:id="@+id/dialNum9"
-                android:gravity="center_horizontal"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:tag="9"
                 android:background="@drawable/keyboard_background_selector"
@@ -325,7 +325,7 @@
 
             <LinearLayout
                 android:id="@+id/dialNum0"
-                android:gravity="center_horizontal"
+                android:gravity="center"
                 android:orientation="horizontal"
                 android:tag="0"
                 android:background="@drawable/keyboard_background_selector"

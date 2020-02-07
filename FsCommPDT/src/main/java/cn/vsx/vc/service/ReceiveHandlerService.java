@@ -1102,6 +1102,11 @@ public class ReceiveHandlerService extends Service{
             AppKeyUtils.setAppKey(null);
             return;
         }
+        if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
+            ToastUtil.showToast(ReceiveHandlerService.this,getString(R.string.text_personal_calling_can_not_report));
+            AppKeyUtils.setAppKey(null);
+            return;
+        }
         logger.error("上报给：" + uniqueNoAndType);
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.no_push_authority));
@@ -1179,6 +1184,11 @@ public class ReceiveHandlerService extends Service{
         }
         if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
             ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_pushing_can_not_pull));
+            AppKeyUtils.setAppKey(null);
+            return;
+        }
+        if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
+            ToastUtil.showToast(ReceiveHandlerService.this,getString(R.string.text_personal_calling_can_not_pull));
             AppKeyUtils.setAppKey(null);
             return;
         }

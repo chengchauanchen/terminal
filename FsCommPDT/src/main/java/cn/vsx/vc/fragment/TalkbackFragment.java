@@ -692,7 +692,11 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
                 if (groupId > 0) {
                     MyTerminalFactory.getSDK().getGroupManager().changeGroup(groupId);
                 } else {
-                    ToastUtil.showToast(context, getString(R.string.text_change_group_data_wrong));
+                    if(change_group_view!=null&&change_group_view.getDataSize()>0){
+                        ToastUtil.showToast(context, getString(R.string.text_change_group_data_wrong));
+                    }else{
+                        ToastUtil.showToast(context, getString(R.string.text_change_group_data_wrong_by_no_data));
+                    }
                 }
             });
         }

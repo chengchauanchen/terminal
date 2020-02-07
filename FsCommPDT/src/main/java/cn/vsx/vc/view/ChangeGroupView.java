@@ -196,6 +196,11 @@ public class ChangeGroupView extends FrameLayout{
 		tempData.addAll(data);
 	}
 
+	public int getDataSize(){
+		return data.size();
+	}
+
+
 	//	private void resetData(){
 //		if(data.size() > 0){
 //			for(int i = 0 ; i < textViewList.size() ; i++){
