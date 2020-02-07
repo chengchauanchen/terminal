@@ -18,9 +18,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
-
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
 import cn.vsx.hamster.common.IndividualCallType;
@@ -49,6 +46,7 @@ import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.view.IndividualCallTimerView;
 import cn.vsx.vc.view.IndividualCallView;
+import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.receiveHandler.ReceiveHeadSetPlugHandler;
@@ -92,7 +90,11 @@ public class CallingService extends BaseService{
     private IndividualCallView mIctvHalfDuplexTimeSpeaking;
     private Button mBtnIndividualCallHalfDuplexPtt;
 
-    private float downX = 0;
+    //网络状态的布局
+    private LinearLayout  ll_individual_call_network_state;
+    private LinearLayout  ll_individual_call_half_duplex_network_state;
+
+   private float downX = 0;
     private float downY = 0;
     private int oddOffsetX = 0;
     private int oddOffsetY = 0;
@@ -148,6 +150,12 @@ public class CallingService extends BaseService{
         ivMemberPortraitSpeaking.setImageResource(BitmapUtil.getUserPhoto());
         ImageView ivMemberPortraitChooice = rootView.findViewById(R.id.iv_member_portrait_half_duplex);
         ivMemberPortraitChooice.setImageResource(BitmapUtil.getUserPhoto());
+
+        //网络状态的布局
+        ll_individual_call_network_state = rootView.findViewById(R.id.ll_individual_call_network_state);
+        ll_individual_call_half_duplex_network_state = rootView.findViewById(R.id.ll_individual_call_half_duplex_network_state);
+        ll_individual_call_network_state.setVisibility(View.GONE);
+        ll_individual_call_half_duplex_network_state.setVisibility(View.GONE);
     }
 
     @Override
@@ -216,6 +224,12 @@ public class CallingService extends BaseService{
             mPopupICTVSpeakingTime.onContinue();
             mIctvSpeakingTimeSpeaking.onContinue();
             mIctvHalfDuplexTimeSpeaking.onContinue();
+        }
+        if(ll_individual_call_network_state!=null){
+            ll_individual_call_network_state.setVisibility((!connected)?View.VISIBLE:View.GONE);
+        }
+        if(ll_individual_call_half_duplex_network_state!=null){
+            ll_individual_call_half_duplex_network_state.setVisibility((!connected)?View.VISIBLE:View.GONE);
         }
     }
 

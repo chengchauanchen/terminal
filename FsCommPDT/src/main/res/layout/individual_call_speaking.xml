@@ -223,6 +223,11 @@
 
         </LinearLayout>
 
+        <include
+            android:id="@+id/ll_individual_call_network_state"
+            layout="@layout/layout_no_network_h"
+            android:visibility="gone" />
+
     </RelativeLayout>
 </LinearLayout>
 

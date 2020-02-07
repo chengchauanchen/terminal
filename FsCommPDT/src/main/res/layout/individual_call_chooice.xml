@@ -17,6 +17,7 @@
         android:background="@drawable/new_call_reset_icon" />
 
     <RelativeLayout
+        android:id="@+id/rl_user_info"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/individual_call_retract_emergency"
@@ -175,5 +176,13 @@
                 android:textSize="@dimen/sp_18" />
         </LinearLayout>
     </LinearLayout>
+
+    <include
+        android:id="@+id/ll_network_state"
+        layout="@layout/layout_no_network_h"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/x40"
+        android:layout_below="@+id/rl_user_info"
+        android:visibility="gone" />
 </RelativeLayout>
 

@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.Handler;
 import android.support.v4.widget.TextViewCompat;
+import android.text.InputFilter;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -12,6 +13,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import cn.vsx.vc.utils.SpaceFilter;
 import com.bigkoo.pickerview.OptionsPickerView;
 
 import java.util.ArrayList;
@@ -103,6 +105,7 @@ public class CreateTemporaryGroupsActivity extends BaseActivity implements View.
         iv_unscan.setSelected(false);
         initOptionsPickerViewA();
         createTemporaryGroupsDialog = new CreateTemporaryGroupsDialog(this);
+        create_temporary_group_name.setFilters(new InputFilter[]{new SpaceFilter()});
     }
 
     private void initOptionsPickerViewA() {

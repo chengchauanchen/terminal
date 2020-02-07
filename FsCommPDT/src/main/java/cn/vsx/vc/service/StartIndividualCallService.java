@@ -85,6 +85,9 @@ public class StartIndividualCallService extends BaseService{
         mPopMinimize = rootView.findViewById(R.id.pop_minimize);
         mTvWaiting = rootView.findViewById(R.id.tv_waiting);
         mTimerView = rootView.findViewById(R.id.popup_ICTV_speaking_time);
+
+        //网络状态布局
+        mLlNoNetwork = rootView.findViewById(R.id.ll_network_state);
     }
 
     @Override

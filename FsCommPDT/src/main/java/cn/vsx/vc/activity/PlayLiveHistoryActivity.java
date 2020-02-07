@@ -403,6 +403,7 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
     @Override
     public void initData(){
         final TerminalMessage terminalMessage = (TerminalMessage) getIntent().getSerializableExtra("terminalMessage");
+        logger.info(TAG+"---initData--TerminalMessage："+terminalMessage);
         setLiveTheme(terminalMessage);
         getData(terminalMessage);
         recyclerview.setLayoutManager(new LinearLayoutManager(this));
@@ -640,31 +641,36 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
     }
 
     private void setLiveTheme(TerminalMessage terminalMessage){
-        JSONObject messageBody = terminalMessage.messageBody;
-        String liver = messageBody.getString(JsonParam.LIVER);
+        try{
+            JSONObject messageBody = terminalMessage.messageBody;
+            String liver = messageBody.getString(JsonParam.LIVER);
 
-        String[] split = liver.split("_");
-        //上报主题，如果没有就取上报者的名字
-        liveTheme = messageBody.getString(JsonParam.TITLE);
-        if(Util.isEmpty(liveTheme)){
-            if(split.length>1){
-                String memberName = split[1];
-                liveTheme = String.format(getString(R.string.text_living_theme_member_name),memberName);
-            }else {
-                int memberNo = terminalMessage.messageFromId;
-                TerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(memberNo,true);
-                    String name = (account!=null)?account.getName():terminalMessage.messageFromName;
-                    liveTheme = String.format(getString(R.string.text_living_theme_member_name),name);
-                    mHandler.post(() -> {
-                        if(tv_theme !=null){
-                            tv_theme.setText(liveTheme);
-                        }
+            String[] split = liver.split("_");
+            //上报主题，如果没有就取上报者的名字
+            liveTheme = messageBody.getString(JsonParam.TITLE);
+            if(Util.isEmpty(liveTheme)){
+                if(split.length>1){
+                    String memberName = split[1];
+                    liveTheme = String.format(getString(R.string.text_living_theme_member_name),memberName);
+                }else {
+                    int memberNo = terminalMessage.messageFromId;
+                    TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                        Account account = cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(memberNo,true);
+                        String name = (account!=null)?account.getName():terminalMessage.messageFromName;
+                        liveTheme = String.format(getString(R.string.text_living_theme_member_name),name);
+                        mHandler.post(() -> {
+                            if(tv_theme !=null){
+                                tv_theme.setText(liveTheme);
+                            }
+                        });
                     });
-                });
+                }
             }
+            tv_theme.setText(liveTheme);
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        tv_theme.setText(liveTheme);
+
     }
 
     /**

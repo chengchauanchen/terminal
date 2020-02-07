@@ -184,28 +184,32 @@ public class ContactAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             //执法记录仪
             setRecoderData((UserViewHolder) holder, position);
         }else if(getItemViewType(position) == Constants.TYPE_TERMINAL){
-            UserViewHolder userViewHolder = (UserViewHolder) holder;
-            final Member member = (Member) mDatas.get(position).getBean();
-            String terminalMemberType = member.getTerminalMemberType();
-            TerminalMemberType memberType = TerminalMemberType.valueOf(terminalMemberType);
-            switch(memberType){
-                case TERMINAL_BODY_WORN_CAMERA:
-                case TERMINAL_HDMI:
-                    setRecoderData((UserViewHolder) holder, position);
-                    break;
-                case TERMINAL_LTE:
-                case TERMINAL_LTE_HYTERA:
-                case TERMINAL_UAV:
-                    setLTEData((UserViewHolder) holder, position);
-                    break;
-                case TERMINAL_PDT:
-                case TERMINAL_PDT_WANGE:
-                case TERMINAL_PDT_HAIGE:
-                    setUserData((UserViewHolder) holder, position);
-                    break;
-                default:
-                    setUserData((UserViewHolder) holder, position);
-                    break;
+            try{
+                UserViewHolder userViewHolder = (UserViewHolder) holder;
+                final Member member = (Member) mDatas.get(position).getBean();
+                String terminalMemberType = member.getTerminalMemberType();
+                TerminalMemberType memberType = TerminalMemberType.valueOf(terminalMemberType);
+                switch(memberType){
+                    case TERMINAL_BODY_WORN_CAMERA:
+                    case TERMINAL_HDMI:
+                        setRecoderData((UserViewHolder) holder, position);
+                        break;
+                    case TERMINAL_LTE:
+                    case TERMINAL_LTE_HYTERA:
+                    case TERMINAL_UAV:
+                        setLTEData((UserViewHolder) holder, position);
+                        break;
+                    case TERMINAL_PDT:
+                    case TERMINAL_PDT_WANGE:
+                    case TERMINAL_PDT_HAIGE:
+                        setUserData((UserViewHolder) holder, position);
+                        break;
+                    default:
+                        setUserData((UserViewHolder) holder, position);
+                        break;
+                }
+            }catch (Exception e){
+                e.printStackTrace();
             }
         }
     }

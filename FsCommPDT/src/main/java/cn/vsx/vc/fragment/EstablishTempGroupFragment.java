@@ -120,7 +120,7 @@ public class EstablishTempGroupFragment extends Fragment implements View.OnClick
             getActivity().finish();
         }else if(i == R.id.ok_btn){
             if(tempGroupMemberFragment.getSelectedMember().isEmpty()){
-                ToastUtil.showToast(getContext(), getString(R.string.text_add_at_least_one_member));
+                ToastUtil.showToast(getContext(), getString(R.string.text_please_choose_group_member));
                 return;
             }
             if(type == Constants.CREATE_TEMP_GROUP){

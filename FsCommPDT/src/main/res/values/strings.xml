@@ -351,6 +351,7 @@
     <string name="text_you_have_added_this_member">您已经添加过该成员</string>
     <string name="text_add_group_member">添加成员</string>
     <string name="text_add_at_least_one_member">至少添加一名成员</string>
+    <string name="text_please_choose_group_member">请选择组员</string>
     <string name="text_network_connection_abnormal_please_check_the_network">网络连接异常，请检查网络！</string>
     <string name="text_get_member_info_fail">获取成员信息失败</string>
     <string name="text_get_audio_success_ready_to_play">获取音频成功，准备播放</string>

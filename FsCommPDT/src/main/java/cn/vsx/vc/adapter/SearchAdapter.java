@@ -114,11 +114,14 @@ public class SearchAdapter extends BaseMultiItemQuickAdapter<ContactItemBean, Ba
                 setContractPdtData(holder, contractpdt);
                 break;
             case Constants.TYPE_CONTRACT_TERMINAL:
-                Member contractMember = (Member) item.getBean();
-                String terminalMemberType = contractMember.getTerminalMemberType();
-                TerminalMemberType memberType = TerminalMemberType.valueOf(terminalMemberType);
-                setTerminalData(memberType,holder,contractMember);
-
+                try{
+                    Member contractMember = (Member) item.getBean();
+                    String terminalMemberType = contractMember.getTerminalMemberType();
+                    TerminalMemberType memberType = TerminalMemberType.valueOf(terminalMemberType);
+                    setTerminalData(memberType,holder,contractMember);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
             case Constants.TYPE_CONTRACT_LTE:
                 Member contractLte = (Member) item.getBean();
                 setLteData(holder, contractLte);

@@ -31,12 +31,16 @@ public class GroupVideoLiveListAdapter extends BaseQuickAdapter<TerminalMessage,
         if (item != null){
             item.messageUrl = "";
             //图标
-            helper.setImageResource(R.id.iv_user_photo,
+            try{
+                helper.setImageResource(R.id.iv_user_photo,
                     BitmapUtil.getImageResourceByType(
-                            TerminalMemberType.valueOf(
-                                    TextUtils.isEmpty(item.terminalMemberType)?TerminalMemberType.TERMINAL_PHONE.toString():item.terminalMemberType)
-                                    .getCode()
+                        TerminalMemberType.valueOf(
+                            TextUtils.isEmpty(item.terminalMemberType)?TerminalMemberType.TERMINAL_PHONE.toString():item.terminalMemberType)
+                            .getCode()
                     ));
+            }catch (Exception e){
+                e.printStackTrace();
+            }
             JSONObject messageBody = item.messageBody;
             if (messageBody!=null&&!TextUtils.isEmpty(messageBody.toJSONString())) {
                 //姓名
