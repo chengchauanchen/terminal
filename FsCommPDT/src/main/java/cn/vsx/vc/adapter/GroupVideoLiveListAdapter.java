@@ -44,18 +44,19 @@ public class GroupVideoLiveListAdapter extends BaseQuickAdapter<TerminalMessage,
             JSONObject messageBody = item.messageBody;
             if (messageBody!=null&&!TextUtils.isEmpty(messageBody.toJSONString())) {
                 //姓名
-                if(messageBody.containsKey(JsonParam.BACKUP)){
-                    String backUp = messageBody.getString(JsonParam.BACKUP);
-                    if(!TextUtils.isEmpty(backUp)&&backUp.contains("_")){
-                        String[] split = backUp.split("_");
-                        if(split.length>1){
-                            helper.setText(R.id.tv_user_name, split[1]);
-                        }
-                        helper.setText(R.id.tv_user_name, "");
-                    }else{
-                        helper.setText(R.id.tv_user_name, "");
-                    }
-                }
+                helper.setText(R.id.tv_user_name, "");
+                //if(messageBody.containsKey(JsonParam.LIVER)){
+                //    String backUp = messageBody.getString(JsonParam.LIVER);
+                //    if(!TextUtils.isEmpty(backUp)&&backUp.contains("_")){
+                //        String[] split = backUp.split("_");
+                //        if(split.length>1){
+                //            helper.setText(R.id.tv_user_name, split[1]);
+                //        }
+                //        helper.setText(R.id.tv_user_name, "");
+                //    }else{
+                //        helper.setText(R.id.tv_user_name, "");
+                //    }
+                //}
                 //警号
                 if(messageBody.containsKey(JsonParam.LIVERNO)){
                     helper.setText(R.id.tv_user_number, String.valueOf(messageBody.getIntValue(JsonParam.LIVERNO)));
