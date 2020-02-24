@@ -69,6 +69,7 @@ import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.auth.AuthManagerTwo;
 import cn.vsx.hamster.terminalsdk.manager.auth.LoginModel;
 import cn.vsx.hamster.terminalsdk.model.IdentifyType;
+import cn.vsx.hamster.terminalsdk.model.UpdateType;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCanUpdateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetNameByOrgHandler;
@@ -344,22 +345,26 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     private ReceiveCanUpdateHandler receiveCanUpdateHandler = new ReceiveCanUpdateHandler() {
         @Override
-        public void handle(boolean canUpdate, String ip, String port, boolean isAuth) {
+        public void handle(boolean canUpdate, UpdateType type,  String ip, String port, boolean isAuth) {
             if (!canUpdate) {
-                if (isAuth) {
-                    int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(ip, port);
-                    if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                        changeProgressMsg(getString(R.string.authing));
+                if(type == UpdateType.FORCE){
+                    exitApp();
+                }else{
+                    if (isAuth) {
+                        int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(ip, port);
+                        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                            changeProgressMsg(getString(R.string.authing));
+                        } else {
+                            //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                        }
                     } else {
-                        //状态机没有转到正在认证，说明已经在状态机中了，不用处理
+                        myHandler.post(() -> {
+                            String useOrg = userOrg.getText().toString().trim();
+                            String useName = userName.getText().toString().trim();
+                            changeProgressMsg(getString(R.string.text_registing));
+                            TerminalFactory.getSDK().getThreadPool().execute(() -> TerminalFactory.getSDK().getAuthManagerTwo().regist(useName, useOrg));
+                        });
                     }
-                } else {
-                    myHandler.post(() -> {
-                        String useOrg = userOrg.getText().toString().trim();
-                        String useName = userName.getText().toString().trim();
-                        changeProgressMsg(getString(R.string.text_registing));
-                        TerminalFactory.getSDK().getThreadPool().execute(() -> TerminalFactory.getSDK().getAuthManagerTwo().regist(useName, useOrg));
-                    });
                 }
             }
         }
@@ -1171,7 +1176,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 });
             }
         }else{
-            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCanUpdateHandler.class, false,ip,port,isAuth);
+            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCanUpdateHandler.class, false,UpdateType.NONE,ip,port,isAuth);
         }
     }
 

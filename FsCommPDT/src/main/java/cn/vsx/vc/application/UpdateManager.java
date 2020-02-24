@@ -16,12 +16,15 @@ import android.os.Looper;
 import android.os.Message;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.FileProvider;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ProgressBar;
-
-import org.apache.log4j.Logger;
-
+import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.model.UpdateType;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCanUpdateHandler;
+import cn.vsx.vc.R;
+import cn.vsx.vc.utils.ToastUtil;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,11 +33,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
-
-import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCanUpdateHandler;
-import cn.vsx.vc.R;
-import cn.vsx.vc.utils.ToastUtil;
+import org.apache.log4j.Logger;
+import ptt.terminalsdk.tools.ApkUtil;
 import ptt.terminalsdk.tools.PhoneAdapter;
 
 import static cn.vsx.vc.activity.BaseActivity.REQUEST_INSTALL_PACKAGES_CODE;
@@ -46,6 +46,7 @@ public class UpdateManager
 
 	private String updateUrl = null;
 	private String url_apk = null;
+	private String versionName = "";
 	/* 下载中 */
 	private static final int DOWNLOAD = 1;
 	/* 下载结束 */
@@ -99,14 +100,15 @@ public class UpdateManager
 	{
 		logger.info("检查更新");
 		this.updateUrl = updateUrl;
-		if (isUpdate()){
+		UpdateType type = isUpdate();
+		if (type!=UpdateType.NONE){
 			// 显示提示对话框
-			showNoticeDialog(isAuth);
+			showNoticeDialog(isAuth,type);
 		} else {
 			if(showMsg){
 				ToastUtil.showToast(MyApplication.instance, MyApplication.instance.getString(R.string.soft_update_no));
 			}
-			TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCanUpdateHandler.class, false,ip,port,isAuth);
+			TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCanUpdateHandler.class, false,type,ip,port,isAuth);
 		}
 	}
 
@@ -125,7 +127,7 @@ public class UpdateManager
 	 *
 	 * @return
 	 */
-	private boolean isUpdate(){
+	private UpdateType isUpdate(){
 		try {
 			// 获取当前软件版本
 			int versionCode = getVersionCode(MyApplication.instance);
@@ -137,8 +139,9 @@ public class UpdateManager
 			mHashMap = ParseXmlService.parseXml(inStream);
 			logger.info("检查版本更新时，解析xml文件的结果："+mHashMap);
 			if (null != mHashMap) {
+				boolean forceUpdate = Boolean.valueOf(mHashMap.get("forceUpdate"));
 				boolean checkVersion = Boolean.valueOf(mHashMap.get("checkVersion"));
-				if(checkVersion){
+				if(forceUpdate||checkVersion){
 					int serviceCode = Integer.valueOf(mHashMap.get("version"));
 					if (serviceCode > versionCode) {
 						logger.info("PhoneAdapter.isF32() ----> "+ PhoneAdapter.isF32());
@@ -147,16 +150,15 @@ public class UpdateManager
 						}else {
 							url_apk = mHashMap.get("url");
 						}
-						return true;
+						versionName = mHashMap.containsKey("versionName")?mHashMap.get("versionName"):"";
+						return forceUpdate?UpdateType.FORCE:UpdateType.COMMON;
 					}
-				}else{
-					return false;
 				}
 			}
 		} catch (Exception e) {
 			logger.warn("服务器版本文件读取出错", e);
 		}
-		return false;
+		return UpdateType.NONE;
 	}
 
 	/**
@@ -182,24 +184,28 @@ public class UpdateManager
 	/**
 	 * 显示软件更新对话框
 	 */
-	public void showNoticeDialog(boolean isAuth){
+	public void showNoticeDialog(boolean isAuth,UpdateType type){
 		mHandler.post(() -> {
 			try{
 				// 构造对话框
 				Builder builder = new Builder(mContext);
-				builder.setTitle(R.string.soft_update_title);
-				builder.setMessage(R.string.soft_update_info);
+				String title = ApkUtil.getAppName(mContext);
+				if(!TextUtils.isEmpty(versionName)){
+					title = title+String.format(mContext.getResources().getString(R.string.soft_update_force_title), versionName);
+				}
+				builder.setTitle(title);
+				builder.setMessage((type == UpdateType.FORCE)?R.string.soft_update_force_info:R.string.soft_update_info);
 				// 更新
 				builder.setPositiveButton(R.string.soft_update_updatebtn, (dialog, which) -> {
 					dialog.dismiss();
 					// 显示下载对话框
-					showDownloadDialog(isAuth);
+					showDownloadDialog(isAuth,type);
 				});
 				// 稍后更新
-				builder.setNegativeButton(R.string.soft_update_later, (dialog, which) -> {
+				builder.setNegativeButton((type == UpdateType.FORCE)?R.string.soft_update_exit:R.string.soft_update_later, (dialog, which) -> {
 					dialog.dismiss();
 					MyApplication.instance.isUpdatingAPP = false;
-					TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCanUpdateHandler.class, false,ip,port,isAuth);
+					TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCanUpdateHandler.class, false,type,ip,port,isAuth);
 				});
 				builder.setCancelable(false);
 				AlertDialog dialog = builder.create();
@@ -218,7 +224,7 @@ public class UpdateManager
 	/**
 	 *显示软件下载对话框
 	 */
-	private void showDownloadDialog(boolean isAuth)
+	private void showDownloadDialog(boolean isAuth,UpdateType type)
 	{
 		try {
 			// 构造软件下载对话框
@@ -236,7 +242,7 @@ public class UpdateManager
 				MyApplication.instance.isUpdatingAPP = false;
 				// 设置取消状态
 				cancelUpdate = true;
-				TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCanUpdateHandler.class, false,ip,port,isAuth);
+				TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCanUpdateHandler.class, false,type,ip,port,isAuth);
 			});
 			mDownloadDialog = builder.create();
 			mDownloadDialog.setCancelable(false);

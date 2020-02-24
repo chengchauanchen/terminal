@@ -23,40 +23,42 @@ public class ParseXmlService{
 		Document document = builder.parse(inStream);
 		Element root = document.getDocumentElement();
 		NodeList childNodes = root.getChildNodes();
-		for (int j = 0; j < childNodes.getLength(); j++)
-		{
+		for (int j = 0; j < childNodes.getLength(); j++) {
 			Node childNode =  childNodes.item(j);
-			if (childNode.getNodeType() == Node.ELEMENT_NODE)
-			{
+			if (childNode.getNodeType() == Node.ELEMENT_NODE) {
 				Element childElement = (Element) childNode;
-				if ("version".equals(childElement.getNodeName()))
-				{
+				if ("version".equals(childElement.getNodeName())) {
 					hashMap.put("version",childElement.getFirstChild().getNodeValue());
-				}
-				else if (("name".equals(childElement.getNodeName())))
-				{
+				} else if (("versionName".equals(childElement.getNodeName()))) {
+					hashMap.put("versionName",childElement.getFirstChild().getNodeValue());
+				} else if (("name".equals(childElement.getNodeName()))) {
 					hashMap.put("name",childElement.getFirstChild().getNodeValue());
-				}
-				else if (("url".equals(childElement.getNodeName())))
-				{
+				} else if (("url".equals(childElement.getNodeName()))) {
 					hashMap.put("url",childElement.getFirstChild().getNodeValue());
-				}
-				else if (("name_f32".equals(childElement.getNodeName())))
-				{
+				} else if (("name_f32".equals(childElement.getNodeName()))) {
 					hashMap.put("name_f32",childElement.getFirstChild().getNodeValue());
-				}
-				else if (("url_f32".equals(childElement.getNodeName())))
-				{
+				} else if (("url_f32".equals(childElement.getNodeName()))) {
 					hashMap.put("url_f32",childElement.getFirstChild().getNodeValue());
 				}else if(TextUtils.equals("checkVersion",childElement.getNodeName())){
 					hashMap.put("checkVersion",childElement.getFirstChild().getNodeValue());
+				}else if(TextUtils.equals("forceUpdate",childElement.getNodeName())){
+					hashMap.put("forceUpdate",childElement.getFirstChild().getNodeValue());
 				}
 			}
 		}
 		if(!hashMap.containsKey("checkVersion")){
 			hashMap.put("checkVersion","false");
-//			hashMap.put("checkVersion","true");
+			//			hashMap.put("checkVersion","true");
 		}
+		if(!hashMap.containsKey("forceUpdate")){
+			hashMap.put("forceUpdate","false");
+			//			hashMap.put("forceUpdate","true");
+		}
+
+		//hashMap.put("forceUpdate","false");
+		//hashMap.put("checkVersion","true");
+		//hashMap.put("version","71");
+		//hashMap.put("versionName","1.0.71");
 		return hashMap;
 	}
 
