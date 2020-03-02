@@ -514,13 +514,16 @@ public class ReceiveHandlerService extends Service{
             startSetting();
             return;
         }
-        startTranspantActivity();
-        Intent individualCallIntent = new Intent(ReceiveHandlerService.this, ReceiveCallComingService.class);
-        individualCallIntent.putExtra(Constants.MEMBER_NAME, mainMemberName);
-        individualCallIntent.putExtra(Constants.MEMBER_ID, mainMemberId);
-        individualCallIntent.putExtra(Constants.CALL_TYPE, individualCallType);
-        individualCallIntent.putExtra(Constants.TYPE, Constants.RECEIVE_CALL);
-        startService(individualCallIntent);
+        myHandler.postDelayed(() -> {
+            startTranspantActivity();
+            Intent individualCallIntent = new Intent(ReceiveHandlerService.this, ReceiveCallComingService.class);
+            individualCallIntent.putExtra(Constants.MEMBER_NAME, mainMemberName);
+            individualCallIntent.putExtra(Constants.MEMBER_ID, mainMemberId);
+            individualCallIntent.putExtra(Constants.CALL_TYPE, individualCallType);
+            individualCallIntent.putExtra(Constants.TYPE, Constants.RECEIVE_CALL);
+            startService(individualCallIntent);
+        },500);
+
     };
 
     /**
@@ -1063,6 +1066,10 @@ public class ReceiveHandlerService extends Service{
         //观看上报图像,个呼
         if(currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PLAYING)|| currentStateMap.containsKey(TerminalState.INDIVIDUAL_CALLING)){
             TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyEmergencyMessageHandler.class);
+        }
+        //组呼
+        if(currentStateMap.containsKey(TerminalState.GROUP_CALL_LISTENING) || currentStateMap.containsKey(TerminalState.GROUP_CALL_SPEAKING)){
+            TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
         }
         //开启上报功能
         myHandler.postDelayed(() -> TerminalFactory.getSDK().getLiveManager().openFunctionToLivingIncomming(message),1000);

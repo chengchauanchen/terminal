@@ -236,7 +236,8 @@ public abstract class BaseSearchFragment extends BaseFragment {
     private ReceivegUpdateGroupHandler receivegUpdateGroupHandler = new ReceivegUpdateGroupHandler(){
         @Override
         public void handler(int depId, String depName, List<Department> departments, List<Group> groups){
-            //updateData( depId,  depName, departments, groups);
+            //更新临时组的数据
+            // updateData( depId,  depName, departments, groups);
         }
     };
 

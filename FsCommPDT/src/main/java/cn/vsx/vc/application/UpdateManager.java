@@ -134,6 +134,8 @@ public class UpdateManager
 			System.out.println("UpdateManager-----------"+updateUrl);
 			URL url = new URL(updateUrl);
 			HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+      conn.setConnectTimeout(5*1000);
+			conn.setReadTimeout(5*1000);
 			conn.connect();
 			InputStream inStream = conn.getInputStream();
 			mHashMap = ParseXmlService.parseXml(inStream);
