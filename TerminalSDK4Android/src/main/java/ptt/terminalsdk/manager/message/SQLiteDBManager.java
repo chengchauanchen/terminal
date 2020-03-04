@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import cn.vsx.hamster.terminalsdk.manager.search.TianjinDeviceBean;
 import com.alibaba.fastjson.JSONObject;
 import com.pinyinsearch.util.PinyinUtil;
 
@@ -1192,13 +1193,15 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override
-    public void updateAllGroup(List<Group> groups) {
+    public void updateAllGroup(List<Group> groups,boolean deleteData) {
         logger.info("保存组数据:" + groups);
         SQLiteDatabase db = helper.getWritableDatabase();
         //开始事务
         db.beginTransaction();
         try {
-            db.execSQL("DELETE FROM allGroup");
+            if(deleteData){
+                db.execSQL("DELETE FROM allGroup");
+            }
             for (Group group : groups) {
                 ContentValues values = new ContentValues();
                 values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
@@ -1270,6 +1273,23 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         return groups;
     }
 
+    /**
+     * 根据GroupNo删除Group
+     * @param groupNo
+     */
+    @Override public void deleteGroupByNo(int groupNo) {
+        logger.info("删除组数据:" + groupNo);
+        SQLiteDatabase db = helper.getWritableDatabase();
+        try {
+            db.delete(ALL_GROUP,"current_member_id = ? AND group_no = ?",
+                new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)+"",groupNo + ""});
+        } catch (Exception e) {
+            logger.error(e);
+        } finally {
+            //结束事务
+            db.close();
+        }
+    }
 
     @Override
     public synchronized List<GroupSearchBean> getAllGroup(List<GroupSearchBean> groups, int index) {
@@ -1405,6 +1425,22 @@ public class SQLiteDBManager implements ISQLiteDBManager {
             memberList.add(account);
         }
         return memberList;
+    }
+
+    @Override public void updateAccountUseTime(int accountNo) {
+
+    }
+
+    @Override public List<MemberSearchBean> getTop5ContactsAccount() {
+        return null;
+    }
+
+    @Override public Long addBindDevice(TianjinDeviceBean device) {
+        return null;
+    }
+
+    @Override public List<TianjinDeviceBean> getTop5TianjinDevice(String type) {
+        return null;
     }
 
     private int pageSize = 500;

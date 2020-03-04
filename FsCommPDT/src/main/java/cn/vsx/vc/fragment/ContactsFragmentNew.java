@@ -409,6 +409,20 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                         if (isLocked || isSwitch || isScan) {
                             setting_group_name.setText(tempGroupName);
                         }
+                      //获取该组信息，并更新数据库，最后更新UI
+                      TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                        Group group = TerminalFactory.getSDK().getDataManager().getGroupSearchByNoWithNoThread(tempGroupNo);
+                        if(group!=null){
+                            List<Group> groups = new ArrayList<>();
+                            groups.add(group);
+                            //更新到数据库
+                            TerminalFactory.getSDK().getSQLiteDBManager().updateAllGroup(groups,false);
+                            //更新UI
+                            //通知界面
+                            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetAllGroupHandler.class, groups);
+                        }
+                        logger.info("加入临时组时根据groupNo获取组信息为："+group);
+                      });
                     } else {
                         int currentGroupId = TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0);
                         setting_group_name.setText(DataUtil.getGroupName(currentGroupId));
@@ -416,6 +430,14 @@ public class ContactsFragmentNew extends BaseFragment implements View.OnClickLis
                         //有两种解决办法，1.延迟播放；2.将池子的大小设为2(优先级的参数目前是无效的)
                         ToastUtil.showToast(getActivity(), tempGroupName + "到期");
                         PromptManager.getInstance().playTempGroupExpire();
+                        //获取该组信息，并更新数据库，最后更新UI
+                        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                            TerminalFactory.getSDK().getSQLiteDBManager().deleteGroupByNo(tempGroupNo);
+                            List<Group> groups = new ArrayList<>();
+                            //通知界面
+                            TerminalFactory.getSDK().notifyReceiveHandler(ReceiveGetAllGroupHandler.class, groups);
+                            logger.info("退出临时组时groupNo为："+tempGroupNo);
+                        });
                     }
                 }
             });
