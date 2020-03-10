@@ -1483,7 +1483,11 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
         return serviceBusManager;
     }
 
-    /**
+	@Override public boolean inMeeting() {
+		return false;
+	}
+
+	/**
 	 * 全局请求的统一配置（以下配置根据自身情况选择性的配置即可）
 	 */
 	private void initRxHttpUtils() {

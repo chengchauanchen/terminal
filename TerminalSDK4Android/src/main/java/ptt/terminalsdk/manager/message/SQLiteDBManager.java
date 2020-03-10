@@ -8,6 +8,8 @@ import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
 import cn.vsx.hamster.terminalsdk.manager.search.TianjinDeviceBean;
+import cn.vsx.hamster.terminalsdk.model.VideoMeetingDataBean;
+import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
 import com.alibaba.fastjson.JSONObject;
 import com.pinyinsearch.util.PinyinUtil;
 
@@ -1440,6 +1442,49 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override public List<TianjinDeviceBean> getTop5TianjinDevice(String type) {
+        return null;
+    }
+
+    @Override public void addVideoMeetingMessage(VideoMeetingMessage message) {
+
+    }
+
+    @Override
+    public void updateVideoMeetingMessageList(CopyOnWriteArrayList<VideoMeetingMessage> messages) {
+
+    }
+
+    @Override public void removeVideoMeetingMessageByRoomId(long roomId) {
+
+    }
+
+    @Override public void updateVideoMeetingMessageList(List<VideoMeetingDataBean> data) {
+
+    }
+
+    @Override public void updateVideoMeetingMessageListToNoMeeting(List<Long> data) {
+
+    }
+
+    @Override public CopyOnWriteArrayList<VideoMeetingMessage> getMeetingVideoMeetingMessage() {
+        return null;
+    }
+
+    @Override public CopyOnWriteArrayList<VideoMeetingMessage> getAllVideoMeetingMessage() {
+        return null;
+    }
+
+    @Override public VideoMeetingMessage getMeetingVideoMeetingMessageByRoomId(long roomId) {
+        return null;
+    }
+
+    @Override
+    public CopyOnWriteArrayList<VideoMeetingMessage> getVideoMeetingMessageBySendTime(long sendTime,
+        int pageLimit) {
+        return null;
+    }
+
+    @Override public CopyOnWriteArrayList<VideoMeetingMessage> getVideoMeetingMessageLast() {
         return null;
     }
 
