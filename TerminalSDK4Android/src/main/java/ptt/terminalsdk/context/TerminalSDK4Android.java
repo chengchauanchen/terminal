@@ -1155,6 +1155,9 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			logger.error("MessageService --- onServiceConnected");
 			messageService = Stub.asInterface(service);
+			if(getClientChannel()!=null){
+				getClientChannel().stop();
+			}
 			clientChannel = null;
 			getClientChannel().registServerConnectionChangedHandler(serverConnectionChangedHandler);
 			getClientChannel().registServerConnectionEstablishedHandler(serverConnectionEstablishedHandler);
