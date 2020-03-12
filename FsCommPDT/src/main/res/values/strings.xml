@@ -658,4 +658,7 @@
     <string name="text_same_to_old_user_status">与设置前的状态一样</string>
     <string name="text_set_fail">设置失败</string>
     <string name="text_return_code_error">返回值错误</string>
+
+    <string name="text_next_count">下一步(%1$s)</string>
+    <string name="text_sure_count">确定(%1$s)</string>
 </resources>

@@ -619,4 +619,6 @@
     <color name="blue_00_30">#4d00a4ff</color>
     <color name="blue_00_10">#1a00a4ff</color>
     <color name="blue_019_95">#f20D182B</color>
+
+    <color name="text_grey_dc">#dcdcdc</color>
 </resources>
