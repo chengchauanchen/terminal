@@ -181,6 +181,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     tv_status.setText(R.string.login_success);
                     noNetWork.setVisibility(View.GONE);
                 });
+            }else{
+                myHandler.post(()->{
+                    noNetWork.setVisibility(View.GONE);
+                });
             }
         }
     };
@@ -232,6 +236,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 myHandler.post(()->{
                     noNetWork.setVisibility(View.VISIBLE);
                     tv_status.setText(R.string.text_disconnection_of_network_connection);
+                });
+            }else{
+                myHandler.post(()->{
+                    noNetWork.setVisibility(View.VISIBLE);
+                    tv_status.setText(R.string.logining);
                 });
             }
         }
