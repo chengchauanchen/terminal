@@ -129,13 +129,15 @@ public abstract class BaseService extends Service{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
         KeepLiveManager.getInstance().setServiceForeground(this);
-        logger.info(TAG+"---onStartCommand--"+dialogAdd);
+        logger.info(TAG+"---onStartCommand--"+dialogAdd+"-intent-"+(null != intent));
         if(!dialogAdd){
             windowManager.addView(rootView, layoutParams1);
             MyApplication.instance.viewAdded = true;
             dialogAdd = true;
             if(null != intent){
                 initView(intent);
+            }else{
+                stopBusiness();
             }
         }
         return super.onStartCommand(intent, flags, startId);

@@ -530,6 +530,7 @@ public class MediaStream {
                 mMuxer.release();
                 mMuxer = null;
             }
+            logger.info("--StopPreview---end");
         } catch (Exception e) {
             logger.info(e.getMessage());
             e.printStackTrace();

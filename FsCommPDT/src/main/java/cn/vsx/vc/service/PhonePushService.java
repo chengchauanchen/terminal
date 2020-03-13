@@ -524,20 +524,22 @@ public class PhonePushService extends BaseService{
                     pushcount = 0;
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_FAILED:
-                    resultData.putString("event-msg", "EasyRTSP 连接失败");
-                    if(pushcount <= 10){
+                    resultData.putString("event-msg", "EasyRTSP 连接失败--pushcount:"+pushcount);
+                    if(pushcount <= 5){
                         pushcount++;
                     }else{
-                        finishVideoLive();
+                      ToastUtil.showToast("连接失败");
+                      mHandler.post(() -> finishVideoLive());
                     }
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_ABORT:
-                    resultData.putString("event-msg", "EasyRTSP 连接异常中断");
-                    if(pushcount <= 10){
+                    resultData.putString("event-msg", "EasyRTSP 连接异常中断--pushcount:"+pushcount);
+                    if(pushcount <= 5){
                         pushcount++;
 //                        startPush();
                     }else{
-                        finishVideoLive();
+                      ToastUtil.showToast("连接异常中断");
+                      mHandler.post(() -> finishVideoLive());
                     }
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_PUSHING:

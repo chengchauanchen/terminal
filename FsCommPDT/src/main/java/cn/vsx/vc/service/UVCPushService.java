@@ -388,7 +388,7 @@ public class UVCPushService extends BaseService{
 
     private ReceiveUVCCameraConnectChangeHandler receiveUVCCameraConnectChangeHandler = connected -> {
         if(!connected){
-            finishVideoLive();
+            mHandler.post(() -> finishVideoLive());
         }
     };
 
@@ -510,20 +510,22 @@ public class UVCPushService extends BaseService{
                     pushcount = 0;
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_FAILED:
-                    resultData.putString("event-msg", "EasyRTSP 连接失败");
-                    if(pushcount <= 10){
+                    resultData.putString("event-msg", "EasyRTSP 连接失败--pushcount:"+pushcount);
+                    if(pushcount <= 5){
                         pushcount++;
                     }else{
-                        finishVideoLive();
+                        ptt.terminalsdk.tools.ToastUtil.showToast("连接失败");
+                        mHandler.post(() -> finishVideoLive());
                     }
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_ABORT:
-                    resultData.putString("event-msg", "EasyRTSP 连接异常中断");
-                    if(pushcount <= 10){
+                    resultData.putString("event-msg", "EasyRTSP 连接异常中断--pushcount:"+pushcount);
+                    if(pushcount <= 5){
                         pushcount++;
 //                        startPush();
                     }else{
-                        finishVideoLive();
+                        ptt.terminalsdk.tools.ToastUtil.showToast("连接异常中断");
+                        mHandler.post(() -> finishVideoLive());
                     }
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_PUSHING:
@@ -542,6 +544,7 @@ public class UVCPushService extends BaseService{
                     resultData.putString("event-msg", "EasyRTSP 进程名称长度不匹配");
                     break;
             }
+            logger.info("PhonePushService--PushCallback--msg:"+resultData.getString("event-msg")+"--code:"+code);
         }
     }
 
