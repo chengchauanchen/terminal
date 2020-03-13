@@ -1268,18 +1268,20 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                     pushcount = 0;
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_FAILED:
-                    resultData.putString("event-msg", "EasyRTSP 连接失败");
-                    if (pushcount <= 10) {
+                    resultData.putString("event-msg", "EasyRTSP 连接失败--pushcount:"+pushcount);
+                    if (pushcount <= 5) {
                         pushcount++;
                     } else {
+                        ptt.terminalsdk.tools.ToastUtil.showToast("连接失败");
                         finishVideoLive();
                     }
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_ABORT:
-                    resultData.putString("event-msg", "EasyRTSP 连接异常中断");
-                    if (pushcount <= 10) {
+                    resultData.putString("event-msg", "EasyRTSP 连接异常中断--pushcount:"+pushcount);
+                    if (pushcount <= 5) {
                         pushcount++;
                     } else {
+                        ptt.terminalsdk.tools.ToastUtil.showToast("连接异常中断");
                         finishVideoLive();
                     }
                     break;
@@ -1300,7 +1302,6 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                     break;
             }
             logger.info("PhonePushService--PushCallback--msg:"+resultData.getString("event-msg")+"--code:"+code);
-//            mResultReceiver.send(EasyRTSPClient.RESULT_EVENT, resultData);
         }
     }
 
