@@ -218,21 +218,19 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
     private ReceiveGetGroupLivingHistoryListHandler receiveGetGroupLivingHistoryListHandler = (beanList, resultCode, resultDesc) -> {
         handler.post(() -> {
             layoutSrl.setRefreshing(false);
-            if (resultCode == BaseCommonCode.SUCCESS_CODE && !beanList.isEmpty()) {
+            if (!beanList.isEmpty()) {
                 if (mPage == 0) {
-                    adapter.getData().clear();
-                    adapter.loadMoreEnd(true);
+                    adapter.setNewData(beanList);
                     adapter.setEnableLoadMore(!(beanList.size() < mPageSize));
 //                    ToastUtil.showToast(GroupVideoLiveListActivity.this, resultDesc);
                 } else {
-                    adapter.loadMoreComplete();
+                    adapter.addData(beanList);
                     if (beanList.size() < mPageSize) {
                         adapter.loadMoreEnd();
                     } else {
-                        adapter.setEnableLoadMore(true);
+                        adapter.loadMoreComplete();
                     }
                 }
-                adapter.getData().addAll(beanList);
                 adapter.notifyDataSetChanged();
             } else {
                 if (mPage == 0) {
@@ -241,16 +239,20 @@ public class GroupVideoLiveListActivity extends BaseActivity implements SwipeRef
                     adapter.setEnableLoadMore(false);
                     adapter.notifyDataSetChanged();
                 } else {
-                    adapter.loadMoreComplete();
+                    //adapter.loadMoreComplete();
                     if (resultCode != BaseCommonCode.SUCCESS_CODE) {
                         adapter.loadMoreFail();
+                    }else{
+                        adapter.loadMoreEnd();
                     }
-                    adapter.setEnableLoadMore(true);
+                    //adapter.setEnableLoadMore(true);
                 }
+                ToastUtil.showToast(GroupVideoLiveListActivity.this, resultDesc);
+            }
+            if (resultCode != BaseCommonCode.SUCCESS_CODE) {
                 if (mPage > 0) {
                     mPage = mPage - 1;
                 }
-                ToastUtil.showToast(GroupVideoLiveListActivity.this, resultDesc);
             }
         });
     };
