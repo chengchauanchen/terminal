@@ -44,19 +44,24 @@ public class GroupVideoLiveListAdapter extends BaseQuickAdapter<TerminalMessage,
             JSONObject messageBody = item.messageBody;
             if (messageBody!=null&&!TextUtils.isEmpty(messageBody.toJSONString())) {
                 //姓名
-                helper.setText(R.id.tv_user_name, "");
-                //if(messageBody.containsKey(JsonParam.LIVER)){
-                //    String backUp = messageBody.getString(JsonParam.LIVER);
-                //    if(!TextUtils.isEmpty(backUp)&&backUp.contains("_")){
-                //        String[] split = backUp.split("_");
-                //        if(split.length>1){
-                //            helper.setText(R.id.tv_user_name, split[1]);
-                //        }
-                //        helper.setText(R.id.tv_user_name, "");
-                //    }else{
-                //        helper.setText(R.id.tv_user_name, "");
-                //    }
-                //}
+                try{
+                    helper.setText(R.id.tv_user_name, "");
+                    helper.setGone(R.id.tv_user_name,false);
+                    if(messageBody.containsKey(JsonParam.LIVER)){
+                        String backUp = messageBody.getString(JsonParam.LIVER);
+                        if(!TextUtils.isEmpty(backUp)&&backUp.contains("_")){
+                            String[] split = backUp.split("_");
+                            if(split.length>1){
+                                helper.setText(R.id.tv_user_name, split[1]);
+                                helper.setGone(R.id.tv_user_name,true);
+                            }
+                        }
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                    helper.setText(R.id.tv_user_name, "");
+                    helper.setGone(R.id.tv_user_name,false);
+                }
                 //警号
                 if(messageBody.containsKey(JsonParam.LIVERNO)){
                     helper.setText(R.id.tv_user_number, String.valueOf(messageBody.getIntValue(JsonParam.LIVERNO)));

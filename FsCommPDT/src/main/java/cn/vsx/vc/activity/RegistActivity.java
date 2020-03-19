@@ -914,8 +914,16 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         }
 
         ll_regist.setVisibility(View.GONE);
-        updateManager = new UpdateManager(this);
+        initUpdate();
         judgePermission();
+    }
+
+    /**
+     * 初始化自动更新
+     */
+    private void initUpdate() {
+        updateManager = new UpdateManager(this);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveCanUpdateHandler);
     }
 
     private void startVPNService(){
@@ -1213,7 +1221,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetNameByOrgHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReturnAvailableIPHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveCanUpdateHandler);
         userOrg.setOnFocusChangeListener(onFocusChangeListener);
         userOrg.addTextChangedListener(new TextWatcherImpOrg());//监听输入内容的变化
         userName.setOnFocusChangeListener(onFocusChangeListener);
