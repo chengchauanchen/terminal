@@ -2598,6 +2598,13 @@ public abstract class ChatBaseActivity extends BaseActivity
                                             }else{
                                                 downloadRecordFileOrPlay(terminalMessage, onCompletionListener);
                                             }
+                                            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                                                TerminalMessage message = chatMessageList.get(mposition);
+                                                if(message!=null&&message.messageBody!=null){
+                                                    message.messageBody.put(JsonParam.UNREAD, false);
+                                                    TerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessage(message);
+                                                }
+                                            });
                                         } catch (IndexOutOfBoundsException e) {
                                             logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
                                         }
@@ -2624,6 +2631,13 @@ public abstract class ChatBaseActivity extends BaseActivity
                                         }else{
                                             downloadRecordFileOrPlay(terminalMessage, onCompletionListener);
                                         }
+                                        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                                            TerminalMessage message = chatMessageList.get(mposition);
+                                            if(message!=null&&message.messageBody!=null){
+                                                message.messageBody.put(JsonParam.UNREAD, false);
+                                                TerminalFactory.getSDK().getSQLiteDBManager().updateTerminalMessage(message);
+                                            }
+                                        });
                                     } catch (IndexOutOfBoundsException e) {
                                         logger.warn("mPosition出现异常，其中mposition=" + mposition + "，mTerminalMessageList.size()=" + chatMessageList.size(), e);
                                     }
@@ -2671,28 +2685,34 @@ public abstract class ChatBaseActivity extends BaseActivity
                     temporaryAdapter.notifyDataSetChanged();
                 }
             });
+            autoPlay(mposition+1);
         }
     };
 
     protected boolean isReject=false;
     //自动播放下一条语音
     private void autoPlay(int index){
-        if(index<chatMessageList.size()){//不是最后一条消息，自动播放
-            //不是语音消息跳过执行下一条
-            if (chatMessageList.get(index).messageType != MessageType.AUDIO.getCode()&&!isReject) {
-                index = index + 1;
-                autoPlay(index);
-            }else {
-                if (chatMessageList.get(index).messageBody.containsKey(JsonParam.UNREAD) &&
+        try{
+            if(index<chatMessageList.size()){//不是最后一条消息，自动播放
+                //不是语音消息跳过执行下一条
+                if (chatMessageList.get(index).messageType != MessageType.AUDIO.getCode()&&!isReject) {
+                    index = index + 1;
+                    autoPlay(index);
+                }else {
+                    if (chatMessageList.get(index).messageBody.containsKey(JsonParam.UNREAD) &&
                         chatMessageList.get(index).messageBody.getBooleanValue(JsonParam.UNREAD) && !MediaManager.isPlaying() && !isReject) {
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayIndividualChatVoiceHandler.class, chatMessageList.get(index), index, PlayType.PLAY_AUDIO.getCode());
-                } else {
-                    logger.error("点击消息以下的未读消息已播放完成");
+                        OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayIndividualChatVoiceHandler.class, chatMessageList.get(index), index,
+                            (chatMessageList.get(index).messageType == MessageType.AUDIO.getCode())?PlayType.PLAY_AUDIO.getCode():PlayType.PLAY_GROUP_CALL.getCode());
+                    } else {
+                        logger.error("点击消息以下的未读消息已播放完成");
+                    }
                 }
-            }
 
-        }else {
-            logger.debug("最后一条消息已播放完成");
+            }else {
+                logger.debug("最后一条消息已播放完成");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

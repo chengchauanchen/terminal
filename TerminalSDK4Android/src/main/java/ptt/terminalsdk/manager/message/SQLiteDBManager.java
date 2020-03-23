@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.manager.search.TianjinDeviceBean;
 import cn.vsx.hamster.terminalsdk.model.VideoMeetingDataBean;
 import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
@@ -82,28 +83,46 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     @Override
     public synchronized void addTerminalMessage(TerminalMessage terminalMessage) {
         logger.info("向terminalMessage表存消息：" + terminalMessage);
-        SQLiteDatabase db = helper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
-        values.put("message_id", terminalMessage.messageId);
-        values.put("message_body_id", terminalMessage.messageBodyId);
-        values.put("message_body", terminalMessage.messageBody.toJSONString());
-        values.put("message_url", terminalMessage.messageUrl);
-        values.put("message_path", terminalMessage.messagePath);
-        values.put("message_from_id", terminalMessage.messageFromId);
-        values.put("message_from_name", terminalMessage.messageFromName);
-        values.put("message_to_id", terminalMessage.messageToId);
-        values.put("message_category", terminalMessage.messageCategory);
-        values.put("message_to_name", terminalMessage.messageToName);
-        values.put("message_type", terminalMessage.messageType);
-        values.put("message_version", terminalMessage.messageVersion);
-        values.put("result_code", terminalMessage.resultCode);
-        values.put("send_time", terminalMessage.sendTime);
-        values.put("message_to_unique_no", terminalMessage.messageToUniqueNo);
-        values.put("message_from_unique_no", terminalMessage.messageFromUniqueNo);
-        values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
-        db.replace(TABLE_TERMINAL_MESSAGE, null, values);
-//        db.close();
+        try{
+            SQLiteDatabase db = helper.getWritableDatabase();
+            TerminalMessage message = null;
+            Cursor cursor = db.query(TABLE_TERMINAL_MESSAGE, null, "current_member_id = ? AND message_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "",terminalMessage.messageId+""}, null, null, null);
+            List<TerminalMessage> list = getTerminalMessageList(db, cursor);
+            if(list!=null&&!list.isEmpty()) {
+                message = list.get(0);
+            }
+            if(message!=null){
+                if(message.messageBody!=null){
+                    terminalMessage.messageBody.put(
+                        JsonParam.UNREAD, (message.messageBody.containsKey(JsonParam.UNREAD))?message.messageBody.getBooleanValue(JsonParam.UNREAD):true);
+                }else{
+                    terminalMessage.messageBody.put(JsonParam.UNREAD, true);
+                }
+            }
+            ContentValues values = new ContentValues();
+            values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
+            values.put("message_id", terminalMessage.messageId);
+            values.put("message_body_id", terminalMessage.messageBodyId);
+            values.put("message_body", terminalMessage.messageBody.toJSONString());
+            values.put("message_url", terminalMessage.messageUrl);
+            values.put("message_path", terminalMessage.messagePath);
+            values.put("message_from_id", terminalMessage.messageFromId);
+            values.put("message_from_name", terminalMessage.messageFromName);
+            values.put("message_to_id", terminalMessage.messageToId);
+            values.put("message_category", terminalMessage.messageCategory);
+            values.put("message_to_name", terminalMessage.messageToName);
+            values.put("message_type", terminalMessage.messageType);
+            values.put("message_version", terminalMessage.messageVersion);
+            values.put("result_code", terminalMessage.resultCode);
+            values.put("send_time", terminalMessage.sendTime);
+            values.put("message_to_unique_no", terminalMessage.messageToUniqueNo);
+            values.put("message_from_unique_no", terminalMessage.messageFromUniqueNo);
+            values.put("message_status", MessageStatus.valueOf(terminalMessage.messageStatus).getCode());
+            db.replace(TABLE_TERMINAL_MESSAGE, null, values);
+            //        db.close();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -144,7 +163,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         values.put("current_member_id", TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0));
         values.put("message_path", terminalMessage.messagePath);
         values.put("message_body", terminalMessage.messageBody.toJSONString());
-        db.update(TABLE_TERMINAL_MESSAGE, values, "message_version = ?", new String[]{terminalMessage.messageVersion + ""});
+        db.update(TABLE_TERMINAL_MESSAGE, values, "current_member_id = ? AND message_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0)+"",terminalMessage.messageId + ""});
 //        db.close();
     }
 
@@ -254,6 +273,28 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         }
 
         return terminalMessageList;
+    }
+
+    @Override public TerminalMessage getMessageFromSQLite(long message_id) {
+        TerminalMessage message = null;
+        SQLiteDatabase db = helper.getWritableDatabase();
+        try{
+            Cursor cursor = db.query(TABLE_TERMINAL_MESSAGE, null, "current_member_id = ? AND message_id = ?", new String[]{TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0) + "",message_id+""}, null, null, null);
+            List<TerminalMessage> list = getTerminalMessageList(db, cursor);
+            if(list!=null&&!list.isEmpty()) {
+                message = list.get(0);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            try{
+                db.close();
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+        logger.info("向terminalMessage表获取消息message_id："+message_id+"-message:"+message);
+        return message;
     }
 
     @Override

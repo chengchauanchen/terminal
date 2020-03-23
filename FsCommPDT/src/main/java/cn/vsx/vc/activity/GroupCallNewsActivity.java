@@ -436,28 +436,11 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     }
 
     private void setIvMonitorDrawable(){
-        if(checkIsMonitorGroup(userId)){
+        if(DataUtil.checkIsMonitorGroup(userId)){
             iv_monitor.setImageResource(R.drawable.monitor_open);
         }else {
             iv_monitor.setImageResource(R.drawable.monitor_close);
         }
-    }
-
-    private boolean checkIsMonitorGroup(int groupNo){
-        Group group = TerminalFactory.getSDK().getGroupByGroupNo(groupNo);
-        if(ResponseGroupType.RESPONSE_TRUE.toString().equals(group.getResponseGroupType())){
-            return true;
-        }
-        if(TerminalFactory.getSDK().getConfigManager().getMonitorGroupNo().contains(groupNo)){
-            return true;
-        }
-        if(TerminalFactory.getSDK().getConfigManager().getTempMonitorGroupNos().contains(groupNo)){
-            return true;
-        }
-        if(TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0) == groupNo){
-            return true;
-        }
-        return false;
     }
 
     private void stateView() {

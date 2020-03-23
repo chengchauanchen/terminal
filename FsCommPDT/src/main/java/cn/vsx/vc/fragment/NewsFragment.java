@@ -788,24 +788,24 @@ public class NewsFragment extends BaseFragment {
                     GroupCallNewsActivity activity = ActivityCollector.getActivity(GroupCallNewsActivity.class);
                     if (terminalMessage.messageToId == activity.getChatTargetId()){// 会话的组是打开的组，不通知
                         terminalMessage.unReadCount = 0;
-
+                        terminalMessage.messageBody.put(JsonParam.UNREAD, !(DataUtil.checkIsMonitorGroup(terminalMessage.messageToId)));
                         //如果组扫描开启了
-                        if(MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN,false)){
-                            //如果不是当前组或者扫描组的消息，添加未读红点
-                            ArrayList<Integer> scanGroups = MyTerminalFactory.getSDK().getConfigManager().getScanGroups();
-                            if(null != scanGroups && scanGroups.contains(terminalMessage.messageToId)){
-                                terminalMessage.messageBody.put(JsonParam.UNREAD, false);
-                            }else {
-                                terminalMessage.messageBody.put(JsonParam.UNREAD, true);
-                            }
-                        }else{
-                            //如果组扫描没开启判断是否为当前组
-                            if(terminalMessage.messageToId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
-                                terminalMessage.messageBody.put(JsonParam.UNREAD, false);
-                            }else {
-                                terminalMessage.messageBody.put(JsonParam.UNREAD, true);
-                            }
-                        }
+                        //if(MyTerminalFactory.getSDK().getParam(Params.GROUP_SCAN,false)){
+                        //    //如果不是当前组或者扫描组的消息，添加未读红点
+                        //    ArrayList<Integer> scanGroups = MyTerminalFactory.getSDK().getConfigManager().getScanGroups();
+                        //    if(null != scanGroups && scanGroups.contains(terminalMessage.messageToId)){
+                        //        terminalMessage.messageBody.put(JsonParam.UNREAD, false);
+                        //    }else {
+                        //        terminalMessage.messageBody.put(JsonParam.UNREAD, true);
+                        //    }
+                        //}else{
+                        //    //如果组扫描没开启判断是否为当前组
+                        //    if(terminalMessage.messageToId == MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
+                        //        terminalMessage.messageBody.put(JsonParam.UNREAD, false);
+                        //    }else {
+                        //        terminalMessage.messageBody.put(JsonParam.UNREAD, true);
+                        //    }
+                        //}
                     }else {//不是当前打开的会话组，通知
                         setGroupMessageUnReadCount(unReadCount, terminalMessage,tempGroupMessageVersion,clearUnread);
                     }

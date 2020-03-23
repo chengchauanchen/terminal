@@ -28,6 +28,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import cn.vsx.hamster.common.GroupType;
+import cn.vsx.hamster.common.TempGroupType;
+import cn.vsx.hamster.terminalsdk.tools.Util;
 import com.baidu.speechsynthesizer.SpeechSynthesizer;
 import com.baidu.speechsynthesizer.SpeechSynthesizerListener;
 import com.baidu.speechsynthesizer.publicutility.SpeechError;
@@ -191,6 +194,10 @@ public class TalkbackFragment extends BaseFragment implements UserStateDropDownL
         public void run() {
             myHandler.post(() -> {
                 tv_current_group.setText(group.getName());
+                if(Util.equals(group.getGroupType(), GroupType.TEMPORARY.toString())
+                    &&Util.equals(group.getTempGroupType(), TempGroupType.COMMON_TEAM_GROUP.toString())){
+                    group.setDepartmentName("临时组");
+                }
                 tv_current_folder.setText(group.getDepartmentName());
             });
         }

@@ -160,7 +160,7 @@ public class MediaManager {
     }
 
     public static boolean   isPlaying(){
-        return mPlayer.isPlaying();
+        return (mPlayer!=null)&&mPlayer.isPlaying();
     }
 
     //切换声筒或听筒
