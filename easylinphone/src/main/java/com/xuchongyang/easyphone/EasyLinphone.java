@@ -312,4 +312,35 @@ public class EasyLinphone {
     public static void destroy(){
         LinphoneUtils.destroy();
     }
+
+    /**
+     * 清空用户信息
+     */
+    public static void removeAuthInfo(){
+        mUsername = null;
+        mPassword = null;
+        mServerIP = null;
+        try {
+            LinphoneCore core = LinphoneManager.getLc();
+            if(core!=null){
+                if(core.getAuthInfosList()!=null&&core.getAuthInfosList().length>0){
+                    LinphoneManager.getLc().clearAuthInfos();
+                }
+                LinphoneManager.getLc().clearProxyConfigs();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //       destroy();
+    }
+    /**
+     * 清空用户信息
+     */
+    public static void clearUtil(){
+        try {
+            LinphoneUtils.clear();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

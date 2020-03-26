@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import cn.vsx.vc.receiveHandle.ReceiveVoipCallActiveEndHandler;
 import com.alibaba.fastjson.JSONObject;
 import com.blankj.utilcode.util.ToastUtils;
 
@@ -117,16 +118,26 @@ public class VoipPhoneActivity extends BaseActivity{
     @Override
     public void initListener(){
         llHangupRequest.setOnClickListener(v -> {
-            ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
-            status = HANG_UP_SELF + "";
-            MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
-            mHandler.postDelayed(() -> finish(),500);
+            try{
+                ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
+                status = HANG_UP_SELF + "";
+                MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                mHandler.postDelayed(() -> finish(),500);
+            }
         });
         ivHangupSpeaking.setOnClickListener(v -> {
-            ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
-            status = CALL_END + "";
-            MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
-            mHandler.postDelayed(() -> finish(),500);
+            try{
+                ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
+                status = CALL_END + "";
+                MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                mHandler.postDelayed(() -> finish(),500);
+            }
         });
         ivMicroMute.setOnClickListener(v -> {
             boolean isMicrophoneMute = MyTerminalFactory.getSDK().getAudioProxy().isMicrophoneMute();
@@ -145,6 +156,7 @@ public class VoipPhoneActivity extends BaseActivity{
 
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipConnectedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallEndHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallActiveEndHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipErrorHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveHeadSetPlugHandler);
     }
@@ -222,27 +234,44 @@ public class VoipPhoneActivity extends BaseActivity{
         });
     };
 
+    private ReceiveVoipCallActiveEndHandler receiveVoipCallActiveEndHandler = ()->{
+        //电话接通之后挂断，还有主叫拨号时挂断
+        Log.e("VoipPhoneActivity", "电话挂断");
+        TerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
+        mHandler.post(() -> {
+            try{
+                ToastUtil.showToast(MyApplication.instance, getString(R.string.text_call_is_over));
+                status = CALL_END + "";
+                MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+            }catch (Exception e){
+                e.printStackTrace();
+            }finally {
+                mHandler.postDelayed(() -> VoipPhoneActivity.this.finish(),500);
+            }
+        });
+    };
+
     private ReceiveVoipErrorHandler receiveVoipErrorHandler = (linphoneCall)->{
         Log.e("VoipPhoneActivity", "error");
         TerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                status=CALL_ERROR+"";
-                CallRecord callRecord = new CallRecord();
-                callRecord.setCallId(linphoneCall.getCallLog().getCallId());
-                callRecord.setMemberName(userName);
-                callRecord.setPhone(phone);
-                callRecord.setTime(DateUtils.getNowTime());
-                callRecord.setCallRecords(status);
-
-                CopyOnWriteArrayList<CallRecord> callRecords = MyTerminalFactory.getSDK().getSQLiteDBManager().getCallRecords();
-                callRecords.add(callRecord);
-                MyTerminalFactory.getSDK().getSQLiteDBManager().addCallRecord(callRecords);
-                ictVspeakingTimeSpeaking.onStop();
-                ToastUtil.showToast(VoipPhoneActivity.this,getString(R.string.other_stop_call));
-                SystemClock.sleep(2000);
                 try{
+                    status=CALL_ERROR+"";
+                    CallRecord callRecord = new CallRecord();
+                    callRecord.setCallId(linphoneCall.getCallLog().getCallId());
+                    callRecord.setMemberName(userName);
+                    callRecord.setPhone(phone);
+                    callRecord.setTime(DateUtils.getNowTime());
+                    callRecord.setCallRecords(status);
+
+                    CopyOnWriteArrayList<CallRecord> callRecords = MyTerminalFactory.getSDK().getSQLiteDBManager().getCallRecords();
+                    callRecords.add(callRecord);
+                    MyTerminalFactory.getSDK().getSQLiteDBManager().addCallRecord(callRecords);
+                    ictVspeakingTimeSpeaking.onStop();
+                    ToastUtil.showToast(VoipPhoneActivity.this,getString(R.string.other_stop_call));
+                    SystemClock.sleep(2000);
                     finish();
                 }catch (Exception e){
                     logger.error(e.toString());
@@ -319,6 +348,7 @@ public class VoipPhoneActivity extends BaseActivity{
         setSpeakPhoneOn(ivHandFree,false);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipConnectedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipCallEndHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipCallActiveEndHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipErrorHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveHeadSetPlugHandler);
 
@@ -329,7 +359,11 @@ public class VoipPhoneActivity extends BaseActivity{
             editor.commit();
             MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateFoldersAndGroupsHandler.class);
         }
-        MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+        try{
+            MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         mHandler.removeCallbacksAndMessages(null);
     }
 

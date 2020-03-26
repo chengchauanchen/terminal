@@ -266,9 +266,14 @@ public class LinphoneManager implements LinphoneCoreListener {
     private void doDestroy() {
         try {
             mTimer.cancel();
+            mLc.clearProxyConfigs();
+            mLc.clearCallLogs();
+            mLc.clearAuthInfos();
             mLc.destroy();
 
         } catch (RuntimeException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             mLc = null;

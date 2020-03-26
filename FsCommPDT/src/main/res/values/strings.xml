@@ -661,4 +661,14 @@
 
     <string name="text_next_count">下一步(%1$s)</string>
     <string name="text_sure_count">确定(%1$s)</string>
+
+    <string name="text_video_meeting">视频会商</string>
+    <string name="text_create_video_meeting_by_user">%1$s&#160;&#160;发起会商</string>
+    <string name="text_video_meeting_number">视频会商(%1$d)</string>
+    <string name="text_video_meeting_data_error">视频会商信息有误</string>
+    <string name="text_video_meeting_end">视频会商已结束</string>
+    <string name="text_invitation_you_to_video_meeting">邀请您加入视频会商</string>
+    <string name="text_can_not_join_in_video_meeting">无加入权限</string>
+    <string name="text_you_were_kicked_outvideo_meeting">您被请出视频会商</string>
+    <string name="text_end">已结束</string>
 </resources>

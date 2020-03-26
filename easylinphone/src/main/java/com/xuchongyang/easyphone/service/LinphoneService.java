@@ -76,6 +76,7 @@ public class LinphoneService extends Service implements LinphoneCoreListener {
         }catch(Exception e){
             e.printStackTrace();
         }
+        instance = null;
         //        if (mWakeLock != null) {
 //            mWakeLock.release();
 //            mWakeLock = null;

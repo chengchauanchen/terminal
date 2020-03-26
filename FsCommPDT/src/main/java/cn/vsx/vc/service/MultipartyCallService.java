@@ -11,6 +11,7 @@ import android.widget.TextView;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.prompt.PromptManager;
+import cn.vsx.vc.receiveHandle.ReceiveVoipCallActiveEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipConnectedHandler;
 import cn.vsx.vc.utils.Constants;
@@ -71,6 +72,7 @@ public class MultipartyCallService extends BaseService{
         mIvIndividualCallHandFree.setOnClickListener(handFreeListener);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipConnectedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallEndHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveVoipCallActiveEndHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveHeadSetPlugHandler);
     }
 
@@ -79,7 +81,11 @@ public class MultipartyCallService extends BaseService{
         PromptManager.getInstance().stopRing();
         String userName = intent.getStringExtra(Constants.USER_NAME);
 //        mTvMemberNameSpeaking.setText(userName);
-        MyTerminalFactory.getSDK().getVoipCallManager().acceptCall();
+        try{
+            MyTerminalFactory.getSDK().getVoipCallManager().acceptCall();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
         //打开默认听筒说话，
         setSpeakPhoneOn(mIvIndividualCallHandFree,false);
@@ -107,6 +113,7 @@ public class MultipartyCallService extends BaseService{
         setSpeakPhoneOn(mIvIndividualCallHandFree,false);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipConnectedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipCallEndHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveVoipCallActiveEndHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveHeadSetPlugHandler);
     }
 
@@ -129,10 +136,15 @@ public class MultipartyCallService extends BaseService{
     };
 
     private void huangUp(){
-        mTvSpeakingToast.setText(getResources().getString(R.string.huang_up));
-        MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
-        mIctvSpeakingTimeSpeaking.onStop();
-        stopBusiness();
+        try{
+            mTvSpeakingToast.setText(getResources().getString(R.string.huang_up));
+            MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
+            mIctvSpeakingTimeSpeaking.onStop();
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            stopBusiness();
+        }
     }
 
     private ReceiveVoipConnectedHandler receiveVoipConnectedHandler = (linphoneCall)-> mHandler.post(new Runnable(){
@@ -145,6 +157,7 @@ public class MultipartyCallService extends BaseService{
 
     private ReceiveVoipCallEndHandler receiveVoipCallEndHandler = linphoneCall -> mHandler.post(this::huangUp);
 
+    private ReceiveVoipCallActiveEndHandler receiveVoipCallActiveEndHandler = () -> mHandler.post(this::huangUp);
     /**
      * 设置是否可以打开扬声器
      */

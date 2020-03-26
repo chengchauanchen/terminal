@@ -706,6 +706,16 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     }
 
     /**
+     * 显示加载数据的ProgressDialog
+     */
+    public void showProgressDialog(String msg) {
+        if (myProgressDialog != null) {
+            myProgressDialog.setMsg(msg);
+            myProgressDialog.show();
+        }
+    }
+
+    /**
      * 隐藏加载数据的ProgressDialog
      */
     public void dismissProgressDialog() {

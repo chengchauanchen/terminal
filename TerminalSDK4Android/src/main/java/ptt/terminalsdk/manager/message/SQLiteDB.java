@@ -12,7 +12,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
 
 
     public SQLiteDB(Context context) {
-        super(context, "4gptt.db", null, 22);
+        super(context, "4gptt.db", null, 23);
     }
 
     @Override
@@ -68,6 +68,9 @@ public class SQLiteDB extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE IF NOT EXISTS allAccount (_id INTEGER primary key autoincrement,current_member_id INTEGER, account_id INTEGER, account_name varchar, account_no INTEGER, " +
                 "name_pinyin varchar,name_first_pinyin varchar, account_phone varchar, department_name varchar,members TEXT,dept_id INTEGER, unique(account_id))");
 
+        //视频会商
+        db.execSQL("CREATE TABLE IF NOT EXISTS videoMeetingMessage (_id INTEGER primary key autoincrement, current_member_id INTEGER,room_id INTEGER,create_terminal_unqieno INTEGER, create_terminal_no INTEGER, " +
+            "create_terminal_name varchar,add_or_out_meeting varchar, meeting_describe TEXT, send_time INTEGER,is_meeting varchar, unique(room_id))");
     }
 
     @Override
@@ -86,6 +89,7 @@ public class SQLiteDB extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS bitStarFileRecord");
         db.execSQL("DROP TABLE IF EXISTS allGroup");
         db.execSQL("DROP TABLE IF EXISTS allAccount");
+        db.execSQL("DROP TABLE IF EXISTS videoMeetingMessage");
         onCreate(db);
     }
 }

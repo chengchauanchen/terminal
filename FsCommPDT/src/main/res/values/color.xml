@@ -621,4 +621,9 @@
     <color name="blue_019_95">#f20D182B</color>
 
     <color name="text_grey_dc">#dcdcdc</color>
+
+    <color name="news_fragment_top_layout_bg">#114E6B</color>
+
+    <color name="video_meeting_text_name">#B5E5F0</color>
+    <color name="video_meeting_text_time">#617F8E</color>
 </resources>

@@ -12,7 +12,9 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
@@ -20,6 +22,11 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageAddOrOutCompleteHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageReduceUnreadCountHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageUpdateCompleteHandler;
+import cn.vsx.vc.activity.VideoMeetingListActivity;
 import com.blankj.utilcode.util.ToastUtils;
 import com.zectec.imageandfileselector.utils.FileUtil;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
@@ -90,6 +97,7 @@ import cn.vsx.vc.receiver.NotificationClickReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.view.custompopupwindow.MyTopRightMenu;
+import java.util.concurrent.CopyOnWriteArrayList;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -112,6 +120,8 @@ public class NewsFragment extends BaseFragment {
     ImageView voice_image;
 
     LinearLayout layoutPcLoginState;
+    LinearLayout layoutVideoMeetingState;
+    TextView tvVideoMeetingStateContent;
 
     private int deletePos = -1 ;
     private MessageListAdapter mMessageListAdapter;
@@ -120,6 +130,8 @@ public class NewsFragment extends BaseFragment {
     private List<TerminalMessage> terminalMessageData = new ArrayList<>();
     //界面显示的消息列表
     private ArrayList<TerminalMessage> messageList = new ArrayList<>();
+    //视频会商的最新一条记录
+    private TerminalMessage videoMeetingMessage;
     @SuppressLint("UseSparseArrays")
     private boolean soundOff;//是否静音
     private boolean isFirstCall;
@@ -127,8 +139,17 @@ public class NewsFragment extends BaseFragment {
     private void saveMessagesToSql(){
         synchronized(NewsFragment.this){
             logger.info("---------保存消息列表---------"+messageList);
-            MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(messageList);
+            TerminalFactory.getSDK().getThreadPool().execute(() -> {
+                MyTerminalFactory.getSDK().getTerminalMessageManager().updateMessageList(messageList);
+            });
         }
+    }
+
+    /**
+     * 获取本地的视频会商的消息
+     */
+    private void loadVideoMessages() {
+        TerminalFactory.getSDK().getVideoMeetingManager().checkVideoMeetingState();
     }
 
     private void loadMessages(){
@@ -139,6 +160,7 @@ public class NewsFragment extends BaseFragment {
             logger.info("从数据库取出消息列表："+messageList);
 
             addData(messageList);
+            addToNewsList();
         }
     }
 
@@ -211,6 +233,7 @@ public class NewsFragment extends BaseFragment {
                 clearData();
                 addData(currentResponseGroupMessage);
                 addData(temporaryList);
+                addToNewsList();
             }
         }
 
@@ -287,6 +310,7 @@ public class NewsFragment extends BaseFragment {
             clearData();
             addData(currentGroupMessage);
             addData(temporaryList);
+            addToNewsList();
         }
 
         if(mMessageListAdapter != null){
@@ -296,6 +320,14 @@ public class NewsFragment extends BaseFragment {
 
     public NewsFragment() {
 
+    }
+
+    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container,
+        Bundle savedInstanceState) {
+        View view = super.onCreateView(inflater, container, savedInstanceState);
+        //获取视频会商的消息
+        loadVideoMessages();
+        return view;
     }
 
     @Override
@@ -311,6 +343,8 @@ public class NewsFragment extends BaseFragment {
         add_icon = (ImageView) mRootView.findViewById(R.id.add_icon);
         newsList = (ListView) mRootView.findViewById(R.id.news_list);
         layoutPcLoginState = (LinearLayout) mRootView.findViewById(R.id.layout_pc_login_state);
+        layoutVideoMeetingState = (LinearLayout) mRootView.findViewById(R.id.layout_video_meeting_state);
+        tvVideoMeetingStateContent = (TextView) mRootView.findViewById(R.id.tv_video_meeting_state_content);
         setVideoIcon();
         setting_group_name.setText(DataUtil.getGroupName(MyTerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID, 0)));
         voice_image.setImageResource(BitmapUtil.getVolumeImageResourceByValue(false));
@@ -331,6 +365,12 @@ public class NewsFragment extends BaseFragment {
         //pc的登录状态
         boolean isLogin = MyTerminalFactory.getSDK().getParam(Params.PC_LOGIN_STATE, false);
         layoutPcLoginState.setVisibility(isLogin?View.VISIBLE:View.GONE);
+        //正在进行的视频会商
+        layoutVideoMeetingState.setVisibility(View.GONE);
+        layoutVideoMeetingState.setOnClickListener(v -> {
+            clearVideoMeetingMessageUnReadCount();
+            startActivity(new Intent(context, VideoMeetingListActivity.class));
+        });
     }
 
     @Override
@@ -359,6 +399,9 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRecallRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mNotifyRecallRecordMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveTerminalStatusOfPcMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyVideoMeetingMessageUpdateCompleteHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyVideoMeetingMessageAddOrOutCompleteHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyVideoMeetingMessageReduceUnreadCountHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverDeleteMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveVolumeOffCallHandler);
 
@@ -415,6 +458,9 @@ public class NewsFragment extends BaseFragment {
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberAboutTempGroupHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTerminalStatusOfPcMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyVideoMeetingMessageUpdateCompleteHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyVideoMeetingMessageAddOrOutCompleteHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyVideoMeetingMessageReduceUnreadCountHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverDeleteMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiveVolumeOffCallHandler);
         clearData();
@@ -425,6 +471,7 @@ public class NewsFragment extends BaseFragment {
     private void setViewEnable (boolean isEnable) {
         newsList.setEnabled(isEnable);
         add_icon.setEnabled(isEnable);
+        layoutVideoMeetingState.setEnabled(isEnable);
     }
 
     /***  组呼的时候显示View **/
@@ -492,6 +539,11 @@ public class NewsFragment extends BaseFragment {
             //进入电话助手
             else if(terminalMessage.messageType ==MessageType.CALL_RECORD.getCode()){
                 Intent intent = new Intent(context, PhoneAssistantManageActivity.class);
+                context.startActivity(intent);
+            }
+            //进入视频会商
+            else if(terminalMessage.messageType ==MessageType.VIDEO_MEETING.getCode()){
+                Intent intent = new Intent(context, VideoMeetingListActivity.class);
                 context.startActivity(intent);
             }
             else if (terminalMessage.messageCategory == MessageCategory.MESSAGE_TO_PERSONAGE.getCode()) {
@@ -598,6 +650,7 @@ public class NewsFragment extends BaseFragment {
             mHandler.post(() -> {
                 clearData();
                 addData(terminalMessageData);
+                addToNewsList();
                 sortMessageList();
                 unReadCountChanged();
             });
@@ -648,6 +701,7 @@ public class NewsFragment extends BaseFragment {
             mHandler.post(() -> {
                 clearData();
                 addData(terminalMessageData);
+                addToNewsList();
                 //来一条消息的时候不用删除响应组
                 sortMessageList();
                 unReadCountChanged();
@@ -978,6 +1032,7 @@ public class NewsFragment extends BaseFragment {
                 mHandler.post(() -> {
                     clearData();
                     addData(terminalMessageData);
+                    addToNewsList();
 //                    sortMessageList();
                     sortFirstMessageList();
                     updateFrequentMembers();
@@ -1000,6 +1055,189 @@ public class NewsFragment extends BaseFragment {
      */
     private ReceiveTerminalStatusOfPcMessageHandler receiveTerminalStatusOfPcMessageHandler = ( uniqueNo, isOnline) ->
             mHandler.post(() -> layoutPcLoginState.setVisibility(isOnline?View.VISIBLE:View.GONE));
+
+    /**
+     * 更新完数据库之后更新UI
+     */
+    private ReceiveNotifyVideoMeetingMessageUpdateCompleteHandler
+        receiveNotifyVideoMeetingMessageUpdateCompleteHandler = ( ) ->{
+        //查询是否还有正在进行的视频会商
+        int size = TerminalFactory.getSDK().getSQLiteDBManager().getMeetingVideoMeetingMessage().size();
+        updateVideoMeetingStateUI(size);
+        CopyOnWriteArrayList<VideoMeetingMessage>
+            list = TerminalFactory.getSDK().getSQLiteDBManager().getVideoMeetingMessageLast();
+        if(!list.isEmpty()){
+            int count =  getVideoMeetingMessageUnReadCount();
+            //加入的消息显示UI
+            TerminalMessage message1 = DataUtil.getTerminalMessageNotify(list.get(0));
+            if(message1!=null){
+                //加入消息列表
+                message1.unReadCount = count;
+                videoMeetingMessage = message1;
+                addToNewsList();
+                //再保存到数据库
+                saveMessagesToSql();
+                unReadCountChanged();
+            }
+        }
+    };
+
+    /**
+     * 更新完数据库之后更新UI
+     */
+    private ReceiveNotifyVideoMeetingMessageAddOrOutCompleteHandler
+        receiveNotifyVideoMeetingMessageAddOrOutCompleteHandler = (message,update,addUnreadCount) ->{
+        //更新UI
+        //正在进行的视频会商
+        int size = TerminalFactory.getSDK().getSQLiteDBManager().getMeetingVideoMeetingMessage().size();
+        updateVideoMeetingStateUI(size);
+        if(update){
+            if(message!=null){
+                // 更新消息列表的历史视频会商的入口
+                int count =  getVideoMeetingMessageUnReadCount();
+                if(message.isAddOrOutMeeting()){
+                    if(addUnreadCount){
+                        addUnreadCount = (!ActivityCollector.isActivityExist(VideoMeetingListActivity.class));
+                    }
+                    if(addUnreadCount){
+                        count++;
+                    }
+                }
+                //加入的消息显示UI
+                TerminalMessage message1 = DataUtil.getTerminalMessageNotify(message);
+                if(message1!=null){
+                    //加入消息列表
+                    message1.unReadCount = count;
+                    videoMeetingMessage = message1;
+                    addToNewsList();
+                    //再保存到数据库
+                    saveMessagesToSql();
+                    unReadCountChanged();
+                }
+                //}
+            }
+        }
+    };
+
+    /**
+     * 减未读数量更新UI
+     */
+    private ReceiveNotifyVideoMeetingMessageReduceUnreadCountHandler
+        receiveNotifyVideoMeetingMessageReduceUnreadCountHandler = () ->{
+        //更新UI
+        boolean canReduce = (!ActivityCollector.isActivityExist(VideoMeetingListActivity.class));
+        if(canReduce){
+            TerminalMessage message =  getVideoMeetingMessage();
+            if(message!=null){
+                if(message.unReadCount>0){
+                    message.unReadCount--;
+                }
+                videoMeetingMessage = message;
+                addToNewsList();
+                //再保存到数据库
+                saveMessagesToSql();
+                unReadCountChanged();
+            }
+        }
+    };
+
+    /**
+     * 获取已经显示的视频会商消息
+     * @return
+     */
+    private TerminalMessage getVideoMeetingMessage() {
+        TerminalMessage  result = null;
+        if(messageList!=null){
+            for (TerminalMessage message:messageList) {
+                if(message!=null&&message.messageType == MessageType.VIDEO_MEETING.getCode()){
+                    result =  message;
+                    break;
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
+     * 获取已经显示的视频会商的未读数量
+     * @return
+     */
+    private int getVideoMeetingMessageUnReadCount() {
+        int count = 0;
+        if(messageList!=null){
+            for (TerminalMessage message:messageList) {
+                if(message!=null&&message.messageType == MessageType.VIDEO_MEETING.getCode()){
+                    count = message.unReadCount;
+                    break;
+                }
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 清空视频会商的未读数量
+     * @return
+     */
+    private void clearVideoMeetingMessageUnReadCount() {
+        if(messageList!=null){
+            for (TerminalMessage message:messageList) {
+                if(message!=null&&message.messageType == MessageType.VIDEO_MEETING.getCode()){
+                    message.unReadCount = 0;
+                    break;
+                }
+            }
+            mHandler.post(() -> {
+                if(mMessageListAdapter !=null){
+                    mMessageListAdapter.notifyDataSetChanged();
+                }
+                //再保存到数据库
+                saveMessagesToSql();
+                unReadCountChanged();
+            });
+        }
+    }
+
+    /**
+     * 更新正在进行的视频会议的布局
+     * @param size
+     */
+    private void updateVideoMeetingStateUI(int size){
+        mHandler.post(() -> {
+            if(size>0){
+                if(size == 1){
+                    tvVideoMeetingStateContent.setText(getResources().getString(R.string.text_video_meeting));
+                }else {
+                    tvVideoMeetingStateContent.setText(String.format(getResources().getString(R.string.text_video_meeting_number),size));
+                }
+            }
+            layoutVideoMeetingState.setVisibility(size>0?View.VISIBLE:View.GONE);
+        });
+    }
+
+    /**
+     * 把视频会商消息加入到消息列表中
+     */
+    private  void addToNewsList(){
+        synchronized(NewsFragment.this){
+            if(videoMeetingMessage!=null){
+                Iterator<TerminalMessage> iterator = messageList.iterator();
+                while(iterator.hasNext()){
+                    TerminalMessage message = iterator.next();
+                    if(message!=null&&message.messageType == MessageType.VIDEO_MEETING.getCode()){
+                        iterator.remove();
+                    }
+                }
+                addData(videoMeetingMessage);
+                Collections.sort(messageList, (o1, o2) -> (o1.sendTime) > (o2.sendTime) ? -1 : 1);
+                mHandler.post(() -> {
+                    if(mMessageListAdapter !=null){
+                        mMessageListAdapter.notifyDataSetChanged();
+                    }
+                });
+            }
+        }
+    }
 
     private void updateFrequentMembers(){
         if(messageList.size()>0){

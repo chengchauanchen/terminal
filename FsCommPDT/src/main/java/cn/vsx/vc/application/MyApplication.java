@@ -12,6 +12,14 @@ import android.os.IBinder;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
+import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
+import cn.vsx.util.StateMachine.IState;
+import cn.vsx.vc.activity.VideoMeetingActivity;
+import cn.vsx.vc.activity.VideoMeetingInvitationActivity;
+import cn.vsx.vc.utils.ActivityCollector;
+import cn.vsx.vc.utils.SystemUtil;
+import java.util.Map;
 import org.linphone.core.LinphoneCall;
 
 import java.util.ArrayList;
@@ -279,6 +287,36 @@ public class MyApplication extends BaseApplication{
 		//注册 连接jumpService的广播
 		ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().register(this);
 		ThirdSendMessage.getInstance().getRegisterBroadcastReceiver().sendBroadcast(this);
+	}
+
+	/**
+	 * 停止一切业务(除了视频会议)
+	 */
+	public void stopAllBusiness(){
+		Map<TerminalState, IState<?>>
+				currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
+		if(currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PUSHING)
+				||currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PLAYING)
+				|| currentStateMap.containsKey(TerminalState.INDIVIDUAL_CALLING)){
+			TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyEmergencyMessageHandler.class);
+		}
+		if(currentStateMap.containsKey(TerminalState.GROUP_CALL_LISTENING) || currentStateMap.containsKey(TerminalState.GROUP_CALL_SPEAKING)){
+			TerminalFactory.getSDK().getGroupCallManager().ceaseGroupCall();
+		}
+	}
+
+	/**
+	 * 检查是否在视频会议中
+	 * @return
+	 */
+	public boolean checkVideoMeeting(){
+		if((ActivityCollector.isActivityExist(VideoMeetingActivity.class)
+				&& SystemUtil.isForeground(this,VideoMeetingActivity.class.getName()))||
+				(ActivityCollector.isActivityExist(VideoMeetingInvitationActivity.class)
+						&&SystemUtil.isForeground(this,VideoMeetingInvitationActivity.class.getName()))){
+			return true;
+		}
+		return false;
 	}
 
 }

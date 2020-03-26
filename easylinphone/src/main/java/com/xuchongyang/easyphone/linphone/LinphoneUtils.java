@@ -27,6 +27,7 @@ public class LinphoneUtils {
     private static final String TAG = "LinphoneUtils";
     private static volatile LinphoneUtils sLinphoneUtils;
     private LinphoneCore mLinphoneCore = null;
+    private final int SIP_PORT  = -1;
 
     public static LinphoneUtils getInstance() {
         if (sLinphoneUtils == null) {
@@ -71,6 +72,11 @@ public class LinphoneUtils {
         prxCfg.setQualityReportingCollector(null);
         prxCfg.setQualityReportingInterval(0);
         prxCfg.enableRegister(true);
+        LinphoneCore.Transports transportPorts = mLinphoneCore.getSignalingTransportPorts();//端口
+        transportPorts.udp = SIP_PORT;
+        transportPorts.tcp = SIP_PORT;
+        transportPorts.tls = SIP_PORT;
+        mLinphoneCore.setSignalingTransportPorts(transportPorts);
         mLinphoneCore.addProxyConfig(prxCfg);
         mLinphoneCore.addAuthInfo(authInfo);
         mLinphoneCore.setDefaultProxyConfig(prxCfg);
@@ -106,13 +112,17 @@ public class LinphoneUtils {
      * 挂断电话
      */
     public void hangUp() {
-        LinphoneCall currentCall = mLinphoneCore.getCurrentCall();
-        if (currentCall != null) {
-            mLinphoneCore.terminateCall(currentCall);
-        } else if (mLinphoneCore.isInConference()) {
-            mLinphoneCore.terminateConference();
-        } else {
-            mLinphoneCore.terminateAllCalls();
+        try{
+            LinphoneCall currentCall = mLinphoneCore.getCurrentCall();
+            if (currentCall != null) {
+                mLinphoneCore.terminateCall(currentCall);
+            } else if (mLinphoneCore.isInConference()) {
+                mLinphoneCore.terminateConference();
+            } else {
+                mLinphoneCore.terminateAllCalls();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -183,5 +193,14 @@ public class LinphoneUtils {
 
     public static void destroy(){
          LinphoneManager.destroy();
+    }
+    public static void clear(){
+        try{
+            if(sLinphoneUtils!=null){
+                sLinphoneUtils = null;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 }

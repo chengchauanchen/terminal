@@ -30,6 +30,13 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 
+import cn.vsx.SpecificSDK.SpecificSDK;
+import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyAddVideoMeetingMessageHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageAddOrOutCompleteHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReStartVoipHandler;
+import cn.vsx.vc.activity.VideoMeetingInvitationActivity;
+import cn.vsx.vc.receiveHandle.ReceiveVoipCallActiveEndHandler;
 import com.alibaba.fastjson.JSONObject;
 import com.blankj.utilcode.util.ToastUtils;
 import com.xuchongyang.easyphone.callback.PhoneCallback;
@@ -234,6 +241,8 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getWarningMessageDetailHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponNotifyWatchHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyAddVideoMeetingMessageHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveReStartVoipHandler);
 
         //监听voip来电
         MyTerminalFactory.getSDK().getVoipCallManager().addCallback(voipRegistrationCallback,voipPhoneCallback);
@@ -318,6 +327,10 @@ public class ReceiveHandlerService extends Service{
             super.incomingCall(linphoneCall);
             if(!checkFloatPermission()){
                 startSetting();
+                return;
+            }
+            //判断是否在视频会议中
+            if(MyApplication.instance.checkVideoMeeting()){
                 return;
             }
             //将状态机至于正在个呼状态
@@ -514,6 +527,10 @@ public class ReceiveHandlerService extends Service{
             startSetting();
             return;
         }
+        //判断是否在视频会议中
+        if(MyApplication.instance.checkVideoMeeting()){
+            return;
+        }
         myHandler.postDelayed(() -> {
             startTranspantActivity();
             Intent individualCallIntent = new Intent(ReceiveHandlerService.this, ReceiveCallComingService.class);
@@ -563,6 +580,10 @@ public class ReceiveHandlerService extends Service{
      */
     @SuppressWarnings("unused")
     private ReceiveNotifyEmergencyIndividualCallHandler receiveNotifyEmergencyIndividualCallHandler = mainMemberId -> {
+        //判断是否在视频会议中
+        if(MyApplication.instance.checkVideoMeeting()){
+            return;
+        }
     };
 
 
@@ -577,6 +598,8 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(getWarningMessageDetailHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponNotifyWatchHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyAddVideoMeetingMessageHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReStartVoipHandler);
 
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoHandler);
@@ -596,6 +619,10 @@ public class ReceiveHandlerService extends Service{
     protected void onVideoLiveComming(String mainMemberName, int mainMemberId, boolean emergencyType){
         if(!checkFloatPermission()){
             startSetting();
+            return;
+        }
+        //判断是否在视频会议中
+        if(MyApplication.instance.checkVideoMeeting()){
             return;
         }
         startTranspantActivity();
@@ -687,6 +714,10 @@ public class ReceiveHandlerService extends Service{
         if(!newMessage){
             return;
         }
+        //判断是否在视频会议中
+        if(MyApplication.instance.checkVideoMeeting()){
+            return;
+        }
         if(!TerminalMessageUtil.isGroupMessage(terminalMessage)){
             //个人的警情消息需要弹窗显示
             myHandler.post(()->{
@@ -745,6 +776,10 @@ public class ReceiveHandlerService extends Service{
         if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()){
             //紧急观看
             if(terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.EMERGENCY_INFORM_TO_WATCH_LIVE){
+                //判断是否在视频会议中
+                if(MyApplication.instance.checkVideoMeeting()){
+                    return;
+                }
                 //停止一切业务，开始观看
                 String callId = terminalMessage.messageBody.getString(JsonParam.CALLID);
                 //过滤重复收到强制观看的消息
@@ -779,7 +814,10 @@ public class ReceiveHandlerService extends Service{
                         }
                         cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(terminalMessage.messageFromId,true);
                     });
-
+                    //判断是否在视频会议中
+                    if(MyApplication.instance.checkVideoMeeting()){
+                        return;
+                    }
                     //判断是否是组内上报，组内上报不弹窗
                     if(!TerminalMessageUtil.isGroupMessage(terminalMessage)){
                         //延迟弹窗，否则判断是否在上报接口返回的是没有在上报
@@ -809,6 +847,10 @@ public class ReceiveHandlerService extends Service{
                         cn.vsx.hamster.terminalsdk.tools.DataUtil.getAccountByMemberNo(StringUtil.stringToInt(terminalMessage.messageBody.getString(JsonParam.ACCOUNT_ID)),true);
                     }
                 });
+                //判断是否在视频会议中
+                if(MyApplication.instance.checkVideoMeeting()){
+                    return;
+                }
                 if(!TerminalMessageUtil.isGroupMessage(terminalMessage)){
                     //延迟弹窗，否则判断是否在上报接口返回的是没有在上报
                     myHandler.postDelayed(() -> {
@@ -1061,6 +1103,10 @@ public class ReceiveHandlerService extends Service{
      */
     @SuppressWarnings("unchecked")
     private ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler receiveNotifyEmergencyVideoLiveIncommingMessageHandler = message -> myHandler.post(() -> {
+        //判断是否在视频会议中
+        if(MyApplication.instance.checkVideoMeeting()){
+            return;
+        }
         startTranspantActivity();
         Map<TerminalState, IState<?>> currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
         //观看上报图像,个呼
@@ -1243,6 +1289,64 @@ public class ReceiveHandlerService extends Service{
                 startService(intent);
             }
         }
+    };
+
+    /**
+     * 通知终端加入视频会商会议室
+     */
+    private ReceiveNotifyAddVideoMeetingMessageHandler receiveNotifyAddVideoMeetingMessageHandler = (notifyMessage) -> {
+        //1.保存到数据库中，2.从数据库中查到所有正在会议的和时间最近的一条消息，3.刷新UI
+        TerminalFactory.getSDK().getThreadPool().execute(() -> {
+            if(notifyMessage!=null){
+                VideoMeetingMessage meetingMessage =  DataUtil.getVideoMeetingMessageByNotify(notifyMessage);
+                if(meetingMessage!=null){
+                    TerminalFactory.getSDK().getSQLiteDBManager().addVideoMeetingMessage(meetingMessage);
+                    ////获取更新完的数据
+                    VideoMeetingMessage message = TerminalFactory.getSDK().getSQLiteDBManager().getMeetingVideoMeetingMessageByRoomId(meetingMessage.getRoomId());
+                    //如果是加入邀请通知，跳转到邀请页面
+                    //但要判断当前的状态，是否在是否在其他业务和在视频会议业务中
+                    if(message.isAddOrOutMeeting()){
+                        //更新UI
+                        TerminalFactory.getSDK().notifyReceiveHandler(
+                            ReceiveNotifyVideoMeetingMessageAddOrOutCompleteHandler.class,message,true,true);
+                        if(!MyApplication.instance.checkVideoMeeting()){
+                            //不在视频会议的业务中
+                            MyApplication.instance.stopAllBusiness();
+                            Intent intent = new Intent(this, VideoMeetingInvitationActivity.class);
+                            intent.putExtra(Constants.VIDEO_MEETING_MESSAGE,message);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(intent);
+                        }else{
+                            //正在视频会议的业务中
+                            TerminalFactory.getSDK().getVideoMeetingManager().responseInvitationMessage(message.getRoomId(),1);
+                        }
+                    }else{
+                        //更新UI
+                        TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyVideoMeetingMessageAddOrOutCompleteHandler.class,message,true,false);
+                    }
+                }
+            }
+        });
+    };
+
+    /**
+     * 通知重启voip
+     */
+    private ReceiveReStartVoipHandler receiveReStartVoipHandler = () -> {
+        //TerminalFactory.getSDK().getThreadPool().execute(() -> {
+        MyTerminalFactory.getSDK().putParam(Params.VOIP_SUCCESS,false);
+        //关闭页面
+        MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveVoipCallActiveEndHandler.class);
+        //VOIP服务注销
+        myHandler.postDelayed(() ->{
+            MyTerminalFactory.getSDK().getVoipCallManager().removeAuthInfo();
+        } ,1000);
+        //重启voip
+        myHandler.postDelayed(() ->{
+            //监听voip来电
+            SpecificSDK.initVoipSpecificSDK();
+        } ,2000);
+        //});
     };
 
     private void showWarningDialog(){

@@ -52,7 +52,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 			HttpResponse response = client.execute(request);
 			if (null != response) {
 				String responseString = new String(EntityUtils.toByteArray(response.getEntity()), DEFAULT_ENCODING);
-				logger.info("发送了一个get请求：url="+url+",收到的信息为："+responseString);
+				logger.info("发送了一个post请求：url="+url+",收到的信息为："+responseString);
 				return responseString;
 			}
 		} catch (Exception e) {
@@ -77,7 +77,7 @@ public class MyHttpClient extends HttpClientBaseImpl{
 			HttpResponse response = client.execute(request);
 			if (null != response) {
 				String responseString = new String(EntityUtils.toByteArray(response.getEntity()), DEFAULT_ENCODING);
-				logger.info("发送了一个get请求：url="+url+",收到的信息为："+responseString);
+				logger.info("发送了一个post请求：url="+url+",收到的信息为："+responseString);
 				return responseString;
 			}
 		} catch (Exception e) {

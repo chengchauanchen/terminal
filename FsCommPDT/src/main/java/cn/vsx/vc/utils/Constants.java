@@ -142,4 +142,9 @@ public class Constants{
 
     public static final String PTT_DOWN_EVENT = "com.chivin.action.MEDIA_PTT_DOWN";
     public static final String PTT_UP_EVENT = "com.chivin.action.MEDIA_PTT_UP";
+
+    //视频会商的会议id
+    public static final String ROOM_ID = "roomId";
+    //视频会议的消息
+    public static final String VIDEO_MEETING_MESSAGE = "videoMeetingMessage";
 }

@@ -124,6 +124,7 @@ import ptt.terminalsdk.manager.voip.VoipManager;
 import ptt.terminalsdk.service.BluetoothLeService;
 import ptt.terminalsdk.service.MessageService;
 import ptt.terminalsdk.tools.ApkUtil;
+import ptt.terminalsdk.tools.AppUtil;
 import ptt.terminalsdk.tools.DeleteData;
 import ptt.terminalsdk.tools.HttpUtil;
 import ptt.terminalsdk.tools.ToastUtil;
@@ -1487,7 +1488,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
     }
 
 	@Override public boolean inMeeting() {
-		return false;
+		return AppUtil.isForeground(application,"cn.vsx.vc.activity.VideoMeetingActivity")||
+				AppUtil.isForeground(application,"cn.vsx.vc.activity.VideoMeetingInvitationActivity");
 	}
 
 	/**
