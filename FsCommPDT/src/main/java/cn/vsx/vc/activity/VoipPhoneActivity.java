@@ -130,7 +130,6 @@ public class VoipPhoneActivity extends BaseActivity{
     public void initListener(){
         llHangupRequest.setOnClickListener(v -> {
             try{
-                PromptManager.getInstance().stopRing();//提示音
                 ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
                 status = HANG_UP_SELF + "";
                 MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
@@ -142,7 +141,6 @@ public class VoipPhoneActivity extends BaseActivity{
         });
         ivHangupSpeaking.setOnClickListener(v -> {
             try{
-                PromptManager.getInstance().stopRing();//提示音
                 ToastUtil.showToast(VoipPhoneActivity.this, getString(R.string.text_call_is_over));
                 status = CALL_END + "";
                 MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
@@ -180,7 +178,6 @@ public class VoipPhoneActivity extends BaseActivity{
         mHandler.post(new Runnable(){
             @Override
             public void run(){
-                PromptManager.getInstance().stopRing();//提示音
                 if(TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().getCurrentState() == IndividualCallState.RINGING){
                     if (TerminalFactory.getSDK().getIndividualCallManager().getIndividualCallStateMachine().moveToState(IndividualCallState.SPEAKING)){
                         //将状态机移动到说话状态
@@ -198,7 +195,6 @@ public class VoipPhoneActivity extends BaseActivity{
     private ReceiveVoipCallEndHandler receiveVoipCallEndHandler = (linphoneCall)->{
         //电话接通之后挂断，还有主叫拨号时挂断
         Log.e("VoipPhoneActivity", "电话挂断");
-        PromptManager.getInstance().stopRing();//提示音
         TerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         mHandler.post(new Runnable() {
             @Override
@@ -253,7 +249,6 @@ public class VoipPhoneActivity extends BaseActivity{
     private ReceiveVoipCallActiveEndHandler receiveVoipCallActiveEndHandler = ()->{
         //电话接通之后挂断，还有主叫拨号时挂断
         Log.e("VoipPhoneActivity", "电话挂断");
-        PromptManager.getInstance().stopRing();//提示音
         TerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         mHandler.post(() -> {
             try{
@@ -270,7 +265,6 @@ public class VoipPhoneActivity extends BaseActivity{
 
     private ReceiveVoipErrorHandler receiveVoipErrorHandler = (linphoneCall)->{
         Log.e("VoipPhoneActivity", "error");
-        PromptManager.getInstance().stopRing();//提示音
         TerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
         mHandler.post(new Runnable() {
             @Override
@@ -358,7 +352,7 @@ public class VoipPhoneActivity extends BaseActivity{
             MyTerminalFactory.getSDK().getVoipCallManager().audioCall(phone);
         }
 
-        PromptManager.getInstance().IndividualCallRequestRing();//提示音
+        //PromptManager.getInstance().IndividualCallRequestRing();//提示音
         MyTerminalFactory.getSDK().getVoipCallManager().toggleSpeaker(false);//是否开启免提
 
     }
@@ -393,7 +387,6 @@ public class VoipPhoneActivity extends BaseActivity{
             MyTerminalFactory.getSDK().notifyReceiveHandler(ReceiveUpdateFoldersAndGroupsHandler.class);
         }
         try{
-            PromptManager.getInstance().stopRing();//提示音
             MyTerminalFactory.getSDK().getVoipCallManager().hangUp();
         }catch (Exception e){
             e.printStackTrace();
