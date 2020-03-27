@@ -396,21 +396,25 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
      * 拨打电话
      */
     private void goToCall(Member member) {
-        if(TextUtils.isEmpty(member.getPhone())){
-            ToastUtils.showShort(R.string.text_has_no_member_phone_number);
-            return;
-        }
-        if(member.getUniqueNo() == 0){
-            //普通电话
-            CallPhoneUtil.callPhone( IndividualNewsActivity.this, member.getPhone());
-        }else{
-            if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
-                Intent intent = new Intent(IndividualNewsActivity.this, VoipPhoneActivity.class);
-                intent.putExtra("member",member);
-                startActivity(intent);
-            }else {
-                ToastUtil.showToast(IndividualNewsActivity.this,getString(R.string.text_voip_regist_fail_please_check_server_configure));
+        try{
+            if(TextUtils.isEmpty(member.getPhone())){
+                ToastUtils.showShort(R.string.text_has_no_member_phone_number);
+                return;
             }
+            if(member.getUniqueNo() == 0){
+                //普通电话
+                CallPhoneUtil.callPhone( IndividualNewsActivity.this, member.getPhone());
+            }else{
+                if(MyTerminalFactory.getSDK().getParam(Params.VOIP_SUCCESS,false)){
+                    Intent intent = new Intent(IndividualNewsActivity.this, VoipPhoneActivity.class);
+                    intent.putExtra("member",member);
+                    startActivity(intent);
+                }else {
+                    ToastUtil.showToast(IndividualNewsActivity.this,getString(R.string.text_voip_regist_fail_please_check_server_configure));
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -530,6 +534,14 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
             if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
             }else {
                 ToastUtils.showShort(R.string.no_record_perssion);
+            }
+        }else if(requestCode == CallPhoneUtil.PHONE_PERMISSIONS_REQUEST_CODE){
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                //同意，拨打电话
+                CallPhoneUtil.callPhone( IndividualNewsActivity.this, TerminalFactory.getSDK().getParam(Params.TEMP_CALL_PHONE_NUMBER,""));
+            }else {
+                //不同意，提示
+                ToastUtil.showToast(MyApplication.instance, getString(R.string.text_call_phone_not_open_call_is_unenabled));
             }
         }
     }

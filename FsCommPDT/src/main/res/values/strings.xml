@@ -671,4 +671,7 @@
     <string name="text_can_not_join_in_video_meeting">无加入权限</string>
     <string name="text_you_were_kicked_outvideo_meeting">您被请出视频会商</string>
     <string name="text_end">已结束</string>
+
+    <string name="text_call_voip_data_error">对方手机号为空</string>
+    <string name="text_call_phone_not_open_call_is_unenabled">拨打电话权限未打开，不能拨打电话。</string>
 </resources>

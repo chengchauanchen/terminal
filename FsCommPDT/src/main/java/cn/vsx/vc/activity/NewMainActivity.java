@@ -42,6 +42,7 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import cn.vsx.vc.utils.CallPhoneUtil;
 import com.hytera.api.SDKException;
 import com.hytera.api.SDKManager;
 import com.hytera.api.base.common.CallManager;
@@ -1488,6 +1489,15 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                     judgePermission();
                 }else {
                     permissionDenied(requestCode);
+                }
+                break;
+            case  CallPhoneUtil.PHONE_PERMISSIONS_REQUEST_CODE:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //同意，拨打电话
+                    CallPhoneUtil.callPhone( NewMainActivity.this, TerminalFactory.getSDK().getParam(Params.TEMP_CALL_PHONE_NUMBER,""));
+                }else {
+                    //不同意，提示
+                    cn.vsx.vc.utils.ToastUtil.showToast(MyApplication.instance, getString(R.string.text_call_phone_not_open_call_is_unenabled));
                 }
                 break;
             default:

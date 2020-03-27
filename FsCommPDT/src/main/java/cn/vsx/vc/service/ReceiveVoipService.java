@@ -56,6 +56,9 @@ public class ReceiveVoipService extends BaseService{
         mLlIndividualCallRefuse =  rootView.findViewById(R.id.ll_individual_call_refuse);
         mLlIndividualCallAccept =  rootView.findViewById(R.id.ll_individual_call_accept);
 
+        //网络状态布局
+        mLlNoNetwork = rootView.findViewById(R.id.ll_network_state);
+
     }
 
     @Override

@@ -55,6 +55,9 @@ public class MultipartyCallService extends BaseService{
         mIvIndividualCallHangupSpeaking =  rootView.findViewById(R.id.iv_individual_call_hangup_speaking);
         mIvIndividualCallMicroMute = rootView.findViewById(R.id.iv_individual_call_micro_mute);
         mIvIndividualCallHandFree = rootView.findViewById(R.id.iv_individual_call_hand_free);
+
+        //网络状态布局
+        mLlNoNetwork = rootView.findViewById(R.id.ll_network_state);
     }
 
     @Override
