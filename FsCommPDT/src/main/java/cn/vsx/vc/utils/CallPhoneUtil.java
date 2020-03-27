@@ -21,7 +21,7 @@ public class CallPhoneUtil {
                 //判断有没有拨打电话权限
                 if (PermissionChecker.checkSelfPermission(activity, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                     //请求拨打电话权限
-                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, 0);
+                    ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CALL_PHONE}, PHONE_PERMISSIONS_REQUEST_CODE);
                 } else {
                     //直接拨号
                     Uri uri = Uri.parse("tel:" + phoneNo);
