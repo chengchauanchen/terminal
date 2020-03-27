@@ -1178,12 +1178,17 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	 * 如果messageService不为空把Service先unbind,再bindService，保证onServiceConnected可以正常被调用
 	 */
 	private void unBindMessageService() {
-		if (bindService && messageServiceConn != null) {
-			application.unbindService(messageServiceConn);
-			logger.error("停止与服务器的连接");
+		try{
+			if (bindService && messageServiceConn != null) {
+				application.unbindService(messageServiceConn);
+				logger.error("停止与服务器的连接");
+			}
+		}catch (Exception e){
+			logger.error(e.toString());
+		}finally {
+			bindService = false;
+			messageService = null;
 		}
-		bindService = false;
-		messageService = null;
 	}
 
 	/**
