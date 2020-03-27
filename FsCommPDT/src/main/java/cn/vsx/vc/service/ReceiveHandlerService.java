@@ -29,32 +29,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
-
 import cn.vsx.SpecificSDK.SpecificSDK;
-import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyAddVideoMeetingMessageHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageAddOrOutCompleteHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReStartVoipHandler;
-import cn.vsx.vc.activity.VideoMeetingInvitationActivity;
-import cn.vsx.vc.receiveHandle.ReceiveVoipCallActiveEndHandler;
-import com.alibaba.fastjson.JSONObject;
-import com.blankj.utilcode.util.ToastUtils;
-import com.xuchongyang.easyphone.callback.PhoneCallback;
-import com.xuchongyang.easyphone.callback.RegistrationCallback;
-import com.zectec.imageandfileselector.utils.FileUtil;
-import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
-
-import org.apache.http.util.TextUtils;
-import org.apache.log4j.Logger;
-import org.linphone.core.LinphoneAddress;
-import org.linphone.core.LinphoneCall;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageType;
@@ -71,15 +46,20 @@ import cn.vsx.hamster.terminalsdk.manager.terminal.TerminalState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
 import cn.vsx.hamster.terminalsdk.model.WarningRecord;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetWarningMessageDetailHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyAddVideoMeetingMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyIndividualCallHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyVideoLiveIncommingMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyVideoMeetingMessageAddOrOutCompleteHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReStartVoipHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponNotifyWatchHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -94,6 +74,7 @@ import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.activity.PlayLiveHistoryActivity;
 import cn.vsx.vc.activity.TransparentActivity;
+import cn.vsx.vc.activity.VideoMeetingInvitationActivity;
 import cn.vsx.vc.activity.WarningMessageDetailActivity;
 import cn.vsx.vc.adapter.StackViewAdapter;
 import cn.vsx.vc.application.MyApplication;
@@ -103,6 +84,7 @@ import cn.vsx.vc.model.InviteMemberExceptList;
 import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiveGoWatchRTSPHandler;
+import cn.vsx.vc.receiveHandle.ReceiveVoipCallActiveEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipConnectedHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipErrorHandler;
@@ -116,6 +98,21 @@ import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView;
+import com.alibaba.fastjson.JSONObject;
+import com.blankj.utilcode.util.ToastUtils;
+import com.xuchongyang.easyphone.callback.PhoneCallback;
+import com.xuchongyang.easyphone.callback.RegistrationCallback;
+import com.zectec.imageandfileselector.utils.FileUtil;
+import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.apache.http.util.TextUtils;
+import org.apache.log4j.Logger;
+import org.linphone.core.LinphoneAddress;
+import org.linphone.core.LinphoneCall;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.permission.FloatWindowManager;
 import ptt.terminalsdk.service.KeepLiveManager;
@@ -243,6 +240,7 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponNotifyWatchHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyAddVideoMeetingMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReStartVoipHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
 
         //监听voip来电
         MyTerminalFactory.getSDK().getVoipCallManager().addCallback(voipRegistrationCallback,voipPhoneCallback);
@@ -600,6 +598,7 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponNotifyWatchHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyAddVideoMeetingMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReStartVoipHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
 
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoHandler);
@@ -1347,6 +1346,15 @@ public class ReceiveHandlerService extends Service{
             SpecificSDK.initVoipSpecificSDK();
         } ,2000);
         //});
+    };
+
+    /**
+     * 在线状态
+     */
+    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = connected -> {
+        if(connected){
+            MyTerminalFactory.getSDK().getVoipCallManager().refreshLogin();
+        }
     };
 
     private void showWarningDialog(){

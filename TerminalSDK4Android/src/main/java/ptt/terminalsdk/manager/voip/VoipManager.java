@@ -6,6 +6,7 @@ import com.xuchongyang.easyphone.EasyLinphone;
 import com.xuchongyang.easyphone.callback.PhoneCallback;
 import com.xuchongyang.easyphone.callback.RegistrationCallback;
 
+import com.xuchongyang.easyphone.linphone.LinphoneManager;
 import org.apache.log4j.Logger;
 import org.linphone.core.LinphoneCall;
 
@@ -122,6 +123,19 @@ public class VoipManager{
         try{
             EasyLinphone.setAccount(account, password, serverIP);
             EasyLinphone.login();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 登陆
+     */
+    public void refreshLogin(){
+        try{
+            if(LinphoneManager.getLcIfManagerNotDestroyOrNull()!=null){
+                LinphoneManager.getLc().refreshRegisters();
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
