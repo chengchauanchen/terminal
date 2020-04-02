@@ -12,6 +12,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -104,6 +105,7 @@ public class StartIndividualCallService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseStartLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartIndividualCallHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveStopStartReceiveCallServiceHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         mIvIndividualCallRetractRequest.setOnClickListener(retractOnClickListener);
         mLlIndividualCallHangupRequest.setOnClickListener(stopCallListener);
         mPopMinimize.setOnTouchListener(miniPopOnTouchListener);
@@ -169,6 +171,7 @@ public class StartIndividualCallService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseStartLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartIndividualCallHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveStopStartReceiveCallServiceHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
     }
 
     private View.OnClickListener retractOnClickListener = v -> showPopMiniView();
@@ -258,6 +261,12 @@ public class StartIndividualCallService extends BaseService{
     private ReceiveStopStartReceiveCallServiceHandler receiveStopStartReceiveCallServiceHandler = () -> mHandler.post(() -> {
         mHandler.postDelayed(this::removeView,500);
     });
+
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
+        if(!connected){
+            stopBusiness();
+        }
+    };
 
     private void callAnswer(int individualCallType){
         PromptManager.getInstance().stopRing();

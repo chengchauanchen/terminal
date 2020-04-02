@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
@@ -134,6 +135,7 @@ public class ReceiveCallComingService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveStopStartReceiveCallServiceHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         mLlIndividualCallRefuse.setOnClickListener(refuseCallListener);
         mLlIndividualCallAccept.setOnClickListener(acceptCallListener);
         mIndividualCallRetractEmergency.setOnClickListener(retractOnClickListener);
@@ -175,6 +177,7 @@ public class ReceiveCallComingService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerIndividualCallTimeoutHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyIndividualCallStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveStopStartReceiveCallServiceHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
     }
 
     /**
@@ -208,6 +211,12 @@ public class ReceiveCallComingService extends BaseService{
     private ReceiveStopStartReceiveCallServiceHandler receiveStopStartReceiveCallServiceHandler = () -> mHandler.post(() -> {
         mHandler.postDelayed(this::removeView,500);
     });
+
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = connected -> {
+        if(!connected){
+            stopBusiness();
+        }
+    };
 
     private View.OnClickListener refuseCallListener = v -> refuseCall();
 
