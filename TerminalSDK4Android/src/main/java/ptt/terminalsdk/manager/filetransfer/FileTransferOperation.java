@@ -15,25 +15,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-
-import com.alibaba.fastjson.JSONObject;
-import com.google.gson.Gson;
-
-import org.apache.log4j.Logger;
-import org.easydarwin.push.EasyPusher;
-import org.easydarwin.push.InitCallback;
-import org.easydarwin.push.LocalVideoPushStream;
-
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
-
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -51,10 +32,27 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLocalVideoPushFinishHand
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberUploadFileMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateUploadFileRateLimitHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
+import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.Gson;
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
+import org.apache.log4j.Logger;
+import org.easydarwin.push.EasyPusher;
+import org.easydarwin.push.InitCallback;
+import org.easydarwin.push.LocalVideoPushStream;
 import ptt.terminalsdk.broadcastreceiver.FileExpireReceiver;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.FileTransgerUtil;
@@ -79,14 +77,16 @@ public class FileTransferOperation {
     private static final String UPLOAD_FILE_SERVER_HEAD = "http://";
     private static final String UPLOAD_FILE_SERVER_PATH = "/file/btx/uploadFile";
     private static final String UPLOAD_FILE_INFO_SERVER_PATH = "/file/btx/uploadInfo";
+    private static final String UPLOAD_FILE_NEW_SERVER_PATH = "/interface/btx/uploadFileInfo";
     private static final String COLON = ":";
     private static final String RESULT_SUCCESS = "success";
     private static final String RESULT_SUCCESS_TRUE = "true";
     private static final String RESULT_MSG = "msg";
     private String uploadFileServerUrl;
+    private String uploadFileNewServerUrl;
     //通知未上传文件上传的间隔时间
     private static final long EXPIRE_TIME = 48 * 60 * 60 * 1000;
-//        private static final long EXPIRE_TIME = 15 * 1000;
+    //        private static final long EXPIRE_TIME = 15 * 1000;
     //第一次保存48小时对比的文件信息
     private static final int HANDLER_WHAT_SAVE_EXPIRE_INFO_FOR_FRIST_TIMES = 1;
     //更新48小时对比的文件信息
@@ -142,7 +142,7 @@ public class FileTransferOperation {
                     //从数据库中获取文件的信息,并上传
                     uploadFileByPaths(getRecordsByNames(list), message.getRequestMemberId(),message.getRequestUniqueNo(), false);
                     //推送视频文件到流媒体服务器
-//                    pushStreamOfVideoFile(list);
+                    //                    pushStreamOfVideoFile(list);
                 }
             }
         }
@@ -178,7 +178,7 @@ public class FileTransferOperation {
             } else {
                 //推送下个视频文件
                 pushIndex++;
-//                requestPushStream();
+                //                requestPushStream();
                 pushVideoFile();
             }
         }
@@ -317,85 +317,117 @@ public class FileTransferOperation {
         TerminalFactory.getSDK().getBITStarFileUploadThreadPool().execute(new Runnable() {
             @Override
             public void run() {
-                    File file = new File(path);
-                    logger.info(TAG + "uploadFileByPath:path:" + path + "-file-exists-" + (file.exists()));
-                    String fileName = FileTransgerUtil.getFileName(path);
+                File file = new File(path);
+                logger.info(TAG + "uploadFileByPath:path:" + path + "-file-exists-" + (file.exists()));
+                String fileName = FileTransgerUtil.getFileName(path);
                 try {
                     if (file.exists()) {
-                        long startTime = System.currentTimeMillis();
-                        //使用httpClient
-//                        Map<String, String> paramsMap = new HashMap<>();
-//                        paramsMap.put("name", fileName);
-//                        paramsMap.put("memberId", FileTransgerUtil.getPoliceIdInt() + "");
-//                        paramsMap.put("uniqueNo", FileTransgerUtil.getPoliceUniqueNo() + "");
-//                        if (requestMemberId != 0 && requestUniqueNo != 0) {
-//                            paramsMap.put("requestMemberId", requestMemberId + "");
-//                            paramsMap.put("requestUniqueNo", requestUniqueNo + "");
-//                        }
-//                        String result = TerminalFactory.getSDK().getHttpClient().postFile(getUploadFileServerUrl() + UPLOAD_FILE_SERVER_PATH, file, paramsMap);
-
-                        //使用okhttp
-                        rateLimitingRequestBody = RateLimitingRequestBody.createRequestBody(MediaType.parse("multipart/form-data"), file, getUpLoadFileNeedRateLimit()?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
-                        MultipartBody.Part fileBody = MultipartBody.Part.createFormData("fileStream", fileName, rateLimitingRequestBody);
-                        MultipartBody.Builder builder = new MultipartBody.Builder()
-                                .setType(MultipartBody.FORM)
-                                .addPart(fileBody)
-                                .addFormDataPart("name", fileName)
-                                .addFormDataPart("memberId", FileTransgerUtil.getPoliceIdInt() + "")
-                                .addFormDataPart("uniqueNo", FileTransgerUtil.getPoliceUniqueNo() + "");
-                        if (requestMemberId != 0 && requestUniqueNo != 0) {
-                            builder.addFormDataPart("requestMemberId", requestMemberId + "");
-                            builder.addFormDataPart("requestUniqueNo", requestUniqueNo + "");
+                        String type = FileTransgerUtil.getBITFileType(path);
+                        String url = MyTerminalFactory.getSDK().getParam(Params.FILE_UPLOAD_URL, "");
+                        if(TextUtils.equals(type,FileTransgerUtil.TYPE_IMAGE)){
+                            url = MyTerminalFactory.getSDK().getParam(Params.IMAGE_UPLOAD_URL, "");
                         }
-                        String url = getUploadFileServerUrl();
-//                        url = TerminalFactory.getSDK().getServiceBusManager().getUrl(url);
-                        Request request = new Request.Builder()
-                                .url(url + UPLOAD_FILE_SERVER_PATH)
-                                .post(builder.build())
-                                .build();
-                        String result = mOkHttpClient.newCall(request).execute().body().string();
-
-                        long endTime = System.currentTimeMillis() - startTime;
-                        logger.info(TAG + "uploadFileByPath:url:" + url + UPLOAD_FILE_SERVER_PATH + "-fileName-" + fileName + "-result-" + result + "-time-" + endTime);
-                        if (!TextUtils.isEmpty(result)) {
-
-                            JSONObject object = JSONObject.parseObject(result);
-                            if (object != null) {
-                                String success = object.getString(RESULT_SUCCESS);
-                                if (RESULT_SUCCESS_TRUE.equals(success)) {
-                                    //是否删除
-                                    if (isDelete) {
-                                        deleteRecordByName(fileName);
-                                        file.delete();
+                        String fileUrl = uploadFileByOkHttp(url,file);
+                        if(!TextUtils.isEmpty(fileUrl)){
+                            //上传成功，调用接口更新文件信息到服务端
+                            String result = updateFileByOkHttp(fileName,fileUrl,requestMemberId,requestUniqueNo);
+                            if (!TextUtils.isEmpty(result)) {
+                                JSONObject object = JSONObject.parseObject(result);
+                                if (object != null) {
+                                    String success = object.getString(RESULT_SUCCESS);
+                                    if (TextUtils.equals(RESULT_SUCCESS_TRUE,success)) {
+                                        //是否删除
+                                        if (isDelete) {
+                                            deleteRecordByName(fileName);
+                                            file.delete();
+                                        } else {
+                                            //更新数据库中文件的上传状态
+                                            updateRecordState(fileName, UPLOAD_STATE_YES);
+                                        }
+                                        //更新48小时未上传的对比的文件信息
+                                        checkUpdateExpireFileInfo();
                                     } else {
-                                        //更新数据库中文件的上传状态
-                                        updateRecordState(fileName, UPLOAD_STATE_YES);
+                                        logger.error(TAG + "uploadFileInfo:result;" + object.getString(RESULT_MSG));
+                                        String resultDesc = TextUtils.isEmpty(object.getString(RESULT_MSG))?FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL:object.getString(RESULT_MSG);
+                                        notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, resultDesc);
                                     }
-                                    //更新48小时未上传的对比的文件信息
-                                    checkUpdateExpireFileInfo();
                                 } else {
-                                    logger.error(TAG + "uploadFileByPath:result;" + object.getString(RESULT_MSG));
-                                    String resultDesc = TextUtils.isEmpty(object.getString(RESULT_MSG))?FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR:object.getString(RESULT_MSG);
-                                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, resultDesc);
+                                    logger.info(TAG + "uploadFileInfo:result;解析错误");
+                                    notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL);
                                 }
                             } else {
-                                logger.info(TAG + "uploadFileByPath:result;解析错误");
-                                notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
+                                notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_INFO_FAEL);
                             }
                         } else {
-                            notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_NO_RESPONSE);
+                            //上传失败
+                            notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_UPLOAD_FAEL);
                         }
                     } else {
                         notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_NOT_EXISTS);
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-//                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
+                    //                    TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
                     logger.info(TAG + "uploadFileByPath:result:Exception" + e);
                     notifyMemberUploadFileFail(fileName, requestUniqueNo, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_CODE, FileTransgerUtil.UPLOAD_FILE_FAIL_RESULT_DESC_SERVER_ERROR);
                 }
             }
         });
+    }
+
+    /**
+     * 上传文件
+     */
+    public String uploadFileByOkHttp(String url, final File file) {
+        try{
+            long startTime = System.currentTimeMillis();
+            rateLimitingRequestBody = RateLimitingRequestBody.createRequestBody(MediaType.parse("application/octet-stream"), file, getUpLoadFileNeedRateLimit()?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
+            RequestBody requestBody;
+            requestBody = new MultipartBody.Builder()
+                .addFormDataPart("fileStream", file.getName(), rateLimitingRequestBody)
+                .addFormDataPart("sign", SignatureUtil.sign(""))
+                .build();
+            Request.Builder builder = new Request.Builder();
+            builder.url(url);
+            builder.post(requestBody);
+            Request request = builder.build();
+
+            String result = mOkHttpClient.newCall(request).execute().body().string();
+            long endTime = System.currentTimeMillis() - startTime;
+            logger.info(TAG + "uploadFileByOkHttp:url:" + url + "-fileName-" + file.getName() +  "-time-" + endTime+"-result-"+result);
+            JSONObject jsonObject = JSONObject.parseObject(result);
+            boolean success = jsonObject.getBoolean("success");
+            if (success) {
+                return jsonObject.getString("path");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            logger.info(TAG + "uploadFileByOkHttp:result:Exception" + e);
+            return "";
+        }
+        return "";
+    }
+
+    /**
+     * 更新文件信息
+     */
+    public String updateFileByOkHttp(String fileName, String path, int requestMemberId, long requestUniqueNo) {
+        try{
+            Map<String, String> paramsMap = new HashMap<>();
+            paramsMap.put("name", fileName);
+            paramsMap.put("memberId", FileTransgerUtil.getPoliceIdInt() + "");
+            paramsMap.put("uniqueNo", FileTransgerUtil.getPoliceUniqueNo() + "");
+            paramsMap.put("path", path);
+            if (requestMemberId != 0 && requestUniqueNo != 0) {
+                paramsMap.put("requestMemberId", requestMemberId + "");
+                paramsMap.put("requestUniqueNo", requestUniqueNo + "");
+            }
+            return TerminalFactory.getSDK().getHttpClient().post(getUploadFileNewServerUrl() + UPLOAD_FILE_NEW_SERVER_PATH, paramsMap);
+        }catch (Exception e){
+            e.printStackTrace();
+            logger.info(TAG + "updateFileByOkHttp:result:Exception" + e);
+        }
+        return "";
     }
 
     /**
@@ -408,7 +440,7 @@ public class FileTransferOperation {
         if (records != null && records.size() > 0) {
             for (BitStarFileRecord record : records) {
                 //上传文件
-//                isDelete?FileTransgerUtil.isOutOf48Hours(record.getFileTime()):如果确认删除 也只是删除48小时之前的文件
+                //                isDelete?FileTransgerUtil.isOutOf48Hours(record.getFileTime()):如果确认删除 也只是删除48小时之前的文件
                 uploadFileByPath(record.getFilePath(), requestMemberId,requestUniqueNo, isDelete);
             }
         }
@@ -442,7 +474,7 @@ public class FileTransferOperation {
                         showToast("有48小时未上传的文件，开始上传");
                     } else {
                         //没有超过48小时未上传的文件，就把未上传的最早的一条文件信息记录并打开定时任务
-//                        sendMessgeToUpdateExpireInfo(list.get(0));
+                        //                        sendMessgeToUpdateExpireInfo(list.get(0));
                         updateExpireFileInfo(list.get(0));
                     }
                 }else{
@@ -605,7 +637,7 @@ public class FileTransferOperation {
      * @return
      */
     private List<FileBean> saveAndGetBITFileTreeBean(String path) {
-//        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(getExternalUsableStorageDirectory())) {
+        //        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(getExternalUsableStorageDirectory())) {
         List<FileBean> list = new ArrayList<>();
         //获取保存的没有上传的文件目录信息
         FileTreeBean fileTreeBean = TerminalFactory.getSDK().getBean(Params.UNUPLOAD_FILE_TREE_LIST,new FileTreeBean(),FileTreeBean.class);
@@ -629,17 +661,17 @@ public class FileTransferOperation {
     private void deleteBITFileTreeBean(List<FileBean> list){
         FileTreeBean fileTreeBean = TerminalFactory.getSDK().getBean(Params.UNUPLOAD_FILE_TREE_LIST,new FileTreeBean(),FileTreeBean.class);
         List<FileBean> allList =  fileTreeBean.getFileTree();
-            if(allList != null && allList.size()>0){
-                if(list!=null&&list.size()>0){
-                    for (FileBean bean :list) {
-                        if(allList.contains(bean)){
-                            allList.remove(bean);
-                        }
+        if(allList != null && allList.size()>0){
+            if(list!=null&&list.size()>0){
+                for (FileBean bean :list) {
+                    if(allList.contains(bean)){
+                        allList.remove(bean);
                     }
-                    fileTreeBean.setFileTree(allList);
-                    TerminalFactory.getSDK().putBean(Params.UNUPLOAD_FILE_TREE_LIST,fileTreeBean);
                 }
+                fileTreeBean.setFileTree(allList);
+                TerminalFactory.getSDK().putBean(Params.UNUPLOAD_FILE_TREE_LIST,fileTreeBean);
             }
+        }
     }
 
     /**
@@ -666,16 +698,16 @@ public class FileTransferOperation {
      */
     private List<FileBean> getBITFileTreeBeanByAll() {
         int code = MyTerminalFactory.getSDK().getFileTransferOperation().getExternalUsableStorageDirectory();
-//        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(code)) {
-            int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
-            File file = new File(MyTerminalFactory.getSDK().getBITRecordesDirectoty(code));
-            if (!file.exists()) {
-                file.mkdir();
-            }
-            return FileTransgerUtil.getFileTree(file, new ArrayList<FileBean>(), memberId);
-//        } else {
-//            return null;
-//        }
+        //        if (TerminalFactory.getSDK().checkeExternalStorageIsAvailable(code)) {
+        int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+        File file = new File(MyTerminalFactory.getSDK().getBITRecordesDirectoty(code));
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        return FileTransgerUtil.getFileTree(file, new ArrayList<FileBean>(), memberId);
+        //        } else {
+        //            return null;
+        //        }
     }
 
     /**
@@ -696,7 +728,7 @@ public class FileTransferOperation {
         long usb = MyTerminalFactory.getSDK().getExternalUsableSize(USB.getCode());
         long sdCard = MyTerminalFactory.getSDK().getExternalUsableSize(BitStarFileDirectory.SDCARD.getCode());
         return (usb>sdCard)?USB.getCode():BitStarFileDirectory.SDCARD.getCode();
-   }
+    }
 
     /**
      * 获取存储空间的目录
@@ -953,6 +985,23 @@ public class FileTransferOperation {
     }
 
     /**
+     * 获取更新文件地址到服务的地址
+     *
+     * @return
+     */
+    private String getUploadFileNewServerUrl() {
+        if (TextUtils.isEmpty(uploadFileNewServerUrl)) {
+            String serverIp = MyTerminalFactory.getSDK().getParam(Params.HTTP_IP, "");
+            int serverPort = MyTerminalFactory.getSDK().getParam(Params.HTTP_PORT, 0);
+            uploadFileNewServerUrl = UPLOAD_FILE_SERVER_HEAD + serverIp + COLON + serverPort;
+            return uploadFileNewServerUrl;
+        } else {
+            return uploadFileNewServerUrl;
+        }
+    }
+
+
+    /**
      * 获取是否来自上传推送本地视频文件
      *
      * @return
@@ -1024,7 +1073,7 @@ public class FileTransferOperation {
 
             //文件不存在，通知PC上传失败
             TerminalFactory.getSDK().getFileTransferManager().notifyMemberUploadFileFail(fileName,requestUniqueNo,
-                    resultCode,resultDesc);
+                resultCode,resultDesc);
         }
     }
 
@@ -1074,10 +1123,10 @@ public class FileTransferOperation {
      * 上传文件的okhttp客户端
      */
     private OkHttpClient mOkHttpClient = new OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
-            .build();
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build();
 
     /**
      * 获取限速大小
