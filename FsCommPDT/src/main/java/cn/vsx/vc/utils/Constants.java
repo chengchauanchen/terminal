@@ -145,6 +145,13 @@ public class Constants{
 
     //视频会商的会议id
     public static final String ROOM_ID = "roomId";
+    //视频会商的类型
+    public static final String VIDEO_MEETING_TYPE = "videoMeetingType";
+
+    //视频会商的组No
+    public static final String VIDEO_MEETING_GROUP_NO = "videoMeetingGroupNo";
+
+    public static final String VIDEO_MEETING_URL = "videoMeetingUrl";
     //视频会议的消息
     public static final String VIDEO_MEETING_MESSAGE = "videoMeetingMessage";
 }

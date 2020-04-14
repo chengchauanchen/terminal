@@ -40,6 +40,7 @@ import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
+import ptt.terminalsdk.bean.SearchTitleBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 

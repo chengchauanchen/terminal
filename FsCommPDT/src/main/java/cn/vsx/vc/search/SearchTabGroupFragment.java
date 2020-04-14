@@ -14,6 +14,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
 import cn.vsx.vc.R;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import ptt.terminalsdk.manager.search.SearchUtil;
 
 /**
  * 通讯录 搜索

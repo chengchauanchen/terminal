@@ -40,6 +40,7 @@ import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
+import ptt.terminalsdk.bean.SearchTitleBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -108,31 +109,36 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, final int position) {
-        int itemViewType = getItemViewType(position);
-        switch (itemViewType) {
-            case TITLE:
-                SearchTitleBean data = (SearchTitleBean) mDatas.get(position);
-                TitleViewHolder holder = (TitleViewHolder) viewHolder;
-                bindTitle(data, holder);
-                break;
-            case MONITOR_GROUP:
-                GroupSearchBean data2 = (GroupSearchBean) mDatas.get(position);
-                GroupViewHolder holder2 = (GroupViewHolder) viewHolder;
-                bindGroup(data2, holder2);
-                break;
-            case GROUP:
-                GroupSearchBean data3 = (GroupSearchBean) mDatas.get(position);
-                GroupViewHolder holder3 = (GroupViewHolder) viewHolder;
-                bindGroup(data3, holder3);
-                break;
-            case MEMBER:
-                MemberSearchBean data4 = (MemberSearchBean) mDatas.get(position);
-                UserViewHolder holder4 = (UserViewHolder) viewHolder;
-                bindMember(data4, holder4);
-                break;
-            default:
-                break;
+        try{
+            int itemViewType = getItemViewType(position);
+            switch (itemViewType) {
+                case TITLE:
+                    SearchTitleBean data = (SearchTitleBean) mDatas.get(position);
+                    TitleViewHolder holder = (TitleViewHolder) viewHolder;
+                    bindTitle(data, holder);
+                    break;
+                case MONITOR_GROUP:
+                    GroupSearchBean data2 = (GroupSearchBean) mDatas.get(position);
+                    GroupViewHolder holder2 = (GroupViewHolder) viewHolder;
+                    bindGroup(data2, holder2);
+                    break;
+                case GROUP:
+                    GroupSearchBean data3 = (GroupSearchBean) mDatas.get(position);
+                    GroupViewHolder holder3 = (GroupViewHolder) viewHolder;
+                    bindGroup(data3, holder3);
+                    break;
+                case MEMBER:
+                    MemberSearchBean data4 = (MemberSearchBean) mDatas.get(position);
+                    UserViewHolder holder4 = (UserViewHolder) viewHolder;
+                    bindMember(data4, holder4);
+                    break;
+                default:
+                    break;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
+
     }
 
 

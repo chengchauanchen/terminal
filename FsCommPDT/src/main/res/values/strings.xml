@@ -544,6 +544,10 @@
     <string name="text_pushing_can_not_private_call">正在进行图像上报，无法个呼</string>
     <string name="text_watching_can_not_request_report">正在进行图像观看，无法请求上报</string>
     <string name="text_watching_can_not_private_call">正在进行图像观看，无法个呼</string>
+    <string name="text_watching_can_not_request_video_meeting">正在进行图像观看，无法发起视频会商</string>
+    <string name="text_pushing_can_not_request_video_meeting">正在进行图像上报，无法发起视频会商</string>
+    <string name="text_personal_calling_can_not_request_video_meeting">个呼中，无法发起视频会商</string>
+    <string name="text_video_meeting_can_not_request_video_meeting">视频会商中，无法发起视频会商</string>
     <string name="text_push">上报图像</string>
     <string name="text_pull">请求图像</string>
     <string name="text_personal_pulling_can_not_group_call">观看图像中，不能组呼</string>
@@ -671,7 +675,15 @@
     <string name="text_can_not_join_in_video_meeting">无加入权限</string>
     <string name="text_you_were_kicked_outvideo_meeting">您被请出视频会商</string>
     <string name="text_end">已结束</string>
+    <string name="text_in_video_meeting_can_not_in">视频会商中，不能再进入视频会商</string>
 
     <string name="text_call_voip_data_error">对方手机号为空</string>
     <string name="text_call_phone_not_open_call_is_unenabled">拨打电话权限未打开，不能拨打电话。</string>
+    <string name="text_meeting_invitation">会议邀请</string>
+    <string name="text_join">加入</string>
+    <string name="please_open_app_notification">请允许%1$s的通知</string>
+    <string name="please_open_video_meeting_notification">请允许视频会商的通知</string>
+
+    <string name="text_get_group_data_error">获取组数据失败</string>
+    <string name="text_send_group_data_error">传递的组数据有误</string>
 </resources>

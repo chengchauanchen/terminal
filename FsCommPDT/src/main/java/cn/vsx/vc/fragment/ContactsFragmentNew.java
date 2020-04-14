@@ -18,7 +18,6 @@ import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.CallMode;
@@ -26,13 +25,10 @@ import cn.vsx.hamster.common.TempGroupType;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
 import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
-import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
-import cn.vsx.hamster.terminalsdk.model.TerminalContactTab;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCeaseGroupCallConformationHander;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveChangeGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceChangeGroupHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllAccountHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGroupByNoHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
@@ -51,7 +47,6 @@ import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.search.CustomException;
 import cn.vsx.vc.search.SearchTabFragment;
 import cn.vsx.vc.search.SearchTabGroupFragment;
-import cn.vsx.vc.search.SearchUtil;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.ToastUtil;
@@ -67,6 +62,7 @@ import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.search.SearchUtil;
 
 import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.LISTENING;
 import static cn.vsx.vc.view.MyTabLayout.MyTabLayout.MODE_FIXED;

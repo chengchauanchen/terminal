@@ -119,6 +119,7 @@ import ptt.terminalsdk.manager.http.ProgressUIListener;
 import ptt.terminalsdk.manager.live.LiveManager;
 import ptt.terminalsdk.manager.message.SQLiteDBManager;
 import ptt.terminalsdk.manager.recordingAudio.RecordingAudioManager;
+import ptt.terminalsdk.manager.search.SearchDataManager;
 import ptt.terminalsdk.manager.video.VideoProxy;
 import ptt.terminalsdk.manager.voip.VoipManager;
 import ptt.terminalsdk.service.BluetoothLeService;
@@ -184,7 +185,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		getVideoProxy().start();
 		PromptManager.getInstance().start(application);
 		getFileTransferOperation().start();
-
+		searchDataStart();
 		// 广播接收器，用来监听SSL服务发出的广播
 		vpnConnectionChangeReceiver = new VPNConnectionChangeReceiver();
 		IntentFilter filter = new IntentFilter();
@@ -242,6 +243,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	@Override
 	protected void onStop() {
 		logger.error("TerminalSDK4Android----stop！！");
+		searchDataStop();
 		getFileTransferOperation().stop();
 		locationStop();
 		getVideoProxy().stop();
@@ -894,6 +896,13 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 		return locationManager;
 	}
+	private SearchDataManager searchDataManager;
+	public SearchDataManager getSearchDataManager(){
+		if(searchDataManager == null){
+			searchDataManager = new SearchDataManager();
+		}
+		return searchDataManager;
+	}
 	public Application getApplication(){
 		return application;
 	}
@@ -1384,6 +1393,39 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 //				}
 			}
 		}
+	}
+
+	/**
+	 * 根据设备类型开启搜索
+	 */
+	private void searchDataStart() {
+		if(checkSearchDataDevice()){
+			getSearchDataManager().start();
+		}
+	}
+
+	/**
+	 * 根据设备类型开启搜索
+	 */
+	private void searchDataStop() {
+		if(checkSearchDataDevice()){
+			getSearchDataManager().stop();
+		}
+	}
+
+	/**
+	 * 判断哪些设备可以加载搜索数据
+	 * @return
+	 */
+	private boolean checkSearchDataDevice(){
+		String deviceType = MyTerminalFactory.getSDK().getParam(UrlParams.TERMINALMEMBERTYPE);
+		if(!TextUtils.isEmpty(deviceType)){
+			if(TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_PHONE.toString())
+					||TextUtils.equals(deviceType, TerminalMemberType.TERMINAL_UAV.toString())){
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

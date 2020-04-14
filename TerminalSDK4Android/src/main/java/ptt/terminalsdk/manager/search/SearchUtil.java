@@ -1,4 +1,4 @@
-package cn.vsx.vc.search;
+package ptt.terminalsdk.manager.search;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -11,18 +11,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
 import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
+import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+import ptt.terminalsdk.bean.SearchTitleBean;
+import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class SearchUtil {
 
@@ -247,6 +249,33 @@ public class SearchUtil {
             Log.e("SearchUtil", "搜索组数据search.size:" + search.size());
             return search;
         }).subscribeOn(Schedulers.io());
+    }
+
+    /**
+     * 人员 拼音搜索Observable
+     *
+     * @param keyword
+     * @return
+     */
+    public static List<MemberSearchBean> searchMemberByKey(String keyword) {
+        List<MemberSearchBean> accounts = MyTerminalFactory.getSDK().getSearchDataManager().getAccountSreachDatas();
+        List<MemberSearchBean> search = SearchUtil.searchMember(keyword, accounts);
+        List<MemberSearchBean> result = DataUtil.filterNoMemberFromAccount(search);
+        Log.e("SearchUtil", "搜索成员数据search.size:" + search.size()+"-filter:"+result.size());
+        return result;
+    }
+
+    /**
+     * 组 拼音搜索Observable
+     *
+     * @param keyword
+     * @return
+     */
+    public static List<GroupSearchBean> searchGroupByKey(String keyword) {
+        List<GroupSearchBean> groups = MyTerminalFactory.getSDK().getSearchDataManager().getGroupSreachDatas();
+        List<GroupSearchBean> search = SearchUtil.searchGroup(keyword, groups);
+        Log.e("SearchUtil", "搜索组数据search.size:" + search.size());
+        return search;
     }
 
     /**

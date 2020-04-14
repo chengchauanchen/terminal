@@ -1,7 +1,6 @@
 package cn.vsx.vc.search;
 
 import android.os.Handler;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
@@ -12,34 +11,32 @@ import android.widget.TextView;
 import com.allen.library.observer.CommonObserver;
 import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
-import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllAccountHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
-import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
 import cn.vsx.vc.jump.utils.MemberUtil;
 import cn.vsx.vc.search.SearchKeyboardView.HideOnClick;
 import cn.vsx.vc.search.SearchKeyboardView.OnT9TelephoneDialpadView;
-import cn.vsx.vc.utils.CommonGroupUtil;
+import cn.vsx.vc.view.RecyclerViewNoBugLinearLayoutManager;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import ptt.terminalsdk.bean.SearchTitleBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.search.SearchUtil;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -47,8 +44,6 @@ import ptt.terminalsdk.tools.ToastUtil;
  */
 public class SearchTabFragment extends BaseSearchFragment {
 
-    private List<GroupSearchBean> groupDatas;
-    private List<MemberSearchBean> memberDatas;
     private List<GroupSearchBean> ListenedGroupDatas;
     private TextView phone;
     private SearchKeyboardView search_keyboard;
@@ -129,7 +124,7 @@ public class SearchTabFragment extends BaseSearchFragment {
 
     private void initRecyclerView() {
         group_recyclerView = mRootView.findViewById(R.id.group_recyclerView);
-        group_recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        group_recyclerView.setLayoutManager(new RecyclerViewNoBugLinearLayoutManager(getContext()));
         searchAdapter = new SearchAdapter(getContext(), datas);
         group_recyclerView.setAdapter(searchAdapter);
     }
@@ -137,17 +132,14 @@ public class SearchTabFragment extends BaseSearchFragment {
 
     @Override
     public void initData() {
-        groupDatas = new ArrayList<>();
-        memberDatas = new ArrayList<>();
-        getDbAllGroup();
-        getDbAllAccount();
+        MyTerminalFactory.getSDK().getSearchDataManager().getDbAllGroup();
+        MyTerminalFactory.getSDK().getSearchDataManager().getDbAllAccount();
         getListenedGroup();
     }
 
     @Override
     public void initListener() {
         TerminalFactory.getSDK().registReceiveHandler(receiveGetAllGroupHandler);
-        TerminalFactory.getSDK().registReceiveHandler(receiveGetAllAccountHandler);
         TerminalFactory.getSDK().registReceiveHandler(receiveSetMonitorGroupViewHandler);
 
         /*---------------------------*/
@@ -158,7 +150,6 @@ public class SearchTabFragment extends BaseSearchFragment {
     public void onDestroyView() {
         super.onDestroyView();
         TerminalFactory.getSDK().unregistReceiveHandler(receiveGetAllGroupHandler);
-        TerminalFactory.getSDK().unregistReceiveHandler(receiveGetAllAccountHandler);
         TerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupViewHandler);
 
         /*---------------------------*/
@@ -179,18 +170,8 @@ public class SearchTabFragment extends BaseSearchFragment {
         @Override
         public void handler(List<Group> groups) {
             logger.info("SearchTabFragment获取组数据:" + groups);
-            getDbAllGroup();
             getListenedGroup();
 //            groupDatas = groups;
-        }
-    };
-
-    //所有人
-    ReceiveGetAllAccountHandler receiveGetAllAccountHandler = new ReceiveGetAllAccountHandler() {
-        @Override
-        public void handler(List<Account> accounts) {
-            logger.info("SearchTabFragment获取人数据:" + accounts);
-            getDbAllAccount();
         }
     };
 
@@ -230,8 +211,8 @@ public class SearchTabFragment extends BaseSearchFragment {
      * @param curCharacter
      */
     private void searchAll(String curCharacter) {
-        Observable.zip(SearchUtil.searchObservable(curCharacter, groupDatas),
-                SearchUtil.searchMemberObservable(curCharacter, memberDatas),
+        Observable.zip(SearchUtil.searchObservable(curCharacter, MyTerminalFactory.getSDK().getSearchDataManager().getGroupSreachDatas()),
+                SearchUtil.searchMemberObservable(curCharacter, MyTerminalFactory.getSDK().getSearchDataManager().getAccountSreachDatas()),
                 (groupSearchBeans, memberSearchBeans) -> {
                     datas.clear();
                     if (groupSearchBeans != null && groupSearchBeans.size() > 0) {
@@ -250,8 +231,12 @@ public class SearchTabFragment extends BaseSearchFragment {
                     }
                     return datas;
                 }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
                 .subscribe(new CommonObserver<List<Object>>() {
+
+                    @Override protected boolean isHideToast() {
+                        return true;
+                    }
                     @Override
                     public void doOnSubscribe(Disposable d) {
                         super.doOnSubscribe(d);
@@ -271,59 +256,9 @@ public class SearchTabFragment extends BaseSearchFragment {
                     @Override
                     protected void onSuccess(List<Object> allRowSize) {
                         logger.info(allRowSize);
-                        searchAdapter.notifyDataSetChanged();
-                    }
-                });
-    }
-
-    /**
-     * 获取本地数据库 组数据
-     */
-    private void getDbAllGroup() {
-        SearchUtil.getDbAllGroup()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new CommonObserver<List<GroupSearchBean>>() {
-                    @Override
-                    protected String setTag() {
-                        return "";
-                    }
-
-                    @Override
-                    protected void onError(String errorMsg) {
-                        logger.error("getTotalCountPolice----请求报错:" + errorMsg);
-                    }
-
-                    @Override
-                    protected void onSuccess(List<GroupSearchBean> allRowSize) {
-                        logger.info(allRowSize);
-                        groupDatas = allRowSize;
-                    }
-                });
-    }
-
-    /**
-     * 获取本地数据库 人数据
-     */
-    private void getDbAllAccount() {
-        SearchUtil.getDbAllAccount()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new CommonObserver<List<MemberSearchBean>>() {
-                    @Override
-                    protected String setTag() {
-                        return "";
-                    }
-
-                    @Override
-                    protected void onError(String errorMsg) {
-                        logger.error("getTotalCountPolice----请求报错:" + errorMsg);
-                    }
-
-                    @Override
-                    protected void onSuccess(List<MemberSearchBean> allRowSize) {
-                        logger.info(allRowSize);
-                        memberDatas = allRowSize;
+                        myHandler.post(() -> {
+                            searchAdapter.notifyDataSetChanged();
+                        });
                     }
                 });
     }

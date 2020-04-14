@@ -29,6 +29,25 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
+
+import com.alibaba.fastjson.JSONObject;
+import com.blankj.utilcode.util.ToastUtils;
+import com.xuchongyang.easyphone.callback.PhoneCallback;
+import com.xuchongyang.easyphone.callback.RegistrationCallback;
+import com.zectec.imageandfileselector.utils.FileUtil;
+import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
+
+import org.apache.http.util.TextUtils;
+import org.apache.log4j.Logger;
+import org.linphone.core.LinphoneAddress;
+import org.linphone.core.LinphoneCall;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import cn.vsx.SpecificSDK.SpecificSDK;
 import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.common.MessageCategory;
@@ -74,7 +93,6 @@ import cn.vsx.vc.activity.IndividualNewsActivity;
 import cn.vsx.vc.activity.NewMainActivity;
 import cn.vsx.vc.activity.PlayLiveHistoryActivity;
 import cn.vsx.vc.activity.TransparentActivity;
-import cn.vsx.vc.activity.VideoMeetingInvitationActivity;
 import cn.vsx.vc.activity.WarningMessageDetailActivity;
 import cn.vsx.vc.adapter.StackViewAdapter;
 import cn.vsx.vc.application.MyApplication;
@@ -91,6 +109,7 @@ import cn.vsx.vc.receiveHandle.ReceiveVoipErrorHandler;
 import cn.vsx.vc.receiveHandle.ReceiveWarningReadCountChangedHandler;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
+import cn.vsx.vc.receiveHandle.ReceiverRequestVideoMeetingHandler;
 import cn.vsx.vc.receiver.NotificationClickReceiver;
 import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.Constants;
@@ -98,21 +117,6 @@ import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView;
-import com.alibaba.fastjson.JSONObject;
-import com.blankj.utilcode.util.ToastUtils;
-import com.xuchongyang.easyphone.callback.PhoneCallback;
-import com.xuchongyang.easyphone.callback.RegistrationCallback;
-import com.zectec.imageandfileselector.utils.FileUtil;
-import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.apache.http.util.TextUtils;
-import org.apache.log4j.Logger;
-import org.linphone.core.LinphoneAddress;
-import org.linphone.core.LinphoneCall;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.permission.FloatWindowManager;
 import ptt.terminalsdk.service.KeepLiveManager;
@@ -234,6 +238,7 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);//请求开视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverActivePushVideoHandler);//上报视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoHandler);//请求视频
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoMeetingHandler);//视频会商
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveNotifyDataMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyEmergencyVideoLiveIncommingMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getWarningMessageDetailHandler);
@@ -602,6 +607,7 @@ public class ReceiveHandlerService extends Service{
 
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoHandler);
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoMeetingHandler);//视频会商
 
         removeView();
         return super.onUnbind(intent);
@@ -1289,6 +1295,42 @@ public class ReceiveHandlerService extends Service{
             }
         }
     };
+    /**
+     * 发起视频会商
+     */
+    private ReceiverRequestVideoMeetingHandler receiverRequestVideoMeetingHandler = (videoMeetingType) -> {
+        if(!checkFloatPermission()){
+            startSetting();
+            return;
+        }
+        if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_watching_can_not_request_video_meeting));
+            AppKeyUtils.setAppKey(null);
+            return;
+        }
+        if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
+            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_pushing_can_not_request_video_meeting));
+            AppKeyUtils.setAppKey(null);
+            return;
+        }
+        if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
+            ToastUtil.showToast(ReceiveHandlerService.this,getString(R.string.text_personal_calling_can_not_request_video_meeting));
+            AppKeyUtils.setAppKey(null);
+            return;
+        }
+        if(MyApplication.instance.checkVideoMeeting()){
+            //正在视频会议的业务中
+            ToastUtil.showToast(ReceiveHandlerService.this,getString(R.string.text_video_meeting_can_not_request_video_meeting));
+            return;
+        }
+
+        Intent intent = new Intent(this, VideoMeetingService.class);
+        //intent.putExtra(Constants.VIDEO_MEETING_GROUP_NO,groupNo);
+        intent.putExtra(Constants.VIDEO_MEETING_TYPE,videoMeetingType);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startService(intent);
+    };
+
 
     /**
      * 通知终端加入视频会商会议室
@@ -1311,10 +1353,12 @@ public class ReceiveHandlerService extends Service{
                         if(!MyApplication.instance.checkVideoMeeting()){
                             //不在视频会议的业务中
                             MyApplication.instance.stopAllBusiness();
-                            Intent intent = new Intent(this, VideoMeetingInvitationActivity.class);
-                            intent.putExtra(Constants.VIDEO_MEETING_MESSAGE,message);
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
+                            myHandler.postDelayed(() -> {
+                                Intent intent = new Intent(this, VideoMeetingInvitationService.class);
+                                intent.putExtra(Constants.VIDEO_MEETING_MESSAGE,message);
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startService(intent);
+                            },500);
                         }else{
                             //正在视频会议的业务中
                             TerminalFactory.getSDK().getVideoMeetingManager().responseInvitationMessage(message.getRoomId(),1);

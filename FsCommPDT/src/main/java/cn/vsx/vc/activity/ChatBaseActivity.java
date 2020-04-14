@@ -114,6 +114,7 @@ import cn.vsx.vc.model.ContactItemBean;
 import cn.vsx.vc.model.PlayType;
 import cn.vsx.vc.model.TransponSelectedBean;
 import cn.vsx.vc.receiveHandle.ReceiverChatListItemClickHandler;
+import cn.vsx.vc.receiveHandle.ReceiverRequestVideoMeetingHandler;
 import cn.vsx.vc.receiveHandle.ReceiverSelectChatListHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowCopyPopupHandler;
 import cn.vsx.vc.receiveHandle.ReceiverShowForwardMoreHandler;
@@ -1772,6 +1773,10 @@ public abstract class ChatBaseActivity extends BaseActivity
                                 case ReceiverSendFileCheckMessageHandler.QR_CODE://二维码
 //                                    showQRDialog();
                                     goToScan();
+                                    break;
+                                case ReceiverSendFileCheckMessageHandler.VIDEO_MEETING://视频会商
+                                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(
+                                            ReceiverRequestVideoMeetingHandler.class, 2);
                                     break;
                             }
                         } else {

@@ -356,7 +356,9 @@ public abstract class BaseService extends Service{
             if(action.equals(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)){
                 String reason = intent.getStringExtra(Constants.SYSTEM_DIALOG_REASON_KEY);
                 if(Constants.SYSTEM_DIALOG_REASON_HOME_KEY.equals(reason) || Constants.SYSTEM_DIALOG_REASON_RECENT_APPS.equals(reason)){
-                    showPopMiniView();
+                    if(!MyApplication.instance.isMiniLive){
+                        showPopMiniView();
+                    }
                 }
             }
         }

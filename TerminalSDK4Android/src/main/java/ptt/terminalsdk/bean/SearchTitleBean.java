@@ -1,4 +1,4 @@
-package cn.vsx.vc.search;
+package ptt.terminalsdk.bean;
 
 public class SearchTitleBean {
     private String title;

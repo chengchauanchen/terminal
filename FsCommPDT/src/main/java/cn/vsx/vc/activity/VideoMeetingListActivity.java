@@ -11,6 +11,18 @@ import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.View;
 import android.widget.TextView;
+
+import com.alibaba.fastjson.JSONObject;
+import com.chad.library.adapter.base.BaseQuickAdapter;
+
+import org.apache.log4j.Logger;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.VideoMeetingDataBean;
 import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
@@ -21,16 +33,9 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.VideoMeetingListAdapter;
 import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.service.VideoMeetingService;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.ToastUtil;
-import com.alibaba.fastjson.JSONObject;
-import com.chad.library.adapter.base.BaseQuickAdapter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import org.apache.log4j.Logger;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
 public class VideoMeetingListActivity extends BaseActivity
@@ -181,6 +186,10 @@ public class VideoMeetingListActivity extends BaseActivity
   @Override
   public void goToWatch(VideoMeetingMessage item) {
     // 获取状态，判断是否可以进入视频会商页面
+    if(MyApplication.instance.checkVideoMeeting()){
+      ToastUtil.showToast(VideoMeetingListActivity.this,getString(R.string.text_in_video_meeting_can_not_in));
+      return;
+    }
     if(item!=null&&item.getRoomId()>0){
       showProgressDialog();
       TerminalFactory.getSDK().getThreadPool().execute(() -> {
@@ -191,9 +200,12 @@ public class VideoMeetingListActivity extends BaseActivity
             //判断业务逻辑
             handler.post(() -> {
               MyApplication.instance.stopAllBusiness();
-              Intent intent = new Intent(VideoMeetingListActivity.this, VideoMeetingActivity.class);
+              TerminalFactory.getSDK().getVideoMeetingManager().setMeetingStatus(true);
+              Intent intent = new Intent(this, VideoMeetingService.class);
               intent.putExtra(Constants.ROOM_ID,item.getRoomId());
-              startActivity(intent);
+              intent.putExtra(Constants.VIDEO_MEETING_TYPE,3);
+              intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+              startService(intent);
             });
           }
         }
