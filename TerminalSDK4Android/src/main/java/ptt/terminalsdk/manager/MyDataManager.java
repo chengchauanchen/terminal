@@ -166,6 +166,7 @@ public class MyDataManager extends DataManager{
                                 member.setDeptId(department.getIntValue("id"));
                                 member.setDepartmentName(department.getString("name"));
                                 member.setUniqueNo(terminal.getLongValue("uniqueNo"));
+                                member.setUniqueNoStr(member.getUniqueNo()+"");
                                 member.setType((TerminalMemberType.valueOf(terminal.getString("terminalMemberType")).getCode()));
                                 member.setTerminalMemberType(terminal.getString("terminalMemberType"));
                                 member.setStatus(TerminalMemberStatusEnum.valueOf(terminal.getString("terminalMemberStatus")).getCode());
@@ -269,6 +270,7 @@ public class MyDataManager extends DataManager{
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                                 member.setId(Integer.valueOf(jsonObject.getString("id")));
                                 member.setUniqueNo(Long.parseLong(jsonObject.getString("uniqueNo")));
+                                member.setUniqueNoStr(member.getUniqueNo()+"");
                                 member.setType(TerminalMemberType.valueOf(jsonObject.getString("terminalMemberType")).getCode());
                                 member.setStatus(TerminalMemberStatusEnum.valueOf(jsonObject.getString("terminalMemberStatus")).getCode());
                                 JSONObject account = jsonObject.getJSONObject("account");

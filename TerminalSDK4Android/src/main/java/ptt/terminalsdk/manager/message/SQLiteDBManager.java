@@ -7,10 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
-import cn.vsx.hamster.common.util.JsonParam;
-import cn.vsx.hamster.terminalsdk.manager.search.TianjinDeviceBean;
-import cn.vsx.hamster.terminalsdk.model.VideoMeetingDataBean;
-import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
 import com.alibaba.fastjson.JSONObject;
 import com.pinyinsearch.util.PinyinUtil;
 
@@ -26,10 +22,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import cn.vsx.hamster.common.MessageCategory;
 import cn.vsx.hamster.common.MessageStatus;
 import cn.vsx.hamster.common.MessageType;
+import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.message.ISQLiteDBManager;
 import cn.vsx.hamster.terminalsdk.manager.search.GroupSearchBean;
 import cn.vsx.hamster.terminalsdk.manager.search.MemberSearchBean;
+import cn.vsx.hamster.terminalsdk.manager.search.TianjinDeviceBean;
 import cn.vsx.hamster.terminalsdk.model.Account;
 import cn.vsx.hamster.terminalsdk.model.BitStarFileRecord;
 import cn.vsx.hamster.terminalsdk.model.CallRecord;
@@ -37,6 +35,8 @@ import cn.vsx.hamster.terminalsdk.model.Folder;
 import cn.vsx.hamster.terminalsdk.model.Group;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
+import cn.vsx.hamster.terminalsdk.model.VideoMeetingDataBean;
+import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
 import cn.vsx.hamster.terminalsdk.model.WarningRecord;
 import cn.vsx.hamster.terminalsdk.tools.MyGsonUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
@@ -734,6 +734,7 @@ public class SQLiteDBManager implements ISQLiteDBManager {
                     member.phone = cursor.getString(cursor.getColumnIndex("member_phone"));
                     member.departmentName = cursor.getString(cursor.getColumnIndex("department_name"));
                     member.setUniqueNo(cursor.getLong(cursor.getColumnIndex("unique_no")));
+                    member.setUniqueNoStr(member.getUniqueNo()+"");
                     memberList.add(member);
                 }
                 cursor.close();
