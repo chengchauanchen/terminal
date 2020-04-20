@@ -31,7 +31,16 @@ public class ProgressDialog extends Dialog {
 		Animation anim = AnimationUtils.loadAnimation(context,
 				R.anim.loading_dialog_progressbar_anim);
 		img.setAnimation(anim);
-		setContentView(view);
+//        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+//        Display display = ((WindowManager) windowManager).getDefaultDisplay();
+//        android.view.WindowManager.LayoutParams p = getWindow().getAttributes();
+//        p.height = (int) (display.getHeight() * 0.8);//
+//        p.width = display.getWidth();
+//        p.gravity = Gravity.TOP;
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE);//解决dialog悬浮再activity上无法点击其他未被覆盖控件问题
+//        this.getWindow().setAttributes(p);
+
+        setContentView(view);
     }
 
     @Override
