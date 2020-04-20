@@ -580,4 +580,5 @@
     <color name="work_text_gray_5">#313131</color><!--任务字体灰色1 -->
 
     <color name="funcation_top_et_underline">#33313131</color>
+    <color name="upload_log_button">#0191ff</color>
 </resources>

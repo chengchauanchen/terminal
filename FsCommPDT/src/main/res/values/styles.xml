@@ -122,6 +122,15 @@
         <item name="android:windowNoTitle">true</item>
         <item name="android:backgroundDimEnabled">false</item>
         <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:activityCloseEnterAnimation">@null</item>
+
+    </style>
+    <!-- 进度条样式 -->
+    <style name="progress_dialog_for_regist" parent="android:Animation">
+
+        <item name="android:windowEnterAnimation">@anim/progress_dialog_for_regist_enter</item>
+        <item name="android:windowExitAnimation">@anim/progress_dialog_for_regist_exit</item>
+
     </style>
     <!-- 改名dialog样式 -->
     <style name="change_name_dialog" parent="@android:style/Theme.Dialog">

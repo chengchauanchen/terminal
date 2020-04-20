@@ -686,4 +686,6 @@
 
     <string name="text_get_group_data_error">获取组数据失败</string>
     <string name="text_send_group_data_error">传递的组数据有误</string>
+    <string name="log_uploading">日志上传中...</string>
+
 </resources>

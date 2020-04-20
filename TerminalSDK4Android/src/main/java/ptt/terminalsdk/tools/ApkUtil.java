@@ -87,4 +87,8 @@ public class ApkUtil{
         address.append("version.xml");
         return address.toString();
     }
+
+    public static String getLogUpdateAddress(String path) {
+        return path+"/file/upload/log";
+    }
 }

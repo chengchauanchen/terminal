@@ -1244,6 +1244,10 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 	public void setAPKUpdateAddress(String path) {
 		TerminalFactory.getSDK().putParam(Params.UPDATE_URL, ApkUtil.getAPKUpdateAddress(path));
 	}
+	@Override
+	public void setLogUpLoadAddress(String path) {
+		TerminalFactory.getSDK().putParam(Params.LOG_UPLOAD_URL, ApkUtil.getLogUpdateAddress(path));
+	}
 
 	@Override
 	public void setDataUpdateAddress(String path) {
@@ -1621,7 +1625,7 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		return okHttpClient;
 	}
 
-	private String getVersionName(){
+	public String getVersionName(){
 		String localVersion = "";
 		try{
 			PackageInfo packageInfo = application.getApplicationContext().getPackageManager().getPackageInfo(application.getPackageName(), 0);

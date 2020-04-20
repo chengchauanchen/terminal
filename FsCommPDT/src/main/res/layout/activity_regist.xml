@@ -347,4 +347,36 @@
 
     </RelativeLayout>
 
+    <!--created by tzl 2020/04/15  for bug  3508  begin-->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="@dimen/dp_20"
+        android:layout_marginRight="@dimen/dp_20"
+        android:paddingBottom="@dimen/dp_20"
+        >
+
+        <TextView
+            android:id="@+id/tv_apk_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="v"
+            android:textSize="@dimen/sp_18"
+            android:textColor="@color/upload_log_button"
+            android:layout_alignParentLeft="true"
+            />
+        <TextView
+            android:id="@+id/tv_uoloadLog"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="上传日志"
+            android:textColor="@color/upload_log_button"
+            android:layout_alignParentRight="true"
+            android:textSize="@dimen/sp_18"
+            />
+
+    </RelativeLayout>
+    <!--created by tzl 2020/04/15  for bug  3508  end-->
+
 </RelativeLayout>

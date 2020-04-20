@@ -22,6 +22,7 @@ import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,6 +46,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -73,6 +76,7 @@ import cn.vsx.hamster.terminalsdk.model.UpdateType;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCanUpdateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetNameByOrgHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLogFileUploadCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRegistCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler;
@@ -86,6 +90,7 @@ import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.application.UpdateManager;
 import cn.vsx.vc.dialog.ProgressDialog;
+import cn.vsx.vc.dialog.ProgressDialogForResgistActivity;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.RecvCallBack;
@@ -104,7 +109,7 @@ import ptt.terminalsdk.tools.DeleteData;
 import ptt.terminalsdk.tools.DialogUtil;
 import sec.vpn.ISecVpnService;
 
-public class RegistActivity extends BaseActivity implements RecvCallBack, Actions {
+public class RegistActivity extends BaseActivity implements RecvCallBack, Actions ,OnClickListener{
 
     private AlertDialog netWorkDialog;
 
@@ -134,7 +139,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     View view_pop;
     private int reAuthCount;
-    private ProgressDialog myProgressDialog;
+    private ProgressDialogForResgistActivity myProgressDialog;
     private Handler myHandler = new Handler(Looper.getMainLooper());
     private String orgHint;
     private String nameHint;
@@ -176,6 +181,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private LinearLayout ll_idcard_info;
     private EditText et_idcard;
     private EditText et_name;
+    private Timer timer = new Timer();
+    private TextView tv_uoloadLog;
+    private TextView tv_apk_version;
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -878,6 +887,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         departmentId = (EditText) findViewById(R.id.departmentId);
         departmentName = (EditText) findViewById(R.id.departmentName);
         btn_confirm = (Button) findViewById(R.id.btn_confirm);
+        tv_uoloadLog = (TextView) findViewById(R.id.tv_uoloadLog);
+        tv_apk_version= (TextView) findViewById(R.id.tv_apk_version);
+        tv_apk_version.setText(MyTerminalFactory.getSDK().getVersionName());
 
         tvVersionPrompt = (TextView) findViewById(R.id.tv_version_prompt);
         xcd_available_ip = (XCDropDownListView) findViewById(R.id.xcd_available_ip);
@@ -909,8 +921,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         orgHint = getResources().getString(R.string.regist_org_hint);
         nameHint = getResources().getString(R.string.regist_name_hint);
         if (myProgressDialog == null) {
-            myProgressDialog = new ProgressDialog(RegistActivity.this);
+            myProgressDialog = new ProgressDialogForResgistActivity(RegistActivity.this);
             myProgressDialog.setCancelable(false);
+
         }
 
         ll_regist.setVisibility(View.GONE);
@@ -1167,6 +1180,16 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private void setUpdateUrl(String ip, String port) {
         String path = "http://" + ip + ":" + port;
         TerminalFactory.getSDK().setAPKUpdateAddress(path);
+        setLogUpLoadUrl(ip,port);
+    }
+    /**
+     *设置更新上传日志的url
+     * @param ip
+     * @param port
+     */
+    private void  setLogUpLoadUrl(String ip, String port){
+        String path = "http://" + ip + ":" + port;
+        TerminalFactory.getSDK().setLogUpLoadAddress(path);
     }
 
     /**
@@ -1221,6 +1244,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetNameByOrgHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReturnAvailableIPHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLogFileUploadCompleteHandler);//上传日志
+
         userOrg.setOnFocusChangeListener(onFocusChangeListener);
         userOrg.addTextChangedListener(new TextWatcherImpOrg());//监听输入内容的变化
         userName.setOnFocusChangeListener(onFocusChangeListener);
@@ -1228,6 +1253,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         btnAddMember.setOnClickListener(new OnSwitchingModeClickListener());
         btn_confirm.setOnClickListener(new OnClickListenerImplementation());
         xcd_available_ip.setOnXCDropDownListViewClickListeren(new XCDClickListener());
+        myProgressDialog.setUpLoadLogClickListeren(new MyProgressUpLoadLogListener());
         btn_idcard_login.setOnClickListener(new IdcardLoginClickListener());
         if (viewHolder == null) {
             return;
@@ -1241,8 +1267,46 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         viewHolder.userPort.addTextChangedListener(new IpClickListener());
         viewHolder.userIP.addTextChangedListener(new IpClickListener());
         viewHolder.btnCustomIpOk.setOnClickListener(new BtnCustomIpOkOnClickListener());
+        tv_uoloadLog.setOnClickListener(this);
     }
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()){
+            //点击上传日志
+            case R.id.tv_uoloadLog:
+                uploadLog();
+                break;
+        }
 
+    }
+    /**
+     * 日志上传是否成功的消息
+     */
+    private ReceiveLogFileUploadCompleteHandler receiveLogFileUploadCompleteHandler = (resultCode, type) -> myHandler.post(() -> {
+        if ("log".equals(type)) {
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                ToastUtil.showToast(getString(R.string.text_log_upload_success_thanks));
+            } else {
+                ToastUtil.showToast(getString(R.string.text_log_upload_fail_try_again_later));
+            }
+        }
+    });
+    private long currentTime;
+    public void uploadLog() {
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                Log.d("result:","开始上传");
+                ToastUtil.showToast(getString(R.string.log_uploading));
+                if (System.currentTimeMillis() - currentTime > 5000) {
+                    MyTerminalFactory.getSDK().getLogFileManager().uploadAllLogFile();
+                    currentTime = System.currentTimeMillis();
+                } else {
+                    ToastUtil.showToast(getString(R.string.text_uploaded_log_try_again_later));
+                }
+            }
+        }, 0);
+    }
     @Override
     public void initData() {
     }
@@ -1697,6 +1761,17 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE,AuthManagerTwo.POLICESTORE);
         if(TextUtils.equals(AuthManagerTwo.LANGFANG,apkType)){
             ToastUtil.showToast(MyApplication.instance.getApplicationContext(), getString(R.string.text_please_open_langfang_police_work_first));
+        }
+    }
+
+    /**
+     *
+     */
+    private class MyProgressUpLoadLogListener implements ProgressDialogForResgistActivity.UpLoadLogClickListeren {
+        @Override
+        public void onUploadLogClickListeren() {
+//            logger.info("result ProgressDialogForResgistActivity 点击上传");
+            uploadLog();
         }
     }
 }
