@@ -15,6 +15,25 @@ import android.os.Looper;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+
+import com.alibaba.fastjson.JSONObject;
+import com.google.gson.Gson;
+
+import org.apache.log4j.Logger;
+import org.easydarwin.push.EasyPusher;
+import org.easydarwin.push.InitCallback;
+import org.easydarwin.push.LocalVideoPushStream;
+
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
 import cn.vsx.hamster.errcode.BaseCommonCode;
@@ -33,26 +52,11 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberUploadFileMe
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateUploadFileRateLimitHandler;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
-import com.alibaba.fastjson.JSONObject;
-import com.google.gson.Gson;
-import java.io.File;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
-import org.apache.log4j.Logger;
-import org.easydarwin.push.EasyPusher;
-import org.easydarwin.push.InitCallback;
-import org.easydarwin.push.LocalVideoPushStream;
 import ptt.terminalsdk.broadcastreceiver.FileExpireReceiver;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.FileTransgerUtil;
@@ -381,7 +385,7 @@ public class FileTransferOperation {
     public String uploadFileByOkHttp(String url, final File file) {
         try{
             long startTime = System.currentTimeMillis();
-            rateLimitingRequestBody = RateLimitingRequestBody.createRequestBody(MediaType.parse("application/octet-stream"), file, getUpLoadFileNeedRateLimit()?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
+            rateLimitingRequestBody = RateLimitingRequestBody.createRequestBody(MediaType.parse("multipart/form-data"), file, getUpLoadFileNeedRateLimit()?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
             RequestBody requestBody;
             requestBody = new MultipartBody.Builder()
                 .addFormDataPart("fileStream", file.getName(), rateLimitingRequestBody)
