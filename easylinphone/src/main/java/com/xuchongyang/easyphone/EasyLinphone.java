@@ -3,6 +3,7 @@ package com.xuchongyang.easyphone;
 import android.content.Context;
 import android.content.Intent;
 import android.opengl.GLSurfaceView;
+import android.text.TextUtils;
 import android.view.SurfaceView;
 
 import com.xuchongyang.easyphone.callback.PhoneCallback;
@@ -107,7 +108,7 @@ public class EasyLinphone {
         if (!LinphoneService.isReady() || !LinphoneManager.isInstanceiated()) {
             return;
         }
-        if (!"".equals(num)) {
+        if (!TextUtils.isEmpty(num)) {
             PhoneBean phone = new PhoneBean();
             phone.setUserName(num);
             phone.setHost(mServerIP);
