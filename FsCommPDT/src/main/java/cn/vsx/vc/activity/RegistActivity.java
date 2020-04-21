@@ -920,11 +920,12 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
         orgHint = getResources().getString(R.string.regist_org_hint);
         nameHint = getResources().getString(R.string.regist_name_hint);
-        if (myProgressDialog == null) {
-            myProgressDialog = new ProgressDialogForResgistActivity(RegistActivity.this);
-            myProgressDialog.setCancelable(false);
-
-        }
+//        if (myProgressDialog == null) {
+//            myProgressDialog = new ProgressDialogForResgistActivity(RegistActivity.this);
+//            myProgressDialog.setCancelable(false);
+//
+//        }
+        myProgressDialog =ProgressDialogForResgistActivity.getInstance(RegistActivity.this);
 
         ll_regist.setVisibility(View.GONE);
         initUpdate();
@@ -1253,7 +1254,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         btnAddMember.setOnClickListener(new OnSwitchingModeClickListener());
         btn_confirm.setOnClickListener(new OnClickListenerImplementation());
         xcd_available_ip.setOnXCDropDownListViewClickListeren(new XCDClickListener());
-        myProgressDialog.setUpLoadLogClickListeren(new MyProgressUpLoadLogListener());
+        ProgressDialogForResgistActivity.getInstance(RegistActivity.this).setUpLoadLogClickListeren(new MyProgressUpLoadLogListener());
         btn_idcard_login.setOnClickListener(new IdcardLoginClickListener());
         if (viewHolder == null) {
             return;

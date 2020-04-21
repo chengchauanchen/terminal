@@ -30,6 +30,19 @@ public class ProgressDialogForResgistActivity extends Dialog {
     private ImageView iv_loading_bg;//上传日志
     private TextView tv_apk_version;//版本号
     private Timer timer = new Timer();
+    static ProgressDialogForResgistActivity progressDialogForResgistActivity;
+
+    public static ProgressDialogForResgistActivity getInstance(Context context) {
+        if (progressDialogForResgistActivity==null){
+            synchronized (ProgressDialogForResgistActivity.class){
+                if (progressDialogForResgistActivity==null){
+                    progressDialogForResgistActivity=new ProgressDialogForResgistActivity(context);
+                }
+            }
+
+        }
+    return progressDialogForResgistActivity;
+    }
 
     public ProgressDialogForResgistActivity(@NonNull Context context) {
         super(context, R.style.progress_dialog);
@@ -39,10 +52,10 @@ public class ProgressDialogForResgistActivity extends Dialog {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.progress_dialog_for_resgit, null);
         iv_loading_bg = view.findViewById(R.id.iv_loading_bg);
-        img =  view.findViewById(R.id.progress_dialog_img);
-        txt =  view.findViewById(R.id.progress_dialog_txt);
+        img = view.findViewById(R.id.progress_dialog_img);
+        txt = view.findViewById(R.id.progress_dialog_txt);
 
-        tv_apk_version= (TextView) view.findViewById(R.id.tv_apk_version);
+        tv_apk_version = (TextView) view.findViewById(R.id.tv_apk_version);
         tv_apk_version.setText(MyTerminalFactory.getSDK().getVersionName());
 
         tv_uoloadLog = (TextView) view.findViewById(R.id.tv_uoloadLog);
@@ -56,6 +69,7 @@ public class ProgressDialogForResgistActivity extends Dialog {
 //        img.setAnimation(anim);
         setContentView(view);
     }
+
     @Override
     public void show() {
         super.show();
@@ -65,36 +79,42 @@ public class ProgressDialogForResgistActivity extends Dialog {
         img.setAnimation(anim);
     }
 
-    public void setMsg(String msg){
+    public void setMsg(String msg) {
         txt.setText(msg);
     }
-    public void setMsg(int msgId){
+
+    public void setMsg(int msgId) {
         txt.setText(msgId);
     }
-    public void setTextColor(int color){
+
+    public void setTextColor(int color) {
         txt.setTextColor(color);
     }
-    public void setLoadingBgRes(int loading_bgRes){
+
+    public void setLoadingBgRes(int loading_bgRes) {
         iv_loading_bg.setImageResource(loading_bgRes);
     }
-    public void setLoadingRes(int loadingRes){
+
+    public void setLoadingRes(int loadingRes) {
         img.setImageResource(loadingRes);
     }
 
     private class MyOnClickListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            switch (v.getId()){
+            switch (v.getId()) {
                 //点击上传日志
                 case R.id.tv_uoloadLog:
-                    if (loadLogClickListeren!=null){
+                    if (loadLogClickListeren != null) {
                         loadLogClickListeren.onUploadLogClickListeren();
                     }
-                break;
+                    break;
             }
         }
     }
+
     private long currentTime;
+
     public void uploadLog() {
 //        timer.schedule(new TimerTask() {
 //            @Override
@@ -112,11 +132,13 @@ public class ProgressDialogForResgistActivity extends Dialog {
 
     }
 
-    public interface UpLoadLogClickListeren{
+    public interface UpLoadLogClickListeren {
         void onUploadLogClickListeren();
     }
+
     private UpLoadLogClickListeren loadLogClickListeren;
-    public void setUpLoadLogClickListeren(UpLoadLogClickListeren loadLogClickListerenr){
+
+    public void setUpLoadLogClickListeren(UpLoadLogClickListeren loadLogClickListerenr) {
         this.loadLogClickListeren = loadLogClickListerenr;
     }
 }
