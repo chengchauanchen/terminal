@@ -78,6 +78,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetNameByOrgHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLogFileUploadCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRegistCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveReturnAvailableIPHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
@@ -89,7 +90,6 @@ import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.application.UpdateManager;
-import cn.vsx.vc.dialog.ProgressDialog;
 import cn.vsx.vc.dialog.ProgressDialogForResgistActivity;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
@@ -131,7 +131,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     Button btn_confirm;
 
-    TextView tvVersionPrompt;
+    LinearLayout llPushLive;
 
     XCDropDownListView xcd_available_ip;
 
@@ -228,6 +228,9 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 } else if (resultCode == TerminalErrorCode.TERMINAL_REPEAT.getErrorCode()) {
                     AlertDialog alerDialog = new AlertDialog.Builder(RegistActivity.this).setTitle(R.string.text_prompt).setMessage(resultCode + getString(R.string.text_terminal_repeat)).setPositiveButton(R.string.text_sure, (dialogInterface, i) -> finish()).create();
                     alerDialog.show();
+                } else if (resultCode == TerminalErrorCode.REGISTER_DEVICE_KILL.getErrorCode()) {
+                    //设备被遥毙
+                    TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyMemberKilledHandler.class, true);
                 } else if (resultCode == TerminalErrorCode.EXCEPTION.getErrorCode()) {
                     if (reAuthCount < 3) {
                         reAuthCount++;
@@ -256,7 +259,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         TerminalFactory.getSDK().getAuthManagerTwo().checkRegistIp();
                     }
                     if (!isRegisted) {
-                        ToastUtils.showShort(R.string.please_regist_account);
+                        ToastUtils.showShort(R.string.accunt_no_exist);
                         ll_regist.setVisibility(View.VISIBLE);
                         hideProgressDialog();
                     } else {
@@ -355,26 +358,40 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private ReceiveCanUpdateHandler receiveCanUpdateHandler = new ReceiveCanUpdateHandler() {
         @Override
         public void handle(boolean canUpdate, UpdateType type,  String ip, String port, boolean isAuth) {
-            if (!canUpdate) {
-                if(type == UpdateType.FORCE){
-                    exitApp();
-                }else{
-                    if (isAuth) {
-                        int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(ip, port);
-                        if (resultCode == BaseCommonCode.SUCCESS_CODE) {
-                            changeProgressMsg(getString(R.string.authing));
-                        } else {
-                            //状态机没有转到正在认证，说明已经在状态机中了，不用处理
-                        }
-                    } else {
-                        myHandler.post(() -> {
-                            String useOrg = userOrg.getText().toString().trim();
-                            String useName = userName.getText().toString().trim();
-                            changeProgressMsg(getString(R.string.text_registing));
-                            TerminalFactory.getSDK().getThreadPool().execute(() -> TerminalFactory.getSDK().getAuthManagerTwo().regist(useName, useOrg));
-                        });
-                    }
+            //判断是否可以更新版本号
+            if(canUpdate){
+                return;
+            }
+            //判断是否是强制更新
+            if(type == UpdateType.FORCE){
+                exitApp();
+                return;
+            }
+            //判断是否已经登录成功过（数据已经更新过）
+            boolean hasCompleteData = TerminalFactory.getSDK().getParam(Params.HAS_COMPLETE_DATA,false);
+            if(hasCompleteData){
+                TerminalFactory.getSDK().getDataManager().initFunctionFromAuth();
+                changeProgressMsg(getString(R.string.text_start_success));
+                myHandler.postDelayed(() -> goOn(),1000);
+                return;
+            }
+            //是否是认证
+            if (isAuth) {
+                //认证
+                int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(ip, port);
+                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                    changeProgressMsg(getString(R.string.authing));
+                } else {
+                    //状态机没有转到正在认证，说明已经在状态机中了，不用处理
                 }
+            } else {
+                //注册
+                myHandler.post(() -> {
+                    String useOrg = userOrg.getText().toString().trim();
+                    String useName = userName.getText().toString().trim();
+                    changeProgressMsg(getString(R.string.text_registing));
+                    TerminalFactory.getSDK().getThreadPool().execute(() -> TerminalFactory.getSDK().getAuthManagerTwo().regist(useName, useOrg));
+                });
             }
         }
     };
@@ -457,6 +474,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 setUpdateUrl(selectIp, selectPort);
                 //检查是否自动更新
                 checkUpdate(selectIp, selectPort, true);
+                getMediaServerInfo();
 //                int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
 //                checkUpdate();
 //                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
@@ -473,6 +491,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 setUpdateUrl(selectIp, selectPort);
                 //检查是否自动更新
                 checkUpdate(selectIp, selectPort, true);
+                getMediaServerInfo();
 //                int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
 //                checkUpdate();
 //                if (resultCode == BaseCommonCode.SUCCESS_CODE) {
@@ -507,6 +526,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     setUpdateUrl(registIP, registPort);
                     //检查是否自动更新
                     checkUpdate(registIP, registPort, false);
+                    getMediaServerInfo();
 //                    changeProgressMsg(getString(R.string.text_registing));
 //                    String path = "http://"+ registIP+":"+registPort;
 //                    TerminalFactory.getSDK().setAPKUpdateAddress(path);
@@ -536,6 +556,27 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             ptt.terminalsdk.tools.ToastUtil.showToast(RegistActivity.this,getString(R.string.text_input_name_regex));
         }
         return result;
+    }
+
+    private class PushLiveClickListener implements OnClickListener{
+        @Override
+        public void onClick(View v){
+            //开始推流，需要判断是否获取注册服务的ip、端口以及流媒体服务的信息
+            String serverIp = TerminalFactory.getSDK().getParam(Params.REGIST_IP, "");
+            String serverPort = TerminalFactory.getSDK().getParam(Params.REGIST_PORT, "");
+            if(TextUtils.isEmpty(serverIp)||TextUtils.isEmpty(serverPort)){
+                ToastUtil.showToast(getString(R.string.text_please_choose_server));
+                return;
+            }
+            String mediaIp = TerminalFactory.getSDK().getParam(Params.MEDIA_SERVER_IP,"");
+            int mediaPort = TerminalFactory.getSDK().getParam(Params.MEDIA_SERVER_PORT,0);
+            if(TextUtils.isEmpty(mediaIp)||mediaPort <=0){
+                ToastUtil.showToast(getString(R.string.text_media_server_info_error));
+                return;
+            }
+            // TODO: 2020/4/21 开始推流
+            
+        }
     }
 
     private class IdcardLoginClickListener implements OnClickListener{
@@ -679,6 +720,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         //设置自动更新的Url
                         setUpdateUrl(selectIp, selectPort);
                         checkUpdate(selectIp, selectPort, true);
+                        getMediaServerInfo();
 //                        //认证
 //                        int resultCode = MyTerminalFactory.getSDK().getAuthManagerTwo().startAuth(selectIp, selectPort);
 //                        checkUpdate();
@@ -772,6 +814,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             String port = viewHolder.userPort.getText().toString();
             setUpdateUrl(ip, port);
             checkUpdate(ip, port, true);
+            getMediaServerInfo();
 //            int code = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(viewHolder.userIP.getText().toString(), viewHolder.userPort.getText().toString());
 //            checkUpdate();
 //            if (code == BaseCommonCode.SUCCESS_CODE) {
@@ -891,7 +934,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         tv_apk_version= (TextView) findViewById(R.id.tv_apk_version);
         tv_apk_version.setText(MyTerminalFactory.getSDK().getVersionName());
 
-        tvVersionPrompt = (TextView) findViewById(R.id.tv_version_prompt);
+        llPushLive = (LinearLayout) findViewById(R.id.ll_push_live);
         xcd_available_ip = (XCDropDownListView) findViewById(R.id.xcd_available_ip);
         ll_regist = (LinearLayout) findViewById(R.id.ll_regist);
         view_pop = (View) findViewById(R.id.view_pop);
@@ -930,6 +973,28 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         ll_regist.setVisibility(View.GONE);
         initUpdate();
         judgePermission();
+        showDefultServerIPAndPort();
+    }
+
+    /**
+     * 显示默认的ip和端口
+     */
+    private void showDefultServerIPAndPort() {
+        try{
+            if (ApkUtil.isAppStore()|| TextUtils.equals(AuthManagerTwo.POLICETEST,apkType)
+                    || TextUtils.equals(AuthManagerTwo.YINGJIGUANLITING,apkType)) {
+                String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
+                if (defaultAddress.length == 3) {
+                    xcd_available_ip.setText(defaultAddress[2]);
+                    availableIPlist.clear();
+                    availableIPlist.add(defaultAddress[2]);
+                    availableIPlist.add(company);
+                    xcd_available_ip.setItemsData(availableIPlist);
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -1132,13 +1197,15 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         if (TextUtils.isEmpty(authUrl)) {
             //平台包或者没获取到类型，直接用AuthManager中的地址,
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
-            if (ApkUtil.isAppStore()|| AuthManagerTwo.POLICETEST.equals(apkType) || TextUtils.isEmpty(apkType)) {
+            if (ApkUtil.isAppStore()|| AuthManagerTwo.POLICETEST.equals(apkType)
+                    || TextUtils.equals(AuthManagerTwo.YINGJIGUANLITING,apkType) || TextUtils.isEmpty(apkType)) {
                 String[] defaultAddress = TerminalFactory.getSDK().getAuthManagerTwo().getDefaultAddress();
                 if (defaultAddress.length >= 2) {
                     //设置自动更新url
                     setUpdateUrl(defaultAddress[0], defaultAddress[1]);
                     //检查是否自动更新
                     checkUpdate(defaultAddress[0], defaultAddress[1], true);
+                    getMediaServerInfo();
 //                    int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(defaultAddress[0], defaultAddress[1]);
 //                    checkUpdate();
 //                    if (resultCode == BaseCommonCode.SUCCESS_CODE) {
@@ -1163,6 +1230,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             setUpdateUrl(ip, port);
             //检查是否自动更新
             checkUpdate(ip, port, true);
+            getMediaServerInfo();
 //            int resultCode = TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getParam(Params.REGIST_IP, ""), TerminalFactory.getSDK().getParam(Params.REGIST_PORT, ""));
 //            checkUpdate();
 //            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
@@ -1182,6 +1250,8 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         String path = "http://" + ip + ":" + port;
         TerminalFactory.getSDK().setAPKUpdateAddress(path);
         setLogUpLoadUrl(ip,port);
+        TerminalFactory.getSDK().putParam(Params.REGIST_IP,ip);
+        TerminalFactory.getSDK().putParam(Params.REGIST_PORT, port);
     }
     /**
      *设置更新上传日志的url
@@ -1210,6 +1280,13 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         }else{
             TerminalFactory.getSDK().notifyReceiveHandler(ReceiveCanUpdateHandler.class, false,UpdateType.NONE,ip,port,isAuth);
         }
+    }
+
+    /**
+     * 获取流媒体服务的信息
+     */
+    private void getMediaServerInfo(){
+        TerminalFactory.getSDK().getDataManager().noRegistGetMediaServerInfo();
     }
 
     private void initPopupWindow() {
@@ -1256,6 +1333,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         xcd_available_ip.setOnXCDropDownListViewClickListeren(new XCDClickListener());
         ProgressDialogForResgistActivity.getInstance(RegistActivity.this).setUpLoadLogClickListeren(new MyProgressUpLoadLogListener());
         btn_idcard_login.setOnClickListener(new IdcardLoginClickListener());
+        llPushLive.setOnClickListener(new PushLiveClickListener());
         if (viewHolder == null) {
             return;
         }
@@ -1346,7 +1424,6 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
 
     private void goOn() {
-        changeProgressMsg(getString(R.string.text_start_success));
         myHandler.removeCallbacksAndMessages(null);
         //第三方app包名
         String third_app_package_name = getIntent().getStringExtra(UrlParams.THIRD_APP_PACKAGE_NAME);
@@ -1363,6 +1440,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
             intent.putExtra(UrlParams.THIRD_APP_PACKAGE_NAME,third_app_package_name);
             intent.putExtra(UrlParams.IS_REGIST_ACTIVITY_JOIN,true);
             startActivity(intent);
+            TerminalFactory.getSDK().putParam(Params.HAS_COMPLETE_DATA,true);
         }catch(ClassNotFoundException e){
             e.printStackTrace();
         }

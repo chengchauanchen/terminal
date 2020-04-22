@@ -894,24 +894,21 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
     }
 
     public void exitApp() {
-
-        if(TerminalFactory.getSDK().isServerConnected()){
-            TerminalFactory.getSDK().getAuthManagerTwo().logout();
+        try{
+            if(TerminalFactory.getSDK().isServerConnected()){
+                TerminalFactory.getSDK().getAuthManagerTwo().logout();
+            }
+            Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
+            stoppedCallIntent.putExtra("stoppedResult", "0");
+            SendRecvHelper.send(BaseActivity.this, stoppedCallIntent);
+            for (Activity activity : ActivityCollector.getAllActivity().values()) {
+                activity.finish();
+            }
+            MyApplication.instance.isClickVolumeToCall = false;
+            MyApplication.instance.isPttPress = false;
+            MyApplication.instance.stopHandlerService();
+        }catch (Exception e){
+            e.printStackTrace();
         }
-
-        Intent stoppedCallIntent = new Intent("stop_indivdualcall_service");
-        stoppedCallIntent.putExtra("stoppedResult", "0");
-        SendRecvHelper.send(BaseActivity.this, stoppedCallIntent);
-
-
-        for (Activity activity : ActivityCollector.getAllActivity().values()) {
-            activity.finish();
-        }
-        MyApplication.instance.isClickVolumeToCall = false;
-        MyApplication.instance.isPttPress = false;
-        MyApplication.instance.stopHandlerService();
     }
-
-
-
 }

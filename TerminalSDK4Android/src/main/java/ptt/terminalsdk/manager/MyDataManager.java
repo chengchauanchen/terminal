@@ -29,6 +29,7 @@ import cn.vsx.hamster.terminalsdk.tools.Util;
 import ptt.terminalsdk.BuildConfig;
 import ptt.terminalsdk.bean.DepData;
 import ptt.terminalsdk.bean.GroupBean;
+import ptt.terminalsdk.bean.MediaServerInfoBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.http.AppUrlConfig;
 import ptt.terminalsdk.receiveHandler.ReceiveGetTerminalDeviceHandler;
@@ -332,6 +333,39 @@ public class MyDataManager extends DataManager{
                 }catch (Exception e){
                     e.printStackTrace();
                     TerminalFactory.getSDK().getServiceBusManager().addErrorCount();
+                }
+            }
+        });
+    }
+
+    /**
+     * 未注册时获取流媒体服务信息
+     */
+    @Override
+    public void noRegistGetMediaServerInfo(){
+
+        TerminalFactory.getSDK().getThreadPool().execute(new Runnable() {
+            @Override
+            public void run() {
+                try{
+                    String serverIp = TerminalFactory.getSDK().getParam(Params.REGIST_IP, "");
+                    String serverPort = TerminalFactory.getSDK().getParam(Params.REGIST_PORT, "");
+                    String url = "http://" + serverIp + ":" + serverPort + "/mediaServerInfo";
+                    String result = TerminalFactory.getSDK().getHttpClient().sendGet(url);
+                    logger.info("未注册时获取流媒体服务信息:"+result);
+                    if(!Util.isEmpty(result)){
+                        MediaServerInfoBean bean = new Gson().fromJson(result, MediaServerInfoBean.class);
+                        if(bean != null ){
+                            if(!TextUtils.isEmpty(bean.getMediaServerIp())){
+                                TerminalFactory.getSDK().putParam(Params.MEDIA_SERVER_IP, bean.getMediaServerIp());
+                            }
+                            if(bean.getMediaServerPort()> 0){
+                                TerminalFactory.getSDK().putParam(Params.MEDIA_SERVER_PORT, bean.getMediaServerPort());
+                            }
+                        }
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
                 }
             }
         });
