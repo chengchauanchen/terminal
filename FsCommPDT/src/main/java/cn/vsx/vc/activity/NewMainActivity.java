@@ -302,7 +302,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 });
             } else {
                 //网络连接上，需要更新组数据（防止在断网的时候有些组不存在）
-                TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(false);
+                TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(true);
             }
         }
     };

@@ -100,7 +100,7 @@ public class AddMemberToGroup extends BaseCommand implements IJumpCommand {
         Group group = DataUtil.getTempGroupByGroupName(BusinessId);
         if (group == null) {
             //为空，主动请求一次
-            TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(false);
+            TerminalFactory.getSDK().getConfigManager().updateAllGroupInfo(true);
             Group group2 = DataUtil.getTempGroupByGroupName(BusinessId);
             if (group2 == null) {
                 ToastUtil.showToast(context, "未找到当前组,请重试");
