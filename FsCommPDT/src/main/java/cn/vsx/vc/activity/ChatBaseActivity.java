@@ -24,6 +24,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -78,6 +79,7 @@ import cn.vsx.hamster.errcode.module.SignalServerErrorCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.manager.audio.IAudioPlayComplateHandler;
+import cn.vsx.hamster.terminalsdk.manager.auth.LoginState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
@@ -92,12 +94,19 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetGPSLocationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupOrMemberNotExistHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMessageNotifyDateHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHistoryMultimediaFailHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMultimediaMessageCompleteHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyRecallRecordHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestLoginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseRecallRecordHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageFailedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -125,6 +134,7 @@ import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.DensityUtil;
 import cn.vsx.vc.utils.FileUtil;
 import cn.vsx.vc.utils.HandleIdUtil;
+import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.StatusBarUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.FixedRecyclerView;
@@ -206,6 +216,9 @@ public abstract class ChatBaseActivity extends BaseActivity
     private NFCBindingDialog nfcBindingDialog;//nfc弹窗
     private boolean isActivity;//是否是显示
 
+    LinearLayout noNetWork;
+    TextView tv_status;
+
 //    private NfcAdapter mNfcAdapter;
 //    private PendingIntent mPendingIntent;
 
@@ -261,6 +274,13 @@ public abstract class ChatBaseActivity extends BaseActivity
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveResponseRecallRecordHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mNotifyRecallRecordMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(getWarningMessageDetailHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestLoginHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileCheckMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowTransponPopupHandler);
@@ -370,6 +390,9 @@ public abstract class ChatBaseActivity extends BaseActivity
             setListSelection(chatMessageList.size() - 1);
             temporaryAdapter.notifyDataSetChanged();
         }
+        if(!NetworkUtil.isConnected(this)){
+            updateLoginStateView(0);
+        }
     }
 
 //    private void initNFC() {
@@ -471,6 +494,13 @@ public abstract class ChatBaseActivity extends BaseActivity
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveResponseRecallRecordHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mNotifyRecallRecordMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(getWarningMessageDetailHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestLoginHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowTransponPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowForwardMoreHandler);
@@ -2853,6 +2883,133 @@ public abstract class ChatBaseActivity extends BaseActivity
         }
 
 
+    }
+
+    /**
+     * 真实网络的状态
+     */
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            if (!connected) {
+                updateLoginStateView(0);
+            }
+        }
+    };
+
+
+    /**
+     * 网络连接状态
+     */
+    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
+
+        @Override
+        public void handler(final boolean connected) {
+            logger.info("个人会话页面收到服务是否连接的通知" + connected);
+            if (!connected) {
+                updateLoginStateView(0);
+            }
+        }
+    };
+
+    private ReceiveServerConnectionEstablishedHandler receiveServerConnectionEstablishedHandler = new ReceiveServerConnectionEstablishedHandler(){
+        @Override
+        public void handler(boolean connected){
+            updateLoginStateView(0);
+        }
+    };
+
+    /**
+     * 信令服务发送NotifyForceRegisterMessage消息时，先去reAuth(false)，然后login()
+     */
+    private ReceiveSendUuidResponseHandler receiveSendUuidResponseHandler = new ReceiveSendUuidResponseHandler() {
+        @Override
+        public void handler(int resultCode, final String resultDesc, boolean isRegisted) {
+            if (resultCode == BaseCommonCode.SUCCESS_CODE) {
+                if (isRegisted) {//注册过，在后台登录，session超时也走这
+                    updateLoginStateView(0);
+                }
+            }else if(resultCode == TerminalErrorCode.REGISTER_DEVICE_KILL.getErrorCode()){
+            }else if(resultCode == TerminalErrorCode.REGISTER_ACCOUNT_DELETE.getErrorCode()
+                    ||resultCode == TerminalErrorCode.REGISTER_NO_REGIST.getErrorCode()){
+            }else {
+                updateLoginStateView(0);
+            }
+        }
+    };
+
+    /**
+     * 请求登录
+     */
+    private ReceiveRequestLoginHandler receiveRequestLoginHandler = new ReceiveRequestLoginHandler(){
+        @Override
+        public void handler(int code, LoginState state){
+            if(code == BaseCommonCode.SUCCESS_CODE){
+                updateLoginStateView(0);
+            }else if(state!=null&&state == LoginState.IDLE){
+                updateLoginStateView(0);
+            }else if(state!=null&&state == LoginState.LOGIN){
+                //正在登录时，再次登录不修改UI
+            }else{
+                updateLoginStateView(-1);
+            }
+        }
+    };
+
+    private ReceiveLoginResponseHandler receiveLoginResponseHandler = new ReceiveLoginResponseHandler(){
+        @Override
+        public void handler(int resultCode, String resultDesc){
+            if(resultCode == BaseCommonCode.SUCCESS_CODE){
+                updateLoginStateView(1);
+            }else {
+                updateLoginStateView(0);
+            }
+        }
+    };
+
+    private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = new ReceiveUpdateAllDataCompleteHandler(){
+        @Override
+        public void handler(int errorCode, String errorDesc){
+            if(errorCode == BaseCommonCode.SUCCESS_CODE){
+                updateLoginStateView(1);
+            }else{
+                updateLoginStateView(-1);
+            }
+        }
+    };
+
+    /**
+     * 更新登录的状态
+     * @param type -1：Gone 0：离线中  1：登录成功
+     */
+    private void updateLoginStateView(int type){
+        try{
+            myHandler.post(()->{
+                if(type == 0){
+                    if(noNetWork!=null){
+                        noNetWork.setVisibility(View.VISIBLE);
+                    }
+                    if(tv_status!=null){
+                        tv_status.setText(R.string.text_use_in_offline);
+                    }
+                }else if(type == 1){
+                    if(tv_status!=null){
+                        tv_status.setText(R.string.login_success);
+                    }
+                    myHandler.postDelayed(()-> {
+                        if(noNetWork!=null){
+                            noNetWork.setVisibility(View.GONE);
+                        }
+                    },1000);
+                }else {
+                    if(noNetWork!=null){
+                        noNetWork.setVisibility(View.GONE);
+                    }
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

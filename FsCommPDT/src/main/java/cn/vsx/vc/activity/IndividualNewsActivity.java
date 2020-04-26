@@ -38,7 +38,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMultimediaMessageComplet
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyIndividualCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -77,8 +76,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     ImageView individualNewsInfo;
 
     ImageView individual_news_help;
-
-    LinearLayout noNetWork;
 
     VolumeViewLayout volumeViewLayout;
 
@@ -156,6 +153,7 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         newsBarGroupName = (TextView) findViewById(R.id.tv_chat_name);
         volumeViewLayout = (VolumeViewLayout) findViewById(R.id.volume_layout);
         noNetWork = (LinearLayout) findViewById(R.id.noNetWork);
+        tv_status = (TextView) findViewById(R.id.tv_status);
         individual_news_help = (ImageView) findViewById(R.id.individual_news_help);
         individualNewsInfo = (ImageView) findViewById(R.id.individual_news_info);
         individualNewsPhone = (ImageView) findViewById(R.id.individual_news_phone);
@@ -185,7 +183,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
         individualNewsInfo.setOnClickListener(this);
         individual_news_help.setOnClickListener(this);
         ivCall.setOnClickListener(this);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseStartLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
@@ -276,7 +273,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     public void doOtherDestroy() {
         handler.removeCallbacksAndMessages(null);
         record.cancel();
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseStartLiveHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverIndividualCallFromMsgItemHandler);
@@ -443,24 +439,6 @@ public class IndividualNewsActivity extends ChatBaseActivity implements View.OnC
     };
 
     private Handler myHandler = new Handler(Looper.getMainLooper());
-
-    /**
-     * 网络连接状态
-     */
-    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
-
-        @Override
-        public void handler(final boolean connected) {
-            logger.info("个人会话页面收到服务是否连接的通知" + connected);
-            IndividualNewsActivity.this.runOnUiThread(() -> {
-                if (!connected) {
-                    noNetWork.setVisibility(View.VISIBLE);
-                } else {
-                    noNetWork.setVisibility(View.GONE);
-                }
-            });
-        }
-    };
 
     /**更新所有成员列表*/
     private ReceiveNotifyMemberChangeHandler receiveNotifyMemberChangeHandler = new ReceiveNotifyMemberChangeHandler() {

@@ -178,7 +178,11 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = new ReceiveUpdateAllDataCompleteHandler(){
         @Override
         public void handler(int errorCode, String errorDesc){
-            updateLoginStateView(-1);
+            if(errorCode == BaseCommonCode.SUCCESS_CODE){
+                updateLoginStateView(1);
+            }else{
+                updateLoginStateView(-1);
+            }
         }
     };
 

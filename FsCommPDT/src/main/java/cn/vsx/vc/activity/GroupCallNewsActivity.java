@@ -58,7 +58,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicatio
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberAboutTempGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberChangeHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTUpHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveRequestGroupCallConformationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseGroupActiveHandler;
@@ -96,8 +95,6 @@ import static cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState.
  */
 
 public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnClickListener {
-
-    LinearLayout noNetWork;
 
     ImageView newsBarReturn;
 
@@ -203,6 +200,7 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     @Override
     public void initView() {
         noNetWork = (LinearLayout) findViewById(R.id.noNetWork);
+        tv_status = (TextView) findViewById(R.id.tv_status);
         newsBarReturn = (ImageView) findViewById(R.id.news_bar_return);
         groupLiveHistory = (ImageView) findViewById(R.id.group_live_history);
         groupCallActivityMemberInfo = (ImageView) findViewById(R.id.group_call_activity_member_info);
@@ -313,7 +311,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mmReceiveGetGroupCurrentOnlineMemberListHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveForceChangeGroupHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateConfigHandler);
@@ -387,7 +384,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSetMonitorGroupListHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestGroupCallConformationHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCeaseGroupCallConformationHander);
@@ -822,24 +818,6 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
                     });
                 }
             }
-        }
-    };
-
-    /**
-     * 网络连接状态
-     */
-    private ReceiveOnLineStatusChangedHandler receiveOnLineStatusChangedHandler = new ReceiveOnLineStatusChangedHandler() {
-
-        @Override
-        public void handler(final boolean connected) {
-            logger.info("组会话页面收到服务是否连接的通知" + connected);
-            GroupCallNewsActivity.this.runOnUiThread(() -> {
-                if (!connected) {
-                    noNetWork.setVisibility(View.VISIBLE);
-                } else {
-                    noNetWork.setVisibility(View.GONE);
-                }
-            });
         }
     };
 
