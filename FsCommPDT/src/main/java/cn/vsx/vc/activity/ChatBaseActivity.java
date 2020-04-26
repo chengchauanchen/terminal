@@ -2727,14 +2727,15 @@ public abstract class ChatBaseActivity extends BaseActivity
     //自动播放下一条语音
     private void autoPlay(int index){
         try{
+            logger.debug("autoPlay---size:"+chatMessageList.size());
             if(index<chatMessageList.size()){//不是最后一条消息，自动播放
                 //不是语音消息跳过执行下一条
-                if (chatMessageList.get(index).messageType != MessageType.AUDIO.getCode()&&!isReject) {
+                if (chatMessageList.get(index).messageType != MessageType.AUDIO.getCode()&&chatMessageList.get(index).messageType != MessageType.GROUP_CALL.getCode()&&!isReject) {
                     index = index + 1;
                     autoPlay(index);
                 }else {
                     if (chatMessageList.get(index).messageBody.containsKey(JsonParam.UNREAD) &&
-                        chatMessageList.get(index).messageBody.getBooleanValue(JsonParam.UNREAD) && !MediaManager.isPlaying() && !isReject) {
+                        chatMessageList.get(index).messageBody.getBooleanValue(JsonParam.UNREAD) && !isReject) {
                         OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayIndividualChatVoiceHandler.class, chatMessageList.get(index), index,
                             (chatMessageList.get(index).messageType == MessageType.AUDIO.getCode())?PlayType.PLAY_AUDIO.getCode():PlayType.PLAY_GROUP_CALL.getCode());
                     } else {

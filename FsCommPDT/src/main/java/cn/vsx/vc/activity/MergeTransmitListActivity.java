@@ -606,7 +606,8 @@ public class MergeTransmitListActivity extends BaseActivity implements SwipeRefr
                 if (chatMessageList.get(index).messageBody.containsKey(JsonParam.UNREAD) &&
                         chatMessageList.get(index).messageBody.getBooleanValue(JsonParam.UNREAD)
                         && MyTerminalFactory.getSDK().getParam(Params.IS_PLAY_END, false)) {
-                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupMergeTransmitVoiceHandler.class, index);
+                    OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverReplayGroupMergeTransmitVoiceHandler.class, index,
+                            (chatMessageList.get(index).messageType == MessageType.AUDIO.getCode())?PlayType.PLAY_AUDIO.getCode():PlayType.PLAY_GROUP_CALL.getCode());
                 }
             }
         } else {
