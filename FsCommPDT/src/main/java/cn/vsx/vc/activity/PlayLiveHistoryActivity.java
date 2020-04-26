@@ -488,6 +488,7 @@ public class PlayLiveHistoryActivity extends BaseActivity implements View.OnClic
             logger.info("消息："+terminalMessage);
             paramsMap.put("callId",getCallId(terminalMessage));
             paramsMap.put("id",getLiveUniqueNo(terminalMessage));
+            paramsMap.put("filter","1");
 //            logger.info("获取视频回放url："+url);
             String result = TerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
             //            result = "{\"msg\":\"success\",\"code\":0,\"data\":{\"list\":[{\"name\":\"88045832_6540978884229379386\",\"start_time\":\"20190517154511\",\"duration\":\"13.598\",\"hls\":\"/hls/88045832_6540978884229379386/20190517/20190517154511/88045832_6540978884229379386_record.m3u8\"}]}}";
