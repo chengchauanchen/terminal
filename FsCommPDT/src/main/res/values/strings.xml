@@ -692,5 +692,9 @@
     <string name="text_push_live">视频上报</string>
     <string name="text_please_choose_server">请选择单位</string>
     <string name="text_media_server_info_error">流媒体服务信息错误</string>
+    <string name="text_liveing_url_is_empty">流地址为空</string>
+    <string name="text_liveing_error_recording">上报失败，正在本地录像</string>
+    <string name="text_media_server_error_recording">流媒体服务器无效，正在本地录像</string>
+    <string name="text_video_live_from_no_regist_can_not_watch_history">未注册账号上报的历史图像不能观看</string>
 
 </resources>

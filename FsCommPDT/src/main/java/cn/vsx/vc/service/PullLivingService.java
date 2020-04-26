@@ -52,6 +52,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetRtspStreamUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberNotLivingHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberStopWatchMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
@@ -68,6 +69,7 @@ import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
 import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
+import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
@@ -111,6 +113,7 @@ public class PullLivingService extends BaseService{
     private RelativeLayout mPopupMiniLive;
     private RelativeLayout mRlPullLive;
     public Member liveMember;
+    protected LinearLayout llNoNetwork;
     //callId
     public long callId;
 
@@ -119,6 +122,7 @@ public class PullLivingService extends BaseService{
     @Override
     @SuppressLint({"WrongConstant", "ClickableViewAccessibility"})
     protected void initListener(){
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetRtspStreamUrlHandler);
@@ -181,7 +185,7 @@ public class PullLivingService extends BaseService{
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
             mLlLiveLookInviteMember.setVisibility(View.GONE);
         }else {
-            mLlLiveLookInviteMember.setVisibility(View.VISIBLE);
+//            mLlLiveLookInviteMember.setVisibility(View.VISIBLE);
         }
     }
 
@@ -206,22 +210,6 @@ public class PullLivingService extends BaseService{
 
     @Override
     protected void onNetworkChanged(boolean connected){
-        if(!connected){
-            if(!mHandler.hasMessages(OFF_LINE)){
-                mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
-            }
-        }else {
-            mHandler.removeMessages(OFF_LINE);
-//            if(MyApplication.instance.isMiniLive){
-//                if(null != mSvLivePop.getSurfaceTexture()){
-//                    startPull(mSvLivePop);
-//                }
-//            }else {
-//                if(null != mSvLive.getSurfaceTexture()){
-//                    startPull(mSvLive);
-//                }
-//            }
-        }
     }
 
     @SuppressLint("InflateParams")
@@ -257,7 +245,7 @@ public class PullLivingService extends BaseService{
         mTvLiveSpeakingName = rootView.findViewById(R.id.tv_live_speakingName);
         mTvLiveGroupName = rootView.findViewById(R.id.tv_live_groupName);
         mTvLiveSpeakingId = rootView.findViewById(R.id.tv_live_speakingId);
-        mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
+        llNoNetwork = rootView.findViewById(R.id.ll_no_network);
         mLlRefreshing = rootView.findViewById(R.id.ll_refreshing);
         mRefreshingIcon = rootView.findViewById(R.id.refreshing_icon);
         ImageView mLiveVedioIcon = rootView.findViewById(R.id.live_vedioIcon);
@@ -265,6 +253,7 @@ public class PullLivingService extends BaseService{
         ImageView ivLiveSpeakingHead = rootView.findViewById(R.id.iv_live_speaking_head);
         ivLiveSpeakingHead.setImageResource(BitmapUtil.getUserPhotoRound());
         dismissLoadingView(mLlRefreshing,mRefreshingIcon);
+        llNoNetwork.setVisibility(NetworkUtil.isConnected(MyApplication.getApplication())?View.GONE:View.VISIBLE);
     }
 
     @Override
@@ -281,6 +270,7 @@ public class PullLivingService extends BaseService{
     @Override
     public void onDestroy(){
         super.onDestroy();
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTUpHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTDownHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
@@ -295,6 +285,28 @@ public class PullLivingService extends BaseService{
 //        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseWatchLiveAndTempGroupMessageHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
+
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            mHandler.post(() -> {
+                if(llNoNetwork!=null) {
+                    llNoNetwork.setVisibility((!connected) ? View.VISIBLE : View.GONE);
+                }
+            });
+            if(connected){
+                if(MyApplication.instance.isMiniLive){
+                if(null != mSvLivePop.getSurfaceTexture()){
+                    startPull(mSvLivePop);
+                }
+            }else {
+                if(null != mSvLive.getSurfaceTexture()){
+                    startPull(mSvLive);
+                }
+            }
+            }
+        }
+    };
     /**
      * 主动方请求组呼的消息
      */

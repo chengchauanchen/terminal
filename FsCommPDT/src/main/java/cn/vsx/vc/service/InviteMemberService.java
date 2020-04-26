@@ -925,7 +925,7 @@ public class InviteMemberService extends BaseService implements SwipeRefreshLayo
                         searchAdapter.loadMoreComplete();
                     }
 
-                    if(page == 0){
+                    if(page <= 1){
                         searchList.clear();
                     }
                     int viewType = getSearchTerminalType();

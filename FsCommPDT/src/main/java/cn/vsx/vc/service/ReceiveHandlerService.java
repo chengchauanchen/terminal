@@ -44,7 +44,6 @@ import org.linphone.core.LinphoneCall;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +68,8 @@ import cn.vsx.hamster.terminalsdk.model.VideoMeetingMessage;
 import cn.vsx.hamster.terminalsdk.model.WarningRecord;
 import cn.vsx.hamster.terminalsdk.receiveHandler.GetWarningMessageDetailHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCallHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeByNoRegistHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyAddVideoMeetingMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyDataMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyIndividualCallHandler;
@@ -83,9 +84,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponNotifyWatchHandler
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.TerminalMessageUtil;
-import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.util.StateMachine.IState;
 import cn.vsx.vc.R;
 import cn.vsx.vc.activity.GroupCallNewsActivity;
@@ -107,6 +106,7 @@ import cn.vsx.vc.receiveHandle.ReceiveVoipCallEndHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipConnectedHandler;
 import cn.vsx.vc.receiveHandle.ReceiveVoipErrorHandler;
 import cn.vsx.vc.receiveHandle.ReceiveWarningReadCountChangedHandler;
+import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoByNoRegistHandler;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoHandler;
 import cn.vsx.vc.receiveHandle.ReceiverRequestVideoMeetingHandler;
@@ -118,6 +118,7 @@ import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.SensorUtil;
 import cn.vsx.vc.view.flingswipe.SwipeFlingAdapterView;
 import ptt.terminalsdk.context.MyTerminalFactory;
+import ptt.terminalsdk.manager.filetransfer.FileTransferOperation;
 import ptt.terminalsdk.permission.FloatWindowManager;
 import ptt.terminalsdk.service.KeepLiveManager;
 import ptt.terminalsdk.tools.ApkUtil;
@@ -236,6 +237,7 @@ public class ReceiveHandlerService extends Service{
         //视频上报监听
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGoWatchRTSPHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingIncommingHandler);//请求开视频
+        OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverActivePushVideoByNoRegistHandler);//上报视频（没有注册）
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverActivePushVideoHandler);//上报视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoHandler);//请求视频
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiverRequestVideoMeetingHandler);//视频会商
@@ -246,6 +248,8 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyAddVideoMeetingMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReStartVoipHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeByNoRegistHandler);
 
         //监听voip来电
         MyTerminalFactory.getSDK().getVoipCallManager().addCallback(voipRegistrationCallback,voipPhoneCallback);
@@ -471,32 +475,34 @@ public class ReceiveHandlerService extends Service{
         //判断消息类型
         if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()){
             MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
-                String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
-                int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
-                String url = "http://" + serverIp + ":" + serverPort + "/file/download/isLiving";
-                Map<String, String> paramsMap = new HashMap<>();
-                paramsMap.put("callId", terminalMessage.messageBody.getString(JsonParam.CALLID));
-                paramsMap.put("sign", SignatureUtil.sign(paramsMap));
-                logger.info("查看视频播放是否结束url：" + url);
-                String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
-                logger.info("查看视频播放是否结束结果：" + result);
-                if(!Util.isEmpty(result)){
-                    JSONObject jsonObject = JSONObject.parseObject(result);
-                    boolean living = jsonObject.getBoolean("living");
-                    if(living){
+                String liveUrl = "";
+                try{
+                    liveUrl = terminalMessage.messageBody.getString(JsonParam.EASYDARWIN_RTSP_URL);
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+                if(!android.text.TextUtils.isEmpty(liveUrl)){
+                    boolean isLiving = TerminalFactory.getSDK().getLiveManager().checkPushLiveIsLivingByUrl(liveUrl);
+                    if (isLiving) {
                         Message msg = Message.obtain();
                         msg.what = WATCH_LIVE;
                         msg.obj = terminalMessage;
                         msg.arg1 = position;
                         myHandler.sendMessage(msg);
-                    }else{
+                    } else {
                         removeView();
-                        Intent intent = new Intent(MyTerminalFactory.getSDK().application, PlayLiveHistoryActivity.class);
-                        intent.putExtra("terminalMessage", terminalMessage);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        //                                intent.putExtra("endChatTime",endChatTime);
-                        startActivity(intent);
+                        if(TerminalFactory.getSDK().getTerminalMessageManager().checkVideoLiveMessageFromNoRegist(terminalMessage.messageBody)){
+                            cn.vsx.vc.utils.ToastUtil.showToast(getString(R.string.text_video_live_from_no_regist_can_not_watch_history));
+                        }else{
+                            Intent intent = new Intent(MyTerminalFactory.getSDK().application, PlayLiveHistoryActivity.class);
+                            intent.putExtra("terminalMessage", terminalMessage);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            //intent.putExtra("endChatTime",endChatTime);
+                            startActivity(intent);
+                        }
                     }
+                }else{
+//                    ToastUtil.showToast(getString(R.string.text_liveing_url_is_empty));
                 }
             });
         }else if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode()){
@@ -604,7 +610,10 @@ public class ReceiveHandlerService extends Service{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyAddVideoMeetingMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReStartVoipHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeByNoRegistHandler);
 
+        OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoByNoRegistHandler);//上报图像（没有注册）
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverActivePushVideoHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(receiverRequestVideoMeetingHandler);//视频会商
@@ -630,6 +639,8 @@ public class ReceiveHandlerService extends Service{
         if(MyApplication.instance.checkVideoMeeting()){
             return;
         }
+        //判断是否在上报中
+
         startTranspantActivity();
         Intent intent = new Intent();
         intent.putExtra(Constants.MEMBER_NAME, mainMemberName);
@@ -665,6 +676,15 @@ public class ReceiveHandlerService extends Service{
                 intent.putExtra(Constants.EMERGENCY_TYPE,true);
                 myHandler.postDelayed(() -> startService(intent),1000);
             }else{
+//                if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
+//                    return;
+//                }
+//                if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
+//                    return;
+//                }
+//                if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
+//                    return;
+//                }
                 intent.setClass(ReceiveHandlerService.this, ReceiveLiveCommingService.class);
                 startService(intent);
             }
@@ -1115,7 +1135,8 @@ public class ReceiveHandlerService extends Service{
         startTranspantActivity();
         Map<TerminalState, IState<?>> currentStateMap = TerminalFactory.getSDK().getTerminalStateManager().getCurrentStateMap();
         //观看上报图像,个呼
-        if(currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PLAYING)|| currentStateMap.containsKey(TerminalState.INDIVIDUAL_CALLING)){
+        if(currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PUSHING)||currentStateMap.containsKey(TerminalState.VIDEO_LIVING_PLAYING)
+                || currentStateMap.containsKey(TerminalState.INDIVIDUAL_CALLING)){
             TerminalFactory.getSDK().notifyReceiveHandler(ReceiveNotifyEmergencyMessageHandler.class);
         }
         //组呼
@@ -1140,7 +1161,27 @@ public class ReceiveHandlerService extends Service{
             ToastUtils.showShort(message.getResultDesc());
         }
     };
+    //接收到上报视频的回调(没有注册)
+    private ReceiverActivePushVideoByNoRegistHandler receiverActivePushVideoByNoRegistHandler = this::onActivePushVideoByNoRegist;
 
+    private void onActivePushVideoByNoRegist() {
+        try{
+            //判断权限
+            if(!checkFloatPermission()){
+                startSetting();
+                return;
+            }
+            //清空状态
+            MyApplication.instance.stopAllBusiness();
+            myHandler.postDelayed(() -> {
+                Intent intent = new Intent(this, PhonePushByNoRegistService.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                startService(intent);
+            },500);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 
     //接收到上报视频的回调
     private ReceiverActivePushVideoHandler receiverActivePushVideoHandler = this::onActivePushVideo;
@@ -1401,6 +1442,36 @@ public class ReceiveHandlerService extends Service{
         }
     };
 
+    /**
+     * 网络状态
+     */
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            if(connected){
+                //清理数据库
+                FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
+                //48小时未上传的文件上传,警务通暂时不要自动上传48小时未上传的功能
+                //上传没有上传的文件信息
+                manager.uploadFileTreeBean(null);
+            }
+        }
+    };
+    /**
+     * 网络状态(没有注册时的网络变化)
+     */
+    private ReceiveNetworkChangeByNoRegistHandler receiveNetworkChangeByNoRegistHandler = new ReceiveNetworkChangeByNoRegistHandler(){
+        @Override
+        public void handler(boolean connected){
+            if(connected){
+                //清理数据库
+                FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
+                //48小时未上传的文件上传,警务通暂时不要自动上传48小时未上传的功能
+                //上传没有上传的文件信息
+                manager.uploadFileTreeBean(null);
+            }
+        }
+    };
     private void showWarningDialog(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (!Settings.canDrawOverlays(ReceiveHandlerService.this)) {

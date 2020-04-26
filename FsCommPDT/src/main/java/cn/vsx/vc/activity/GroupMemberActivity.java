@@ -17,8 +17,6 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.utils.CallPhoneUtil;
 import com.blankj.utilcode.util.ToastUtils;
 
 import java.util.ArrayList;
@@ -40,6 +38,8 @@ import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.GroupMemberAdapter;
+import cn.vsx.vc.application.MyApplication;
+import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.VolumeViewLayout;
@@ -181,6 +181,7 @@ public class GroupMemberActivity extends BaseActivity implements View.OnClickLis
         if(null ==group){
             group = DataUtil.getGroupByGroupNo(groupId);
         }
+        logger.info( "临时组---group:" + group);
         if(group != null){
             isTemporaryGroup = GroupType.TEMPORARY.toString().equals(group.getGroupType());
             if(group.getCreatedMemberUniqueNo() == MyTerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO,-1L) && isTemporaryGroup){

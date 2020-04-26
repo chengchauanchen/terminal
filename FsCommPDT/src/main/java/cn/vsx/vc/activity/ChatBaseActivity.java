@@ -102,7 +102,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
-import cn.vsx.hamster.terminalsdk.tools.SignatureUtil;
 import cn.vsx.hamster.terminalsdk.tools.Util;
 import cn.vsx.vc.R;
 import cn.vsx.vc.adapter.TemporaryAdapter;
@@ -1569,34 +1568,34 @@ public abstract class ChatBaseActivity extends BaseActivity
                     ToastUtils.showShort(R.string.text_calling_cannot_pull);
                     return;
                 }
-
-
                 //先请求看视频上报是否已经结束
                 MyTerminalFactory.getSDK().getThreadPool().execute(() -> {
-                    String serverIp = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_IP, "");
-                    int serverPort = MyTerminalFactory.getSDK().getParam(Params.FILE_SERVER_PORT, 0);
-                    String url = "http://" + serverIp + ":" + serverPort + "/file/download/isLiving";
-                    Map<String, String> paramsMap = new HashMap<>();
-                    paramsMap.put("callId", terminalMessage.messageBody.getString(JsonParam.CALLID));
-                    paramsMap.put("sign", SignatureUtil.sign(paramsMap));
-                    logger.info("查看视频播放是否结束url：" + url);
-                    String result = MyTerminalFactory.getSDK().getHttpClient().sendGet(url, paramsMap);
-                    logger.info("查看视频播放是否结束结果：" + result);
-                    if (!Util.isEmpty(result)) {
-                        JSONObject jsonObject = JSONObject.parseObject(result);
-                        boolean living = jsonObject.getBoolean("living");
-                        if (living) {
-                            Message msg = Message.obtain();
-                            msg.what = WATCH_LIVE;
-                            msg.obj = terminalMessage;
-                            handler.sendMessage(msg);
-                        } else {
-                            // TODO: 2018/8/7
-                            Intent intent = new Intent(ChatBaseActivity.this, PlayLiveHistoryActivity.class);
-                            intent.putExtra("terminalMessage", terminalMessage);
-                            ChatBaseActivity.this.startActivity(intent);
-                        }
+                    String liveUrl = "";
+                    try{
+                        liveUrl = terminalMessage.messageBody.getString(JsonParam.EASYDARWIN_RTSP_URL);
+                    }catch (Exception e){
+                        e.printStackTrace();
                     }
+                   if(!android.text.TextUtils.isEmpty(liveUrl)){
+                       boolean isLiving = TerminalFactory.getSDK().getLiveManager().checkPushLiveIsLivingByUrl(liveUrl);
+                       if (isLiving) {
+                           Message msg = Message.obtain();
+                           msg.what = WATCH_LIVE;
+                           msg.obj = terminalMessage;
+                           handler.sendMessage(msg);
+                       } else {
+                           // 如果是没有注册的上报图像就不观看历史上报图像
+                           if(TerminalFactory.getSDK().getTerminalMessageManager().checkVideoLiveMessageFromNoRegist(terminalMessage.messageBody)){
+                               ToastUtil.showToast(getString(R.string.text_video_live_from_no_regist_can_not_watch_history));
+                           }else{
+                               Intent intent = new Intent(ChatBaseActivity.this, PlayLiveHistoryActivity.class);
+                               intent.putExtra("terminalMessage", terminalMessage);
+                               ChatBaseActivity.this.startActivity(intent);
+                           }
+                       }
+                   }else{
+                       ToastUtil.showToast(getString(R.string.text_liveing_url_is_empty));
+                   }
                 });
             }
 
@@ -2528,7 +2527,7 @@ public abstract class ChatBaseActivity extends BaseActivity
                 if (i < size) {
                     noteJsonArray.add(String.valueOf(temporaryAdapter.getMessageContent(forwardList.get(i))));
                 }
-                idJsonArray.add(forwardList.get(i).messageId);
+                idJsonArray.add(forwardList.get(i).messageId+"");
             }
             JSONObject jsonObject = new JSONObject();
             String name = MyTerminalFactory.getSDK().getParam(Params.MEMBER_NAME, "");

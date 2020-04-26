@@ -14,6 +14,7 @@ public class MediaServerInfoBean implements Serializable {
     private static final long serialVersionUID = -1947689681631663196L;
     private String  mediaServerIp;
     private int  mediaServerPort;
+    private int mediaServerApiPort;
 
     public MediaServerInfoBean() {
     }
@@ -34,11 +35,20 @@ public class MediaServerInfoBean implements Serializable {
         this.mediaServerPort = mediaServerPort;
     }
 
+    public int getMediaServerApiPort() {
+        return mediaServerApiPort;
+    }
+
+    public void setMediaServerApiPort(int mediaServerApiPort) {
+        this.mediaServerApiPort = mediaServerApiPort;
+    }
+
     @Override
     public String toString() {
         return "MediaServerInfoBean{" +
                 "mediaServerIp='" + mediaServerIp + '\'' +
                 ", mediaServerPort=" + mediaServerPort +
+                ", mediaServerApiPort=" + mediaServerApiPort +
                 '}';
     }
 }

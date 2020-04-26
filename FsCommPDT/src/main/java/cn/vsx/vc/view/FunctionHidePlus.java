@@ -172,7 +172,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
                 }else if (title.equals("发送位置")
                         &&MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_MESSAGE_SEND.name())){
                     OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverSendFileHandler.class, ReceiverSendFileHandler.LOCATION);
-                }else if (title.equals("上报图像")||(title.equals("组内上图"))){
+                }else if (title.equals("上报图像")||(title.equals("视频上报"))){
                     if (!CheckMyPermission.selfPermissionGranted(context, Manifest.permission.RECORD_AUDIO)) {//没有录音权限
                         CheckMyPermission.permissionPrompt((Activity) context, Manifest.permission.RECORD_AUDIO);
                         return;
@@ -478,7 +478,7 @@ public class FunctionHidePlus extends LinearLayout implements View.OnClickListen
     private void setNoVideo() {
         titles = null;
         titles=new String[]{
-                "相册","拍照","文件","发送位置","组内上图"
+                "相册","拍照","文件","发送位置","视频上报"
         };
         images = null;
         images=new Integer[]{

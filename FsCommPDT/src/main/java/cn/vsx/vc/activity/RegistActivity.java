@@ -5,10 +5,12 @@ import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,6 +41,7 @@ import android.widget.TextView;
 
 import com.blankj.utilcode.util.ToastUtils;
 import com.ycgis.pclient.PService;
+import com.zectec.imageandfileselector.utils.OperateReceiveHandlerUtilSync;
 
 import org.apache.log4j.Logger;
 
@@ -95,6 +98,7 @@ import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receive.SendRecvHelper;
+import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoByNoRegistHandler;
 import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.KeyboarUtils;
@@ -103,6 +107,7 @@ import cn.vsx.vc.utils.SelfStartupPermissionUtils;
 import cn.vsx.vc.utils.SetToListUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import cn.vsx.vc.view.XCDropDownListView;
+import ptt.terminalsdk.broadcastreceiver.NetWorkConnectionChangeByNoRegistReceiver;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.audio.CheckMyPermission;
 import ptt.terminalsdk.tools.DeleteData;
@@ -148,6 +153,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private PopupWindow popupWindow;
     private boolean isCheckSuccess;//联通校验是否通过
     private boolean isCheckFinished;//联通校验是否完成
+    private NetWorkConnectionChangeByNoRegistReceiver netWorkConnectionChangeByNoRegistReceiver;
     // 安全VPN服务名称
     private static final String SEC_VPN_SERVICE_ACTION_NAME = "sec.vpn.service";
 
@@ -237,10 +243,13 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                         //发生异常的时候重试几次，因为网络原因经常导致一个io异常
                         TerminalFactory.getSDK().getAuthManagerTwo().startAuth(TerminalFactory.getSDK().getAuthManagerTwo().getTempIp(), TerminalFactory.getSDK().getAuthManagerTwo().getTempPort());
                     } else {
-                        changeProgressMsg(TextUtils.isEmpty(resultDesc) ? getResources().getString(R.string.auth_fail) : resultDesc);
-                        // TODO: 2020/1/7 判断是否在自动更新，如果在自动更新就不能退出
+                        changeProgressMsg((TextUtils.isEmpty(resultDesc) ? getResources().getString(R.string.auth_fail) : resultDesc));
+                        //
                         if(!MyApplication.instance.isUpdatingAPP){
-                            myHandler.postDelayed(() -> exit(), 3000);
+                            myHandler.postDelayed(() -> {
+                                ll_regist.setVisibility(View.VISIBLE);
+                                hideProgressDialog();
+                            }, 3000);
                         }
                     }
                 } else if (resultCode == TerminalErrorCode.TERMINAL_FAIL.getErrorCode()) {
@@ -574,8 +583,18 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                 ToastUtil.showToast(getString(R.string.text_media_server_info_error));
                 return;
             }
-            // TODO: 2020/4/21 开始推流
-            
+            //摄像头的权限
+            if(!CheckMyPermission.selfPermissionGranted(RegistActivity.this, permission.CAMERA)){
+                CheckMyPermission.permissionPrompt(RegistActivity.this, permission.CAMERA);
+                return;
+            }
+            //录音的权限
+            if(!CheckMyPermission.selfPermissionGranted(RegistActivity.this, permission.RECORD_AUDIO)){
+                CheckMyPermission.permissionPrompt(RegistActivity.this, permission.RECORD_AUDIO);
+                return;
+            }
+            // 开始推流
+            OperateReceiveHandlerUtilSync.getInstance().notifyReceiveHandler(ReceiverActivePushVideoByNoRegistHandler.class);
         }
     }
 
@@ -1057,6 +1076,26 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
                     permissionDenied(permission.READ_PHONE_STATE);
                 }
                 break;
+
+            case CheckMyPermission.REQUEST_CAMERA:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission Granted
+                    judgePermission();
+                } else {
+                    // Permission Denied
+                    permissionDenied(permission.CAMERA);
+                }
+                break;
+
+            case CheckMyPermission.REQUEST_RECORD_AUDIO:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission Granted
+                    judgePermission();
+                } else {
+                    // Permission Denied
+                    permissionDenied(permission.RECORD_AUDIO);
+                }
+                break;
             default:
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
@@ -1066,17 +1105,28 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
      * 必须要有SD卡和读取电话状态的权限，APP才能使用
      */
     public void judgePermission() {
-        if (CheckMyPermission.selfPermissionGranted(this, permission.WRITE_EXTERNAL_STORAGE)) {//SD卡读写权限
-            if (CheckMyPermission.selfPermissionGranted(this, permission.READ_PHONE_STATE)) {//手机权限，获取uuid
-                SpecificSDK.getInstance().configLogger();
-                checkIfAuthorize();
-            } else {
-                CheckMyPermission.permissionPrompt(this, permission.READ_PHONE_STATE);
-            }
-
-        } else {
+        //SD卡读写权限
+        if(!CheckMyPermission.selfPermissionGranted(this, permission.WRITE_EXTERNAL_STORAGE)){
             CheckMyPermission.permissionPrompt(this, permission.WRITE_EXTERNAL_STORAGE);
+            return;
         }
+        //手机权限，获取uuid
+        if(!CheckMyPermission.selfPermissionGranted(this, permission.READ_PHONE_STATE)){
+            CheckMyPermission.permissionPrompt(this, permission.READ_PHONE_STATE);
+            return;
+        }
+        //摄像头的权限
+        if(!CheckMyPermission.selfPermissionGranted(this, permission.CAMERA)){
+            CheckMyPermission.permissionPrompt(this, permission.CAMERA);
+            return;
+        }
+        //录音的权限
+        if(!CheckMyPermission.selfPermissionGranted(this, permission.RECORD_AUDIO)){
+            CheckMyPermission.permissionPrompt(this, permission.RECORD_AUDIO);
+            return;
+        }
+        SpecificSDK.getInstance().configLogger();
+        checkIfAuthorize();
     }
 
     /**
@@ -1195,6 +1245,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         String authUrl = TerminalFactory.getSDK().getParam(Params.AUTH_URL, "");
         System.out.println("注册服务器的地址:" + authUrl);
         if (TextUtils.isEmpty(authUrl)) {
+            clearRegistServerInfo();
             //平台包或者没获取到类型，直接用AuthManager中的地址,
             String apkType = TerminalFactory.getSDK().getParam(Params.APK_TYPE, AuthManagerTwo.POLICESTORE);
             if (ApkUtil.isAppStore()|| AuthManagerTwo.POLICETEST.equals(apkType)
@@ -1239,6 +1290,14 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 //                //状态机没有转到正在认证，说明已经在状态机中了，不用处理
 //            }
         }
+    }
+
+    /**
+     * 清除注册服务的信息
+     */
+    private void clearRegistServerInfo() {
+        TerminalFactory.getSDK().putParam(Params.REGIST_IP,"");
+        TerminalFactory.getSDK().putParam(Params.REGIST_PORT, "");
     }
 
     /**
@@ -1314,6 +1373,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     @Override
     public void initListener() {
+        registNetworkChangeHandler();
         MyTerminalFactory.getSDK().registReceiveHandler(receiveExitHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
@@ -1392,6 +1452,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     @Override
     public void doOtherDestroy() {
+        unregistNetworkChangeHandler();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
@@ -1851,6 +1912,19 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         public void onUploadLogClickListeren() {
 //            logger.info("result ProgressDialogForResgistActivity 点击上传");
             uploadLog();
+        }
+    }
+
+    public void registNetworkChangeHandler(){
+        netWorkConnectionChangeByNoRegistReceiver = new NetWorkConnectionChangeByNoRegistReceiver();
+        IntentFilter netFilter = new IntentFilter();
+        netFilter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(netWorkConnectionChangeByNoRegistReceiver,netFilter);
+    }
+
+    public void unregistNetworkChangeHandler(){
+        if(netWorkConnectionChangeByNoRegistReceiver!=null){
+            unregisterReceiver(netWorkConnectionChangeByNoRegistReceiver);
         }
     }
 }

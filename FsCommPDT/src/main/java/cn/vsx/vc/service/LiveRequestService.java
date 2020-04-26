@@ -15,6 +15,7 @@ import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveAnswerLiveTimeoutHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetRtspStreamUrlHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseStartLiveHandler;
 import cn.vsx.hamster.terminalsdk.tools.Util;
@@ -71,6 +72,7 @@ public class LiveRequestService extends BaseService{
     @Override
     protected void initListener(){
         mLlLiveRequestStopTotal.setOnClickListener(cancelOnClickListener);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveReaponseStartLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerLiveTimeoutHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetRtspStreamUrlHandler);
@@ -82,7 +84,7 @@ public class LiveRequestService extends BaseService{
 
         String memberName = intent.getStringExtra(Constants.MEMBER_NAME);
         memberId = intent.getIntExtra(Constants.MEMBER_ID, 0);
-        uniqueNo = intent.getLongExtra(Constants.UNIQUE_NO, 0l);
+        uniqueNo = intent.getLongExtra(Constants.UNIQUE_NO, 0L);
         //开始响铃
         PromptManager.getInstance().IndividualCallRequestRing();
         mTvLiveRequestName.setText(HandleIdUtil.handleName(memberName));
@@ -106,20 +108,27 @@ public class LiveRequestService extends BaseService{
 
     @Override
     protected void onNetworkChanged(boolean connected){
-        if(!connected){
-            MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId,uniqueNo);
-            stopBusiness();
-        }
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReaponseStartLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerLiveTimeoutHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetRtspStreamUrlHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
     }
+
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            if(!connected){
+                MyTerminalFactory.getSDK().getLiveManager().stopRequestMemberLive(memberId,uniqueNo);
+                stopBusiness();
+            }
+        }
+    };
 
     private View.OnClickListener cancelOnClickListener = v ->{
         ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.canceled));

@@ -1065,16 +1065,18 @@ public class GroupCallNewsActivity extends ChatBaseActivity implements View.OnCl
     private ReceiveSetCurrentGroupHandler receiveSetCurrentGroupHandler = new ReceiveSetCurrentGroupHandler(){
         @Override
         public void handler(int currentGroupId, int errorCode, String errorDesc){
-            if(errorCode == BaseCommonCode.SUCCESS_CODE){
-                if(currentGroupId == userId){
-                    refreshPtt();
+            handler.post(() -> {
+                if(errorCode == BaseCommonCode.SUCCESS_CODE){
+                    if(currentGroupId == userId){
+                        refreshPtt();
 
-                    TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
-                    isCurrentGroup = !isCurrentGroup;
+                        TextViewCompat.setTextAppearance(ptt, R.style.funcation_top_btn_text);
+                        isCurrentGroup = !isCurrentGroup;
+                    }
+                }else {
+                    ToastUtils.showShort(errorDesc);
                 }
-            }else {
-                ToastUtils.showShort(errorDesc);
-            }
+            });
         }
     };
 

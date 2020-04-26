@@ -8,7 +8,6 @@ import android.hardware.Camera;
 import android.os.Bundle;
 import android.os.Message;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.Surface;
@@ -16,7 +15,6 @@ import android.view.TextureView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -30,69 +28,43 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
-import cn.vsx.hamster.common.Authority;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.errcode.module.TerminalErrorCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
-import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
-import cn.vsx.hamster.terminalsdk.model.VideoMember;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExternStorageSizeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeByNoRegistHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyOtherStopVideoMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSupportResolutionHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
-import cn.vsx.hamster.terminalsdk.tools.DataUtil;
 import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
-import cn.vsx.vc.adapter.MemberEnterAdapter;
 import cn.vsx.vc.application.MyApplication;
-import cn.vsx.vc.model.PushLiveMemberList;
 import cn.vsx.vc.prompt.PromptManager;
 import cn.vsx.vc.receiveHandle.ReceiverCloseKeyBoardHandler;
-import cn.vsx.vc.utils.BitmapUtil;
-import cn.vsx.vc.utils.Constants;
-import cn.vsx.vc.utils.HandleIdUtil;
-import cn.vsx.vc.utils.MyDataUtil;
 import cn.vsx.vc.utils.NetworkUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
- * 普通手机上报视频
+ * 没有注册的手机上报视频
  */
-public class PhonePushService extends BaseService{
+public class PhonePushByNoRegistService extends BaseService{
 
     private RelativeLayout mPopupMiniLive;
     private TextureView mSvLivePop;
     private RelativeLayout mRlPhonePushLive;
     private TextureView mSvLive;
-    private TextView mLiveVedioTheme;
     private TextView mTvLiveRealtime;
     private ImageView mIvLiveRetract;
-    private LinearLayout mLlLiveGroupCall;
-    private TextView mTvLiveSpeakingName;
-    private TextView mTvLiveGroupName;
-    private TextView mTvLiveSpeakingId;
-    private ListView mLvLiveMemberInfo;
     private LinearLayout mLlLiveChageCamera;
     private ImageView mIvLiveChageCamera;
     private LinearLayout mLlLiveHangupTotal;
-    private LinearLayout mLlLiveInviteMember;
-    private ImageView mIvLiveAddmember;
     private MediaStream mMediaStream;
     private List<String> listResolution;
-    private List<VideoMember> watchOrExitMembers;
-    private ArrayList<VideoMember> watchMembers;
-    private List<String> pushMemberList = new ArrayList<>();
     private PushCallback pushCallback;
     private String ip;
     private String port;
@@ -101,23 +73,21 @@ public class PhonePushService extends BaseService{
     private float downY = 0;
     private int oddOffsetX = 0;
     private int oddOffsetY = 0;
-    private MemberEnterAdapter enterOrExitMemberAdapter;
     private static final int CURRENTTIME = 0;
     private static final int HIDELIVINGVIEW = 1;
     private static final int AUTOFOCUS = 2;
     private static final int SHOWERRORVIEW = 3;
-    private boolean isGroupPushLive;
     private int width = 640;
     private int height = 480;
     protected TextView tvNoNetwork;
     protected LinearLayout llNoNetwork;
 
-    public PhonePushService(){}
+    public PhonePushByNoRegistService(){}
 
     @SuppressLint("InflateParams")
     @Override
     protected void setRootView(){
-        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_phone_push, null);
+        rootView = LayoutInflater.from(MyTerminalFactory.getSDK().application).inflate(R.layout.layout_phone_push_by_no_regist, null);
     }
 
     @Override
@@ -138,32 +108,21 @@ public class PhonePushService extends BaseService{
         //大窗口
         mRlPhonePushLive = rootView.findViewById(R.id.rl_phone_push_live);
         mSvLive = rootView.findViewById(R.id.sv_live);
-        mLiveVedioTheme = rootView.findViewById(R.id.live_vedioTheme);
         mTvLiveRealtime = rootView.findViewById(R.id.tv_live_realtime);
         mIvLiveRetract = rootView.findViewById(R.id.iv_live_retract);
-        mLlLiveGroupCall = rootView.findViewById(R.id.ll_live_group_call);
-        mTvLiveSpeakingName = rootView.findViewById(R.id.tv_live_speakingName);
-        mTvLiveGroupName = rootView.findViewById(R.id.tv_live_groupName);
-        mTvLiveSpeakingId = rootView.findViewById(R.id.tv_live_speakingId);
-        mLvLiveMemberInfo = rootView.findViewById(R.id.lv_live_member_info);
         mLlLiveChageCamera = rootView.findViewById(R.id.ll_live_chage_camera);
         mIvLiveChageCamera = rootView.findViewById(R.id.iv_live_chage_camera);
         mLlLiveHangupTotal = rootView.findViewById(R.id.ll_live_hangup_total);
-        mLlLiveInviteMember = rootView.findViewById(R.id.ll_live_invite_member);
-        mIvLiveAddmember = rootView.findViewById(R.id.iv_live_addmember);
 
         tvNoNetwork = rootView.findViewById(R.id.tv_no_network);
         llNoNetwork = rootView.findViewById(R.id.ll_no_network);
-
-        ImageView ivLiveSpeakingHead = rootView.findViewById(R.id.iv_live_speaking_head);
-        ivLiveSpeakingHead.setImageResource(BitmapUtil.getUserPhotoRound());
-
         showNoNetworkView(getString(R.string.text_liveing_error_recording));
         if(NetworkUtil.isConnected(MyApplication.getApplication())){
             llNoNetwork.setVisibility(View.GONE);
         }else{
             llNoNetwork.setVisibility(View.VISIBLE);
         }
+
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -173,10 +132,6 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberJoinOrExitHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveExternStorageSizeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSupportResolutionHandler);
@@ -186,49 +141,23 @@ public class PhonePushService extends BaseService{
 //        mSvLive.setOnClickListener(svOnClickListener);
         mSvLive.setOnTouchListener(svOnTouchListener);
         mSvLivePop.setSurfaceTextureListener(surfaceTextureListener);
-        mIvLiveAddmember.setOnClickListener(inviteMemberOnClickListener);
         mLlLiveHangupTotal.setOnClickListener(hangUpOnClickListener);
         mIvLiveRetract.setOnClickListener(retractOnClickListener);
         mPopupMiniLive.setOnTouchListener(miniPopOnTouchListener);
         mIvLiveChageCamera.setOnClickListener(changeCameraOnClickListener);
-        mLvLiveMemberInfo.setOnTouchListener(listViewOnTouchListener);
     }
 
     @Override
     protected void initView(Intent intent){
-        String type = intent.getStringExtra(Constants.TYPE);
-        isGroupPushLive =  intent.getBooleanExtra(Constants.IS_GROUP_PUSH_LIVING,false);
-        boolean emergencyType =  intent.getBooleanExtra(Constants.EMERGENCY_TYPE,false);
         hideAllView();
         mRlPhonePushLive.setVisibility(View.VISIBLE);
         showLivingView();
         mHandler.sendEmptyMessage(CURRENTTIME);
         mHandler.sendEmptyMessageDelayed(HIDELIVINGVIEW, 5000);
-        if(Constants.ACTIVE_PUSH.equals(type)){
-            PushLiveMemberList list = (PushLiveMemberList) intent.getSerializableExtra(Constants.PUSH_MEMBERS);
-            if(list!=null&&list.getList()!=null){
-                pushMemberList.clear();
-                pushMemberList.addAll(list.getList());
-            }
-            String theme = intent.getStringExtra(Constants.THEME);
-            if(TextUtils.isEmpty(theme)){
-                mLiveVedioTheme.setText(getResources().getString(R.string.i_pushing_video));
-            }else {
-                mLiveVedioTheme.setText(theme);
-            }
-            int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMyselfLive(theme, "");
-            if(requestCode != BaseCommonCode.SUCCESS_CODE){
-                ToastUtil.livingFailToast(this, requestCode, TerminalErrorCode.LIVING_PUSHING.getErrorCode());
-                finishVideoLive();
-            }
-        }else if(Constants.RECEIVE_PUSH.equals(type)){
-            //发送接受上报图像的通知
-            MyTerminalFactory.getSDK().getLiveManager().responseLiving(true);
-            if (!emergencyType) {
-                PromptManager.getInstance().stopRing();
-            }
-            mLiveVedioTheme.setText(getResources().getString(R.string.i_pushing_video));
-            MyApplication.instance.isPrivateCallOrVideoLiveHand = true;
+        int requestCode = MyTerminalFactory.getSDK().getLiveManager().requestMyselfLive("", "");
+        if(requestCode != BaseCommonCode.SUCCESS_CODE){
+            ToastUtil.livingFailToast(this, requestCode, TerminalErrorCode.LIVING_PUSHING.getErrorCode());
+            finishVideoLive();
         }
     }
 
@@ -241,9 +170,6 @@ public class PhonePushService extends BaseService{
         MyApplication.instance.isMiniLive = true;
         mPopupMiniLive.setVisibility(View.VISIBLE);
         mSvLivePop.setRotation(90.0f);
-//        mSvLivePop.getLayoutParams().width = DensityUtil.dip2px(getApplicationContext(),90);
-//        mSvLivePop.getLayoutParams().height = DensityUtil.dip2px(getApplicationContext(),160);
-//        mSvLivePop.requestLayout();
     }
 
     @Override
@@ -271,8 +197,6 @@ public class PhonePushService extends BaseService{
                 mHandler.removeMessages(SHOWERRORVIEW);
                 showErrorView();
                 break;
-
-
         }
     }
 
@@ -286,10 +210,6 @@ public class PhonePushService extends BaseService{
     @Override
     protected void initData(){
         listResolution = new ArrayList<>(Arrays.asList("1920x1080", "1280x720", "640x480", "320x240"));
-        watchOrExitMembers = new ArrayList<>();
-        watchMembers = new ArrayList<>();
-        enterOrExitMemberAdapter = new MemberEnterAdapter(MyTerminalFactory.getSDK().application, watchOrExitMembers);
-        mLvLiveMemberInfo.setAdapter(enterOrExitMemberAdapter);
     }
 
     @Override
@@ -301,10 +221,6 @@ public class PhonePushService extends BaseService{
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberJoinOrExitHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveExternStorageSizeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyOtherStopVideoMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSupportResolutionHandler);
@@ -319,7 +235,7 @@ public class PhonePushService extends BaseService{
         }
     }
 
-    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+    private ReceiveNetworkChangeByNoRegistHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeByNoRegistHandler(){
         @Override
         public void handler(boolean connected){
             mHandler.post(() -> {
@@ -338,38 +254,11 @@ public class PhonePushService extends BaseService{
      **/
     private ReceiveResponseMyselfLiveHandler receiveResponseMyselfLiveHandler = (resultCode, resultDesc) -> mHandler.post(() -> {
         if(resultCode == BaseCommonCode.SUCCESS_CODE){
-            if(pushMemberList != null && !pushMemberList.isEmpty()){
-                logger.info("自己发起直播成功,要推送的列表：" + pushMemberList);
-                MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(pushMemberList,
-                        MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0),
-                        TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L));
-            }
         }else{
             ToastUtil.showToast(MyTerminalFactory.getSDK().application, resultDesc);
             finishVideoLive();
         }
     });
-
-    private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode,uniqueNo) -> {
-        logger.info("PhonePushService---ReceiveGroupCallIncommingHandler");
-        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
-            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_has_no_group_call_listener_authority));
-        }else{
-            mHandler.post(() -> {
-                mLlLiveGroupCall.setVisibility(View.VISIBLE);
-                mTvLiveGroupName.setText(DataUtil.getGroupName(groupId));
-                mTvLiveSpeakingName.setText(memberName);
-                mTvLiveSpeakingId.setText(HandleIdUtil.handleId(memberId));
-            });
-        }
-    };
-
-    private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setPushAuthority);
-
-    private ReceiveGroupCallCeasedIndicationHandler receiveGroupCallCeasedIndicationHandler = (reasonCode) -> {
-        logger.info("收到组呼停止");
-        mHandler.post(() -> mLlLiveGroupCall.setVisibility(View.GONE));
-    };
 
     /**
      * 通知直播停止 通知界面关闭视频页
@@ -386,7 +275,7 @@ public class PhonePushService extends BaseService{
         logger.info("自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
         ip = streamMediaServerIp;
         port = String.valueOf(streamMediaServerPort);
-        id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "" ;
+        id = TerminalFactory.getSDK().getUuid() ;
         //如果是组内上报，在组内发送一条上报消息
 //        sendGroupMessage(streamMediaServerIp,streamMediaServerPort,callId,pushMemberList,isGroupPushLive);
         startPush();
@@ -394,39 +283,11 @@ public class PhonePushService extends BaseService{
     }, 1000);
 
     /**
-     * 观看成员的进入和退出
-     **/
-    @SuppressLint("SimpleDateFormat")
-    private ReceiveMemberJoinOrExitHandler receiveMemberJoinOrExitHandler = (memberName, memberId, joinOrExit) -> mHandler.post(() -> {
-        Log.e("IndividualCallService", memberName + ",memberId:" + memberId);
-        SimpleDateFormat formatter = new SimpleDateFormat("HH:mm");
-        Date currentTime = new Date();
-        String enterTime = formatter.format(currentTime);
-        VideoMember videoMember = new VideoMember(memberId, memberName, enterTime, joinOrExit);
-        watchOrExitMembers.add(videoMember);
-        enterOrExitMemberAdapter.notifyDataSetChanged();
-        if(joinOrExit){//进入直播间
-            watchMembers.add(videoMember);
-        }else{//退出直播间
-            Iterator<VideoMember> iterator = watchMembers.iterator();
-            while(iterator.hasNext()){
-                if(iterator.next().getId() == memberId){
-                    iterator.remove();
-                    break;
-                }
-            }
-        }
-        if(!watchOrExitMembers.isEmpty()){
-            mLvLiveMemberInfo.smoothScrollToPosition(watchOrExitMembers.size() - 1);
-        }
-    });
-
-    /**
      *通知存储空间不足
      */
     private ReceiveExternStorageSizeHandler mReceiveExternStorageSizeHandler = memorySize -> mHandler.post(() -> {
         if (memorySize < 100) {
-            ToastUtil.showToast(PhonePushService.this, getString(R.string.toast_tempt_insufficient_storage_space));
+            ToastUtil.showToast(PhonePushByNoRegistService.this, getString(R.string.toast_tempt_insufficient_storage_space));
             PromptManager.getInstance().startExternNoStorage();
             if(mMediaStream!=null&&mMediaStream.isRecording()){
                 //停止录像
@@ -436,7 +297,7 @@ public class PhonePushService extends BaseService{
             MyTerminalFactory.getSDK().getFileTransferOperation().externNoStorageOperation();
         } else if (memorySize < 200){
             PromptManager.getInstance().startExternStorageNotEnough();
-            ToastUtil.showToast(PhonePushService.this, getString(R.string.toast_tempt_storage_space_is_in_urgent_need));
+            ToastUtil.showToast(PhonePushByNoRegistService.this, getString(R.string.toast_tempt_storage_space_is_in_urgent_need));
         }
     });
     /**
@@ -473,20 +334,6 @@ public class PhonePushService extends BaseService{
             String[] splitR = supportListResolution.get(0).split("x");
             width = Integer.parseInt(splitR[0]);
             height = Integer.parseInt(splitR[1]);
-        }
-    }
-
-
-    /**
-     * 根据权限设置组呼PTT图标
-     */
-    private void setPushAuthority() {
-        //图像推送
-        if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
-            mIvLiveAddmember.setEnabled(false);
-            mLlLiveInviteMember.setVisibility(View.GONE);
-        }else {
-//            mLlLiveInviteMember.setVisibility(View.VISIBLE);
         }
     }
 
@@ -543,7 +390,7 @@ public class PhonePushService extends BaseService{
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECTED:
                     resultData.putString("event-msg", "EasyRTSP 连接成功");
-                    mHandler.post(PhonePushService.this::dissmissErrorView);
+                    mHandler.post(PhonePushByNoRegistService.this::dissmissErrorView);
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_FAILED:
                     resultData.putString("event-msg", "EasyRTSP 连接失败--");
@@ -622,19 +469,6 @@ public class PhonePushService extends BaseService{
         return true;
     };
 
-    private View.OnClickListener inviteMemberOnClickListener = v -> {
-        if (MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())) {
-            Intent intent = new Intent(PhonePushService.this, InviteMemberService.class);
-            intent.putExtra(Constants.TYPE, Constants.PUSH);
-            intent.putExtra(Constants.PUSHING, true);
-            intent.putExtra(Constants.INVITE_MEMBER_EXCEPT_UNIQUE_NO, MyDataUtil.getInviteMemberExceptList(watchMembers));
-            startService(intent);
-        }else{
-            ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.text_no_video_push_authority));
-        }
-    };
-
-
     private TextureView.SurfaceTextureListener surfaceTextureListener = new TextureView.SurfaceTextureListener(){
         @Override
         public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height){
@@ -701,22 +535,6 @@ public class PhonePushService extends BaseService{
         return true;
     };
 
-    @SuppressLint("ClickableViewAccessibility")
-    private View.OnTouchListener listViewOnTouchListener = (v,event)->{
-        switch(event.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                v.performClick();
-                mHandler.removeMessages(HIDELIVINGVIEW);
-                break;
-            case MotionEvent.ACTION_UP:
-                Message message = Message.obtain();
-                message.what = HIDELIVINGVIEW;
-                mHandler.sendMessageDelayed(message, 5000);
-                break;
-        }
-        return false;
-    };
-
     private void handleFocus(Camera camera){
         if(null != mMediaStream && mMediaStream.isStreaming() && camera != null && mMediaStream.isPreView()){
             camera.autoFocus(null);//屏幕聚焦
@@ -758,7 +576,7 @@ public class PhonePushService extends BaseService{
             mMediaStream.startPreview();
 //            startRecord();
             if(mMediaStream.isStreaming()){
-                ToastUtil.showToast(PhonePushService.this, getResources().getString(R.string.pushing_stream));
+                ToastUtil.showToast(PhonePushByNoRegistService.this, getResources().getString(R.string.pushing_stream));
             }
         }else{
             mMediaStream = new MediaStream(MyTerminalFactory.getSDK().application, surface, true);
@@ -788,7 +606,7 @@ public class PhonePushService extends BaseService{
         mMediaStream.startPreview();
         startRecord();
         if(mMediaStream.isStreaming()){
-            ToastUtil.showToast(PhonePushService.this, getResources().getString(R.string.pushing_stream));
+            ToastUtil.showToast(PhonePushByNoRegistService.this, getResources().getString(R.string.pushing_stream));
         }
         mHandler.sendEmptyMessage(AUTOFOCUS);
     }
@@ -827,30 +645,13 @@ public class PhonePushService extends BaseService{
         mIvLiveRetract.setVisibility(View.GONE);
         mLlLiveChageCamera.setVisibility(View.GONE);
         mLlLiveHangupTotal.setVisibility(View.GONE);
-        mLlLiveInviteMember.setVisibility(View.GONE);
     }
 
     private void showLivingView(){
-        setPushAuthority();
         mTvLiveRealtime.setVisibility(View.VISIBLE);
         mIvLiveRetract.setVisibility(View.VISIBLE);
         mLlLiveChageCamera.setVisibility(View.VISIBLE);
         mLlLiveHangupTotal.setVisibility(View.VISIBLE);
-        if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
-            mLlLiveInviteMember.setVisibility(View.VISIBLE);
-        }else{
-            mLlLiveInviteMember.setVisibility(View.GONE);
-        }
-        if(MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING){
-            if(null != MyApplication.instance.groupCallMember){
-                mLlLiveGroupCall.setVisibility(View.VISIBLE);
-                mTvLiveSpeakingName.setText(MyApplication.instance.groupCallMember.getName());
-                mTvLiveSpeakingId.setText(HandleIdUtil.handleId(MyApplication.instance.groupCallMember.getId()));
-            }
-            if(MyApplication.instance.currentCallGroupId !=-1){
-                mTvLiveGroupName.setText(DataUtil.getGroupName(MyApplication.instance.currentCallGroupId));
-            }
-        }
     }
 
     /**
@@ -893,4 +694,5 @@ public class PhonePushService extends BaseService{
             e.printStackTrace();
         }
     }
+
 }

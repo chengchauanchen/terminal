@@ -351,16 +351,23 @@ public class MyDataManager extends DataManager{
                     String serverIp = TerminalFactory.getSDK().getParam(Params.REGIST_IP, "");
                     String serverPort = TerminalFactory.getSDK().getParam(Params.REGIST_PORT, "");
                     String url = "http://" + serverIp + ":" + serverPort + "/mediaServerInfo";
+                    String serverInfo = serverIp+":"+serverPort;
                     String result = TerminalFactory.getSDK().getHttpClient().sendGet(url);
                     logger.info("未注册时获取流媒体服务信息:"+result);
-                    if(!Util.isEmpty(result)){
-                        MediaServerInfoBean bean = new Gson().fromJson(result, MediaServerInfoBean.class);
-                        if(bean != null ){
-                            if(!TextUtils.isEmpty(bean.getMediaServerIp())){
-                                TerminalFactory.getSDK().putParam(Params.MEDIA_SERVER_IP, bean.getMediaServerIp());
-                            }
-                            if(bean.getMediaServerPort()> 0){
-                                TerminalFactory.getSDK().putParam(Params.MEDIA_SERVER_PORT, bean.getMediaServerPort());
+                    if(!Util.isEmpty(result)&&JSONObject.parseObject(result)!=null){
+                        JSONObject jsonObject = JSONObject.parseObject(result);
+                        if(jsonObject.containsKey(serverInfo)){
+                            String json = jsonObject.getJSONObject(serverInfo).toJSONString();
+                            if(!TextUtils.isEmpty(json)){
+                                MediaServerInfoBean bean = new Gson().fromJson(json, MediaServerInfoBean.class);
+                                if(bean != null ){
+                                    if(!TextUtils.isEmpty(bean.getMediaServerIp())){
+                                        TerminalFactory.getSDK().putParam(Params.MEDIA_SERVER_IP, bean.getMediaServerIp());
+                                    }
+                                    if(bean.getMediaServerPort()> 0){
+                                        TerminalFactory.getSDK().putParam(Params.MEDIA_SERVER_PORT, bean.getMediaServerPort());
+                                    }
+                                }
                             }
                         }
                     }

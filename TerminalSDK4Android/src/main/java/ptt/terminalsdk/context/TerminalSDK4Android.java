@@ -1286,6 +1286,8 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		}
 		logger.info(" TerminalSDK4Android--------> account = "+account+"---terminalType = "+deviceType);
 		return account+deviceType;
+//		return account;
+//		return account+"1234567890";
 	}
 	@SuppressLint("MissingPermission")
 	@Override

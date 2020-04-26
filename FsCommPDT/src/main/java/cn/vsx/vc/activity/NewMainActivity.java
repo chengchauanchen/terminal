@@ -79,6 +79,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveExitHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveLoginResponseHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberKilledHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveOnLineStatusChangedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceivePTTDownHandler;
@@ -177,11 +178,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
     private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = new ReceiveUpdateAllDataCompleteHandler(){
         @Override
         public void handler(int errorCode, String errorDesc){
-            if(errorCode == BaseCommonCode.SUCCESS_CODE){
-                updateLoginStateView(1);
-            }else{
-                updateLoginStateView(0);
-            }
+            updateLoginStateView(-1);
         }
     };
 
@@ -189,7 +186,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         @Override
         public void handler(int resultCode, String resultDesc){
             if(resultCode == BaseCommonCode.SUCCESS_CODE){
-                updateLoginStateView(0);
+                updateLoginStateView(1);
                 MyTerminalFactory.getSDK().getTerminalMessageManager().getAllMessageRecordNewMethod(null);
             }else {
                 updateLoginStateView(0);
@@ -277,6 +274,28 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                 if(contactsFragmentNew!=null&&currentCheckedId == R.id.bv_group_contacts){
                     myHandler.post(() -> setTabSelection(R.id.bv_talk_back));
                 }
+            }
+        }
+    };
+
+    /**
+     * 真实网络的状态
+     */
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            if (!connected) {
+                myHandler.post(() -> {
+                    updateLoginStateView(0);
+                    if (ll_emergency_prompt != null && ll_emergency_prompt.getVisibility() == View.VISIBLE) {
+                        ll_emergency_prompt.setVisibility(View.GONE);
+                        ICTV_emergency_time.onStop();
+                    }
+                    if (ll_groupCall_prompt != null && ll_groupCall_prompt.getVisibility() == View.VISIBLE) {
+                        ll_groupCall_prompt.setVisibility(View.GONE);
+                        ICTV_groupCall_time.stop();
+                    }
+                });
             }
         }
     };
@@ -1010,6 +1029,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestGroupCallConformationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveCeaseGroupCallConformationHander);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveOnLineStatusChangedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
@@ -1153,11 +1173,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         startService(new Intent(this,CardService.class));
         //清理数据库
         FileTransferOperation manager =  MyTerminalFactory.getSDK().getFileTransferOperation();
-        //48小时未上传的文件上传,警务通暂时不要自动上传48小时未上传的功能
-//        manager.checkStartExpireFileAlarm();
         //上传没有上传的文件信息
         manager.uploadFileTreeBean(null);
-
+        //48小时未上传的文件上传,警务通暂时不要自动上传48小时未上传的功能
+        manager.checkStartExpireFileAlarm();
         if(!FloatWindowManager.getInstance().checkPermission(this)){
             FloatWindowManager.getInstance().applyPermission(this);
         }
@@ -1600,6 +1619,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestLoginHandler );
 

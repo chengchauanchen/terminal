@@ -43,6 +43,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyOtherStopVideoMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
@@ -61,6 +62,7 @@ import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.MyDataUtil;
+import cn.vsx.vc.utils.NetworkUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -95,13 +97,15 @@ public class UVCPushService extends BaseService{
     private PushCallback pushCallback;
     private static final int CURRENTTIME = 0;
     private static final int HIDELIVINGVIEW = 1;
+    private static final int SHOWERRORVIEW = 3;
     private UVCMediaStream mUvcMediaStream;
-    private int pushcount;
     private ArrayList<String> listResolution;
     private View mLlUvcInviteMember;
     private boolean isGroupPushLive;
     private int width = 640;
     private int height = 480;
+    protected TextView tvNoNetwork;
+    protected LinearLayout llNoNetwork;
 
     public UVCPushService(){}
 
@@ -139,14 +143,24 @@ public class UVCPushService extends BaseService{
         mIvUvcHangup = rootView.findViewById(R.id.iv_uvc_hangup);
         mIvUvcInviteMember = rootView.findViewById(R.id.iv_uvc_invite_member);
         mLlUvcInviteMember = rootView.findViewById(R.id.ll_uvc_invite_member);
-        mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
+
+        tvNoNetwork = rootView.findViewById(R.id.tv_no_network);
+        llNoNetwork = rootView.findViewById(R.id.ll_no_network);
 
         ImageView ivLiveSpeakingHead = rootView.findViewById(R.id.iv_live_speaking_head);
         ivLiveSpeakingHead.setImageResource(BitmapUtil.getUserPhotoRound());
+
+        showNoNetworkView(getString(R.string.text_liveing_error_recording));
+        if(NetworkUtil.isConnected(MyApplication.getApplication())){
+            llNoNetwork.setVisibility(View.GONE);
+        }else{
+            llNoNetwork.setVisibility(View.VISIBLE);
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")
     protected void initListener(){
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGetVideoPushUrlHandler);
@@ -229,23 +243,15 @@ public class UVCPushService extends BaseService{
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_push));
                 stopBusiness();
                 break;
+            case SHOWERRORVIEW:
+                mHandler.removeMessages(SHOWERRORVIEW);
+                showErrorView();
+                break;
         }
     }
 
     @Override
     protected void onNetworkChanged(boolean connected){
-        if(!connected){
-            if(!mHandler.hasMessages(OFF_LINE)){
-                mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
-            }
-        }else {
-            mHandler.removeMessages(OFF_LINE);
-            if(MyApplication.instance.isMiniLive){
-                pushStream(mSvLivePop.getSurfaceTexture());
-            }else{
-                pushStream(mSvUvcLive.getSurfaceTexture());
-            }
-        }
     }
 
     @Override
@@ -253,6 +259,7 @@ public class UVCPushService extends BaseService{
         //处理当正在录像的时候，异常退出处理
         finishVideoLive();
         super.onDestroy();
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseMyselfLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetVideoPushUrlHandler);
@@ -280,6 +287,20 @@ public class UVCPushService extends BaseService{
 
     private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setAuthorityView);
 
+
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            mHandler.post(() -> {
+                if(!connected){
+                    showNoNetworkView(getString(R.string.text_liveing_error_recording));
+                }
+                if(llNoNetwork!=null) {
+                    llNoNetwork.setVisibility((!connected) ? View.VISIBLE : View.GONE);
+                }
+            });
+        }
+    };
     /**
      * 自己发起直播的响应
      **/
@@ -333,7 +354,7 @@ public class UVCPushService extends BaseService{
         logger.info("自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
         ip = streamMediaServerIp;
         port = String.valueOf(streamMediaServerPort);
-        id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "_" + callId;
+        id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "" ;
         //如果是组内上报，在组内发送一条上报消息
         sendGroupMessage(streamMediaServerIp,streamMediaServerPort,callId,pushMemberList,isGroupPushLive);
         startPush();
@@ -374,10 +395,10 @@ public class UVCPushService extends BaseService{
         if (memorySize < 100) {
             ToastUtil.showToast(UVCPushService.this, getString(R.string.toast_tempt_insufficient_storage_space));
             PromptManager.getInstance().startExternNoStorage();
-//            if(mUvcMediaStream!=null&&mUvcMediaStream.isRecording()){
-//                //停止录像
-//                mUvcMediaStream.stopRecord();
-//            }
+            if(mUvcMediaStream!=null&&mUvcMediaStream.isRecording()){
+                //停止录像
+                mUvcMediaStream.stopRecord();
+            }
             //上传没有上传的文件，删除已经上传的文件
             MyTerminalFactory.getSDK().getFileTransferOperation().externNoStorageOperation();
         } else if (memorySize < 200){
@@ -507,26 +528,14 @@ public class UVCPushService extends BaseService{
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECTED:
                     resultData.putString("event-msg", "EasyRTSP 连接成功");
-                    pushcount = 0;
+                    mHandler.post(UVCPushService.this::dissmissErrorView);
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_FAILED:
-                    resultData.putString("event-msg", "EasyRTSP 连接失败--pushcount:"+pushcount);
-                    if(pushcount <= 5){
-                        pushcount++;
-                    }else{
-                        ptt.terminalsdk.tools.ToastUtil.showToast("连接失败");
-                        mHandler.post(() -> finishVideoLive());
-                    }
+                    resultData.putString("event-msg", "EasyRTSP 连接失败--");
+                    mHandler.sendEmptyMessageDelayed(SHOWERRORVIEW,3000);
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_ABORT:
-                    resultData.putString("event-msg", "EasyRTSP 连接异常中断--pushcount:"+pushcount);
-                    if(pushcount <= 5){
-                        pushcount++;
-//                        startPush();
-                    }else{
-                        ptt.terminalsdk.tools.ToastUtil.showToast("连接异常中断");
-                        mHandler.post(() -> finishVideoLive());
-                    }
+                    resultData.putString("event-msg", "EasyRTSP 连接异常中断--");
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_PUSHING:
                     resultData.putString("event-msg", "EasyRTSP 推流中");
@@ -543,6 +552,7 @@ public class UVCPushService extends BaseService{
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_ACTIVATE_PROCESS_NAME_LEN_ERR:
                     resultData.putString("event-msg", "EasyRTSP 进程名称长度不匹配");
                     break;
+                    default:break;
             }
             logger.info("PhonePushService--PushCallback--msg:"+resultData.getString("event-msg")+"--code:"+code);
         }
@@ -625,7 +635,6 @@ public class UVCPushService extends BaseService{
             mUvcMediaStream = new UVCMediaStream(MyTerminalFactory.getSDK().application, surface);
             startCamera();
         }
-        pushcount = 0;
     }
 
     private void stopPush(){
@@ -729,7 +738,48 @@ public class UVCPushService extends BaseService{
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
             mLlUvcInviteMember.setVisibility(View.GONE);
         }else {
-            mLlUvcInviteMember.setVisibility(View.VISIBLE);
+//            mLlUvcInviteMember.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * 显示错误提示
+     */
+    private void showErrorView(){
+        try{
+            showNoNetworkView((NetworkUtil.isConnected(MyApplication.getApplication()))
+                    ?getString(R.string.text_media_server_error_recording)
+                    :getString(R.string.text_liveing_error_recording));
+            if(llNoNetwork!=null&&llNoNetwork.getVisibility() == View.GONE){
+                llNoNetwork.setVisibility(View.VISIBLE);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    /**
+     * 隐藏错误提示
+     */
+    private void dissmissErrorView(){
+        try{
+            if(llNoNetwork!=null&&llNoNetwork.getVisibility() == View.VISIBLE){
+                llNoNetwork.setVisibility(View.GONE);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    /**
+     * 显示断流的文字提示
+     * @param string
+     */
+    private void showNoNetworkView(String string){
+        try{
+            if(tvNoNetwork!=null){
+                tvNoNetwork.setText(string);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
         }
     }
 

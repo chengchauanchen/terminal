@@ -36,6 +36,7 @@ import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingStateMachine
 import cn.vsx.hamster.terminalsdk.model.Member;
 import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyEmergencyMessageHandler;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.util.StateMachine.IState;
 import cn.vsx.vc.jump.sendMessage.ThirdSendMessage;
 import cn.vsx.vc.prompt.PromptManager;
@@ -111,6 +112,8 @@ public class MyApplication extends BaseApplication{
         // TODO 初始化 向地三方应用同步消息的service
 		//初始化 ThirdSendMessage
 		BaseApplication.getApplication().initVsxSendMessage();
+		//上报图像可以不走信令
+		TerminalFactory.getSDK().putParam(Params.PUSH_LIVE_NO_SINGLE,true);
 	}
 
 	protected void initSdk(){

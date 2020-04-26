@@ -35,10 +35,13 @@ import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
 import cn.vsx.hamster.terminalsdk.model.TerminalMessage;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveHiKvisionUrlHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyMemberStopWatchMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateConfigHandler;
 import cn.vsx.vc.R;
+import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.utils.Constants;
+import cn.vsx.vc.utils.NetworkUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.tools.ToastUtil;
 
@@ -63,6 +66,7 @@ public class PullOutGB28181Service extends BaseService{
 
     private EasyRTSPClient mStreamRender;
     private TerminalMessage terminalMessage;
+    protected LinearLayout llNoNetwork;
     //是否开始拉流
     private boolean started;
 
@@ -95,10 +99,11 @@ public class PullOutGB28181Service extends BaseService{
         mIvClose =  rootView.findViewById(R.id.iv_close);
         mLlInviteMember =  rootView.findViewById(R.id.ll_invite_member);
         mIvLiveLookAddmember =  rootView.findViewById(R.id.iv_live_look_addmember);
-        mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
+        llNoNetwork = rootView.findViewById(R.id.ll_no_network);
         mLlRefreshing = rootView.findViewById(R.id.ll_refreshing);
         mRefreshingIcon = rootView.findViewById(R.id.refreshing_icon);
         dismissLoadingView(mLlRefreshing,mRefreshingIcon);
+        llNoNetwork.setVisibility(NetworkUtil.isConnected(MyApplication.getApplication())?View.GONE:View.VISIBLE);
     }
 
     @Override
@@ -118,6 +123,7 @@ public class PullOutGB28181Service extends BaseService{
         mSvGb28181.setSurfaceTextureListener(GB28181SurfaceTextureListener);
         mIvClose.setOnClickListener(closeOnClickListener);
         mLlInviteMember.setOnClickListener(inviteOnClickListener);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveHiKvisionUrlHandler);
@@ -159,26 +165,33 @@ public class PullOutGB28181Service extends BaseService{
 
     @Override
     protected void onNetworkChanged(boolean connected){
-        if(!connected){
-            if(!mHandler.hasMessages(OFF_LINE)){
-                mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
-            }
-        }else {
-            mHandler.removeMessages(OFF_LINE);
-//            if(checkIfStartPull()){
-//                startPullGB28121(mSvGb28181.getSurfaceTexture());
-//            }
-        }
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(mReceiveUpdateConfigHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberStopWatchMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveHiKvisionUrlHandler);
         unregisterReceiver(mBroadcastReceiv);
     }
+
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            mHandler.post(() -> {
+                if(llNoNetwork!=null) {
+                    llNoNetwork.setVisibility((!connected) ? View.VISIBLE : View.GONE);
+                }
+            });
+            if(connected){
+                if(checkIfStartPull()){
+                startPullGB28121(mSvGb28181.getSurfaceTexture());
+               }
+            }
+        }
+    };
 
     private ReceiveUpdateConfigHandler mReceiveUpdateConfigHandler= () -> mHandler.post(this::setPushAuthority);
 
@@ -419,7 +432,7 @@ public class PullOutGB28181Service extends BaseService{
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
             mLlInviteMember.setVisibility(View.GONE);
         }else {
-            mLlInviteMember.setVisibility(View.VISIBLE);
+//            mLlInviteMember.setVisibility(View.VISIBLE);
         }
     }
 

@@ -2,8 +2,8 @@
 <manifest package="cn.vsx.vc"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:versionCode="78"
-    android:versionName="1.0.78">
+    android:versionCode="81"
+    android:versionName="1.0.81">
     <!-- android:sharedUserId="android.uid.system" -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
@@ -322,6 +322,10 @@
             android:exported="false" />
         <service
             android:name=".service.PhonePushService"
+            android:enabled="true"
+            android:exported="false" />
+        <service
+            android:name=".service.PhonePushByNoRegistService"
             android:enabled="true"
             android:exported="false" />
         <service

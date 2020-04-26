@@ -39,6 +39,7 @@ import cn.vsx.hamster.common.util.JsonParam;
 import cn.vsx.hamster.common.util.NoCodec;
 import cn.vsx.hamster.errcode.BaseCommonCode;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
+import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallListenState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePushingState;
@@ -252,16 +253,18 @@ public abstract class BaseService extends Service{
      * 重置状态机
      */
     protected void revertStateMachine(){
-
         if(MyApplication.instance.getVideoLivePushingState() != VideoLivePushingState.IDLE){
             MyTerminalFactory.getSDK().getLiveManager().ceaseLiving();
         }
         if(MyApplication.instance.getVideoLivePlayingState() != VideoLivePlayingState.IDLE){
             ceaseWatching();
         }
-        Log.d("BaseService", "MyApplication.instance.getIndividualState():" + MyApplication.instance.getIndividualState());
         if(MyApplication.instance.getIndividualState() != IndividualCallState.IDLE){
             MyTerminalFactory.getSDK().getIndividualCallManager().ceaseIndividualCall();
+        }
+        //如果切组是在听组呼，先停止
+        if(MyApplication.instance.getGroupListenenState() != GroupCallListenState.IDLE){
+            TerminalFactory.getSDK().getGroupCallManager().getGroupCallListenStateMachine().cleanListen(false);
         }
     }
 

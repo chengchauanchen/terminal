@@ -47,6 +47,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetVideoPushUrlHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallCeasedIndicationHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGroupCallIncommingHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberJoinOrExitHandler;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNetworkChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyLivingStoppedHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveNotifyOtherStopVideoMessageHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveResponseMyselfLiveHandler;
@@ -64,6 +65,7 @@ import cn.vsx.vc.utils.BitmapUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.HandleIdUtil;
 import cn.vsx.vc.utils.MyDataUtil;
+import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.ToastUtil;
 import ptt.terminalsdk.context.MyTerminalFactory;
 
@@ -84,7 +86,6 @@ public class RecoderPushService extends BaseService{
     private ImageView mIvHangup;
     private RelativeLayout mRlRecoderView;
     private PushRTSPClient pushRTSPClient;
-    private int pushcount;
     private int mLiveWidth;
     private int mLiveHeight;
     private int pullcount;
@@ -98,8 +99,11 @@ public class RecoderPushService extends BaseService{
     private MemberEnterAdapter enterOrExitMemberAdapter;
     private static final int CURRENTTIME = 0;
     private static final int HIDELIVINGVIEW = 1;
+    private static final int SHOWERRORVIEW = 3;
     private LinearLayout mLlLiveInviteMember;
     private LinearLayout mLlLiveHangupTotal;
+    protected TextView tvNoNetwork;
+    protected LinearLayout llNoNetwork;
 
     private float downX = 0;
     private float downY = 0;
@@ -111,6 +115,7 @@ public class RecoderPushService extends BaseService{
 
     @Override
     protected void initListener(){
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyLivingStoppedHandler);
@@ -188,23 +193,15 @@ public class RecoderPushService extends BaseService{
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.exit_push));
                 stopBusiness();
                 break;
+            case SHOWERRORVIEW:
+                mHandler.removeMessages(SHOWERRORVIEW);
+                showErrorView();
+                break;
         }
     }
 
     @Override
     protected void onNetworkChanged(boolean connected){
-        if(!connected){
-            if(!mHandler.hasMessages(OFF_LINE)){
-                mHandler.sendEmptyMessageDelayed(OFF_LINE,OFF_LINE_TIME);
-            }
-        }else {
-            mHandler.removeMessages(OFF_LINE);
-            if(MyApplication.instance.isMiniLive){
-                pushLawRecorder(mSvLivePop.getSurfaceTexture());
-            }else{
-                pushLawRecorder(mSvLive.getSurfaceTexture());
-            }
-        }
     }
 
     protected void initData(){
@@ -222,6 +219,7 @@ public class RecoderPushService extends BaseService{
     public void onDestroy(){
         finishVideoLive();
         super.onDestroy();
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallIncommingHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyLivingStoppedHandler);
@@ -269,10 +267,19 @@ public class RecoderPushService extends BaseService{
         mLvLiveMemberInfo =  rootView.findViewById(R.id.lv_live_member_info);
         mIvLiveAddmember =  rootView.findViewById(R.id.iv_live_addmember);
         mIvHangup = rootView.findViewById(R.id.iv_hangup);
-        mLlNoNetwork = rootView.findViewById(R.id.ll_no_network);
+
+        tvNoNetwork = rootView.findViewById(R.id.tv_no_network);
+        llNoNetwork = rootView.findViewById(R.id.ll_no_network);
 
         ImageView ivLiveSpeakingHead = rootView.findViewById(R.id.iv_live_speaking_head);
         ivLiveSpeakingHead.setImageResource(BitmapUtil.getUserPhotoRound());
+
+        showNoNetworkView(getString(R.string.text_liveing_error_recording));
+        if(NetworkUtil.isConnected(MyApplication.getApplication())){
+            llNoNetwork.setVisibility(View.GONE);
+        }else{
+            llNoNetwork.setVisibility(View.VISIBLE);
+        }
     }
 
     private View.OnClickListener hangUpOnClickListener = v-> finishVideoLive();
@@ -324,6 +331,20 @@ public class RecoderPushService extends BaseService{
         }
     };
 
+    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+        @Override
+        public void handler(boolean connected){
+            mHandler.post(() -> {
+                if(!connected){
+                    showNoNetworkView(getString(R.string.text_liveing_error_recording));
+                }
+                if(llNoNetwork!=null) {
+                    llNoNetwork.setVisibility((!connected) ? View.VISIBLE : View.GONE);
+                }
+            });
+        }
+    };
+
     private ReceiveGroupCallIncommingHandler receiveGroupCallIncommingHandler = (memberId, memberName, groupId, groupName, currentCallMode,uniqueNo) -> {
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_GROUP_LISTEN.name())){
             ptt.terminalsdk.tools.ToastUtil.showToast(MyTerminalFactory.getSDK().application,getString(R.string.text_has_no_group_call_listener_authority));
@@ -359,7 +380,7 @@ public class RecoderPushService extends BaseService{
                 logger.info("自己发起直播成功,要推送的列表：" + pushMemberList);
                 MyTerminalFactory.getSDK().getLiveManager().requestNotifyWatch(pushMemberList,
                         MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0),
-                        TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0l));
+                        TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L));
             }
         }else{
             ptt.terminalsdk.tools.ToastUtil.showToast(MyTerminalFactory.getSDK().application, resultDesc);
@@ -374,7 +395,7 @@ public class RecoderPushService extends BaseService{
         logger.info("自己发起直播，服务端返回的ip：" + streamMediaServerIp + "端口：" + streamMediaServerPort + "---callId:" + callId);
         ip = streamMediaServerIp;
         port = String.valueOf(streamMediaServerPort);
-        id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "_" + callId;
+        id = TerminalFactory.getSDK().getParam(Params.MEMBER_UNIQUENO, 0L) + "";
         //如果是组内上报，在组内发送一条上报消息
         sendGroupMessage(streamMediaServerIp,streamMediaServerPort,callId,pushMemberList,isGroupPushLive);
         if(null != mSvLive.getSurfaceTexture()){
@@ -420,7 +441,7 @@ public class RecoderPushService extends BaseService{
             ptt.terminalsdk.tools.ToastUtil.showToast(RecoderPushService.this, getString(R.string.toast_tempt_insufficient_storage_space));
             PromptManager.getInstance().startExternNoStorage();
             if(pushRTSPClient != null){
-                pushRTSPClient.stop();
+                pushRTSPClient.stopRecord();
             }
             //上传没有上传的文件，删除已经上传的文件
             MyTerminalFactory.getSDK().getFileTransferOperation().externNoStorageOperation();
@@ -463,25 +484,14 @@ public class RecoderPushService extends BaseService{
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECTED:
                     resultData.putString("event-msg", "EasyRTSP 连接成功");
-                    pushcount = 0;
+                    mHandler.post(RecoderPushService.this::dissmissErrorView);
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_FAILED:
-                    resultData.putString("event-msg", "EasyRTSP 连接失败--pushcount:"+pushcount);
-                    if(pushcount <=5){
-                        pushcount++;
-                    }else {
-                        ptt.terminalsdk.tools.ToastUtil.showToast("连接失败");
-                        mHandler.post(() -> finishVideoLive());
-                    }
+                    resultData.putString("event-msg", "EasyRTSP 连接失败--");
+                    mHandler.sendEmptyMessageDelayed(SHOWERRORVIEW,3000);
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_CONNECT_ABORT:
-                    resultData.putString("event-msg", "EasyRTSP 连接异常中断--pushcount:"+pushcount);
-                    if(pushcount <=5){
-                        pushcount++;
-                    }else {
-                        ptt.terminalsdk.tools.ToastUtil.showToast("连接异常中断");
-                        mHandler.post(() -> finishVideoLive());
-                    }
+                    resultData.putString("event-msg", "EasyRTSP 连接异常中断--");
                     break;
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_PUSH_STATE_PUSHING:
                     resultData.putString("event-msg", "EasyRTSP 推流中");
@@ -498,6 +508,7 @@ public class RecoderPushService extends BaseService{
                 case EasyPusher.OnInitPusherCallback.CODE.EASY_ACTIVATE_PROCESS_NAME_LEN_ERR:
                     resultData.putString("event-msg", "EasyRTSP 进程名称长度不匹配");
                     break;
+                    default:break;
             }
             logger.info("PhonePushService--PushCallback--msg:"+resultData.getString("event-msg")+"--code:"+code);
         }
@@ -523,7 +534,6 @@ public class RecoderPushService extends BaseService{
                 onVideoSizeChange();
             }else if(resultCode == EasyRTSPClient.RESULT_TIMEOUT){
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.time_up));
-
             }else if(resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_AUDIO){
                 ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.voice_not_support));
             }else if(resultCode == EasyRTSPClient.RESULT_UNSUPPORTED_VIDEO){
@@ -533,36 +543,36 @@ public class RecoderPushService extends BaseService{
                 String resultDataString = resultData.getString("event-msg");
                 logger.error("视频流播放状态：" + errorcode + "=========" + resultDataString + "-----count:" + pullcount);
 
-                if(errorcode != 0){
-                    stopPull();
-                }
-                if(errorcode == 500 || errorcode == 404 || errorcode == -32 || errorcode == -101){
-                    if(pullcount < 10){
-                        try{
-                            Thread.sleep(300);
-                            logger.error("请求第" + pullcount + "次");
-                            if(mSvLive != null && mSvLive.getVisibility() == View.VISIBLE && mSvLive.getSurfaceTexture() != null){
-//                                pushLawRecorder(mSvLive.getSurfaceTexture());
-                                pullcount++;
-
-                            }else if(mSvLivePop != null && mSvLivePop.getVisibility() == View.VISIBLE && mSvLivePop.getSurfaceTexture() != null){
-//                                pushLawRecorder(mSvLivePop.getSurfaceTexture());
-                                pullcount++;
-                            }else{
-                                TerminalFactory.getSDK().getLiveManager().ceaseWatching();
-                            }
-                        }catch(Exception e){
-                            e.printStackTrace();
-                        }
-                    }else{
-                        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
-                        TerminalFactory.getSDK().getLiveManager().ceaseWatching();
-                        mHandler.post(() -> finishVideoLive());
-                    }
-                }else if(errorcode != 0){
-                    ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDataString);
-                    mHandler.post(() -> finishVideoLive());
-                }
+//                if(errorcode != 0){
+//                    stopPull();
+//                }
+//                if(errorcode == 500 || errorcode == 404 || errorcode == -32 || errorcode == -101){
+//                    if(pullcount < 10){
+//                        try{
+//                            Thread.sleep(300);
+//                            logger.error("请求第" + pullcount + "次");
+//                            if(mSvLive != null && mSvLive.getVisibility() == View.VISIBLE && mSvLive.getSurfaceTexture() != null){
+////                                pushLawRecorder(mSvLive.getSurfaceTexture());
+//                                pullcount++;
+//
+//                            }else if(mSvLivePop != null && mSvLivePop.getVisibility() == View.VISIBLE && mSvLivePop.getSurfaceTexture() != null){
+////                                pushLawRecorder(mSvLivePop.getSurfaceTexture());
+//                                pullcount++;
+//                            }else{
+//                                TerminalFactory.getSDK().getLiveManager().ceaseWatching();
+//                            }
+//                        }catch(Exception e){
+//                            e.printStackTrace();
+//                        }
+//                    }else{
+//                        ToastUtil.showToast(MyTerminalFactory.getSDK().application,getResources().getString(R.string.push_stoped));
+//                        TerminalFactory.getSDK().getLiveManager().ceaseWatching();
+//                        mHandler.post(() -> finishVideoLive());
+//                    }
+//                }else if(errorcode != 0){
+//                    ToastUtil.showToast(MyTerminalFactory.getSDK().application,resultDataString);
+//                    mHandler.post(() -> finishVideoLive());
+//                }
             }
         }
     }
@@ -646,7 +656,11 @@ public class RecoderPushService extends BaseService{
         mTvLiveRealtime.setVisibility(View.VISIBLE);
         mIvLiveRetract.setVisibility(View.VISIBLE);
         mLlLiveHangupTotal.setVisibility(View.VISIBLE);
-        mLlLiveInviteMember.setVisibility(View.VISIBLE);
+        if(MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
+            mLlLiveInviteMember.setVisibility(View.VISIBLE);
+        }else {
+            mLlLiveInviteMember.setVisibility(View.GONE);
+        }
         setAuthorityView();
         if(MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING){
             if(null != MyApplication.instance.groupCallMember){
@@ -665,7 +679,7 @@ public class RecoderPushService extends BaseService{
         if(!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_VIDEO_PUSH.name())){
             mLlLiveInviteMember.setVisibility(View.GONE);
         }else {
-            mLlLiveInviteMember.setVisibility(View.VISIBLE);
+//            mLlLiveInviteMember.setVisibility(View.VISIBLE);
         }
     }
 
@@ -714,5 +728,46 @@ public class RecoderPushService extends BaseService{
         }
         return true;
     };
+
+    /**
+     * 显示错误提示
+     */
+    private void showErrorView(){
+        try{
+            showNoNetworkView((NetworkUtil.isConnected(MyApplication.getApplication()))
+                    ?getString(R.string.text_media_server_error_recording)
+                    :getString(R.string.text_liveing_error_recording));
+            if(llNoNetwork!=null&&llNoNetwork.getVisibility() == View.GONE){
+                llNoNetwork.setVisibility(View.VISIBLE);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    /**
+     * 隐藏错误提示
+     */
+    private void dissmissErrorView(){
+        try{
+            if(llNoNetwork!=null&&llNoNetwork.getVisibility() == View.VISIBLE){
+                llNoNetwork.setVisibility(View.GONE);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    /**
+     * 显示断流的文字提示
+     * @param string
+     */
+    private void showNoNetworkView(String string){
+        try{
+            if(tvNoNetwork!=null){
+                tvNoNetwork.setText(string);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
 
 }

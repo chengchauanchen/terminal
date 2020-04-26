@@ -79,6 +79,7 @@ public class ReceiveLiveCommingService extends BaseService{
     protected void initListener(){
         mLlLiveRespondAcceptTotal.setOnClickListener(acceptOnClickListener);
         mLlLiveRespondRefuseTotal.setOnClickListener(refuseOnClickListener);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveAnswerLiveTimeoutHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNobodyRequestVideoLiveHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRemoveSwitchCameraViewHandler);
@@ -109,22 +110,29 @@ public class ReceiveLiveCommingService extends BaseService{
 
     @Override
     protected void onNetworkChanged(boolean connected){
-        if(!connected){
-            if(!mHandler.hasMessages(OFF_LINE)){
-                mHandler.sendEmptyMessageDelayed(OFF_LINE,3000);
-            }
-        }else {
-            mHandler.removeMessages(OFF_LINE);
-        }
     }
 
     @Override
     public void onDestroy(){
         super.onDestroy();
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNetworkChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveAnswerLiveTimeoutHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNobodyRequestVideoLiveHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRemoveSwitchCameraViewHandler);
     }
+
+//    private ReceiveNetworkChangeHandler receiveNetworkChangeHandler = new ReceiveNetworkChangeHandler(){
+//        @Override
+//        public void handler(boolean connected){
+////            if(!connected){
+////                if(!mHandler.hasMessages(OFF_LINE)){
+////                    mHandler.sendEmptyMessageDelayed(OFF_LINE,3000);
+////                }
+////            }else {
+////                mHandler.removeMessages(OFF_LINE);
+////            }
+//        }
+//    };
 
     //收到没人请求我开视频的消息，关闭界面和响铃
     private ReceiveNobodyRequestVideoLiveHandler receiveNobodyRequestVideoLiveHandler = () -> {
