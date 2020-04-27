@@ -137,6 +137,10 @@
                 <action android:name="vsxin.action.livingstoptime" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".broadcastreceiver.KeepLiveNotificationClickReceiver"
+            android:enabled="true"
+            android:exported="true" />
         <service
             android:name="org.easydarwin.push.UVCCameraService"
             android:enabled="true" />

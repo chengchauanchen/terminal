@@ -1652,6 +1652,16 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override
+    public void deleteAllGroup() {
+        try{
+            SQLiteDatabase db = helper.getWritableDatabase();
+            db.execSQL("DELETE FROM allGroup");
+        }catch (Exception e){
+            logger.error(e.toString());
+        }
+    }
+
+    @Override
     public synchronized List<GroupSearchBean> getAllGroup(List<GroupSearchBean> groups, int index) {
         logger.info("分页查询 group index:" + index);
         long start = System.currentTimeMillis();
@@ -1803,6 +1813,16 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         }
 
         return memberList;
+    }
+
+    @Override
+    public void deleteAllAccount() {
+        try{
+            SQLiteDatabase db = helper.getWritableDatabase();
+            db.execSQL("DELETE FROM allAccount");
+        }catch (Exception e){
+            logger.error(e.toString());
+        }
     }
 
     @Override public void updateAccountUseTime(int accountNo) {

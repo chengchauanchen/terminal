@@ -43,6 +43,7 @@ import cn.vsx.hamster.terminalsdk.manager.groupcall.GroupCallSpeakState;
 import cn.vsx.hamster.terminalsdk.manager.individualcall.IndividualCallState;
 import cn.vsx.hamster.terminalsdk.manager.videolive.VideoLivePlayingState;
 import cn.vsx.hamster.terminalsdk.model.RecorderBindTranslateBean;
+import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveDeparmentChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceOfflineHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveForceReloginHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveMemberDeleteHandler;
@@ -236,7 +237,21 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         startActivity(intent);
         ActivityCollector.removeAllActivityExcept(RegistActivity.class);
         android.os.Process.killProcess(android.os.Process.myPid());
+    }
 
+    protected void goToRegistActivity() {
+        // 重新走应用的流程是一个正确的做法，因为应用被强杀了还保存 Activity 的栈信息是不合理的
+        if(TerminalFactory.getSDK().isServerConnected()){
+            TerminalFactory.getSDK().getAuthManagerTwo().logout();
+        }
+        MyApplication.instance.isClickVolumeToCall = false;
+        MyApplication.instance.isPttPress = false;
+        OperateReceiveHandlerUtil.getInstance().clear();
+        Intent intent = new Intent(this, RegistActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent.putExtra(Constants.GO_TO_REGIST_TYPE,Constants.GO_TO_REGIST_TYPE_CLEAR);
+        startActivity(intent);
+        android.os.Process.killProcess(android.os.Process.myPid());
     }
 
     /**
@@ -272,6 +287,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().registReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveForceReloginHandler);
+        MyTerminalFactory.getSDK().registReceiveHandler(receiveDeparmentChangeHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveResponseZfyBoundPhoneByRequestMessageHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveTianjinAuthLoginAndLogoutHandler);
         registerHeadsetPlugReceiver();
@@ -285,6 +301,7 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveMemberDeleteHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveNotifyMemberKilledHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveForceReloginHandler);
+        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveDeparmentChangeHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveResponseZfyBoundPhoneByRequestMessageHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveTianjinAuthLoginAndLogoutHandler);
     }
@@ -641,6 +658,19 @@ public abstract class BaseActivity extends AppCompatActivity implements RecvCall
                     }
                 });
             }
+        }
+    };
+
+    /**
+     * 部门修改之后，提示用户重新登录
+     */
+    private ReceiveDeparmentChangeHandler receiveDeparmentChangeHandler = new ReceiveDeparmentChangeHandler() {
+        @Override
+        public void handler() {
+            //清除数据
+            TerminalFactory.getSDK().clearData();
+            ToastUtil.showToast(getString(R.string.text_account_data_change_please_relogin));
+            myHandler.postDelayed(() -> goToRegistActivity(),2000);
         }
     };
 

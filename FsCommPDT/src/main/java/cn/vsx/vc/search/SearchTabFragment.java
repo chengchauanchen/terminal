@@ -37,6 +37,7 @@ import io.reactivex.schedulers.Schedulers;
 import ptt.terminalsdk.bean.SearchTitleBean;
 import ptt.terminalsdk.context.MyTerminalFactory;
 import ptt.terminalsdk.manager.search.SearchUtil;
+import ptt.terminalsdk.tools.StringUtil;
 import ptt.terminalsdk.tools.ToastUtil;
 
 /**
@@ -112,14 +113,34 @@ public class SearchTabFragment extends BaseSearchFragment {
             @Override
             public void onClick(View v) {
                 String s = phone.getText().toString();
-                if (TextUtils.isEmpty(s)) {
-                    return;
+                //效验拨打账号的限制（只能输入1~8位长度的数字，输入的编号不能全是0）
+                if(checkCallData(s)){
+                    getAccount(s);
                 }
-                getAccount(s);
             }
         });
-
         initRecyclerView();
+    }
+
+    /**
+     * 效验（只能输入1~8位长度的数字，输入的编号不能全是0）
+     * @param s
+     */
+    private boolean checkCallData(String s) {
+        if (TextUtils.isEmpty(s)) {
+            return false;
+        }
+
+        if(s.length()<=0||s.length()>8){
+            ToastUtil.showToast(getString(R.string.text_call_length_error));
+            return false;
+        }
+
+        if(StringUtil.stringToInt(s) == 0){
+            ToastUtil.showToast(getString(R.string.text_call_zero_error));
+            return false;
+        }
+        return true;
     }
 
     private void initRecyclerView() {
@@ -308,27 +329,29 @@ public class SearchTabFragment extends BaseSearchFragment {
         //根据警号找 Account
         TerminalFactory.getSDK().getThreadPool().execute(() -> {
             Account account = DataUtil.getAccountByMemberNo(MemberUtil.checkMemberNo(memberNo), true);
-            if (account == null) {
-                ToastUtil.showToast(context, "号码异常");
-                return;
-            }
-            indivudualCall(account);
+            indivudualCall(account,memberNo);
         });
     }
 
     private Handler myHandler = new Handler();
 
-    private void indivudualCall(Account account) {
+    private void indivudualCall(Account account,String memberNo) {
         if (!MyTerminalFactory.getSDK().getConfigManager().getExtendAuthorityList().contains(Authority.AUTHORITY_CALL_PRIVATE.name())) {
             ToastUtil.showToast(getContext(), getContext().getString(R.string.text_no_call_permission));
         } else {
-            myHandler.post(new Runnable() {
-                @Override
-                public void run() {
+            myHandler.post(() -> {
+                if (account != null) {
                     new ChooseDevicesDialog(getContext(), ChooseDevicesDialog.TYPE_CALL_PRIVATE, account, (dialog, member) -> {
                         activeIndividualCall(member);
                         dialog.dismiss();
                     }).showDialog();
+                }else{
+                    //直接拨打
+                    Member member = new Member();
+                    member.setName(memberNo);
+                    member.setNo(StringUtil.stringToInt(memberNo));
+                    member.setUniqueNo(StringUtil.stringToInt(memberNo));
+                    activeIndividualCall(member);
                 }
             });
         }

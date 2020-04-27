@@ -99,6 +99,7 @@ import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoByNoRegistHandler;
+import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.KeyboarUtils;
@@ -144,7 +145,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     View view_pop;
     private int reAuthCount;
-    private ProgressDialogForResgistActivity myProgressDialog;
+//    private ProgressDialogForResgistActivity myProgressDialog;
     private Handler myHandler = new Handler(Looper.getMainLooper());
     private String orgHint;
     private String nameHint;
@@ -987,7 +988,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 //            myProgressDialog.setCancelable(false);
 //
 //        }
-        myProgressDialog =ProgressDialogForResgistActivity.getInstance(RegistActivity.this);
+//        myProgressDialog =ProgressDialogForResgistActivity.getInstance(RegistActivity.this);
 
         ll_regist.setVisibility(View.GONE);
         initUpdate();
@@ -1451,6 +1452,19 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        try{
+            int type =  getIntent().getIntExtra(Constants.GO_TO_REGIST_TYPE,Constants.GO_TO_REGIST_TYPE_DEFLAT);
+            if(type == 1){
+                ActivityCollector.removeAllActivityExcept(RegistActivity.class);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
     public void doOtherDestroy() {
         unregistNetworkChangeHandler();
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
@@ -1463,10 +1477,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReturnAvailableIPHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCanUpdateHandler);
         myHandler.removeCallbacksAndMessages(null);
-        if (myProgressDialog != null) {
-            myProgressDialog.dismiss();
-            myProgressDialog = null;
-        }
+        ProgressDialogForResgistActivity.getInstance(this).dismiss();
         reAuthCount = 0;
 
         viewHolder = null;
@@ -1478,9 +1489,10 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     private void hideProgressDialog() {
-        if (myProgressDialog != null) {
-            myProgressDialog.dismiss();
-        }
+        ProgressDialogForResgistActivity.getInstance(this).dismiss();
+//        if (myProgressDialog != null) {
+//            myProgressDialog.dismiss();
+//        }
     }
 
 
@@ -1510,9 +1522,12 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     private void changeProgressMsg(final String msg) {
         myHandler.post(() -> {
-            if (myProgressDialog != null && !isFinishing()) {
-                myProgressDialog.setMsg(msg);
-                myProgressDialog.show();
+            if(!RegistActivity.this.isFinishing()){
+                ProgressDialogForResgistActivity dialog =  ProgressDialogForResgistActivity.getInstance(RegistActivity.this);
+                if(dialog!=null){
+                    dialog.setMsg(msg);
+                    dialog.show();
+                }
             }
         });
     }

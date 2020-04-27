@@ -12,6 +12,8 @@ import android.os.IBinder;
 import android.support.multidex.MultiDex;
 import android.util.Log;
 
+import com.tencent.bugly.crashreport.CrashReport;
+
 import org.apache.log4j.Logger;
 import org.linphone.core.LinphoneCall;
 
@@ -47,6 +49,7 @@ import cn.vsx.vc.utils.CommonGroupUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.SystemUtil;
 import ptt.terminalsdk.context.BaseApplication;
+import ptt.terminalsdk.context.MyTerminalFactory;
 import skin.support.SkinCompatManager;
 import skin.support.design.app.SkinMaterialViewInflater;
 
@@ -114,6 +117,10 @@ public class MyApplication extends BaseApplication{
 		BaseApplication.getApplication().initVsxSendMessage();
 		//上报图像可以不走信令
 		TerminalFactory.getSDK().putParam(Params.PUSH_LIVE_NO_SINGLE,true);
+
+		CrashReport.initCrashReport(getApplicationContext(), "3ebac89656", false);
+		int memberId = MyTerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+		CrashReport.setUserId(memberId+"");
 	}
 
 	protected void initSdk(){

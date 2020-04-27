@@ -154,4 +154,9 @@ public class Constants{
     public static final String VIDEO_MEETING_URL = "videoMeetingUrl";
     //视频会议的消息
     public static final String VIDEO_MEETING_MESSAGE = "videoMeetingMessage";
+
+    //跳转到注册页面
+    public static final String GO_TO_REGIST_TYPE = "goToRegistType";
+    public static final int GO_TO_REGIST_TYPE_DEFLAT = 0;
+    public static final int GO_TO_REGIST_TYPE_CLEAR = 1;
 }
