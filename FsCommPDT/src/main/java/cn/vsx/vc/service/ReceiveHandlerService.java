@@ -800,7 +800,7 @@ public class ReceiveHandlerService extends Service{
         //视频消息
         if(terminalMessage.messageType == MessageType.VIDEO_LIVE.getCode()){
             //紧急观看
-            if(terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.EMERGENCY_INFORM_TO_WATCH_LIVE){
+            if(terminalMessage.messageBody.containsKey(JsonParam.REMARK)&&terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.EMERGENCY_INFORM_TO_WATCH_LIVE){
                 //判断是否在视频会议中
                 if(MyApplication.instance.checkVideoMeeting()){
                     return;
@@ -823,7 +823,8 @@ public class ReceiveHandlerService extends Service{
                     myHandler.postDelayed(() -> goToWatch(terminalMessage,-1),1000);
                 }
                 return;
-            }else if(terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE){
+            }else if((terminalMessage.messageBody.containsKey(JsonParam.REMARK)&&terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.INFORM_TO_WATCH_LIVE)
+                    ||TerminalFactory.getSDK().getTerminalMessageManager().checkVideoLiveMessageFromNoRegist(terminalMessage.messageBody)){
                 //voip走的个呼状态机
                 if(MyApplication.instance.getIndividualState() ==  IndividualCallState.IDLE && !MyApplication.instance.viewAdded && !MyApplication.instance.isPttPress){
                     String liver = (String) terminalMessage.messageBody.get(JsonParam.LIVER);
@@ -857,8 +858,8 @@ public class ReceiveHandlerService extends Service{
                         myHandler.sendMessageDelayed(message, 30 * 1000);
                     }
                 }
-            }else if(terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.LIVE_WATCHING_END ||
-                    terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.STOP_ASK_VIDEO_LIVE){
+            }else if(terminalMessage.messageBody.containsKey(JsonParam.REMARK)&&(terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.LIVE_WATCHING_END ||
+                    terminalMessage.messageBody.getInteger(JsonParam.REMARK) == Remark.STOP_ASK_VIDEO_LIVE)){
                 return;
             }
         }else if(terminalMessage.messageType == MessageType.GB28181_RECORD.getCode() ||
