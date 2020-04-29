@@ -68,6 +68,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimerTask;
 
 import cn.vsx.hamster.common.TerminalMemberType;
 import cn.vsx.hamster.common.UrlParams;
@@ -1179,7 +1180,12 @@ public class TerminalSDK4Android extends TerminalSDKBaseImpl {
 		@Override
 		public void onServiceDisconnected(ComponentName name) {
 			logger.error("MessageServiceon----onServiceDisconnected");
-			connectToServer();
+			TerminalFactory.getSDK().getTimer().schedule(new TimerTask() {
+				@Override
+				public void run() {
+					connectToServer();
+				}
+			},15*1000);
 		}
 	};
 

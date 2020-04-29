@@ -106,7 +106,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageFailedHan
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendDataMessageSuccessHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSendUuidResponseHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablishedHandler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUploadProgressHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiverReplayIndividualChatVoiceHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -280,7 +279,6 @@ public abstract class ChatBaseActivity extends BaseActivity
         MyTerminalFactory.getSDK().registReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveRequestLoginHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveLoginResponseHandler);
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverSendFileCheckMessageHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverShowTransponPopupHandler);
@@ -390,9 +388,6 @@ public abstract class ChatBaseActivity extends BaseActivity
             setListSelection(chatMessageList.size() - 1);
             temporaryAdapter.notifyDataSetChanged();
         }
-        if(!NetworkUtil.isConnected(this)){
-            updateLoginStateView(0);
-        }
     }
 
 //    private void initNFC() {
@@ -500,7 +495,6 @@ public abstract class ChatBaseActivity extends BaseActivity
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestLoginHandler);
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverChatListItemClickHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowTransponPopupHandler);
         OperateReceiveHandlerUtilSync.getInstance().unregistReceiveHandler(mReceiverShowForwardMoreHandler);
@@ -1852,6 +1846,10 @@ public abstract class ChatBaseActivity extends BaseActivity
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(mReceiverReplayIndividualChatVoiceHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveMultimediaMessageCompleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveHistoryMultimediaFailHandler);
+
+        if(!NetworkUtil.isConnected(this)){
+            updateLoginStateView(0);
+        }
     }
 
     @Override
@@ -2894,6 +2892,12 @@ public abstract class ChatBaseActivity extends BaseActivity
         public void handler(boolean connected){
             if (!connected) {
                 updateLoginStateView(0);
+            }else{
+                if(TerminalFactory.getSDK().isServerConnected()){
+                    updateLoginStateView(-1);
+                }else {
+                    updateLoginStateView(0);
+                }
             }
         }
     };
@@ -2968,16 +2972,16 @@ public abstract class ChatBaseActivity extends BaseActivity
         }
     };
 
-    private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = new ReceiveUpdateAllDataCompleteHandler(){
-        @Override
-        public void handler(int errorCode, String errorDesc){
-            if(errorCode == BaseCommonCode.SUCCESS_CODE){
-                updateLoginStateView(1);
-            }else{
-                updateLoginStateView(-1);
-            }
-        }
-    };
+//    private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = new ReceiveUpdateAllDataCompleteHandler(){
+//        @Override
+//        public void handler(int errorCode, String errorDesc){
+//            if(errorCode == BaseCommonCode.SUCCESS_CODE){
+//                updateLoginStateView(1);
+//            }else{
+//                updateLoginStateView(-1);
+//            }
+//        }
+//    };
 
     /**
      * 更新登录的状态

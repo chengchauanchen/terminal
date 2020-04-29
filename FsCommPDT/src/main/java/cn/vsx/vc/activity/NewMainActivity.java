@@ -93,7 +93,6 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveServerConnectionEstablis
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupListHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUVCCameraConnectChangeHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUnreadMessageAdd1Handler;
-import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateAllDataCompleteHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveUpdateFoldersAndGroupsHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveVolumeOffCallHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
@@ -121,6 +120,7 @@ import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.CallPhoneUtil;
 import cn.vsx.vc.utils.HeadSetUtil;
 import cn.vsx.vc.utils.HongHuUtils;
+import cn.vsx.vc.utils.NetworkUtil;
 import cn.vsx.vc.utils.NfcUtil;
 import cn.vsx.vc.utils.SystemUtil;
 import cn.vsx.vc.view.BottomView;
@@ -175,16 +175,16 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         }
     };
 
-    private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = new ReceiveUpdateAllDataCompleteHandler(){
-        @Override
-        public void handler(int errorCode, String errorDesc){
-            if(errorCode == BaseCommonCode.SUCCESS_CODE){
-                updateLoginStateView(1);
-            }else{
-                updateLoginStateView(-1);
-            }
-        }
-    };
+//    private ReceiveUpdateAllDataCompleteHandler receiveUpdateAllDataCompleteHandler = new ReceiveUpdateAllDataCompleteHandler(){
+//        @Override
+//        public void handler(int errorCode, String errorDesc){
+//            if(errorCode == BaseCommonCode.SUCCESS_CODE){
+//                updateLoginStateView(1);
+//            }else{
+//                updateLoginStateView(-1);
+//            }
+//        }
+//    };
 
     private ReceiveLoginResponseHandler receiveLoginResponseHandler = new ReceiveLoginResponseHandler(){
         @Override
@@ -300,6 +300,12 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
                         ICTV_groupCall_time.stop();
                     }
                 });
+            }else{
+                if(TerminalFactory.getSDK().isServerConnected()){
+                    updateLoginStateView(-1);
+                }else {
+                    updateLoginStateView(0);
+                }
             }
         }
     };
@@ -1027,7 +1033,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 
         OperateReceiveHandlerUtilSync.getInstance().registReceiveHandler(receiveCallingCannotClickHandler);
 
-        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
+//        MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateAllDataCompleteHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveUpdateFoldersAndGroupsHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallCeasedIndicationHandler);
         MyTerminalFactory.getSDK().registReceiveHandler(receiveGroupCallIncommingHandler);
@@ -1434,6 +1440,10 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
 //        if (mNfcAdapter != null) {
 //            mNfcAdapter.enableForegroundDispatch(this, mPendingIntent, null, null);
 //        }
+
+        if(!NetworkUtil.isConnected(this)){
+            updateLoginStateView(0);
+        }
     }
 
 
@@ -1627,7 +1637,7 @@ public class NewMainActivity extends BaseActivity implements SettingFragmentNew.
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveOnLineStatusChangedHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRequestLoginHandler );
 
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler );
+//        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler );
         MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateFoldersAndGroupsHandler );
 
         MyTerminalFactory.getSDK().unregistReceiveHandler(receivePTTDownHandler);

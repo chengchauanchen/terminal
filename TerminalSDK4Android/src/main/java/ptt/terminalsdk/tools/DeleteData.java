@@ -22,8 +22,8 @@ public class DeleteData {
 		deleteSharedPreferences();
 		deleteSerializableData();
 		deleteSQLiteDatabase();
-		deleteAudioRecord();
 		deletePhotoRecord();
+		deleteAudioRecord();
 		deleteVideoRecord();
 		deleteWordRecord();
 		deleteFileRecord();
@@ -126,5 +126,7 @@ public class DeleteData {
 		TerminalFactory.getSDK().getSQLiteDBManager().deletePhoneMember();
 		TerminalFactory.getSDK().getSQLiteDBManager().deleteGroup();
 		TerminalFactory.getSDK().getSQLiteDBManager().deleteMessageList();
+		TerminalFactory.getSDK().getSQLiteDBManager().deleteAllGroup();
+		TerminalFactory.getSDK().getSQLiteDBManager().deleteAllAccount();
 	}
 }

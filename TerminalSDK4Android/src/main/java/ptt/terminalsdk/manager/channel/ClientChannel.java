@@ -10,6 +10,8 @@ import org.ddpush.im.common.v1.handler.PushMessageSendResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.TimerTask;
+
 import cn.vsx.hamster.common.MessageFunEnum;
 import cn.vsx.hamster.protolbuf.codec.PTTMsgCodec;
 import cn.vsx.hamster.terminalsdk.TerminalFactory;
@@ -148,10 +150,16 @@ public class ClientChannel extends AbsClientChannel {
 				logger.error("ClientChannel  start失败");
 				isStarted = false;
 			}
-		} catch (RemoteException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			//start失败，重新start，直到成功
-			start();
+			TerminalFactory.getSDK().getTimer().schedule(new TimerTask() {
+				@Override
+				public void run() {
+					start();
+				}
+			},15*1000);
+
 		}
 	}
 

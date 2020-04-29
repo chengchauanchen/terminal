@@ -384,12 +384,14 @@ public class FileTransferOperation {
      */
     public String uploadFileByOkHttp(String url, final File file) {
         try{
+            logger.info(TAG + "uploadFileByOkHttp--url:" + url);
             long startTime = System.currentTimeMillis();
             rateLimitingRequestBody = RateLimitingRequestBody.createRequestBody(MediaType.parse("multipart/form-data"), file, getUpLoadFileNeedRateLimit()?UPLOAD_FILE_RATE_LIMIT:UPLOAD_FILE_RATE_LIMIT_NO);
             RequestBody requestBody;
             requestBody = new MultipartBody.Builder()
-                .addFormDataPart("fileStream", file.getName(), rateLimitingRequestBody)
-                .addFormDataPart("sign", SignatureUtil.sign(""))
+                    .setType(MultipartBody.FORM)
+                    .addFormDataPart("fileStream", file.getName(), rateLimitingRequestBody)
+                    .addFormDataPart("sign", SignatureUtil.sign(""))
                 .build();
             Request.Builder builder = new Request.Builder();
             builder.url(url);

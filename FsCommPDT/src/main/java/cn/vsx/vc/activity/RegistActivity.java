@@ -99,6 +99,7 @@ import cn.vsx.vc.receive.Actions;
 import cn.vsx.vc.receive.RecvCallBack;
 import cn.vsx.vc.receive.SendRecvHelper;
 import cn.vsx.vc.receiveHandle.ReceiverActivePushVideoByNoRegistHandler;
+import cn.vsx.vc.utils.ActivityCollector;
 import cn.vsx.vc.utils.ApkUtil;
 import cn.vsx.vc.utils.Constants;
 import cn.vsx.vc.utils.KeyboarUtils;
@@ -144,7 +145,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
     View view_pop;
     private int reAuthCount;
-    private ProgressDialogForResgistActivity myProgressDialog;
+//    private ProgressDialogForResgistActivity myProgressDialog;
     private Handler myHandler = new Handler(Looper.getMainLooper());
     private String orgHint;
     private String nameHint;
@@ -153,6 +154,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     private PopupWindow popupWindow;
     private boolean isCheckSuccess;//联通校验是否通过
     private boolean isCheckFinished;//联通校验是否完成
+    private boolean showDialog;//联通校验是否完成
     private NetWorkConnectionChangeByNoRegistReceiver netWorkConnectionChangeByNoRegistReceiver;
     // 安全VPN服务名称
     private static final String SEC_VPN_SERVICE_ACTION_NAME = "sec.vpn.service";
@@ -202,6 +204,7 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     @Override
     protected void onResume() {
         super.onResume();
+        showDialog = true;
         KeyboarUtils.getKeyBoardHeight(this);
     }
 
@@ -982,12 +985,13 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
 
         orgHint = getResources().getString(R.string.regist_org_hint);
         nameHint = getResources().getString(R.string.regist_name_hint);
+        showDialog = true;
 //        if (myProgressDialog == null) {
 //            myProgressDialog = new ProgressDialogForResgistActivity(RegistActivity.this);
 //            myProgressDialog.setCancelable(false);
 //
 //        }
-        myProgressDialog =ProgressDialogForResgistActivity.getInstance(RegistActivity.this);
+//        myProgressDialog =ProgressDialogForResgistActivity.getInstance(RegistActivity.this);
 
         ll_regist.setVisibility(View.GONE);
         initUpdate();
@@ -1451,35 +1455,59 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        try{
+            int type =  getIntent().getIntExtra(Constants.GO_TO_REGIST_TYPE,Constants.GO_TO_REGIST_TYPE_DEFLAT);
+            if(type == 1){
+                ActivityCollector.removeAllActivityExcept(RegistActivity.class);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        showDialog = false;
+    }
+
+    @Override
     public void doOtherDestroy() {
-        unregistNetworkChangeHandler();
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRegistCompleteHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetNameByOrgHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReturnAvailableIPHandler);
-        MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCanUpdateHandler);
-        myHandler.removeCallbacksAndMessages(null);
-        if (myProgressDialog != null) {
-            myProgressDialog.dismiss();
-            myProgressDialog = null;
-        }
-        reAuthCount = 0;
+        try{
+            unregistNetworkChangeHandler();
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveExitHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveSendUuidResponseHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveLoginResponseHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveRegistCompleteHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveUpdateAllDataCompleteHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveGetNameByOrgHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveServerConnectionEstablishedHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveReturnAvailableIPHandler);
+            MyTerminalFactory.getSDK().unregistReceiveHandler(receiveCanUpdateHandler);
+            myHandler.removeCallbacksAndMessages(null);
+            ProgressDialogForResgistActivity.getInstance(this).dismiss();
+            reAuthCount = 0;
 
-        viewHolder = null;
-        if (popupWindow != null) {
-            popupWindow.dismiss();
-            popupWindow = null;
+            viewHolder = null;
+            if (popupWindow != null) {
+                popupWindow.dismiss();
+                popupWindow = null;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
-
     }
 
     private void hideProgressDialog() {
-        if (myProgressDialog != null) {
-            myProgressDialog.dismiss();
+        try{
+            ProgressDialogForResgistActivity.getInstance(this).dismiss();
+//        if (myProgressDialog != null) {
+//            myProgressDialog.dismiss();
+//        }
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -1509,12 +1537,19 @@ public class RegistActivity extends BaseActivity implements RecvCallBack, Action
     }
 
     private void changeProgressMsg(final String msg) {
-        myHandler.post(() -> {
-            if (myProgressDialog != null && !isFinishing()) {
-                myProgressDialog.setMsg(msg);
-                myProgressDialog.show();
-            }
-        });
+        try{
+            myHandler.post(() -> {
+                if(showDialog){
+                    ProgressDialogForResgistActivity dialog =  ProgressDialogForResgistActivity.getInstance(RegistActivity.this);
+                    if(dialog!=null){
+                        dialog.setMsg(msg);
+                        dialog.show();
+                    }
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     @Override

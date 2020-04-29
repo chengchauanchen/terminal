@@ -828,7 +828,7 @@ public class PullLivingService extends BaseService{
     private void showPullView(){
         mLiveVedioTheme.setText(theme);
         mLiveVedioName.setText(liveMember.getName());
-        mLiveVedioId.setText(HandleIdUtil.handleId(liveMember.getNo()));
+        mLiveVedioId.setText((liveMember.getNo()==0)?"":HandleIdUtil.handleId(liveMember.getNo()));
         if(MyApplication.instance.getGroupListenenState() == GroupCallListenState.LISTENING){
             if(null != MyApplication.instance.groupCallMember){
                 mLlLiveGroupCall.setVisibility(View.VISIBLE);
