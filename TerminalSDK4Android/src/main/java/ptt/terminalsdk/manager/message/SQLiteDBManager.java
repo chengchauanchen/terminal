@@ -569,6 +569,36 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override
+    public TerminalMessage existMessageListDB(int userId) {
+        logger.info("获取本地数据库中是否存在对应消息existMessageListDB userId:" + userId);
+        SQLiteDatabase db = helper.getReadableDatabase();
+        TerminalMessage terminalMessage = null;
+        Cursor cursor;
+
+        int memberId = TerminalFactory.getSDK().getParam(Params.MEMBER_ID, 0);
+
+//        if (userId ==memberId) {
+//            //发给谁
+//            cursor = db.query(MESSAGE_LIST, null, "message_from_id = ? and current_member_id = ?", new String[]{userId + "",memberId + ""}, null, null, null);
+//            logger.info("获取本地数据库中是否存在对应消息existMessageListDB message_from_id = {"+userId+"} and current_member_id = {"+memberId+"}");
+//        } else {
+//            cursor = db.query(MESSAGE_LIST, null, "(message_to_id = ? or message_from_id =?) and current_member_id = ?", new String[]{userId + "",memberId + ""}, null, null, null);
+//            logger.info("获取本地数据库中是否存在对应消息existMessageListDB message_to_id = {"+userId+"} and current_member_id = {"+memberId+"}");
+//        }
+
+        cursor = db.query(MESSAGE_LIST, null, "(message_to_id = ? or message_from_id =?) and current_member_id = ?", new String[]{userId + "",userId + "",memberId + ""}, null, null, null);
+        logger.info("获取本地数据库中是否存在对应消息existMessageListDB message_to_id = {"+userId+"} and current_member_id = {"+memberId+"}");
+
+        List<TerminalMessage> terminalMessageList = getTerminalMessageList(db, cursor);
+        logger.info("查询消息列表数据existMessageListDB：" + terminalMessageList);
+        if(terminalMessageList!=null &&terminalMessageList.size()>0){
+            terminalMessage = terminalMessageList.get(0);
+            logger.info("找到了："+terminalMessage);
+        }
+        return terminalMessage;
+    }
+
+    @Override
     public synchronized void updateCombatMessageList(List<TerminalMessage> terminalMessages) {
         logger.info("保存合成作战组列表数据:" + terminalMessages);
         SQLiteDatabase db = null;
@@ -1652,6 +1682,16 @@ public class SQLiteDBManager implements ISQLiteDBManager {
     }
 
     @Override
+    public void deleteAllGroup() {
+        try{
+            SQLiteDatabase db = helper.getWritableDatabase();
+            db.execSQL("DELETE FROM allGroup");
+        }catch (Exception e){
+            logger.error(e.toString());
+        }
+    }
+
+    @Override
     public synchronized List<GroupSearchBean> getAllGroup(List<GroupSearchBean> groups, int index) {
         logger.info("分页查询 group index:" + index);
         long start = System.currentTimeMillis();
@@ -1803,6 +1843,16 @@ public class SQLiteDBManager implements ISQLiteDBManager {
         }
 
         return memberList;
+    }
+
+    @Override
+    public void deleteAllAccount() {
+        try{
+            SQLiteDatabase db = helper.getWritableDatabase();
+            db.execSQL("DELETE FROM allAccount");
+        }catch (Exception e){
+            logger.error(e.toString());
+        }
     }
 
     @Override public void updateAccountUseTime(int accountNo) {
