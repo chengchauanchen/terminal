@@ -94,7 +94,7 @@ public class SearchTabGroupFragment extends BaseSearchFragment {
 
                     @Override
                     protected void onSuccess(List<GroupSearchBean> allRowSize) {
-                        logger.info(allRowSize);
+                        logger.info("获取本地数据库 组数据"+allRowSize);
                         datas.clear();
                         datas.addAll(allRowSize);
                         searchAdapter.notifyDataSetChanged();

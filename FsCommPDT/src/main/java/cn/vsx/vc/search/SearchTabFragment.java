@@ -23,6 +23,7 @@ import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveCurrentGroupIndividualCa
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveGetAllGroupHandler;
 import cn.vsx.hamster.terminalsdk.receiveHandler.ReceiveSetMonitorGroupViewHandler;
 import cn.vsx.hamster.terminalsdk.tools.DataUtil;
+import cn.vsx.hamster.terminalsdk.tools.Params;
 import cn.vsx.vc.R;
 import cn.vsx.vc.application.MyApplication;
 import cn.vsx.vc.dialog.ChooseDevicesDialog;
@@ -285,6 +286,8 @@ public class SearchTabFragment extends BaseSearchFragment {
     }
 
     private void getListenedGroup() {
+        //取出所有组信息
+        getDbAllGroup();
         //当前没有监听组的数据，说明没有显示监听组，或显示的是搜索的结果,则不需要更新监听组
         if (datas.size() > 0) {
             Object o = datas.get(0);
@@ -316,15 +319,48 @@ public class SearchTabFragment extends BaseSearchFragment {
                         ListenedGroupDatas = groupSearchBeans;
                         datas.clear();
                         if (ListenedGroupDatas != null) {
+                            GroupSearchBean currentGroupBean=TerminalFactory.getSDK().getBean(Params.CURRENT_GROUP_BEAN,new GroupSearchBean(),GroupSearchBean.class);
                             SearchTitleBean titleBean = new SearchTitleBean("监听组");
                             datas.add(titleBean);
                             datas.addAll(ListenedGroupDatas);
+                            if (!datas.contains(currentGroupBean)&&currentGroupBean!=null){
+                                datas.add(currentGroupBean);
+                            }
                             searchAdapter.notifyDataSetChanged();
                         }
                     }
                 });
     }
+    /**
+     * 获取本地数据库 组数据
+     */
+    private void getDbAllGroup() {
+        SearchUtil.getDbAllGroup()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new CommonObserver<List<GroupSearchBean>>() {
+                    @Override
+                    protected String setTag() {
+                        return "";
+                    }
 
+                    @Override
+                    protected void onError(String errorMsg) {
+                        logger.error("getTotalCountPolice----请求报错:" + errorMsg);
+                    }
+
+                    @Override
+                    protected void onSuccess(List<GroupSearchBean> allRowSize) {
+                        logger.info("获取本地数据库 组数据"+allRowSize);
+                        for (GroupSearchBean data:allRowSize) {
+                            if (data.getNo()==TerminalFactory.getSDK().getParam(Params.CURRENT_GROUP_ID,0)){
+                                //存储当前组
+                                TerminalFactory.getSDK().putBean(Params.CURRENT_GROUP_BEAN,data);
+                            }
+                        }
+                    }
+                });
+    }
     private void getAccount(String memberNo) {
         //根据警号找 Account
         TerminalFactory.getSDK().getThreadPool().execute(() -> {

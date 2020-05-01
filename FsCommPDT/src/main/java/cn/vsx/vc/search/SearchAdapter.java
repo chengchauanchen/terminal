@@ -487,7 +487,7 @@ public class SearchAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     }
 
     /**
-     * 判断时候监听
+     * 判断是否监听
      *
      * @param group
      * @return
